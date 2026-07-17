@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     supabase_url: str = ""
     supabase_anon_key: str = ""
     supabase_service_role_key: str = ""
+    supabase_jwt_secret: str = "dev-jwt-secret-cambiar-en-produccion"
 
     # IA
     anthropic_api_key: str = ""
