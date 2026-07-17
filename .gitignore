@@ -1,0 +1,35 @@
+# ── Python ──────────────────────────────────────────────────────────────────
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# ── Node / Next.js ───────────────────────────────────────────────────────────
+node_modules/
+.next/
+out/
+.turbo/
+
+# ── Variables de entorno (NUNCA committear valores reales) ───────────────────
+.env
+.env.local
+.env.*.local
+# .env.example  ← este SÍ se commitea
+
+# ── Misceláneos ──────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.log
+coverage/
+.coverage
+
+# ── Docker ───────────────────────────────────────────────────────────────────
+docker-compose.override.yml
