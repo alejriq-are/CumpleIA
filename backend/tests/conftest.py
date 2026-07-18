@@ -11,6 +11,7 @@ import pytest
 import pytest_asyncio
 from jose import jwt
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.pool import NullPool
 
 from app.core.config import get_settings
 from app.core.deps import get_current_profile
@@ -44,11 +45,8 @@ def make_token(auth_user_id: uuid.UUID) -> str:
 
 @pytest.fixture(scope="session")
 def _engine():
-    import asyncio
-
-    engine = create_async_engine(settings.database_url, echo=False)
+    engine = create_async_engine(settings.database_url, echo=False, poolclass=NullPool)
     yield engine
-    asyncio.run(engine.dispose())
 
 
 @pytest.fixture(scope="session")
