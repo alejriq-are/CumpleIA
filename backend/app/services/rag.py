@@ -35,7 +35,8 @@ async def search_chunks(
     embedding_str = "[" + ",".join(str(v) for v in embedding) + "]"
 
     rows = await db.execute(
-        text("""
+        text(
+            """
             SELECT
                 id::text,
                 source,
@@ -46,7 +47,8 @@ async def search_chunks(
             WHERE embedding IS NOT NULL
             ORDER BY embedding <=> :emb::vector
             LIMIT :limit
-        """),
+        """
+        ),
         {"emb": embedding_str, "limit": top_k},
     )
 

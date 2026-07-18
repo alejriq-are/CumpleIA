@@ -39,10 +39,12 @@ def upgrade() -> None:
     # ── Schema auth stub para desarrollo local (Docker) ──────────────────────
     # En Supabase este schema ya existe; estas líneas se omiten silenciosamente.
     op.execute("CREATE SCHEMA IF NOT EXISTS auth")
-    op.execute("""
+    op.execute(
+        """
         CREATE OR REPLACE FUNCTION auth.uid() RETURNS uuid
         LANGUAGE sql STABLE AS $$ SELECT NULL::uuid $$
-        """)
+        """
+    )
 
     # ── Tipos enum ───────────────────────────────────────────────────────────
     op.execute("CREATE TYPE user_role AS ENUM ('owner', 'admin', 'editor', 'viewer')")
@@ -166,7 +168,8 @@ def upgrade() -> None:
     )
 
     # Función helper para RLS (usa auth.uid() de Supabase o el stub local)
-    op.execute("""
+    op.execute(
+        """
         CREATE OR REPLACE FUNCTION auth_org_ids()
         RETURNS SETOF uuid
         LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $$
@@ -175,7 +178,8 @@ def upgrade() -> None:
             JOIN profiles p ON p.id = m.profile_id
             WHERE p.auth_user_id = auth.uid()
         $$
-        """)
+        """
+    )
 
     op.create_table(
         "diagnostics",

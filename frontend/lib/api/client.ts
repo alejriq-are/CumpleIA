@@ -44,21 +44,17 @@ async function apiFetch<T>(path: string, opts: FetchOptions): Promise<T> {
 
   if (!res.ok) {
     const detail = await res.json().catch(() => ({ detail: res.statusText }));
-    throw new Error(
-      (detail as { detail?: string })?.detail ?? `Error ${res.status}`
-    );
+    throw new Error((detail as { detail?: string })?.detail ?? `Error ${res.status}`);
   }
 
   return res.json() as Promise<T>;
 }
 
 export const api = {
-  health: (): Promise<HealthOut> =>
-    fetch(`${API_URL}/health`).then((r) => r.json()),
+  health: (): Promise<HealthOut> => fetch(`${API_URL}/health`).then((r) => r.json()),
 
   me: {
-    get: (token: string): Promise<ProfileOut> =>
-      apiFetch<ProfileOut>("/me", { token }),
+    get: (token: string): Promise<ProfileOut> => apiFetch<ProfileOut>("/me", { token }),
 
     membership: (token: string, organizationId: string): Promise<MembershipOut> =>
       apiFetch<MembershipOut>("/me/membership", { token, organizationId }),

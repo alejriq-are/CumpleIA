@@ -75,10 +75,7 @@ export function LoginForm() {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label
-            htmlFor="email"
-            className="block text-sm font-medium text-gray-700"
-          >
+          <label htmlFor="email" className="block text-sm font-medium text-gray-700">
             Correo electrónico
           </label>
           <input
@@ -93,10 +90,7 @@ export function LoginForm() {
         </div>
 
         <div>
-          <label
-            htmlFor="password"
-            className="block text-sm font-medium text-gray-700"
-          >
+          <label htmlFor="password" className="block text-sm font-medium text-gray-700">
             Contraseña
           </label>
           <input
@@ -114,9 +108,7 @@ export function LoginForm() {
         {message && (
           <p
             className={`rounded-lg px-3 py-2 text-sm ${
-              message.type === "error"
-                ? "bg-red-50 text-red-700"
-                : "bg-blue-50 text-blue-700"
+              message.type === "error" ? "bg-red-50 text-red-700" : "bg-blue-50 text-blue-700"
             }`}
           >
             {message.text}
@@ -128,11 +120,7 @@ export function LoginForm() {
           disabled={loading}
           className="w-full rounded-lg bg-blue-700 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-800 disabled:opacity-60"
         >
-          {loading
-            ? "Procesando…"
-            : mode === "login"
-            ? "Iniciar sesión"
-            : "Crear cuenta"}
+          {loading ? "Procesando…" : mode === "login" ? "Iniciar sesión" : "Crear cuenta"}
         </button>
       </form>
     </div>
