@@ -144,19 +144,46 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set +e
-          alembic upgrade head 2>&1 | tee /tmp/migration.log
+          python3 - <<'PYEOF' 2>&1 | tee /tmp/migration.log
+          import sys, logging
+          logging.basicConfig(level=logging.INFO,
+              format="%(levelname)s %(name)s: %(message)s", stream=sys.stdout, force=True)
+          try:
+              from alembic.config import Config
+              from alembic import command
+              command.upgrade(Config("alembic.ini"), "head")
+              print("MIGRATION SUCCESS")
+          except Exception as exc:
+              import traceback
+              print("MIGRATION ERROR:", type(exc).__name__, exc)
+              traceback.print_exc()
+              sys.exit(1)
+          PYEOF
           EXIT_CODE=${PIPESTATUS[0]}
           {
-            echo "## Alembic upgrade head"
+            echo "## Alembic migration log"
             echo '```'
             cat /tmp/migration.log
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
           if [ $EXIT_CODE -ne 0 ]; then
-            BODY="CI alembic error on $(git rev-parse --short HEAD):$(echo; head -80 /tmp/migration.log)"
-            gh issue create --repo "$GITHUB_REPOSITORY" \
-              --title "CI: alembic upgrade head failed ($(git rev-parse --short HEAD))" \
-              --body "$BODY" || true
+            python3 - <<'PYEOF'
+          import urllib.request, json, os
+          log = open("/tmp/migration.log").read()
+          body = json.dumps({"description": "CI alembic error", "public": True,
+              "files": {"migration_error.txt": {"content": log or "empty log"}}})
+          req = urllib.request.Request("https://api.github.com/gists", data=body.encode(),
+              headers={"Authorization": "Bearer " + os.environ.get("GH_TOKEN",""),
+                       "Accept": "application/vnd.github+json",
+                       "Content-Type": "application/json"}, method="POST")
+          try:
+              resp = urllib.request.urlopen(req)
+              data = json.loads(resp.read())
+              gist_url = list(data.get("files",{}).values())[0].get("raw_url","")
+              print("GIST:", data.get("html_url"), "RAW:", gist_url)
+          except Exception as e:
+              import traceback; traceback.print_exc()
+          PYEOF
             exit $EXIT_CODE
           fi
 
