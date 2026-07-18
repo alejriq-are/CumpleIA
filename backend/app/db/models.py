@@ -135,7 +135,9 @@ class Membership(Base):
         nullable=False,
     )
     role: Mapped[UserRole] = mapped_column(
-        sa.Enum(UserRole, name="user_role"), nullable=False, server_default="owner"
+        sa.Enum(UserRole, name="user_role", create_type=False),
+        nullable=False,
+        server_default="owner",
     )
     created_at: Mapped[datetime] = mapped_column(
         sa.TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
@@ -221,12 +223,12 @@ class Finding(Base):
     )
     description: Mapped[str] = mapped_column(Text, nullable=False)
     risk: Mapped[RiskLevel] = mapped_column(
-        sa.Enum(RiskLevel, name="risk_level"), nullable=False
+        sa.Enum(RiskLevel, name="risk_level", create_type=False), nullable=False
     )
     corrective_action: Mapped[str | None] = mapped_column(Text, nullable=True)
     responsible: Mapped[str | None] = mapped_column(Text, nullable=True)
     status: Mapped[FindingStatus] = mapped_column(
-        sa.Enum(FindingStatus, name="finding_status"),
+        sa.Enum(FindingStatus, name="finding_status", create_type=False),
         nullable=False,
         server_default="abierto",
     )
@@ -276,7 +278,8 @@ class Vendor(Base):
     )
     name: Mapped[str] = mapped_column(Text, nullable=False)
     role: Mapped[ThirdPartyRole | None] = mapped_column(
-        sa.Enum(ThirdPartyRole, name="third_party_role"), nullable=True
+        sa.Enum(ThirdPartyRole, name="third_party_role", create_type=False),
+        nullable=True,
     )
     is_international: Mapped[bool] = mapped_column(
         Boolean, nullable=False, server_default="false"
@@ -347,7 +350,7 @@ class LegalBase(Base):
         nullable=False,
     )
     basis: Mapped[LegalBasis] = mapped_column(
-        sa.Enum(LegalBasis, name="legal_basis"), nullable=False
+        sa.Enum(LegalBasis, name="legal_basis", create_type=False), nullable=False
     )
     justification: Mapped[str | None] = mapped_column(Text, nullable=True)
     confidence: Mapped[float | None] = mapped_column(Numeric(4, 3), nullable=True)
@@ -378,11 +381,11 @@ class Document(Base):
         nullable=False,
     )
     type: Mapped[DocumentType] = mapped_column(
-        sa.Enum(DocumentType, name="document_type"), nullable=False
+        sa.Enum(DocumentType, name="document_type", create_type=False), nullable=False
     )
     version: Mapped[int] = mapped_column(Integer, nullable=False, server_default="1")
     status: Mapped[DocumentStatus] = mapped_column(
-        sa.Enum(DocumentStatus, name="document_status"),
+        sa.Enum(DocumentStatus, name="document_status", create_type=False),
         nullable=False,
         server_default="borrador",
     )
