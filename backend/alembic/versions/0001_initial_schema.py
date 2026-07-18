@@ -611,10 +611,9 @@ def upgrade() -> None:
     for table in tenant_index_tables:
         op.create_index(f"ix_{table}_organization_id", table, ["organization_id"])
 
-    # Índice vectorial para RAG (ivfflat, similitud coseno)
+    # Índice vectorial para RAG (hnsw, similitud coseno — funciona en tablas vacías)
     op.execute(
-        "CREATE INDEX ON knowledge_chunks "
-        "USING ivfflat (embedding vector_cosine_ops) WITH (lists = 100)"
+        "CREATE INDEX ON knowledge_chunks " "USING hnsw (embedding vector_cosine_ops)"
     )
 
     # ── Row-Level Security ────────────────────────────────────────────────────
