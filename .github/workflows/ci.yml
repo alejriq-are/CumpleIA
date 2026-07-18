@@ -104,7 +104,39 @@ jobs:
               conn.close()
           except Exception as e:
               print("ERROR DB connection:", e); traceback.print_exc()
+
+          try:
+              from sqlalchemy import create_engine, pool, text
+              url = "postgresql://postgres:postgres@localhost:5432/cumpleia_test"
+              engine = create_engine(url, poolclass=pool.NullPool)
+              with engine.connect() as conn:
+                  db = conn.execute(text("SELECT current_database()")).scalar()
+                  print("SQLAlchemy sync engine: OK, DB =", db)
+                  conn.execute(text('CREATE EXTENSION IF NOT EXISTS "vector"'))
+                  print("CREATE EXTENSION vector: OK")
+                  conn.execute(text("CREATE SCHEMA IF NOT EXISTS auth"))
+                  print("CREATE SCHEMA auth: OK")
+                  conn.rollback()
+              engine.dispose()
+          except Exception as e:
+              print("ERROR SQLAlchemy sync:", e); traceback.print_exc()
+
+          try:
+              import importlib.util
+              spec = importlib.util.spec_from_file_location(
+                  "mig", "alembic/versions/0001_initial_schema.py"
+              )
+              mod = importlib.util.module_from_spec(spec)
+              spec.loader.exec_module(mod)
+              print("migration file import: OK")
+          except Exception as e:
+              print("ERROR migration import:", e); traceback.print_exc()
           EOF
+
+      - name: Debug — alembic current
+        shell: bash
+        continue-on-error: true
+        run: alembic current 2>&1
 
       - name: Aplicar migraciones
         shell: bash
