@@ -42,13 +42,11 @@ def make_token(auth_user_id: uuid.UUID) -> str:
 # ── Engine de test (session-scoped para reutilizar conexión) ──────────────────
 
 
-@pytest.fixture(scope="session")
-def _engine():
+@pytest_asyncio.fixture(scope="session")
+async def _engine():
     engine = create_async_engine(settings.database_url, echo=False)
     yield engine
-    import asyncio
-
-    asyncio.get_event_loop().run_until_complete(engine.dispose())
+    await engine.dispose()
 
 
 @pytest.fixture(scope="session")
