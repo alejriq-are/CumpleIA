@@ -147,7 +147,7 @@ def upgrade() -> None:
         ),
         sa.Column(
             "role",
-            sa.Enum(
+            postgresql.ENUM(
                 "owner",
                 "admin",
                 "editor",
@@ -279,14 +279,16 @@ def upgrade() -> None:
         sa.Column("description", sa.Text(), nullable=False),
         sa.Column(
             "risk",
-            sa.Enum("alto", "medio", "bajo", name="risk_level", create_type=False),
+            postgresql.ENUM(
+                "alto", "medio", "bajo", name="risk_level", create_type=False
+            ),
             nullable=False,
         ),
         sa.Column("corrective_action", sa.Text(), nullable=True),
         sa.Column("responsible", sa.Text(), nullable=True),
         sa.Column(
             "status",
-            sa.Enum(
+            postgresql.ENUM(
                 "abierto",
                 "en_proceso",
                 "cerrado",
@@ -356,7 +358,7 @@ def upgrade() -> None:
         sa.Column("name", sa.Text(), nullable=False),
         sa.Column(
             "role",
-            sa.Enum(
+            postgresql.ENUM(
                 "encargado",
                 "cesion",
                 "transferencia_internacional",
@@ -450,7 +452,7 @@ def upgrade() -> None:
         ),
         sa.Column(
             "basis",
-            sa.Enum(
+            postgresql.ENUM(
                 "consentimiento",
                 "contrato",
                 "obligacion_legal",
@@ -495,7 +497,7 @@ def upgrade() -> None:
         ),
         sa.Column(
             "type",
-            sa.Enum(
+            postgresql.ENUM(
                 "politica_proteccion_datos",
                 "politica_privacidad",
                 "politica_conservacion",
@@ -510,7 +512,7 @@ def upgrade() -> None:
         sa.Column("version", sa.Integer(), nullable=False, server_default="1"),
         sa.Column(
             "status",
-            sa.Enum(
+            postgresql.ENUM(
                 "borrador",
                 "aprobado",
                 "archivado",
