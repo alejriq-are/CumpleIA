@@ -57,8 +57,38 @@ jobs:
       - name: Formato — black
         run: black --check .
 
+      - name: Diagnóstico previo a migraciones
+        run: |
+          python - <<'EOF'
+          import sys, psycopg2
+          print("Python:", sys.version)
+          try:
+              conn = psycopg2.connect("postgresql://postgres:postgres@localhost:5432/cumpleia_test")
+              conn.autocommit = True
+              cur = conn.cursor()
+              cur.execute("SELECT version()")
+              print("PG:", cur.fetchone()[0][:60])
+              cur.execute("SELECT name, default_version FROM pg_available_extensions WHERE name IN ('vector','pgcrypto')")
+              for row in cur.fetchall():
+                  print(f"Extension disponible: {row[0]} {row[1]}")
+              conn.close()
+              print("Conexion OK")
+          except Exception as e:
+              print(f"ERROR: {e}")
+              sys.exit(1)
+          EOF
+
       - name: Aplicar migraciones
-        run: alembic upgrade head
+        run: |
+          alembic upgrade head 2>&1 | tee /tmp/migration.log
+          status=${PIPESTATUS[0]}
+          if [ $status -ne 0 ]; then
+            echo "## Migracion fallida" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            tail -40 /tmp/migration.log >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          fi
+          exit $status
 
       - name: Tests (incluye aislamiento multi-tenant)
         run: pytest tests/ -v --tb=short
