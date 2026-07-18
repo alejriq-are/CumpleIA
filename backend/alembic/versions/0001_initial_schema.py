@@ -39,12 +39,10 @@ def upgrade() -> None:
     # ── Schema auth stub para desarrollo local (Docker) ──────────────────────
     # En Supabase este schema ya existe; estas líneas se omiten silenciosamente.
     op.execute("CREATE SCHEMA IF NOT EXISTS auth")
-    op.execute(
-        """
+    op.execute("""
         CREATE OR REPLACE FUNCTION auth.uid() RETURNS uuid
         LANGUAGE sql STABLE AS $$ SELECT NULL::uuid $$
-        """
-    )
+        """)
 
     # ── Tipos enum ───────────────────────────────────────────────────────────
     op.execute("CREATE TYPE user_role AS ENUM ('owner', 'admin', 'editor', 'viewer')")
@@ -65,7 +63,9 @@ def upgrade() -> None:
         "('politica_proteccion_datos', 'politica_privacidad', 'politica_conservacion', "
         "'politica_seguridad', 'procedimiento_arsop', 'procedimiento_incidentes')"
     )
-    op.execute("CREATE TYPE document_status AS ENUM ('borrador', 'aprobado', 'archivado')")
+    op.execute(
+        "CREATE TYPE document_status AS ENUM ('borrador', 'aprobado', 'archivado')"
+    )
 
     # ── Tablas (orden respeta FK) ─────────────────────────────────────────────
 
@@ -145,7 +145,14 @@ def upgrade() -> None:
         ),
         sa.Column(
             "role",
-            sa.Enum("owner", "admin", "editor", "viewer", name="user_role", create_type=False),
+            sa.Enum(
+                "owner",
+                "admin",
+                "editor",
+                "viewer",
+                name="user_role",
+                create_type=False,
+            ),
             nullable=False,
             server_default="owner",
         ),
@@ -159,8 +166,7 @@ def upgrade() -> None:
     )
 
     # Función helper para RLS (usa auth.uid() de Supabase o el stub local)
-    op.execute(
-        """
+    op.execute("""
         CREATE OR REPLACE FUNCTION auth_org_ids()
         RETURNS SETOF uuid
         LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $$
@@ -169,8 +175,7 @@ def upgrade() -> None:
             JOIN profiles p ON p.id = m.profile_id
             WHERE p.auth_user_id = auth.uid()
         $$
-        """
-    )
+        """)
 
     op.create_table(
         "diagnostics",
@@ -202,10 +207,16 @@ def upgrade() -> None:
             server_default=sa.text("now()"),
         ),
         sa.Column(
-            "created_by", postgresql.UUID(as_uuid=True), sa.ForeignKey("profiles.id"), nullable=True
+            "created_by",
+            postgresql.UUID(as_uuid=True),
+            sa.ForeignKey("profiles.id"),
+            nullable=True,
         ),
         sa.Column(
-            "updated_by", postgresql.UUID(as_uuid=True), sa.ForeignKey("profiles.id"), nullable=True
+            "updated_by",
+            postgresql.UUID(as_uuid=True),
+            sa.ForeignKey("profiles.id"),
+            nullable=True,
         ),
     )
 
@@ -272,7 +283,10 @@ def upgrade() -> None:
         sa.Column(
             "status",
             sa.Enum(
-                "abierto", "en_proceso", "cerrado", "no_aplica",
+                "abierto",
+                "en_proceso",
+                "cerrado",
+                "no_aplica",
                 name="finding_status",
                 create_type=False,
             ),
@@ -310,7 +324,9 @@ def upgrade() -> None:
         sa.Column("name", sa.Text(), nullable=False),
         sa.Column("provider", sa.Text(), nullable=True),
         sa.Column("hosting_location", sa.Text(), nullable=True),
-        sa.Column("is_international", sa.Boolean(), nullable=False, server_default="false"),
+        sa.Column(
+            "is_international", sa.Boolean(), nullable=False, server_default="false"
+        ),
         sa.Column(
             "created_at",
             sa.TIMESTAMP(timezone=True),
@@ -337,13 +353,17 @@ def upgrade() -> None:
         sa.Column(
             "role",
             sa.Enum(
-                "encargado", "cesion", "transferencia_internacional",
+                "encargado",
+                "cesion",
+                "transferencia_internacional",
                 name="third_party_role",
                 create_type=False,
             ),
             nullable=True,
         ),
-        sa.Column("is_international", sa.Boolean(), nullable=False, server_default="false"),
+        sa.Column(
+            "is_international", sa.Boolean(), nullable=False, server_default="false"
+        ),
         sa.Column("has_dpa", sa.Boolean(), nullable=False, server_default="false"),
         sa.Column(
             "created_at",
@@ -371,9 +391,13 @@ def upgrade() -> None:
         sa.Column("purpose", sa.Text(), nullable=True),
         sa.Column("data_categories", postgresql.ARRAY(sa.Text()), nullable=True),
         sa.Column("data_subjects", postgresql.ARRAY(sa.Text()), nullable=True),
-        sa.Column("has_sensitive", sa.Boolean(), nullable=False, server_default="false"),
+        sa.Column(
+            "has_sensitive", sa.Boolean(), nullable=False, server_default="false"
+        ),
         sa.Column("retention", sa.Text(), nullable=True),
-        sa.Column("is_international", sa.Boolean(), nullable=False, server_default="false"),
+        sa.Column(
+            "is_international", sa.Boolean(), nullable=False, server_default="false"
+        ),
         sa.Column(
             "created_at",
             sa.TIMESTAMP(timezone=True),
@@ -387,10 +411,16 @@ def upgrade() -> None:
             server_default=sa.text("now()"),
         ),
         sa.Column(
-            "created_by", postgresql.UUID(as_uuid=True), sa.ForeignKey("profiles.id"), nullable=True
+            "created_by",
+            postgresql.UUID(as_uuid=True),
+            sa.ForeignKey("profiles.id"),
+            nullable=True,
         ),
         sa.Column(
-            "updated_by", postgresql.UUID(as_uuid=True), sa.ForeignKey("profiles.id"), nullable=True
+            "updated_by",
+            postgresql.UUID(as_uuid=True),
+            sa.ForeignKey("profiles.id"),
+            nullable=True,
         ),
     )
 
@@ -417,7 +447,11 @@ def upgrade() -> None:
         sa.Column(
             "basis",
             sa.Enum(
-                "consentimiento", "contrato", "obligacion_legal", "interes_legitimo", "otra",
+                "consentimiento",
+                "contrato",
+                "obligacion_legal",
+                "interes_legitimo",
+                "otra",
                 name="legal_basis",
                 create_type=False,
             ),
@@ -458,8 +492,12 @@ def upgrade() -> None:
         sa.Column(
             "type",
             sa.Enum(
-                "politica_proteccion_datos", "politica_privacidad", "politica_conservacion",
-                "politica_seguridad", "procedimiento_arsop", "procedimiento_incidentes",
+                "politica_proteccion_datos",
+                "politica_privacidad",
+                "politica_conservacion",
+                "politica_seguridad",
+                "procedimiento_arsop",
+                "procedimiento_incidentes",
                 name="document_type",
                 create_type=False,
             ),
@@ -468,7 +506,13 @@ def upgrade() -> None:
         sa.Column("version", sa.Integer(), nullable=False, server_default="1"),
         sa.Column(
             "status",
-            sa.Enum("borrador", "aprobado", "archivado", name="document_status", create_type=False),
+            sa.Enum(
+                "borrador",
+                "aprobado",
+                "archivado",
+                name="document_status",
+                create_type=False,
+            ),
             nullable=False,
             server_default="borrador",
         ),
@@ -487,7 +531,10 @@ def upgrade() -> None:
             server_default=sa.text("now()"),
         ),
         sa.Column(
-            "created_by", postgresql.UUID(as_uuid=True), sa.ForeignKey("profiles.id"), nullable=True
+            "created_by",
+            postgresql.UUID(as_uuid=True),
+            sa.ForeignKey("profiles.id"),
+            nullable=True,
         ),
     )
 
@@ -546,8 +593,16 @@ def upgrade() -> None:
 
     # ── Índices por tenant ────────────────────────────────────────────────────
     tenant_index_tables = [
-        "diagnostics", "diagnostic_answers", "findings", "systems", "vendors",
-        "treatments", "legal_bases", "documents", "evidence_events", "memberships",
+        "diagnostics",
+        "diagnostic_answers",
+        "findings",
+        "systems",
+        "vendors",
+        "treatments",
+        "legal_bases",
+        "documents",
+        "evidence_events",
+        "memberships",
     ]
     for table in tenant_index_tables:
         op.create_index(f"ix_{table}_organization_id", table, ["organization_id"])
@@ -560,9 +615,17 @@ def upgrade() -> None:
 
     # ── Row-Level Security ────────────────────────────────────────────────────
     rls_tables = [
-        "organizations", "memberships", "diagnostics", "diagnostic_answers",
-        "findings", "systems", "vendors", "treatments", "legal_bases",
-        "documents", "evidence_events",
+        "organizations",
+        "memberships",
+        "diagnostics",
+        "diagnostic_answers",
+        "findings",
+        "systems",
+        "vendors",
+        "treatments",
+        "legal_bases",
+        "documents",
+        "evidence_events",
     ]
     for table in rls_tables:
         op.execute(f"ALTER TABLE {table} ENABLE ROW LEVEL SECURITY")
@@ -609,9 +672,19 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     tables = [
-        "knowledge_chunks", "evidence_events", "documents", "legal_bases",
-        "treatments", "vendors", "systems", "findings", "diagnostic_answers",
-        "diagnostics", "memberships", "profiles", "organizations",
+        "knowledge_chunks",
+        "evidence_events",
+        "documents",
+        "legal_bases",
+        "treatments",
+        "vendors",
+        "systems",
+        "findings",
+        "diagnostic_answers",
+        "diagnostics",
+        "memberships",
+        "profiles",
+        "organizations",
     ]
     for table in tables:
         op.drop_table(table)
@@ -621,7 +694,12 @@ def downgrade() -> None:
     op.execute("DROP SCHEMA IF EXISTS auth CASCADE")
 
     for enum_name in [
-        "document_status", "document_type", "third_party_role",
-        "legal_basis", "finding_status", "risk_level", "user_role",
+        "document_status",
+        "document_type",
+        "third_party_role",
+        "legal_basis",
+        "finding_status",
+        "risk_level",
+        "user_role",
     ]:
         op.execute(f"DROP TYPE IF EXISTS {enum_name}")

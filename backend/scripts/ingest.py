@@ -28,9 +28,9 @@ from app.db.models import KnowledgeChunk
 
 settings = get_settings()
 
-CHUNK_SIZE = 1500   # caracteres objetivo por fragmento
-OVERLAP = 200       # solapamiento entre fragmentos
-BATCH_SIZE = 20     # máx textos por llamada a Voyage AI
+CHUNK_SIZE = 1500  # caracteres objetivo por fragmento
+OVERLAP = 200  # solapamiento entre fragmentos
+BATCH_SIZE = 20  # máx textos por llamada a Voyage AI
 
 FUENTES_DIR = Path(__file__).resolve().parent.parent.parent / "docs" / "fuentes"
 
@@ -94,6 +94,7 @@ EXAMPLE_CHUNKS = [
 
 
 # ── Utilidades ────────────────────────────────────────────────────────────────
+
 
 def detect_source(filename: str) -> str:
     name = Path(filename).stem.lower()
@@ -162,6 +163,7 @@ async def embed_texts(texts: list[str]) -> list[list[float]]:
 
 # ── Lógica de ingesta ─────────────────────────────────────────────────────────
 
+
 async def ingest_file(
     filepath: Path, source: str, db: AsyncSession, with_embeddings: bool
 ) -> int:
@@ -217,8 +219,14 @@ async def ingest_examples(db: AsyncSession, with_embeddings: bool) -> int:
             print(f"    Ya existe: {ex['reference']} — omitido")
             continue
 
-        db.add(KnowledgeChunk(source=ex["source"], reference=ex["reference"],
-                              content=ex["content"], embedding=emb))
+        db.add(
+            KnowledgeChunk(
+                source=ex["source"],
+                reference=ex["reference"],
+                content=ex["content"],
+                embedding=emb,
+            )
+        )
         inserted += 1
 
     await db.commit()
@@ -228,9 +236,12 @@ async def ingest_examples(db: AsyncSession, with_embeddings: bool) -> int:
 
 # ── Punto de entrada ──────────────────────────────────────────────────────────
 
+
 async def main(args: argparse.Namespace) -> None:
     engine = create_async_engine(settings.database_url, echo=False)
-    SessionLocal = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+    SessionLocal = async_sessionmaker(
+        engine, class_=AsyncSession, expire_on_commit=False
+    )
 
     async with SessionLocal() as db:
         if args.examples:
@@ -244,9 +255,13 @@ async def main(args: argparse.Namespace) -> None:
             fp = Path(args.file)
             files.append((fp, args.source or detect_source(fp.name)))
         else:
-            if not FUENTES_DIR.exists() or not list(FUENTES_DIR.glob("*.txt")) + list(FUENTES_DIR.glob("*.md")):
+            if not FUENTES_DIR.exists() or not list(FUENTES_DIR.glob("*.txt")) + list(
+                FUENTES_DIR.glob("*.md")
+            ):
                 print(f"No hay archivos en {FUENTES_DIR}")
-                print("Deposita archivos .txt o .md ahí, o usa --examples para datos de prueba.")
+                print(
+                    "Deposita archivos .txt o .md ahí, o usa --examples para datos de prueba."
+                )
                 await engine.dispose()
                 sys.exit(0)
             for ext in ("*.txt", "*.md"):

@@ -15,6 +15,7 @@ from app.main import app
 
 # ── Aislamiento de tenant ─────────────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_usuario_b_no_puede_acceder_a_org_a(client_b, org_a_id):
     """Usuario B intenta acceder a org A → debe recibir 403."""
@@ -57,9 +58,9 @@ async def test_usuario_a_puede_acceder_a_su_propia_org(client_a, org_a_id):
             "/me/membership",
             headers={"X-Organization-Id": str(org_a_id)},
         )
-    assert response.status_code == 200, (
-        f"Se esperaba 200 pero se obtuvo {response.status_code}."
-    )
+    assert (
+        response.status_code == 200
+    ), f"Se esperaba 200 pero se obtuvo {response.status_code}."
     data = response.json()
     assert str(data["organization_id"]) == str(org_a_id)
     assert data["role"] == "owner"
@@ -97,6 +98,7 @@ async def test_org_id_inventado_es_rechazado(client_a):
 
 # ── Autenticación ─────────────────────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_request_sin_token_es_rechazado():
     """Sin header Authorization → 403 (HTTPBearer devuelve 403 si falta el header)."""
@@ -113,7 +115,9 @@ async def test_token_invalido_es_rechazado():
     async with AsyncClient(
         transport=ASGITransport(app=app), base_url="http://test"
     ) as ac:
-        response = await ac.get("/me", headers={"Authorization": "Bearer token.falso.aqui"})
+        response = await ac.get(
+            "/me", headers={"Authorization": "Bearer token.falso.aqui"}
+        )
     assert response.status_code == 401
 
 

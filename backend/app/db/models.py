@@ -20,6 +20,7 @@ from app.db.base import Base
 
 # ── Enums ────────────────────────────────────────────────────────────────────
 
+
 class UserRole(str, enum.Enum):
     owner = "owner"
     admin = "admin"
@@ -71,6 +72,7 @@ class DocumentStatus(str, enum.Enum):
 
 # ── Núcleo multi-tenant ───────────────────────────────────────────────────────
 
+
 class Organization(Base):
     __tablename__ = "organizations"
 
@@ -89,7 +91,9 @@ class Organization(Base):
         sa.TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
     )
 
-    memberships: Mapped[list["Membership"]] = relationship(back_populates="organization")
+    memberships: Mapped[list["Membership"]] = relationship(
+        back_populates="organization"
+    )
 
 
 class Profile(Base):
@@ -143,6 +147,7 @@ class Membership(Base):
 
 # ── Módulo 1 — Diagnóstico ────────────────────────────────────────────────────
 
+
 class Diagnostic(Base):
     __tablename__ = "diagnostics"
 
@@ -156,7 +161,9 @@ class Diagnostic(Base):
     )
     global_score: Mapped[float | None] = mapped_column(Numeric(5, 2), nullable=True)
     section_scores: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
-    status: Mapped[str] = mapped_column(Text, nullable=False, server_default="en_progreso")
+    status: Mapped[str] = mapped_column(
+        Text, nullable=False, server_default="en_progreso"
+    )
     created_at: Mapped[datetime] = mapped_column(
         sa.TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
     )
@@ -233,6 +240,7 @@ class Finding(Base):
 
 # ── Módulo 2 — Inventario (RAT) ───────────────────────────────────────────────
 
+
 class System(Base):
     __tablename__ = "systems"
 
@@ -273,7 +281,9 @@ class Vendor(Base):
     is_international: Mapped[bool] = mapped_column(
         Boolean, nullable=False, server_default="false"
     )
-    has_dpa: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="false")
+    has_dpa: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, server_default="false"
+    )
     created_at: Mapped[datetime] = mapped_column(
         sa.TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
     )
@@ -292,7 +302,9 @@ class Treatment(Base):
     )
     name: Mapped[str] = mapped_column(Text, nullable=False)
     purpose: Mapped[str | None] = mapped_column(Text, nullable=True)
-    data_categories: Mapped[list[str] | None] = mapped_column(ARRAY(Text), nullable=True)
+    data_categories: Mapped[list[str] | None] = mapped_column(
+        ARRAY(Text), nullable=True
+    )
     data_subjects: Mapped[list[str] | None] = mapped_column(ARRAY(Text), nullable=True)
     has_sensitive: Mapped[bool] = mapped_column(
         Boolean, nullable=False, server_default="false"
@@ -317,6 +329,7 @@ class Treatment(Base):
 
 # ── Módulo 3 — Bases de licitud ───────────────────────────────────────────────
 
+
 class LegalBase(Base):
     __tablename__ = "legal_bases"
 
@@ -338,7 +351,9 @@ class LegalBase(Base):
     )
     justification: Mapped[str | None] = mapped_column(Text, nullable=True)
     confidence: Mapped[float | None] = mapped_column(Numeric(4, 3), nullable=True)
-    approved: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="false")
+    approved: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, server_default="false"
+    )
     lia: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         sa.TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
@@ -349,6 +364,7 @@ class LegalBase(Base):
 
 
 # ── Módulo 4 — Documentos generados ──────────────────────────────────────────
+
 
 class Document(Base):
     __tablename__ = "documents"
@@ -385,6 +401,7 @@ class Document(Base):
 
 # ── Módulo 5 — Bitácora de evidencia (append-only) ───────────────────────────
 
+
 class EvidenceEvent(Base):
     __tablename__ = "evidence_events"
 
@@ -410,6 +427,7 @@ class EvidenceEvent(Base):
 
 
 # ── RAG — Base de conocimiento (global, sin RLS por tenant) ──────────────────
+
 
 class KnowledgeChunk(Base):
     __tablename__ = "knowledge_chunks"

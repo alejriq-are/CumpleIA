@@ -41,11 +41,13 @@ def make_token(auth_user_id: uuid.UUID) -> str:
 
 # ── Engine de test (session-scoped para reutilizar conexión) ──────────────────
 
+
 @pytest.fixture(scope="session")
 def _engine():
     engine = create_async_engine(settings.database_url, echo=False)
     yield engine
     import asyncio
+
     asyncio.get_event_loop().run_until_complete(engine.dispose())
 
 
@@ -56,13 +58,15 @@ def _session_factory(_engine):
 
 # ── Datos de test (session-scoped: se crean una vez y se limpian al final) ────
 
+
 @pytest_asyncio.fixture(scope="session", autouse=True)
 async def _seed_test_data(_session_factory):
     """Crea orgs, perfiles y membresías de test. Se limpia al final de la sesión."""
     async with _session_factory() as session:
         # Limpiar datos previos si quedaron de una ejecución anterior
         for model_id, Model in [
-            (_ORG_A_ID, Organization), (_ORG_B_ID, Organization),
+            (_ORG_A_ID, Organization),
+            (_ORG_B_ID, Organization),
         ]:
             existing = await session.get(Model, model_id)
             if existing:
@@ -101,8 +105,16 @@ async def _seed_test_data(_session_factory):
         await session.flush()
 
         # Membresías: A → org_a, B → org_b (cada uno solo tiene acceso a la suya)
-        session.add(Membership(organization_id=_ORG_A_ID, profile_id=_PROFILE_A_ID, role=UserRole.owner))
-        session.add(Membership(organization_id=_ORG_B_ID, profile_id=_PROFILE_B_ID, role=UserRole.owner))
+        session.add(
+            Membership(
+                organization_id=_ORG_A_ID, profile_id=_PROFILE_A_ID, role=UserRole.owner
+            )
+        )
+        session.add(
+            Membership(
+                organization_id=_ORG_B_ID, profile_id=_PROFILE_B_ID, role=UserRole.owner
+            )
+        )
         await session.commit()
 
     yield  # tests corren aquí
@@ -122,25 +134,31 @@ async def _seed_test_data(_session_factory):
 
 # ── Perfiles expuestos a los tests ────────────────────────────────────────────
 
+
 @pytest.fixture(scope="session")
 def profile_a_id() -> uuid.UUID:
     return _PROFILE_A_ID
+
 
 @pytest.fixture(scope="session")
 def profile_b_id() -> uuid.UUID:
     return _PROFILE_B_ID
 
+
 @pytest.fixture(scope="session")
 def org_a_id() -> uuid.UUID:
     return _ORG_A_ID
+
 
 @pytest.fixture(scope="session")
 def org_b_id() -> uuid.UUID:
     return _ORG_B_ID
 
+
 @pytest.fixture(scope="session")
 def token_a() -> str:
     return make_token(_AUTH_A_ID)
+
 
 @pytest.fixture(scope="session")
 def token_b() -> str:
@@ -149,12 +167,15 @@ def token_b() -> str:
 
 # ── Cliente HTTP con JWT override ─────────────────────────────────────────────
 
+
 def _make_auth_override(profile_id: uuid.UUID, session_factory):
     """Override de get_current_profile que devuelve el perfil de test desde la BD."""
+
     async def _override():
         async with session_factory() as session:
             profile = await session.get(Profile, profile_id)
             return profile
+
     return _override
 
 

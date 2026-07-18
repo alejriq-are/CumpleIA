@@ -22,9 +22,10 @@ async def test_rag_search_sin_api_key_devuelve_503():
         )
     # 503 = clave no configurada (esperado en dev sin Voyage AI)
     # 200 = clave configurada y BD con datos
-    assert response.status_code in (200, 503), (
-        f"Se esperaba 200 o 503, se obtuvo {response.status_code}: {response.text}"
-    )
+    assert response.status_code in (
+        200,
+        503,
+    ), f"Se esperaba 200 o 503, se obtuvo {response.status_code}: {response.text}"
 
 
 @pytest.mark.asyncio

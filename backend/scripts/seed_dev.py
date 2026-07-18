@@ -24,7 +24,9 @@ DEV_AUTH_USER_ID = uuid.UUID("30000000-0000-0000-0000-000000000001")
 
 async def seed() -> None:
     engine = create_async_engine(settings.database_url, echo=False)
-    SessionLocal = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+    SessionLocal = async_sessionmaker(
+        engine, class_=AsyncSession, expire_on_commit=False
+    )
 
     async with SessionLocal() as session:
         # Idempotente: no duplicar si ya existe
