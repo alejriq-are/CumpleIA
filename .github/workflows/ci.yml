@@ -36,6 +36,7 @@ jobs:
       SUPABASE_JWT_SECRET: ci-test-jwt-secret-cumpleia-2026
       ENVIRONMENT: test
       DEBUG: "false"
+      GH_TOKEN: ${{ github.token }}
 
     steps:
       - name: Checkout
@@ -58,16 +59,20 @@ jobs:
         run: black --check .
 
       - name: Aplicar migraciones
+        shell: bash
         run: |
-          alembic upgrade head 2>&1 | tee /tmp/migration.log || {
-            python3 -c "
-import urllib.request, json, os
+          set +e
+          alembic upgrade head 2>&1 | tee /tmp/migration.log
+          EXIT_CODE=${PIPESTATUS[0]}
+          if [ $EXIT_CODE -ne 0 ]; then
+            python3 - <<'PYEOF'
+import urllib.request, json, os, sys
 log = open('/tmp/migration.log').read() if os.path.exists('/tmp/migration.log') else 'no log file'
-body = json.dumps({'body': '## CI: error en alembic upgrade head\n\`\`\`\n' + log[-3000:] + '\n\`\`\`'})
+body = json.dumps({'body': '## CI: alembic upgrade head error\n```\n' + log[-3000:] + '\n```'})
 req = urllib.request.Request(
-    'https://api.github.com/repos/' + os.environ['GITHUB_REPOSITORY'] + '/commits/' + os.environ['GITHUB_SHA'] + '/comments',
+    'https://api.github.com/repos/' + os.environ.get('GITHUB_REPOSITORY','') + '/commits/' + os.environ.get('GITHUB_SHA','') + '/comments',
     data=body.encode(),
-    headers={'Authorization': 'token ' + os.environ['GH_TOKEN'], 'Content-Type': 'application/json'},
+    headers={'Authorization': 'token ' + os.environ.get('GH_TOKEN',''), 'Content-Type': 'application/json'},
     method='POST'
 )
 try:
@@ -75,9 +80,9 @@ try:
     print('Comment posted:', resp.status)
 except Exception as e:
     print('Failed to post comment:', e)
-"
-            exit 1
-          }
+PYEOF
+            exit $EXIT_CODE
+          fi
 
       - name: Tests (incluye aislamiento multi-tenant)
         run: pytest tests/ -v --tb=short
