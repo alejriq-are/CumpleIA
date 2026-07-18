@@ -59,21 +59,25 @@ jobs:
 
       - name: Aplicar migraciones
         run: |
-          alembic upgrade head 2>&1 | tee /tmp/migration.log
-          exit ${PIPESTATUS[0]}
-
-      - name: Postear error como commit comment (debug)
-        if: failure()
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          LOG=$(tail -60 /tmp/migration.log 2>/dev/null || echo "no log")
-          gh api repos/${{ github.repository }}/commits/${{ github.sha }}/comments \
-            --method POST \
-            --field body="## CI migration error (debug)
-          \`\`\`
-          ${LOG}
-          \`\`\`"
+          alembic upgrade head 2>&1 | tee /tmp/migration.log || {
+            python3 -c "
+import urllib.request, json, os
+log = open('/tmp/migration.log').read() if os.path.exists('/tmp/migration.log') else 'no log file'
+body = json.dumps({'body': '## CI: error en alembic upgrade head\n\`\`\`\n' + log[-3000:] + '\n\`\`\`'})
+req = urllib.request.Request(
+    'https://api.github.com/repos/' + os.environ['GITHUB_REPOSITORY'] + '/commits/' + os.environ['GITHUB_SHA'] + '/comments',
+    data=body.encode(),
+    headers={'Authorization': 'token ' + os.environ['GH_TOKEN'], 'Content-Type': 'application/json'},
+    method='POST'
+)
+try:
+    resp = urllib.request.urlopen(req)
+    print('Comment posted:', resp.status)
+except Exception as e:
+    print('Failed to post comment:', e)
+"
+            exit 1
+          }
 
       - name: Tests (incluye aislamiento multi-tenant)
         run: pytest tests/ -v --tb=short
