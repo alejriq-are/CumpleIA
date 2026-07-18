@@ -1,7 +1,6 @@
 import enum
 import uuid
 from datetime import datetime
-from typing import Optional
 
 import sqlalchemy as sa
 from pgvector.sqlalchemy import Vector
@@ -18,7 +17,6 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 
 from app.db.base import Base
-
 
 # ── Enums ────────────────────────────────────────────────────────────────────
 
@@ -80,9 +78,9 @@ class Organization(Base):
         UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid()
     )
     name: Mapped[str] = mapped_column(Text, nullable=False)
-    rut: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    industry: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    size: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    rut: Mapped[str | None] = mapped_column(Text, nullable=True)
+    industry: Mapped[str | None] = mapped_column(Text, nullable=True)
+    size: Mapped[str | None] = mapped_column(Text, nullable=True)
     plan: Mapped[str] = mapped_column(Text, nullable=False, server_default="free")
     created_at: Mapped[datetime] = mapped_column(
         sa.TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
@@ -104,7 +102,7 @@ class Profile(Base):
         UUID(as_uuid=True), unique=True, nullable=False
     )
     email: Mapped[str] = mapped_column(Text, nullable=False)
-    full_name: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    full_name: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         sa.TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
     )
@@ -156,8 +154,8 @@ class Diagnostic(Base):
         ForeignKey("organizations.id", ondelete="CASCADE"),
         nullable=False,
     )
-    global_score: Mapped[Optional[float]] = mapped_column(Numeric(5, 2), nullable=True)
-    section_scores: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
+    global_score: Mapped[float | None] = mapped_column(Numeric(5, 2), nullable=True)
+    section_scores: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
     status: Mapped[str] = mapped_column(Text, nullable=False, server_default="en_progreso")
     created_at: Mapped[datetime] = mapped_column(
         sa.TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
@@ -165,10 +163,10 @@ class Diagnostic(Base):
     updated_at: Mapped[datetime] = mapped_column(
         sa.TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
     )
-    created_by: Mapped[Optional[uuid.UUID]] = mapped_column(
+    created_by: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True), ForeignKey("profiles.id"), nullable=True
     )
-    updated_by: Mapped[Optional[uuid.UUID]] = mapped_column(
+    updated_by: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True), ForeignKey("profiles.id"), nullable=True
     )
 
@@ -191,8 +189,8 @@ class DiagnosticAnswer(Base):
     )
     section: Mapped[str] = mapped_column(Text, nullable=False)
     question_code: Mapped[str] = mapped_column(Text, nullable=False)
-    answer: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    answer: Mapped[str | None] = mapped_column(Text, nullable=True)
+    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         sa.TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
     )
@@ -209,7 +207,7 @@ class Finding(Base):
         ForeignKey("organizations.id", ondelete="CASCADE"),
         nullable=False,
     )
-    diagnostic_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+    diagnostic_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("diagnostics.id", ondelete="SET NULL"),
         nullable=True,
@@ -218,8 +216,8 @@ class Finding(Base):
     risk: Mapped[RiskLevel] = mapped_column(
         sa.Enum(RiskLevel, name="risk_level"), nullable=False
     )
-    corrective_action: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    responsible: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    corrective_action: Mapped[str | None] = mapped_column(Text, nullable=True)
+    responsible: Mapped[str | None] = mapped_column(Text, nullable=True)
     status: Mapped[FindingStatus] = mapped_column(
         sa.Enum(FindingStatus, name="finding_status"),
         nullable=False,
@@ -247,8 +245,8 @@ class System(Base):
         nullable=False,
     )
     name: Mapped[str] = mapped_column(Text, nullable=False)
-    provider: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    hosting_location: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    provider: Mapped[str | None] = mapped_column(Text, nullable=True)
+    hosting_location: Mapped[str | None] = mapped_column(Text, nullable=True)
     is_international: Mapped[bool] = mapped_column(
         Boolean, nullable=False, server_default="false"
     )
@@ -269,7 +267,7 @@ class Vendor(Base):
         nullable=False,
     )
     name: Mapped[str] = mapped_column(Text, nullable=False)
-    role: Mapped[Optional[ThirdPartyRole]] = mapped_column(
+    role: Mapped[ThirdPartyRole | None] = mapped_column(
         sa.Enum(ThirdPartyRole, name="third_party_role"), nullable=True
     )
     is_international: Mapped[bool] = mapped_column(
@@ -293,13 +291,13 @@ class Treatment(Base):
         nullable=False,
     )
     name: Mapped[str] = mapped_column(Text, nullable=False)
-    purpose: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    data_categories: Mapped[Optional[list[str]]] = mapped_column(ARRAY(Text), nullable=True)
-    data_subjects: Mapped[Optional[list[str]]] = mapped_column(ARRAY(Text), nullable=True)
+    purpose: Mapped[str | None] = mapped_column(Text, nullable=True)
+    data_categories: Mapped[list[str] | None] = mapped_column(ARRAY(Text), nullable=True)
+    data_subjects: Mapped[list[str] | None] = mapped_column(ARRAY(Text), nullable=True)
     has_sensitive: Mapped[bool] = mapped_column(
         Boolean, nullable=False, server_default="false"
     )
-    retention: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    retention: Mapped[str | None] = mapped_column(Text, nullable=True)
     is_international: Mapped[bool] = mapped_column(
         Boolean, nullable=False, server_default="false"
     )
@@ -309,10 +307,10 @@ class Treatment(Base):
     updated_at: Mapped[datetime] = mapped_column(
         sa.TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
     )
-    created_by: Mapped[Optional[uuid.UUID]] = mapped_column(
+    created_by: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True), ForeignKey("profiles.id"), nullable=True
     )
-    updated_by: Mapped[Optional[uuid.UUID]] = mapped_column(
+    updated_by: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True), ForeignKey("profiles.id"), nullable=True
     )
 
@@ -338,10 +336,10 @@ class LegalBase(Base):
     basis: Mapped[LegalBasis] = mapped_column(
         sa.Enum(LegalBasis, name="legal_basis"), nullable=False
     )
-    justification: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    confidence: Mapped[Optional[float]] = mapped_column(Numeric(4, 3), nullable=True)
+    justification: Mapped[str | None] = mapped_column(Text, nullable=True)
+    confidence: Mapped[float | None] = mapped_column(Numeric(4, 3), nullable=True)
     approved: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="false")
-    lia: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
+    lia: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         sa.TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
     )
@@ -372,15 +370,15 @@ class Document(Base):
         nullable=False,
         server_default="borrador",
     )
-    storage_path: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    content_hash: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    storage_path: Mapped[str | None] = mapped_column(Text, nullable=True)
+    content_hash: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         sa.TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
     )
     updated_at: Mapped[datetime] = mapped_column(
         sa.TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
     )
-    created_by: Mapped[Optional[uuid.UUID]] = mapped_column(
+    created_by: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True), ForeignKey("profiles.id"), nullable=True
     )
 
@@ -399,12 +397,12 @@ class EvidenceEvent(Base):
         nullable=False,
     )
     event_type: Mapped[str] = mapped_column(Text, nullable=False)
-    actor_profile_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+    actor_profile_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True), ForeignKey("profiles.id"), nullable=True
     )
-    payload: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
+    payload: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
     payload_hash: Mapped[str] = mapped_column(Text, nullable=False)
-    prev_hash: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    prev_hash: Mapped[str | None] = mapped_column(Text, nullable=True)
     event_hash: Mapped[str] = mapped_column(Text, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         sa.TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
@@ -420,9 +418,9 @@ class KnowledgeChunk(Base):
         UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid()
     )
     source: Mapped[str] = mapped_column(Text, nullable=False)
-    reference: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    reference: Mapped[str | None] = mapped_column(Text, nullable=True)
     content: Mapped[str] = mapped_column(Text, nullable=False)
-    embedding: Mapped[Optional[list]] = mapped_column(Vector(1024), nullable=True)
+    embedding: Mapped[list | None] = mapped_column(Vector(1024), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         sa.TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
     )

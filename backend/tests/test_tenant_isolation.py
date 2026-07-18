@@ -13,7 +13,6 @@ from httpx import ASGITransport, AsyncClient
 
 from app.main import app
 
-
 # ── Aislamiento de tenant ─────────────────────────────────────────────────────
 
 @pytest.mark.asyncio

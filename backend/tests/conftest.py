@@ -9,14 +9,12 @@ import uuid
 
 import pytest
 import pytest_asyncio
-from httpx import ASGITransport, AsyncClient
 from jose import jwt
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from app.core.config import get_settings
 from app.core.deps import get_current_profile
 from app.db.models import Membership, Organization, Profile, UserRole
-from app.db.session import get_db
 from app.main import app
 
 settings = get_settings()

@@ -181,7 +181,7 @@ async def ingest_file(
         else:
             embeddings = [None] * len(batch)
 
-        for text_str, emb in zip(batch, embeddings):
+        for text_str, emb in zip(batch, embeddings, strict=True):
             db.add(
                 KnowledgeChunk(
                     source=source,
@@ -206,7 +206,7 @@ async def ingest_examples(db: AsyncSession, with_embeddings: bool) -> int:
         print("  Insertando sin embeddings (usa --embed para generarlos con Voyage AI)")
 
     inserted = 0
-    for ex, emb in zip(EXAMPLE_CHUNKS, embs):
+    for ex, emb in zip(EXAMPLE_CHUNKS, embs, strict=True):
         existing = await db.execute(
             select(KnowledgeChunk).where(
                 KnowledgeChunk.source == ex["source"],
