@@ -1,4 +1,3 @@
-import os
 from logging.config import fileConfig
 
 from sqlalchemy import create_engine, pool
@@ -18,8 +17,6 @@ settings = get_settings()
 
 # URL síncrona para migraciones (psycopg2); asyncpg es para la app en runtime
 _sync_url = settings.database_url.replace("+asyncpg", "")
-# En entorno de test mostramos el SQL ejecutado para facilitar el diagnóstico
-_echo_sql = os.environ.get("ENVIRONMENT") == "test"
 
 
 def run_migrations_offline() -> None:
@@ -40,7 +37,7 @@ def do_run_migrations(connection) -> None:
 
 
 def run_migrations_online() -> None:
-    connectable = create_engine(_sync_url, poolclass=pool.NullPool, echo=_echo_sql)
+    connectable = create_engine(_sync_url, poolclass=pool.NullPool)
     with connectable.connect() as connection:
         do_run_migrations(connection)
     connectable.dispose()

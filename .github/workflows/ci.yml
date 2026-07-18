@@ -11,8 +11,6 @@ jobs:
   backend:
     name: Backend (Python 3.12)
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
 
     services:
       postgres:
@@ -59,160 +57,25 @@ jobs:
       - name: Formato — black
         run: black --check .
 
-      - name: Debug — importaciones y conexión DB
+      - name: Preparar base de datos
         shell: bash
         run: |
           python3 - <<'EOF'
-          import sys, traceback
-          print("Python:", sys.version)
-
-          try:
-              import psycopg2
-              print("psycopg2:", psycopg2.__version__)
-          except Exception as e:
-              print("ERROR psycopg2:", e); traceback.print_exc()
-
-          try:
-              from pgvector.sqlalchemy import Vector
-              print("pgvector.sqlalchemy.Vector: OK")
-          except Exception as e:
-              print("ERROR pgvector:", e); traceback.print_exc()
-
-          try:
-              from app.db.base import Base
-              import app.db.models
-              print("app.db.models: OK")
-          except Exception as e:
-              print("ERROR app.db.models:", e); traceback.print_exc()
-
-          try:
-              from app.core.config import get_settings
-              s = get_settings()
-              url = s.database_url
-              sync_url = url.replace("+asyncpg", "")
-              print("Settings OK, sync URL:", sync_url[:60])
-          except Exception as e:
-              print("ERROR settings:", e); traceback.print_exc()
-
-          try:
-              import psycopg2
-              conn = psycopg2.connect("postgresql://postgres:postgres@localhost:5432/cumpleia_test")
-              cur = conn.cursor()
-              cur.execute("SELECT version()")
-              print("PostgreSQL:", cur.fetchone()[0])
-              cur.execute("SELECT * FROM pg_available_extensions WHERE name = 'vector'")
-              row = cur.fetchone()
-              print("pgvector extension available:", row is not None)
-              conn.close()
-          except Exception as e:
-              print("ERROR DB connection:", e); traceback.print_exc()
-
-          try:
-              from sqlalchemy import create_engine, pool, text
-              url = "postgresql://postgres:postgres@localhost:5432/cumpleia_test"
-              engine = create_engine(url, poolclass=pool.NullPool)
-              with engine.connect() as conn:
-                  db = conn.execute(text("SELECT current_database()")).scalar()
-                  print("SQLAlchemy sync engine: OK, DB =", db)
-                  conn.execute(text('CREATE EXTENSION IF NOT EXISTS "vector"'))
-                  print("CREATE EXTENSION vector: OK")
-                  conn.execute(text("CREATE SCHEMA IF NOT EXISTS auth"))
-                  print("CREATE SCHEMA auth: OK")
-                  conn.commit()  # commit pre-migration: la extensión queda disponible
-              engine.dispose()
-          except Exception as e:
-              print("ERROR SQLAlchemy sync:", e); traceback.print_exc()
-
-          try:
-              import importlib.util
-              spec = importlib.util.spec_from_file_location(
-                  "mig", "alembic/versions/0001_initial_schema.py"
-              )
-              mod = importlib.util.module_from_spec(spec)
-              spec.loader.exec_module(mod)
-              print("migration file import: OK")
-          except Exception as e:
-              print("ERROR migration import:", e); traceback.print_exc()
+          from sqlalchemy import create_engine, pool, text
+          url = "postgresql://postgres:postgres@localhost:5432/cumpleia_test"
+          engine = create_engine(url, poolclass=pool.NullPool)
+          with engine.connect() as conn:
+              conn.execute(text('CREATE EXTENSION IF NOT EXISTS "vector"'))
+              conn.execute(text("CREATE SCHEMA IF NOT EXISTS auth"))
+              conn.commit()
+          engine.dispose()
           EOF
 
-      - name: Debug — alembic current
-        shell: bash
-        continue-on-error: true
-        run: alembic current 2>&1
-
       - name: Aplicar migraciones
-        shell: bash
-        run: |
-          set +e
-          python3 - <<'PYEOF' 2>&1 | tee /tmp/migration.log
-          import sys, logging
-          logging.basicConfig(level=logging.INFO,
-              format="%(levelname)s %(name)s: %(message)s", stream=sys.stdout, force=True)
-          try:
-              from alembic.config import Config
-              from alembic import command
-              command.upgrade(Config("alembic.ini"), "head")
-              print("MIGRATION SUCCESS")
-          except Exception as exc:
-              import traceback
-              print("MIGRATION ERROR:", type(exc).__name__, exc)
-              traceback.print_exc()
-              sys.exit(1)
-          PYEOF
-          EXIT_CODE=${PIPESTATUS[0]}
-          {
-            echo "## Alembic migration log"
-            echo '```'
-            cat /tmp/migration.log
-            echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
-          exit $EXIT_CODE
-
-      - name: Subir log de migración (siempre)
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: migration-log
-          path: /tmp/migration.log
-          retention-days: 1
-
-      - name: Postear error como commit comment
-        if: failure()
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const fs = require('fs');
-            let log = '';
-            try { log = fs.readFileSync('/tmp/migration.log', 'utf8').slice(0, 65000); } catch(e) { log = 'No log: ' + e; }
-            await github.rest.repos.createCommitComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              commit_sha: context.sha,
-              body: '### Migration Error (CI)\n```\n' + log + '\n```'
-            });
+        run: alembic upgrade head
 
       - name: Tests (incluye aislamiento multi-tenant)
-        shell: bash
-        run: |
-          set +e
-          pytest tests/ -v --tb=short 2>&1 | tee /tmp/pytest.log
-          EXIT_CODE=${PIPESTATUS[0]}
-          exit $EXIT_CODE
-
-      - name: Postear resultado de tests como commit comment
-        if: failure()
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const fs = require('fs');
-            let log = '';
-            try { log = fs.readFileSync('/tmp/pytest.log', 'utf8').slice(-50000); } catch(e) { log = 'No log: ' + e; }
-            await github.rest.repos.createCommitComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              commit_sha: context.sha,
-              body: '### Test Failure (CI)\n```\n' + log + '\n```'
-            });
+        run: pytest tests/ -v --tb=short
 
   # ── Frontend Node.js ────────────────────────────────────────────────────────
   frontend:
