@@ -33,7 +33,7 @@ _TENANT_TABLES = [
 
 def upgrade() -> None:
     # ── Extensiones ──────────────────────────────────────────────────────────
-    op.execute('CREATE EXTENSION IF NOT EXISTS "pgcrypto"')
+    # pgcrypto no es necesario: gen_random_uuid() es built-in desde PostgreSQL 13
     op.execute('CREATE EXTENSION IF NOT EXISTS "vector"')
 
     # ── Schema auth stub para desarrollo local (Docker) ──────────────────────
