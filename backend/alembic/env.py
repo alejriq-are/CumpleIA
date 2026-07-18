@@ -1,9 +1,6 @@
-import asyncio
 from logging.config import fileConfig
 
-from sqlalchemy import pool
-from sqlalchemy.engine import Connection
-from sqlalchemy.ext.asyncio import async_engine_from_config
+from sqlalchemy import create_engine, pool
 
 import app.db.models  # noqa: F401 — registra los modelos en Base.metadata
 from alembic import context
@@ -18,11 +15,13 @@ if config.config_file_name is not None:
 target_metadata = Base.metadata
 settings = get_settings()
 
+# URL síncrona para migraciones (psycopg2); asyncpg es para la app en runtime
+_sync_url = settings.database_url.replace("+asyncpg", "")
+
 
 def run_migrations_offline() -> None:
-    url = settings.database_url.replace("+asyncpg", "")
     context.configure(
-        url=url,
+        url=_sync_url,
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
@@ -31,27 +30,17 @@ def run_migrations_offline() -> None:
         context.run_migrations()
 
 
-def do_run_migrations(connection: Connection) -> None:
+def do_run_migrations(connection) -> None:
     context.configure(connection=connection, target_metadata=target_metadata)
     with context.begin_transaction():
         context.run_migrations()
 
 
-async def run_async_migrations() -> None:
-    configuration = config.get_section(config.config_ini_section, {})
-    configuration["sqlalchemy.url"] = settings.database_url
-    connectable = async_engine_from_config(
-        configuration,
-        prefix="sqlalchemy.",
-        poolclass=pool.NullPool,
-    )
-    async with connectable.connect() as connection:
-        await connection.run_sync(do_run_migrations)
-    await connectable.dispose()
-
-
 def run_migrations_online() -> None:
-    asyncio.run(run_async_migrations())
+    connectable = create_engine(_sync_url, poolclass=pool.NullPool)
+    with connectable.connect() as connection:
+        do_run_migrations(connection)
+    connectable.dispose()
 
 
 if context.is_offline_mode():
