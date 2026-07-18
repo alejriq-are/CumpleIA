@@ -140,8 +140,6 @@ jobs:
 
       - name: Aplicar migraciones
         shell: bash
-        env:
-          GH_TOKEN: ${{ github.token }}
         run: |
           set +e
           python3 - <<'PYEOF' 2>&1 | tee /tmp/migration.log
@@ -166,26 +164,15 @@ jobs:
             cat /tmp/migration.log
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
-          if [ $EXIT_CODE -ne 0 ]; then
-            python3 - <<'PYEOF'
-          import urllib.request, json, os
-          log = open("/tmp/migration.log").read()
-          body = json.dumps({"description": "CI alembic error", "public": True,
-              "files": {"migration_error.txt": {"content": log or "empty log"}}})
-          req = urllib.request.Request("https://api.github.com/gists", data=body.encode(),
-              headers={"Authorization": "Bearer " + os.environ.get("GH_TOKEN",""),
-                       "Accept": "application/vnd.github+json",
-                       "Content-Type": "application/json"}, method="POST")
-          try:
-              resp = urllib.request.urlopen(req)
-              data = json.loads(resp.read())
-              gist_url = list(data.get("files",{}).values())[0].get("raw_url","")
-              print("GIST:", data.get("html_url"), "RAW:", gist_url)
-          except Exception as e:
-              import traceback; traceback.print_exc()
-          PYEOF
-            exit $EXIT_CODE
-          fi
+          exit $EXIT_CODE
+
+      - name: Subir log de migración (siempre)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: migration-log
+          path: /tmp/migration.log
+          retention-days: 1
 
       - name: Tests (incluye aislamiento multi-tenant)
         run: pytest tests/ -v --tb=short
