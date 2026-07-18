@@ -140,18 +140,23 @@ jobs:
 
       - name: Aplicar migraciones
         shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           set +e
           alembic upgrade head 2>&1 | tee /tmp/migration.log
           EXIT_CODE=${PIPESTATUS[0]}
+          {
+            echo "## Alembic upgrade head"
+            echo '```'
+            cat /tmp/migration.log
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
           if [ $EXIT_CODE -ne 0 ]; then
-            {
-              echo "## :x: alembic upgrade head — error"
-              echo ""
-              echo '```'
-              cat /tmp/migration.log
-              echo '```'
-            } >> "$GITHUB_STEP_SUMMARY"
+            BODY="CI alembic error on $(git rev-parse --short HEAD):$(echo; head -80 /tmp/migration.log)"
+            gh issue create --repo "$GITHUB_REPOSITORY" \
+              --title "CI: alembic upgrade head failed ($(git rev-parse --short HEAD))" \
+              --body "$BODY" || true
             exit $EXIT_CODE
           fi
 
