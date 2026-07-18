@@ -11,6 +11,8 @@ jobs:
   backend:
     name: Backend (Python 3.12)
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     services:
       postgres:
@@ -116,7 +118,7 @@ jobs:
                   print("CREATE EXTENSION vector: OK")
                   conn.execute(text("CREATE SCHEMA IF NOT EXISTS auth"))
                   print("CREATE SCHEMA auth: OK")
-                  conn.rollback()
+                  conn.commit()  # commit pre-migration: la extensión queda disponible
               engine.dispose()
           except Exception as e:
               print("ERROR SQLAlchemy sync:", e); traceback.print_exc()
