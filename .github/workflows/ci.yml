@@ -36,7 +36,6 @@ jobs:
       SUPABASE_JWT_SECRET: ci-test-jwt-secret-cumpleia-2026
       ENVIRONMENT: test
       DEBUG: "false"
-      GH_TOKEN: ${{ github.token }}
 
     steps:
       - name: Checkout
@@ -58,6 +57,55 @@ jobs:
       - name: Formato — black
         run: black --check .
 
+      - name: Debug — importaciones y conexión DB
+        shell: bash
+        run: |
+          python3 - <<'EOF'
+          import sys, traceback
+          print("Python:", sys.version)
+
+          try:
+              import psycopg2
+              print("psycopg2:", psycopg2.__version__)
+          except Exception as e:
+              print("ERROR psycopg2:", e); traceback.print_exc()
+
+          try:
+              from pgvector.sqlalchemy import Vector
+              print("pgvector.sqlalchemy.Vector: OK")
+          except Exception as e:
+              print("ERROR pgvector:", e); traceback.print_exc()
+
+          try:
+              from app.db.base import Base
+              import app.db.models
+              print("app.db.models: OK")
+          except Exception as e:
+              print("ERROR app.db.models:", e); traceback.print_exc()
+
+          try:
+              from app.core.config import get_settings
+              s = get_settings()
+              url = s.database_url
+              sync_url = url.replace("+asyncpg", "")
+              print("Settings OK, sync URL:", sync_url[:60])
+          except Exception as e:
+              print("ERROR settings:", e); traceback.print_exc()
+
+          try:
+              import psycopg2
+              conn = psycopg2.connect("postgresql://postgres:postgres@localhost:5432/cumpleia_test")
+              cur = conn.cursor()
+              cur.execute("SELECT version()")
+              print("PostgreSQL:", cur.fetchone()[0])
+              cur.execute("SELECT * FROM pg_available_extensions WHERE name = 'vector'")
+              row = cur.fetchone()
+              print("pgvector extension available:", row is not None)
+              conn.close()
+          except Exception as e:
+              print("ERROR DB connection:", e); traceback.print_exc()
+          EOF
+
       - name: Aplicar migraciones
         shell: bash
         run: |
@@ -65,22 +113,13 @@ jobs:
           alembic upgrade head 2>&1 | tee /tmp/migration.log
           EXIT_CODE=${PIPESTATUS[0]}
           if [ $EXIT_CODE -ne 0 ]; then
-            python3 - <<'PYEOF'
-import urllib.request, json, os, sys
-log = open('/tmp/migration.log').read() if os.path.exists('/tmp/migration.log') else 'no log file'
-body = json.dumps({'body': '## CI: alembic upgrade head error\n```\n' + log[-3000:] + '\n```'})
-req = urllib.request.Request(
-    'https://api.github.com/repos/' + os.environ.get('GITHUB_REPOSITORY','') + '/commits/' + os.environ.get('GITHUB_SHA','') + '/comments',
-    data=body.encode(),
-    headers={'Authorization': 'token ' + os.environ.get('GH_TOKEN',''), 'Content-Type': 'application/json'},
-    method='POST'
-)
-try:
-    resp = urllib.request.urlopen(req)
-    print('Comment posted:', resp.status)
-except Exception as e:
-    print('Failed to post comment:', e)
-PYEOF
+            {
+              echo "## :x: alembic upgrade head — error"
+              echo ""
+              echo '```'
+              cat /tmp/migration.log
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
             exit $EXIT_CODE
           fi
 
