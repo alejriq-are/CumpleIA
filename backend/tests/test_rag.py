@@ -1,7 +1,8 @@
 """Tests del endpoint RAG /rag/search.
 
-Verifica que el endpoint existe, valida parámetros y responde correctamente
-cuando no hay VOYAGE_API_KEY configurada (retorna 503, no 500).
+El endpoint requiere autenticación. Las pruebas de validación y de
+comportamiento sin VOYAGE_API_KEY se hacen autenticadas (fixture client_a);
+además se verifica que sin token la respuesta sea 401.
 """
 
 import pytest
@@ -11,10 +12,24 @@ from app.main import app
 
 
 @pytest.mark.asyncio
-async def test_rag_search_sin_api_key_devuelve_503():
-    """Sin VOYAGE_API_KEY el endpoint debe retornar 503, no un error interno."""
+async def test_rag_search_sin_token_devuelve_401():
+    """Sin header Authorization el endpoint debe rechazar con 401."""
     async with AsyncClient(
         transport=ASGITransport(app=app), base_url="http://test"
+    ) as ac:
+        response = await ac.post(
+            "/rag/search",
+            json={"query": "base de licitud consentimiento", "top_k": 3},
+        )
+    assert response.status_code == 401
+    assert response.headers.get("WWW-Authenticate") == "Bearer"
+
+
+@pytest.mark.asyncio
+async def test_rag_search_sin_api_key_devuelve_503(client_a):
+    """Autenticado pero sin VOYAGE_API_KEY: 503, no un error interno."""
+    async with AsyncClient(
+        transport=ASGITransport(app=client_a), base_url="http://test"
     ) as ac:
         response = await ac.post(
             "/rag/search",
@@ -29,10 +44,10 @@ async def test_rag_search_sin_api_key_devuelve_503():
 
 
 @pytest.mark.asyncio
-async def test_rag_search_query_muy_corta_devuelve_422():
+async def test_rag_search_query_muy_corta_devuelve_422(client_a):
     """Query de menos de 3 caracteres debe ser rechazada con 422."""
     async with AsyncClient(
-        transport=ASGITransport(app=app), base_url="http://test"
+        transport=ASGITransport(app=client_a), base_url="http://test"
     ) as ac:
         response = await ac.post(
             "/rag/search",
@@ -42,10 +57,10 @@ async def test_rag_search_query_muy_corta_devuelve_422():
 
 
 @pytest.mark.asyncio
-async def test_rag_search_top_k_fuera_de_rango_devuelve_422():
+async def test_rag_search_top_k_fuera_de_rango_devuelve_422(client_a):
     """top_k > 20 debe ser rechazado con 422."""
     async with AsyncClient(
-        transport=ASGITransport(app=app), base_url="http://test"
+        transport=ASGITransport(app=client_a), base_url="http://test"
     ) as ac:
         response = await ac.post(
             "/rag/search",
@@ -55,10 +70,10 @@ async def test_rag_search_top_k_fuera_de_rango_devuelve_422():
 
 
 @pytest.mark.asyncio
-async def test_rag_search_respeta_esquema():
+async def test_rag_search_respeta_esquema(client_a):
     """La respuesta debe incluir los campos query y results."""
     async with AsyncClient(
-        transport=ASGITransport(app=app), base_url="http://test"
+        transport=ASGITransport(app=client_a), base_url="http://test"
     ) as ac:
         response = await ac.post(
             "/rag/search",
