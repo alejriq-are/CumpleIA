@@ -10,6 +10,7 @@ Nunca se registra el token completo en el log.
 
 import logging
 import uuid
+from dataclasses import dataclass
 from functools import lru_cache
 from typing import Any
 
@@ -114,3 +115,44 @@ def extract_auth_user_id(token: str) -> uuid.UUID:
         return uuid.UUID(sub)
     except ValueError as exc:
         raise _unauthorized("Identificador de usuario inválido en el token") from exc
+
+
+@dataclass(frozen=True)
+class AuthIdentity:
+    """Identidad derivada EXCLUSIVAMENTE de los claims del JWT ya validado.
+
+    `auth_user_id` (el `sub` de Supabase) es la clave de vinculación: única e
+    inmutable. `email` y `full_name` se usan solo para poblar el perfil en el
+    aprovisionamiento JIT; nunca se leen del cuerpo de la petición.
+    """
+
+    auth_user_id: uuid.UUID
+    email: str | None
+    full_name: str | None
+
+
+def extract_auth_identity(token: str) -> AuthIdentity:
+    """Valida el token y devuelve la identidad para aprovisionar el perfil.
+
+    Toma `sub`, `email` y el nombre (`user_metadata.full_name` o `.name`) del
+    payload firmado por Supabase. El cliente no puede influir en estos valores.
+    """
+    payload = decode_supabase_jwt(token)
+
+    sub = payload.get("sub")
+    if not sub:
+        raise _unauthorized("Token sin identificador de usuario")
+    try:
+        auth_user_id = uuid.UUID(sub)
+    except ValueError as exc:
+        raise _unauthorized("Identificador de usuario inválido en el token") from exc
+
+    email = payload.get("email")
+    metadata = payload.get("user_metadata") or {}
+    full_name = metadata.get("full_name") or metadata.get("name")
+
+    return AuthIdentity(
+        auth_user_id=auth_user_id,
+        email=email,
+        full_name=full_name,
+    )

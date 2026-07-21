@@ -4,9 +4,10 @@ from typing import Annotated
 from fastapi import Depends, Header, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy import select
+from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.security import extract_auth_user_id
+from app.core.security import extract_auth_identity
 from app.db.models import Membership, Profile
 from app.db.session import get_db
 
@@ -26,19 +27,35 @@ async def get_current_profile(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    auth_user_id = extract_auth_user_id(credentials.credentials)
+    identity = extract_auth_identity(credentials.credentials)
+
+    # Aprovisionamiento JIT: en el primer acceso de un usuario de Supabase aún no
+    # existe su fila en `profiles`. Se crea aquí a partir de los claims validados
+    # del JWT. La ausencia de perfil NO es un fallo de autenticación (el token es
+    # válido); por eso ya no se devuelve 401: simplemente se crea el perfil.
+    #
+    # Idempotente y seguro ante concurrencia: INSERT ... ON CONFLICT DO NOTHING
+    # sobre `auth_user_id` (índice único). Dos peticiones simultáneas del mismo
+    # usuario recién logueado no duplican filas ni fallan por carrera. Se hace
+    # INSERT-luego-SELECT (nunca SELECT-luego-INSERT, que sí tendría carrera).
+    #
+    # `email` es NOT NULL; los tokens de Supabase siempre lo traen, pero se deja
+    # un valor derivado del `sub` como red de seguridad si faltara.
+    email = identity.email or f"{identity.auth_user_id}@sin-email.local"
+    await db.execute(
+        pg_insert(Profile)
+        .values(
+            auth_user_id=identity.auth_user_id,
+            email=email,
+            full_name=identity.full_name,
+        )
+        .on_conflict_do_nothing(index_elements=["auth_user_id"])
+    )
 
     result = await db.execute(
-        select(Profile).where(Profile.auth_user_id == auth_user_id)
+        select(Profile).where(Profile.auth_user_id == identity.auth_user_id)
     )
-    profile = result.scalar_one_or_none()
-
-    if profile is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Perfil de usuario no encontrado",
-        )
-    return profile
+    return result.scalar_one()
 
 
 async def get_org_membership(

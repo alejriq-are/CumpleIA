@@ -36,6 +36,13 @@ jobs:
       SUPABASE_URL: https://thsivchuzxqofrloriiy.supabase.co
       ENVIRONMENT: test
       DEBUG: "false"
+      # Dummies: el runner debe parecerse a un entorno real con secretos
+      # presentes. Así el test que exige secretos en producción demuestra que
+      # neutraliza el entorno (fixture _hermetic_settings) en vez de pasar por
+      # omisión. No son secretos reales; solo satisfacen la validación.
+      SUPABASE_SERVICE_ROLE_KEY: dummy-service-role-key-for-ci
+      SUPABASE_ANON_KEY: dummy-anon-key-for-ci
+      SECRET_KEY: dummy-secret-key-for-ci
 
     steps:
       - name: Checkout

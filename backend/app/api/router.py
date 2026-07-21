@@ -2,9 +2,11 @@ from fastapi import APIRouter
 
 from app.api.health import router as health_router
 from app.api.me import router as me_router
+from app.api.organizations import router as organizations_router
 from app.api.rag import router as rag_router
 
 api_router = APIRouter()
 api_router.include_router(health_router)
 api_router.include_router(me_router)
+api_router.include_router(organizations_router)
 api_router.include_router(rag_router)
