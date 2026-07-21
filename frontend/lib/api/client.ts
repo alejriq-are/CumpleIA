@@ -18,6 +18,12 @@ export type OrganizationOut = {
   role: string;
 };
 
+export type OrganizationMembershipOut = {
+  id: string;
+  name: string;
+  role: string;
+};
+
 export type OrganizationCreate = {
   name: string;
   rut?: string;
@@ -71,6 +77,11 @@ export const api = {
 
     membership: (token: string, organizationId: string): Promise<MembershipOut> =>
       apiFetch<MembershipOut>("/me/membership", { token, organizationId }),
+
+    // Organizaciones del usuario con su rol; no requiere X-Organization-Id.
+    // Lista vacía si aún no pertenece a ninguna. Útil para el onboarding.
+    organizations: (token: string): Promise<OrganizationMembershipOut[]> =>
+      apiFetch<OrganizationMembershipOut[]>("/me/organizations", { token }),
   },
 
   organizations: {

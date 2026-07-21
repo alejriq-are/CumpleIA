@@ -247,3 +247,81 @@ async def test_usuario_sin_membresia_no_accede_a_org_ajena(
             },
         )
     assert response.status_code == 403, response.text
+
+
+# ── GET /me/organizations ─────────────────────────────────────────────────────
+
+
+@pytest.mark.asyncio
+async def test_me_organizations_sin_membresias_devuelve_lista_vacia(
+    patch_jwks, signing_key, app_db_only, clean_new_user
+):
+    """Usuario sin organizaciones → 200 con lista vacía (no 404)."""
+    token = _sign(signing_key, sub=str(_NEW_AUTH_ID))
+    async with AsyncClient(
+        transport=ASGITransport(app=app_db_only), base_url="http://test"
+    ) as ac:
+        response = await ac.get(
+            "/me/organizations", headers={"Authorization": f"Bearer {token}"}
+        )
+    assert response.status_code == 200, response.text
+    assert response.json() == []
+
+
+@pytest.mark.asyncio
+async def test_me_organizations_con_dos_devuelve_ambas_con_rol(
+    patch_jwks, signing_key, app_db_only, clean_new_user
+):
+    """Usuario con dos organizaciones → ambas, cada una con su rol."""
+    token = _sign(signing_key, sub=str(_NEW_AUTH_ID))
+    headers = {"Authorization": f"Bearer {token}"}
+
+    async with AsyncClient(
+        transport=ASGITransport(app=app_db_only), base_url="http://test"
+    ) as ac:
+        for nombre in ("Alfa SpA", "Beta Ltda"):
+            created = await ac.post(
+                "/organizations", headers=headers, json={"name": nombre}
+            )
+            assert created.status_code == 201, created.text
+
+        response = await ac.get("/me/organizations", headers=headers)
+
+    assert response.status_code == 200, response.text
+    orgs = response.json()
+    assert len(orgs) == 2
+    # Ordenadas por nombre (Alfa, Beta) según el endpoint.
+    assert [o["name"] for o in orgs] == ["Alfa SpA", "Beta Ltda"]
+    assert all(o["role"] == "owner" for o in orgs)
+    # Cada entrada trae el id de su organización.
+    assert all(o["id"] for o in orgs)
+
+
+@pytest.mark.asyncio
+async def test_me_organizations_no_incluye_organizaciones_ajenas(
+    patch_jwks, signing_key, app_db_only, clean_new_user, org_a_id, org_b_id
+):
+    """Nunca lista organizaciones donde el usuario no tiene membresía.
+
+    El usuario nuevo crea UNA organización; las orgs A y B del seed (de otros
+    usuarios) no deben aparecer.
+    """
+    token = _sign(signing_key, sub=str(_NEW_AUTH_ID))
+    headers = {"Authorization": f"Bearer {token}"}
+
+    async with AsyncClient(
+        transport=ASGITransport(app=app_db_only), base_url="http://test"
+    ) as ac:
+        created = await ac.post(
+            "/organizations", headers=headers, json={"name": "Propia SpA"}
+        )
+        assert created.status_code == 201, created.text
+        propia_id = created.json()["id"]
+
+        response = await ac.get("/me/organizations", headers=headers)
+
+    assert response.status_code == 200, response.text
+    ids = {o["id"] for o in response.json()}
+    assert ids == {propia_id}
+    assert str(org_a_id) not in ids
+    assert str(org_b_id) not in ids
