@@ -12,6 +12,19 @@ export type MembershipOut = {
   role: string;
 };
 
+export type OrganizationOut = {
+  id: string;
+  name: string;
+  role: string;
+};
+
+export type OrganizationCreate = {
+  name: string;
+  rut?: string;
+  industry?: string;
+  size?: string;
+};
+
 export type HealthOut = {
   status: string;
   database: string;
@@ -58,5 +71,11 @@ export const api = {
 
     membership: (token: string, organizationId: string): Promise<MembershipOut> =>
       apiFetch<MembershipOut>("/me/membership", { token, organizationId }),
+  },
+
+  organizations: {
+    // Onboarding: crea la organización y deja al usuario actual como owner.
+    create: (token: string, body: OrganizationCreate): Promise<OrganizationOut> =>
+      apiFetch<OrganizationOut>("/organizations", { token, method: "POST", body }),
   },
 };

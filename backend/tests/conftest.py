@@ -175,11 +175,22 @@ def _make_auth_override(profile_id: uuid.UUID, session_factory):
 
 
 def _make_db_override(session_factory):
-    """Override de get_db que usa el engine NullPool de test."""
+    """Override de get_db que usa el engine NullPool de test.
+
+    Refleja el `get_db` real (commit al terminar, rollback ante excepción): sin
+    el commit, las escrituras del request —como el aprovisionamiento JIT del
+    perfil o la creación de una organización— se revertirían al cerrar la sesión
+    y no serían visibles para requests posteriores ni para las aserciones.
+    """
 
     async def _override():
         async with session_factory() as session:
-            yield session
+            try:
+                yield session
+                await session.commit()
+            except Exception:
+                await session.rollback()
+                raise
 
     return _override
 
