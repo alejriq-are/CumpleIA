@@ -110,7 +110,12 @@ jobs:
       - name: Lint — ESLint
         run: npm run lint
 
+      # ESLint no comprueba tipos: un error del compilador (p. ej. any implícito)
+      # pasa el lint. tsc --noEmit es el gate determinista que lo detecta y pone
+      # el CI en rojo, sin necesidad de levantar el servidor ni variables de
+      # entorno (a diferencia de `next build`, cuya fase de workers es frágil).
+      - name: Comprobación de tipos — tsc
+        run: npm run type-check
+
       - name: Formato — Prettier
         run: npx prettier --check .
-        # TypeScript se valida durante el build de Next.js en producción.
-        # Para CI ligero usamos ESLint + Prettier sin ejecutar el servidor.
