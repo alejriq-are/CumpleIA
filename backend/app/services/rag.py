@@ -42,10 +42,10 @@ async def search_chunks(
                 source,
                 reference,
                 content,
-                1 - (embedding <=> :emb::vector) AS similarity
+                1 - (embedding <=> CAST(:emb AS vector)) AS similarity
             FROM knowledge_chunks
             WHERE embedding IS NOT NULL
-            ORDER BY embedding <=> :emb::vector
+            ORDER BY embedding <=> CAST(:emb AS vector)
             LIMIT :limit
         """
         ),

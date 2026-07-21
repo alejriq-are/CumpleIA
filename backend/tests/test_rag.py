@@ -84,3 +84,30 @@ async def test_rag_search_respeta_esquema(client_a):
         assert "query" in data
         assert "results" in data
         assert isinstance(data["results"], list)
+
+
+@pytest.mark.asyncio
+async def test_rag_search_sql_valido_con_embedding_mockeado(monkeypatch):
+    """Regresión: la consulta pgvector debe ejecutarse sin error de sintaxis.
+
+    Antes usaba `:emb::vector`, que SQLAlchemy no bindeaba y Postgres rechazaba
+    con 'syntax error at or near ":"'. Se mockea el embedding para no depender de
+    Voyage y así el SQL se ejecuta de verdad contra la BD (0 resultados si no hay
+    chunks con embedding, pero sin error 500).
+    """
+    from app.services import rag as rag_service
+
+    async def _fake_embedding(query: str) -> list[float]:
+        return [0.01] * 1024
+
+    monkeypatch.setattr(rag_service, "_get_query_embedding", _fake_embedding)
+
+    async with AsyncClient(
+        transport=ASGITransport(app=app), base_url="http://test"
+    ) as ac:
+        response = await ac.post(
+            "/rag/search",
+            json={"query": "dato personal identificable", "top_k": 3},
+        )
+    assert response.status_code == 200, response.text
+    assert isinstance(response.json()["results"], list)
