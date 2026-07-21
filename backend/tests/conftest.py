@@ -32,6 +32,36 @@ from app.main import app  # noqa: E402
 
 settings = get_settings()
 
+# Variables de secretos que config.py exige en producción. En un entorno real
+# (contenedor de dev o CI con dummies) están presentes en os.environ, y
+# pydantic-settings las lee aunque se pase _env_file=None. Si no se neutralizan,
+# el test que garantiza el arranque seguro en producción pasaría por omisión.
+_SENSITIVE_ENV_VARS = (
+    "SUPABASE_SERVICE_ROLE_KEY",
+    "SUPABASE_ANON_KEY",
+    "SECRET_KEY",
+)
+
+
+@pytest.fixture(autouse=True)
+def _hermetic_settings(monkeypatch):
+    """Aísla cada test de los secretos presentes en el entorno real.
+
+    Borra las variables sensibles antes de cada test e invalida la caché de
+    `get_settings()` para que cualquier reconstrucción de `Settings` vea el
+    entorno neutralizado. `monkeypatch` restaura las variables al finalizar.
+
+    Un test que necesite esos secretos presentes (p. ej. el caso inverso de
+    producción) los define con `monkeypatch.setenv` dentro de su cuerpo: como
+    corre después de este fixture, prevalece.
+    """
+    for var in _SENSITIVE_ENV_VARS:
+        monkeypatch.delenv(var, raising=False)
+    get_settings.cache_clear()
+    yield
+    get_settings.cache_clear()
+
+
 # IDs fijos: facilitan debugging y evitan colisiones entre ejecuciones
 _ORG_A_ID = uuid.UUID("a0000000-0000-0000-0000-000000000001")
 _ORG_B_ID = uuid.UUID("b0000000-0000-0000-0000-000000000001")

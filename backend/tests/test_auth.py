@@ -195,8 +195,13 @@ def test_config_sin_supabase_url_falla(monkeypatch):
         Settings(_env_file=None)
 
 
-def test_config_produccion_exige_secretos(monkeypatch):
-    """En producción, faltar service_role/anon/secret_key hace fallar el arranque."""
+def test_config_produccion_exige_secretos():
+    """En producción, faltar service_role/anon/secret_key hace fallar el arranque.
+
+    Las variables sensibles se neutralizan en el fixture autouse `_hermetic_settings`
+    (conftest), así que este test es determinista con o sin secretos definidos en
+    el entorno real (local o CI).
+    """
     from pydantic import ValidationError
 
     from app.core.config import Settings
@@ -207,3 +212,29 @@ def test_config_produccion_exige_secretos(monkeypatch):
             supabase_url="https://x.supabase.co",
             environment="production",
         )
+
+
+def test_config_produccion_con_secretos_arranca(monkeypatch):
+    """Caso inverso: con los tres secretos presentes y environment=production,
+    Settings se construye SIN lanzar.
+
+    Sin este test, `test_config_produccion_exige_secretos` pasaría igual si el
+    validador reventara por un motivo equivocado: aquí se prueba que exige por
+    AUSENCIA de secretos, no por otra causa.
+    """
+    from app.core.config import Settings
+
+    monkeypatch.setenv("SUPABASE_SERVICE_ROLE_KEY", "dummy-service-role")
+    monkeypatch.setenv("SUPABASE_ANON_KEY", "dummy-anon")
+    monkeypatch.setenv("SECRET_KEY", "dummy-secret")
+
+    settings = Settings(
+        _env_file=None,
+        supabase_url="https://x.supabase.co",
+        environment="production",
+    )
+
+    assert settings.is_production
+    assert settings.supabase_service_role_key == "dummy-service-role"
+    assert settings.supabase_anon_key == "dummy-anon"
+    assert settings.secret_key == "dummy-secret"
