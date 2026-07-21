@@ -1,12 +1,18 @@
 from functools import lru_cache
+from pathlib import Path
 
 from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+# Ancla al .env de la raíz del repo (no al cwd): así docker compose (cwd=raíz)
+# y uvicorn directo desde backend/ (cwd=backend/) leen el mismo archivo.
+_REPO_ROOT = Path(__file__).resolve().parent.parent.parent.parent
+_ENV_FILE = _REPO_ROOT / ".env"
+
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=_ENV_FILE,
         env_file_encoding="utf-8",
         case_sensitive=False,
         extra="ignore",
@@ -32,6 +38,23 @@ class Settings(BaseSettings):
     environment: str = "development"
     debug: bool = True
     allowed_origins: list[str] = ["http://localhost:3000"]
+
+    @model_validator(mode="before")
+    @classmethod
+    def _exigir_supabase_url(cls, valores: object) -> object:
+        """Falla rápido y con mensaje claro si SUPABASE_URL no se resolvió.
+
+        Sin esto, un .env ausente o mal ubicado produce el genérico "Field
+        required" de pydantic, que no dice dónde buscar. Aquí se apunta
+        directamente al archivo que Settings intenta leer.
+        """
+        if isinstance(valores, dict) and not valores.get("supabase_url"):
+            raise ValueError(
+                "SUPABASE_URL no está definido. Verifica que exista "
+                f"{_ENV_FILE} con esa variable, o expórtala como variable "
+                "de entorno antes de arrancar el backend."
+            )
+        return valores
 
     @property
     def is_production(self) -> bool:

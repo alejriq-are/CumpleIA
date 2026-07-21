@@ -90,6 +90,11 @@ cd backend
 pip install -r requirements.txt
 ```
 
+> A partir de aquí los comandos corren con cwd en `backend/`, pero `Settings`
+> (`app/core/config.py`) siempre lee el `.env` de la **raíz** del repo (ruta
+> absoluta anclada a la ubicación de `config.py`), no uno en `backend/`. No
+> hace falta un `.env` separado dentro de `backend/`.
+
 ### 5. Aplicar migraciones
 
 ```bash

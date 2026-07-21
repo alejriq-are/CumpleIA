@@ -183,15 +183,20 @@ async def test_jwks_inaccesible_devuelve_503(signing_key, auth_a_id, monkeypatch
     assert response.status_code == 503
 
 
-def test_config_sin_supabase_url_falla(monkeypatch):
-    """Sin SUPABASE_URL definido, Settings no valida → la app no arranca."""
+def test_config_sin_supabase_url_falla_con_mensaje_claro(monkeypatch):
+    """Sin SUPABASE_URL definido, Settings no valida y el mensaje dice dónde buscar.
+
+    Antes de la validación custom, el error era el genérico "Field required"
+    de pydantic, que no indica qué archivo revisar cuando el .env no aporta
+    el valor.
+    """
     from pydantic import ValidationError
 
     from app.core.config import Settings
 
     monkeypatch.delenv("SUPABASE_URL", raising=False)
-    with pytest.raises(ValidationError):
-        # _env_file=None evita que un .env local aporte el valor
+    # _env_file=None evita que un .env local aporte el valor
+    with pytest.raises(ValidationError, match="SUPABASE_URL no está definido"):
         Settings(_env_file=None)
 
 
