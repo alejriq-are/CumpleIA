@@ -33,7 +33,7 @@ jobs:
 
     env:
       DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/cumpleia_test
-      SUPABASE_JWT_SECRET: ci-test-jwt-secret-cumpleia-2026
+      SUPABASE_URL: https://thsivchuzxqofrloriiy.supabase.co
       ENVIRONMENT: test
       DEBUG: "false"
 

@@ -5,25 +5,32 @@ los tests corren contra esos datos y el teardown los elimina.
 El engine usa la misma DATABASE_URL del .env (requiere Docker Postgres activo).
 """
 
-import uuid
+import os
 
-import pytest
-import pytest_asyncio
-from jose import jwt
-from sqlalchemy import delete
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
-from sqlalchemy.pool import NullPool
+# SUPABASE_URL es obligatorio para arrancar la app (config.py). Se define un valor
+# de test ANTES de importar app.main; en CI/producción la env var real tiene
+# prioridad y no es sobreescrita por setdefault.
+os.environ.setdefault("SUPABASE_URL", "https://test-project.supabase.co")
 
-from app.core.config import get_settings
-from app.core.deps import get_current_profile
-from app.db.models import Membership, Organization, Profile, UserRole
-from app.db.session import get_db
-from app.main import app
+import uuid  # noqa: E402
+
+import pytest  # noqa: E402
+import pytest_asyncio  # noqa: E402
+from sqlalchemy import delete  # noqa: E402
+from sqlalchemy.ext.asyncio import (  # noqa: E402
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
+)
+from sqlalchemy.pool import NullPool  # noqa: E402
+
+from app.core.config import get_settings  # noqa: E402
+from app.core.deps import get_current_profile  # noqa: E402
+from app.db.models import Membership, Organization, Profile, UserRole  # noqa: E402
+from app.db.session import get_db  # noqa: E402
+from app.main import app  # noqa: E402
 
 settings = get_settings()
-
-# Secret fijo para tests (no necesita coincidir con Supabase en local)
-TEST_JWT_SECRET = "test-jwt-secret-cumpleia-isolation-2026"
 
 # IDs fijos: facilitan debugging y evitan colisiones entre ejecuciones
 _ORG_A_ID = uuid.UUID("a0000000-0000-0000-0000-000000000001")
@@ -32,14 +39,6 @@ _PROFILE_A_ID = uuid.UUID("a0000000-0000-0000-0000-000000000002")
 _PROFILE_B_ID = uuid.UUID("b0000000-0000-0000-0000-000000000002")
 _AUTH_A_ID = uuid.UUID("a0000000-0000-0000-0000-000000000003")
 _AUTH_B_ID = uuid.UUID("b0000000-0000-0000-0000-000000000003")
-
-
-def make_token(auth_user_id: uuid.UUID) -> str:
-    return jwt.encode(
-        {"sub": str(auth_user_id), "aud": "authenticated", "role": "authenticated"},
-        TEST_JWT_SECRET,
-        algorithm="HS256",
-    )
 
 
 # ── Engine de test (NullPool: sin caché de conexiones, evita cross-loop reuse) ──
@@ -156,13 +155,9 @@ def org_b_id() -> uuid.UUID:
 
 
 @pytest.fixture(scope="session")
-def token_a() -> str:
-    return make_token(_AUTH_A_ID)
-
-
-@pytest.fixture(scope="session")
-def token_b() -> str:
-    return make_token(_AUTH_B_ID)
+def auth_a_id() -> uuid.UUID:
+    """auth_user_id (el 'sub' del JWT) del perfil A, para firmar tokens de test."""
+    return _AUTH_A_ID
 
 
 # ── Cliente HTTP con JWT override ─────────────────────────────────────────────
@@ -210,4 +205,17 @@ def client_b(_session_factory, _seed_test_data):
     app.dependency_overrides[get_db] = _make_db_override(_session_factory)
     yield app
     app.dependency_overrides.pop(get_current_profile, None)
+    app.dependency_overrides.pop(get_db, None)
+
+
+@pytest.fixture
+def app_db_only(_session_factory, _seed_test_data):
+    """App con SOLO get_db overrideado.
+
+    A diferencia de client_a/client_b, NO sobreescribe get_current_profile: la
+    validación real del JWT (ES256 + JWKS) se ejecuta. Se usa para probar el
+    camino completo de autenticación con un token válido contra datos de test.
+    """
+    app.dependency_overrides[get_db] = _make_db_override(_session_factory)
+    yield app
     app.dependency_overrides.pop(get_db, None)

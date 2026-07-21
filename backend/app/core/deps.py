@@ -10,13 +10,22 @@ from app.core.security import extract_auth_user_id
 from app.db.models import Membership, Profile
 from app.db.session import get_db
 
-_bearer = HTTPBearer()
+# auto_error=False: si falta el header Authorization NO lanzamos 403 automático;
+# lo gestionamos abajo para devolver 401 (semántica HTTP correcta).
+_bearer = HTTPBearer(auto_error=False)
 
 
 async def get_current_profile(
-    credentials: Annotated[HTTPAuthorizationCredentials, Depends(_bearer)],
+    credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(_bearer)],
     db: AsyncSession = Depends(get_db),
 ) -> Profile:
+    if credentials is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="No autenticado",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
     auth_user_id = extract_auth_user_id(credentials.credentials)
 
     result = await db.execute(

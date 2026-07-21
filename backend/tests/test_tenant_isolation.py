@@ -101,12 +101,13 @@ async def test_org_id_inventado_es_rechazado(client_a):
 
 @pytest.mark.asyncio
 async def test_request_sin_token_es_rechazado():
-    """Sin header Authorization → 403 (HTTPBearer devuelve 403 si falta el header)."""
+    """Sin header Authorization → 401 con WWW-Authenticate: Bearer."""
     async with AsyncClient(
         transport=ASGITransport(app=app), base_url="http://test"
     ) as ac:
         response = await ac.get("/me")
-    assert response.status_code == 403
+    assert response.status_code == 401
+    assert response.headers.get("WWW-Authenticate") == "Bearer"
 
 
 @pytest.mark.asyncio
