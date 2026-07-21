@@ -30,6 +30,8 @@ Thumbs.db
 *.log
 coverage/
 .coverage
+.claude/
+*.tsbuildinfo
 
 # ── Docker ───────────────────────────────────────────────────────────────────
 docker-compose.override.yml
