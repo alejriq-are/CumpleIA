@@ -25,6 +25,7 @@ Segmento objetivo: micro y pequeña empresa. Prioridades de diseño: **simple, e
 - **Base de datos / Auth / Storage:** Supabase (PostgreSQL 16 + pgvector + Supabase Auth + Supabase Storage). Una sola cuenta cubre dev.
 - **LLM:** API de Anthropic (Claude). **Embeddings:** Voyage AI (`voyage-3`, dimensión 1024). *(Alternativa: OpenAI embeddings; si cambia el modelo, ajustar la dimensión del vector.)*
 - **RAG:** pgvector dentro de la misma base PostgreSQL.
+- **Ingesta de PDFs:** `pypdf` (BSD, sin dependencias del sistema) para extraer texto de las fuentes legales en `docs/fuentes/` antes de chunkear (`backend/scripts/ingest.py`). No hace OCR: un PDF escaneado como imagen se reporta pero no se procesa.
 - **CI/CD:** GitHub Actions.
 - **Despliegue (más adelante, no en Fase 0):** Vercel (frontend) + Render/Railway/Fly (backend).
 

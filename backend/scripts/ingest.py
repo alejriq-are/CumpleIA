@@ -7,8 +7,9 @@ Uso:
     python -m scripts.ingest --examples            # 3 fragmentos de prueba (sin Voyage AI)
     python -m scripts.ingest --examples --embed    # 3 fragmentos con embeddings reales
 
-Formatos soportados: .txt  .md
-Fuentes reconocidas en el nombre del archivo: ley_21719, guia_ccs (resto → "otro")
+Formatos soportados: .txt  .md  .pdf
+Fuentes reconocidas en el nombre del archivo: ley_21719, ley_19628, guia_ccs
+(resto → "otro")
 """
 
 import argparse
@@ -31,17 +32,28 @@ settings = get_settings()
 CHUNK_SIZE = 1500  # caracteres objetivo por fragmento
 OVERLAP = 200  # solapamiento entre fragmentos
 BATCH_SIZE = 20  # máx textos por llamada a Voyage AI
+EMBED_PACING_SECONDS = (
+    21  # > 60s/3 RPM: espacia llamadas para no gatillar el rate limit
+)
 
 FUENTES_DIR = Path(__file__).resolve().parent.parent.parent / "docs" / "fuentes"
 
 SOURCE_MAP = {
     "ley_21719": "ley_21719",
     "ley21719": "ley_21719",
+    "21719": "ley_21719",
+    "ley_19628": "ley_19628",
+    "ley19628": "ley_19628",
+    "19628": "ley_19628",
     "guia_ccs": "guia_ccs",
     "guia": "guia_ccs",
     "ccs": "guia_ccs",
     "plantilla": "plantilla",
 }
+
+# Chars/página por debajo de este umbral se reportan como posible PDF
+# escaneado (imagen sin texto real, necesitaría OCR).
+MIN_CHARS_PER_PAGE = 100
 
 EXAMPLE_CHUNKS = [
     {
@@ -151,14 +163,71 @@ def chunk_text(text: str) -> list[str]:
     return [c for c in chunks if len(c) > 50]
 
 
+def extract_pdf_text(filepath: Path) -> str:
+    """Extrae el texto de un PDF, avisando si alguna página parece escaneada.
+
+    Un PDF con texto seleccionable (born-digital) entrega varios cientos de
+    caracteres por página; una página escaneada como imagen, sin OCR previo,
+    entrega texto vacío o casi vacío. No corrige eso (requeriría un motor de
+    OCR aparte) — solo lo reporta para que quede claro qué archivo/página
+    necesita revisión manual.
+    """
+    from pypdf import PdfReader
+
+    reader = PdfReader(str(filepath))
+    paginas_con_poco_texto: list[int] = []
+    textos: list[str] = []
+
+    for i, page in enumerate(reader.pages, start=1):
+        texto_pagina = page.extract_text() or ""
+        textos.append(texto_pagina)
+        if len(texto_pagina.strip()) < MIN_CHARS_PER_PAGE:
+            paginas_con_poco_texto.append(i)
+
+    if paginas_con_poco_texto:
+        print(
+            f"  ⚠ {filepath.name}: {len(paginas_con_poco_texto)} página(s) con "
+            f"< {MIN_CHARS_PER_PAGE} caracteres extraídos (posible escaneo sin "
+            f"OCR): {paginas_con_poco_texto}"
+        )
+
+    return "\n\n".join(textos)
+
+
+def read_source_text(filepath: Path) -> str:
+    if filepath.suffix.lower() == ".pdf":
+        return extract_pdf_text(filepath)
+    return filepath.read_text(encoding="utf-8", errors="replace")
+
+
+RATE_LIMIT_RETRY_SECONDS = 65  # > 60s: alcanza para liberar la ventana de RPM
+RATE_LIMIT_MAX_RETRIES = 5
+
+
 async def embed_texts(texts: list[str]) -> list[list[float]]:
     if not settings.voyage_api_key:
         raise RuntimeError("VOYAGE_API_KEY no configurada en el .env")
     import voyageai
 
     client = voyageai.AsyncClient(api_key=settings.voyage_api_key)
-    result = await client.embed(texts=texts, model="voyage-3", input_type="document")
-    return result.embeddings
+
+    for intento in range(1, RATE_LIMIT_MAX_RETRIES + 1):
+        try:
+            result = await client.embed(
+                texts=texts, model="voyage-3", input_type="document"
+            )
+            return result.embeddings
+        except voyageai.error.RateLimitError:
+            if intento == RATE_LIMIT_MAX_RETRIES:
+                raise
+            print(
+                f"  Rate limit de Voyage AI (cuenta sin método de pago: 3 RPM / "
+                f"10K TPM). Reintento {intento}/{RATE_LIMIT_MAX_RETRIES} en "
+                f"{RATE_LIMIT_RETRY_SECONDS}s…"
+            )
+            await asyncio.sleep(RATE_LIMIT_RETRY_SECONDS)
+
+    raise RuntimeError("No debería llegar aquí")  # pragma: no cover
 
 
 # ── Lógica de ingesta ─────────────────────────────────────────────────────────
@@ -168,7 +237,7 @@ async def ingest_file(
     filepath: Path, source: str, db: AsyncSession, with_embeddings: bool
 ) -> int:
     print(f"  Leyendo: {filepath.name}")
-    content = filepath.read_text(encoding="utf-8", errors="replace")
+    content = read_source_text(filepath)
     chunks = chunk_text(content)
     print(f"  Fragmentos: {len(chunks)}")
 
@@ -178,6 +247,8 @@ async def ingest_file(
         embeddings: list[list[float] | None]
 
         if with_embeddings:
+            if i > 0:
+                await asyncio.sleep(EMBED_PACING_SECONDS)
             print(f"  Embeddings {i + 1}–{i + len(batch)}…")
             embeddings = await embed_texts(batch)
         else:
@@ -255,16 +326,18 @@ async def main(args: argparse.Namespace) -> None:
             fp = Path(args.file)
             files.append((fp, args.source or detect_source(fp.name)))
         else:
-            if not FUENTES_DIR.exists() or not list(FUENTES_DIR.glob("*.txt")) + list(
-                FUENTES_DIR.glob("*.md")
+            supported = ("*.txt", "*.md", "*.pdf")
+            if not FUENTES_DIR.exists() or not any(
+                list(FUENTES_DIR.glob(ext)) for ext in supported
             ):
                 print(f"No hay archivos en {FUENTES_DIR}")
                 print(
-                    "Deposita archivos .txt o .md ahí, o usa --examples para datos de prueba."
+                    "Deposita archivos .txt, .md o .pdf ahí, "
+                    "o usa --examples para datos de prueba."
                 )
                 await engine.dispose()
                 sys.exit(0)
-            for ext in ("*.txt", "*.md"):
+            for ext in supported:
                 for fp in sorted(FUENTES_DIR.glob(ext)):
                     files.append((fp, detect_source(fp.name)))
 
@@ -287,7 +360,7 @@ if __name__ == "__main__":
     parser.add_argument("--file", help="Archivo específico a ingestar")
     parser.add_argument(
         "--source",
-        choices=["ley_21719", "guia_ccs", "plantilla", "otro"],
+        choices=["ley_21719", "ley_19628", "guia_ccs", "plantilla", "otro"],
         help="Fuente del documento (se detecta automáticamente si se omite)",
     )
     parser.add_argument(
