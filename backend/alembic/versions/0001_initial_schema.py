@@ -773,9 +773,7 @@ def upgrade() -> None:
     )
     op.execute("GRANT EXECUTE ON FUNCTION auth.uid() TO app_user")
     op.execute("GRANT EXECUTE ON FUNCTION auth_org_ids() TO app_user")
-    op.execute(
-        "GRANT EXECUTE ON FUNCTION organization_is_unclaimed(uuid) TO app_user"
-    )
+    op.execute("GRANT EXECUTE ON FUNCTION organization_is_unclaimed(uuid) TO app_user")
 
     # Nota deliberadamente NO se usa ALTER TABLE ... FORCE ROW LEVEL SECURITY:
     # forzaría RLS incluso para el dueño de las tablas (el rol de migración),
