@@ -19,7 +19,16 @@ class Settings(BaseSettings):
     )
 
     # Base de datos
+    # database_url: rol de administración (dueño de las tablas). Solo lo usan
+    # Alembic y los scripts de mantenimiento — nunca el backend en runtime,
+    # porque ese rol ignora RLS (todo dueño de tabla la ignora por defecto).
     database_url: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/cumpleia"
+    # app_database_url: rol restringido (`app_user`, sin BYPASSRLS) que crea la
+    # migración 0001. Es el que debe usar el backend en runtime para que las
+    # políticas RLS realmente filtren las consultas por organización.
+    app_database_url: str = (
+        "postgresql+asyncpg://app_user:app_dev_password@localhost:5432/cumpleia"
+    )
 
     # Supabase
     # supabase_url es OBLIGATORIO: de él se deriva la URL del JWKS y el emisor (iss)

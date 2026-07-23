@@ -32,7 +32,15 @@ jobs:
         working-directory: backend
 
     env:
+      # Rol de administración: dueño de las tablas, solo lo usa Alembic. El
+      # rol de runtime (sin BYPASSRLS) es APP_DATABASE_URL — ver
+      # app/db/session.py. Sin este segundo env var, app_database_url cae al
+      # default de Settings (db "cumpleia"), que no existe en este runner
+      # (aquí la BD de test es "cumpleia_test") y test_rls_isolation.py falla
+      # con "database cumpleia does not exist".
       DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/cumpleia_test
+      APP_DATABASE_URL: postgresql+asyncpg://app_user:app_dev_password@localhost:5432/cumpleia_test
+      APP_DB_PASSWORD: app_dev_password
       SUPABASE_URL: https://thsivchuzxqofrloriiy.supabase.co
       ENVIRONMENT: test
       DEBUG: "false"

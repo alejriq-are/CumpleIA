@@ -3,7 +3,7 @@ from typing import Annotated
 
 from fastapi import Depends, Header, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from sqlalchemy import select
+from sqlalchemy import select, text
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -28,6 +28,20 @@ async def get_current_profile(
         )
 
     identity = extract_auth_identity(credentials.credentials)
+
+    # Puebla auth.uid() para esta transacción: las políticas RLS (ver migración
+    # 0001) filtran por `auth_org_ids()`, que a su vez lee auth.uid(). Sin esto
+    # el backend consultaría siempre como "usuario NULL" y RLS bloquearía todo
+    # (o, si el rol de conexión tuviera BYPASSRLS, no filtraría nada — de ahí
+    # que el runtime deba usar `app_user`, ver app/db/session.py).
+    # `is_local=true` (tercer argumento de set_config) lo limita a la
+    # transacción actual: al hacer commit/rollback en get_db() el valor se
+    # descarta y no se filtra a la siguiente petición que reutilice la conexión
+    # del pool.
+    await db.execute(
+        text("SELECT set_config('request.jwt.claim.sub', :sub, true)"),
+        {"sub": str(identity.auth_user_id)},
+    )
 
     # Aprovisionamiento JIT: en el primer acceso de un usuario de Supabase aún no
     # existe su fila en `profiles`. Se crea aquí a partir de los claims validados

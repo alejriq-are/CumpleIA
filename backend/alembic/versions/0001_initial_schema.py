@@ -5,6 +5,7 @@ Revises:
 Create Date: 2026-07-17
 """
 
+import os
 from collections.abc import Sequence
 
 import sqlalchemy as sa
@@ -37,12 +38,30 @@ def upgrade() -> None:
     op.execute('CREATE EXTENSION IF NOT EXISTS "vector"')
 
     # ── Schema auth stub para desarrollo local (Docker) ──────────────────────
-    # En Supabase este schema ya existe; estas líneas se omiten silenciosamente.
+    # En Supabase este schema y auth.uid() ya existen con la implementación real
+    # (lee el JWT vía PostgREST). CREATE OR REPLACE los pisaría con este stub y
+    # rompería RLS en todo el proyecto, no solo para este backend — por eso se
+    # crea SOLO si no existe. El stub replica el comportamiento real: lee el
+    # mismo GUC de sesión (`request.jwt.claim.sub`) que el backend puebla en
+    # cada request (ver app/core/deps.py::get_current_profile), así RLS se
+    # comporta igual en Docker local que en Supabase.
     op.execute("CREATE SCHEMA IF NOT EXISTS auth")
     op.execute(
         """
-        CREATE OR REPLACE FUNCTION auth.uid() RETURNS uuid
-        LANGUAGE sql STABLE AS $$ SELECT NULL::uuid $$
+        DO $$
+        BEGIN
+            IF NOT EXISTS (
+                SELECT 1 FROM pg_proc p
+                JOIN pg_namespace n ON n.oid = p.pronamespace
+                WHERE n.nspname = 'auth' AND p.proname = 'uid'
+            ) THEN
+                CREATE FUNCTION auth.uid() RETURNS uuid
+                LANGUAGE sql STABLE AS $fn$
+                    SELECT NULLIF(current_setting('request.jwt.claim.sub', true), '')::uuid
+                $fn$;
+            END IF;
+        END
+        $$;
         """
     )
 
@@ -652,6 +671,16 @@ def upgrade() -> None:
         "CREATE POLICY org_visibility ON organizations "
         "FOR SELECT USING (id IN (SELECT auth_org_ids()))"
     )
+    # Alta de tenant por autoservicio (POST /organizations, ver
+    # app/api/organizations.py): en ese momento el usuario NO tiene ninguna
+    # membresía todavía, por lo que auth_org_ids() está vacío y no sirve como
+    # condición. Cualquier usuario autenticado puede crear una organización
+    # nueva; lo sensible (leer/escribir SUS datos) sigue detrás de
+    # org_visibility y de las políticas por tenant de arriba.
+    op.execute(
+        "CREATE POLICY org_self_service_insert ON organizations "
+        "FOR INSERT WITH CHECK (auth.uid() IS NOT NULL)"
+    )
 
     # Membresías
     op.execute(
@@ -662,6 +691,45 @@ def upgrade() -> None:
         "CREATE POLICY tenant_isolation_modify ON memberships "
         "FOR ALL USING (organization_id IN (SELECT auth_org_ids())) "
         "WITH CHECK (organization_id IN (SELECT auth_org_ids()))"
+    )
+    # Mismo problema del huevo y la gallina: la primera membresía de una
+    # organización recién creada no puede validarse contra auth_org_ids()
+    # (todavía vacío). Se permite auto-insertarse como 'owner' ÚNICAMENTE si
+    # la organización aún no tiene ninguna membresía — así no sirve para
+    # auto-adjudicarse acceso a una organización ya existente (eso lo sigue
+    # bloqueando tenant_isolation_modify, que exige pertenencia previa). Las
+    # políticas permisivas se combinan con OR: basta con que una de las dos
+    # autorice el INSERT.
+    #
+    # OJO: el chequeo de "¿ya tiene dueño esta organización?" NO puede ser un
+    # NOT EXISTS directo contra `memberships` dentro de la propia política.
+    # Ese subquery lo ejecutaría `app_user` bajo tenant_isolation_select, que
+    # solo deja ver membresías de organizaciones a las que YA perteneces — es
+    # decir, para cualquier organización ajena el subquery siempre parecería
+    # "vacío" (no por estar realmente desocupada, sino porque el atacante no
+    # puede verla), y NOT EXISTS daría TRUE igual. Eso habría permitido a
+    # cualquier usuario autenticado autoasignarse 'owner' de una organización
+    # ajena ya existente. Por eso se delega en una función SECURITY DEFINER
+    # (mismo patrón que auth_org_ids()) que ve todas las filas sin el filtro
+    # de RLS del rol que llama.
+    op.execute(
+        """
+        CREATE OR REPLACE FUNCTION organization_is_unclaimed(target_org_id uuid)
+        RETURNS boolean
+        LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $$
+            SELECT NOT EXISTS (
+                SELECT 1 FROM memberships WHERE organization_id = target_org_id
+            )
+        $$
+        """
+    )
+    op.execute(
+        "CREATE POLICY memberships_self_bootstrap_insert ON memberships "
+        "FOR INSERT WITH CHECK ("
+        "role = 'owner' "
+        "AND profile_id IN (SELECT id FROM profiles WHERE auth_user_id = auth.uid()) "
+        "AND organization_is_unclaimed(organization_id)"
+        ")"
     )
 
     # Evidencia: INSERT + SELECT permitidos; sin UPDATE ni DELETE (append-only)
@@ -674,8 +742,64 @@ def upgrade() -> None:
         "FOR INSERT WITH CHECK (organization_id IN (SELECT auth_org_ids()))"
     )
 
+    # ── Rol de aplicación restringido (para que RLS aplique de verdad) ────────
+    # El rol usado para migraciones (DATABASE_URL) es dueño de las tablas y,
+    # como cualquier superusuario/dueño de tabla en Postgres, ignora RLS por
+    # defecto. Si el backend consultara con ese mismo rol, las políticas de
+    # arriba serían letra muerta. `app_user` es un rol de login sin
+    # BYPASSRLS ni superusuario: es el que debe usar app/db/session.py
+    # (APP_DATABASE_URL) en runtime.
+    app_db_password = os.environ.get("APP_DB_PASSWORD", "app_dev_password")
+    op.execute(
+        f"""
+        DO $$
+        BEGIN
+            IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'app_user') THEN
+                CREATE ROLE app_user LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE
+                    NOBYPASSRLS PASSWORD '{app_db_password}';
+            END IF;
+        END
+        $$;
+        """
+    )
+    op.execute("GRANT USAGE ON SCHEMA public TO app_user")
+    op.execute("GRANT USAGE ON SCHEMA auth TO app_user")
+    op.execute(
+        "GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO app_user"
+    )
+    op.execute(
+        "ALTER DEFAULT PRIVILEGES IN SCHEMA public "
+        "GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO app_user"
+    )
+    op.execute("GRANT EXECUTE ON FUNCTION auth.uid() TO app_user")
+    op.execute("GRANT EXECUTE ON FUNCTION auth_org_ids() TO app_user")
+    op.execute("GRANT EXECUTE ON FUNCTION organization_is_unclaimed(uuid) TO app_user")
+
+    # Nota deliberadamente NO se usa ALTER TABLE ... FORCE ROW LEVEL SECURITY:
+    # forzaría RLS incluso para el dueño de las tablas (el rol de migración),
+    # y auth_org_ids()/organization_is_unclaimed() son SECURITY DEFINER que
+    # dependen de que ESE rol vea `memberships` sin el filtro de RLS para
+    # poder calcular a qué organizaciones pertenece cada usuario. Con FORCE,
+    # esas funciones se autobloquearían (auth_org_ids() necesitaría el
+    # resultado de auth_org_ids() para leer memberships). No hace falta de
+    # todos modos: `app_user` nunca es dueño de estas tablas, así que ya está
+    # sujeto a RLS sin excepción.
+
 
 def downgrade() -> None:
+    op.execute(
+        """
+        DO $$
+        BEGIN
+            IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'app_user') THEN
+                EXECUTE 'DROP OWNED BY app_user';
+                DROP ROLE app_user;
+            END IF;
+        END
+        $$;
+        """
+    )
+
     tables = [
         "knowledge_chunks",
         "evidence_events",
@@ -694,6 +818,7 @@ def downgrade() -> None:
     for table in tables:
         op.drop_table(table)
 
+    op.execute("DROP FUNCTION IF EXISTS organization_is_unclaimed(uuid)")
     op.execute("DROP FUNCTION IF EXISTS auth_org_ids()")
     op.execute("DROP FUNCTION IF EXISTS auth.uid()")
     op.execute("DROP SCHEMA IF EXISTS auth CASCADE")
