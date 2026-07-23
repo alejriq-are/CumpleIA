@@ -190,6 +190,12 @@ def auth_a_id() -> uuid.UUID:
     return _AUTH_A_ID
 
 
+@pytest.fixture(scope="session")
+def auth_b_id() -> uuid.UUID:
+    """auth_user_id (el 'sub' del JWT) del perfil B, para firmar tokens de test."""
+    return _AUTH_B_ID
+
+
 # ── Cliente HTTP con JWT override ─────────────────────────────────────────────
 
 

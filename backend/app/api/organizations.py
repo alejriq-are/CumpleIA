@@ -17,6 +17,7 @@ import uuid
 
 from fastapi import APIRouter, Depends, status
 from pydantic import BaseModel, Field
+from sqlalchemy import insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.deps import CurrentProfile
@@ -51,22 +52,42 @@ async def create_organization(
     request (`get_db` hace commit al final). Si cualquiera de los dos falla, el
     manejador de `get_db` hace rollback y no queda nada a medias: nunca una
     organización sin dueño ni una membresía huérfana.
-    """
-    org = Organization(
-        name=payload.name,
-        rut=payload.rut,
-        industry=payload.industry,
-        size=payload.size,
-    )
-    db.add(org)
-    await db.flush()  # asigna org.id sin cerrar la transacción
 
-    membership = Membership(
-        organization_id=org.id,
-        profile_id=current_profile.id,
-        role=UserRole.owner,
+    IDs generados en Python (no vía DEFAULT de Postgres) e INSERTs sin
+    RETURNING a propósito: con RETURNING, Postgres reevalúa la política de
+    SELECT (`org_visibility`/visibilidad de memberships) sobre la fila recién
+    insertada, y en ese instante la membership `owner` todavía no existe
+    (huevo y gallina) → RLS la rechaza aunque el INSERT en sí sea legítimo.
+    Insertando sin RETURNING evitamos esa reevaluación; el SELECT de vuelta se
+    hace después, cuando la membership ya existe dentro de la misma
+    transacción y la política de visibilidad la deja pasar.
+    """
+    org_id = uuid.uuid4()
+    membership_id = uuid.uuid4()
+
+    await db.execute(
+        insert(Organization).values(
+            id=org_id,
+            name=payload.name,
+            rut=payload.rut,
+            industry=payload.industry,
+            size=payload.size,
+        )
     )
-    db.add(membership)
-    await db.flush()
+    await db.execute(
+        insert(Membership).values(
+            id=membership_id,
+            organization_id=org_id,
+            profile_id=current_profile.id,
+            role=UserRole.owner,
+        )
+    )
+
+    org = (
+        await db.execute(select(Organization).where(Organization.id == org_id))
+    ).scalar_one()
+    membership = (
+        await db.execute(select(Membership).where(Membership.id == membership_id))
+    ).scalar_one()
 
     return OrganizationOut(id=org.id, name=org.name, role=membership.role)
