@@ -13,8 +13,8 @@ Automatiza el "sprint de adecuación": diagnóstico, inventario de tratamientos 
 | Frontend | Next.js 15 (App Router) + TypeScript + Tailwind CSS |
 | Backend | Python 3.12 + FastAPI + SQLAlchemy 2.0 + Alembic |
 | Base de datos / Auth / Storage | Supabase (PostgreSQL 16 + pgvector + Auth + Storage) |
-| LLM | Anthropic Claude (API) |
-| Embeddings | Voyage AI (`voyage-3`, dimensión 1024) |
+| LLM | Configurable por env var (`LLM_PROVIDER`/`LLM_MODEL`); por defecto Anthropic Claude |
+| Embeddings | Configurable por env var (`EMBEDDING_PROVIDER`/`EMBEDDING_MODEL`); por defecto Voyage AI (`voyage-3`, dimensión 1024) |
 | RAG | pgvector dentro de PostgreSQL |
 | CI/CD | GitHub Actions |
 
@@ -65,6 +65,12 @@ VOYAGE_API_KEY=<clave-voyage-ai>
 
 # Requeridas para generación de documentos con IA
 ANTHROPIC_API_KEY=<clave-anthropic>
+
+# Proveedor y modelo de LLM/embeddings (ver "Cambiar de proveedor de IA" más abajo)
+LLM_PROVIDER=anthropic
+LLM_MODEL=claude-sonnet-5
+EMBEDDING_PROVIDER=voyage
+EMBEDDING_MODEL=voyage-3
 ```
 
 > Las variables del frontend van en `frontend/.env.local` (copia `frontend/` y rellena `NEXT_PUBLIC_*`).
@@ -229,6 +235,7 @@ Postgres 16 + pgvector corre como servicio en el runner de CI.
     /core                    # Config (Pydantic Settings), seguridad, dependencias
     /db                      # Modelos SQLAlchemy, sesión, base declarativa
     /services                # Lógica RAG (embeddings, búsqueda)
+      /providers              # Fábrica de clientes LLM/embeddings por proveedor
     /schemas                 # (próximos pasos)
   /alembic                   # Migraciones de BD
   /scripts                   # seed_dev.py, ingest.py
@@ -258,13 +265,44 @@ CLAUDE.md                    # Contexto permanente para Claude Code
 | `SUPABASE_ANON_KEY` | Clave anónima de Supabase | Frontend + backend |
 | `SUPABASE_SERVICE_ROLE_KEY` | Clave de rol de servicio | Operaciones admin |
 | `SUPABASE_JWT_SECRET` | Secret para validar JWTs | Backend auth |
-| `ANTHROPIC_API_KEY` | API key de Anthropic | LLM (Fase 1+) |
-| `VOYAGE_API_KEY` | API key de Voyage AI | Embeddings RAG |
+| `LLM_PROVIDER` | Proveedor de LLM (`anthropic`, ver adaptadores soportados) | LLM (Fase 1+) |
+| `LLM_MODEL` | Nombre del modelo de LLM del proveedor elegido | LLM (Fase 1+) |
+| `EMBEDDING_PROVIDER` | Proveedor de embeddings (`voyage`, ver adaptadores soportados) | Embeddings RAG |
+| `EMBEDDING_MODEL` | Nombre del modelo de embeddings del proveedor elegido | Embeddings RAG |
+| `ANTHROPIC_API_KEY` | API key de Anthropic | LLM (Fase 1+), si `LLM_PROVIDER=anthropic` |
+| `VOYAGE_API_KEY` | API key de Voyage AI | Embeddings RAG, si `EMBEDDING_PROVIDER=voyage` |
 | `SECRET_KEY` | Clave interna del backend | Siempre |
 | `ENVIRONMENT` | `development` / `production` | Configuración |
 | `NEXT_PUBLIC_SUPABASE_URL` | URL Supabase (frontend) | Login/registro |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Clave anónima (frontend) | Login/registro |
 | `NEXT_PUBLIC_API_URL` | URL del backend desde el browser | Llamadas API |
+
+---
+
+## Cambiar de proveedor de IA
+
+El proveedor y el modelo de LLM/embeddings **nunca están hardcodeados** en el código: se
+resuelven en tiempo de arranque a partir de 4 variables de entorno, vía la fábrica en
+`backend/app/services/providers/` (`embeddings.py`, `llm.py`):
+
+```env
+LLM_PROVIDER=anthropic
+LLM_MODEL=claude-sonnet-5
+EMBEDDING_PROVIDER=voyage
+EMBEDDING_MODEL=voyage-3
+```
+
+Para cambiar de proveedor (por ejemplo, si un cliente ya tiene suscripción a otro LLM),
+basta con editar esas variables en `.env` y la API key correspondiente — no se toca código.
+Si `LLM_PROVIDER`/`EMBEDDING_PROVIDER` no tiene un adaptador registrado, la app **no arranca**
+y falla con un mensaje explícito listando los proveedores soportados (fail-fast, no un error
+silencioso en runtime).
+
+Para agregar soporte a un proveedor nuevo (p. ej. OpenAI): crear una clase que implemente
+`EmbeddingClient` o `LLMClient` en el módulo correspondiente y registrarla en el diccionario
+`_EMBEDDING_ADAPTERS` / `_LLM_ADAPTERS` de ese archivo. La lógica de negocio (`rag.py`,
+`scripts/ingest.py`) no cambia: siempre llama a `get_embedding_client(settings)` /
+`get_llm_client(settings)`, nunca importa el SDK de un proveedor directamente.
 
 ---
 

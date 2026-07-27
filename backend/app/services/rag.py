@@ -3,25 +3,20 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
+from app.services.providers.embeddings import get_embedding_client
 
 settings = get_settings()
 
 
 async def _get_query_embedding(query: str) -> list[float]:
-    if not settings.voyage_api_key:
+    try:
+        client = get_embedding_client(settings)
+    except RuntimeError as exc:
         raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="VOYAGE_API_KEY no configurada. Agrega la clave en el .env.",
-        )
-    import voyageai
-
-    client = voyageai.AsyncClient(api_key=settings.voyage_api_key)
-    result = await client.embed(
-        texts=[query],
-        model="voyage-3",
-        input_type="query",
-    )
-    return result.embeddings[0]
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc)
+        ) from exc
+    embeddings = await client.embed(texts=[query], input_type="query")
+    return embeddings[0]
 
 
 async def search_chunks(

@@ -38,7 +38,13 @@ class Settings(BaseSettings):
     supabase_anon_key: str = ""
     supabase_service_role_key: str = ""
 
-    # IA
+    # IA — proveedor y modelo se eligen solo por env vars, nunca hardcodeados
+    # en la lógica de negocio (ver app/services/providers/ para los adaptadores
+    # soportados; agregar uno nuevo ahí, no acá).
+    llm_provider: str = "anthropic"
+    llm_model: str = "claude-sonnet-5"
+    embedding_provider: str = "voyage"
+    embedding_model: str = "voyage-3"
     anthropic_api_key: str = ""
     voyage_api_key: str = ""
 

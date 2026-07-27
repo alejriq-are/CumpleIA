@@ -4,7 +4,7 @@ Uso:
     cd backend
     python -m scripts.ingest                        # todos los archivos de /docs/fuentes/
     python -m scripts.ingest --file ruta/ley.txt   # archivo específico
-    python -m scripts.ingest --examples            # 3 fragmentos de prueba (sin Voyage AI)
+    python -m scripts.ingest --examples            # 3 fragmentos de prueba (sin embeddings)
     python -m scripts.ingest --examples --embed    # 3 fragmentos con embeddings reales
 
 Formatos soportados: .txt  .md  .pdf
@@ -26,12 +26,24 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from app.core.config import get_settings
 from app.db.models import KnowledgeChunk
+from app.services.providers.embeddings import (
+    EmbeddingRateLimitError,
+    get_embedding_adapter_class,
+    get_embedding_client,
+)
 
 settings = get_settings()
 
+# Fail-fast: valida EMBEDDING_PROVIDER antes de procesar archivos (no requiere
+# la API key todavía, solo que el proveedor tenga un adaptador registrado).
+get_embedding_adapter_class(settings.embedding_provider)
+
 CHUNK_SIZE = 1500  # caracteres objetivo por fragmento
 OVERLAP = 200  # solapamiento entre fragmentos
-BATCH_SIZE = 20  # máx textos por llamada a Voyage AI (tope adicional al de caracteres)
+# Los siguientes valores están ajustados para el rate limit gratuito de
+# Voyage AI (proveedor de embeddings por defecto, ver EMBEDDING_PROVIDER);
+# revisar si se cambia de proveedor.
+BATCH_SIZE = 20  # máx textos por llamada (tope adicional al de caracteres)
 MAX_BATCH_CHARS = 8000  # ~2000-2300 tokens estimados: margen bajo el techo de 10K TPM
 EMBED_PACING_SECONDS = (
     21  # > 60s/3 RPM: espacia llamadas para no gatillar el rate limit
@@ -316,25 +328,18 @@ RATE_LIMIT_MAX_RETRIES = 5
 
 
 async def embed_texts(texts: list[str]) -> list[list[float]]:
-    if not settings.voyage_api_key:
-        raise RuntimeError("VOYAGE_API_KEY no configurada en el .env")
-    import voyageai
-
-    client = voyageai.AsyncClient(api_key=settings.voyage_api_key)
+    client = get_embedding_client(settings)
 
     for intento in range(1, RATE_LIMIT_MAX_RETRIES + 1):
         try:
-            result = await client.embed(
-                texts=texts, model="voyage-3", input_type="document"
-            )
-            return result.embeddings
-        except voyageai.error.RateLimitError:
+            return await client.embed(texts=texts, input_type="document")
+        except EmbeddingRateLimitError:
             if intento == RATE_LIMIT_MAX_RETRIES:
                 raise
             print(
-                f"  Rate limit de Voyage AI (cuenta sin método de pago: 3 RPM / "
-                f"10K TPM). Reintento {intento}/{RATE_LIMIT_MAX_RETRIES} en "
-                f"{RATE_LIMIT_RETRY_SECONDS}s…"
+                f"  Rate limit del proveedor de embeddings (cuenta sin método de "
+                f"pago: 3 RPM / 10K TPM en Voyage AI). Reintento "
+                f"{intento}/{RATE_LIMIT_MAX_RETRIES} en {RATE_LIMIT_RETRY_SECONDS}s…"
             )
             await asyncio.sleep(RATE_LIMIT_RETRY_SECONDS)
 
@@ -424,7 +429,7 @@ async def ingest_examples(db: AsyncSession, with_embeddings: bool) -> int:
         embs = await embed_texts([e["content"] for e in EXAMPLE_CHUNKS])
     else:
         embs = [None] * len(EXAMPLE_CHUNKS)
-        print("  Insertando sin embeddings (usa --embed para generarlos con Voyage AI)")
+        print("  Insertando sin embeddings (usa --embed para generarlos)")
 
     inserted = 0
     for ex, emb in zip(EXAMPLE_CHUNKS, embs, strict=True):
@@ -519,11 +524,14 @@ if __name__ == "__main__":
     parser.add_argument(
         "--embed",
         action="store_true",
-        help="Generar embeddings reales con Voyage AI (requiere VOYAGE_API_KEY)",
+        help=(
+            "Generar embeddings reales con el proveedor configurado "
+            "(EMBEDDING_PROVIDER; requiere su API key)"
+        ),
     )
     parser.add_argument(
         "--no-embed",
         action="store_true",
-        help="Insertar solo el texto, sin embeddings (para pruebas sin Voyage AI)",
+        help="Insertar solo el texto, sin embeddings (para pruebas sin API key)",
     )
     asyncio.run(main(parser.parse_args()))
