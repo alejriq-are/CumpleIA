@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { api } from "@/lib/api/client";
+import { SignOutButton } from "@/components/auth/SignOutButton";
 
 // Panel interno de CumpleIA (rol superadmin) — no visible ni enlazado para
 // admin_pyme/usuario. La verificación real vive en el backend (403 si el
@@ -25,7 +26,10 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       <nav className="border-b border-gray-200 bg-white px-6 py-4">
         <div className="mx-auto flex max-w-5xl items-center justify-between">
           <span className="text-xl font-bold text-blue-800">CumpleIA · Panel interno</span>
-          <span className="text-sm text-gray-500">{profile.email}</span>
+          <div className="flex items-center gap-4">
+            <span className="text-sm text-gray-500">{profile.email}</span>
+            <SignOutButton />
+          </div>
         </div>
       </nav>
       <main className="mx-auto max-w-5xl px-6 py-8">{children}</main>
