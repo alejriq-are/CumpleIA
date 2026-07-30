@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
@@ -14,6 +14,13 @@ export function LoginForm() {
   const [message, setMessage] = useState<Message | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("reset") === "success") {
+      setMessage({ type: "info", text: "Contraseña actualizada. Ya puedes iniciar sesión." });
+    }
+  }, []);
 
   function switchMode(m: Mode) {
     setMode(m);
@@ -104,6 +111,15 @@ export function LoginForm() {
             className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
           />
         </div>
+
+        {mode === "login" && (
+          <a
+            href="/forgot-password"
+            className="block text-right text-sm font-medium text-blue-700 hover:text-blue-800"
+          >
+            ¿Olvidaste tu contraseña?
+          </a>
+        )}
 
         {message && (
           <p
