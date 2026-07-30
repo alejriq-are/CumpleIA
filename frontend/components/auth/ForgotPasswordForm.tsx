@@ -38,8 +38,8 @@ export function ForgotPasswordForm() {
     return (
       <div className="space-y-4">
         <p className="rounded-lg bg-blue-50 px-3 py-2 text-sm text-blue-700">
-          Si el correo está registrado, te enviamos un enlace para recuperar tu contraseña.
-          Revisa tu bandeja de entrada.
+          Si el correo está registrado, te enviamos un enlace para recuperar tu contraseña. Revisa
+          tu bandeja de entrada.
         </p>
         <a
           href="/login"
