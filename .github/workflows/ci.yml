@@ -89,6 +89,15 @@ jobs:
       - name: Aplicar migraciones
         run: alembic upgrade head
 
+      # Los tests de Módulo 1 (test_cuestionario_config.py y
+      # test_rls_isolation_diagnosticos.py) requieren la v1 activa de
+      # config_versiones/secciones/preguntas — la migración crea las tablas
+      # pero no las llena. Sin este paso fallan aquí con 404/None aunque
+      # pasen en local si alguna vez se corrió el seed a mano contra el
+      # Postgres de dev. Idempotente: no hace nada si v1 ya existe.
+      - name: Seed — configuración Módulo 1 (cuestionario)
+        run: python -m scripts.seed_modulo1_cuestionario
+
       - name: Tests (incluye aislamiento multi-tenant)
         run: pytest tests/ -v --tb=short
 
