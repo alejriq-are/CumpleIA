@@ -6,9 +6,11 @@ import sqlalchemy as sa
 from pgvector.sqlalchemy import Vector
 from sqlalchemy import (
     Boolean,
+    CheckConstraint,
     ForeignKey,
     Integer,
     Numeric,
+    SmallInteger,
     Text,
     UniqueConstraint,
 )
@@ -107,6 +109,11 @@ class Profile(Base):
     )
     email: Mapped[str] = mapped_column(Text, nullable=False)
     full_name: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # Bandera global de plataforma (staff CumpleIA), independiente de cualquier
+    # organización — no confundir con Membership.role, que es por-tenant.
+    is_superadmin: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, server_default="false"
+    )
     created_at: Mapped[datetime] = mapped_column(
         sa.TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
     )
@@ -147,6 +154,114 @@ class Membership(Base):
     profile: Mapped["Profile"] = relationship(back_populates="memberships")
 
 
+# ── Módulo 1 — Cuestionario: contenido fijo (fuente CCS, global, sin RLS) ────
+
+
+class Obligacion(Base):
+    __tablename__ = "obligaciones"
+
+    id: Mapped[str] = mapped_column(Text, primary_key=True)
+    numero_guia: Mapped[str] = mapped_column(Text, nullable=False)
+    nombre: Mapped[str] = mapped_column(Text, nullable=False)
+    creado_en: Mapped[datetime] = mapped_column(
+        sa.TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
+    )
+
+
+class Seccion(Base):
+    __tablename__ = "secciones"
+
+    id: Mapped[str] = mapped_column(Text, primary_key=True)
+    numero_romano: Mapped[str] = mapped_column(Text, nullable=False)
+    nombre: Mapped[str] = mapped_column(Text, nullable=False)
+    obligacion_id: Mapped[str] = mapped_column(
+        Text, ForeignKey("obligaciones.id"), nullable=False
+    )
+    orden: Mapped[int] = mapped_column(SmallInteger, nullable=False)
+    creado_en: Mapped[datetime] = mapped_column(
+        sa.TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
+    )
+
+
+class Pregunta(Base):
+    __tablename__ = "preguntas"
+
+    id: Mapped[str] = mapped_column(Text, primary_key=True)
+    seccion_id: Mapped[str] = mapped_column(
+        Text, ForeignKey("secciones.id"), nullable=False
+    )
+    texto: Mapped[str] = mapped_column(Text, nullable=False)
+    orden: Mapped[int] = mapped_column(SmallInteger, nullable=False)
+    creado_en: Mapped[datetime] = mapped_column(
+        sa.TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
+    )
+
+
+# ── Módulo 1 — Cuestionario: parámetros de negocio versionados ───────────────
+# Append-only: nunca se actualiza una versión existente, solo se crea una
+# nueva y se activa. Editable solo por profiles.is_superadmin (ver RLS).
+
+
+class ConfigVersion(Base):
+    __tablename__ = "config_versiones"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid()
+    )
+    numero_version: Mapped[int] = mapped_column(Integer, nullable=False, unique=True)
+    activa: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, server_default="false"
+    )
+    nota: Mapped[str | None] = mapped_column(Text, nullable=True)
+    creado_por: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("profiles.id"), nullable=False
+    )
+    creado_en: Mapped[datetime] = mapped_column(
+        sa.TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
+    )
+
+
+class ConfigSeccionPeso(Base):
+    __tablename__ = "config_seccion_pesos"
+    __table_args__ = (UniqueConstraint("version_id", "seccion_id"),)
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid()
+    )
+    version_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("config_versiones.id"), nullable=False
+    )
+    seccion_id: Mapped[str] = mapped_column(
+        Text, ForeignKey("secciones.id"), nullable=False
+    )
+    peso_pct: Mapped[float] = mapped_column(
+        Numeric(5, 2),
+        CheckConstraint(
+            "peso_pct >= 0 AND peso_pct <= 100",
+            name="peso_pct_rango",
+        ),
+        nullable=False,
+    )
+
+
+class ConfigPreguntaRiesgo(Base):
+    __tablename__ = "config_pregunta_riesgo"
+    __table_args__ = (UniqueConstraint("version_id", "pregunta_id"),)
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid()
+    )
+    version_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("config_versiones.id"), nullable=False
+    )
+    pregunta_id: Mapped[str] = mapped_column(
+        Text, ForeignKey("preguntas.id"), nullable=False
+    )
+    riesgo: Mapped[RiskLevel] = mapped_column(
+        sa.Enum(RiskLevel, name="risk_level", create_type=False), nullable=False
+    )
+
+
 # ── Módulo 1 — Diagnóstico ────────────────────────────────────────────────────
 
 
@@ -160,6 +275,11 @@ class Diagnostic(Base):
         UUID(as_uuid=True),
         ForeignKey("organizations.id", ondelete="CASCADE"),
         nullable=False,
+    )
+    # FK a la versión de config (pesos/riesgo) vigente cuando se generó, para
+    # que el informe sea reproducible aunque el admin ajuste valores después.
+    config_version_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("config_versiones.id"), nullable=False
     )
     global_score: Mapped[float | None] = mapped_column(Numeric(5, 2), nullable=True)
     section_scores: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
@@ -179,9 +299,23 @@ class Diagnostic(Base):
         UUID(as_uuid=True), ForeignKey("profiles.id"), nullable=True
     )
 
+    __table_args__ = (
+        CheckConstraint(
+            "status IN ('en_progreso', 'completado')",
+            name="status_valido",
+        ),
+    )
+
 
 class DiagnosticAnswer(Base):
     __tablename__ = "diagnostic_answers"
+    __table_args__ = (
+        UniqueConstraint("diagnostic_id", "pregunta_id"),
+        CheckConstraint(
+            "answer IN ('Sí', 'Parcial', 'No', 'N/A')",
+            name="answer_valido",
+        ),
+    )
 
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid()
@@ -196,8 +330,9 @@ class DiagnosticAnswer(Base):
         ForeignKey("diagnostics.id", ondelete="CASCADE"),
         nullable=False,
     )
-    section: Mapped[str] = mapped_column(Text, nullable=False)
-    question_code: Mapped[str] = mapped_column(Text, nullable=False)
+    pregunta_id: Mapped[str] = mapped_column(
+        Text, ForeignKey("preguntas.id"), nullable=False
+    )
     answer: Mapped[str | None] = mapped_column(Text, nullable=True)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(

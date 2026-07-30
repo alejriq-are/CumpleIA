@@ -5,6 +5,7 @@ export type ProfileOut = {
   id: string;
   email: string;
   full_name: string | null;
+  is_superadmin: boolean;
 };
 
 export type MembershipOut = {
@@ -34,6 +35,61 @@ export type OrganizationCreate = {
 export type HealthOut = {
   status: string;
   database: string;
+};
+
+// Módulo 1 — configuración versionada del cuestionario de autodiagnóstico.
+// El riesgo viaja como 'Alto'/'Medio'/'Bajo': el backend hace la conversión
+// de/hacia el enum interno en minúscula (ver app/services/cuestionario_config.py).
+export type RiesgoDisplay = "Alto" | "Medio" | "Bajo";
+
+export type ObligacionOut = {
+  id: string;
+  numero_guia: string;
+  nombre: string;
+};
+
+export type SeccionOut = {
+  id: string;
+  numero_romano: string;
+  nombre: string;
+  obligacion_id: string;
+  orden: number;
+  peso_pct: number;
+};
+
+export type PreguntaOut = {
+  id: string;
+  seccion_id: string;
+  texto: string;
+  orden: number;
+  riesgo: RiesgoDisplay;
+};
+
+export type CreadoPorOut = {
+  id: string;
+  email: string;
+  full_name: string | null;
+};
+
+export type ConfigVersionOut = {
+  numero_version: number;
+  activa: boolean;
+  nota: string | null;
+  creado_en: string;
+  creado_por: CreadoPorOut;
+};
+
+export type ConfigCuestionarioOut = {
+  version: ConfigVersionOut;
+  obligaciones: ObligacionOut[];
+  secciones: SeccionOut[];
+  preguntas: PreguntaOut[];
+};
+
+export type GuardarConfigRequest = {
+  nota?: string;
+  pesos: { seccion_id: string; peso_pct: number }[];
+  riesgos: { pregunta_id: string; riesgo: RiesgoDisplay }[];
 };
 
 type FetchOptions = {
@@ -88,5 +144,19 @@ export const api = {
     // Onboarding: crea la organización y deja al usuario actual como owner.
     create: (token: string, body: OrganizationCreate): Promise<OrganizationOut> =>
       apiFetch<OrganizationOut>("/organizations", { token, method: "POST", body }),
+  },
+
+  // Config global (no tenant-scoped): no requiere X-Organization-Id.
+  cuestionarioConfig: {
+    get: (token: string): Promise<ConfigCuestionarioOut> =>
+      apiFetch<ConfigCuestionarioOut>("/cuestionario-config", { token }),
+
+    // Solo superadmin; el backend responde 403 para cualquier otro rol.
+    save: (token: string, body: GuardarConfigRequest): Promise<ConfigCuestionarioOut> =>
+      apiFetch<ConfigCuestionarioOut>("/cuestionario-config", {
+        token,
+        method: "POST",
+        body,
+      }),
   },
 };

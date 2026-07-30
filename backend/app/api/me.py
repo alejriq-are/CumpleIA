@@ -16,6 +16,7 @@ class ProfileOut(BaseModel):
     id: uuid.UUID
     email: str
     full_name: str | None
+    is_superadmin: bool  # bandera global de plataforma, no de organización
 
     model_config = {"from_attributes": True}
 

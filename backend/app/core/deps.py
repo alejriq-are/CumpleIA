@@ -72,6 +72,23 @@ async def get_current_profile(
     return result.scalar_one()
 
 
+async def require_superadmin(
+    current_profile: Profile = Depends(get_current_profile),
+) -> Profile:
+    """Exige que el perfil autenticado tenga la bandera global `is_superadmin`.
+
+    A diferencia de `get_org_membership`, este chequeo NO depende de ninguna
+    organización: is_superadmin vive en `profiles`, no en `memberships` (ver
+    migración 0002). Para paneles internos de CumpleIA, no de las PYMEs cliente.
+    """
+    if not current_profile.is_superadmin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Requiere rol superadmin",
+        )
+    return current_profile
+
+
 async def get_org_membership(
     x_organization_id: Annotated[uuid.UUID, Header()],
     current_profile: Profile = Depends(get_current_profile),
@@ -101,3 +118,4 @@ async def get_org_membership(
 # Tipos anotados para inyección en endpoints
 CurrentProfile = Annotated[Profile, Depends(get_current_profile)]
 OrgMembership = Annotated[Membership, Depends(get_org_membership)]
+SuperadminProfile = Annotated[Profile, Depends(require_superadmin)]

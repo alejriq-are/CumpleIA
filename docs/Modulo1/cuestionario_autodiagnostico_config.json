@@ -1,0 +1,214 @@
+{
+  "version": "1.0",
+  "producto": "CumpleIA - Módulo 1: Autodiagnóstico Inteligente",
+  "fuente_preguntas": "Cámara de Comercio de Santiago (CCS), 'Protección de Datos - Guía Esencial para Pequeñas y Medianas Empresas', 2026, Sección 4 'Cuestionario de Autodiagnóstico de Cumplimiento' (págs. 29-32). Ley N° 19.628 modificada por Ley N° 21.719.",
+  "fuente_obligaciones": "CCS, misma guía, Sección 1 'Principales Obligaciones bajo la Ley N° 21.719' (1.1 a 1.8, págs. 4-16).",
+  "nota_metodologica": "Las 10 secciones y 50 preguntas son fieles al cuestionario de la CCS (no se agregó ni quitó ninguna). Las 8 'obligaciones' corresponden a los 8 puntos que la propia guía CCS lista en su Sección 1 (1.1-1.8) como 'Principales Obligaciones'. Gobernanza (Sección I) y Capacitación (Sección IX) del cuestionario NO figuran como obligaciones independientes en esa lista de la CCS: son medidas habilitantes del principio de responsabilidad demostrable que la guía define en su FAQ N°19 ('mantener evidencia de: políticas, procedimientos, registros, capacitaciones, contratos y evaluaciones'). Por eso aquí se agrupan, junto con la Sección X (Evidencia), bajo la Obligación 8. Los pesos por sección (peso_pct) y los niveles de riesgo por pregunta (riesgo) SÍ son reglas de negocio propias de CumpleIA -no están en la fuente CCS- y deben validarse con Alicia antes de producción.",
+  "escala_respuesta": ["Sí", "Parcial", "No", "N/A"],
+  "puntaje_por_respuesta": {
+    "Sí": 1.0,
+    "Parcial": 0.5,
+    "No": 0.0,
+    "N/A": null
+  },
+  "formula_puntaje": {
+    "por_seccion": "promedio de puntaje_por_respuesta de las preguntas contestadas (N/A se excluye del denominador) * 100",
+    "global": "suma ponderada de (puntaje_seccion * peso_pct) de las 10 secciones, renormalizando peso_pct sobre las secciones con al menos una pregunta no-N/A",
+    "por_obligacion_reporte": "promedio simple de las secciones que componen esa obligación (ver campo secciones_ids en obligaciones); uso: agrupar brechas en el Informe de Diagnóstico, no para el puntaje global"
+  },
+  "niveles_riesgo": ["Alto", "Medio", "Bajo"],
+  "regla_riesgo_brecha": "Una respuesta 'No' genera una brecha con el nivel de riesgo indicado en la pregunta (campo riesgo). Una respuesta 'Parcial' genera una brecha un nivel por debajo (Alto->Medio, Medio->Bajo, Bajo->Bajo).",
+  "obligaciones": [
+    {
+      "id": "OB1",
+      "numero_guia": "1.1",
+      "nombre": "Identificar los Tratamientos de Datos Personales",
+      "secciones_ids": ["S2"]
+    },
+    {
+      "id": "OB2",
+      "numero_guia": "1.2",
+      "nombre": "Determinar la Base de Licitud de Cada Tratamiento",
+      "secciones_ids": ["S3"]
+    },
+    {
+      "id": "OB3",
+      "numero_guia": "1.3",
+      "nombre": "Informar Adecuadamente a los Titulares",
+      "secciones_ids": ["S4"]
+    },
+    {
+      "id": "OB4",
+      "numero_guia": "1.4",
+      "nombre": "Implementar Medidas de Seguridad",
+      "secciones_ids": ["S6"]
+    },
+    {
+      "id": "OB5",
+      "numero_guia": "1.5",
+      "nombre": "Gestionar los Derechos de los Titulares (ARSOP-B)",
+      "secciones_ids": ["S5"]
+    },
+    {
+      "id": "OB6",
+      "numero_guia": "1.6",
+      "nombre": "Regular la Relación con Proveedores (Encargados)",
+      "secciones_ids": ["S8"]
+    },
+    {
+      "id": "OB7",
+      "numero_guia": "1.7",
+      "nombre": "Gestionar Incidentes de Seguridad",
+      "secciones_ids": ["S7"]
+    },
+    {
+      "id": "OB8",
+      "numero_guia": "1.8",
+      "nombre": "Mantener Evidencia de Cumplimiento (Responsabilidad Demostrable)",
+      "secciones_ids": ["S1", "S9", "S10"],
+      "nota": "Absorbe Gobernanza (S1) y Capacitación (S9), no listadas como obligación propia en la guía CCS; ver nota_metodologica."
+    }
+  ],
+  "secciones": [
+    {
+      "id": "S1",
+      "numero": "I",
+      "nombre": "Gobernanza y Gestión de Datos",
+      "obligacion_id": "OB8",
+      "peso_pct": 6,
+      "preguntas": [
+        { "id": "S1Q1", "texto": "¿La organización ha designado a una persona responsable de coordinar materias de protección de datos?", "riesgo": "Alto" },
+        { "id": "S1Q2", "texto": "¿Existen roles y responsabilidades definidas respecto del tratamiento de datos personales?", "riesgo": "Medio" },
+        { "id": "S1Q3", "texto": "¿La alta dirección conoce las obligaciones de la Ley N° 21.719?", "riesgo": "Bajo" },
+        { "id": "S1Q4", "texto": "¿La organización ha iniciado formalmente un proceso de adecuación a la ley?", "riesgo": "Medio" }
+      ]
+    },
+    {
+      "id": "S2",
+      "numero": "II",
+      "nombre": "Inventario de Datos Personales",
+      "obligacion_id": "OB1",
+      "peso_pct": 14,
+      "preguntas": [
+        { "id": "S2Q1", "texto": "¿La organización sabe qué datos personales recopila?", "riesgo": "Alto" },
+        { "id": "S2Q2", "texto": "¿Se encuentran identificadas las finalidades para las cuales se utilizan los datos?", "riesgo": "Alto" },
+        { "id": "S2Q3", "texto": "¿Se conoce dónde se almacenan los datos personales?", "riesgo": "Medio" },
+        { "id": "S2Q4", "texto": "¿Se encuentran identificados los sistemas y plataformas que almacenan datos personales?", "riesgo": "Medio" },
+        { "id": "S2Q5", "texto": "¿Se han identificado los datos sensibles tratados por la organización?", "riesgo": "Alto" },
+        { "id": "S2Q6", "texto": "¿Existe un inventario o Registro de Actividades de Tratamiento (RATs)?", "riesgo": "Alto" }
+      ]
+    },
+    {
+      "id": "S3",
+      "numero": "III",
+      "nombre": "Bases de Licitud",
+      "obligacion_id": "OB2",
+      "peso_pct": 14,
+      "preguntas": [
+        { "id": "S3Q1", "texto": "¿La organización ha identificado la base legal que justifica cada tratamiento de datos personales?", "riesgo": "Alto" },
+        { "id": "S3Q2", "texto": "¿Se mantiene evidencia de los consentimientos obtenidos cuando corresponde?", "riesgo": "Alto" },
+        { "id": "S3Q3", "texto": "¿Se revisan periódicamente los consentimientos otorgados por los titulares?", "riesgo": "Medio" },
+        { "id": "S3Q4", "texto": "¿Se encuentran documentadas las situaciones en que se utiliza interés legítimo como base de licitud?", "riesgo": "Medio" }
+      ]
+    },
+    {
+      "id": "S4",
+      "numero": "IV",
+      "nombre": "Transparencia y Deber de Información",
+      "obligacion_id": "OB3",
+      "peso_pct": 8,
+      "preguntas": [
+        { "id": "S4Q1", "texto": "¿La organización cuenta con una Política de Privacidad vigente?", "riesgo": "Alto" },
+        { "id": "S4Q2", "texto": "¿La Política de Privacidad se encuentra disponible para los titulares?", "riesgo": "Alto" },
+        { "id": "S4Q3", "texto": "¿Los formularios de recopilación contienen información adecuada sobre el tratamiento?", "riesgo": "Medio" },
+        { "id": "S4Q4", "texto": "¿Los contratos incorporan cláusulas informativas cuando corresponde?", "riesgo": "Medio" },
+        { "id": "S4Q5", "texto": "¿Se informa a los titulares sobre sus derechos ARSOP-B?", "riesgo": "Medio" }
+      ]
+    },
+    {
+      "id": "S5",
+      "numero": "V",
+      "nombre": "Derechos de los Titulares (ARSOP-B)",
+      "obligacion_id": "OB5",
+      "peso_pct": 13,
+      "preguntas": [
+        { "id": "S5Q1", "texto": "¿Existe un canal para que los titulares ejerzan sus derechos?", "riesgo": "Alto" },
+        { "id": "S5Q2", "texto": "¿Existe un procedimiento documentado para gestionar solicitudes ARSOP-B?", "riesgo": "Alto" },
+        { "id": "S5Q3", "texto": "¿Se encuentra definido quién responde estas solicitudes?", "riesgo": "Medio" },
+        { "id": "S5Q4", "texto": "¿Existe un registro de solicitudes recibidas y respuestas otorgadas?", "riesgo": "Medio" },
+        { "id": "S5Q5", "texto": "¿La organización conoce los plazos legales para responder solicitudes?", "riesgo": "Alto" }
+      ]
+    },
+    {
+      "id": "S6",
+      "numero": "VI",
+      "nombre": "Seguridad de la Información",
+      "obligacion_id": "OB4",
+      "peso_pct": 16,
+      "preguntas": [
+        { "id": "S6Q1", "texto": "¿Existen controles de acceso a los sistemas que contienen datos personales?", "riesgo": "Alto" },
+        { "id": "S6Q2", "texto": "¿Se utilizan contraseñas robustas?", "riesgo": "Medio" },
+        { "id": "S6Q3", "texto": "¿Se utiliza autenticación multifactor o similar en sistemas críticos?", "riesgo": "Medio" },
+        { "id": "S6Q4", "texto": "¿Se realizan respaldos periódicos de la información?", "riesgo": "Medio" },
+        { "id": "S6Q5", "texto": "¿Existe una política o procedimiento de seguridad de la información?", "riesgo": "Alto" },
+        { "id": "S6Q6", "texto": "¿Los trabajadores han suscrito compromisos de confidencialidad?", "riesgo": "Medio" },
+        { "id": "S6Q7", "texto": "¿Existen procedimientos para eliminar información de forma segura?", "riesgo": "Medio" }
+      ]
+    },
+    {
+      "id": "S7",
+      "numero": "VII",
+      "nombre": "Gestión de Incidentes",
+      "obligacion_id": "OB7",
+      "peso_pct": 12,
+      "preguntas": [
+        { "id": "S7Q1", "texto": "¿Existe un procedimiento para gestionar incidentes de seguridad?", "riesgo": "Alto" },
+        { "id": "S7Q2", "texto": "¿Los trabajadores saben cómo reportar un incidente?", "riesgo": "Medio" },
+        { "id": "S7Q3", "texto": "¿Existe un responsable para coordinar la gestión de incidentes?", "riesgo": "Alto" },
+        { "id": "S7Q4", "texto": "¿Se mantiene un registro de incidentes ocurridos?", "riesgo": "Medio" },
+        { "id": "S7Q5", "texto": "¿La organización conoce su obligación de notificar a la Agencia cuando corresponda?", "riesgo": "Alto" }
+      ]
+    },
+    {
+      "id": "S8",
+      "numero": "VIII",
+      "nombre": "Proveedores y Encargados de Tratamiento",
+      "obligacion_id": "OB6",
+      "peso_pct": 12,
+      "preguntas": [
+        { "id": "S8Q1", "texto": "¿La organización ha identificado qué proveedores acceden a datos personales?", "riesgo": "Alto" },
+        { "id": "S8Q2", "texto": "¿Existe un registro de dichos proveedores?", "riesgo": "Medio" },
+        { "id": "S8Q3", "texto": "¿Los contratos regulan adecuadamente la protección de datos personales?", "riesgo": "Alto" },
+        { "id": "S8Q4", "texto": "¿Existen Acuerdos de Tratamiento de Datos (DPA) cuando corresponde?", "riesgo": "Alto" },
+        { "id": "S8Q5", "texto": "¿Los proveedores son evaluados desde una perspectiva de seguridad y privacidad?", "riesgo": "Medio" }
+      ]
+    },
+    {
+      "id": "S9",
+      "numero": "IX",
+      "nombre": "Capacitación y Cultura Organizacional",
+      "obligacion_id": "OB8",
+      "peso_pct": 2,
+      "preguntas": [
+        { "id": "S9Q1", "texto": "¿Los trabajadores han recibido capacitación sobre protección de datos personales?", "riesgo": "Medio" },
+        { "id": "S9Q2", "texto": "¿Los trabajadores conocen sus obligaciones de confidencialidad?", "riesgo": "Medio" },
+        { "id": "S9Q3", "texto": "¿Existe material o comunicación interna sobre protección de datos?", "riesgo": "Bajo" },
+        { "id": "S9Q4", "texto": "¿La capacitación se realiza de manera periódica?", "riesgo": "Bajo" }
+      ]
+    },
+    {
+      "id": "S10",
+      "numero": "X",
+      "nombre": "Evidencia y Cumplimiento",
+      "obligacion_id": "OB8",
+      "peso_pct": 3,
+      "preguntas": [
+        { "id": "S10Q1", "texto": "¿La organización mantiene evidencia de cumplimiento de sus obligaciones?", "riesgo": "Alto" },
+        { "id": "S10Q2", "texto": "¿Se conservan registros de capacitaciones, solicitudes e incidentes?", "riesgo": "Medio" },
+        { "id": "S10Q3", "texto": "¿Existe una carpeta o repositorio de cumplimiento?", "riesgo": "Medio" },
+        { "id": "S10Q4", "texto": "¿Se revisan periódicamente las políticas y procedimientos?", "riesgo": "Bajo" },
+        { "id": "S10Q5", "texto": "¿La organización cuenta con un plan de mejora continua en materia de protección de datos?", "riesgo": "Bajo" }
+      ]
+    }
+  ]
+}
