@@ -21,7 +21,14 @@ from sqlalchemy import insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.deps import CurrentProfile
-from app.db.models import Membership, Organization, UserRole
+from app.db.models import (
+    Membership,
+    Organization,
+    Subscription,
+    SubscriptionCommitmentType,
+    SubscriptionStatus,
+    UserRole,
+)
 from app.db.session import get_db
 
 router = APIRouter(prefix="/organizations", tags=["organizaciones"])
@@ -46,12 +53,17 @@ async def create_organization(
     current_profile: CurrentProfile,
     db: AsyncSession = Depends(get_db),
 ) -> OrganizationOut:
-    """Crea la organización y la membresía `owner` en una sola transacción.
+    """Crea la organización, la membresía `owner` y su suscripción en una sola
+    transacción.
 
-    Ambos INSERT viven en la misma sesión y se confirman juntos al cerrar la
-    request (`get_db` hace commit al final). Si cualquiera de los dos falla, el
+    Los tres INSERT viven en la misma sesión y se confirman juntos al cerrar
+    la request (`get_db` hace commit al final). Si cualquiera falla, el
     manejador de `get_db` hace rollback y no queda nada a medias: nunca una
-    organización sin dueño ni una membresía huérfana.
+    organización sin dueño, sin suscripción, ni una membresía huérfana. La
+    suscripción nace `active`/`monthly` (ver
+    docs/adr/0001-modelo-organizaciones-roles-suscripcion.md y
+    app/services/subscriptions.py): toda organización debe tener exactamente
+    una fila en `subscriptions` desde que existe.
 
     IDs generados en Python (no vía DEFAULT de Postgres) e INSERTs sin
     RETURNING a propósito: con RETURNING, Postgres reevalúa la política de
@@ -64,6 +76,7 @@ async def create_organization(
     """
     org_id = uuid.uuid4()
     membership_id = uuid.uuid4()
+    subscription_id = uuid.uuid4()
 
     await db.execute(
         insert(Organization).values(
@@ -80,6 +93,16 @@ async def create_organization(
             organization_id=org_id,
             profile_id=current_profile.id,
             role=UserRole.owner,
+        )
+    )
+    await db.execute(
+        insert(Subscription).values(
+            id=subscription_id,
+            organization_id=org_id,
+            commitment_type=SubscriptionCommitmentType.monthly,
+            status=SubscriptionStatus.active,
+            created_by=current_profile.id,
+            updated_by=current_profile.id,
         )
     )
 

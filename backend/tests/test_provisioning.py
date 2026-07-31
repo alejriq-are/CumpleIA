@@ -24,7 +24,7 @@ from sqlalchemy import delete, func, select
 
 from app.core import security
 from app.core.config import get_settings
-from app.db.models import Membership, Organization, Profile
+from app.db.models import Membership, Organization, Profile, Subscription
 
 _KID = "test-key-1"
 
@@ -202,7 +202,7 @@ async def test_jit_idempotente_bajo_doble_llamada(
 
 @pytest.mark.asyncio
 async def test_crear_organizacion_genera_membresia_owner(
-    patch_jwks, signing_key, app_db_only, clean_new_user
+    patch_jwks, signing_key, app_db_only, clean_new_user, _session_factory
 ):
     """POST /organizations → 201, y el creador queda con acceso owner al tenant."""
     token = _sign(signing_key, sub=str(_NEW_AUTH_ID))
@@ -228,6 +228,19 @@ async def test_crear_organizacion_genera_membresia_owner(
     assert membership.status_code == 200, membership.text
     assert membership.json()["role"] == "owner"
     assert str(membership.json()["organization_id"]) == org_id
+
+    # Ver docs/adr/0001-modelo-organizaciones-roles-suscripcion.md: ninguna
+    # organización debe llegar a existir sin su fila de suscripción.
+    async with _session_factory() as session:
+        subscription = (
+            await session.execute(
+                select(Subscription).where(
+                    Subscription.organization_id == uuid.UUID(org_id)
+                )
+            )
+        ).scalar_one()
+    assert subscription.status.value == "active"
+    assert subscription.commitment_type.value == "monthly"
 
 
 @pytest.mark.asyncio

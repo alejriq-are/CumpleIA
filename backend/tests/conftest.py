@@ -27,7 +27,15 @@ from sqlalchemy.pool import NullPool  # noqa: E402
 
 from app.core.config import get_settings  # noqa: E402
 from app.core.deps import get_current_profile  # noqa: E402
-from app.db.models import Membership, Organization, Profile, UserRole  # noqa: E402
+from app.db.models import (  # noqa: E402
+    Membership,
+    Organization,
+    Profile,
+    Subscription,
+    SubscriptionCommitmentType,
+    SubscriptionStatus,
+    UserRole,
+)
 from app.db.session import get_db  # noqa: E402
 from app.main import app  # noqa: E402
 
@@ -119,6 +127,11 @@ async def _seed_test_data(_session_factory):
     async with _session_factory() as session:
         # Limpiar datos previos en orden FK-seguro (sin ORM cascade)
         await session.execute(
+            delete(Subscription).where(
+                Subscription.organization_id.in_([_ORG_A_ID, _ORG_B_ID])
+            )
+        )
+        await session.execute(
             delete(Membership).where(
                 Membership.organization_id.in_([_ORG_A_ID, _ORG_B_ID])
             )
@@ -166,12 +179,39 @@ async def _seed_test_data(_session_factory):
                 organization_id=_ORG_B_ID, profile_id=_PROFILE_B_ID, role=UserRole.owner
             )
         )
+
+        # Toda organización real tiene exactamente una Subscription desde que
+        # se crea (ver docs/adr/0001-modelo-organizaciones-roles-suscripcion.md
+        # y app/api/organizations.py) — sin esto, org_a/org_b no serían
+        # representativas de una organización real para los tests que ejercen
+        # get_subscription_status o la RLS de `subscriptions`.
+        session.add(
+            Subscription(
+                organization_id=_ORG_A_ID,
+                commitment_type=SubscriptionCommitmentType.monthly,
+                status=SubscriptionStatus.active,
+                created_by=_PROFILE_A_ID,
+            )
+        )
+        session.add(
+            Subscription(
+                organization_id=_ORG_B_ID,
+                commitment_type=SubscriptionCommitmentType.monthly,
+                status=SubscriptionStatus.active,
+                created_by=_PROFILE_B_ID,
+            )
+        )
         await session.commit()
 
     yield  # tests corren aquí
 
     # Teardown: eliminar en orden FK-seguro via DELETE bulk (sin ORM cascade)
     async with _session_factory() as session:
+        await session.execute(
+            delete(Subscription).where(
+                Subscription.organization_id.in_([_ORG_A_ID, _ORG_B_ID])
+            )
+        )
         await session.execute(
             delete(Membership).where(
                 Membership.organization_id.in_([_ORG_A_ID, _ORG_B_ID])
