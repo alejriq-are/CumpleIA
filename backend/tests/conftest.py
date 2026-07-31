@@ -16,7 +16,8 @@ import uuid  # noqa: E402
 
 import pytest  # noqa: E402
 import pytest_asyncio  # noqa: E402
-from sqlalchemy import delete  # noqa: E402
+from fastapi import Depends  # noqa: E402
+from sqlalchemy import delete, select, text  # noqa: E402
 from sqlalchemy.ext.asyncio import (  # noqa: E402
     AsyncSession,
     async_sessionmaker,
@@ -73,6 +74,17 @@ _AUTH_B_ID = uuid.UUID("b0000000-0000-0000-0000-000000000003")
 
 # ── Engine de test (NullPool: sin caché de conexiones, evita cross-loop reuse) ──
 
+# Dos engines separados y con roles distintos, a propósito:
+# - `_engine`/`_session_factory` (settings.database_url, rol admin): SOLO para
+#   fixtures de setup/teardown/aserciones directas (sembrar orgs de test,
+#   verificar filas). BYPASSRLS — nunca debe ser el que sirve una request HTTP
+#   de los tests, porque eso escondería un bug real de RLS (pasó en Fase 0:
+#   ver Claude_22_julio_2026/estado-23jul2026.md).
+# - `_app_engine`/`_app_session_factory` (settings.app_database_url, `app_user`
+#   real, sin BYPASSRLS): el que deben usar los overrides de get_db que sirven
+#   una request de test, para que RLS esté realmente activo — igual que en
+#   producción (ver app/db/session.py).
+
 
 @pytest.fixture(scope="session")
 def _engine():
@@ -83,6 +95,19 @@ def _engine():
 @pytest.fixture(scope="session")
 def _session_factory(_engine):
     return async_sessionmaker(_engine, class_=AsyncSession, expire_on_commit=False)
+
+
+@pytest.fixture(scope="session")
+def _app_engine():
+    engine = create_async_engine(
+        settings.app_database_url, echo=False, poolclass=NullPool
+    )
+    yield engine
+
+
+@pytest.fixture(scope="session")
+def _app_session_factory(_app_engine):
+    return async_sessionmaker(_app_engine, class_=AsyncSession, expire_on_commit=False)
 
 
 # ── Datos de test (session-scoped: se crean una vez y se limpian al final) ────
@@ -199,24 +224,61 @@ def auth_b_id() -> uuid.UUID:
 # ── Cliente HTTP con JWT override ─────────────────────────────────────────────
 
 
-def _make_auth_override(profile_id: uuid.UUID, session_factory):
-    """Override de get_current_profile que devuelve el perfil de test desde la BD."""
+def _make_rls_db_override(auth_user_id: uuid.UUID, session_factory):
+    """Override de get_db que corre contra `app_user` con RLS realmente activo.
+
+    Puebla `request.jwt.claim.sub` al abrir la sesión — lo que en producción
+    hace `get_current_profile()` real (ver app/core/deps.py) sobre la MISMA
+    sesión que después sirve el resto del request. Acá hace falta hacerlo en
+    el override de get_db porque get_current_profile también está overrideado
+    (para no validar un JWT real en cada test) y por lo tanto nunca ejecuta
+    ese set_config por su cuenta. Sin esto, auth.uid() quedaría NULL y RLS
+    bloquearía todo (o, peor, pasaría inadvertido si el rol tuviera BYPASSRLS).
+    """
 
     async def _override():
         async with session_factory() as session:
-            profile = await session.get(Profile, profile_id)
-            return profile
+            await session.execute(
+                text("SELECT set_config('request.jwt.claim.sub', :sub, true)"),
+                {"sub": str(auth_user_id)},
+            )
+            try:
+                yield session
+                await session.commit()
+            except Exception:
+                await session.rollback()
+                raise
+
+    return _override
+
+
+def _make_profile_override_from_db(auth_user_id: uuid.UUID):
+    """Override de get_current_profile que reutiliza la sesión de get_db.
+
+    Depende de `get_db` (no abre una sesión propia) para que la lectura del
+    perfil ocurra en la misma sesión donde ya corrió el set_config de
+    `_make_rls_db_override` — si abriera una sesión aparte, sería una conexión
+    distinta sin auth.uid() poblado y perfectamente podría devolver 0 filas
+    bajo RLS.
+    """
+
+    async def _override(db: AsyncSession = Depends(get_db)) -> Profile:
+        result = await db.execute(
+            select(Profile).where(Profile.auth_user_id == auth_user_id)
+        )
+        return result.scalar_one()
 
     return _override
 
 
 def _make_db_override(session_factory):
-    """Override de get_db que usa el engine NullPool de test.
+    """Override de get_db que usa el engine NullPool de test (rol admin, sin RLS).
 
-    Refleja el `get_db` real (commit al terminar, rollback ante excepción): sin
-    el commit, las escrituras del request —como el aprovisionamiento JIT del
-    perfil o la creación de una organización— se revertirían al cerrar la sesión
-    y no serían visibles para requests posteriores ni para las aserciones.
+    Solo para fixtures de setup/teardown que necesitan escribir sin pasar por
+    políticas de organización (p. ej. sembrar datos). Refleja el `get_db` real
+    (commit al terminar, rollback ante excepción): sin el commit, las
+    escrituras del request se revertirían al cerrar la sesión y no serían
+    visibles para requests posteriores ni para las aserciones.
     """
 
     async def _override():
@@ -232,37 +294,42 @@ def _make_db_override(session_factory):
 
 
 @pytest.fixture
-def client_a(_session_factory, _seed_test_data):
-    """AsyncClient autenticado como usuario A."""
-    app.dependency_overrides[get_current_profile] = _make_auth_override(
-        _PROFILE_A_ID, _session_factory
+def client_a(_app_session_factory, auth_a_id, _seed_test_data):
+    """AsyncClient autenticado como usuario A, contra `app_user` con RLS activo."""
+    app.dependency_overrides[get_current_profile] = _make_profile_override_from_db(
+        auth_a_id
     )
-    app.dependency_overrides[get_db] = _make_db_override(_session_factory)
+    app.dependency_overrides[get_db] = _make_rls_db_override(
+        auth_a_id, _app_session_factory
+    )
     yield app
     app.dependency_overrides.pop(get_current_profile, None)
     app.dependency_overrides.pop(get_db, None)
 
 
 @pytest.fixture
-def client_b(_session_factory, _seed_test_data):
-    """AsyncClient autenticado como usuario B."""
-    app.dependency_overrides[get_current_profile] = _make_auth_override(
-        _PROFILE_B_ID, _session_factory
+def client_b(_app_session_factory, auth_b_id, _seed_test_data):
+    """AsyncClient autenticado como usuario B, contra `app_user` con RLS activo."""
+    app.dependency_overrides[get_current_profile] = _make_profile_override_from_db(
+        auth_b_id
     )
-    app.dependency_overrides[get_db] = _make_db_override(_session_factory)
+    app.dependency_overrides[get_db] = _make_rls_db_override(
+        auth_b_id, _app_session_factory
+    )
     yield app
     app.dependency_overrides.pop(get_current_profile, None)
     app.dependency_overrides.pop(get_db, None)
 
 
 @pytest.fixture
-def app_db_only(_session_factory, _seed_test_data):
-    """App con SOLO get_db overrideado.
+def app_db_only(_app_session_factory, _seed_test_data):
+    """App con SOLO get_db overrideado, contra `app_user` con RLS activo.
 
     A diferencia de client_a/client_b, NO sobreescribe get_current_profile: la
-    validación real del JWT (ES256 + JWKS) se ejecuta. Se usa para probar el
-    camino completo de autenticación con un token válido contra datos de test.
+    validación real del JWT (ES256 + JWKS) se ejecuta, y el propio
+    get_current_profile real hace su set_config sobre esta misma sesión — no
+    hace falta el override especial de get_db con set_config incluido.
     """
-    app.dependency_overrides[get_db] = _make_db_override(_session_factory)
+    app.dependency_overrides[get_db] = _make_db_override(_app_session_factory)
     yield app
     app.dependency_overrides.pop(get_db, None)

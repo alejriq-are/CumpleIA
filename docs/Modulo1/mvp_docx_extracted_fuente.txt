@@ -1,0 +1,135 @@
+ESPECIFICACIÓN TÉCNICA DEL MVP
+Arquitectura y funcionalidades
+CumpleIA · Sprint de adecuación Ley 21.719
+Stack tecnológico · modelo de datos · orquestación de IA · detalle por módulo
+Preparado para Alicia · Julio 2026
+Contenido
+1. Supuestos y principios de diseño
+El MVP se diseña para el escenario real del proyecto: un equipo pequeño, presupuesto acotado y necesidad de llegar a diciembre de 2026. Por eso la arquitectura prioriza velocidad de construcción, bajo costo operacional y capacidad de escalar después, evitando complejidad prematura.
+Monolito modular, no microservicios. Un solo backend con módulos de límites claros. Más barato, más rápido de construir y depurar; se puede descomponer más adelante si el volumen lo exige.
+Multi-tenant desde el día uno. Una sola instancia atiende a todas las empresas, con aislamiento lógico por organización (identificador de tenant en cada tabla + Row-Level Security en PostgreSQL).
+IA con anclaje (RAG), nunca generación libre. Todo texto legal se genera a partir de plantillas + recuperación del texto de la ley y la guía CCS, con revisión humana antes de dar por válido un documento.
+La evidencia es sagrada. Todo lo que el sistema genera o el usuario aprueba queda registrado de forma inmutable, con sello de tiempo, para sostener el principio de responsabilidad demostrable.
+Servicios gestionados donde convenga. Autenticación, pagos y correo se delegan a proveedores probados para no reinventar y reducir superficie de riesgo.
+2. Vista general de la arquitectura
+La solución se organiza en capas: cliente web, backend de aplicación con los cinco módulos, una capa de IA (LLM + RAG), procesamiento asíncrono, capa de datos y servicios transversales.
+3. Stack tecnológico por capa
+4. Modelo de datos (entidades principales)
+Todas las tablas llevan un identificador de organización (tenant) y campos de auditoría (creado/modificado por y cuándo). Entidades centrales:
+5. Orquestación de IA y RAG
+La IA no inventa: recupera el fragmento pertinente de la Ley 21.719 y la guía CCS, y produce salidas estructuradas que el sistema valida contra reglas y plantillas.
+Pipeline de RAG
+Ingesta: el texto de la Ley 21.719, la guía CCS y las plantillas se dividen en fragmentos y se convierten en embeddings almacenados en pgvector.
+Recuperación: ante cada tarea (clasificar una base de licitud, redactar una política), el sistema busca los fragmentos legales más relevantes.
+Generación con contexto: se arma el prompt con el fragmento recuperado + los datos de la empresa + la plantilla, y el LLM produce el resultado.
+Salida estructurada: para clasificaciones (base de licitud, nivel de riesgo, detección de dato sensible) se usa tool calling con esquema JSON, de modo que la respuesta sea un dato validable, no texto libre.
+Validación y cita: cada resultado incluye la referencia al artículo o sección que lo sustenta; el sistema marca la confianza y exige revisión humana antes de aprobar.
+Guardarraíles
+Plantillas legales como andamiaje: el LLM completa y adapta, no redacta desde cero un documento legal.
+Revisión humana obligatoria (‘aprobar’) antes de que un documento pase de borrador a evidencia.
+Registro de la versión del modelo, del prompt y de las fuentes usadas, por trazabilidad.
+6. Funcionalidades detalladas por módulo
+  Módulo 1 · Autodiagnóstico inteligente
+Qué hace
+Asistente de onboarding con las 10 secciones del cuestionario CCS (gobernanza, inventario, bases de licitud, transparencia, ARSOP-B, seguridad, incidentes, proveedores, capacitación, evidencia); ~45 preguntas con respuesta Sí / Parcial / No / N-A.
+Lógica adaptativa: ajusta y omite preguntas según rubro y tamaño de la empresa.
+Motor de puntaje: cada respuesta pondera un puntaje por sección y un puntaje global de madurez (0–100 o niveles).
+Capa de IA: interpreta el contexto libre que agregue el usuario, redacta el informe narrativo y prioriza cada brecha por riesgo (Alto/Medio/Bajo) mapeándola a las 8 obligaciones.
+Entradas y salidas
+Entrada: respuestas del cuestionario + perfil de la empresa. Salida: dashboard con puntajes + Informe de Diagnóstico y Brechas descargable (formato de hallazgos de la CCS: N°, hallazgo, riesgo, acción, responsable, estado).
+Los datos capturados alimentan automáticamente los módulos 2 a 5.
+  Módulo 2 · Asistente de inventario (RAT)
+Qué hace
+Entrevista conversacional guiada por rubro: plantillas de industria (retail, servicios, salud, educación, etc.) que pre-sugieren los tratamientos típicos (‘como retail, probablemente tratas: base de clientes, videovigilancia, RRHH, marketing…’).
+Por cada tratamiento captura: finalidad, categorías de datos, tipo de titulares (clientes/trabajadores/proveedores), sistemas y plataformas, destinatarios/terceros y plazo de conservación.
+IA — detección de datos sensibles: marca automáticamente salud, biométricos, situación socioeconómica, etc., a partir de la descripción.
+IA — detección de transferencias internacionales: infiere, desde la lista de SaaS/proveedores, cuáles almacenan datos fuera de Chile y lo señala.
+IA — sugerencia de tratamientos faltantes según el rubro, para que no se escape ninguno.
+Salidas
+Inventario / Registro de Actividades de Tratamiento (RAT) editable, mapa de datos y listado de sistemas; exportable. Es la base de los módulos 3 y 4.
+  Módulo 3 · Motor de bases de licitud
+Qué hace
+Para cada tratamiento del RAT, la IA sugiere una base de licitud (consentimiento, ejecución de contrato, obligación legal o interés legítimo) con su justificación y un nivel de confianza.
+Marca los tratamientos que requieren consentimiento, y exige consentimiento reforzado cuando hay datos sensibles.
+Genera el borrador del Análisis de Interés Legítimo (LIA) cuando se elige esa base: test de finalidad, test de necesidad y test de ponderación.
+Flujo de revisión y aprobación humana por tratamiento.
+Salidas
+Matriz de bases de licitud y borradores de LIA, listos para la carpeta de evidencia.
+  Módulo 4 · Generador de documentos
+Qué hace
+Genera, a partir del RAT + bases de licitud + perfil de la empresa, los documentos base: Política de Protección de Datos, Política de Privacidad, Política de Conservación y Eliminación, Política de Seguridad, más los procedimientos ARSOP-B y de Gestión de Incidentes.
+Personalización real: usa los tratamientos, sistemas, canales de contacto y responsable concretos de la empresa, no un texto genérico.
+Versionado y regeneración: si cambia el RAT, avisa y permite regenerar los documentos afectados.
+Salidas
+Documentos en Word y PDF, editables y con la marca de la empresa; cada versión aprobada se sella en la carpeta de evidencia.
+  Módulo 5 · Carpeta de evidencia + exportación
+Qué hace
+Repositorio central de todo lo generado y aprobado: diagnóstico, RAT, matrices, políticas, procedimientos y aprobaciones.
+Integridad: cada artefacto se registra como un evento inmutable con sello de tiempo y hash encadenado (cada evento guarda el hash del anterior), y una copia versionada en storage con Object Lock (WORM).
+Permite subir evidencia adicional (registros de capacitación, contratos, DPA).
+Bitácora de auditoría: quién hizo qué y cuándo.
+Salidas
+Exportación del ‘Expediente de Cumplimiento’: un paquete (ZIP/PDF) estructurado con índice y un manifiesto de integridad, listo para presentar ante una fiscalización de la Agencia.
+7. Seguridad, integridad y cumplimiento propio
+Un producto de protección de datos debe ser ejemplo de protección de datos; esto es también argumento de venta.
+Aislamiento multi-tenant por identificador de organización + Row-Level Security en PostgreSQL.
+Cifrado en tránsito (TLS) y en reposo (base de datos y storage).
+Control de acceso por roles (RBAC) y principio de mínimo privilegio; MFA vía el proveedor de autenticación.
+Gestor de secretos para claves y credenciales; nunca en el código.
+Inmutabilidad de la evidencia con hash encadenado + Object Lock; opcionalmente sellado de tiempo confiable (RFC 3161).
+Residencia de datos en región LATAM y contrato de tratamiento con los proveedores de infraestructura (el propio producto cumple la ley).
+Respaldos periódicos y plan de recuperación.
+8. Infraestructura y costo operacional aproximado
+Con servicios gestionados y un monolito, el costo de infraestructura del MVP es bajo y crece con el uso. Órdenes de magnitud referenciales (mensuales, en fase temprana):
+Clave económica: el costo dominante y variable es la API del LLM. Se controla acotando el contexto con RAG, cacheando resultados, usando modelos más económicos para tareas simples (clasificación) y reservando el modelo mayor para redacción. Esto mantiene el margen incluso en el plan Micro de bajo precio.
+9. Fases de construcción sugeridas
+Fase 0 — Cimientos (semanas 1–2): repositorio, autenticación, multi-tenant, modelo de datos base, CI/CD, ingesta de la base de conocimiento (ley + guía CCS) para RAG.
+Fase 1 — Diagnóstico (semanas 3–4): cuestionario, motor de puntaje e informe de brechas. Es el gancho freemium; se puede lanzar solo.
+Fase 2 — RAT + bases de licitud (semanas 5–7): asistente de inventario con IA y motor de bases de licitud.
+Fase 3 — Generador de documentos (semanas 8–9): plantillas, personalización y export Word/PDF.
+Fase 4 — Carpeta de evidencia (semanas 10–11): repositorio, bitácora inmutable y exportación del expediente.
+Fase 5 — Pagos, pulido y beta (semana 12): suscripción, onboarding y beta con PYMEs reales.
+Es un plan orientativo; con un equipo de 1–2 desarrolladores full-stack + apoyo puntual de IA, un MVP funcional es alcanzable en ese orden de magnitud.
+10. Riesgos técnicos y mitigaciones
+Documento técnico de trabajo con fines referenciales. El stack y las estimaciones son recomendaciones iniciales y deben ajustarse al equipo, presupuesto y decisiones de producto. Los costos son órdenes de magnitud a julio de 2026.
+--- TABLE ---
+Capa | Tecnología | Por qué
+Frontend | Next.js + React + TypeScript + Tailwind | SSR para SEO/captación y SPA para la app; TypeScript reduce errores; Tailwind acelera la UI.
+Backend / API | Python 3.12 + FastAPI + Pydantic | Mejor ecosistema para orquestar IA y procesar datos; FastAPI es rápido y tipado. (Alternativa válida: Node/NestJS si el equipo es JS.)
+IA / LLM | Claude API + orquestación (LangChain o LlamaIndex) + tool calling | Salidas estructuradas vía JSON schema para clasificaciones fiables; RAG para anclar en la norma.
+Búsqueda semántica | pgvector (extensión de PostgreSQL) | Un solo motor para datos y embeddings; menos piezas que mantener que un vector store aparte.
+Base de datos | PostgreSQL 16 (con Row-Level Security) | Robusto, transaccional, aislamiento multi-tenant nativo con RLS.
+Almacenamiento | Object storage S3 (versionado / Object Lock WORM) | Guarda documentos y evidencia; el Object Lock impide alterar o borrar (inmutabilidad legal).
+Cola y caché | Redis + Celery | Ejecuta en segundo plano la generación de documentos y las llamadas largas a la IA.
+Generación de documentos | docxtpl / python-docx (Word) + WeasyPrint o LibreOffice headless (PDF) | Plantillas Word rellenadas con datos + export a PDF fiel.
+Autenticación | Clerk / Auth0 / Supabase Auth | SSO, MFA y gestión de usuarios sin construirlo; acelera y es más seguro.
+Pagos | Webpay (Transbank) vía Flow / Khipu o Mercado Pago | Medios locales; suscripciones indexadas a UF.
+Infra / despliegue | Contenedores (Docker) en PaaS (Render/Railway/Fly) o AWS región São Paulo | PaaS reduce operaciones en el MVP; región LATAM por residencia de datos.
+Observabilidad | Sentry + logs estructurados + métricas | Detección de errores y trazas de auditoría.
+--- TABLE ---
+Entidad | Contenido principal
+Organización (Tenant) | Datos de la empresa, rubro, tamaño, plan contratado, responsable interno designado.
+Usuario / Rol | Usuarios de la organización con roles (administrador, responsable, colaborador, solo lectura).
+Diagnóstico | Respuestas al cuestionario, puntajes por sección y global, fecha.
+Brecha (Hallazgo) | Descripción, nivel de riesgo (Alto/Medio/Bajo), acción correctiva, responsable, estado.
+Tratamiento (RAT) | Finalidad, categorías de datos, tipo de titulares, sistemas, destinatarios, conservación, flag de datos sensibles, flag de transferencia internacional.
+Sistema / Plataforma | Software y SaaS que usa la empresa; ubicación de servidores (para detectar transferencias).
+Proveedor / Encargado | Terceros con acceso a datos; clasificación (encargado/cesión/transferencia).
+Base de licitud + LIA | Base asignada por tratamiento, justificación, y análisis de interés legítimo cuando aplica.
+Documento | Tipo (política/procedimiento), versión, estado (borrador/aprobado), referencia en storage, hash.
+Evento de evidencia | Bitácora append-only: tipo de evento, actor, timestamp, hash del contenido y hash del evento anterior (cadena).
+Base de conocimiento | Fragmentos del texto legal, guía CCS y plantillas, con sus embeddings para RAG.
+--- TABLE ---
+Componente | Rango aprox. | Nota
+Hosting backend + workers | US$25–100 | PaaS por contenedor; escala con el tráfico.
+PostgreSQL gestionado | US$20–80 | Incluye pgvector.
+Object storage | US$5–30 | Documentos y evidencia; crece lento.
+API de LLM (Claude) | Por uso | Costo por tokens; se controla con caché y RAG acotado. Principal variable a monitorear.
+Auth + pagos + Sentry | US$0–75 | Planes con capa gratuita al inicio.
+--- TABLE ---
+Riesgo | Mitigación
+Alucinación de la IA en textos legales | RAG + plantillas + salidas estructuradas + revisión humana obligatoria; citar la fuente legal.
+Costo del LLM se dispara con el uso | Caché, contexto acotado, modelos económicos para tareas simples, límites por plan.
+La norma cambia (reglamentos de la Agencia) | Base de conocimiento y plantillas versionadas y actualizables sin tocar el código.
+Fuga o mezcla de datos entre tenants | Row-Level Security, pruebas automáticas de aislamiento, revisión de accesos.
+Cuestionamiento de la integridad de la evidencia | Hash encadenado + Object Lock + sello de tiempo confiable; manifiesto verificable.

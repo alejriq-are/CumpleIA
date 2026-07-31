@@ -25,14 +25,23 @@ from app.db.models import (
 )
 from app.db.session import get_db
 from app.main import app
+from tests.conftest import _make_profile_override_from_db, _make_rls_db_override
 
 _SUPERADMIN_PROFILE_ID = uuid.uuid4()
 _SUPERADMIN_AUTH_ID = uuid.uuid4()
 
 
 @pytest_asyncio.fixture
-async def superadmin_client(_session_factory):
-    """AsyncClient autenticado como un perfil con is_superadmin=True."""
+async def superadmin_client(_session_factory, _app_session_factory):
+    """AsyncClient autenticado como un perfil con is_superadmin=True.
+
+    Corre contra `app_user` con RLS activo (mismas fixtures que client_a/
+    client_b en conftest.py) para que la política `..._insert WITH CHECK
+    (is_superadmin())` de la migración 0002 se ejerza de verdad, no solo el
+    guard de FastAPI (`require_superadmin` en app/core/deps.py). El alta y
+    baja del perfil de test sí usan el rol admin (`_session_factory`): es
+    setup/teardown de fixture, no la sesión que sirve el request bajo prueba.
+    """
     async with _session_factory() as session:
         session.add(
             Profile(
@@ -44,21 +53,12 @@ async def superadmin_client(_session_factory):
         )
         await session.commit()
 
-    async def _override_profile():
-        async with _session_factory() as session:
-            return await session.get(Profile, _SUPERADMIN_PROFILE_ID)
-
-    async def _override_db():
-        async with _session_factory() as session:
-            try:
-                yield session
-                await session.commit()
-            except Exception:
-                await session.rollback()
-                raise
-
-    app.dependency_overrides[get_current_profile] = _override_profile
-    app.dependency_overrides[get_db] = _override_db
+    app.dependency_overrides[get_current_profile] = _make_profile_override_from_db(
+        _SUPERADMIN_AUTH_ID
+    )
+    app.dependency_overrides[get_db] = _make_rls_db_override(
+        _SUPERADMIN_AUTH_ID, _app_session_factory
+    )
     yield app
     app.dependency_overrides.pop(get_current_profile, None)
     app.dependency_overrides.pop(get_db, None)
