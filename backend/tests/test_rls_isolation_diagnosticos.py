@@ -4,13 +4,14 @@ Paso 5 del prompt de docs/Modulo1/PROMPT_modulo1_cuestionario.md: confirmar que
 las tablas tenant-scoped del cuestionario (`diagnostics`/`diagnostic_answers`
 en el esquema real — el prompt las menciona como `autodiagnosticos`/
 `autodiagnostico_respuestas`, ver comentario de la migración 0002) siguen
-aislando por organización como en Fase 0.
+aislando por organización como en Fase 0. Extendido en Fase 1/Módulo 1/Tarea 1
+(Paso 1.3) para cubrir también `findings` (el modelo "Brecha" del plan).
 
 Mismo patrón que test_rls_isolation.py: habla directo con Postgres usando el
 rol restringido `app_user` (APP_DATABASE_URL, sin BYPASSRLS), sin pasar por
 FastAPI. Las políticas (`tenant_isolation_select`/`tenant_isolation_modify`)
 ya existen desde la migración 0001 — este archivo es el que faltaba para
-probarlas contra estas dos tablas específicas, no solo dejarlas cubiertas
+probarlas contra estas tablas específicas, no solo dejarlas cubiertas
 "por generalización" del bucle que las crea.
 """
 
@@ -24,7 +25,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlalchemy.pool import NullPool
 
 from app.core.config import get_settings
-from app.db.models import ConfigVersion, Diagnostic, DiagnosticAnswer
+from app.db.models import ConfigVersion, Diagnostic, DiagnosticAnswer, Finding
 
 settings = get_settings()
 
@@ -176,3 +177,75 @@ async def test_rls_permite_insert_de_respuesta_propia(
     row = result.first()
     assert row is not None
     assert row[0] == "Sí"
+
+
+# ── findings (Brecha) ─────────────────────────────────────────────────────────
+
+
+@pytest_asyncio.fixture
+async def hallazgo_org_a(_session_factory, org_a_id, diagnostico_org_a):
+    """Crea un Finding ("Brecha") de la organización A con el rol admin (sin
+    RLS), colgado del diagnóstico de `diagnostico_org_a`, y lo limpia al final.
+    """
+    async with _session_factory() as session:
+        finding_id = uuid.uuid4()
+        session.add(
+            Finding(
+                id=finding_id,
+                organization_id=org_a_id,
+                diagnostic_id=diagnostico_org_a,
+                description="Falta designar responsable de protección de datos.",
+                risk="alto",
+            )
+        )
+        await session.commit()
+
+    yield finding_id
+
+    async with _session_factory() as session:
+        await session.execute(delete(Finding).where(Finding.id == finding_id))
+        await session.commit()
+
+
+@pytest.mark.asyncio
+async def test_rls_permite_lectura_directa_de_findings_propios(
+    app_role_session, auth_a_id, org_a_id, hallazgo_org_a
+):
+    """Usuario A, consultando directo con SQL, ve el hallazgo de su org."""
+    await _set_auth_user(app_role_session, auth_a_id)
+    result = await app_role_session.execute(
+        text("SELECT id FROM findings WHERE organization_id = :org_id"),
+        {"org_id": str(org_a_id)},
+    )
+    assert result.first() is not None
+
+
+@pytest.mark.asyncio
+async def test_rls_bloquea_lectura_directa_de_findings_ajenos(
+    app_role_session, auth_b_id, org_a_id, hallazgo_org_a
+):
+    """El usuario B no ve el hallazgo de la organización A, aunque el SQL no
+    filtre por organization_id del lado de la app."""
+    await _set_auth_user(app_role_session, auth_b_id)
+    result = await app_role_session.execute(
+        text("SELECT id FROM findings WHERE organization_id = :org_id"),
+        {"org_id": str(org_a_id)},
+    )
+    assert result.first() is None
+
+
+@pytest.mark.asyncio
+async def test_rls_bloquea_insert_de_finding_en_organizacion_ajena(
+    app_role_session, auth_b_id, org_a_id
+):
+    """Usuario B no puede crear un hallazgo bajo la organización A."""
+    await _set_auth_user(app_role_session, auth_b_id)
+
+    with pytest.raises(DBAPIError, match="row-level security"):
+        await app_role_session.execute(
+            text(
+                "INSERT INTO findings (organization_id, description, risk) "
+                "VALUES (:org_id, 'Hallazgo ajeno', 'alto')"
+            ),
+            {"org_id": str(org_a_id)},
+        )
