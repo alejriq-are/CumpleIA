@@ -1,6 +1,6 @@
 import enum
 import uuid
-from datetime import datetime
+from datetime import date, datetime
 
 import sqlalchemy as sa
 from pgvector.sqlalchemy import Vector
@@ -332,10 +332,17 @@ class Diagnostic(Base):
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid()
     )
+    # UNIQUE (Tarea 3): "diagnóstico vigente" es get-or-create, no historial —
+    # a lo sumo un Diagnostic por organización. Ver
+    # app/services/diagnostico.py::obtener_o_crear_diagnostico_vigente
+    # (patrón insert-then-select, igual que el aprovisionamiento JIT de
+    # Profile en app/core/deps.py, para que sea seguro ante dos guardados
+    # concurrentes).
     organization_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("organizations.id", ondelete="CASCADE"),
         nullable=False,
+        unique=True,
     )
     # FK a la versión de config (pesos/riesgo) vigente cuando se generó, para
     # que el informe sea reproducible aunque el admin ajuste valores después.
@@ -403,6 +410,13 @@ class DiagnosticAnswer(Base):
 
 class Finding(Base):
     __tablename__ = "findings"
+    __table_args__ = (
+        UniqueConstraint(
+            "diagnostic_id",
+            "pregunta_id",
+            name="uq_findings_diagnostic_id_pregunta_id",
+        ),
+    )
 
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid()
@@ -416,6 +430,14 @@ class Finding(Base):
         UUID(as_uuid=True),
         ForeignKey("diagnostics.id", ondelete="SET NULL"),
         nullable=True,
+    )
+    # Pregunta que originó la brecha (Fase 1, Módulo 1, Tarea 3): permite que
+    # app/services/diagnostico.py sincronice (abra/cierre) el Finding de cada
+    # recálculo por identidad, no por comparar el texto libre de description.
+    # Nula para hallazgos que no vengan del motor de puntaje (p. ej. RAT,
+    # módulos futuros).
+    pregunta_id: Mapped[str | None] = mapped_column(
+        Text, ForeignKey("preguntas.id"), nullable=True
     )
     description: Mapped[str] = mapped_column(Text, nullable=False)
     risk: Mapped[RiskLevel] = mapped_column(
@@ -433,6 +455,58 @@ class Finding(Base):
     )
     updated_at: Mapped[datetime] = mapped_column(
         sa.TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
+    )
+
+
+class ReferenceDocument(Base):
+    """Documento de referencia (ADR 0002, capa 3): la organización enlaza su
+    propia política de gobernanza para justificar cómo resuelve una brecha,
+    en vez de que CumpleIA fije plazos de cumplimiento propios sin respaldo
+    normativo. Hoy solo se usa `tipo='politica_interna_gobernanza'` (tabla
+    tenant-scoped); `instructivo_agencia` es de dominio, pero poblarlo como
+    catálogo global (sin organization_id, análogo a `Obligacion`/`Seccion`/
+    `Pregunta`) es trabajo futuro, no de esta tabla — ver ADR 0002.
+    """
+
+    __tablename__ = "reference_documents"
+    __table_args__ = (
+        CheckConstraint(
+            "tipo IN ('politica_interna_gobernanza', 'instructivo_agencia')",
+            name="tipo_valido",
+        ),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid()
+    )
+    organization_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("organizations.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    tipo: Mapped[str] = mapped_column(Text, nullable=False)
+    titulo: Mapped[str] = mapped_column(Text, nullable=False)
+    fecha: Mapped[date | None] = mapped_column(sa.Date, nullable=True)
+    url: Mapped[str] = mapped_column(Text, nullable=False)
+    finding_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("findings.id", ondelete="SET NULL"), nullable=True
+    )
+    diagnostic_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("diagnostics.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        sa.TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        sa.TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
+    )
+    created_by: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("profiles.id"), nullable=True
+    )
+    updated_by: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("profiles.id"), nullable=True
     )
 
 

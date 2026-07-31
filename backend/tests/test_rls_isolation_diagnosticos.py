@@ -25,7 +25,13 @@ from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlalchemy.pool import NullPool
 
 from app.core.config import get_settings
-from app.db.models import ConfigVersion, Diagnostic, DiagnosticAnswer, Finding
+from app.db.models import (
+    ConfigVersion,
+    Diagnostic,
+    DiagnosticAnswer,
+    Finding,
+    ReferenceDocument,
+)
 
 settings = get_settings()
 
@@ -246,6 +252,82 @@ async def test_rls_bloquea_insert_de_finding_en_organizacion_ajena(
             text(
                 "INSERT INTO findings (organization_id, description, risk) "
                 "VALUES (:org_id, 'Hallazgo ajeno', 'alto')"
+            ),
+            {"org_id": str(org_a_id)},
+        )
+
+
+# ── reference_documents (Tarea 3, ADR 0002 capa 3) ────────────────────────────
+
+
+@pytest_asyncio.fixture
+async def documento_referencia_org_a(_session_factory, org_a_id):
+    """Crea un ReferenceDocument de la organización A con el rol admin (sin
+    RLS), y lo limpia al final — mismo patrón que hallazgo_org_a."""
+    async with _session_factory() as session:
+        documento_id = uuid.uuid4()
+        session.add(
+            ReferenceDocument(
+                id=documento_id,
+                organization_id=org_a_id,
+                tipo="politica_interna_gobernanza",
+                titulo="Política interna de gobernanza de datos",
+                url="https://ejemplo.cl/politica-gobernanza.pdf",
+            )
+        )
+        await session.commit()
+
+    yield documento_id
+
+    async with _session_factory() as session:
+        await session.execute(
+            delete(ReferenceDocument).where(ReferenceDocument.id == documento_id)
+        )
+        await session.commit()
+
+
+@pytest.mark.asyncio
+async def test_rls_permite_lectura_directa_de_reference_documents_propios(
+    app_role_session, auth_a_id, org_a_id, documento_referencia_org_a
+):
+    """Usuario A, consultando directo con SQL, ve su propio documento de
+    referencia."""
+    await _set_auth_user(app_role_session, auth_a_id)
+    result = await app_role_session.execute(
+        text("SELECT id FROM reference_documents WHERE organization_id = :org_id"),
+        {"org_id": str(org_a_id)},
+    )
+    assert result.first() is not None
+
+
+@pytest.mark.asyncio
+async def test_rls_bloquea_lectura_directa_de_reference_documents_ajenos(
+    app_role_session, auth_b_id, org_a_id, documento_referencia_org_a
+):
+    """El usuario B no ve el documento de referencia de la organización A."""
+    await _set_auth_user(app_role_session, auth_b_id)
+    result = await app_role_session.execute(
+        text("SELECT id FROM reference_documents WHERE organization_id = :org_id"),
+        {"org_id": str(org_a_id)},
+    )
+    assert result.first() is None
+
+
+@pytest.mark.asyncio
+async def test_rls_bloquea_insert_de_reference_document_en_organizacion_ajena(
+    app_role_session, auth_b_id, org_a_id
+):
+    """Usuario B no puede vincular un documento de referencia bajo la
+    organización A."""
+    await _set_auth_user(app_role_session, auth_b_id)
+
+    with pytest.raises(DBAPIError, match="row-level security"):
+        await app_role_session.execute(
+            text(
+                "INSERT INTO reference_documents "
+                "(organization_id, tipo, titulo, url) "
+                "VALUES (:org_id, 'politica_interna_gobernanza', "
+                "'Documento ajeno', 'https://ejemplo.cl/ajeno.pdf')"
             ),
             {"org_id": str(org_a_id)},
         )

@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 
 from app.api.cuestionario_config import router as cuestionario_config_router
+from app.api.diagnostico import router as diagnostico_router
 from app.api.health import router as health_router
 from app.api.me import router as me_router
 from app.api.organizations import router as organizations_router
@@ -12,3 +13,4 @@ api_router.include_router(me_router)
 api_router.include_router(organizations_router)
 api_router.include_router(rag_router)
 api_router.include_router(cuestionario_config_router)
+api_router.include_router(diagnostico_router)
