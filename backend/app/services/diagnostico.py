@@ -36,11 +36,13 @@ from app.services.diagnostico_puntaje import (
     detectar_brechas,
 )
 
+RESPUESTAS_VALIDAS = {"Sí", "Parcial", "No", "N/A"}
+
 
 @dataclass(frozen=True)
 class RespuestaGuardar:
     pregunta_id: str
-    answer: str  # 'Sí' | 'Parcial' | 'No' | 'N/A' — ya validado por el schema Pydantic del router
+    answer: str  # 'Sí' | 'Parcial' | 'No' | 'N/A'
     notes: str | None = None
 
 
@@ -89,12 +91,25 @@ async def guardar_respuestas(
 ) -> None:
     """Upsert de DiagnosticAnswer por (diagnostic_id, pregunta_id).
 
-    Valida ANTES de escribir que todo pregunta_id exista en el catálogo
-    (mismo estilo fail-fast que validar_guardado en cuestionario_config.py):
-    un pregunta_id inventado no debe crear una respuesta huérfana.
+    Valida ANTES de escribir que todo pregunta_id exista en el catálogo y que
+    todo answer esté en el dominio permitido (mismo estilo fail-fast que
+    validar_guardado en cuestionario_config.py): un valor inválido no debe
+    crear una respuesta huérfana ni depender de que el CHECK de la base
+    aborte con un error crudo — el router ya restringe `answer` con un
+    Literal de Pydantic, pero esta función es el servicio reusable, no solo
+    su único llamador actual.
     """
     if not respuestas:
         return
+
+    answers_invalidas = sorted(
+        {r.answer for r in respuestas if r.answer not in RESPUESTAS_VALIDAS}
+    )
+    if answers_invalidas:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Respuestas fuera del dominio permitido: {answers_invalidas}",
+        )
 
     pregunta_ids_catalogo = set((await db.execute(select(Pregunta.id))).scalars().all())
     desconocidas = sorted({r.pregunta_id for r in respuestas} - pregunta_ids_catalogo)
