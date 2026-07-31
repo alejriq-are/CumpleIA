@@ -30,6 +30,18 @@ class UserRole(str, enum.Enum):
     viewer = "viewer"
 
 
+class SubscriptionCommitmentType(str, enum.Enum):
+    monthly = "monthly"
+    annual_commitment_monthly_billing = "annual_commitment_monthly_billing"
+
+
+class SubscriptionStatus(str, enum.Enum):
+    active = "active"
+    grace = "grace"
+    suspended = "suspended"
+    cancelled = "cancelled"
+
+
 class RiskLevel(str, enum.Enum):
     alto = "alto"
     medio = "medio"
@@ -152,6 +164,55 @@ class Membership(Base):
 
     organization: Mapped["Organization"] = relationship(back_populates="memberships")
     profile: Mapped["Profile"] = relationship(back_populates="memberships")
+
+
+# ── Suscripción (vigencia de acceso por organización) ────────────────────────
+# Ver docs/adr/0001-modelo-organizaciones-roles-suscripcion.md. Una fila por
+# organización (organization_id UNIQUE); todas nacen 'active' porque el
+# cálculo real de facturación todavía no existe (ver
+# app/services/subscriptions.py).
+
+
+class Subscription(Base):
+    __tablename__ = "subscriptions"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid()
+    )
+    organization_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("organizations.id", ondelete="CASCADE"),
+        nullable=False,
+        unique=True,
+    )
+    commitment_type: Mapped[SubscriptionCommitmentType] = mapped_column(
+        sa.Enum(
+            SubscriptionCommitmentType,
+            name="subscription_commitment_type",
+            create_type=False,
+        ),
+        nullable=False,
+    )
+    status: Mapped[SubscriptionStatus] = mapped_column(
+        sa.Enum(SubscriptionStatus, name="subscription_status", create_type=False),
+        nullable=False,
+        server_default="active",
+    )
+    grace_until: Mapped[datetime | None] = mapped_column(
+        sa.TIMESTAMP(timezone=True), nullable=True
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        sa.TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        sa.TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
+    )
+    created_by: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("profiles.id"), nullable=True
+    )
+    updated_by: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("profiles.id"), nullable=True
+    )
 
 
 # ── Módulo 1 — Cuestionario: contenido fijo (fuente CCS, global, sin RLS) ────

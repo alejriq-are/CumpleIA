@@ -12,7 +12,15 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from app.core.config import get_settings
-from app.db.models import Membership, Organization, Profile, UserRole
+from app.db.models import (
+    Membership,
+    Organization,
+    Profile,
+    Subscription,
+    SubscriptionCommitmentType,
+    SubscriptionStatus,
+    UserRole,
+)
 
 settings = get_settings()
 
@@ -65,6 +73,16 @@ async def seed() -> None:
             role=UserRole.owner,
         )
         session.add(membership)
+
+        subscription = Subscription(
+            organization_id=org.id,
+            commitment_type=SubscriptionCommitmentType.monthly,
+            status=SubscriptionStatus.active,
+            created_by=profile.id,
+            updated_by=profile.id,
+        )
+        session.add(subscription)
+
         await session.commit()
 
     print("Seed creado correctamente.")

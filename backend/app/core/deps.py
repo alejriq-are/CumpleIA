@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.security import extract_auth_identity
 from app.db.models import Membership, Profile
 from app.db.session import get_db
+from app.services.authorization import Permission, has_permission
 
 # auto_error=False: si falta el header Authorization NO lanzamos 403 automático;
 # lo gestionamos abajo para devolver 401 (semántica HTTP correcta).
@@ -113,6 +114,37 @@ async def get_org_membership(
             detail="Sin acceso a esta organización",
         )
     return membership
+
+
+def require_permission(permission: Permission):
+    """Factory de dependencia: exige `permission` sobre la organización del
+    header X-Organization-Id (nunca se confía en el cliente más allá del
+    propio header, igual que `get_org_membership`).
+
+    A diferencia de encadenar `get_org_membership`, delega en
+    `has_permission` (app/services/authorization.py) directamente: un
+    superadmin tiene el permiso sobre CUALQUIER organización aunque no sea
+    miembro de ella (ver ADR 0001), y `get_org_membership` por sí solo
+    bloquearía ese caso con 403 antes de llegar a chequear el permiso.
+
+    Pensada para que la futura API de Autodiagnóstico (Fase 1/Módulo 1,
+    Tarea 3) la use como `Depends(require_permission(Permission.edit_content))`
+    sin tener que volver a tocar este módulo.
+    """
+
+    async def _dependency(
+        x_organization_id: Annotated[uuid.UUID, Header()],
+        current_profile: Profile = Depends(get_current_profile),
+        db: AsyncSession = Depends(get_db),
+    ) -> Profile:
+        if not await has_permission(db, current_profile, permission, x_organization_id):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Permiso insuficiente en esta organización",
+            )
+        return current_profile
+
+    return _dependency
 
 
 # Tipos anotados para inyección en endpoints
