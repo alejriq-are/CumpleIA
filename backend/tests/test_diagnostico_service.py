@@ -139,6 +139,48 @@ async def test_guardar_respuestas_rechaza_pregunta_desconocida_sin_escribir_nada
 
 
 @pytest.mark.asyncio
+async def test_guardar_respuestas_rechaza_answer_fuera_de_dominio_sin_escribir_nada(
+    _session_factory, diagnostico_org_a
+):
+    """El servicio no debe confiar únicamente en el Literal de Pydantic del
+    router: un llamador que lo invoque directamente con un `answer` fuera de
+    dominio debe recibir un 400 controlado, no un DBAPIError crudo del CHECK
+    de la base."""
+    async with _session_factory() as session:
+        diagnostic = await session.get(Diagnostic, diagnostico_org_a)
+        pregunta_real = (
+            await session.execute(select(Pregunta.id).limit(1))
+        ).scalar_one()
+
+        with pytest.raises(HTTPException) as exc_info:
+            await diagnostico.guardar_respuestas(
+                session,
+                diagnostic,
+                [
+                    diagnostico.RespuestaGuardar(
+                        pregunta_id=pregunta_real, answer="Tal vez"
+                    )
+                ],
+            )
+        assert exc_info.value.status_code == 400
+        await session.rollback()
+
+    async with _session_factory() as session:
+        respuestas = (
+            (
+                await session.execute(
+                    select(DiagnosticAnswer).where(
+                        DiagnosticAnswer.diagnostic_id == diagnostico_org_a
+                    )
+                )
+            )
+            .scalars()
+            .all()
+        )
+    assert respuestas == [], "un answer fuera de dominio no debe escribir nada"
+
+
+@pytest.mark.asyncio
 async def test_recalcular_marca_completado_solo_con_todas_las_preguntas(
     _session_factory, diagnostico_org_a
 ):
