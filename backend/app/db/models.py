@@ -489,7 +489,9 @@ class ReferenceDocument(Base):
     fecha: Mapped[date | None] = mapped_column(sa.Date, nullable=True)
     url: Mapped[str] = mapped_column(Text, nullable=False)
     finding_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("findings.id", ondelete="SET NULL"), nullable=True
+        UUID(as_uuid=True),
+        ForeignKey("findings.id", ondelete="SET NULL"),
+        nullable=True,
     )
     diagnostic_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True),

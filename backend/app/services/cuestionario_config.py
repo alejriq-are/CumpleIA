@@ -188,7 +188,9 @@ async def obtener_config_activa(db: AsyncSession) -> ConfigActiva:
     return await _construir_config(db, version)
 
 
-async def obtener_config_por_id(db: AsyncSession, version_id: uuid.UUID) -> ConfigActiva:
+async def obtener_config_por_id(
+    db: AsyncSession, version_id: uuid.UUID
+) -> ConfigActiva:
     """Config pinneada a una versión histórica, no necesariamente la activa.
 
     Usada por app/services/diagnostico.py para recalcular un diagnóstico

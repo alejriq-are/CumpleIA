@@ -55,7 +55,9 @@ def upgrade() -> None:
     # ── findings.pregunta_id ──────────────────────────────────────────────────
     op.add_column(
         "findings",
-        sa.Column("pregunta_id", sa.Text(), sa.ForeignKey("preguntas.id"), nullable=True),
+        sa.Column(
+            "pregunta_id", sa.Text(), sa.ForeignKey("preguntas.id"), nullable=True
+        ),
     )
     op.create_unique_constraint(
         "uq_findings_diagnostic_id_pregunta_id",
@@ -148,13 +150,11 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    op.execute(
-        "DROP POLICY IF EXISTS tenant_isolation_modify ON reference_documents"
+    op.execute("DROP POLICY IF EXISTS tenant_isolation_modify ON reference_documents")
+    op.execute("DROP POLICY IF EXISTS tenant_isolation_select ON reference_documents")
+    op.drop_index(
+        "ix_reference_documents_organization_id", table_name="reference_documents"
     )
-    op.execute(
-        "DROP POLICY IF EXISTS tenant_isolation_select ON reference_documents"
-    )
-    op.drop_index("ix_reference_documents_organization_id", table_name="reference_documents")
     op.drop_table("reference_documents")
 
     op.drop_constraint(

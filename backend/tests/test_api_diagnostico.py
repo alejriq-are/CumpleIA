@@ -239,10 +239,14 @@ async def test_alternar_respuesta_cierra_hallazgo_sin_borrarlo(client_a, org_a_i
             json={"respuestas": [{"pregunta_id": pregunta_id, "answer": "No"}]},
         )
         hallazgo_id = next(
-            h["id"] for h in abrir.json()["hallazgos"] if h["pregunta_id"] == pregunta_id
+            h["id"]
+            for h in abrir.json()["hallazgos"]
+            if h["pregunta_id"] == pregunta_id
         )
         assert (
-            next(h for h in abrir.json()["hallazgos"] if h["id"] == hallazgo_id)["status"]
+            next(h for h in abrir.json()["hallazgos"] if h["id"] == hallazgo_id)[
+                "status"
+            ]
             == "abierto"
         )
 

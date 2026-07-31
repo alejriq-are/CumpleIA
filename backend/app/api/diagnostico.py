@@ -24,7 +24,10 @@ from app.db.models import Diagnostic, DiagnosticAnswer, Finding, Profile
 from app.db.session import get_db
 from app.services import diagnostico as diagnostico_service
 from app.services.authorization import Permission
-from app.services.cuestionario_config import obtener_config_activa, obtener_config_por_id
+from app.services.cuestionario_config import (
+    obtener_config_activa,
+    obtener_config_por_id,
+)
 
 router = APIRouter(prefix="/diagnostico", tags=["diagnostico"])
 
@@ -133,7 +136,11 @@ async def _construir_actual_out(
         .all()
     )
     hallazgos = (
-        (await db.execute(select(Finding).where(Finding.diagnostic_id == diagnostic.id)))
+        (
+            await db.execute(
+                select(Finding).where(Finding.diagnostic_id == diagnostic.id)
+            )
+        )
         .scalars()
         .all()
     )
@@ -142,7 +149,9 @@ async def _construir_actual_out(
         id=diagnostic.id,
         status=diagnostic.status,
         global_score=(
-            float(diagnostic.global_score) if diagnostic.global_score is not None else None
+            float(diagnostic.global_score)
+            if diagnostic.global_score is not None
+            else None
         ),
         puntaje_por_seccion=[
             PuntajeSeccionOut(
@@ -187,7 +196,9 @@ async def leer_cuestionario(
     return CuestionarioOut(
         opciones_respuesta=list(OPCIONES_RESPUESTA),
         obligaciones=[
-            ObligacionCuestionarioOut(id=o.id, numero_guia=o.numero_guia, nombre=o.nombre)
+            ObligacionCuestionarioOut(
+                id=o.id, numero_guia=o.numero_guia, nombre=o.nombre
+            )
             for o in config.obligaciones
         ],
         secciones=[
@@ -236,7 +247,9 @@ async def leer_diagnostico_actual(
     current_profile: Profile = Depends(require_permission(Permission.view_content)),
     db: AsyncSession = Depends(get_db),
 ) -> DiagnosticoActualOut:
-    diagnostic = await diagnostico_service.obtener_diagnostico_vigente(db, x_organization_id)
+    diagnostic = await diagnostico_service.obtener_diagnostico_vigente(
+        db, x_organization_id
+    )
     if diagnostic is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

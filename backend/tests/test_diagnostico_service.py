@@ -112,7 +112,9 @@ async def test_guardar_respuestas_rechaza_pregunta_desconocida_sin_escribir_nada
                 session,
                 diagnostic,
                 [
-                    diagnostico.RespuestaGuardar(pregunta_id=preguntas_reales, answer="Sí"),
+                    diagnostico.RespuestaGuardar(
+                        pregunta_id=preguntas_reales, answer="Sí"
+                    ),
                     diagnostico.RespuestaGuardar(pregunta_id="NO-EXISTE", answer="No"),
                 ],
             )
@@ -131,7 +133,9 @@ async def test_guardar_respuestas_rechaza_pregunta_desconocida_sin_escribir_nada
             .scalars()
             .all()
         )
-    assert respuestas == [], "un lote con una pregunta inválida no debe escribir ninguna"
+    assert (
+        respuestas == []
+    ), "un lote con una pregunta inválida no debe escribir ninguna"
 
 
 @pytest.mark.asyncio

@@ -17,14 +17,25 @@ from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.models import Diagnostic, DiagnosticAnswer, Finding, FindingStatus, Pregunta, RiskLevel
-from app.services.cuestionario_config import obtener_config_activa, obtener_config_por_id
+from app.db.models import (
+    Diagnostic,
+    DiagnosticAnswer,
+    Finding,
+    FindingStatus,
+    Pregunta,
+    RiskLevel,
+)
+from app.services.cuestionario_config import (
+    obtener_config_activa,
+    obtener_config_por_id,
+)
 from app.services.diagnostico_puntaje import (
     RespuestaInput,
     calcular_puntaje_global,
     calcular_puntaje_por_seccion,
     detectar_brechas,
 )
+
 
 @dataclass(frozen=True)
 class RespuestaGuardar:
@@ -141,13 +152,17 @@ async def recalcular_diagnostico(db: AsyncSession, diagnostic: Diagnostic) -> No
         if a.answer is not None
     ]
 
-    puntaje_por_seccion = calcular_puntaje_por_seccion(respuestas_input, seccion_por_pregunta)
+    puntaje_por_seccion = calcular_puntaje_por_seccion(
+        respuestas_input, seccion_por_pregunta
+    )
     diagnostic.section_scores = puntaje_por_seccion
     diagnostic.global_score = calcular_puntaje_global(
         puntaje_por_seccion, config.peso_por_seccion
     )
     diagnostic.status = (
-        "completado" if len(respuestas_input) >= len(config.preguntas) else "en_progreso"
+        "completado"
+        if len(respuestas_input) >= len(config.preguntas)
+        else "en_progreso"
     )
 
     brechas = detectar_brechas(
@@ -189,5 +204,8 @@ async def recalcular_diagnostico(db: AsyncSession, diagnostic: Diagnostic) -> No
                 existente.status = FindingStatus.abierto
 
     for pregunta_id, hallazgo in hallazgos_existentes.items():
-        if pregunta_id not in detectadas_por_pregunta and hallazgo.status != FindingStatus.cerrado:
+        if (
+            pregunta_id not in detectadas_por_pregunta
+            and hallazgo.status != FindingStatus.cerrado
+        ):
             hallazgo.status = FindingStatus.cerrado
