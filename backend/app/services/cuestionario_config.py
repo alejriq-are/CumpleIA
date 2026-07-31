@@ -185,7 +185,29 @@ async def obtener_config_activa(db: AsyncSession) -> ConfigActiva:
                 "Ejecuta scripts.seed_modulo1_cuestionario."
             ),
         )
+    return await _construir_config(db, version)
 
+
+async def obtener_config_por_id(
+    db: AsyncSession, version_id: uuid.UUID
+) -> ConfigActiva:
+    """Config pinneada a una versión histórica, no necesariamente la activa.
+
+    Usada por app/services/diagnostico.py para recalcular un diagnóstico
+    contra `Diagnostic.config_version_id` — la versión vigente cuando se
+    creó, no la que el superadmin haya publicado después (ver docstring de
+    Diagnostic.config_version_id en app/db/models.py).
+    """
+    version = await db.get(ConfigVersion, version_id)
+    if version is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"No existe la versión de configuración {version_id}.",
+        )
+    return await _construir_config(db, version)
+
+
+async def _construir_config(db: AsyncSession, version: ConfigVersion) -> ConfigActiva:
     creado_por_profile = await db.get(Profile, version.creado_por)
 
     obligaciones = (await db.execute(select(Obligacion))).scalars().all()
