@@ -1,9 +1,15 @@
 """Seed de la configuración versionada del cuestionario de autodiagnóstico (Módulo 1).
 
-Carga docs/Modulo1/cuestionario_autodiagnostico_config.json —fuente de verdad,
-no se inventan valores— en `obligaciones`, `secciones` y `preguntas` (contenido
-fijo, fiel a la guía CCS), y crea `config_versiones` v1 (activa) con sus filas
-de `config_seccion_pesos` y `config_pregunta_riesgo`.
+Carga backend/seed_data/modulo1/cuestionario_autodiagnostico_config.json
+—fuente de verdad, no se inventan valores— en `obligaciones`, `secciones` y
+`preguntas` (contenido fijo, fiel a la guía CCS), y crea `config_versiones` v1
+(activa) con sus filas de `config_seccion_pesos` y `config_pregunta_riesgo`.
+
+El archivo vive dentro de `backend/` (no en `docs/Modulo1/`, donde está el
+resto de la especificación de Módulo 1) porque este script debe poder correr
+dentro del contenedor Docker de producción/dev, cuyo build context es solo
+`backend/` (ver infra/Dockerfile.backend y docker-compose.yml) — `docs/` no
+existe ahí dentro.
 
 Uso:
     cd backend
@@ -41,9 +47,9 @@ from app.db.models import (
 settings = get_settings()
 
 CONFIG_PATH = (
-    Path(__file__).resolve().parent.parent.parent
-    / "docs"
-    / "Modulo1"
+    Path(__file__).resolve().parent.parent
+    / "seed_data"
+    / "modulo1"
     / "cuestionario_autodiagnostico_config.json"
 )
 
