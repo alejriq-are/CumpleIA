@@ -348,3 +348,55 @@ async def test_informe_200_con_diagnostico_completado_y_reflejado_en_actual(
             )
         ).json()
         assert actual["informe"]["resumen_ejecutivo"] == "Resumen mock."
+
+
+@pytest.mark.asyncio
+async def test_reabrir_respuestas_invalida_el_informe_ya_generado(
+    client_a, org_a_id, monkeypatch
+):
+    """Fix de la revisión del PR #13 (hallazgo #2), a nivel de API: tras
+    generar un informe, volver a guardar respuestas debe dejar `informe`
+    en null en vez de mostrar uno desactualizado en silencio."""
+
+    async def _fake_generar_informe(db, diagnostic):
+        diagnostic.informe_ia = {"resumen_ejecutivo": "Resumen mock.", "narrativas": []}
+        diagnostic.informe_generado_en = datetime.now(UTC)
+        return diagnostic.informe_ia
+
+    monkeypatch.setattr(
+        diagnostico_api.diagnostico_ia, "generar_informe", _fake_generar_informe
+    )
+
+    async with AsyncClient(
+        transport=ASGITransport(app=client_a), base_url="http://test"
+    ) as client:
+        cuestionario = (
+            await client.get(
+                "/diagnostico/cuestionario",
+                headers={"X-Organization-Id": str(org_a_id)},
+            )
+        ).json()
+        pregunta_ids = [p["id"] for p in cuestionario["preguntas"]]
+        respuestas = [{"pregunta_id": pid, "answer": "Sí"} for pid in pregunta_ids]
+        await client.post(
+            "/diagnostico/respuestas",
+            headers={"X-Organization-Id": str(org_a_id)},
+            json={"respuestas": respuestas},
+        )
+        await client.post(
+            "/diagnostico/informe", headers={"X-Organization-Id": str(org_a_id)}
+        )
+
+        reabrir = await client.post(
+            "/diagnostico/respuestas",
+            headers={"X-Organization-Id": str(org_a_id)},
+            json={"respuestas": [{"pregunta_id": pregunta_ids[0], "answer": "No"}]},
+        )
+        assert reabrir.json()["informe"] is None
+
+        actual = (
+            await client.get(
+                "/diagnostico/actual", headers={"X-Organization-Id": str(org_a_id)}
+            )
+        ).json()
+        assert actual["informe"] is None

@@ -57,3 +57,10 @@ Guardarraíl verificado con una llamada real (no solo mockeada): cualquier cita 
 - [ ] **Regeneración sin versionado:** cada `POST /diagnostico/informe` sobrescribe `informe_ia` — no hay historial de versiones del informe. Aceptable para el MVP ("simple, económico"); revisar si se necesita conservar informes anteriores cuando exista carpeta de evidencia (Módulo 5).
 - [ ] **Costo/latencia de RAG por informe:** hoy se hace una sola consulta de retrieval agregada (no una por hallazgo) — correcto para costo, pero no se ha medido con diagnósticos de muchas brechas simultáneas (hasta 50). Revisar si `top_k=12` sigue siendo suficiente/necesario a esa escala.
 - [ ] **Capa 3 del ADR 0002 (`reference_documents`)** sigue sin endpoint de carga (ver sección de Tarea 3 arriba) — el informe de la Tarea 4 no los referencia todavía porque no hay ninguno cargado.
+
+### Deuda técnica menor detectada en la revisión del PR #13 (no bloqueante)
+
+Los hallazgos #1 (RLS de `org_visibility` bloqueaba a un superadmin sin membresía) y #2 (informe obsoleto en silencio tras reabrir respuestas) de esa revisión se trataron como fix prioritario, no como backlog — ver migración `0007_org_visibility_superadmin.py` y la invalidación en `app/services/diagnostico.py::recalcular_diagnostico`. Quedan como backlog legítimo (bajo esfuerzo, bajo riesgo):
+
+- [ ] **Narrativas duplicadas por `finding_id` no se deduplican:** el schema de `generate_structured` no impone unicidad de `finding_id` dentro de `narrativas[]`; si el LLM devolviera dos entradas para el mismo hallazgo, el guardarraíl actual (que solo valida pertenencia, no unicidad) dejaría pasar ambas.
+- [ ] **Falta test del filtro `Finding.status != FindingStatus.cerrado`** en `generar_informe`: ningún test de `test_diagnostico_ia.py` cubre un hallazgo ya cerrado — si ese filtro se rompiera en un refactor futuro (narrando también brechas resueltas), ningún test lo detectaría hoy.
