@@ -354,6 +354,13 @@ class Diagnostic(Base):
     status: Mapped[str] = mapped_column(
         Text, nullable=False, server_default="en_progreso"
     )
+    # Tarea 4 (capa de IA): informe narrativo generado y saneado por
+    # app/services/diagnostico_ia.py — None hasta la primera generación.
+    # Se sobrescribe en cada regeneración (sin versionado en esta tarea).
+    informe_ia: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    informe_generado_en: Mapped[datetime | None] = mapped_column(
+        sa.TIMESTAMP(timezone=True), nullable=True
+    )
     created_at: Mapped[datetime] = mapped_column(
         sa.TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
     )

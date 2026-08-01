@@ -1,23 +1,29 @@
-"""Tests funcionales de GET/POST /diagnostico/* (Módulo 1, Tarea 3).
+"""Tests funcionales de GET/POST /diagnostico/* (Módulo 1, Tareas 3 y 4).
 
-Ejercen los 3 endpoints extremo a extremo contra `app_user` con RLS activo
+Ejercen los endpoints extremo a extremo contra `app_user` con RLS activo
 (mismas fixtures `client_a`/`client_b` de conftest.py). El aislamiento RLS a
 nivel de fila (INSERT/SELECT directos contra Postgres) vive en
 test_rls_isolation_diagnosticos.py; este archivo cubre la capa de API: forma
 de la respuesta, wiring de permisos (`require_permission`, primer consumidor
 real — ver app/core/deps.py) y el ciclo de vida completo de un diagnóstico.
 
+`POST /diagnostico/informe` (Tarea 4) mockea `diagnostico_ia.generar_informe`
+— el guardarraíl de citas/finding_id y la exclusión de ley_19628 ya se prueban
+en test_diagnostico_ia.py; aquí solo se cubre el wiring HTTP (404/409/200).
+
 Requiere el seed de scripts/seed_modulo1_cuestionario.py ya aplicado (v1
 activa, 50 preguntas), igual que el resto de la suite del Módulo 1.
 """
 
 import uuid
+from datetime import UTC, datetime
 
 import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy import delete, select
 
+from app.api import diagnostico as diagnostico_api
 from app.core.deps import get_current_profile
 from app.db.models import (
     Diagnostic,
@@ -259,3 +265,86 @@ async def test_alternar_respuesta_cierra_hallazgo_sin_borrarlo(client_a, org_a_i
             h for h in cerrar.json()["hallazgos"] if h["id"] == hallazgo_id
         )
         assert hallazgo_cerrado["status"] == "cerrado"
+
+
+@pytest.mark.asyncio
+async def test_informe_404_sin_diagnostico_previo(client_a, org_a_id):
+    async with AsyncClient(
+        transport=ASGITransport(app=client_a), base_url="http://test"
+    ) as client:
+        resp = await client.post(
+            "/diagnostico/informe", headers={"X-Organization-Id": str(org_a_id)}
+        )
+    assert resp.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_informe_409_con_diagnostico_en_progreso(client_a, org_a_id):
+    async with AsyncClient(
+        transport=ASGITransport(app=client_a), base_url="http://test"
+    ) as client:
+        cuestionario = (
+            await client.get(
+                "/diagnostico/cuestionario",
+                headers={"X-Organization-Id": str(org_a_id)},
+            )
+        ).json()
+        pregunta_id = cuestionario["preguntas"][0]["id"]
+        await client.post(
+            "/diagnostico/respuestas",
+            headers={"X-Organization-Id": str(org_a_id)},
+            json={"respuestas": [{"pregunta_id": pregunta_id, "answer": "Sí"}]},
+        )
+
+        resp = await client.post(
+            "/diagnostico/informe", headers={"X-Organization-Id": str(org_a_id)}
+        )
+    assert resp.status_code == 409
+
+
+@pytest.mark.asyncio
+async def test_informe_200_con_diagnostico_completado_y_reflejado_en_actual(
+    client_a, org_a_id, monkeypatch
+):
+    async def _fake_generar_informe(db, diagnostic):
+        diagnostic.informe_ia = {
+            "resumen_ejecutivo": "Resumen mock.",
+            "narrativas": [],
+        }
+        diagnostic.informe_generado_en = datetime.now(UTC)
+        return diagnostic.informe_ia
+
+    monkeypatch.setattr(
+        diagnostico_api.diagnostico_ia, "generar_informe", _fake_generar_informe
+    )
+
+    async with AsyncClient(
+        transport=ASGITransport(app=client_a), base_url="http://test"
+    ) as client:
+        cuestionario = (
+            await client.get(
+                "/diagnostico/cuestionario",
+                headers={"X-Organization-Id": str(org_a_id)},
+            )
+        ).json()
+        respuestas = [
+            {"pregunta_id": p["id"], "answer": "Sí"} for p in cuestionario["preguntas"]
+        ]
+        await client.post(
+            "/diagnostico/respuestas",
+            headers={"X-Organization-Id": str(org_a_id)},
+            json={"respuestas": respuestas},
+        )
+
+        resp = await client.post(
+            "/diagnostico/informe", headers={"X-Organization-Id": str(org_a_id)}
+        )
+        assert resp.status_code == 200
+        assert resp.json()["informe"]["resumen_ejecutivo"] == "Resumen mock."
+
+        actual = (
+            await client.get(
+                "/diagnostico/actual", headers={"X-Organization-Id": str(org_a_id)}
+            )
+        ).json()
+        assert actual["informe"]["resumen_ejecutivo"] == "Resumen mock."

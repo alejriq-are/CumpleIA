@@ -1,4 +1,4 @@
-"""API del Autodiagnóstico (Fase 1, Módulo 1, Tarea 3).
+"""API del Autodiagnóstico (Fase 1, Módulo 1, Tareas 3 y 4).
 
 Ver `Fase 1/plan-fase1-modulo1-autodiagnostico.md` y
 `docs/adr/0002-logica-adaptativa-riesgo-remediacion.md`. Todo endpoint exige
@@ -8,10 +8,14 @@ tenía la firma pensada para este módulo.
 
 `GET /cuestionario` no filtra preguntas por rubro/tamaño de organización
 (capa 1 del ADR, diferida): el catálogo es el mismo para todas.
+
+`POST /informe` (Tarea 4) genera la narrativa del informe vía
+`app/services/diagnostico_ia.py`, anclada a RAG (Ley 21.719 + guía CCS) y con
+guardarraíles que descartan cualquier cita o finding_id que el LLM invente.
 """
 
 import uuid
-from datetime import date
+from datetime import date, datetime
 from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, Header, HTTPException, status
@@ -23,6 +27,7 @@ from app.core.deps import require_permission
 from app.db.models import Diagnostic, DiagnosticAnswer, Finding, Profile
 from app.db.session import get_db
 from app.services import diagnostico as diagnostico_service
+from app.services import diagnostico_ia
 from app.services.authorization import Permission
 from app.services.cuestionario_config import (
     obtener_config_activa,
@@ -108,6 +113,23 @@ class HallazgoOut(BaseModel):
     documentos_referencia: list[DocumentoReferenciaOut]
 
 
+class CitaOut(BaseModel):
+    source: str
+    reference: str
+
+
+class NarrativaHallazgoOut(BaseModel):
+    finding_id: str
+    narrativa: str
+    citas: list[CitaOut]
+
+
+class InformeOut(BaseModel):
+    resumen_ejecutivo: str
+    narrativas: list[NarrativaHallazgoOut]
+    generado_en: datetime
+
+
 class DiagnosticoActualOut(BaseModel):
     id: uuid.UUID
     status: str
@@ -115,6 +137,7 @@ class DiagnosticoActualOut(BaseModel):
     puntaje_por_seccion: list[PuntajeSeccionOut]
     respuestas: list[RespuestaOut]
     hallazgos: list[HallazgoOut]
+    informe: InformeOut | None
 
 
 async def _construir_actual_out(
@@ -145,6 +168,21 @@ async def _construir_actual_out(
         .all()
     )
 
+    informe_out = None
+    if diagnostic.informe_ia is not None and diagnostic.informe_generado_en is not None:
+        informe_out = InformeOut(
+            resumen_ejecutivo=diagnostic.informe_ia.get("resumen_ejecutivo", ""),
+            narrativas=[
+                NarrativaHallazgoOut(
+                    finding_id=n["finding_id"],
+                    narrativa=n["narrativa"],
+                    citas=[CitaOut(**c) for c in n.get("citas", [])],
+                )
+                for n in diagnostic.informe_ia.get("narrativas", [])
+            ],
+            generado_en=diagnostic.informe_generado_en,
+        )
+
     return DiagnosticoActualOut(
         id=diagnostic.id,
         status=diagnostic.status,
@@ -153,6 +191,7 @@ async def _construir_actual_out(
             if diagnostic.global_score is not None
             else None
         ),
+        informe=informe_out,
         puntaje_por_seccion=[
             PuntajeSeccionOut(
                 seccion_id=s.id,
@@ -255,4 +294,27 @@ async def leer_diagnostico_actual(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="La organización todavía no tiene un diagnóstico en curso.",
         )
+    return await _construir_actual_out(db, diagnostic)
+
+
+@router.post("/informe", response_model=DiagnosticoActualOut)
+async def generar_informe(
+    x_organization_id: Annotated[uuid.UUID, Header()],
+    current_profile: Profile = Depends(require_permission(Permission.edit_content)),
+    db: AsyncSession = Depends(get_db),
+) -> DiagnosticoActualOut:
+    """Genera (o regenera) la narrativa del informe (Tarea 4).
+
+    404 si la organización no tiene diagnóstico vigente; 409 si existe pero
+    no está `completado` (ver app/services/diagnostico_ia.py::generar_informe).
+    """
+    diagnostic = await diagnostico_service.obtener_diagnostico_vigente(
+        db, x_organization_id
+    )
+    if diagnostic is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="La organización todavía no tiene un diagnóstico en curso.",
+        )
+    await diagnostico_ia.generar_informe(db, diagnostic)
     return await _construir_actual_out(db, diagnostic)

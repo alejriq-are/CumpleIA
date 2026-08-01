@@ -24,6 +24,17 @@ class LLMClient(ABC):
     async def generate(self, *, system: str, prompt: str) -> str:
         """Genera texto a partir de un prompt de usuario y un system prompt."""
 
+    @abstractmethod
+    async def generate_structured(
+        self, *, system: str, prompt: str, schema: dict, tool_name: str = "responder"
+    ) -> dict:
+        """Fuerza al modelo a responder vía tool-calling validado contra `schema`.
+
+        Para salidas que el sistema debe poder validar (CLAUDE.md sección 5:
+        "produce salidas estructuradas que el sistema valida"), no para texto
+        libre — usar `generate()` para eso.
+        """
+
 
 class AnthropicLLMClient(LLMClient):
     def __init__(self, settings: "Settings") -> None:
@@ -42,6 +53,31 @@ class AnthropicLLMClient(LLMClient):
             messages=[{"role": "user", "content": prompt}],
         )
         return "".join(block.text for block in response.content if block.type == "text")
+
+    async def generate_structured(
+        self, *, system: str, prompt: str, schema: dict, tool_name: str = "responder"
+    ) -> dict:
+        response = await self._client.messages.create(
+            model=self._model,
+            max_tokens=4096,
+            system=system,
+            messages=[{"role": "user", "content": prompt}],
+            tools=[
+                {
+                    "name": tool_name,
+                    "description": "Devuelve la respuesta estructurada según el schema.",
+                    "input_schema": schema,
+                    "strict": True,
+                }
+            ],
+            tool_choice={"type": "tool", "name": tool_name},
+        )
+        for block in response.content:
+            if block.type == "tool_use" and block.name == tool_name:
+                return block.input
+        raise RuntimeError(
+            "El modelo no devolvió una respuesta estructurada pese a tool_choice forzado."
+        )
 
 
 _LLM_ADAPTERS: dict[str, type[LLMClient]] = {
