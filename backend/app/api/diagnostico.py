@@ -275,8 +275,10 @@ async def guardar_respuestas(
         )
         for r in payload.respuestas
     ]
-    await diagnostico_service.guardar_respuestas(db, diagnostic, respuestas)
-    await diagnostico_service.recalcular_diagnostico(db, diagnostic)
+    hubo_cambio = await diagnostico_service.guardar_respuestas(
+        db, diagnostic, respuestas
+    )
+    await diagnostico_service.recalcular_diagnostico(db, diagnostic, hubo_cambio)
     return await _construir_actual_out(db, diagnostic)
 
 

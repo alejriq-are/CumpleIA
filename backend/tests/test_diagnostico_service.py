@@ -193,19 +193,21 @@ async def test_recalcular_marca_completado_solo_con_todas_las_preguntas(
             diagnostico.RespuestaGuardar(pregunta_id=pid, answer="Sí")
             for pid in pregunta_ids[:-1]
         ]
-        await diagnostico.guardar_respuestas(session, diagnostic, respuestas)
-        await diagnostico.recalcular_diagnostico(session, diagnostic)
+        hubo_cambio = await diagnostico.guardar_respuestas(
+            session, diagnostic, respuestas
+        )
+        await diagnostico.recalcular_diagnostico(session, diagnostic, hubo_cambio)
         await session.commit()
         assert diagnostic.status == "en_progreso"
 
     async with _session_factory() as session:
         diagnostic = await session.get(Diagnostic, diagnostico_org_a)
-        await diagnostico.guardar_respuestas(
+        hubo_cambio = await diagnostico.guardar_respuestas(
             session,
             diagnostic,
             [diagnostico.RespuestaGuardar(pregunta_id=pregunta_ids[-1], answer="Sí")],
         )
-        await diagnostico.recalcular_diagnostico(session, diagnostic)
+        await diagnostico.recalcular_diagnostico(session, diagnostic, hubo_cambio)
         await session.commit()
         assert diagnostic.status == "completado"
 
@@ -220,12 +222,12 @@ async def test_recalcular_reabre_y_cierra_hallazgo_ida_y_vuelta(
     async def _responder(answer: str) -> Finding:
         async with _session_factory() as session:
             diagnostic = await session.get(Diagnostic, diagnostico_org_a)
-            await diagnostico.guardar_respuestas(
+            hubo_cambio = await diagnostico.guardar_respuestas(
                 session,
                 diagnostic,
                 [diagnostico.RespuestaGuardar(pregunta_id=pregunta_id, answer=answer)],
             )
-            await diagnostico.recalcular_diagnostico(session, diagnostic)
+            await diagnostico.recalcular_diagnostico(session, diagnostic, hubo_cambio)
             await session.commit()
 
         async with _session_factory() as session:
