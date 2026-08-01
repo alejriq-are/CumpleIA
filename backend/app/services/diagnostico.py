@@ -88,7 +88,7 @@ async def obtener_o_crear_diagnostico_vigente(
 
 async def guardar_respuestas(
     db: AsyncSession, diagnostic: Diagnostic, respuestas: list[RespuestaGuardar]
-) -> None:
+) -> bool:
     """Upsert de DiagnosticAnswer por (diagnostic_id, pregunta_id).
 
     Valida ANTES de escribir que todo pregunta_id exista en el catálogo y que
@@ -98,9 +98,18 @@ async def guardar_respuestas(
     aborte con un error crudo — el router ya restringe `answer` con un
     Literal de Pydantic, pero esta función es el servicio reusable, no solo
     su único llamador actual.
+
+    Devuelve True si al menos una respuesta es nueva o cambió de valor
+    (`answer` o `notes`) respecto a lo ya guardado. `recalcular_diagnostico`
+    usa este resultado para decidir si invalidar el informe generado: con la
+    config pinneada, esta función es la única vía por la que puntajes,
+    hallazgos o el contexto libre pueden cambiar, así que su resultado es la
+    señal correcta — a diferencia de comparar los puntajes agregados después
+    de recalcular, que pueden coincidir por casualidad aunque las respuestas
+    hayan cambiado.
     """
     if not respuestas:
-        return
+        return False
 
     answers_invalidas = sorted(
         {r.answer for r in respuestas if r.answer not in RESPUESTAS_VALIDAS}
@@ -119,6 +128,25 @@ async def guardar_respuestas(
             detail=f"Preguntas desconocidas en el catálogo: {desconocidas}",
         )
 
+    valores_previos = {
+        a.pregunta_id: (a.answer, a.notes)
+        for a in (
+            await db.execute(
+                select(DiagnosticAnswer).where(
+                    DiagnosticAnswer.diagnostic_id == diagnostic.id,
+                    DiagnosticAnswer.pregunta_id.in_(
+                        {r.pregunta_id for r in respuestas}
+                    ),
+                )
+            )
+        )
+        .scalars()
+        .all()
+    }
+    hubo_cambio = any(
+        valores_previos.get(r.pregunta_id) != (r.answer, r.notes) for r in respuestas
+    )
+
     stmt = pg_insert(DiagnosticAnswer).values(
         [
             {
@@ -136,22 +164,26 @@ async def guardar_respuestas(
         set_={"answer": stmt.excluded.answer, "notes": stmt.excluded.notes},
     )
     await db.execute(stmt)
+    return hubo_cambio
 
 
-async def recalcular_diagnostico(db: AsyncSession, diagnostic: Diagnostic) -> None:
+async def recalcular_diagnostico(
+    db: AsyncSession, diagnostic: Diagnostic, hubo_cambio_en_respuestas: bool
+) -> None:
     """Recalcula puntajes y sincroniza hallazgos tras guardar respuestas.
 
     Usa la config PINNEADA en `diagnostic.config_version_id` (no
     necesariamente la activa hoy): el puntaje debe ser reproducible aunque
     el superadmin publique una nueva versión de pesos/riesgo mientras el
     diagnóstico está en progreso.
+
+    `hubo_cambio_en_respuestas` viene del `guardar_respuestas` que precedió
+    esta llamada (ver su docstring) — decide si el informe generado (Tarea 4)
+    se invalida.
     """
     config = await obtener_config_por_id(db, diagnostic.config_version_id)
     preguntas_por_id = {p.id: p for p in config.preguntas}
     seccion_por_pregunta = {p.id: p.seccion_id for p in config.preguntas}
-
-    section_scores_antes = diagnostic.section_scores
-    status_antes = diagnostic.status
 
     answers = (
         (
@@ -229,21 +261,15 @@ async def recalcular_diagnostico(db: AsyncSession, diagnostic: Diagnostic) -> No
             hallazgo.status = FindingStatus.cerrado
 
     # Un informe generado (Tarea 4) deja de reflejar el diagnóstico solo si
-    # este recálculo produjo puntajes o estado distintos a los que ya tenía
-    # — no en cualquier llamada a esta función. Sin esta condición, un
-    # guardado sin cambios reales (payload vacío, o un reenvío de las mismas
-    # respuestas) borraba un informe que seguía siendo exacto. Comparar
-    # section_scores/status alcanza para detectar el cambio: ambos son
-    # función determinista de las respuestas dada la misma config pinneada,
-    # así que si no cambiaron, global_score tampoco cambió realmente — se
-    # excluye a propósito de la comparación porque el redondeo de
-    # Numeric(5,2) al guardarlo puede diferir del float recién calculado sin
-    # que el valor real haya cambiado, dando un falso positivo.
-    hubo_cambio_real = (
-        diagnostic.section_scores != section_scores_antes
-        or diagnostic.status != status_antes
-    )
-    if hubo_cambio_real and (
+    # guardar_respuestas() reportó un cambio real, no en cualquier llamada a
+    # esta función (un payload vacío o el reenvío de las mismas respuestas no
+    # debe destruir un informe que sigue siendo exacto). No basta con
+    # comparar los puntajes agregados antes/después de recalcular: dos
+    # respuestas de la misma sección pueden cruzarse sin mover el promedio
+    # (cambiando igual qué hallazgo está abierto), y una edición que solo
+    # cambia `notes` (parte del contexto libre del informe) no mueve ningún
+    # puntaje en absoluto.
+    if hubo_cambio_en_respuestas and (
         diagnostic.informe_ia is not None or diagnostic.informe_generado_en is not None
     ):
         diagnostic.informe_ia = None

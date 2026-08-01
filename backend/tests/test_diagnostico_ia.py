@@ -84,8 +84,10 @@ async def diagnostico_completado_org_a(_session_factory, org_a_id, profile_a_id)
             )
             for i, pid in enumerate(pregunta_ids)
         ]
-        await diagnostico.guardar_respuestas(session, diagnostic, respuestas)
-        await diagnostico.recalcular_diagnostico(session, diagnostic)
+        hubo_cambio = await diagnostico.guardar_respuestas(
+            session, diagnostic, respuestas
+        )
+        await diagnostico.recalcular_diagnostico(session, diagnostic, hubo_cambio)
         await session.commit()
         assert diagnostic.status == "completado"
 
@@ -218,9 +220,9 @@ async def test_recalcular_invalida_informe_generado_previamente(
     """Un informe ya generado no debe sobrevivir en silencio a un guardado que
     sí cambia una respuesta — se invalida
     (app/services/diagnostico.py::recalcular_diagnostico) para forzar una
-    regeneración explícita en vez de mostrar datos obsoletos. Ver también
-    los dos tests siguientes: un guardado que NO cambia nada no debe
-    invalidar."""
+    regeneración explícita en vez de mostrar datos obsoletos. Ver también los
+    tests siguientes: un guardado que NO cambia nada (vacío, mismo valor, o
+    solo las notas sin tocar la respuesta) no debe invalidar."""
 
     async def _fake_search_chunks(query, db, top_k=12, sources=None):
         return []
@@ -243,12 +245,12 @@ async def test_recalcular_invalida_informe_generado_previamente(
     async with _session_factory() as session:
         diagnostic = await session.get(Diagnostic, diagnostico_completado_org_a)
         pregunta_id = (await session.execute(select(Pregunta.id).limit(1))).scalar_one()
-        await diagnostico.guardar_respuestas(
+        hubo_cambio = await diagnostico.guardar_respuestas(
             session,
             diagnostic,
             [diagnostico.RespuestaGuardar(pregunta_id=pregunta_id, answer="Sí")],
         )
-        await diagnostico.recalcular_diagnostico(session, diagnostic)
+        await diagnostico.recalcular_diagnostico(session, diagnostic, hubo_cambio)
         await session.commit()
 
     async with _session_factory() as session:
@@ -261,10 +263,10 @@ async def test_recalcular_invalida_informe_generado_previamente(
 async def test_recalcular_no_invalida_informe_con_guardado_vacio(
     _session_factory, diagnostico_completado_org_a, monkeypatch
 ):
-    """Fix del hallazgo #1 (review de PR #14): guardar_respuestas con una
-    lista vacía (payload válido de `POST /diagnostico/respuestas`) no cambia
-    ninguna respuesta — recalcular_diagnostico no debe destruir un informe
-    que sigue siendo exacto."""
+    """guardar_respuestas con una lista vacía (payload válido de `POST
+    /diagnostico/respuestas`) no cambia ninguna respuesta —
+    recalcular_diagnostico no debe destruir un informe que sigue siendo
+    exacto."""
 
     async def _fake_search_chunks(query, db, top_k=12, sources=None):
         return []
@@ -285,8 +287,8 @@ async def test_recalcular_no_invalida_informe_con_guardado_vacio(
 
     async with _session_factory() as session:
         diagnostic = await session.get(Diagnostic, diagnostico_completado_org_a)
-        await diagnostico.guardar_respuestas(session, diagnostic, [])
-        await diagnostico.recalcular_diagnostico(session, diagnostic)
+        hubo_cambio = await diagnostico.guardar_respuestas(session, diagnostic, [])
+        await diagnostico.recalcular_diagnostico(session, diagnostic, hubo_cambio)
         await session.commit()
 
     async with _session_factory() as session:
@@ -333,15 +335,77 @@ async def test_recalcular_no_invalida_informe_al_reenviar_la_misma_respuesta(
 
     async with _session_factory() as session:
         diagnostic = await session.get(Diagnostic, diagnostico_completado_org_a)
-        await diagnostico.guardar_respuestas(
+        hubo_cambio = await diagnostico.guardar_respuestas(
             session,
             diagnostic,
             [diagnostico.RespuestaGuardar(pregunta_id=pregunta_id_no, answer="No")],
         )
-        await diagnostico.recalcular_diagnostico(session, diagnostic)
+        await diagnostico.recalcular_diagnostico(session, diagnostic, hubo_cambio)
         await session.commit()
 
     async with _session_factory() as session:
         diagnostic = await session.get(Diagnostic, diagnostico_completado_org_a)
         assert diagnostic.informe_ia == informe
         assert diagnostic.informe_generado_en is not None
+
+
+@pytest.mark.asyncio
+async def test_recalcular_invalida_informe_si_solo_cambian_las_notas(
+    _session_factory, diagnostico_completado_org_a, monkeypatch
+):
+    """Cambiar únicamente `notes` de una respuesta (misma `answer`) no mueve
+    ningún puntaje ni hallazgo, pero sí cambia el contexto libre que
+    diagnostico_ia.generar_informe incorpora al informe — por eso debe
+    invalidarlo igual, aunque section_scores/status queden idénticos."""
+
+    async def _fake_search_chunks(query, db, top_k=12, sources=None):
+        return []
+
+    monkeypatch.setattr(diagnostico_ia, "search_chunks", _fake_search_chunks)
+    monkeypatch.setattr(
+        diagnostico_ia,
+        "get_llm_client",
+        lambda settings: _FakeLLMClient(
+            {"resumen_ejecutivo": "Resumen.", "narrativas": []}
+        ),
+    )
+
+    async with _session_factory() as session:
+        diagnostic = await session.get(Diagnostic, diagnostico_completado_org_a)
+        respuesta_existente = (
+            (
+                await session.execute(
+                    select(DiagnosticAnswer).where(
+                        DiagnosticAnswer.diagnostic_id == diagnostic.id
+                    )
+                )
+            )
+            .scalars()
+            .first()
+        )
+        assert respuesta_existente is not None
+        pregunta_id = respuesta_existente.pregunta_id
+        answer_actual = respuesta_existente.answer
+
+        await diagnostico_ia.generar_informe(session, diagnostic)
+        await session.commit()
+        assert diagnostic.informe_ia is not None
+
+    async with _session_factory() as session:
+        diagnostic = await session.get(Diagnostic, diagnostico_completado_org_a)
+        hubo_cambio = await diagnostico.guardar_respuestas(
+            session,
+            diagnostic,
+            [
+                diagnostico.RespuestaGuardar(
+                    pregunta_id=pregunta_id, answer=answer_actual, notes="Nota nueva."
+                )
+            ],
+        )
+        await diagnostico.recalcular_diagnostico(session, diagnostic, hubo_cambio)
+        await session.commit()
+
+    async with _session_factory() as session:
+        diagnostic = await session.get(Diagnostic, diagnostico_completado_org_a)
+        assert diagnostic.informe_ia is None
+        assert diagnostic.informe_generado_en is None
