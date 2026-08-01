@@ -224,3 +224,12 @@ async def recalcular_diagnostico(db: AsyncSession, diagnostic: Diagnostic) -> No
             and hallazgo.status != FindingStatus.cerrado
         ):
             hallazgo.status = FindingStatus.cerrado
+
+    # Fix de la revisión del PR #13 (hallazgo #2): toda respuesta nueva puede
+    # cambiar puntajes/hallazgos, así que un informe ya generado (Tarea 4)
+    # deja de reflejar el estado actual del diagnóstico. Se invalida en vez
+    # de dejarlo obsoleto en silencio — el usuario debe pedir uno nuevo
+    # (POST /diagnostico/informe) para verlo actualizado.
+    if diagnostic.informe_ia is not None or diagnostic.informe_generado_en is not None:
+        diagnostic.informe_ia = None
+        diagnostic.informe_generado_en = None

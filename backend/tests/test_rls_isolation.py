@@ -21,14 +21,18 @@ import uuid
 
 import pytest
 import pytest_asyncio
-from sqlalchemy import text
+from sqlalchemy import delete, text
 from sqlalchemy.exc import DBAPIError
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlalchemy.pool import NullPool
 
 from app.core.config import get_settings
+from app.db.models import Profile
 
 settings = get_settings()
+
+_SUPERADMIN_PROFILE_ID = uuid.uuid4()
+_SUPERADMIN_AUTH_ID = uuid.uuid4()
 
 
 @pytest_asyncio.fixture(loop_scope="function")
@@ -61,6 +65,33 @@ async def _set_auth_user(session, auth_user_id) -> None:
         text("SELECT set_config('request.jwt.claim.sub', :sub, true)"),
         {"sub": str(auth_user_id)},
     )
+
+
+@pytest_asyncio.fixture
+async def superadmin_sin_membresia(_session_factory):
+    """Perfil `is_superadmin=True` sin ninguna membresía en ninguna
+    organización — exactamente el caso que exponía el bug de `org_visibility`
+    (revisión del PR #13, hallazgo #1): `require_permission` ya concede el
+    permiso a un superadmin sobre cualquier organización sin exigir
+    membresía, pero la política RLS de `organizations` no lo dejaba pasar."""
+    async with _session_factory() as session:
+        session.add(
+            Profile(
+                id=_SUPERADMIN_PROFILE_ID,
+                auth_user_id=_SUPERADMIN_AUTH_ID,
+                email="superadmin_rls_test@cumpleia.cl",
+                is_superadmin=True,
+            )
+        )
+        await session.commit()
+
+    yield _SUPERADMIN_AUTH_ID
+
+    async with _session_factory() as session:
+        await session.execute(
+            delete(Profile).where(Profile.id == _SUPERADMIN_PROFILE_ID)
+        )
+        await session.commit()
 
 
 # ── Aislamiento cruzado a nivel de RLS (sin pasar por la API) ─────────────────
@@ -159,3 +190,38 @@ async def test_bootstrap_no_permite_apropiarse_de_organizacion_ajena(
             ),
             {"org_id": str(org_b_id), "profile_id": str(profile_a_id)},
         )
+
+
+# ── org_visibility: superadmin sin membresía (fix de la revisión del PR #13) ──
+
+
+@pytest.mark.asyncio
+async def test_rls_superadmin_ve_organizacion_sin_ser_miembro(
+    app_role_session, superadmin_sin_membresia, org_a_id, _seed_test_data
+):
+    """`require_permission` ya concede el permiso a un superadmin sobre
+    cualquier organización sin exigir membresía (ver ADR 0001); esta política
+    debe dejarlo pasar también a nivel de RLS, no solo a nivel de aplicación —
+    de lo contrario código como app/services/diagnostico_ia.py::generar_informe
+    (que sí necesita leer la fila, no solo el permiso) rompe en silencio."""
+    await _set_auth_user(app_role_session, superadmin_sin_membresia)
+    result = await app_role_session.execute(
+        text("SELECT id FROM organizations WHERE id = :org_id"),
+        {"org_id": str(org_a_id)},
+    )
+    assert result.first() is not None
+
+
+@pytest.mark.asyncio
+async def test_rls_no_superadmin_sigue_sin_ver_organizacion_ajena(
+    app_role_session, auth_a_id, org_b_id, _seed_test_data
+):
+    """La relajación de org_visibility es específica de is_superadmin(): un
+    usuario normal sin membresía en B sigue sin poder verla (regresión del
+    aislamiento multi-tenant que la política ya garantizaba)."""
+    await _set_auth_user(app_role_session, auth_a_id)
+    result = await app_role_session.execute(
+        text("SELECT id FROM organizations WHERE id = :org_id"),
+        {"org_id": str(org_b_id)},
+    )
+    assert result.first() is None

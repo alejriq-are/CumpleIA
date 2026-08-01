@@ -209,3 +209,47 @@ async def test_generar_informe_descarta_citas_y_findings_inventados(
         assert diagnostic.informe_ia is not None
         assert diagnostic.informe_generado_en is not None
         assert diagnostic.informe_ia == informe
+
+
+@pytest.mark.asyncio
+async def test_recalcular_invalida_informe_generado_previamente(
+    _session_factory, diagnostico_completado_org_a, monkeypatch
+):
+    """Fix de la revisión del PR #13 (hallazgo #2): un informe ya generado no
+    debe sobrevivir en silencio a un nuevo guardado de respuestas — se
+    invalida (app/services/diagnostico.py::recalcular_diagnostico) para
+    forzar una regeneración explícita en vez de mostrar datos obsoletos."""
+
+    async def _fake_search_chunks(query, db, top_k=12, sources=None):
+        return []
+
+    monkeypatch.setattr(diagnostico_ia, "search_chunks", _fake_search_chunks)
+    monkeypatch.setattr(
+        diagnostico_ia,
+        "get_llm_client",
+        lambda settings: _FakeLLMClient(
+            {"resumen_ejecutivo": "Resumen.", "narrativas": []}
+        ),
+    )
+
+    async with _session_factory() as session:
+        diagnostic = await session.get(Diagnostic, diagnostico_completado_org_a)
+        await diagnostico_ia.generar_informe(session, diagnostic)
+        await session.commit()
+        assert diagnostic.informe_ia is not None
+
+    async with _session_factory() as session:
+        diagnostic = await session.get(Diagnostic, diagnostico_completado_org_a)
+        pregunta_id = (await session.execute(select(Pregunta.id).limit(1))).scalar_one()
+        await diagnostico.guardar_respuestas(
+            session,
+            diagnostic,
+            [diagnostico.RespuestaGuardar(pregunta_id=pregunta_id, answer="Sí")],
+        )
+        await diagnostico.recalcular_diagnostico(session, diagnostic)
+        await session.commit()
+
+    async with _session_factory() as session:
+        diagnostic = await session.get(Diagnostic, diagnostico_completado_org_a)
+        assert diagnostic.informe_ia is None
+        assert diagnostic.informe_generado_en is None
