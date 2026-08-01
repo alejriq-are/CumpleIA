@@ -215,10 +215,12 @@ async def test_generar_informe_descarta_citas_y_findings_inventados(
 async def test_recalcular_invalida_informe_generado_previamente(
     _session_factory, diagnostico_completado_org_a, monkeypatch
 ):
-    """Fix de la revisión del PR #13 (hallazgo #2): un informe ya generado no
-    debe sobrevivir en silencio a un nuevo guardado de respuestas — se
-    invalida (app/services/diagnostico.py::recalcular_diagnostico) para
-    forzar una regeneración explícita en vez de mostrar datos obsoletos."""
+    """Un informe ya generado no debe sobrevivir en silencio a un guardado que
+    sí cambia una respuesta — se invalida
+    (app/services/diagnostico.py::recalcular_diagnostico) para forzar una
+    regeneración explícita en vez de mostrar datos obsoletos. Ver también
+    los dos tests siguientes: un guardado que NO cambia nada no debe
+    invalidar."""
 
     async def _fake_search_chunks(query, db, top_k=12, sources=None):
         return []
@@ -253,3 +255,93 @@ async def test_recalcular_invalida_informe_generado_previamente(
         diagnostic = await session.get(Diagnostic, diagnostico_completado_org_a)
         assert diagnostic.informe_ia is None
         assert diagnostic.informe_generado_en is None
+
+
+@pytest.mark.asyncio
+async def test_recalcular_no_invalida_informe_con_guardado_vacio(
+    _session_factory, diagnostico_completado_org_a, monkeypatch
+):
+    """Fix del hallazgo #1 (review de PR #14): guardar_respuestas con una
+    lista vacía (payload válido de `POST /diagnostico/respuestas`) no cambia
+    ninguna respuesta — recalcular_diagnostico no debe destruir un informe
+    que sigue siendo exacto."""
+
+    async def _fake_search_chunks(query, db, top_k=12, sources=None):
+        return []
+
+    monkeypatch.setattr(diagnostico_ia, "search_chunks", _fake_search_chunks)
+    monkeypatch.setattr(
+        diagnostico_ia,
+        "get_llm_client",
+        lambda settings: _FakeLLMClient(
+            {"resumen_ejecutivo": "Resumen.", "narrativas": []}
+        ),
+    )
+
+    async with _session_factory() as session:
+        diagnostic = await session.get(Diagnostic, diagnostico_completado_org_a)
+        informe = await diagnostico_ia.generar_informe(session, diagnostic)
+        await session.commit()
+
+    async with _session_factory() as session:
+        diagnostic = await session.get(Diagnostic, diagnostico_completado_org_a)
+        await diagnostico.guardar_respuestas(session, diagnostic, [])
+        await diagnostico.recalcular_diagnostico(session, diagnostic)
+        await session.commit()
+
+    async with _session_factory() as session:
+        diagnostic = await session.get(Diagnostic, diagnostico_completado_org_a)
+        assert diagnostic.informe_ia == informe
+        assert diagnostic.informe_generado_en is not None
+
+
+@pytest.mark.asyncio
+async def test_recalcular_no_invalida_informe_al_reenviar_la_misma_respuesta(
+    _session_factory, diagnostico_completado_org_a, monkeypatch
+):
+    """Reenviar exactamente el mismo valor de una respuesta ya guardada no
+    cambia el diagnóstico — tampoco debe invalidar el informe."""
+
+    async def _fake_search_chunks(query, db, top_k=12, sources=None):
+        return []
+
+    monkeypatch.setattr(diagnostico_ia, "search_chunks", _fake_search_chunks)
+    monkeypatch.setattr(
+        diagnostico_ia,
+        "get_llm_client",
+        lambda settings: _FakeLLMClient(
+            {"resumen_ejecutivo": "Resumen.", "narrativas": []}
+        ),
+    )
+
+    async with _session_factory() as session:
+        diagnostic = await session.get(Diagnostic, diagnostico_completado_org_a)
+        hallazgo = (
+            (
+                await session.execute(
+                    select(Finding).where(Finding.diagnostic_id == diagnostic.id)
+                )
+            )
+            .scalars()
+            .first()
+        )
+        assert hallazgo is not None, "la fixture debe generar al menos un hallazgo"
+        pregunta_id_no = hallazgo.pregunta_id
+
+        informe = await diagnostico_ia.generar_informe(session, diagnostic)
+        await session.commit()
+
+    async with _session_factory() as session:
+        diagnostic = await session.get(Diagnostic, diagnostico_completado_org_a)
+        await diagnostico.guardar_respuestas(
+            session,
+            diagnostic,
+            [diagnostico.RespuestaGuardar(pregunta_id=pregunta_id_no, answer="No")],
+        )
+        await diagnostico.recalcular_diagnostico(session, diagnostic)
+        await session.commit()
+
+    async with _session_factory() as session:
+        diagnostic = await session.get(Diagnostic, diagnostico_completado_org_a)
+        assert diagnostic.informe_ia == informe
+        assert diagnostic.informe_generado_en is not None
