@@ -150,6 +150,9 @@ async def recalcular_diagnostico(db: AsyncSession, diagnostic: Diagnostic) -> No
     preguntas_por_id = {p.id: p for p in config.preguntas}
     seccion_por_pregunta = {p.id: p.seccion_id for p in config.preguntas}
 
+    section_scores_antes = diagnostic.section_scores
+    status_antes = diagnostic.status
+
     answers = (
         (
             await db.execute(
@@ -225,11 +228,23 @@ async def recalcular_diagnostico(db: AsyncSession, diagnostic: Diagnostic) -> No
         ):
             hallazgo.status = FindingStatus.cerrado
 
-    # Fix de la revisión del PR #13 (hallazgo #2): toda respuesta nueva puede
-    # cambiar puntajes/hallazgos, así que un informe ya generado (Tarea 4)
-    # deja de reflejar el estado actual del diagnóstico. Se invalida en vez
-    # de dejarlo obsoleto en silencio — el usuario debe pedir uno nuevo
-    # (POST /diagnostico/informe) para verlo actualizado.
-    if diagnostic.informe_ia is not None or diagnostic.informe_generado_en is not None:
+    # Un informe generado (Tarea 4) deja de reflejar el diagnóstico solo si
+    # este recálculo produjo puntajes o estado distintos a los que ya tenía
+    # — no en cualquier llamada a esta función. Sin esta condición, un
+    # guardado sin cambios reales (payload vacío, o un reenvío de las mismas
+    # respuestas) borraba un informe que seguía siendo exacto. Comparar
+    # section_scores/status alcanza para detectar el cambio: ambos son
+    # función determinista de las respuestas dada la misma config pinneada,
+    # así que si no cambiaron, global_score tampoco cambió realmente — se
+    # excluye a propósito de la comparación porque el redondeo de
+    # Numeric(5,2) al guardarlo puede diferir del float recién calculado sin
+    # que el valor real haya cambiado, dando un falso positivo.
+    hubo_cambio_real = (
+        diagnostic.section_scores != section_scores_antes
+        or diagnostic.status != status_antes
+    )
+    if hubo_cambio_real and (
+        diagnostic.informe_ia is not None or diagnostic.informe_generado_en is not None
+    ):
         diagnostic.informe_ia = None
         diagnostic.informe_generado_en = None
