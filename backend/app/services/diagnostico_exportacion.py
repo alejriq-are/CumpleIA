@@ -188,8 +188,9 @@ async def generar_html_informe(db: AsyncSession, diagnostic: Diagnostic) -> str:
 
 <footer>
 Documento generado automáticamente por CumpleIA a partir del Autodiagnóstico
-de cumplimiento de la Ley N.° 21.719. Sujeto a revisión humana antes de
-usarse como evidencia formal de cumplimiento.
+de cumplimiento de la Ley N.° 21.719. Su contenido debe ser validado por el
+responsable correspondiente antes de ser utilizado como evidencia formal de
+cumplimiento.
 </footer>
 </body>
 </html>
