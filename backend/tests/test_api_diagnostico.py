@@ -400,3 +400,141 @@ async def test_reabrir_respuestas_invalida_el_informe_ya_generado(
             )
         ).json()
         assert actual["informe"] is None
+
+
+@pytest.mark.asyncio
+async def test_exportar_404_sin_diagnostico_previo(client_a, org_a_id):
+    async with AsyncClient(
+        transport=ASGITransport(app=client_a), base_url="http://test"
+    ) as client:
+        resp = await client.get(
+            "/diagnostico/informe/exportar",
+            headers={"X-Organization-Id": str(org_a_id)},
+        )
+    assert resp.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_exportar_409_sin_informe_generado(client_a, org_a_id):
+    async with AsyncClient(
+        transport=ASGITransport(app=client_a), base_url="http://test"
+    ) as client:
+        cuestionario = (
+            await client.get(
+                "/diagnostico/cuestionario",
+                headers={"X-Organization-Id": str(org_a_id)},
+            )
+        ).json()
+        pregunta_id = cuestionario["preguntas"][0]["id"]
+        await client.post(
+            "/diagnostico/respuestas",
+            headers={"X-Organization-Id": str(org_a_id)},
+            json={"respuestas": [{"pregunta_id": pregunta_id, "answer": "Sí"}]},
+        )
+
+        resp = await client.get(
+            "/diagnostico/informe/exportar",
+            headers={"X-Organization-Id": str(org_a_id)},
+        )
+    assert resp.status_code == 409
+
+
+@pytest.mark.asyncio
+async def test_exportar_200_devuelve_html_descargable_con_contenido_del_informe(
+    client_a, org_a_id, monkeypatch
+):
+    async def _fake_generar_informe(db, diagnostic):
+        diagnostic.informe_ia = {
+            "resumen_ejecutivo": "Resumen mock <script>alert(1)</script>.",
+            "narrativas": [],
+        }
+        diagnostic.informe_generado_en = datetime.now(UTC)
+        return diagnostic.informe_ia
+
+    monkeypatch.setattr(
+        diagnostico_api.diagnostico_ia, "generar_informe", _fake_generar_informe
+    )
+
+    async with AsyncClient(
+        transport=ASGITransport(app=client_a), base_url="http://test"
+    ) as client:
+        cuestionario = (
+            await client.get(
+                "/diagnostico/cuestionario",
+                headers={"X-Organization-Id": str(org_a_id)},
+            )
+        ).json()
+        pregunta_ids = [p["id"] for p in cuestionario["preguntas"]]
+        preguntas_con_brecha = pregunta_ids[:1]
+        respuestas = [
+            {
+                "pregunta_id": pid,
+                "answer": "No" if pid in preguntas_con_brecha else "Sí",
+            }
+            for pid in pregunta_ids
+        ]
+        await client.post(
+            "/diagnostico/respuestas",
+            headers={"X-Organization-Id": str(org_a_id)},
+            json={"respuestas": respuestas},
+        )
+        await client.post(
+            "/diagnostico/informe", headers={"X-Organization-Id": str(org_a_id)}
+        )
+
+        resp = await client.get(
+            "/diagnostico/informe/exportar",
+            headers={"X-Organization-Id": str(org_a_id)},
+        )
+
+    assert resp.status_code == 200
+    assert resp.headers["content-type"].startswith("text/html")
+    assert "attachment" in resp.headers["content-disposition"]
+    body = resp.text
+    assert "Resumen mock &lt;script&gt;alert(1)&lt;/script&gt;." in body
+    assert "<script>alert(1)</script>" not in body
+    assert "Riesgo Alto" in body or "Riesgo Medio" in body or "Riesgo Bajo" in body
+
+
+@pytest.mark.asyncio
+async def test_viewer_puede_exportar_informe(
+    viewer_client_org_a, client_a, org_a_id, monkeypatch
+):
+    async def _fake_generar_informe(db, diagnostic):
+        diagnostic.informe_ia = {"resumen_ejecutivo": "Resumen mock.", "narrativas": []}
+        diagnostic.informe_generado_en = datetime.now(UTC)
+        return diagnostic.informe_ia
+
+    monkeypatch.setattr(
+        diagnostico_api.diagnostico_ia, "generar_informe", _fake_generar_informe
+    )
+
+    async with AsyncClient(
+        transport=ASGITransport(app=client_a), base_url="http://test"
+    ) as client:
+        cuestionario = (
+            await client.get(
+                "/diagnostico/cuestionario",
+                headers={"X-Organization-Id": str(org_a_id)},
+            )
+        ).json()
+        respuestas = [
+            {"pregunta_id": p["id"], "answer": "Sí"} for p in cuestionario["preguntas"]
+        ]
+        await client.post(
+            "/diagnostico/respuestas",
+            headers={"X-Organization-Id": str(org_a_id)},
+            json={"respuestas": respuestas},
+        )
+        await client.post(
+            "/diagnostico/informe", headers={"X-Organization-Id": str(org_a_id)}
+        )
+
+    async with AsyncClient(
+        transport=ASGITransport(app=viewer_client_org_a), base_url="http://test"
+    ) as client:
+        resp = await client.get(
+            "/diagnostico/informe/exportar",
+            headers={"X-Organization-Id": str(org_a_id)},
+        )
+    assert resp.status_code == 200
