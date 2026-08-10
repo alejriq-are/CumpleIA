@@ -99,7 +99,7 @@ async def test_get_or_create_es_idempotente_y_pinnea_version_activa(
 
 @pytest.mark.asyncio
 async def test_guardar_respuestas_rechaza_pregunta_desconocida_sin_escribir_nada(
-    _session_factory, diagnostico_org_a
+    _session_factory, diagnostico_org_a, profile_a_id
 ):
     async with _session_factory() as session:
         diagnostic = await session.get(Diagnostic, diagnostico_org_a)
@@ -117,6 +117,7 @@ async def test_guardar_respuestas_rechaza_pregunta_desconocida_sin_escribir_nada
                     ),
                     diagnostico.RespuestaGuardar(pregunta_id="NO-EXISTE", answer="No"),
                 ],
+                profile_a_id,
             )
         assert exc_info.value.status_code == 400
         await session.rollback()
@@ -140,7 +141,7 @@ async def test_guardar_respuestas_rechaza_pregunta_desconocida_sin_escribir_nada
 
 @pytest.mark.asyncio
 async def test_guardar_respuestas_rechaza_answer_fuera_de_dominio_sin_escribir_nada(
-    _session_factory, diagnostico_org_a
+    _session_factory, diagnostico_org_a, profile_a_id
 ):
     """El servicio no debe confiar únicamente en el Literal de Pydantic del
     router: un llamador que lo invoque directamente con un `answer` fuera de
@@ -161,6 +162,7 @@ async def test_guardar_respuestas_rechaza_answer_fuera_de_dominio_sin_escribir_n
                         pregunta_id=pregunta_real, answer="Tal vez"
                     )
                 ],
+                profile_a_id,
             )
         assert exc_info.value.status_code == 400
         await session.rollback()
@@ -182,7 +184,7 @@ async def test_guardar_respuestas_rechaza_answer_fuera_de_dominio_sin_escribir_n
 
 @pytest.mark.asyncio
 async def test_recalcular_marca_completado_solo_con_todas_las_preguntas(
-    _session_factory, diagnostico_org_a
+    _session_factory, diagnostico_org_a, profile_a_id
 ):
     pregunta_ids = await _preguntas_activas_ids(_session_factory)
     assert len(pregunta_ids) >= 2, "el catálogo sembrado debe tener preguntas"
@@ -194,7 +196,7 @@ async def test_recalcular_marca_completado_solo_con_todas_las_preguntas(
             for pid in pregunta_ids[:-1]
         ]
         hubo_cambio = await diagnostico.guardar_respuestas(
-            session, diagnostic, respuestas
+            session, diagnostic, respuestas, profile_a_id
         )
         await diagnostico.recalcular_diagnostico(session, diagnostic, hubo_cambio)
         await session.commit()
@@ -206,6 +208,7 @@ async def test_recalcular_marca_completado_solo_con_todas_las_preguntas(
             session,
             diagnostic,
             [diagnostico.RespuestaGuardar(pregunta_id=pregunta_ids[-1], answer="Sí")],
+            profile_a_id,
         )
         await diagnostico.recalcular_diagnostico(session, diagnostic, hubo_cambio)
         await session.commit()
@@ -214,7 +217,7 @@ async def test_recalcular_marca_completado_solo_con_todas_las_preguntas(
 
 @pytest.mark.asyncio
 async def test_recalcular_reabre_y_cierra_hallazgo_ida_y_vuelta(
-    _session_factory, diagnostico_org_a
+    _session_factory, diagnostico_org_a, profile_a_id
 ):
     pregunta_ids = await _preguntas_activas_ids(_session_factory)
     pregunta_id = pregunta_ids[0]
@@ -226,6 +229,7 @@ async def test_recalcular_reabre_y_cierra_hallazgo_ida_y_vuelta(
                 session,
                 diagnostic,
                 [diagnostico.RespuestaGuardar(pregunta_id=pregunta_id, answer=answer)],
+                profile_a_id,
             )
             await diagnostico.recalcular_diagnostico(session, diagnostic, hubo_cambio)
             await session.commit()
@@ -251,3 +255,70 @@ async def test_recalcular_reabre_y_cierra_hallazgo_ida_y_vuelta(
     reabierto = await _responder("No")
     assert reabierto.id == abierto.id
     assert reabierto.status.value == "abierto"
+
+
+@pytest.mark.asyncio
+async def test_guardar_respuestas_registra_quien_respondio(
+    _session_factory, diagnostico_org_a, profile_a_id, profile_b_id
+):
+    """Mejora al informe (trazabilidad): `created_by` queda fijo en quien
+    respondió por primera vez; `updated_by`/`updated_at` reflejan siempre a
+    quien guardó por última vez, tanto en la respuesta como en el
+    `Diagnostic` — el upsert de DiagnosticAnswer es un statement crudo (no
+    pasa por el flush de la ORM), así que esto no es automático por
+    `onupdate` y merece su propio test."""
+    pregunta_ids = await _preguntas_activas_ids(_session_factory)
+    pregunta_id = pregunta_ids[0]
+
+    async with _session_factory() as session:
+        diagnostic = await session.get(Diagnostic, diagnostico_org_a)
+        await diagnostico.guardar_respuestas(
+            session,
+            diagnostic,
+            [diagnostico.RespuestaGuardar(pregunta_id=pregunta_id, answer="Sí")],
+            profile_a_id,
+        )
+        await session.commit()
+
+    async with _session_factory() as session:
+        respuesta = (
+            await session.execute(
+                select(DiagnosticAnswer).where(
+                    DiagnosticAnswer.diagnostic_id == diagnostico_org_a,
+                    DiagnosticAnswer.pregunta_id == pregunta_id,
+                )
+            )
+        ).scalar_one()
+        assert respuesta.created_by == profile_a_id
+        assert respuesta.updated_by == profile_a_id
+        primer_updated_at = respuesta.updated_at
+
+        diagnostic = await session.get(Diagnostic, diagnostico_org_a)
+        assert diagnostic.updated_by == profile_a_id
+
+    # Otra persona edita la misma respuesta: created_by no cambia, updated_by sí.
+    async with _session_factory() as session:
+        diagnostic = await session.get(Diagnostic, diagnostico_org_a)
+        await diagnostico.guardar_respuestas(
+            session,
+            diagnostic,
+            [diagnostico.RespuestaGuardar(pregunta_id=pregunta_id, answer="No")],
+            profile_b_id,
+        )
+        await session.commit()
+
+    async with _session_factory() as session:
+        respuesta = (
+            await session.execute(
+                select(DiagnosticAnswer).where(
+                    DiagnosticAnswer.diagnostic_id == diagnostico_org_a,
+                    DiagnosticAnswer.pregunta_id == pregunta_id,
+                )
+            )
+        ).scalar_one()
+        assert respuesta.created_by == profile_a_id, "created_by no debe cambiar"
+        assert respuesta.updated_by == profile_b_id
+        assert respuesta.updated_at > primer_updated_at
+
+        diagnostic = await session.get(Diagnostic, diagnostico_org_a)
+        assert diagnostic.updated_by == profile_b_id

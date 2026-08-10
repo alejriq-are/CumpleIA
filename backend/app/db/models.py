@@ -101,8 +101,14 @@ class Organization(Base):
     created_at: Mapped[datetime] = mapped_column(
         sa.TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
     )
+    # onupdate: PATCH /organizations muta estos atributos vía ORM (nunca un
+    # upsert crudo), así que se refresca solo — antes de ese endpoint esta
+    # fila nunca se actualizaba después de crearse.
     updated_at: Mapped[datetime] = mapped_column(
-        sa.TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
+        sa.TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
     )
 
     memberships: Mapped[list["Membership"]] = relationship(
@@ -364,8 +370,14 @@ class Diagnostic(Base):
     created_at: Mapped[datetime] = mapped_column(
         sa.TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
     )
+    # onupdate: Diagnostic siempre se toca vía atributos ORM (nunca un upsert
+    # crudo como diagnostic_answers), así que basta con esto para que se
+    # refresque cada vez que guardar_respuestas fija updated_by.
     updated_at: Mapped[datetime] = mapped_column(
-        sa.TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
+        sa.TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
     )
     created_by: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True), ForeignKey("profiles.id"), nullable=True
@@ -412,6 +424,19 @@ class DiagnosticAnswer(Base):
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         sa.TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
+    )
+    # Trazabilidad de quién respondió (mejoras al informe, ver migración
+    # 0008): actualizado explícitamente por
+    # app/services/diagnostico.py::guardar_respuestas, no por `onupdate` —
+    # el upsert (`ON CONFLICT DO UPDATE`) no pasa por el flush de la ORM.
+    updated_at: Mapped[datetime] = mapped_column(
+        sa.TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
+    )
+    created_by: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("profiles.id"), nullable=True
+    )
+    updated_by: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("profiles.id"), nullable=True
     )
 
 
@@ -460,8 +485,13 @@ class Finding(Base):
     created_at: Mapped[datetime] = mapped_column(
         sa.TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
     )
+    # onupdate: recalcular_diagnostico muta description/risk/status vía
+    # atributos ORM (nunca un upsert crudo), así que se refresca solo.
     updated_at: Mapped[datetime] = mapped_column(
-        sa.TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
+        sa.TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
     )
 
 

@@ -13,7 +13,7 @@ import uuid
 from dataclasses import dataclass
 
 from fastapi import HTTPException, status
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -87,7 +87,10 @@ async def obtener_o_crear_diagnostico_vigente(
 
 
 async def guardar_respuestas(
-    db: AsyncSession, diagnostic: Diagnostic, respuestas: list[RespuestaGuardar]
+    db: AsyncSession,
+    diagnostic: Diagnostic,
+    respuestas: list[RespuestaGuardar],
+    profile_id: uuid.UUID,
 ) -> bool:
     """Upsert de DiagnosticAnswer por (diagnostic_id, pregunta_id).
 
@@ -107,6 +110,15 @@ async def guardar_respuestas(
     señal correcta — a diferencia de comparar los puntajes agregados después
     de recalcular, que pueden coincidir por casualidad aunque las respuestas
     hayan cambiado.
+
+    `profile_id` es quién respondió (trazabilidad, migración 0008): se fija
+    en `created_by` solo en el insert y en `updated_by`/`updated_at` en cada
+    guardado (incluida una edición que reenvía el mismo valor) — el upsert es
+    un statement crudo, no pasa por el flush de la ORM, así que no basta con
+    `onupdate` en el modelo para esta tabla. También marca al propio
+    `diagnostic` como tocado por este perfil, sin importar si hubo cambio: es
+    "quién fue la última persona en enviar respuestas", no "quién cambió un
+    valor" (eso ya lo captura `hubo_cambio`).
     """
     if not respuestas:
         return False
@@ -155,15 +167,23 @@ async def guardar_respuestas(
                 "pregunta_id": r.pregunta_id,
                 "answer": r.answer,
                 "notes": r.notes,
+                "created_by": profile_id,
+                "updated_by": profile_id,
             }
             for r in respuestas
         ]
     )
     stmt = stmt.on_conflict_do_update(
         index_elements=["diagnostic_id", "pregunta_id"],
-        set_={"answer": stmt.excluded.answer, "notes": stmt.excluded.notes},
+        set_={
+            "answer": stmt.excluded.answer,
+            "notes": stmt.excluded.notes,
+            "updated_by": stmt.excluded.updated_by,
+            "updated_at": func.now(),
+        },
     )
     await db.execute(stmt)
+    diagnostic.updated_by = profile_id
     return hubo_cambio
 
 

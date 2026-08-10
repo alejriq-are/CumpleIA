@@ -15,6 +15,7 @@ que no pertenezca al diagnóstico.
 """
 
 import logging
+import re
 from datetime import UTC, datetime
 
 from fastapi import HTTPException, status
@@ -36,6 +37,31 @@ from app.services.rag import search_chunks
 logger = logging.getLogger("app.diagnostico_ia")
 
 FUENTES_ANCLAJE = ["ley_21719", "guia_ccs"]
+
+# BUG-01 (revisión manual del informe, Claude_22_julio_2026/
+# mejoras-informe-autodiagnostico.md): la regla 5 del system_prompt le pide
+# al LLM que no declare una cifra total de brechas/hallazgos, pero es solo
+# una instrucción — se verificó en producción que el modelo puede seguir
+# haciéndolo (ej. "se detectaron 35 brechas" cuando `len(hallazgos)` real
+# era 34). Sin este guardarraíl determinista, el número que el LLM decide
+# escribir es una segunda fuente de verdad que puede no coincidir con el
+# conteo real que ya se muestra en app/services/diagnostico_exportacion.py.
+# No cubre números escritos en palabras ("treinta y cinco") — el LLM
+# consistentemente usa dígitos cuando se le da un conteo exacto en el prompt.
+_PATRON_CONTEO_BRECHAS = re.compile(r"\b\d+\b\s+(brechas?|hallazgos?)", re.IGNORECASE)
+
+
+def _quitar_conteo_de_brechas(texto: str) -> str:
+    saneado, n = _PATRON_CONTEO_BRECHAS.subn(r"\1", texto)
+    if n:
+        logger.warning(
+            "Se quitó una cifra de brechas/hallazgos declarada por el LLM en "
+            "el resumen ejecutivo (%d ocurrencia(s)): el conteo determinista "
+            "vive solo en la exportación, no en el texto libre.",
+            n,
+        )
+    return saneado
+
 
 _INFORME_SCHEMA = {
     "type": "object",
@@ -164,7 +190,13 @@ async def generar_informe(db: AsyncSession, diagnostic: Diagnostic) -> dict:
         "sobre ellos.\n"
         "3. Si no hay un fragmento relevante para un hallazgo, escribe la "
         "narrativa igual mencionándolo, pero sin inventar una cita.\n"
-        "4. Escribe en español de Chile, en un tono profesional y directo."
+        "4. Escribe en español de Chile, en un tono profesional y directo.\n"
+        "5. NUNCA menciones en el resumen ejecutivo una cifra total de "
+        "brechas/hallazgos (ej. 'se detectaron 12 brechas'): ese conteo ya "
+        "se muestra de forma exacta en otra sección del informe, calculado "
+        "por el sistema, no por ti. Si necesitas referirte a la cantidad, "
+        "usa términos generales ('varias brechas de riesgo alto', 'la "
+        "mayoría de los hallazgos'), nunca un número."
     )
 
     perfil = (
@@ -247,7 +279,9 @@ async def generar_informe(db: AsyncSession, diagnostic: Diagnostic) -> dict:
         )
 
     informe = {
-        "resumen_ejecutivo": resultado.get("resumen_ejecutivo", ""),
+        "resumen_ejecutivo": _quitar_conteo_de_brechas(
+            resultado.get("resumen_ejecutivo", "")
+        ),
         "narrativas": narrativas_saneadas,
     }
 
