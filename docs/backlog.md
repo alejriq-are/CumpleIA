@@ -72,5 +72,42 @@ Los hallazgos #1 (RLS de `org_visibility` bloqueaba a un superadmin sin membres�
 ### Backlog derivado — Exportación
 
 - [ ] **PDF real:** sigue pendiente para cuando el Módulo 4 (generador de documentos) exista o si una PYME lo pide antes — hoy el usuario debe usar "Imprimir → Guardar como PDF" del navegador sobre el HTML exportado.
-- [ ] **Descarga desde el frontend:** el endpoint ya devuelve `Content-Disposition: attachment`; falta el botón/wiring de la Tarea 6 (frontend) que lo consuma.
-- [ ] **Respuestas crudas no incluidas:** el documento exportado no lista las 50 respuestas individuales (solo puntajes + hallazgos + narrativa), a pedido explícito para mantenerlo corto — evaluar si se necesita un anexo con el detalle completo cuando exista la carpeta de evidencia (Módulo 5).
+- [x] **Descarga desde el frontend:** resuelto en la Tarea 6 (`ResultadosDashboard.tsx::handleDescargar`, fetch con Bearer token + Blob URL, ya que el navegador no puede mandar el header `Authorization` desde un `<a href>` plano).
+- [ ] **Respuestas crudas no incluidas:** decisión explícita (no diferida por falta de tiempo): el anexo con el detalle de las 50 respuestas se reserva para la Carpeta de Evidencia (Módulo 5, de pago) en vez de regalarse en el informe gratuito del Módulo 1 (freemium) — ver nota de estrategia más abajo. El dashboard en pantalla (`ResultadosDashboard.tsx`) ya muestra un aviso "Anexo de respuestas — disponible en la Carpeta de Evidencia" a modo de preview del upsell.
+
+## Frontend del Autodiagnóstico (Fase 1, Módulo 1, Tarea 6)
+
+Wizard del cuestionario por sección + dashboard de resultados + descarga del informe, bajo `/dashboard/autodiagnostico` (`frontend/components/autodiagnostico/`: `AutodiagnosticoWorkspace`, `Cuestionario`, `ResultadosDashboard`). Decisiones tomadas antes de construir (sin selector de organización ni tests de frontend preexistentes en el repo):
+
+- **Organización activa:** se asume una sola organización por usuario (`GET /me/organizations`); si hay más de una se muestra un `<select>` local sin contexto global — no hay onboarding ni selector persistente todavía, y no era el alcance de esta tarea construirlo.
+- **Navegación del wizard:** una sola ruta con estado interno en React (tabs/paso actual), sin URL por sección — el catálogo es chico (50 preguntas) y no había precedente de rutas dinámicas en el repo.
+- **Sin tests automatizados de frontend:** consistente con que todo el proyecto no tenía ningún framework de testing de frontend configurado antes de esta tarea (ni Jest, ni Vitest, ni Playwright) — verificación manual en navegador real.
+
+### Backlog derivado — Frontend
+
+- [ ] **Selector/contexto global de organización:** si alguna vez un usuario pertenece a más de una organización de verdad, el `<select>` local de `AutodiagnosticoWorkspace` no escala a otras pantallas futuras — evaluar un contexto de React reusable en ese momento.
+- [ ] **Testing de frontend:** no hay ningún framework instalado; si se decide adoptar uno, es una decisión de alcance mayor (nueva dependencia a justificar en `CLAUDE.md`) que aplica a todo el proyecto, no solo a este módulo.
+
+## Mejoras al informe de Autodiagnóstico (revisión manual, 2026-08-10)
+
+Origen: `Claude_22_julio_2026/mejoras-informe-autodiagnostico.md` (revisión manual de un informe real exportado). De los 9 ítems + 1 bug del documento, se resolvieron en esta ronda:
+
+- **BUG-01 (desfase entre conteo narrativo y hallazgos listados):** el resumen ejecutivo del LLM podía declarar un número de brechas que no coincidiera con `len(hallazgos)` — dos fuentes de verdad para el mismo dato. Fix: `app/services/diagnostico_ia.py` ahora instruye explícitamente al LLM a NO declarar una cifra total de brechas en el resumen ejecutivo (regla 5 del system prompt); el conteo exacto vive solo en el bloque determinista nuevo (ítem 2). Sin guardarraíl programático que lo garantice al 100% (una instrucción de prompt no es una validación) — si volviera a pasar, considerar post-procesar la respuesta del LLM para detectar y quitar cifras sueltas.
+- **Ítem 1 (encabezado de identificación):** agregado solo al HTML exportado (`app/services/diagnostico_exportacion.py`), no al dashboard en pantalla — nombre, RUT, rubro y tamaño de la organización, quién respondió (perfil `updated_by` del diagnóstico) y su rol de membresía como proxy de "cargo" (no existe un campo de puesto/cargo real en `Profile` todavía), ID del diagnóstico y fecha. "Tamaño" muestra el valor libre `organizations.size`, no una clasificación PYME/gran empresa por umbral legal (esa clasificación no existe en el código).
+- **Ítem 2 (conteo de hallazgos por riesgo):** bloque determinista Alto/Medio/Bajo/Total en el informe exportado, antes de la tabla por sección. Solo el total global, sin desagregado por sección ni gráfico (barras/donut) — se prefirió mantenerlo simple; ver backlog derivado abajo.
+- **Ítem 3 (trazabilidad respuesta + riesgo base/ajustado):** `HallazgoOut` (API) y el HTML exportado ahora muestran la respuesta original de la pregunta y, cuando "Parcial" degrada el riesgo, tanto el riesgo base del catálogo como el ajustado ("Riesgo Medio — base Alto, ajustado por respuesta Parcial"). Se agregó también una sección de Metodología (escala de respuesta, cálculo de puntaje, regla de degradación) en el HTML exportado.
+- **Trazabilidad de quién respondió (pedido del usuario, no del documento original):** `diagnostic_answers` ahora tiene `created_by`/`updated_by`/`updated_at` (migración `0008_diagnostic_answers_auditoria.py`); `Diagnostic.updated_by` se actualiza en cada `POST /diagnostico/respuestas`, y `Diagnostic`/`Finding.updated_at` tienen `onupdate=func.now()`. Antes de este fix, ninguna tabla del Autodiagnóstico registraba quién editó una respuesta ni cuándo — brecha real respecto a la convención de auditoría de `CLAUDE.md`.
+
+### Backlog derivado — Mejoras al informe (ítems 4-9 del documento, diferidos por decisión explícita del usuario)
+
+- [ ] **Ítem 2 (fase 2):** desagregado del conteo de hallazgos por sección y/o gráfico simple (barras o donut) — se implementó solo el total global.
+- [ ] **Ítem 4 — Contenido accionable:** recomendación de acción concreta, responsable (rol) y plazo indicativo por severidad (Alto=30 días, Medio=90, Bajo=180) por hallazgo; exportar como plan de acción independiente (Excel/tabla) es fase 2 dentro del ítem.
+- [ ] **Ítem 5 — Nota de DPD en autodesignación:** detectar cuando el Gerente General (u otro cargo directivo) se autodesigna delegado de protección de datos y agregar una nota sobre la alternativa de designar a un tercero (incluyendo que CumpleIA puede prestar ese servicio).
+- [ ] **Ítem 6 — Fundamento legal por hallazgo:** citar el artículo específico de la Ley N.° 21.719 en hallazgos de riesgo Alto (al menos), extensible a todos si el catálogo llega a tener ese mapeo.
+- [ ] **Ítem 7 — Preguntas N/A:** mostrar por sección cuántas preguntas quedaron en N/A vs. respondidas, para no leer un puntaje de sección como si estuviera completo cuando no lo está.
+- [ ] **Ítem 8 — Comparación histórica (fase 2):** requiere que exista más de un `Diagnostic` por organización — hoy es get-or-create, a lo sumo uno (ver backlog de Autodiagnóstico más arriba, "Re-evaluaciones").
+- [ ] **Ítem 9 — Cierre formal:** bloque de validación/firma (nombre, cargo, fecha) del responsable que revisa, y etiqueta de clasificación de confidencialidad del documento.
+
+### Nota de estrategia — freemium vs. Carpeta de Evidencia (decisión del usuario, 2026-08-10)
+
+El anexo de respuestas crudas y, en general, cualquier bitácora de auditoría fina (quién respondió qué y cuándo) se reserva deliberadamente para la Carpeta de Evidencia (Módulo 5, de pago) en vez de incluirse gratis en el informe del Autodiagnóstico (Módulo 1, "gancho freemium"). El resumen + puntajes + hallazgos ya bastan para mostrarle a la PYME que tiene brechas; el valor probatorio detallado (evidencia formal ante la Agencia) es lo que debería empujar la conversión a suscripción. Los campos de auditoría (`created_by`/`updated_by`/`updated_at`) sí se construyeron ya en el modelo de datos porque son la base necesaria para que el Módulo 5 los explote más adelante — no se exponen todavía como anexo en el informe gratuito.

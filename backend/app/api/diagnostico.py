@@ -110,7 +110,18 @@ class HallazgoOut(BaseModel):
     pregunta_id: str | None
     seccion_id: str | None
     description: str
+    # `risk` es el riesgo AJUSTADO (ya degradado si la respuesta fue
+    # 'Parcial', ver app/services/diagnostico_puntaje.py::detectar_brechas);
+    # `risk_base` es el riesgo del catálogo antes de esa degradación. Ambos
+    # se muestran juntos para que se entienda por qué una pregunta de riesgo
+    # base Alto puede aparecer como hallazgo Medio (mejora al informe,
+    # Claude_22_julio_2026/mejoras-informe-autodiagnostico.md, ítem 3).
     risk: str
+    risk_base: str | None
+    # Respuesta vigente ('Sí'/'Parcial'/'No'/'N/A') de la pregunta que originó
+    # este hallazgo — None si el hallazgo no viene del motor de puntaje
+    # (pregunta_id nulo, ver comentario en el modelo Finding).
+    answer: str | None
     status: str
     corrective_action: str | None
     responsible: str | None
@@ -164,6 +175,7 @@ async def _construir_actual_out(
         .scalars()
         .all()
     )
+    respuestas_por_pregunta = {r.pregunta_id: r.answer for r in respuestas}
     hallazgos = (
         (
             await db.execute(
@@ -222,6 +234,12 @@ async def _construir_actual_out(
                 ),
                 description=h.description,
                 risk=h.risk.value.capitalize(),
+                risk_base=(
+                    config.riesgo_por_pregunta.get(h.pregunta_id)
+                    if h.pregunta_id
+                    else None
+                ),
+                answer=respuestas_por_pregunta.get(h.pregunta_id),
                 status=h.status.value,
                 corrective_action=h.corrective_action,
                 responsible=h.responsible,
@@ -282,7 +300,7 @@ async def guardar_respuestas(
         for r in payload.respuestas
     ]
     hubo_cambio = await diagnostico_service.guardar_respuestas(
-        db, diagnostic, respuestas
+        db, diagnostic, respuestas, current_profile.id
     )
     await diagnostico_service.recalcular_diagnostico(db, diagnostic, hubo_cambio)
     return await _construir_actual_out(db, diagnostic)

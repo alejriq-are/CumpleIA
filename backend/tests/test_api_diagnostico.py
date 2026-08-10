@@ -17,6 +17,7 @@ activa, 50 preguntas), igual que el resto de la suite del Módulo 1.
 
 import uuid
 from datetime import UTC, datetime
+from zoneinfo import ZoneInfo
 
 import pytest
 import pytest_asyncio
@@ -30,6 +31,7 @@ from app.db.models import (
     DiagnosticAnswer,
     Finding,
     Membership,
+    Organization,
     Profile,
     UserRole,
 )
@@ -39,6 +41,32 @@ from tests.conftest import _make_profile_override_from_db, _make_rls_db_override
 
 _VIEWER_PROFILE_ID = uuid.uuid4()
 _VIEWER_AUTH_ID = uuid.uuid4()
+
+
+@pytest_asyncio.fixture(autouse=True)
+async def _restaurar_organizacion_a(_session_factory, org_a_id):
+    """`org_a_id` es session-scoped (`_seed_test_data` en conftest.py): los
+    tests de exportación que fijan `size`/`rut`/`industry` vía
+    `PATCH /organizations` no deben dejar ese estado para el resto de la
+    suite."""
+    async with _session_factory() as session:
+        original = await session.get(Organization, org_a_id)
+        nombre, rut, industry, size = (
+            original.name,
+            original.rut,
+            original.industry,
+            original.size,
+        )
+
+    yield
+
+    async with _session_factory() as session:
+        organizacion = await session.get(Organization, org_a_id)
+        organizacion.name = nombre
+        organizacion.rut = rut
+        organizacion.industry = industry
+        organizacion.size = size
+        await session.commit()
 
 
 @pytest_asyncio.fixture(autouse=True)
@@ -613,3 +641,233 @@ async def test_viewer_puede_exportar_informe(
             headers={"X-Organization-Id": str(org_a_id)},
         )
     assert resp.status_code == 200
+
+
+@pytest.mark.asyncio
+async def test_guardar_respuestas_expone_answer_y_risk_base_por_hallazgo(
+    client_a, org_a_id
+):
+    """Mejora al informe (ítem 3): sin `answer`/`risk_base` en `HallazgoOut`
+    no se puede explicar por qué una pregunta de riesgo base Alto aparece
+    como hallazgo Medio. Responder TODO en 'Parcial' garantiza al menos una
+    degradación real (riesgo_base != risk), salvo que el catálogo sembrado
+    fuera 100% riesgo Bajo, lo que test_diagnostico_puntaje.py ya descarta."""
+    async with AsyncClient(
+        transport=ASGITransport(app=client_a), base_url="http://test"
+    ) as client:
+        cuestionario = (
+            await client.get(
+                "/diagnostico/cuestionario",
+                headers={"X-Organization-Id": str(org_a_id)},
+            )
+        ).json()
+        respuestas = [
+            {"pregunta_id": p["id"], "answer": "Parcial"}
+            for p in cuestionario["preguntas"]
+        ]
+        resp = await client.post(
+            "/diagnostico/respuestas",
+            headers={"X-Organization-Id": str(org_a_id)},
+            json={"respuestas": respuestas},
+        )
+
+    data = resp.json()
+    assert all(h["answer"] == "Parcial" for h in data["hallazgos"])
+    assert all(h["risk_base"] is not None for h in data["hallazgos"])
+    assert any(
+        h["risk"] != h["risk_base"] for h in data["hallazgos"]
+    ), "el catálogo debe tener al menos una pregunta de riesgo base distinto de Bajo"
+
+
+@pytest.mark.asyncio
+async def test_exportar_incluye_identificacion_conteo_metodologia_y_riesgo_ajustado(
+    client_a, org_a_id, monkeypatch
+):
+    """Mejoras al informe (ítems 1, 2 y 3): encabezado de identificación
+    (empresa/RUT/rubro/tamaño/quién respondió/ID), conteo determinista de
+    hallazgos por riesgo (BUG-01: fuente única de verdad, no una cifra que
+    declare el LLM) y la explicación base/ajustado cuando 'Parcial' degrada
+    el riesgo."""
+
+    async def _fake_generar_informe(db, diagnostic):
+        diagnostic.informe_ia = {"resumen_ejecutivo": "Resumen mock.", "narrativas": []}
+        diagnostic.informe_generado_en = datetime.now(UTC)
+        return diagnostic.informe_ia
+
+    monkeypatch.setattr(
+        diagnostico_api.diagnostico_ia, "generar_informe", _fake_generar_informe
+    )
+
+    async with AsyncClient(
+        transport=ASGITransport(app=client_a), base_url="http://test"
+    ) as client:
+        cuestionario = (
+            await client.get(
+                "/diagnostico/cuestionario",
+                headers={"X-Organization-Id": str(org_a_id)},
+            )
+        ).json()
+        respuestas = [
+            {"pregunta_id": p["id"], "answer": "Parcial"}
+            for p in cuestionario["preguntas"]
+        ]
+        guardado = (
+            await client.post(
+                "/diagnostico/respuestas",
+                headers={"X-Organization-Id": str(org_a_id)},
+                json={"respuestas": respuestas},
+            )
+        ).json()
+        degradado = next(
+            h for h in guardado["hallazgos"] if h["risk"] != h["risk_base"]
+        )
+
+        await client.post(
+            "/diagnostico/informe", headers={"X-Organization-Id": str(org_a_id)}
+        )
+        resp = await client.get(
+            "/diagnostico/informe/exportar",
+            headers={"X-Organization-Id": str(org_a_id)},
+        )
+
+    assert resp.status_code == 200
+    body = resp.text
+
+    total_abierto = sum(1 for h in guardado["hallazgos"] if h["status"] != "cerrado")
+    assert (
+        f'<span class="conteo-numero">{total_abierto}</span><span>Total abiertos</span>'
+        in body
+    )
+    assert "Hallazgos abiertos por riesgo" in body
+
+    assert "Metodología" in body
+    assert "Parcial</strong> = 50%" in body
+
+    assert 'class="identificacion"' in body
+    assert "ID de diagnóstico" in body
+    assert "Respondido por" in body
+    assert "Propietario/a" in body  # client_a es owner (conftest.py)
+
+    assert (
+        f"base {degradado['risk_base']}, ajustado por respuesta Parcial" in body
+    ), "debe explicar el riesgo ajustado cuando Parcial degrada el riesgo base"
+
+
+async def _generar_y_exportar_informe(client: AsyncClient, org_a_id) -> str:
+    cuestionario = (
+        await client.get(
+            "/diagnostico/cuestionario",
+            headers={"X-Organization-Id": str(org_a_id)},
+        )
+    ).json()
+    respuestas = [
+        {"pregunta_id": p["id"], "answer": "Sí"} for p in cuestionario["preguntas"]
+    ]
+    await client.post(
+        "/diagnostico/respuestas",
+        headers={"X-Organization-Id": str(org_a_id)},
+        json={"respuestas": respuestas},
+    )
+    await client.post(
+        "/diagnostico/informe", headers={"X-Organization-Id": str(org_a_id)}
+    )
+    resp = await client.get(
+        "/diagnostico/informe/exportar",
+        headers={"X-Organization-Id": str(org_a_id)},
+    )
+    assert resp.status_code == 200
+    return resp.text
+
+
+@pytest.mark.asyncio
+async def test_exportar_incluye_aviso_pyme_para_pequena_y_mediana_empresa(
+    client_a, org_a_id, monkeypatch
+):
+    """Pedido explícito del usuario (2026-08-10): 'pequeña'/'mediana' muestran
+    la sigla PYME y el aviso de asesoría; 'micro'/'grande' no."""
+
+    async def _fake_generar_informe(db, diagnostic):
+        diagnostic.informe_ia = {"resumen_ejecutivo": "Resumen mock.", "narrativas": []}
+        diagnostic.informe_generado_en = datetime.now(UTC)
+        return diagnostic.informe_ia
+
+    monkeypatch.setattr(
+        diagnostico_api.diagnostico_ia, "generar_informe", _fake_generar_informe
+    )
+
+    async with AsyncClient(
+        transport=ASGITransport(app=client_a), base_url="http://test"
+    ) as client:
+        await client.patch(
+            "/organizations",
+            headers={"X-Organization-Id": str(org_a_id)},
+            json={"name": "Organización A (test)", "size": "pequeña"},
+        )
+        body = await _generar_y_exportar_informe(client, org_a_id)
+
+    assert "Pequeña empresa (PYME)" in body
+    assert "CumpleIA puede asesorarte" in body
+
+
+@pytest.mark.asyncio
+async def test_exportar_no_incluye_aviso_pyme_para_micro_empresa(
+    client_a, org_a_id, monkeypatch
+):
+    async def _fake_generar_informe(db, diagnostic):
+        diagnostic.informe_ia = {"resumen_ejecutivo": "Resumen mock.", "narrativas": []}
+        diagnostic.informe_generado_en = datetime.now(UTC)
+        return diagnostic.informe_ia
+
+    monkeypatch.setattr(
+        diagnostico_api.diagnostico_ia, "generar_informe", _fake_generar_informe
+    )
+
+    async with AsyncClient(
+        transport=ASGITransport(app=client_a), base_url="http://test"
+    ) as client:
+        await client.patch(
+            "/organizations",
+            headers={"X-Organization-Id": str(org_a_id)},
+            json={"name": "Organización A (test)", "size": "micro"},
+        )
+        body = await _generar_y_exportar_informe(client, org_a_id)
+
+    assert "Micro empresa" in body
+    assert "(PYME)" not in body
+    assert "CumpleIA puede asesorarte" not in body
+
+
+@pytest.mark.asyncio
+async def test_exportar_muestra_la_hora_convertida_a_chile_no_en_utc(
+    client_a, org_a_id, monkeypatch
+):
+    """`informe_generado_en` se guarda en UTC (`datetime.now(UTC)`,
+    diagnostico_ia.py); el HTML exportado debe convertirla a America/Santiago
+    antes de mostrarla, no formatear el UTC crudo como si fuera hora local."""
+    momento_utc = datetime(2026, 8, 10, 23, 30, tzinfo=UTC)
+
+    async def _fake_generar_informe(db, diagnostic):
+        diagnostic.informe_ia = {"resumen_ejecutivo": "Resumen mock.", "narrativas": []}
+        diagnostic.informe_generado_en = momento_utc
+        return diagnostic.informe_ia
+
+    monkeypatch.setattr(
+        diagnostico_api.diagnostico_ia, "generar_informe", _fake_generar_informe
+    )
+
+    async with AsyncClient(
+        transport=ASGITransport(app=client_a), base_url="http://test"
+    ) as client:
+        body = await _generar_y_exportar_informe(client, org_a_id)
+
+    hora_chile_esperada = momento_utc.astimezone(ZoneInfo("America/Santiago")).strftime(
+        "%d-%m-%Y %H:%M"
+    )
+    hora_utc_cruda = momento_utc.strftime("%d-%m-%Y %H:%M")
+
+    assert hora_chile_esperada in body
+    assert hora_chile_esperada != hora_utc_cruda, (
+        "el momento elegido debe tener un offset real distinto de 0 para que "
+        "este test detecte una regresión a formatear UTC crudo"
+    )
+    assert hora_utc_cruda not in body

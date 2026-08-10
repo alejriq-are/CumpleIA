@@ -31,6 +31,9 @@ class MembershipOut(BaseModel):
 class OrganizationMembershipOut(BaseModel):
     id: uuid.UUID  # id de la organización
     name: str
+    rut: str | None
+    industry: str | None
+    size: str | None
     role: UserRole  # rol del usuario autenticado en esa organización
 
 
@@ -54,13 +57,27 @@ async def get_my_organizations(
     `profile_id` garantiza que nunca se filtren organizaciones ajenas.
     """
     result = await db.execute(
-        select(Organization.id, Organization.name, Membership.role)
+        select(
+            Organization.id,
+            Organization.name,
+            Organization.rut,
+            Organization.industry,
+            Organization.size,
+            Membership.role,
+        )
         .join(Membership, Membership.organization_id == Organization.id)
         .where(Membership.profile_id == current_profile.id)
         .order_by(Organization.name)
     )
     return [
-        OrganizationMembershipOut(id=row.id, name=row.name, role=row.role)
+        OrganizationMembershipOut(
+            id=row.id,
+            name=row.name,
+            rut=row.rut,
+            industry=row.industry,
+            size=row.size,
+            role=row.role,
+        )
         for row in result.all()
     ]
 

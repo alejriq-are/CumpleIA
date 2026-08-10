@@ -18,14 +18,52 @@ superficie de XSS igual que cualquier otra página servida por la app.
 """
 
 from html import escape
+from zoneinfo import ZoneInfo
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.models import Diagnostic, Finding, Organization
+from app.db.models import (
+    Diagnostic,
+    DiagnosticAnswer,
+    Finding,
+    Membership,
+    Organization,
+    Profile,
+)
 from app.services.cuestionario_config import obtener_config_por_id
 
 _RISK_ORDEN = {"alto": 0, "medio": 1, "bajo": 2}
+
+# `informe_generado_en` se guarda en UTC (`datetime.now(UTC)`,
+# app/services/diagnostico_ia.py) — sin convertir a la hora de Chile antes de
+# formatear, el informe mostraba la hora UTC como si fuera local (hasta 4h de
+# diferencia). CumpleIA es un producto solo para Chile (ver CLAUDE.md), así
+# que la zona se fija aquí en vez de derivarla de algo configurable.
+_TZ_CHILE = ZoneInfo("America/Santiago")
+
+# "Cargo" de quien respondió (mejora al informe, ver
+# Claude_22_julio_2026/mejoras-informe-autodiagnostico.md, ítem 1): no existe
+# un campo de puesto/cargo real en Profile todavía, así que se usa el rol de
+# membresía en la organización como proxy — aproximado, pero es el único dato
+# organizacional disponible hoy sin agregar un campo nuevo.
+_ROL_DISPLAY = {
+    "owner": "Propietario/a",
+    "admin": "Administrador/a",
+    "editor": "Editor/a",
+    "viewer": "Colaborador/a",
+}
+
+# Etiquetas de tamaño (pedido explícito del usuario, 2026-08-10): "pequeña" y
+# "mediana" llevan la sigla "(PYME)" — "micro" y "grande" no, a propósito, no
+# es la clasificación MIPYME formal chilena (que sí incluye a la micro).
+_TAMANO_DISPLAY = {
+    "micro": "Micro empresa",
+    "pequeña": "Pequeña empresa (PYME)",
+    "mediana": "Mediana empresa (PYME)",
+    "grande": "Gran Empresa",
+}
+_TAMANOS_PYME = {"pequeña", "mediana"}
 
 
 def _fmt_score(score: float | None) -> str:
@@ -58,12 +96,56 @@ async def generar_html_informe(db: AsyncSession, diagnostic: Diagnostic) -> str:
         n["finding_id"]: n for n in informe_ia.get("narrativas", [])
     }
 
+    answers = (
+        (
+            await db.execute(
+                select(DiagnosticAnswer).where(
+                    DiagnosticAnswer.diagnostic_id == diagnostic.id
+                )
+            )
+        )
+        .scalars()
+        .all()
+    )
+    respuestas_por_pregunta = {a.pregunta_id: a.answer for a in answers}
+
+    # Quién respondió (mejora al informe, ítem 1): el último perfil que
+    # guardó respuestas (`updated_by`, ver migración 0008) — no quien inició
+    # el diagnóstico si alguien más lo completó después.
+    respondedor = (
+        await db.get(Profile, diagnostic.updated_by) if diagnostic.updated_by else None
+    )
+    cargo_respondedor = None
+    if respondedor is not None:
+        membership = (
+            await db.execute(
+                select(Membership).where(
+                    Membership.organization_id == diagnostic.organization_id,
+                    Membership.profile_id == respondedor.id,
+                )
+            )
+        ).scalar_one_or_none()
+        if membership is not None:
+            cargo_respondedor = _ROL_DISPLAY.get(
+                membership.role.value, membership.role.value
+            )
+
     def _orden_hallazgo(f: Finding) -> tuple[int, int]:
         pregunta = preguntas_por_id.get(f.pregunta_id) if f.pregunta_id else None
         seccion = secciones_por_id.get(pregunta.seccion_id) if pregunta else None
         return (_RISK_ORDEN.get(f.risk.value, 9), seccion.orden if seccion else 99)
 
     findings_ordenados = sorted(findings, key=_orden_hallazgo)
+
+    # Conteo por riesgo (BUG-01 / ítem 2): fuente determinista única del
+    # total de brechas abiertas — el resumen ejecutivo del LLM tiene
+    # instrucción explícita de NO declarar esta cifra
+    # (app/services/diagnostico_ia.py) para no tener dos números que puedan
+    # no coincidir.
+    abiertos = [f for f in findings if f.status.value != "cerrado"]
+    conteo_riesgo = {"alto": 0, "medio": 0, "bajo": 0}
+    for f in abiertos:
+        conteo_riesgo[f.risk.value] = conteo_riesgo.get(f.risk.value, 0) + 1
 
     filas_puntaje = "\n".join(
         f"<tr><td>{escape(s.numero_romano)}</td><td>{escape(s.nombre)}</td>"
@@ -91,23 +173,48 @@ async def generar_html_informe(db: AsyncSession, diagnostic: Diagnostic) -> str:
             if narrativa
             else ""
         )
+
+        # Respuesta + riesgo base/ajustado (mejora al informe, ítem 3): una
+        # respuesta 'Parcial' degrada el riesgo un nivel respecto al base del
+        # catálogo (ver app/services/diagnostico_puntaje.py::detectar_brechas)
+        # — sin esto no se entiende por qué una pregunta de riesgo base Alto
+        # puede aparecer como hallazgo Medio.
+        answer = respuestas_por_pregunta.get(f.pregunta_id) if f.pregunta_id else None
+        riesgo_base = (
+            config.riesgo_por_pregunta.get(f.pregunta_id) if f.pregunta_id else None
+        )
+        riesgo_ajustado = f.risk.value.capitalize()
+        if answer == "Parcial" and riesgo_base and riesgo_base != riesgo_ajustado:
+            riesgo_texto = (
+                f"Riesgo {escape(riesgo_ajustado)} — base {escape(riesgo_base)}, "
+                "ajustado por respuesta Parcial"
+            )
+        else:
+            riesgo_texto = f"Riesgo {escape(riesgo_ajustado)}"
+
         bloques_hallazgos.append(
             "<div class='hallazgo risk-{riesgo_clase}'>"
             "<div class='hallazgo-header'>"
-            "<span class='riesgo'>Riesgo {riesgo}</span>"
+            "<span class='riesgo'>{riesgo_texto}</span>"
             "<span class='estado'>{estado}</span>"
             "</div>"
             "<p class='seccion'>{seccion}</p>"
             "<p class='descripcion'>{descripcion}</p>"
+            "{respuesta}"
             "{narrativa_html}"
             "{accion}"
             "{responsable}"
             "</div>".format(
                 riesgo_clase=escape(f.risk.value),
-                riesgo=escape(f.risk.value.capitalize()),
+                riesgo_texto=riesgo_texto,
                 estado=escape(f.status.value.capitalize()),
                 seccion=escape(seccion.nombre if seccion else "Sección desconocida"),
                 descripcion=escape(f.description),
+                respuesta=(
+                    f"<p class='meta'><strong>Respuesta:</strong> {escape(answer)}</p>"
+                    if answer
+                    else ""
+                ),
                 narrativa_html=narrativa_html,
                 accion=(
                     f"<p class='meta'><strong>Acción correctiva:</strong> "
@@ -125,7 +232,7 @@ async def generar_html_informe(db: AsyncSession, diagnostic: Diagnostic) -> str:
         )
 
     generado_en = (
-        diagnostic.informe_generado_en.strftime("%d-%m-%Y %H:%M")
+        diagnostic.informe_generado_en.astimezone(_TZ_CHILE).strftime("%d-%m-%Y %H:%M")
         if diagnostic.informe_generado_en
         else "s/i"
     )
@@ -135,6 +242,78 @@ async def generar_html_informe(db: AsyncSession, diagnostic: Diagnostic) -> str:
         for parrafo in informe_ia.get("resumen_ejecutivo", "").split("\n")
         if parrafo.strip()
     )
+
+    # Encabezado de identificación (mejora al informe, ítem 1): rubro/tamaño
+    # importan porque la Ley 21.719 trata distinto a la PYME; "Tamaño" es el
+    # valor libre que la organización declaró al crear su cuenta
+    # (`organizations.size`), no una clasificación automática por umbral
+    # legal — esa clasificación no existe todavía (ver docs/backlog.md).
+    rut_texto = escape(organization.rut) if organization and organization.rut else "s/i"
+    industry_texto = (
+        escape(organization.industry)
+        if organization and organization.industry
+        else "s/i"
+    )
+    size_texto = (
+        escape(_TAMANO_DISPLAY.get(organization.size, organization.size))
+        if organization and organization.size
+        else "s/i"
+    )
+    respondedor_texto = (
+        escape(respondedor.full_name or respondedor.email) if respondedor else "s/i"
+    )
+    if respondedor is not None and cargo_respondedor:
+        respondedor_texto = f"{respondedor_texto} ({escape(cargo_respondedor)})"
+
+    identificacion_html = f"""<table class="identificacion">
+<tr><td>Organización</td><td>{organizacion_nombre}</td></tr>
+<tr><td>RUT</td><td>{rut_texto}</td></tr>
+<tr><td>Rubro</td><td>{industry_texto}</td></tr>
+<tr><td>Tamaño</td><td>{size_texto}</td></tr>
+<tr><td>Respondido por</td><td>{respondedor_texto}</td></tr>
+<tr><td>ID de diagnóstico</td><td>{diagnostic.id}</td></tr>
+<tr><td>Fecha de generación</td><td>{escape(generado_en)}</td></tr>
+</table>"""
+
+    # Upsell para PYME (pedido explícito del usuario, 2026-08-10): no es parte
+    # del contenido probatorio del informe, es una sugerencia comercial — solo
+    # se muestra si el tamaño declarado es "pequeña" o "mediana".
+    aviso_pyme_html = ""
+    if organization and organization.size in _TAMANOS_PYME:
+        aviso_pyme_html = """<div class="aviso-pyme">
+<strong>¿Sabías que...?</strong> Como empresa PYME, CumpleIA puede asesorarte en la
+implementación de tu programa de cumplimiento de la Ley N.° 21.719 — desde la definición
+de políticas hasta la designación de un Delegado de Protección de Datos.
+</div>"""
+
+    conteo_riesgo_html = f"""<div class="conteo-riesgo">
+<div class="conteo-item risk-alto"><span class="conteo-numero">{conteo_riesgo["alto"]}</span><span>Alto</span></div>
+<div class="conteo-item risk-medio"><span class="conteo-numero">{conteo_riesgo["medio"]}</span><span>Medio</span></div>
+<div class="conteo-item risk-bajo"><span class="conteo-numero">{conteo_riesgo["bajo"]}</span><span>Bajo</span></div>
+<div class="conteo-item conteo-total"><span class="conteo-numero">{len(abiertos)}</span><span>Total abiertos</span></div>
+</div>"""
+
+    # Estático (no depende de datos del diagnóstico): explica la escala de
+    # respuesta y la regla de degradación de riesgo para que un fiscalizador
+    # o auditor externo entienda por qué un hallazgo de riesgo base Alto
+    # puede aparecer como Medio (mejora al informe, ítem 3).
+    metodologia_html = """<p>Cada pregunta se responde con una de estas opciones:
+<strong>Sí</strong>, <strong>Parcial</strong>, <strong>No</strong> o <strong>N/A</strong> (no aplica).
+El puntaje de cada sección es el promedio de sus preguntas respondidas — <strong>Sí</strong> = 100%,
+<strong>Parcial</strong> = 50%, <strong>No</strong> = 0%; las preguntas en <strong>N/A</strong> se
+excluyen del promedio. Una respuesta <strong>No</strong> abre un hallazgo con el riesgo base de la
+pregunta (Alto, Medio o Bajo, según el catálogo); una respuesta <strong>Parcial</strong> abre un
+hallazgo un nivel de riesgo por debajo del base (Alto→Medio, Medio→Bajo, Bajo se mantiene en Bajo).
+Las respuestas Sí y N/A no generan hallazgos.</p>
+<table>
+<thead><tr><th>Respuesta</th><th class="num">Puntaje</th><th>¿Genera hallazgo?</th><th>Riesgo del hallazgo</th></tr></thead>
+<tbody>
+<tr><td>Sí</td><td class="num">100%</td><td>No</td><td>—</td></tr>
+<tr><td>Parcial</td><td class="num">50%</td><td>Sí</td><td>Un nivel bajo el riesgo base</td></tr>
+<tr><td>No</td><td class="num">0%</td><td>Sí</td><td>Riesgo base de la pregunta</td></tr>
+<tr><td>N/A</td><td class="num">excluida</td><td>No</td><td>—</td></tr>
+</tbody>
+</table>"""
 
     return f"""<!DOCTYPE html>
 <html lang="es-CL">
@@ -159,6 +338,15 @@ async def generar_html_informe(db: AsyncSession, diagnostic: Diagnostic) -> str:
   .meta {{ margin: 0.2rem 0; }}
   ul.citas {{ margin: 0.3rem 0 0.6rem 1.2rem; color: #444; font-size: 0.9rem; }}
   .global-score {{ font-size: 2rem; font-weight: bold; }}
+  .identificacion td:first-child {{ color: #555; width: 40%; }}
+  .conteo-riesgo {{ display: flex; gap: 1rem; margin-top: 0.75rem; }}
+  .conteo-item {{ flex: 1; border: 1px solid #ddd; border-left: 4px solid #999; border-radius: 4px; padding: 0.6rem 1rem; text-align: center; }}
+  .conteo-item.risk-alto {{ border-left-color: #b91c1c; }}
+  .conteo-item.risk-medio {{ border-left-color: #b45309; }}
+  .conteo-item.risk-bajo {{ border-left-color: #15803d; }}
+  .conteo-item.conteo-total {{ border-left-color: #1a1a1a; }}
+  .conteo-numero {{ display: block; font-size: 1.5rem; font-weight: bold; }}
+  .aviso-pyme {{ margin-top: 0.75rem; border: 1px solid #bfdbfe; background: #eff6ff; border-radius: 8px; padding: 0.75rem 1rem; font-size: 0.9rem; color: #1e3a8a; }}
   footer {{ margin-top: 2rem; padding-top: 0.75rem; border-top: 1px solid #ddd; color: #777; font-size: 0.85rem; }}
   @media print {{ body {{ margin: 0.5in; }} }}
 </style>
@@ -167,10 +355,16 @@ async def generar_html_informe(db: AsyncSession, diagnostic: Diagnostic) -> str:
 <h1>Informe de Autodiagnóstico — Ley N.° 21.719</h1>
 <p class="subtitulo">{organizacion_nombre} · Generado el {escape(generado_en)}</p>
 
+{identificacion_html}
+{aviso_pyme_html}
+
 <h2>Puntaje global</h2>
 <p class="global-score">{_fmt_score(
         float(diagnostic.global_score) if diagnostic.global_score is not None else None
     )} / 100</p>
+
+<h2>Hallazgos abiertos por riesgo</h2>
+{conteo_riesgo_html}
 
 <h2>Puntaje por sección</h2>
 <table>
@@ -182,6 +376,9 @@ async def generar_html_informe(db: AsyncSession, diagnostic: Diagnostic) -> str:
 
 <h2>Resumen ejecutivo</h2>
 {resumen_ejecutivo_html or "<p>Sin resumen disponible.</p>"}
+
+<h2>Metodología</h2>
+{metodologia_html}
 
 <h2>Hallazgos</h2>
 {"".join(bloques_hallazgos) or "<p>El diagnóstico no registra hallazgos.</p>"}

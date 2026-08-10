@@ -85,7 +85,7 @@ async def diagnostico_completado_org_a(_session_factory, org_a_id, profile_a_id)
             for i, pid in enumerate(pregunta_ids)
         ]
         hubo_cambio = await diagnostico.guardar_respuestas(
-            session, diagnostic, respuestas
+            session, diagnostic, respuestas, profile_a_id
         )
         await diagnostico.recalcular_diagnostico(session, diagnostic, hubo_cambio)
         await session.commit()
@@ -214,8 +214,46 @@ async def test_generar_informe_descarta_citas_y_findings_inventados(
 
 
 @pytest.mark.asyncio
-async def test_recalcular_invalida_informe_generado_previamente(
+async def test_generar_informe_quita_conteo_de_brechas_declarado_por_el_llm(
     _session_factory, diagnostico_completado_org_a, monkeypatch
+):
+    """BUG-01 (revisión manual del informe, 2026-08-10): la instrucción del
+    prompt (regla 5) no bastó en producción — el LLM siguió declarando una
+    cifra ('35 brechas') que no coincidía con el conteo real. Este test
+    verifica el guardarraíl determinista (regex), no la instrucción."""
+
+    async def _fake_search_chunks(query, db, top_k=12, sources=None):
+        return []
+
+    monkeypatch.setattr(diagnostico_ia, "search_chunks", _fake_search_chunks)
+    monkeypatch.setattr(
+        diagnostico_ia,
+        "get_llm_client",
+        lambda settings: _FakeLLMClient(
+            {
+                "resumen_ejecutivo": (
+                    "Se detectaron 35 brechas abiertas en distintas secciones. "
+                    "Hay 1 hallazgo de riesgo Alto que requiere atención inmediata."
+                ),
+                "narrativas": [],
+            }
+        ),
+    )
+
+    async with _session_factory() as session:
+        diagnostic = await session.get(Diagnostic, diagnostico_completado_org_a)
+        informe = await diagnostico_ia.generar_informe(session, diagnostic)
+        await session.commit()
+
+    assert "35" not in informe["resumen_ejecutivo"]
+    assert "1" not in informe["resumen_ejecutivo"]
+    assert "brechas abiertas" in informe["resumen_ejecutivo"]
+    assert "hallazgo de riesgo Alto" in informe["resumen_ejecutivo"]
+
+
+@pytest.mark.asyncio
+async def test_recalcular_invalida_informe_generado_previamente(
+    _session_factory, diagnostico_completado_org_a, profile_a_id, monkeypatch
 ):
     """Un informe ya generado no debe sobrevivir en silencio a un guardado que
     sí cambia una respuesta — se invalida
@@ -249,6 +287,7 @@ async def test_recalcular_invalida_informe_generado_previamente(
             session,
             diagnostic,
             [diagnostico.RespuestaGuardar(pregunta_id=pregunta_id, answer="Sí")],
+            profile_a_id,
         )
         await diagnostico.recalcular_diagnostico(session, diagnostic, hubo_cambio)
         await session.commit()
@@ -261,7 +300,7 @@ async def test_recalcular_invalida_informe_generado_previamente(
 
 @pytest.mark.asyncio
 async def test_recalcular_no_invalida_informe_con_guardado_vacio(
-    _session_factory, diagnostico_completado_org_a, monkeypatch
+    _session_factory, diagnostico_completado_org_a, profile_a_id, monkeypatch
 ):
     """guardar_respuestas con una lista vacía (payload válido de `POST
     /diagnostico/respuestas`) no cambia ninguna respuesta —
@@ -287,7 +326,9 @@ async def test_recalcular_no_invalida_informe_con_guardado_vacio(
 
     async with _session_factory() as session:
         diagnostic = await session.get(Diagnostic, diagnostico_completado_org_a)
-        hubo_cambio = await diagnostico.guardar_respuestas(session, diagnostic, [])
+        hubo_cambio = await diagnostico.guardar_respuestas(
+            session, diagnostic, [], profile_a_id
+        )
         await diagnostico.recalcular_diagnostico(session, diagnostic, hubo_cambio)
         await session.commit()
 
@@ -299,7 +340,7 @@ async def test_recalcular_no_invalida_informe_con_guardado_vacio(
 
 @pytest.mark.asyncio
 async def test_recalcular_no_invalida_informe_al_reenviar_la_misma_respuesta(
-    _session_factory, diagnostico_completado_org_a, monkeypatch
+    _session_factory, diagnostico_completado_org_a, profile_a_id, monkeypatch
 ):
     """Reenviar exactamente el mismo valor de una respuesta ya guardada no
     cambia el diagnóstico — tampoco debe invalidar el informe."""
@@ -339,6 +380,7 @@ async def test_recalcular_no_invalida_informe_al_reenviar_la_misma_respuesta(
             session,
             diagnostic,
             [diagnostico.RespuestaGuardar(pregunta_id=pregunta_id_no, answer="No")],
+            profile_a_id,
         )
         await diagnostico.recalcular_diagnostico(session, diagnostic, hubo_cambio)
         await session.commit()
@@ -351,7 +393,7 @@ async def test_recalcular_no_invalida_informe_al_reenviar_la_misma_respuesta(
 
 @pytest.mark.asyncio
 async def test_recalcular_invalida_informe_si_solo_cambian_las_notas(
-    _session_factory, diagnostico_completado_org_a, monkeypatch
+    _session_factory, diagnostico_completado_org_a, profile_a_id, monkeypatch
 ):
     """Cambiar únicamente `notes` de una respuesta (misma `answer`) no mueve
     ningún puntaje ni hallazgo, pero sí cambia el contexto libre que
@@ -401,6 +443,7 @@ async def test_recalcular_invalida_informe_si_solo_cambian_las_notas(
                     pregunta_id=pregunta_id, answer=answer_actual, notes="Nota nueva."
                 )
             ],
+            profile_a_id,
         )
         await diagnostico.recalcular_diagnostico(session, diagnostic, hubo_cambio)
         await session.commit()
