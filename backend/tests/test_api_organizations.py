@@ -131,6 +131,32 @@ async def test_owner_puede_actualizar_datos_de_organizacion(client_a, org_a_id):
 
 
 @pytest.mark.asyncio
+async def test_actualizar_organizacion_refresca_updated_at(
+    _session_factory, client_a, org_a_id
+):
+    """`Organization.updated_at` tiene `onupdate=func.now()` (app/db/models.py)
+    desde que existe este endpoint — antes de él la fila nunca se actualizaba
+    después de crearse, así que nada ejercitaba ese `onupdate`."""
+    async with _session_factory() as session:
+        antes = (await session.get(Organization, org_a_id)).updated_at
+
+    async with AsyncClient(
+        transport=ASGITransport(app=client_a), base_url="http://test"
+    ) as client:
+        resp = await client.patch(
+            "/organizations",
+            headers={"X-Organization-Id": str(org_a_id)},
+            json={"name": "Organización A (test) actualizada"},
+        )
+    assert resp.status_code == 200
+
+    async with _session_factory() as session:
+        despues = (await session.get(Organization, org_a_id)).updated_at
+
+    assert despues > antes
+
+
+@pytest.mark.asyncio
 async def test_viewer_no_puede_actualizar_organizacion(viewer_client_org_a, org_a_id):
     async with AsyncClient(
         transport=ASGITransport(app=viewer_client_org_a), base_url="http://test"
