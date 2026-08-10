@@ -497,6 +497,81 @@ async def test_exportar_200_devuelve_html_descargable_con_contenido_del_informe(
 
 
 @pytest.mark.asyncio
+async def test_exportar_200_renderiza_narrativa_y_citas_del_hallazgo_con_escape(
+    client_a, org_a_id, monkeypatch
+):
+    """Hallazgo #1 de la revisión del PR #17: ningún test cubría la rama que
+    renderiza `narrativa`/`citas` por hallazgo (app/services/
+    diagnostico_exportacion.py) — el único test 200 previo mockeaba
+    `narrativas: []`, así que ese `escape()` nunca corría en CI."""
+
+    async def _fake_generar_informe(db, diagnostic):
+        findings = (
+            (
+                await db.execute(
+                    select(Finding).where(Finding.diagnostic_id == diagnostic.id)
+                )
+            )
+            .scalars()
+            .all()
+        )
+        diagnostic.informe_ia = {
+            "resumen_ejecutivo": "Resumen mock.",
+            "narrativas": [
+                {
+                    "finding_id": str(findings[0].id),
+                    "narrativa": "Narrativa mock <script>alert(2)</script> con riesgo real.",
+                    "citas": [{"source": "ley_21719", "reference": "Artículo 14"}],
+                }
+            ],
+        }
+        diagnostic.informe_generado_en = datetime.now(UTC)
+        return diagnostic.informe_ia
+
+    monkeypatch.setattr(
+        diagnostico_api.diagnostico_ia, "generar_informe", _fake_generar_informe
+    )
+
+    async with AsyncClient(
+        transport=ASGITransport(app=client_a), base_url="http://test"
+    ) as client:
+        cuestionario = (
+            await client.get(
+                "/diagnostico/cuestionario",
+                headers={"X-Organization-Id": str(org_a_id)},
+            )
+        ).json()
+        pregunta_ids = [p["id"] for p in cuestionario["preguntas"]]
+        respuestas = [
+            {"pregunta_id": pid, "answer": "No" if pid == pregunta_ids[0] else "Sí"}
+            for pid in pregunta_ids
+        ]
+        await client.post(
+            "/diagnostico/respuestas",
+            headers={"X-Organization-Id": str(org_a_id)},
+            json={"respuestas": respuestas},
+        )
+        await client.post(
+            "/diagnostico/informe", headers={"X-Organization-Id": str(org_a_id)}
+        )
+
+        resp = await client.get(
+            "/diagnostico/informe/exportar",
+            headers={"X-Organization-Id": str(org_a_id)},
+        )
+
+    assert resp.status_code == 200
+    body = resp.text
+    assert (
+        "<p class='narrativa'>Narrativa mock &lt;script&gt;alert(2)&lt;/script&gt; con riesgo real.</p>"
+        in body
+    )
+    assert "<script>alert(2)</script>" not in body
+    assert "<ul class='citas'>" in body
+    assert "<li>ley_21719 — Artículo 14</li>" in body
+
+
+@pytest.mark.asyncio
 async def test_viewer_puede_exportar_informe(
     viewer_client_org_a, client_a, org_a_id, monkeypatch
 ):
