@@ -14,22 +14,25 @@ adelante será solo lógica nueva, no una migración que rompa datos.
 """
 
 import uuid
+from typing import Annotated
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Header, HTTPException, status
 from pydantic import BaseModel, Field
 from sqlalchemy import insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.deps import CurrentProfile
+from app.core.deps import CurrentProfile, require_permission
 from app.db.models import (
     Membership,
     Organization,
+    Profile,
     Subscription,
     SubscriptionCommitmentType,
     SubscriptionStatus,
     UserRole,
 )
 from app.db.session import get_db
+from app.services.authorization import Permission
 
 router = APIRouter(prefix="/organizations", tags=["organizaciones"])
 
@@ -41,10 +44,25 @@ class OrganizationCreate(BaseModel):
     size: str | None = None
 
 
+class OrganizationUpdate(BaseModel):
+    name: str = Field(min_length=1, max_length=200)
+    rut: str | None = None
+    industry: str | None = None
+    size: str | None = None
+
+
 class OrganizationOut(BaseModel):
     id: uuid.UUID
     name: str
     role: UserRole  # rol del usuario actual en la organización recién creada
+
+
+class OrganizationDetailOut(BaseModel):
+    id: uuid.UUID
+    name: str
+    rut: str | None
+    industry: str | None
+    size: str | None
 
 
 @router.post("", response_model=OrganizationOut, status_code=status.HTTP_201_CREATED)
@@ -114,3 +132,40 @@ async def create_organization(
     ).scalar_one()
 
     return OrganizationOut(id=org.id, name=org.name, role=membership.role)
+
+
+@router.patch("", response_model=OrganizationDetailOut)
+async def update_organization(
+    payload: OrganizationUpdate,
+    x_organization_id: Annotated[uuid.UUID, Header()],
+    current_profile: Profile = Depends(
+        require_permission(Permission.manage_organization)
+    ),
+    db: AsyncSession = Depends(get_db),
+) -> OrganizationDetailOut:
+    """Edita los datos de identificación de la organización (nombre, RUT,
+    rubro, tamaño) — no existía ningún flujo de edición hasta esta tarea, los
+    datos solo se podían fijar al crear la organización (`POST /organizations`)
+    o vía el seed de desarrollo. `Permission.manage_organization` (no
+    `edit_content`, que es para contenido de negocio como el Autodiagnóstico)
+    porque esto es configuración de la organización misma.
+    """
+    organization = await db.get(Organization, x_organization_id)
+    if organization is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Organización no encontrada.",
+        )
+
+    organization.name = payload.name
+    organization.rut = payload.rut
+    organization.industry = payload.industry
+    organization.size = payload.size
+
+    return OrganizationDetailOut(
+        id=organization.id,
+        name=organization.name,
+        rut=organization.rut,
+        industry=organization.industry,
+        size=organization.size,
+    )
