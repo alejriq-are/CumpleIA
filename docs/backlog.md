@@ -64,3 +64,13 @@ Los hallazgos #1 (RLS de `org_visibility` bloqueaba a un superadmin sin membres�
 
 - [ ] **Narrativas duplicadas por `finding_id` no se deduplican:** el schema de `generate_structured` no impone unicidad de `finding_id` dentro de `narrativas[]`; si el LLM devolviera dos entradas para el mismo hallazgo, el guardarraíl actual (que solo valida pertenencia, no unicidad) dejaría pasar ambas.
 - [ ] **Falta test del filtro `Finding.status != FindingStatus.cerrado`** en `generar_informe`: ningún test de `test_diagnostico_ia.py` cubre un hallazgo ya cerrado — si ese filtro se rompiera en un refactor futuro (narrando también brechas resueltas), ningún test lo detectaría hoy.
+
+## Exportación del informe (Fase 1, Módulo 1, Tarea 5)
+
+`GET /diagnostico/informe/exportar` (`app/services/diagnostico_exportacion.py`) sirve el informe ya generado (Tarea 4) como HTML autocontenido y descargable — resumen ejecutivo, puntaje global y por sección, y el detalle de cada hallazgo (riesgo, sección, narrativa con sus citas, acción correctiva, responsable). 404 sin diagnóstico vigente, 409 si el informe todavía no fue generado (mismo contrato que `POST /informe`), solo requiere `view_content`. Empieza simple a propósito (HTML imprimible a PDF desde el navegador, sin agregar WeasyPrint u otro motor de PDF todavía) — ver la Tarea 5 del plan. Todo texto que no viene del catálogo fijo (nombre de organización, resumen/narrativas del LLM, descripción/acción/responsable de un hallazgo) se escapa con `html.escape`, verificado con un intento de `<script>` real en la verificación en vivo.
+
+### Backlog derivado — Exportación
+
+- [ ] **PDF real:** sigue pendiente para cuando el Módulo 4 (generador de documentos) exista o si una PYME lo pide antes — hoy el usuario debe usar "Imprimir → Guardar como PDF" del navegador sobre el HTML exportado.
+- [ ] **Descarga desde el frontend:** el endpoint ya devuelve `Content-Disposition: attachment`; falta el botón/wiring de la Tarea 6 (frontend) que lo consuma.
+- [ ] **Respuestas crudas no incluidas:** el documento exportado no lista las 50 respuestas individuales (solo puntajes + hallazgos + narrativa), a pedido explícito para mantenerlo corto — evaluar si se necesita un anexo con el detalle completo cuando exista la carpeta de evidencia (Módulo 5).

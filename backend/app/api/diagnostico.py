@@ -12,13 +12,18 @@ tenía la firma pensada para este módulo.
 `POST /informe` (Tarea 4) genera la narrativa del informe vía
 `app/services/diagnostico_ia.py`, anclada a RAG (Ley 21.719 + guía CCS) y con
 guardarraíles que descartan cualquier cita o finding_id que el LLM invente.
+
+`GET /informe/exportar` (Tarea 5) sirve ese mismo informe ya generado como
+HTML autocontenido vía `app/services/diagnostico_exportacion.py` — mismos
+404/409 que `POST /informe` (sin diagnóstico vigente / sin informe generado
+todavía), solo requiere `view_content` porque no genera nada nuevo.
 """
 
 import uuid
 from datetime import date, datetime
 from typing import Annotated, Literal
 
-from fastapi import APIRouter, Depends, Header, HTTPException, status
+from fastapi import APIRouter, Depends, Header, HTTPException, Response, status
 from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -33,6 +38,7 @@ from app.services.cuestionario_config import (
     obtener_config_activa,
     obtener_config_por_id,
 )
+from app.services.diagnostico_exportacion import generar_html_informe
 
 router = APIRouter(prefix="/diagnostico", tags=["diagnostico"])
 
@@ -320,3 +326,41 @@ async def generar_informe(
         )
     await diagnostico_ia.generar_informe(db, diagnostic)
     return await _construir_actual_out(db, diagnostic)
+
+
+@router.get("/informe/exportar")
+async def exportar_informe(
+    x_organization_id: Annotated[uuid.UUID, Header()],
+    current_profile: Profile = Depends(require_permission(Permission.view_content)),
+    db: AsyncSession = Depends(get_db),
+) -> Response:
+    """Exporta el informe ya generado como HTML descargable (Tarea 5).
+
+    404 si la organización no tiene diagnóstico vigente; 409 si el
+    diagnóstico existe pero todavía no tiene informe generado (usar
+    `POST /informe` primero).
+    """
+    diagnostic = await diagnostico_service.obtener_diagnostico_vigente(
+        db, x_organization_id
+    )
+    if diagnostic is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="La organización todavía no tiene un diagnóstico en curso.",
+        )
+    if diagnostic.informe_ia is None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="El informe todavía no fue generado. Genere el informe con "
+            "POST /diagnostico/informe antes de exportarlo.",
+        )
+    html = await generar_html_informe(db, diagnostic)
+    return Response(
+        content=html,
+        media_type="text/html; charset=utf-8",
+        headers={
+            "Content-Disposition": (
+                f'attachment; filename="informe-autodiagnostico-{diagnostic.id}.html"'
+            )
+        },
+    )
