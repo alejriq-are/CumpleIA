@@ -251,10 +251,15 @@ async def test_recalcular_reabre_y_cierra_hallazgo_ida_y_vuelta(
     cerrado = await _responder("Sí")
     assert cerrado.id == abierto.id, "debe ser la MISMA fila, no un Finding nuevo"
     assert cerrado.status.value == "cerrado"
+    assert cerrado.updated_at > abierto.updated_at, (
+        "Finding.updated_at tiene onupdate=func.now() (app/db/models.py) — "
+        "debe refrescarse cuando recalcular_diagnostico cambia el status"
+    )
 
     reabierto = await _responder("No")
     assert reabierto.id == abierto.id
     assert reabierto.status.value == "abierto"
+    assert reabierto.updated_at > cerrado.updated_at
 
 
 @pytest.mark.asyncio
@@ -295,6 +300,7 @@ async def test_guardar_respuestas_registra_quien_respondio(
 
         diagnostic = await session.get(Diagnostic, diagnostico_org_a)
         assert diagnostic.updated_by == profile_a_id
+        primer_updated_at_diagnostic = diagnostic.updated_at
 
     # Otra persona edita la misma respuesta: created_by no cambia, updated_by sí.
     async with _session_factory() as session:
@@ -322,3 +328,7 @@ async def test_guardar_respuestas_registra_quien_respondio(
 
         diagnostic = await session.get(Diagnostic, diagnostico_org_a)
         assert diagnostic.updated_by == profile_b_id
+        assert diagnostic.updated_at > primer_updated_at_diagnostic, (
+            "Diagnostic.updated_at tiene onupdate=func.now() (app/db/models.py) — "
+            "esta aserción es la que detecta si alguna vez se quita por error"
+        )
