@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { SignOutButton } from "@/components/auth/SignOutButton";
@@ -18,6 +19,12 @@ export default async function DashboardLayout({ children }: { children: React.Re
         <div className="mx-auto flex max-w-6xl items-center justify-between">
           <span className="text-xl font-bold text-blue-800">CumpleIA</span>
           <div className="flex items-center gap-4">
+            <Link
+              href="/dashboard/organizacion"
+              className="text-sm text-gray-500 hover:text-gray-700"
+            >
+              Mi organización
+            </Link>
             <span className="text-sm text-gray-500">{user.email}</span>
             <SignOutButton />
           </div>
