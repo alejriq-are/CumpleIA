@@ -1,6 +1,7 @@
 # CLAUDE.md — Contexto del proyecto CumpleIA
 
 > Este archivo va en la **raíz del repositorio**. Claude Code lo lee automáticamente en cada sesión y lo usa como memoria/contexto permanente. Mantenlo actualizado.
+La fuente de verdad neutral del proyecto se encuentra en AGENTS.md y docs/project/. Antes de modificar código, revisar AGENTS.md, docs/project/status.md y docs/project/architecture.md.
 
 ## 1. Qué es el producto
 
@@ -16,7 +17,8 @@ Segmento objetivo: micro y pequeña empresa. Prioridades de diseño: **simple, e
 4. Generador de documentos (4 políticas + 2 procedimientos, Word/PDF).
 5. Carpeta de evidencia (bitácora inmutable + exportación del expediente).
 
-**Fase 0 (esta etapa)** construye SOLO los cimientos: repo, auth, multi-tenant, modelo de datos base, CI/CD e ingesta de la base de conocimiento para RAG. NO se construye la lógica de los módulos todavía.
+*Estado actual: Fase 0 completada. 
+El Módulo 1 — Autodiagnóstico cuenta con un MVP funcional que incluye cuestionario, scoring determinista, hallazgos, API, RLS, generación de informe con IA/RAG, exportación HTML, wizard y dashboard frontend. Los Módulos 2 a 5 todavía no están implementados funcionalmente. Ver docs/project/status.md para el estado vigente.
 
 ## 3. Stack tecnológico (decidido)
 
@@ -79,7 +81,7 @@ README.md
 
 ## 8. Qué NO hacer
 
-- No construir la lógica de los 5 módulos en Fase 0 (solo cimientos).
+- No asumir que la existencia de tablas o modelos implica que un módulo está implementado. El Módulo 1 está construido; los Módulos 2 a 5 permanecen pendientes salvo que docs/project/status.md indique lo contrario.
 - No inventar contenido legal: los textos de la ley y la guía CCS los provee la usuaria; el sistema los ingesta y cita, no los redacta de memoria.
 - No crear cuentas de terceros ni manejar claves reales; dejar `.env.example` y pedir a la usuaria que complete.
 - No usar `localStorage`/`sessionStorage` para datos sensibles.

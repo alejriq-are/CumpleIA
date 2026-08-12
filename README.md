@@ -314,4 +314,24 @@ git commit -m "feat: descripción del cambio"
 git commit -m "fix: corrección de bug"
 git commit -m "chore: tarea de mantenimiento"
 git commit -m "docs: actualización de documentación"
+
+
+---
+
+## Documentación del proyecto
+
+La documentación técnica, funcional y de arquitectura consolidada se encuentra en [`docs/README.md`](docs/README.md).
+
+Puntos de entrada principales:
+
+- [Estado actual del proyecto](docs/project/status.md)
+- [Arquitectura](docs/project/architecture.md)
+- [Mapa del código](docs/project/codebase-map.md)
+- [Modelo de datos](docs/project/data-model.md)
+- [Seguridad y multitenancy](docs/project/security-tenancy.md)
+- [IA y RAG](docs/project/ai-rag.md)
+- [Módulos y roadmap](docs/project/modules-roadmap.md)
+- [Riesgos y pendientes](docs/project/risks-open-items.md)
+
+Los asistentes de IA que trabajen sobre este repositorio deben comenzar leyendo [`AGENTS.md`](AGENTS.md).
 ```

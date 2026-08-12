@@ -22,7 +22,7 @@ Ver `docs/adr/0001-modelo-organizaciones-roles-suscripcion.md`.
 
 ## Autodiagnóstico (Fase 1, Módulo 1)
 
-Ver `Fase 1/plan-fase1-modulo1-autodiagnostico.md` y `docs/adr/0002-logica-adaptativa-riesgo-remediacion.md`. Tareas 0-3 completas:
+Ver `Fase 1/plan-fase1-modulo1-autodiagnostico.md` y `docs/adr/0002-logica-adaptativa-riesgo-remediacion.md`. Tareas 0-6 completadas para el MVP del Módulo 1:
 
 - Tarea 0: catálogo CCS versionado (50 preguntas / 10 secciones / 8 obligaciones).
 - Tarea 1: modelo `Diagnostic`/`DiagnosticAnswer`/`Finding` con RLS real.
@@ -35,8 +35,9 @@ Ver `Fase 1/plan-fase1-modulo1-autodiagnostico.md` y `docs/adr/0002-logica-adapt
 - [ ] **Catálogo `instructivo_agencia` (ADR 0002, capa 3):** catálogo global (sin `organization_id`, análogo a `Obligacion`/`Seccion`/`Pregunta`) para los instructivos que emita el Consejo Directivo de la Agencia de Protección de Datos — no antes de oct-dic 2026 (Consejo Directivo en proceso de ratificación a la fecha del ADR).
 - [ ] **Endpoint de carga/vinculación de `reference_documents`:** la tabla y el modelo ya existen (migración 0005) con `tipo='politica_interna_gobernanza'`, y `GET /diagnostico/actual` ya devuelve `hallazgos[].documentos_referencia` (vacío hoy) — falta el endpoint para que una organización cree/vincule sus propios documentos.
 - [ ] **Re-evaluaciones (historial de diagnósticos):** hoy una organización tiene a lo sumo un `Diagnostic` para siempre (get-or-create). Iniciar un nuevo ciclo de evaluación tras completar uno queda fuera de alcance de la Tarea 3.
-- [ ] Tarea 4 (capa de IA con guardarraíles) y Tarea 5 (exportación del informe, con variación de profundidad por riesgo — capa 4 del ADR 0002) siguen pendientes según el plan original.
-- [ ] Tarea 6 (frontend: wizard, dashboard, descarga del informe).
+- [x] Tarea 4 (capa de IA con guardarraíles) y Tarea 5 (exportación HTML del informe) completadas. Ver las secciones específicas más abajo.
+- [x] Tarea 6 completada: frontend con wizard, dashboard y descarga del informe. Ver la sección específica más abajo.
+
 
 ### Deuda técnica menor detectada en la revisión de PR #11 (no bloqueante)
 
