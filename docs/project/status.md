@@ -78,3 +78,33 @@ La nota del 30-07-2026 reporta 198 chunks con embedding:
 - `ley_21719`: 91
 
 Ese dato es **histórico**, no una consulta al Postgres actual. Debe verificarse en la base al retomar si es importante para la siguiente tarea.
+
+## Checkpoint de entorno local - 31-08-2026
+
+Se reconstruyó y validó el entorno local de desarrollo de CumpleIA en el nuevo equipo HP OMEN, utilizando WSL2 con Ubuntu 24.04 y Docker Desktop con integración WSL.
+
+Estado verificado:
+
+- repositorio en rama `main`, sincronizado con `origin/main` y working tree limpio antes de registrar este checkpoint;
+- PostgreSQL 16 + pgvector operativo mediante Docker;
+- migraciones Alembic aplicadas correctamente hasta `d2e3f4a5b6c7`;
+- rol runtime `app_user` operativo, sin privilegios `SUPERUSER` ni `BYPASSRLS`;
+- autenticación de `app_user` contra PostgreSQL validada desde el entorno Python local;
+- políticas RLS verificadas en las tablas multi-tenant;
+- seed del Módulo 1 ejecutado correctamente:
+  - 8 obligaciones;
+  - 10 secciones;
+  - 50 preguntas;
+  - configuración versión 1 activa;
+- backend levantado correctamente y endpoint `/health` con estado `ok`;
+- suite completa de backend ejecutada en el entorno local:
+  - **129 tests collected**;
+  - **129 passed**;
+  - **0 failed**;
+  - tiempo observado: **10.75 s**.
+
+Este checkpoint reemplaza, para efectos del entorno local actual, la observación anterior de este documento que indicaba que la suite completa no había podido ejecutarse.
+
+**Estado:** baseline local estable y validado para continuar el desarrollo y las pruebas.
+
+**Próximo paso:** retomar la ejecución del Benchmark RAT desde F1.16.
