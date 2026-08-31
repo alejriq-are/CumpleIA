@@ -107,4 +107,12 @@ Este checkpoint reemplaza, para efectos del entorno local actual, la observació
 
 **Estado:** baseline local estable y validado para continuar el desarrollo y las pruebas.
 
-**Próximo paso:** retomar la ejecución del Benchmark RAT desde F1.16.
+**F1.16 — Sandbox Runtime:** completada y validada con resultado **PASS**.
+
+La política SRT pre-final quedó documentada en:
+
+`docs/benchmark/F1.16_SRT_validacion_2026-08-31.md`
+
+La validación confirmó, entre otros controles, aislamiento de red, bloqueo de localhost y sockets Unix, protección de rutas sensibles y de `.git/config`, ejecución de Claude Code dentro de SRT y aislamiento de su configuración runtime.
+
+**Próximo paso:** continuar con la etapa siguiente del Benchmark RAT posterior a F1.16.
