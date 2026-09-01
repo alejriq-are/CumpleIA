@@ -151,3 +151,15 @@ El contrato fija nombre lógico, clase de backend, proveedor, endpoint, model ID
 Python **3.12.3** permanece como baseline común. F1.18A no instala Ollama/Qwen, no selecciona modelos definitivos y no modifica la política SRT, la allowlist de red ni los managed settings de F1.17.
 
 **Próximo paso:** continuar con **F1.18B — validación de transporte cloud** y posteriormente F1.18C para el transporte local controlado.
+
+**F1.18B — Transporte cloud Anthropic:** completada y validada con resultado **PASS**.
+
+La validación quedó documentada en:
+
+`docs/benchmark/F1.18B_Transporte_cloud_Anthropic_validacion_2026-09-01.md`
+
+Se confirmó una inferencia real de Claude Code hacia Anthropic dentro de SRT, manteniendo accesibles únicamente los dominios Anthropic previamente autorizados. El acceso a Internet general permaneció bloqueado mediante allowlist.
+
+No fue necesario modificar la política SRT ni Managed Settings y no se incorporaron componentes de transporte local.
+
+**Próximo paso:** validar el siguiente backend cloud del Benchmark RAT, verificando previamente endpoint, model ID, autenticación y allowlist mínima. La arquitectura de transporte local se abordará posteriormente como una etapa separada.
