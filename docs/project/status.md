@@ -163,3 +163,17 @@ Se confirmó una inferencia real de Claude Code hacia Anthropic dentro de SRT, m
 No fue necesario modificar la política SRT ni Managed Settings y no se incorporaron componentes de transporte local.
 
 **Próximo paso:** validar el siguiente backend cloud del Benchmark RAT, verificando previamente endpoint, model ID, autenticación y allowlist mínima. La arquitectura de transporte local se abordará posteriormente como una etapa separada.
+**F1.18C — Transporte cloud DeepSeek:** completada y validada con resultado **PASS**.
+
+La validación quedó documentada en:
+
+`docs/benchmark/F1.18C_Transporte_cloud_DeepSeek_validacion_2026-09-01.md`
+
+Se validó DeepSeek como segundo backend cloud mediante tres niveles independientes: API nativa, interfaz Anthropic-compatible mediante SDK y ejecución real de Claude Code dentro de SRT utilizando DeepSeek como backend.
+
+La política SRT fue ampliada exclusivamente con `api.deepseek.com`. Internet general permaneció bloqueado y no se habilitaron Unix sockets ni local binding.
+Durante la ejecución con Claude Code 2.1.252 se observaron advertencias `unrecognized_model` asociadas a los identificadores DeepSeek utilizados por llamadas internas de Claude Code. Estas advertencias quedaron documentadas como una limitación de compatibilidad a vigilar, pero no impidieron completar correctamente la inferencia solicitada.
+
+Las credenciales permanecen fuera del repositorio y al finalizar las pruebas no quedaron variables de autenticación persistentes en el entorno.
+
+**Próximo paso:** definir y validar la arquitectura de transporte para un backend LLM local antes de instalar Ollama u otro runtime o descargar un modelo. El diseño deberá permitir la comunicación controlada desde SRT sin habilitar localhost, local binding o Unix sockets de forma general.
