@@ -1,0 +1,30 @@
+{
+  "permissions": {
+    "defaultMode": "dontAsk",
+    "allow": [
+      "Read",
+      "Glob",
+      "Grep",
+      "Edit",
+      "Write",
+      "Bash"
+    ],
+    "deny": [
+      "WebFetch",
+      "WebSearch"
+    ],
+    "disableBypassPermissionsMode": "disable"
+  },
+  "allowManagedPermissionRulesOnly": true,
+  "allowManagedMcpServersOnly": true,
+  "allowedMcpServers": [],
+  "allowManagedHooksOnly": true,
+  "disableCommandPluginSources": true,
+  "disableSideloadFlags": true,
+  "disableRemoteControl": true,
+  "channelsEnabled": false,
+  "env": {
+    "DISABLE_UPDATES": "1",
+    "CLAUDE_CODE_DISABLE_GIT_INSTRUCTIONS": "1"
+  }
+}

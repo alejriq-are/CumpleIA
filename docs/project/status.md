@@ -116,3 +116,21 @@ La política SRT pre-final quedó documentada en:
 La validación confirmó, entre otros controles, aislamiento de red, bloqueo de localhost y sockets Unix, protección de rutas sensibles y de `.git/config`, ejecución de Claude Code dentro de SRT y aislamiento de su configuración runtime.
 
 **Próximo paso:** continuar con la etapa siguiente del Benchmark RAT posterior a F1.16.
+
+**F1.17 — Managed Settings de Claude Code:** completada y validada con resultado **PASS**.
+
+La política administrada quedó documentada en:
+
+`docs/benchmark/F1.17_Managed_Settings_validacion_2026-08-31.md`
+
+La configuración versionada utilizada por el benchmark se encuentra en:
+
+`docs/benchmark/runner/managed-settings.json`
+
+SHA-256 de referencia:
+
+`f51e229df07d539fc1367654110ba028c64261f577e7477dae115049b66f2a0f`
+
+La validación confirmó carga efectiva como `Enterprise managed settings (file)`, modo `dontAsk`, bloqueo de WebFetch y WebSearch, neutralización de bypass de permisos y bloqueo de sideload de MCP, custom agents y plugins.
+
+**Próximo paso:** continuar con **F1.18 — transporte y backend de modelo**, revisando el diseño original del benchmark para incorporar de forma controlada tanto modelos remotos como una eventual LLM local en el HP OMEN.
