@@ -134,3 +134,20 @@ SHA-256 de referencia:
 La validación confirmó carga efectiva como `Enterprise managed settings (file)`, modo `dontAsk`, bloqueo de WebFetch y WebSearch, neutralización de bypass de permisos y bloqueo de sideload de MCP, custom agents y plugins.
 
 **Próximo paso:** continuar con **F1.18 — transporte y backend de modelo**, revisando el diseño original del benchmark para incorporar de forma controlada tanto modelos remotos como una eventual LLM local en el HP OMEN.
+
+**F1.18A — Contrato común de transporte:** implementada documentalmente; la validación de backends permanece pendiente.
+
+El contrato neutral para candidatos cloud y local quedó documentado en:
+
+`docs/benchmark/F1.18A_Contrato_comun_transporte_2026-09-01.md`
+
+Sus archivos de configuración de referencia son:
+
+- `docs/benchmark/runner/transport-contract.schema.json`;
+- `docs/benchmark/runner/candidate-transport.example.json`.
+
+El contrato fija nombre lógico, clase de backend, proveedor, endpoint, model ID, referencia de credencial y timeout. Las credenciales no se versionan: solo se declara el nombre de su variable de entorno, o `null` cuando el backend no requiere autenticación.
+
+Python **3.12.3** permanece como baseline común. F1.18A no instala Ollama/Qwen, no selecciona modelos definitivos y no modifica la política SRT, la allowlist de red ni los managed settings de F1.17.
+
+**Próximo paso:** continuar con **F1.18B — validación de transporte cloud** y posteriormente F1.18C para el transporte local controlado.

@@ -1,0 +1,9 @@
+{
+  "candidateName": "example-cloud-candidate",
+  "backendClass": "cloud",
+  "provider": "example-provider",
+  "endpoint": "https://api.example.invalid/v1",
+  "modelId": "example-model-id",
+  "credentialEnv": "EXAMPLE_PROVIDER_API_KEY",
+  "timeoutSeconds": 300
+}

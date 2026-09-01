@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cumpleia.local/benchmark/transport-contract.schema.json",
+  "title": "CumpleIA benchmark candidate transport",
+  "description": "Common transport contract for cloud and local benchmark candidates.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "candidateName",
+    "backendClass",
+    "provider",
+    "endpoint",
+    "modelId",
+    "credentialEnv",
+    "timeoutSeconds"
+  ],
+  "properties": {
+    "candidateName": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[a-z0-9][a-z0-9._-]*$"
+    },
+    "backendClass": {
+      "type": "string",
+      "enum": [
+        "cloud",
+        "local"
+      ]
+    },
+    "provider": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[a-z0-9][a-z0-9._-]*$"
+    },
+    "endpoint": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^https?://"
+    },
+    "modelId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "credentialEnv": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1,
+      "pattern": "^[A-Z_][A-Z0-9_]*$"
+    },
+    "timeoutSeconds": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 3600
+    }
+  }
+}
