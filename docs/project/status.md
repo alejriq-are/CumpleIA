@@ -190,3 +190,22 @@ Las credenciales permanecen fuera del repositorio y al finalizar las pruebas no 
 - `allowLocalBinding` permanece en false.
 - No se instalaron todavía llama.cpp, Ollama ni modelos locales.
 - Próximo paso: validar el transporte con un runtime LLM real y posteriormente F1.18D-B para Claude Code.
+### F1.18D-A2 — Validación del transporte con runtime LLM real
+
+- Estado: **PASS**.
+- Se instaló CUDA Toolkit 13.1 dentro de WSL, sin instalar drivers NVIDIA Linux.
+- Se compiló `llama.cpp` tag `b10516`, commit `b95502b`, con `GGML_CUDA=ON` y arquitectura CUDA `120`.
+- Se validó `llama-server` utilizando la NVIDIA GeForce RTX 5060 Laptop GPU.
+- Modelo de validación: `Qwen3.5-0.8B-Q4_0.gguf`.
+- El modelo se almacena físicamente en `D:\CumpleIA-LLM\models` y se accede desde el runtime mediante `~/runtime/local-llm/models`.
+- Se endureció el transporte asignando `llm-local.cumpleia` al loopback dedicado `127.77.18.1`.
+- `llama-server` escucha exclusivamente en `127.77.18.1:18080`.
+- Se confirmó inferencia real fuera de SRT con resultado `F1.18D-A2-LOCAL-OK`.
+- Se confirmó inferencia real dentro de SRT con resultado `F1.18D-A2-SRT-OK`.
+- El acceso directo desde SRT a `127.0.0.1:18080` permanece bloqueado (`HTTP=000`).
+- `nvidia-smi` confirmó `/llama-server` como proceso CUDA y aproximadamente 829 MiB de VRAM asignada durante la validación.
+- No se detectaron listeners locales wildcard en `0.0.0.0` ni `[::]`.
+- Se comprobó que `allowedDomains` de SRT controla hostname pero no puerto; por ello la ausencia de listeners wildcard pasa a ser un invariante de seguridad del benchmark.
+- La evidencia completa quedó registrada en `docs/benchmark/F1.18D-A2_Validacion_runtime_LLM_local_2026-09-02.md`.
+
+**Próximo paso:** continuar con **F1.18D-B — integración del backend LLM local con Claude Code**, manteniendo el aislamiento SRT y sin ampliar innecesariamente la superficie de red autorizada.
