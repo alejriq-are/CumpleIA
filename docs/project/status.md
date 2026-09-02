@@ -223,3 +223,44 @@ Las credenciales permanecen fuera del repositorio y al finalizar las pruebas no 
 - La evidencia completa quedó registrada en `docs/benchmark/F1.18D-B_Integracion_Claude_Code_LLM_local_2026-09-02.md`.
 
 **Próximo paso:** iniciar **F1.19 — harness reproducible y confiable**, encargado de preparar/resetear el workspace y ejecutar fuera del sandbox del agente las verificaciones de confianza del benchmark.
+## 2026-09-02 — F1.19A cerrado: contrato y estructura del harness reproducible
+
+Se completó F1.19A del benchmark.
+
+Resultado: PASS.
+
+Artefactos incorporados:
+
+- `docs/benchmark/F1.19A_Contrato_harness_2026-09-02.md`
+- `docs/benchmark/runner/run-config.schema.json`
+- `docs/benchmark/runner/run-result.schema.json`
+- `docs/benchmark/runner/run-config.example.json`
+
+El diseño establece:
+
+- separación explícita entre harness trusted y candidato untrusted;
+- workspace efímero controlado por el harness;
+- baseline identificado por commit Git completo;
+- reutilización independiente del contrato de transporte F1.18A;
+- estados autoritativos `PASS`, `FAIL`, `TIMEOUT` y `HARNESS_ERROR`;
+- resultado estructurado `result.json`;
+- evidencia por corrida con manifest SHA-256;
+- prohibición de persistir secretos en configuración, logs o resultados;
+- regla fail-closed ante fallas del entorno trusted;
+- invariantes de reproducibilidad para comparación entre candidatos.
+
+Los schemas fueron validados con JSON Schema Draft 2020-12.
+
+Pruebas realizadas:
+
+- configuración válida aceptada;
+- resultado válido aceptado;
+- commit corto rechazado;
+- campo adicional rechazado;
+- estado inválido rechazado;
+- campo obligatorio faltante rechazado;
+- ejemplo de configuración validado contra el schema.
+
+La ubicación del workspace no es controlable por la configuración de corrida; será determinada exclusivamente por el harness trusted.
+
+Siguiente etapa: F1.19B — workspace reproducible y aislamiento del repositorio canónico.

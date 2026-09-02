@@ -1,0 +1,9 @@
+{
+  "schemaVersion": "1.0",
+  "runId": "20260902T220000Z-deepseek-v4-pro",
+  "candidateName": "deepseek-v4-pro",
+  "baselineCommit": "49feef333aed6c0660c61824329ddff14f539d01",
+  "transportConfig": "docs/benchmark/runner/candidate-transport.example.json",
+  "timeoutSeconds": 1800,
+  "verificationProfile": "rat-default"
+}

@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cumpleia.local/schemas/benchmark/run-result.schema.json",
+  "title": "CumpleIA Benchmark Run Result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "runId",
+    "candidateName",
+    "baselineCommit",
+    "status",
+    "agentExitCode",
+    "timedOut",
+    "trustedChecksPassed",
+    "startedAt",
+    "finishedAt",
+    "durationSeconds"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "1.0"
+    },
+    "runId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+    },
+    "candidateName": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+    },
+    "baselineCommit": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "PASS",
+        "FAIL",
+        "TIMEOUT",
+        "HARNESS_ERROR"
+      ]
+    },
+    "agentExitCode": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "timedOut": {
+      "type": "boolean"
+    },
+    "trustedChecksPassed": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "startedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "finishedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "durationSeconds": {
+      "type": "number",
+      "minimum": 0
+    }
+  }
+}
