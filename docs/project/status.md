@@ -208,4 +208,18 @@ Las credenciales permanecen fuera del repositorio y al finalizar las pruebas no 
 - Se comprobó que `allowedDomains` de SRT controla hostname pero no puerto; por ello la ausencia de listeners wildcard pasa a ser un invariante de seguridad del benchmark.
 - La evidencia completa quedó registrada en `docs/benchmark/F1.18D-A2_Validacion_runtime_LLM_local_2026-09-02.md`.
 
-**Próximo paso:** continuar con **F1.18D-B — integración del backend LLM local con Claude Code**, manteniendo el aislamiento SRT y sin ampliar innecesariamente la superficie de red autorizada.
+### F1.18D-B — Integración Claude Code con LLM local — PASS
+
+- Se confirmó que `llama-server` expone un endpoint Anthropic-compatible `/v1/messages`.
+- La primera integración con Claude Code falló por incompatibilidad del chat template original de Qwen3.5 (`System message must be at the beginning`).
+- Se resolvió utilizando `--chat-template chatml`, sin introducir proxy o adaptador adicional.
+- La ventana inicial de 4096 tokens fue insuficiente para Claude Code; se amplió a `16384`.
+- Claude Code ejecutado fuera de SRT devolvió correctamente `F1.18D-B-CLAUDE-LOCAL-OK`.
+- Dentro de SRT fue necesario redirigir `TMPDIR` a `/home/cumplebench/runtime/tmp`, evitando habilitar escritura general en `/tmp`.
+- Claude Code ejecutado dentro de SRT devolvió correctamente `F1.18D-B-SRT-LOCAL-OK`.
+- Se confirmó nuevamente que el acceso directo desde SRT a `127.0.0.1:18080` permanece bloqueado (`HTTP=000`).
+- El identificador lógico `local` continúa generando el aviso no fatal `unrecognized_model`; para esta validación se utilizó temporalmente `CLAUDE_CODE_DISABLE_UNKNOWN_MODEL_WINDOW_ENFORCEMENT=1`.
+- El modelo `Qwen3.5-0.8B-Q4_0.gguf` se mantiene como modelo de validación de transporte, no como candidato definitivo para generación de código.
+- La evidencia completa quedó registrada en `docs/benchmark/F1.18D-B_Integracion_Claude_Code_LLM_local_2026-09-02.md`.
+
+**Próximo paso:** iniciar **F1.19 — harness reproducible y confiable**, encargado de preparar/resetear el workspace y ejecutar fuera del sandbox del agente las verificaciones de confianza del benchmark.
