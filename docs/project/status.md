@@ -177,3 +177,16 @@ Durante la ejecución con Claude Code 2.1.252 se observaron advertencias `unreco
 Las credenciales permanecen fuera del repositorio y al finalizar las pruebas no quedaron variables de autenticación persistentes en el entorno.
 
 **Próximo paso:** definir y validar la arquitectura de transporte para un backend LLM local antes de instalar Ollama u otro runtime o descargar un modelo. El diseño deberá permitir la comunicación controlada desde SRT sin habilitar localhost, local binding o Unix sockets de forma general.
+### F1.18D-A — Arquitectura de transporte local seguro
+
+- Estado: PASS arquitectónico.
+- Se descartó el diseño basado en Unix Domain Socket selectivo bajo SRT/Linux.
+- No se habilitó `allowAllUnixSockets`.
+- Se validó transporte local mediante hostname dedicado y proxy/allowlist SRT.
+- `llm-local.cumpleia` autorizado alcanza un servicio loopback local.
+- Acceso directo a `127.0.0.1` desde SRT continúa bloqueado.
+- Un hostname alternativo no autorizado hacia el mismo servicio devuelve HTTP 403.
+- `allowUnixSockets` permanece vacío.
+- `allowLocalBinding` permanece en false.
+- No se instalaron todavía llama.cpp, Ollama ni modelos locales.
+- Próximo paso: validar el transporte con un runtime LLM real y posteriormente F1.18D-B para Claude Code.
