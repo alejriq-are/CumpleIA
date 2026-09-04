@@ -363,6 +363,21 @@ Documentación:
 **Próximo paso:** diseñar una segunda tarea representativa y fijar su verifier
 trusted antes de ejecutar nuevos candidatos.
 
+### F1.21A — Diseño de segunda tarea funcional — EN CURSO
+
+- Se fijó la tarea `organization-current-v1`: implementar
+  `GET /organizations/current` con selección por `X-Organization-Id`, permiso
+  `view_content`, lectura permitida a `viewer` miembro y rechazo de cruce
+  entre tenants.
+- El baseline actual no expone esa ruta, por lo que la validación negativa no
+  dependerá de introducir una vulnerabilidad artificial.
+- Aún no se ejecutaron candidatos ni se eligió/descargó un modelo local nuevo.
+- Falta F1.21B: construir el perfil trusted, verificar baseline negativo y
+  solución dorada temporal, y fijar hashes/baseline de la ronda.
+
+Documentación:
+`docs/benchmark/F1.21A_Diseno_segunda_tarea_organizacion_actual_2026-09-04.md`.
+
 ## 2026-09-02 — F1.19A cerrado: contrato y estructura del harness reproducible
 
 Se completó F1.19A del benchmark.

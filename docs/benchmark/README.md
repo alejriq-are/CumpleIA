@@ -5,6 +5,7 @@ del benchmark reproducible de CumpleIA.
 
 ## Estado vigente
 
+- [F1.21A — Diseño de la segunda tarea](F1.21A_Diseno_segunda_tarea_organizacion_actual_2026-09-04.md): contrato fijado para `organization-current-v1`; falta construir y validar el verifier trusted.
 - [F1.20D — Cierre de la primera ronda RAT](F1.20D_Cierre_primera_ronda_RAT_2026-09-04.md): cierre autoritativo de la tarea `rat-na-section-v1` con tres candidatos.
 - [F1.20B — Tarea y verifier N/A por sección](F1.20B_Tarea_y_verifier_NA_por_seccion_2026-09-04.md): contrato funcional y perfil trusted de la tarea.
 - [F1.20A — Preflight de la primera ronda](F1.20A_Preflight_primera_ronda_2026-09-04.md): hardening y gate funcional previo.
