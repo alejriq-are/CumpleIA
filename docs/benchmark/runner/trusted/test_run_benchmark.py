@@ -71,7 +71,32 @@ def test_task_specific_profile_is_supported(monkeypatch, tmp_path: Path):
 
     assert run_benchmark.validate_run_config(config) == config
 
-def test_local_transport_preflight_passes_with_expected_host_and_no_wildcards(monkeypatch):
+
+def test_organization_current_profile_is_supported(monkeypatch, tmp_path: Path):
+    task = tmp_path / "task.md"
+    transport = tmp_path / "transport.json"
+    task.write_text("task")
+    transport.write_text("{}")
+    monkeypatch.setattr(run_benchmark, "resolve_repo_file", lambda path, label: task)
+    monkeypatch.setattr(
+        run_benchmark.prepare_workspace, "validate_commit_exists", lambda commit: None
+    )
+    config = {
+        "schemaVersion": "1.0",
+        "runId": "round-2-candidate",
+        "candidateName": "candidate",
+        "baselineCommit": "a" * 40,
+        "taskFile": "task.md",
+        "transportConfig": "transport.json",
+        "timeoutSeconds": 1800,
+        "verificationProfile": "rat-organization-current-v1",
+    }
+    assert run_benchmark.validate_run_config(config) == config
+
+
+def test_local_transport_preflight_passes_with_expected_host_and_no_wildcards(
+    monkeypatch,
+):
     monkeypatch.setattr(
         run_benchmark.socket,
         "getaddrinfo",
@@ -89,9 +114,9 @@ def test_local_transport_preflight_passes_with_expected_host_and_no_wildcards(mo
         lambda *args, **kwargs: Result(),
     )
 
-    run_benchmark.validate_local_transport_preflight({
-        "endpoint": "http://llm-local.cumpleia:18080"
-    })
+    run_benchmark.validate_local_transport_preflight(
+        {"endpoint": "http://llm-local.cumpleia:18080"}
+    )
 
 
 def test_local_transport_preflight_rejects_wrong_host_mapping(monkeypatch):
@@ -104,9 +129,9 @@ def test_local_transport_preflight_rejects_wrong_host_mapping(monkeypatch):
     )
 
     with pytest.raises(run_benchmark.HarnessError, match="local transport hostname"):
-        run_benchmark.validate_local_transport_preflight({
-        "endpoint": "http://llm-local.cumpleia:18080"
-    })
+        run_benchmark.validate_local_transport_preflight(
+            {"endpoint": "http://llm-local.cumpleia:18080"}
+        )
 
 
 def test_local_transport_preflight_rejects_wildcard_listener(monkeypatch):
@@ -128,9 +153,10 @@ def test_local_transport_preflight_rejects_wildcard_listener(monkeypatch):
     )
 
     with pytest.raises(run_benchmark.HarnessError, match="wildcard listener"):
-        run_benchmark.validate_local_transport_preflight({
-        "endpoint": "http://llm-local.cumpleia:18080"
-    })
+        run_benchmark.validate_local_transport_preflight(
+            {"endpoint": "http://llm-local.cumpleia:18080"}
+        )
+
 
 def test_cloud_transport_preflight_skips_local_checks(monkeypatch):
     def unexpected_local_preflight(_transport):
@@ -142,7 +168,9 @@ def test_cloud_transport_preflight_skips_local_checks(monkeypatch):
         unexpected_local_preflight,
     )
 
-    run_benchmark.validate_transport_preflight({
-        "backendClass": "cloud",
-        "endpoint": "https://api.anthropic.com",
-    })
+    run_benchmark.validate_transport_preflight(
+        {
+            "backendClass": "cloud",
+            "endpoint": "https://api.anthropic.com",
+        }
+    )

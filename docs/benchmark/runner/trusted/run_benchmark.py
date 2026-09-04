@@ -21,6 +21,7 @@ from urllib.parse import urlsplit
 
 import prepare_workspace
 import run_na_section_profile
+import run_organization_current_profile
 import run_rat_default
 import verify_evidence
 
@@ -42,6 +43,7 @@ class HarnessError(RuntimeError):
 
 def utc_now() -> datetime:
     return datetime.now(UTC)
+
 
 def validate_local_transport_preflight(transport: dict[str, Any]) -> None:
     endpoint = urlsplit(transport["endpoint"])
@@ -85,14 +87,8 @@ def validate_local_transport_preflight(transport: dict[str, Any]) -> None:
             continue
 
         local_address = fields[3]
-        if (
-            local_address.startswith("0.0.0.0:")
-            or local_address.startswith("[::]:")
-        ):
-            raise HarnessError(
-                f"wildcard listener detected: {local_address}"
-            )
-
+        if local_address.startswith("0.0.0.0:") or local_address.startswith("[::]:"):
+            raise HarnessError(f"wildcard listener detected: {local_address}")
 
 
 def validate_transport_preflight(transport: dict[str, Any]) -> None:
@@ -180,6 +176,7 @@ def validate_run_config(data: dict[str, Any]) -> dict[str, Any]:
     if data["verificationProfile"] not in {
         "rat-default",
         run_na_section_profile.PROFILE,
+        run_organization_current_profile.PROFILE,
     }:
         raise HarnessError("unsupported verificationProfile")
     resolve_repo_file(data["taskFile"], "taskFile")
@@ -516,6 +513,10 @@ def main() -> int:
         )
         if config["verificationProfile"] == run_na_section_profile.PROFILE:
             verifier_code = run_na_section_profile.run_profile(
+                config["runId"], workspace, evidence
+            )
+        elif config["verificationProfile"] == run_organization_current_profile.PROFILE:
+            verifier_code = run_organization_current_profile.run_profile(
                 config["runId"], workspace, evidence
             )
         else:
