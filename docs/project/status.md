@@ -426,6 +426,26 @@ candidato de la segunda ronda.
 Documentación:
 `docs/benchmark/F1.21D_Reparacion_sockets_SRT_2026-09-04.md`.
 
+### F1.21E — Cierre de la segunda ronda RAT — CERRADA
+
+- Tarea: `organization-current-v1` sobre baseline
+  `4b3b4b74d71a312096b9329c6e80f5a31c40f03d`.
+- Claude Sonnet 5: **PASS**, 4/4 tests, 261.639231 s.
+- Qwen3-4B local: **FAIL**, 0/4 tests, 106.626028 s; no expuso la ruta y
+  modificó un activo protegido de migración.
+- DeepSeek V4 Pro: **FAIL**, 0/4 tests, 201.262959 s; no expuso la ruta ni
+  agregó o modificó pruebas backend.
+- Las tres evidencias efectivas y sus manifests pasaron el validador trusted.
+- Los intentos previos cerrados por infraestructura o credencial permanecen
+  preservados y no se usan como resultados comparables.
+- Dos tareas aún no permiten inferir un ranking general entre modelos.
+
+Documentación:
+`docs/benchmark/F1.21E_Cierre_segunda_ronda_RAT_2026-09-04.md`.
+
+**Próximo paso:** diseñar y validar una tercera tarea funcional independiente
+antes de concluir rankings o reemplazar candidatos.
+
 ## 2026-09-02 — F1.19A cerrado: contrato y estructura del harness reproducible
 
 Se completó F1.19A del benchmark.
