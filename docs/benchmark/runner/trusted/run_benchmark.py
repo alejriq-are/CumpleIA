@@ -9,6 +9,7 @@ import json
 import os
 import re
 import signal
+import socket
 import subprocess
 import sys
 import tempfile
@@ -41,6 +42,62 @@ class HarnessError(RuntimeError):
 
 def utc_now() -> datetime:
     return datetime.now(UTC)
+
+def validate_local_transport_preflight(transport: dict[str, Any]) -> None:
+    endpoint = urlsplit(transport["endpoint"])
+    host = endpoint.hostname
+    expected_address = "127.77.18.1"
+
+    if not host:
+        raise HarnessError("local transport endpoint has no hostname")
+
+    try:
+        addresses = {
+            item[4][0]
+            for item in socket.getaddrinfo(
+                host,
+                None,
+                type=socket.SOCK_STREAM,
+            )
+        }
+    except socket.gaierror as exc:
+        raise HarnessError("local transport hostname resolution failed") from exc
+
+    if addresses != {expected_address}:
+        raise HarnessError(
+            "local transport hostname does not resolve exclusively "
+            f"to {expected_address}"
+        )
+
+    try:
+        result = subprocess.run(
+            ["ss", "-ltnH"],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+    except (OSError, subprocess.CalledProcessError) as exc:
+        raise HarnessError("unable to inspect local TCP listeners") from exc
+
+    for line in result.stdout.splitlines():
+        fields = line.split()
+        if len(fields) < 4:
+            continue
+
+        local_address = fields[3]
+        if (
+            local_address.startswith("0.0.0.0:")
+            or local_address.startswith("[::]:")
+        ):
+            raise HarnessError(
+                f"wildcard listener detected: {local_address}"
+            )
+
+
+
+def validate_transport_preflight(transport: dict[str, Any]) -> None:
+    if transport["backendClass"] == "local":
+        validate_local_transport_preflight(transport)
 
 
 def atomic_write(path: Path, payload: bytes) -> None:

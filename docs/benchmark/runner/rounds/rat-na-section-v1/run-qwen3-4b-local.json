@@ -1,0 +1,10 @@
+{
+  "schemaVersion": "1.0",
+  "runId": "rat-na-section-v1-qwen3-4b-local",
+  "candidateName": "qwen3-4b-local",
+  "baselineCommit": "f7d8eb223b8adbb97d7a042a24f7c9297447e99c",
+  "taskFile": "docs/benchmark/runner/tasks/na-section-v1.md",
+  "transportConfig": "docs/benchmark/runner/rounds/rat-na-section-v1/transport-qwen3-4b-local.json",
+  "timeoutSeconds": 1800,
+  "verificationProfile": "rat-na-section-v1"
+}

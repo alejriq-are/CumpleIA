@@ -1,0 +1,9 @@
+{
+  "candidateName": "deepseek-v4-pro",
+  "backendClass": "cloud",
+  "provider": "deepseek",
+  "endpoint": "https://api.deepseek.com/anthropic",
+  "modelId": "deepseek-v4-pro",
+  "credentialEnv": "DEEPSEEK_API_KEY",
+  "timeoutSeconds": 1800
+}
