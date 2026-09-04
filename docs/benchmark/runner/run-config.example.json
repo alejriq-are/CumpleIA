@@ -1,9 +1,10 @@
 {
   "schemaVersion": "1.0",
-  "runId": "20260902T220000Z-deepseek-v4-pro",
-  "candidateName": "deepseek-v4-pro",
-  "baselineCommit": "49feef333aed6c0660c61824329ddff14f539d01",
-  "transportConfig": "docs/benchmark/runner/candidate-transport.example.json",
+  "runId": "example-local-run",
+  "candidateName": "example-local-candidate",
+  "baselineCommit": "0fa11eccfb29ba5d476db78b3ee71fcab9ee391f",
+  "taskFile": "docs/benchmark/runner/tasks/example-task.md",
+  "transportConfig": "docs/benchmark/runner/candidate-transport.local.example.json",
   "timeoutSeconds": 1800,
   "verificationProfile": "rat-default"
 }

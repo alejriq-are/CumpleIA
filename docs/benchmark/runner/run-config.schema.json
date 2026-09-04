@@ -9,6 +9,7 @@
     "runId",
     "candidateName",
     "baselineCommit",
+    "taskFile",
     "transportConfig",
     "timeoutSeconds",
     "verificationProfile"
@@ -33,6 +34,10 @@
     "baselineCommit": {
       "type": "string",
       "pattern": "^[0-9a-f]{40}$"
+    },
+    "taskFile": {
+      "type": "string",
+      "minLength": 1
     },
     "transportConfig": {
       "type": "string",

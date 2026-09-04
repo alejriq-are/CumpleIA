@@ -7,7 +7,8 @@ import re
 import subprocess
 from pathlib import Path
 
-CANONICAL_REPO = Path("/home/cumplebench/projects/CumpleIA")
+TRUSTED_ROOT = Path(__file__).resolve().parent
+CANONICAL_REPO = TRUSTED_ROOT.parents[3]
 WORKSPACE_ROOT = Path("/home/cumplebench/benchmark-workspaces")
 RUNTIME_ROOT = Path("/home/cumplebench/benchmark-runtime")
 EVIDENCE_ROOT = Path("/home/cumplebench/benchmark-runs")
@@ -149,6 +150,14 @@ def generate_srt_policy(
     ]
 
     policy["filesystem"]["allowWrite"] = allow_write
+
+    deny_read = set(policy["filesystem"].get("denyRead", []))
+    deny_read.update((str(CANONICAL_REPO), str(EVIDENCE_ROOT)))
+    policy["filesystem"]["denyRead"] = sorted(deny_read)
+
+    deny_write = set(policy["filesystem"].get("denyWrite", []))
+    deny_write.update((str(CANONICAL_REPO), str(EVIDENCE_ROOT)))
+    policy["filesystem"]["denyWrite"] = sorted(deny_write)
 
     forbidden = {
         str(CANONICAL_REPO),

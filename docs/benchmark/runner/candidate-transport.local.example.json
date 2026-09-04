@@ -1,0 +1,9 @@
+{
+  "candidateName": "example-local-candidate",
+  "backendClass": "local",
+  "provider": "llama.cpp",
+  "endpoint": "http://llm-local.cumpleia:18080",
+  "modelId": "local",
+  "credentialEnv": null,
+  "timeoutSeconds": 300
+}

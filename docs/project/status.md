@@ -254,6 +254,29 @@ Documentación: `docs/benchmark/F1.19C_Reset_estado_verificacion_trusted_2026-09
 
 **Próximo paso:** integrar la ejecución candidata y el perfil `rat-default` en
 el ciclo completo que genera `result.json` y `manifest.sha256`.
+
+### F1.19D — Ciclo completo, resultado y manifest — PASS
+
+- `run-config` incorpora `taskFile`; tarea efectiva y hashes quedan preservados
+  en evidencia.
+- Preflight estricto de run, transport, baseline, tarea, perfil, timeout,
+  credencial declarada y managed settings efectivos.
+- Claude Code 2.1.252 se ejecuta dentro de SRT con entorno mínimo, runtime por
+  corrida, timeout de grupo de procesos y sin acceso de lectura/escritura al
+  repositorio canónico ni a evidencia trusted.
+- Logs concurrentes limitados a 16 MiB, con redacción de la credencial efectiva
+  antes de persistir y permisos `0600`.
+- Estado final derivado únicamente por el harness: `PASS`, `FAIL`, `TIMEOUT` o
+  `HARNESS_ERROR`.
+- `result.json` autoritativo y `manifest.sha256` ordenado sobre toda la evidencia.
+- Validaciones: ciclo controlado PASS, ejecutable externo bloqueado/FAIL,
+  timeout real/TIMEOUT, manifest íntegro y 8 tests unitarios PASS.
+
+Documentación:
+`docs/benchmark/F1.19D_Ciclo_completo_resultado_manifest_2026-09-04.md`.
+
+**Próximo paso:** F1.19E — retención/limpieza segura, validación de evidencia
+cerrada y procedimiento operativo para rondas comparables entre candidatos.
 ## 2026-09-02 — F1.19A cerrado: contrato y estructura del harness reproducible
 
 Se completó F1.19A del benchmark.
