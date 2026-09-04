@@ -102,3 +102,19 @@ def test_runtime_tmp_path_is_short_and_deterministic(monkeypatch):
 
     assert path == prepare_workspace.runtime_tmp_path(run_id)
     assert len(str(path / "cc-socks" / "bridge-0000000000.sock")) < 108
+
+
+def test_prepare_run_directories_allows_existing_tmp_root(monkeypatch, tmp_path: Path):
+    runtime_root = tmp_path / "runtime"
+    runtime_tmp_root = tmp_path / "runtime-tmp"
+    evidence_root = tmp_path / "evidence"
+    runtime_tmp_root.mkdir(mode=0o700)
+    monkeypatch.setattr(prepare_workspace, "RUNTIME_ROOT", runtime_root)
+    monkeypatch.setattr(prepare_workspace, "RUNTIME_TMP_ROOT", runtime_tmp_root)
+    monkeypatch.setattr(prepare_workspace, "EVIDENCE_ROOT", evidence_root)
+
+    runtime, evidence = prepare_workspace.prepare_run_directories("round-2-candidate")
+
+    assert runtime.is_dir()
+    assert evidence.is_dir()
+    assert prepare_workspace.runtime_tmp_path("round-2-candidate").is_dir()
