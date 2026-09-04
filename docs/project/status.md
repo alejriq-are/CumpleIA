@@ -223,6 +223,37 @@ Las credenciales permanecen fuera del repositorio y al finalizar las pruebas no 
 - La evidencia completa quedó registrada en `docs/benchmark/F1.18D-B_Integracion_Claude_Code_LLM_local_2026-09-02.md`.
 
 **Próximo paso:** iniciar **F1.19 — harness reproducible y confiable**, encargado de preparar/resetear el workspace y ejecutar fuera del sandbox del agente las verificaciones de confianza del benchmark.
+
+### F1.19B — Workspace reproducible y aislamiento — PASS
+
+- El workspace se materializa como clon Git independiente, sin hardlinks,
+  alternates ni remotes, en detached HEAD del baseline exacto.
+- La política SRT por corrida permite escritura solo en el workspace y runtime
+  correspondientes; repositorio canónico y evidencia trusted quedan fuera.
+- El preflight rechaza colisiones de workspace/runtime/evidencia y opera
+  fail-closed.
+- F1.19C reutilizó el mecanismo en una corrida integral y la regresión pasó.
+
+### F1.19C — Reset de estado y verifier trusted `rat-default` — PASS
+
+- PostgreSQL `pgvector/pg16` efímero sobre la red Docker internal
+  `cumpleia-benchmark-net`.
+- Runner mínimo con Python 3.12.3, filesystem read-only, sin Docker socket y
+  workspace candidato montado read-only durante Alembic.
+- Loader trusted del fixture Módulo 1 protegido por SHA-256, con IDs
+  deterministas, 8 obligaciones, 10 secciones, 50 preguntas, v1 activa, 10
+  pesos que suman 100 y 50 riesgos válidos.
+- Tenants A/B, memberships y diagnósticos centinela deterministas.
+- Verifier trusted de contenido, configuración, privilegios y aislamiento RLS.
+- Generación fail-closed de `verification.json` y `tests.log` fuera del
+  workspace, modo `0600`.
+- Corrida integral `f119c-validation2-20260904`: PASS en los seis grupos de
+  checks; PostgreSQL efímero eliminado al finalizar.
+
+Documentación: `docs/benchmark/F1.19C_Reset_estado_verificacion_trusted_2026-09-04.md`.
+
+**Próximo paso:** integrar la ejecución candidata y el perfil `rat-default` en
+el ciclo completo que genera `result.json` y `manifest.sha256`.
 ## 2026-09-02 — F1.19A cerrado: contrato y estructura del harness reproducible
 
 Se completó F1.19A del benchmark.
