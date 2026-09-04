@@ -394,6 +394,21 @@ Documentación:
 **Próximo paso:** F1.21C — fijar commit baseline, hashes, candidatos, timeout
 y presupuesto antes de ejecutar la segunda ronda.
 
+### F1.21C — Configuración de segunda ronda RAT — DEFINIDA
+
+- Baseline: `4b3b4b74d71a312096b9329c6e80f5a31c40f03d`.
+- Perfil: `rat-organization-current-v1`; tarea y hashes del verifier fijados.
+- Candidatos comparables: Claude Sonnet 5, DeepSeek V4 Pro y Qwen3-4B local.
+- Una ejecución por candidato, timeout común de 1.800 segundos y sin reintentos.
+- No se incorpora aún un modelo local mayor: la RTX 5060 Laptop tiene 8 GiB
+  de VRAM y Qwen3-8B ya resultó operacionalmente inviable en este transporte.
+
+Documentación:
+`docs/benchmark/F1.21C_Configuracion_segunda_ronda_RAT_2026-09-04.md`.
+
+**Próximo paso:** validar las configuraciones y preflights sin ejecutar
+candidatos; después autorizar explícitamente el inicio de la segunda ronda.
+
 ## 2026-09-02 — F1.19A cerrado: contrato y estructura del harness reproducible
 
 Se completó F1.19A del benchmark.

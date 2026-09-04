@@ -1,0 +1,10 @@
+{
+  "schemaVersion": "1.0",
+  "runId": "rat-organization-current-v1-claude-sonnet-5",
+  "candidateName": "claude-sonnet-5",
+  "baselineCommit": "4b3b4b74d71a312096b9329c6e80f5a31c40f03d",
+  "taskFile": "docs/benchmark/runner/tasks/organization-current-v1.md",
+  "transportConfig": "docs/benchmark/runner/rounds/rat-organization-current-v1/transport-claude-sonnet-5.json",
+  "timeoutSeconds": 1800,
+  "verificationProfile": "rat-organization-current-v1"
+}
