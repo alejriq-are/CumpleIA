@@ -20,6 +20,7 @@ from urllib.parse import urlsplit
 
 import prepare_workspace
 import run_rat_default
+import verify_evidence
 
 TRUSTED_ROOT = Path(__file__).resolve().parent
 CANONICAL_REPO = TRUSTED_ROOT.parents[3]
@@ -433,6 +434,7 @@ def main() -> int:
                 "managedSettingsSha256": sha256_file(MANAGED_SETTINGS),
             },
         )
+        atomic_write(evidence / "managed-settings.json", MANAGED_SETTINGS.read_bytes())
 
         if not SYSTEM_MANAGED_SETTINGS.is_file() or sha256_file(
             SYSTEM_MANAGED_SETTINGS
@@ -496,6 +498,39 @@ def main() -> int:
                 started,
             )
             write_manifest(evidence)
+            try:
+                verify_evidence.validate_evidence(evidence)
+            except Exception as exc:
+                status = "HARNESS_ERROR"
+                trusted_checks_passed = None
+                current_log = (evidence / "tests.log").read_bytes()
+                atomic_write(
+                    evidence / "tests.log",
+                    current_log
+                    + f"HARNESS_ERROR evidence validation: {type(exc).__name__}: {exc}\n".encode(),
+                )
+                write_result(
+                    evidence,
+                    config,
+                    status,
+                    agent_exit_code,
+                    timed_out,
+                    trusted_checks_passed,
+                    started,
+                )
+                write_manifest(evidence)
+                try:
+                    verify_evidence.validate_evidence(evidence)
+                except Exception as final_exc:
+                    print(
+                        "HARNESS_ERROR: evidence could not be closed: "
+                        f"{type(final_exc).__name__}: {final_exc}",
+                        file=sys.stderr,
+                    )
+                else:
+                    verify_evidence.lock_evidence(evidence)
+            else:
+                verify_evidence.lock_evidence(evidence)
 
     return {"PASS": 0, "FAIL": 1, "TIMEOUT": 124, "HARNESS_ERROR": 2}[status]
 

@@ -277,6 +277,27 @@ Documentación:
 
 **Próximo paso:** F1.19E — retención/limpieza segura, validación de evidencia
 cerrada y procedimiento operativo para rondas comparables entre candidatos.
+
+### F1.19E — Retención, limpieza y cierre de evidencia — PASS
+
+- Política versionada: workspace/runtime se eliminan solo después del cierre;
+  evidencia se conserva y su borrado no está soportado.
+- Validador independiente de cobertura y hashes del manifest, estructura JSON,
+  coherencia cruzada, estados, tiempos, baseline, tarea y política SRT.
+- Snapshot de managed settings incorporado a la evidencia.
+- Cierre automático `0500` para el directorio y `0400` para sus archivos.
+- Cualquier inconsistencia de cierre degrada el resultado a `HARNESS_ERROR`.
+- Limpieza con dry-run por defecto y `--execute` explícito; objetivos derivados
+  únicamente del runId bajo las raíces efímeras conocidas.
+- Validación real: TIMEOUT coherente, evidencia PASS antes y después de limpiar,
+  workspace/runtime eliminados y evidencia retenida.
+- Suite trusted: 11 passed.
+
+Documentación:
+`docs/benchmark/F1.19E_Retencion_limpieza_evidencia_2026-09-04.md`.
+
+**Próximo paso:** definir y ejecutar la primera ronda benchmark real con tarea,
+candidatos, baseline y presupuesto comparables.
 ## 2026-09-02 — F1.19A cerrado: contrato y estructura del harness reproducible
 
 Se completó F1.19A del benchmark.
