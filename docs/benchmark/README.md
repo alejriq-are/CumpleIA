@@ -5,7 +5,7 @@ del benchmark reproducible de CumpleIA.
 
 ## Estado vigente
 
-- [F1.21C — Configuración de la segunda ronda](F1.21C_Configuracion_segunda_ronda_RAT_2026-09-04.md): baseline, hashes y tres candidatos fijados; falta el gate previo y la ejecución.
+- [F1.21C — Configuración de la segunda ronda](F1.21C_Configuracion_segunda_ronda_RAT_2026-09-04.md): baseline, hashes y tres candidatos fijados; gate técnico aprobado, ejecución pendiente.
 - [F1.21B — Verifier de organización actual](F1.21B_Verifier_organizacion_actual_2026-09-04.md): perfil trusted validado; baseline rechaza y solución dorada aprueba.
 - [F1.21A — Diseño de la segunda tarea](F1.21A_Diseno_segunda_tarea_organizacion_actual_2026-09-04.md): contrato fijado para `organization-current-v1`.
 - [F1.20D — Cierre de la primera ronda RAT](F1.20D_Cierre_primera_ronda_RAT_2026-09-04.md): cierre autoritativo de la tarea `rat-na-section-v1` con tres candidatos.
