@@ -411,6 +411,20 @@ Documentación:
 **Próximo paso:** autorizar explícitamente una ejecución autoritativa por cada
 candidato de la segunda ronda.
 
+### F1.21D — Reparación de sockets puente SRT — EN VALIDACIÓN
+
+- Las corridas Qwen/Claude de segunda ronda no alcanzaron a ejecutar agentes:
+  ambas reportaron fallo de creación de bridge sockets.
+- Causa identificada: el `TMPDIR` por `runId` dejaba insuficiente margen bajo
+  el límite Unix de 108 bytes para `cc-socks`.
+- El harness ahora deriva un TMPDIR corto con hash, lo limita en SRT y lo
+  elimina mediante limpieza trusted.
+- Suite tras el cambio: 18 passed, 2 skipped; Ruff y Black PASS.
+- Falta una sonda SRT aislada antes de crear nuevos runId efectivos.
+
+Documentación:
+`docs/benchmark/F1.21D_Reparacion_sockets_SRT_2026-09-04.md`.
+
 ## 2026-09-02 — F1.19A cerrado: contrato y estructura del harness reproducible
 
 Se completó F1.19A del benchmark.

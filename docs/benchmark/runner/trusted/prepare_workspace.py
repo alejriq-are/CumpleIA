@@ -11,6 +11,7 @@ TRUSTED_ROOT = Path(__file__).resolve().parent
 CANONICAL_REPO = TRUSTED_ROOT.parents[3]
 WORKSPACE_ROOT = Path("/home/cumplebench/benchmark-workspaces")
 RUNTIME_ROOT = Path("/home/cumplebench/benchmark-runtime")
+RUNTIME_TMP_ROOT = Path("/home/cumplebench/benchmark-tmp")
 EVIDENCE_ROOT = Path("/home/cumplebench/benchmark-runs")
 
 BASE_SRT_POLICY = Path("/etc/cumpleia-benchmark/srt-prefinal.json")
@@ -53,6 +54,7 @@ def validate_commit_exists(commit: str) -> str:
 def validate_preconditions(run_id: str) -> None:
     workspace = WORKSPACE_ROOT / run_id
     runtime = RUNTIME_ROOT / run_id
+    runtime_tmp = runtime_tmp_path(run_id)
     evidence = EVIDENCE_ROOT / run_id
 
     if not CANONICAL_REPO.is_dir():
@@ -64,10 +66,17 @@ def validate_preconditions(run_id: str) -> None:
     for label, path in (
         ("workspace", workspace),
         ("runtime", runtime),
+        ("runtime tmp", runtime_tmp),
         ("evidence", evidence),
     ):
         if path.exists():
             raise RuntimeError(f"{label} already exists: {path}")
+
+
+def runtime_tmp_path(run_id: str) -> Path:
+    """Devuelve un TMPDIR corto para no exceder UNIX_PATH_MAX con cc-socks."""
+    digest = hashlib.sha256(validate_run_id(run_id).encode("utf-8")).hexdigest()
+    return RUNTIME_TMP_ROOT / digest[:16]
 
 
 def prepare_workspace(run_id: str, baseline_commit: str) -> Path:
@@ -119,6 +128,7 @@ def prepare_workspace(run_id: str, baseline_commit: str) -> Path:
 
 def prepare_run_directories(run_id: str) -> tuple[Path, Path]:
     runtime = RUNTIME_ROOT / run_id
+    runtime_tmp = runtime_tmp_path(run_id)
     evidence = EVIDENCE_ROOT / run_id
 
     if runtime.exists():
@@ -128,7 +138,8 @@ def prepare_run_directories(run_id: str) -> tuple[Path, Path]:
         raise RuntimeError(f"evidence already exists: {evidence}")
 
     runtime.mkdir(parents=True, mode=0o700)
-    (runtime / "tmp").mkdir(mode=0o700)
+    RUNTIME_TMP_ROOT.mkdir(parents=True, mode=0o700)
+    runtime_tmp.mkdir(mode=0o700)
     (runtime / "claude").mkdir(mode=0o700)
 
     evidence.mkdir(parents=True, mode=0o700)
@@ -145,7 +156,7 @@ def generate_srt_policy(
 
     allow_write = [
         str(workspace),
-        str(runtime / "tmp"),
+        str(runtime_tmp_path(runtime.name)),
         str(runtime / "claude"),
     ]
 
