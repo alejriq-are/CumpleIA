@@ -48,6 +48,8 @@ Este directorio contiene la documentación técnica, funcional y de arquitectura
 
 \- \[Trabajo con asistentes de IA](project/ai-assistants.md)
 
+\- \[Benchmark RAT](benchmark/README.md)
+
 
 
 \## Documentación existente
@@ -77,4 +79,3 @@ Todo agente de programación que trabaje en este repositorio debe comenzar leyen
 3\. `/docs/project/architecture.md`
 
 4\. La documentación específica del módulo que va a modificar.
-

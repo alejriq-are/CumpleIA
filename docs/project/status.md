@@ -343,6 +343,26 @@ Documentación:
 **Próximo paso:** fijar este checkpoint como baseline y decidir candidatos,
 timeout y presupuesto de la primera ronda.
 
+### F1.20D — Cierre de la primera ronda RAT — CERRADA
+
+- Tarea: `rat-na-section-v1` sobre el baseline común
+  `f7d8eb223b8adbb97d7a042a24f7c9297447e99c`.
+- Claude Sonnet 5: **FAIL**, 3/4 tests, 308.498130 s; faltó la
+  representación explícita requerida de ambos conteos en dashboard.
+- DeepSeek V4 Pro: **PASS**, 4/4 tests, 532.326318 s.
+- Qwen3-4B local: **FAIL**, 1/4 tests, 60.880742 s; implementación incompleta
+  en API, exportación HTML y contrato TypeScript/dashboard.
+- Las tres evidencias y sus manifests pasaron el validador independiente
+  trusted sin repetir corridas ni modificar evidencia o workspaces.
+- Baseline, tarea, configuración y verifier de la ronda permanecen preservados.
+- Una sola tarea no permite inferir un ranking general entre modelos.
+
+Documentación:
+`docs/benchmark/F1.20D_Cierre_primera_ronda_RAT_2026-09-04.md`.
+
+**Próximo paso:** diseñar una segunda tarea representativa y fijar su verifier
+trusted antes de ejecutar nuevos candidatos.
+
 ## 2026-09-02 — F1.19A cerrado: contrato y estructura del harness reproducible
 
 Se completó F1.19A del benchmark.
