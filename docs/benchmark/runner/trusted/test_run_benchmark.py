@@ -70,3 +70,25 @@ def test_task_specific_profile_is_supported(monkeypatch, tmp_path: Path):
     }
 
     assert run_benchmark.validate_run_config(config) == config
+
+
+def test_organization_current_profile_is_supported(monkeypatch, tmp_path: Path):
+    task = tmp_path / "task.md"
+    transport = tmp_path / "transport.json"
+    task.write_text("task")
+    transport.write_text("{}")
+    monkeypatch.setattr(run_benchmark, "resolve_repo_file", lambda path, label: task)
+    monkeypatch.setattr(
+        run_benchmark.prepare_workspace, "validate_commit_exists", lambda commit: None
+    )
+    config = {
+        "schemaVersion": "1.0",
+        "runId": "round-2-candidate",
+        "candidateName": "candidate",
+        "baselineCommit": "a" * 40,
+        "taskFile": "task.md",
+        "transportConfig": "transport.json",
+        "timeoutSeconds": 1800,
+        "verificationProfile": "rat-organization-current-v1",
+    }
+    assert run_benchmark.validate_run_config(config) == config

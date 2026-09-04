@@ -363,7 +363,7 @@ Documentación:
 **Próximo paso:** diseñar una segunda tarea representativa y fijar su verifier
 trusted antes de ejecutar nuevos candidatos.
 
-### F1.21A — Diseño de segunda tarea funcional — EN CURSO
+### F1.21A — Diseño de segunda tarea funcional — PASS
 
 - Se fijó la tarea `organization-current-v1`: implementar
   `GET /organizations/current` con selección por `X-Organization-Id`, permiso
@@ -372,11 +372,27 @@ trusted antes de ejecutar nuevos candidatos.
 - El baseline actual no expone esa ruta, por lo que la validación negativa no
   dependerá de introducir una vulnerabilidad artificial.
 - Aún no se ejecutaron candidatos ni se eligió/descargó un modelo local nuevo.
-- Falta F1.21B: construir el perfil trusted, verificar baseline negativo y
-  solución dorada temporal, y fijar hashes/baseline de la ronda.
+- F1.21B completó el perfil trusted y validó baseline negativo y solución
+  dorada temporal.
 
 Documentación:
 `docs/benchmark/F1.21A_Diseno_segunda_tarea_organizacion_actual_2026-09-04.md`.
+
+### F1.21B — Verifier trusted de organización actual — PASS
+
+- Perfil `rat-organization-current-v1` encadenado a `rat-default`.
+- Contenedor sin red, credenciales ni acceso de escritura al workspace.
+- Contrato: 4/4 PASS con solución dorada temporal; 4/4 FAIL con baseline
+  intacto, resultado esperado.
+- Suite del harness: 17 passed, 2 skipped.
+- La solución dorada y sus copias temporales fueron eliminadas tras validar.
+- No se ejecutaron candidatos ni se modificaron evidencias existentes.
+
+Documentación:
+`docs/benchmark/F1.21B_Verifier_organizacion_actual_2026-09-04.md`.
+
+**Próximo paso:** F1.21C — fijar commit baseline, hashes, candidatos, timeout
+y presupuesto antes de ejecutar la segunda ronda.
 
 ## 2026-09-02 — F1.19A cerrado: contrato y estructura del harness reproducible
 
