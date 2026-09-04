@@ -138,7 +138,7 @@ def prepare_run_directories(run_id: str) -> tuple[Path, Path]:
         raise RuntimeError(f"evidence already exists: {evidence}")
 
     runtime.mkdir(parents=True, mode=0o700)
-    RUNTIME_TMP_ROOT.mkdir(parents=True, mode=0o700)
+    RUNTIME_TMP_ROOT.mkdir(parents=True, mode=0o700, exist_ok=True)
     runtime_tmp.mkdir(mode=0o700)
     (runtime / "claude").mkdir(mode=0o700)
 
