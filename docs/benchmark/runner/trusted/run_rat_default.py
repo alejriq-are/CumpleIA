@@ -25,8 +25,21 @@ FIXTURE = (
 )
 NETWORK = "cumpleia-benchmark-net"
 RUNNER_IMAGE = "cumpleia-rat-runner:python-3.12.3"
-POSTGRES_IMAGE = "pgvector/pgvector:pg16"
+POSTGRES_IMAGE = (
+    "pgvector/pgvector@sha256:"
+    "ccc6e83d6e35e931dc7c5def2022729d5a6c370318d099181995567ff1fb4d6b"
+)
 RUN_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$")
+CONTAINER_SECURITY_ARGS = [
+    "--cap-drop",
+    "ALL",
+    "--security-opt",
+    "no-new-privileges",
+    "--pids-limit",
+    "128",
+    "--memory",
+    "256m",
+]
 
 
 class HarnessError(RuntimeError):
@@ -82,7 +95,16 @@ def ensure_runner_image() -> None:
         ]
     )
     version = command(
-        ["docker", "run", "--rm", "--network", "none", RUNNER_IMAGE, "--version"]
+        [
+            "docker",
+            "run",
+            "--rm",
+            "--network",
+            "none",
+            *CONTAINER_SECURITY_ARGS,
+            RUNNER_IMAGE,
+            "--version",
+        ]
     )
     if version.stdout.strip() != "Python 3.12.3":
         raise HarnessError("runner Python version is not 3.12.3")
@@ -167,6 +189,7 @@ def run_profile(run_id: str, workspace: Path, evidence: Path) -> int:
             "--user",
             f"{os.getuid()}:{os.getgid()}",
             "--read-only",
+            *CONTAINER_SECURITY_ARGS,
             "--tmpfs",
             "/tmp:rw,noexec,nosuid,size=64m",
         ]

@@ -298,6 +298,29 @@ Documentación:
 
 **Próximo paso:** definir y ejecutar la primera ronda benchmark real con tarea,
 candidatos, baseline y presupuesto comparables.
+
+### F1.20A — Preflight de la primera ronda — PASS técnico
+
+- Las imágenes Python 3.12.3 y pgvector/pg16 quedaron fijadas por digest.
+- Los contenedores del runner eliminan todas las capacidades y aplican
+  `no-new-privileges`, límite de 128 procesos y 256 MiB de memoria.
+- La integración directa `f119f-hardening-20260904` repitió los seis grupos
+  trusted con PASS y sin PostgreSQL residual.
+- El ciclo completo `f119f-full-hardening-20260904` produjo TIMEOUT controlado,
+  checks trusted PASS, evidencia cerrada/validada y limpieza efectiva.
+- Dos pruebas de regresión cubren el pinning de imágenes y los argumentos de
+  seguridad; la suite trusted completa terminó con 13 passed.
+- Se estableció un gate funcional: `rat-default` valida infraestructura y
+  baseline, pero no puede puntuar por sí solo una tarea nueva porque una
+  solución vacía también puede superarlo.
+
+Documentación:
+`docs/benchmark/F1.20A_Preflight_primera_ronda_2026-09-04.md`.
+
+**Próximo paso:** confirmar tarea y candidatos definitivos; después construir
+el task file y verifier trusted específicos antes de consumir presupuesto de
+modelos.
+
 ## 2026-09-02 — F1.19A cerrado: contrato y estructura del harness reproducible
 
 Se completó F1.19A del benchmark.
