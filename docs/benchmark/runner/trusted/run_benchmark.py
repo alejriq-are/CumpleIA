@@ -19,6 +19,7 @@ from typing import Any
 from urllib.parse import urlsplit
 
 import prepare_workspace
+import run_na_section_profile
 import run_rat_default
 import verify_evidence
 
@@ -119,7 +120,10 @@ def validate_run_config(data: dict[str, Any]) -> dict[str, Any]:
         or not 1 <= data["timeoutSeconds"] <= 86400
     ):
         raise HarnessError("invalid timeoutSeconds")
-    if data["verificationProfile"] != "rat-default":
+    if data["verificationProfile"] not in {
+        "rat-default",
+        run_na_section_profile.PROFILE,
+    }:
         raise HarnessError("unsupported verificationProfile")
     resolve_repo_file(data["taskFile"], "taskFile")
     resolve_repo_file(data["transportConfig"], "transportConfig")
@@ -453,9 +457,14 @@ def main() -> int:
             config["timeoutSeconds"],
             CLAUDE_BIN,
         )
-        verifier_code = run_rat_default.run_profile(
-            config["runId"], workspace, evidence
-        )
+        if config["verificationProfile"] == run_na_section_profile.PROFILE:
+            verifier_code = run_na_section_profile.run_profile(
+                config["runId"], workspace, evidence
+            )
+        else:
+            verifier_code = run_rat_default.run_profile(
+                config["runId"], workspace, evidence
+            )
         status, trusted_checks_passed = derive_status(
             agent_exit_code, timed_out, verifier_code
         )

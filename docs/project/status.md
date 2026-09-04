@@ -321,6 +321,28 @@ Documentación:
 el task file y verifier trusted específicos antes de consumir presupuesto de
 modelos.
 
+### F1.20B — Tarea y verifier N/A por sección — PASS
+
+- La primera tarea funcional quedó fijada en
+  `docs/benchmark/runner/tasks/na-section-v1.md`.
+- El contrato exige conteos API `respondidas`/`no_aplica`, representación en
+  dashboard y HTML, fórmula intacta, tests y alcance acotado.
+- El perfil `rat-na-section-v1` encadena los seis checks de `rat-default` con
+  cuatro pruebas funcionales aisladas y una validación trusted del diff.
+- El código candidato se prueba sin red, secretos ni DB, en workspace
+  read-only y con los límites de seguridad del runner.
+- Validación negativa: el baseline intacto fue rechazado mientras los seis
+  checks de infraestructura permanecieron en PASS.
+- Validación positiva: una solución dorada temporal obtuvo 4 passed y superó
+  el control de alcance; luego fue eliminada.
+- Suite trusted: Ruff PASS, Black PASS, 15 passed y 1 skipped contextual.
+
+Documentación:
+`docs/benchmark/F1.20B_Tarea_y_verifier_NA_por_seccion_2026-09-04.md`.
+
+**Próximo paso:** fijar este checkpoint como baseline y decidir candidatos,
+timeout y presupuesto de la primera ronda.
+
 ## 2026-09-02 — F1.19A cerrado: contrato y estructura del harness reproducible
 
 Se completó F1.19A del benchmark.

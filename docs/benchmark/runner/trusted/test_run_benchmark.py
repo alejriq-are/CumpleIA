@@ -46,3 +46,27 @@ def test_cloud_transport_requires_credential():
     }
     with pytest.raises(run_benchmark.HarnessError):
         run_benchmark.validate_transport(transport, "candidate")
+
+
+def test_task_specific_profile_is_supported(monkeypatch, tmp_path: Path):
+    task = tmp_path / "task.md"
+    transport = tmp_path / "transport.json"
+    task.write_text("task")
+    transport.write_text("{}")
+    monkeypatch.setattr(run_benchmark, "resolve_repo_file", lambda path, label: task)
+    monkeypatch.setattr(
+        run_benchmark.prepare_workspace, "validate_commit_exists", lambda commit: None
+    )
+
+    config = {
+        "schemaVersion": "1.0",
+        "runId": "round-1-candidate",
+        "candidateName": "candidate",
+        "baselineCommit": "a" * 40,
+        "taskFile": "task.md",
+        "transportConfig": "transport.json",
+        "timeoutSeconds": 1800,
+        "verificationProfile": "rat-na-section-v1",
+    }
+
+    assert run_benchmark.validate_run_config(config) == config
