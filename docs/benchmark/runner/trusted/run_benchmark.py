@@ -259,6 +259,7 @@ def candidate_environment(
                 f"required credential environment is not set: {credential_name}"
             )
 
+    runtime_tmp = prepare_workspace.runtime_tmp_path(runtime.name)
     environment = {
         "PATH": (
             "/home/cumplebench/.nvm/versions/node/v20.20.2/bin:"
@@ -266,9 +267,9 @@ def candidate_environment(
         ),
         "LANG": os.environ.get("LANG", "C.UTF-8"),
         "HOME": str(runtime / "claude"),
-        "TMPDIR": str(runtime / "tmp"),
+        "TMPDIR": str(runtime_tmp),
         "CLAUDE_CONFIG_DIR": str(runtime / "claude"),
-        "CLAUDE_CODE_TMPDIR": str(runtime / "tmp"),
+        "CLAUDE_CODE_TMPDIR": str(runtime_tmp),
         "DISABLE_UPDATES": "1",
         "CLAUDE_CODE_DISABLE_GIT_INSTRUCTIONS": "1",
         "ANTHROPIC_BASE_URL": transport["endpoint"],

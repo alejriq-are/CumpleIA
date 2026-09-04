@@ -3,6 +3,7 @@ from pathlib import Path
 import pytest
 
 import run_benchmark
+import prepare_workspace
 
 
 @pytest.mark.parametrize(
@@ -92,6 +93,15 @@ def test_organization_current_profile_is_supported(monkeypatch, tmp_path: Path):
         "verificationProfile": "rat-organization-current-v1",
     }
     assert run_benchmark.validate_run_config(config) == config
+
+
+def test_runtime_tmp_path_is_short_and_deterministic(monkeypatch):
+    monkeypatch.setattr(prepare_workspace, "RUNTIME_TMP_ROOT", Path("/tmp/cb"))
+    run_id = "rat-organization-current-v1-claude-sonnet-5-r3"
+    path = prepare_workspace.runtime_tmp_path(run_id)
+
+    assert path == prepare_workspace.runtime_tmp_path(run_id)
+    assert len(str(path / "cc-socks" / "bridge-0000000000.sock")) < 108
 
 
 def test_local_transport_preflight_passes_with_expected_host_and_no_wildcards(

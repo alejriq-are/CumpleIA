@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import shutil
 from pathlib import Path
 
@@ -11,6 +12,7 @@ import verify_evidence
 
 WORKSPACE_ROOT = Path("/home/cumplebench/benchmark-workspaces")
 RUNTIME_ROOT = Path("/home/cumplebench/benchmark-runtime")
+RUNTIME_TMP_ROOT = Path("/home/cumplebench/benchmark-tmp")
 EVIDENCE_ROOT = Path("/home/cumplebench/benchmark-runs")
 
 
@@ -18,15 +20,19 @@ class CleanupError(RuntimeError):
     pass
 
 
-def resolve_target(root: Path, run_id: str) -> Path:
+def runtime_tmp_name(run_id: str) -> str:
+    return hashlib.sha256(run_id.encode("utf-8")).hexdigest()[:16]
+
+
+def resolve_target(root: Path, target_name: str) -> Path:
     resolved_root = root.resolve(strict=True)
-    target = root / run_id
+    target = root / target_name
     if not target.exists():
         return target
     if target.is_symlink():
         raise CleanupError(f"refusing symlink target: {target}")
     resolved = target.resolve(strict=True)
-    if resolved.parent != resolved_root or resolved.name != run_id:
+    if resolved.parent != resolved_root or resolved.name != target_name:
         raise CleanupError(f"target escaped expected root: {target}")
     return resolved
 
@@ -42,6 +48,7 @@ def cleanup(run_id: str, execute: bool) -> list[tuple[str, str]]:
     targets = [
         ("workspace", resolve_target(WORKSPACE_ROOT, run_id)),
         ("runtime", resolve_target(RUNTIME_ROOT, run_id)),
+        ("runtime_tmp", resolve_target(RUNTIME_TMP_ROOT, runtime_tmp_name(run_id))),
     ]
     result: list[tuple[str, str]] = []
     for label, target in targets:
@@ -63,7 +70,7 @@ def main() -> int:
     parser.add_argument(
         "--execute",
         action="store_true",
-        help="delete workspace/runtime; omission performs a dry run",
+        help="delete workspace/runtime/runtime_tmp; omission performs a dry run",
     )
     args = parser.parse_args()
     try:
