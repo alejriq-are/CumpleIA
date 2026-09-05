@@ -446,6 +446,24 @@ Documentación:
 **Próximo paso:** diseñar y validar una tercera tarea funcional independiente
 antes de concluir rankings o reemplazar candidatos.
 
+### F1.22A — Diseño de tercera tarea funcional: selector de organización activa — PASS
+
+- Tarea `active-organization-selector-v1`: resolver la selección explícita de
+  tenant en las pantallas de organización y autodiagnóstico para usuarios con
+  múltiples membresías.
+- El contexto activo viaja en el parámetro URL `organization`, se valida contra
+  la lista obtenida por el servidor y nunca se reenvía un UUID ajeno al backend.
+- Alcance independiente de F1.20/F1.21: Next.js, TypeScript, UI accesible y
+  propagación de contexto existente; no cambia backend, RLS ni migraciones.
+- F1.22B deberá probar baseline negativo, selector accesible, propagación del
+  UUID válido y fallback seguro ante UUID ajeno.
+
+Documentación:
+`docs/benchmark/F1.22A_Diseno_tercera_tarea_selector_organizacion_2026-09-04.md`.
+
+**Próximo paso:** F1.22B — implementar y validar el verifier trusted de la
+tercera tarea antes de fijar candidatos.
+
 ## 2026-09-02 — F1.19A cerrado: contrato y estructura del harness reproducible
 
 Se completó F1.19A del benchmark.
