@@ -487,6 +487,16 @@ Documentación:
 Documentación:
 `docs/benchmark/F1.22D_Cierre_tercera_ronda_RAT_2026-09-04.md`.
 
+### F1.23A — Calibración del verifier de selector — PASS
+
+- La solución retenida de Claude r2 cumplía el comportamiento de seguridad,
+  pero F1.22 exigía un nombre literal de helper.
+- F1.23B sustituirá esas convenciones por controles observables de validación,
+  fallback, propagación de contexto y selector accesible.
+
+Documentación:
+`docs/benchmark/F1.23A_Calibracion_verifier_selector_2026-09-04.md`.
+
 ## 2026-09-02 — F1.19A cerrado: contrato y estructura del harness reproducible
 
 Se completó F1.19A del benchmark.
