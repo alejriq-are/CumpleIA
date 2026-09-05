@@ -47,11 +47,22 @@ def validate_candidate_scope(workspace: Path, baseline_commit: str) -> str | Non
 
 
 def run_profile(run_id: str, workspace: Path, evidence: Path) -> int:
-    original = (base.PROFILE, base.run_contract_tests, base.validate_candidate_scope)
+    original = (
+        base.PROFILE,
+        base.TASK_CHECK_NAME,
+        base.run_contract_tests,
+        base.validate_candidate_scope,
+    )
     try:
         base.PROFILE = PROFILE
+        base.TASK_CHECK_NAME = "active_organization_selector_contract"
         base.run_contract_tests = run_contract_tests
         base.validate_candidate_scope = validate_candidate_scope
         return base.run_profile(run_id, workspace, evidence)
     finally:
-        base.PROFILE, base.run_contract_tests, base.validate_candidate_scope = original
+        (
+            base.PROFILE,
+            base.TASK_CHECK_NAME,
+            base.run_contract_tests,
+            base.validate_candidate_scope,
+        ) = original
