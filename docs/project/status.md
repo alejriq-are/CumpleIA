@@ -476,6 +476,17 @@ Documentación:
 
 **Próximo paso:** F1.22C — fijar baseline, hashes y candidatos.
 
+### F1.22D — Cierre de tercera ronda RAT — CERRADA
+
+- Qwen3-4B local: FAIL, 2/6, 112.377609 s.
+- Claude Sonnet 5 r2: FAIL, 3/6, 350.831602 s.
+- DeepSeek V4 Pro: FAIL, 2/6, 206.228365 s.
+- Las tres evidencias efectivas pasaron validación trusted; la primera corrida
+  de Claude se preserva como incidencia de etiqueta incorrecta.
+
+Documentación:
+`docs/benchmark/F1.22D_Cierre_tercera_ronda_RAT_2026-09-04.md`.
+
 ## 2026-09-02 — F1.19A cerrado: contrato y estructura del harness reproducible
 
 Se completó F1.19A del benchmark.
