@@ -13,6 +13,7 @@ import run_rat_default
 
 TRUSTED_ROOT = Path(__file__).resolve().parent
 PROFILE = "rat-organization-current-v1"
+TASK_CHECK_NAME = "organization_current_contract"
 VERIFIER_IMAGE = "cumpleia-rat-organization-current-verifier:python-3.12.3"
 TEST_FILE = TRUSTED_ROOT / "test_organization_current_contract.py"
 MAX_TEST_OUTPUT = 64 * 1024
@@ -151,7 +152,7 @@ def run_profile(run_id: str, workspace: Path, evidence: Path) -> int:
                 f"task verifier container exited with code {result.returncode}"
             )
         check: dict[str, Any] = {
-            "name": "organization_current_contract",
+            "name": TASK_CHECK_NAME,
             "status": task_status,
         }
         if task_status != "PASS":
@@ -160,7 +161,7 @@ def run_profile(run_id: str, workspace: Path, evidence: Path) -> int:
             )
         report["checks"].append(check)
         _append_log(
-            log_path, f"{task_status} organization_current_contract\n{output}\n"
+            log_path, f"{task_status} {TASK_CHECK_NAME}\n{output}\n"
         )
     except Exception as exc:
         exit_code = 2
@@ -169,10 +170,10 @@ def run_profile(run_id: str, workspace: Path, evidence: Path) -> int:
         report["trustedChecksPassed"] = False
         report["error"] = message
         report["checks"].append(
-            {"name": "organization_current_contract", "status": "HARNESS_ERROR"}
+            {"name": TASK_CHECK_NAME, "status": "HARNESS_ERROR"}
         )
         _append_log(
-            log_path, f"HARNESS_ERROR organization_current_contract: {message}\n"
+            log_path, f"HARNESS_ERROR {TASK_CHECK_NAME}: {message}\n"
         )
 
     report["finishedAt"] = datetime.now(UTC).isoformat()
