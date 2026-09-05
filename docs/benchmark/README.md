@@ -5,6 +5,7 @@ del benchmark reproducible de CumpleIA.
 
 ## Estado vigente
 
+- [F1.23A — Calibración del verifier de selector](F1.23A_Calibracion_verifier_selector_2026-09-04.md): separa comportamiento observable de convenciones de nombres.
 - [F1.22D — Cierre de la tercera ronda RAT](F1.22D_Cierre_tercera_ronda_RAT_2026-09-04.md): tres FAIL efectivos; evidencias trusted verificadas.
 - [F1.22B — Verifier de selector de organización](F1.22B_Verifier_selector_organizacion_2026-09-04.md): baseline rechazado y solución dorada aprobada.
 - [F1.22A — Diseño de selector de organización activa](F1.22A_Diseno_tercera_tarea_selector_organizacion_2026-09-04.md): tercera tarea funcional definida; verifier pendiente.
