@@ -497,6 +497,14 @@ Documentación:
 Documentación:
 `docs/benchmark/F1.23A_Calibracion_verifier_selector_2026-09-04.md`.
 
+### F1.23B — Verifier calibrado de selector — PASS
+
+- Perfil v2 conserva F1.22 histórico y elimina exigencias de nombres internos.
+- Baseline FAIL; workspace retenido de Claude r2 PASS 4/4 en sólo lectura.
+
+Documentación:
+`docs/benchmark/F1.23B_Verifier_calibrado_selector_2026-09-04.md`.
+
 ## 2026-09-02 — F1.19A cerrado: contrato y estructura del harness reproducible
 
 Se completó F1.19A del benchmark.
