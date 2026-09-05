@@ -464,6 +464,18 @@ Documentación:
 **Próximo paso:** F1.22B — implementar y validar el verifier trusted de la
 tercera tarea antes de fijar candidatos.
 
+### F1.22B — Verifier trusted de selector de organización activa — PASS
+
+- Perfil `rat-active-organization-selector-v1` aislado y encadenado a
+  `rat-default`.
+- Baseline: 4 fallos esperados; solución dorada temporal: 6/6 PASS.
+- Suite trusted: `23 passed, 3 skipped`; worktree dorado eliminado.
+
+Documentación:
+`docs/benchmark/F1.22B_Verifier_selector_organizacion_2026-09-04.md`.
+
+**Próximo paso:** F1.22C — fijar baseline, hashes y candidatos.
+
 ## 2026-09-02 — F1.19A cerrado: contrato y estructura del harness reproducible
 
 Se completó F1.19A del benchmark.
