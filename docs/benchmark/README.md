@@ -5,6 +5,7 @@ del benchmark reproducible de CumpleIA.
 
 ## Estado vigente
 
+- [F1.22B — Verifier de selector de organización](F1.22B_Verifier_selector_organizacion_2026-09-04.md): baseline rechazado y solución dorada aprobada.
 - [F1.22A — Diseño de selector de organización activa](F1.22A_Diseno_tercera_tarea_selector_organizacion_2026-09-04.md): tercera tarea funcional definida; verifier pendiente.
 - [F1.21E — Cierre de la segunda ronda RAT](F1.21E_Cierre_segunda_ronda_RAT_2026-09-04.md): Claude PASS; Qwen y DeepSeek FAIL; evidencias trusted verificadas.
 - [F1.21D — Reparación de sockets SRT](F1.21D_Reparacion_sockets_SRT_2026-09-04.md): TMPDIR corto por corrida y sonda SRT aprobados.
