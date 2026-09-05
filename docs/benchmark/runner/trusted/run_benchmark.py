@@ -20,6 +20,7 @@ from typing import Any
 from urllib.parse import urlsplit
 
 import prepare_workspace
+import run_active_organization_selector_profile
 import run_na_section_profile
 import run_organization_current_profile
 import run_rat_default
@@ -177,6 +178,7 @@ def validate_run_config(data: dict[str, Any]) -> dict[str, Any]:
         "rat-default",
         run_na_section_profile.PROFILE,
         run_organization_current_profile.PROFILE,
+        run_active_organization_selector_profile.PROFILE,
     }:
         raise HarnessError("unsupported verificationProfile")
     resolve_repo_file(data["taskFile"], "taskFile")
@@ -518,6 +520,10 @@ def main() -> int:
             )
         elif config["verificationProfile"] == run_organization_current_profile.PROFILE:
             verifier_code = run_organization_current_profile.run_profile(
+                config["runId"], workspace, evidence
+            )
+        elif config["verificationProfile"] == run_active_organization_selector_profile.PROFILE:
+            verifier_code = run_active_organization_selector_profile.run_profile(
                 config["runId"], workspace, evidence
             )
         else:
