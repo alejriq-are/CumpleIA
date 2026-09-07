@@ -19,10 +19,11 @@ Qwen3.5-9B no mejoró el 1/4 de Qwen3-4B en esta tarea y **no queda seleccionado
 como candidato local final**. F1.24 continúa con otro candidato local de mayor
 capacidad. El [preflight F1.24D](F1.24D_Preflight_siguiente_candidato_local_2026-09-07.md)
 descarta Qwen3-Coder-Next por memoria y registra la descarga verificada de
-Qwen3-Coder-30B-A3B-Instruct. Los gates operativo y de transporte a 8K, 16K
-y 24K pasaron; el prefill limpio 24K fue 24.000 tokens en 64.515 s (~372 tok/s).
-Los gates operativo y de transporte a 32K también pasaron. La corrida funcional
-con el contrato v2 está preparada, pero aún no se ejecuta.
+Qwen3-Coder-30B-A3B-Instruct. Los gates operativo y de transporte a 8K, 16K,
+24K y 32K pasaron; el prefill limpio 24K fue 24.000 tokens en 64.515 s
+(~372 tok/s). La corrida funcional v2 agotó el timeout: 1812.713011 s,
+agentExitCode `null`, contrato 1/4 y evidencia verificada. El candidato no
+queda seleccionado como local final; F1.24 continúa con otro candidato.
 
 ## Histórico preservado
 
