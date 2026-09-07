@@ -21,7 +21,8 @@ capacidad. El [preflight F1.24D](F1.24D_Preflight_siguiente_candidato_local_2026
 descarta Qwen3-Coder-Next por memoria y registra la descarga verificada de
 Qwen3-Coder-30B-A3B-Instruct. Los gates operativo y de transporte a 8K, 16K
 y 24K pasaron; el prefill limpio 24K fue 24.000 tokens en 64.515 s (~372 tok/s).
-El gate operativo 32K pasó; faltan SRT 32K y resultado funcional.
+Los gates operativo y de transporte a 32K también pasaron. La corrida funcional
+con el contrato v2 está preparada, pero aún no se ejecuta.
 
 ## Histórico preservado
 

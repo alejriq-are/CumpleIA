@@ -1,0 +1,10 @@
+{
+  "schemaVersion": "1.0",
+  "runId": "rat-active-organization-selector-v2-qwen3-coder-30b-a3b-local",
+  "candidateName": "qwen3-coder-30b-a3b-local",
+  "baselineCommit": "c29ac90b7486a8ab02af282b6c0978eaccd5809c",
+  "taskFile": "docs/benchmark/runner/tasks/active-organization-selector-v1.md",
+  "transportConfig": "docs/benchmark/runner/rounds/rat-active-organization-selector-v2/transport-qwen3-coder-30b-a3b-local.json",
+  "timeoutSeconds": 1800,
+  "verificationProfile": "rat-active-organization-selector-v2"
+}
