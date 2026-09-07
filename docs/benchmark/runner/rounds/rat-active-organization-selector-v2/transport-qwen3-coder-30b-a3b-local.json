@@ -1,0 +1,9 @@
+{
+  "candidateName": "qwen3-coder-30b-a3b-local",
+  "backendClass": "local",
+  "provider": "llama.cpp",
+  "endpoint": "http://llm-local.cumpleia:18080",
+  "modelId": "local",
+  "credentialEnv": null,
+  "timeoutSeconds": 1800
+}
