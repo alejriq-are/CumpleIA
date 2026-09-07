@@ -505,6 +505,17 @@ Documentación:
 Documentación:
 `docs/benchmark/F1.23B_Verifier_calibrado_selector_2026-09-04.md`.
 
+### F1.23D — Cierre de ronda comparativa calibrada — CERRADA
+
+- Claude Sonnet 5: **PASS**, 4/4, 523.724770 s.
+- Qwen3-4B local: **FAIL**, 1/4, 176.574400 s.
+- DeepSeek V4 Pro: **FAIL**, 1/4, 203.544294 s.
+- Tres evidencias y manifests trusted verificados; la calibración eliminó el
+  falso negativo de F1.22 por convención de nombre.
+
+Documentación:
+`docs/benchmark/F1.23D_Cierre_ronda_calibrada_RAT_2026-09-07.md`.
+
 ## 2026-09-02 — F1.19A cerrado: contrato y estructura del harness reproducible
 
 Se completó F1.19A del benchmark.
