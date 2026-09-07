@@ -7,6 +7,7 @@ del benchmark reproducible de CumpleIA.
 
 - [Estado del benchmark](status.md): cierre documental hasta F1.24C; F1.24 continúa abierta.
 - [F1.24 — Evaluación del candidato local](F1.24_Evaluacion_candidato_local_2026-09-07.md): Qwen3.5-9B, A/B PASS y C FAIL 1/4; no seleccionado como candidato local final.
+- [F1.24D — Preflight del siguiente candidato local](F1.24D_Preflight_siguiente_candidato_local_2026-09-07.md): Qwen3-Coder-Next descartado por memoria; preflight preparado para Qwen3-Coder-30B-A3B-Instruct.
 
 ## Histórico
 
