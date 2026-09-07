@@ -19,9 +19,8 @@ Qwen3.5-9B no mejoró el 1/4 de Qwen3-4B en esta tarea y **no queda seleccionado
 como candidato local final**. F1.24 continúa con otro candidato local de mayor
 capacidad. El [preflight F1.24D](F1.24D_Preflight_siguiente_candidato_local_2026-09-07.md)
 descarta Qwen3-Coder-Next por memoria y registra la descarga verificada de
-Qwen3-Coder-30B-A3B-Instruct. Los gates operativo y de transporte a 8K y el
-gate operativo a 16K pasaron; faltan SRT a 16K, contextos superiores y resultado
-funcional.
+Qwen3-Coder-30B-A3B-Instruct. Los gates operativo y de transporte a 8K y 16K
+pasaron; faltan 24K, 32K y resultado funcional.
 
 ## Histórico preservado
 
