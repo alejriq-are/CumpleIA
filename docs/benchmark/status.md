@@ -32,6 +32,9 @@ oficial de Qwen (8.99 GB, contexto base 32K). El gate operativo local 8K pasó;
 el transporte SRT 8K también pasó. Faltan contextos superiores y la corrida
 funcional.
 
+**Pausa operativa:** servidor activo en 8K; reinicio a 16K pendiente. Ninguna
+prueba 16K o superior se ha iniciado para este candidato.
+
 ## Histórico preservado
 
 [F1.23D — Ronda calibrada cerrada](F1.23D_Cierre_ronda_calibrada_RAT_2026-09-07.md):
