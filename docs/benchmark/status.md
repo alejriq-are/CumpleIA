@@ -29,7 +29,8 @@ queda seleccionado como local final; F1.24 continúa con otro candidato.
 
 El siguiente preflight propone Qwen2.5-Coder-14B-Instruct Q4_K_M desde el GGUF
 oficial de Qwen (8.99 GB, contexto base 32K). El gate operativo local 8K pasó;
-faltan SRT, contextos superiores y la corrida funcional.
+el transporte SRT 8K también pasó. Faltan contextos superiores y la corrida
+funcional.
 
 ## Histórico preservado
 
