@@ -25,6 +25,12 @@ Qwen3-Coder-30B-A3B-Instruct. Los gates operativo y de transporte a 8K, 16K,
 agentExitCode `null`, contrato 1/4 y evidencia verificada. El candidato no
 queda seleccionado como local final; F1.24 continúa con otro candidato.
 
+## F1.24E — Siguiente candidato preparado
+
+El siguiente preflight propone Qwen2.5-Coder-14B-Instruct Q4_K_M desde el GGUF
+oficial de Qwen (8.99 GB, contexto base 32K). No se ha descargado ni ejecutado:
+debe pasar los mismos gates antes de la corrida funcional.
+
 ## Histórico preservado
 
 [F1.23D — Ronda calibrada cerrada](F1.23D_Cierre_ronda_calibrada_RAT_2026-09-07.md):
