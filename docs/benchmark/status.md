@@ -113,7 +113,22 @@ Resultados principales:
 **Decisión:** Qwen3.6-35B-A3B IQ4_XS no se selecciona como candidato local definitivo debido a incompatibilidad de integración con Claude Code. El descarte no se atribuye a falla de inferencia ni de transporte SRT.
 
 Documento: `docs/benchmark/F1.24H_Preflight_qwen36_35b_a3b_2026-09-08.md`.
+### Punto de reanudación — 2026-09-08
 
+La jornada se cierra después de completar y documentar F1.24H.
+
+Estado al cierre:
+
+- F1.24H cerrado como `CANDIDATO NO SELECCIONADO`;
+- commit de cierre: `37787b8`;
+- rama `main` sincronizada con `origin/main`;
+- working tree limpio al finalizar el cierre de F1.24H;
+- no se inicia F1.24I;
+- se preservan los resultados de las evaluaciones locales realizadas y no deben repetirse sin una justificación técnica nueva.
+
+**Próxima actividad:** realizar una revisión consolidada de los resultados de F1.24 y decidir si se cierra la búsqueda de candidatos locales formalizando la arquitectura local + nube de CumpleIA, o si existe un candidato adicional que justifique abrir F1.24I.
+
+No ejecutar nuevas pruebas de modelos antes de esta decisión.
 ## Histórico preservado
 
 [F1.23D — Ronda calibrada cerrada](F1.23D_Cierre_ronda_calibrada_RAT_2026-09-07.md):
