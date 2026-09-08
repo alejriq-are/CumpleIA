@@ -58,6 +58,40 @@ corrida funcional RAT.
 
 Qwen2.5-Coder-7B-Instruct no queda seleccionado como reemplazo local.
 F1.24F se cierra preservando el resultado y sin repetir pruebas.
+
+### F1.24G — Preflight Devstral Small 2 24B
+
+**Estado:** CERRADO — CANDIDATO NO SELECCIONADO
+
+Se evaluó `Devstral-Small-2-24B-Instruct-2512` en cuantización `Q4_K_M` como siguiente candidato local.
+
+Artefacto:
+
+- archivo: `mistralai_Devstral-Small-2-24B-Instruct-2512-Q4_K_M.gguf`;
+- SHA-256: `bfd11c8679c6b81eb43763505465d7dcfa72e460ab1c220ecc235a3efadd7f7f`;
+- tamaño visible: aproximadamente 14 GB;
+- runtime: llama.cpp `b95502b`;
+- arquitectura `mistral3`: soportada por el runtime fijado.
+
+Durante el preflight se detectó que WSL disponía inicialmente de aproximadamente 16 GiB de RAM. Se aumentó la asignación a 24 GB y se repitió desde cero el gate local 8K.
+
+Resultado definitivo 8K:
+
+- carga del modelo: PASS;
+- respuesta exacta `F1.24G-8K-LOCAL-OK`: PASS;
+- VRAM: 7796 / 8151 MiB;
+- prompt throughput: aproximadamente 17.4 tok/s;
+- generation throughput reproducido: aproximadamente 0.54 tok/s.
+
+La ampliación de memoria WSL no produjo una mejora material en la velocidad de generación. El rendimiento observado resulta insuficiente para una corrida agentic con timeout de 1800 segundos.
+
+Por esta razón no se ejecutaron los gates posteriores de Claude Code/SRT, 16K, 24K, prefill limpio 24K, 32K ni la corrida funcional RAT.
+
+**Decisión:** Devstral-Small-2-24B-Instruct-2512 no se selecciona como candidato local definitivo.
+
+A partir de F1.24G, las evaluaciones locales posteriores utilizan WSL con 24 GB de memoria asignada. Los resultados históricos anteriores permanecen válidos bajo las condiciones registradas en sus respectivas ejecuciones.
+
+Documento: `docs/benchmark/F1.24G_Preflight_devstral_small_2_24b_2026-09-08.md`.
 ## Histórico preservado
 
 [F1.23D — Ronda calibrada cerrada](F1.23D_Cierre_ronda_calibrada_RAT_2026-09-07.md):
