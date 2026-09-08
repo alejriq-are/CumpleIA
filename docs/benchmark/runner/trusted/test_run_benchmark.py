@@ -104,6 +104,88 @@ def test_runtime_tmp_path_is_short_and_deterministic(monkeypatch):
     assert len(str(path / "cc-socks" / "bridge-0000000000.sock")) < 108
 
 
+def test_local_transport_preflight_passes_with_expected_host_and_no_wildcards(
+    monkeypatch,
+):
+    monkeypatch.setattr(
+        run_benchmark.socket,
+        "getaddrinfo",
+        lambda *args, **kwargs: [
+            (2, 1, 6, "", ("127.77.18.1", 0)),
+        ],
+    )
+
+    class Result:
+        stdout = "LISTEN 0 128 127.77.18.1:18080 0.0.0.0:*\n"
+
+    monkeypatch.setattr(
+        run_benchmark.subprocess,
+        "run",
+        lambda *args, **kwargs: Result(),
+    )
+
+    run_benchmark.validate_local_transport_preflight(
+        {"endpoint": "http://llm-local.cumpleia:18080"}
+    )
+
+
+def test_local_transport_preflight_rejects_wrong_host_mapping(monkeypatch):
+    monkeypatch.setattr(
+        run_benchmark.socket,
+        "getaddrinfo",
+        lambda *args, **kwargs: [
+            (2, 1, 6, "", ("127.0.0.1", 0)),
+        ],
+    )
+
+    with pytest.raises(run_benchmark.HarnessError, match="local transport hostname"):
+        run_benchmark.validate_local_transport_preflight(
+            {"endpoint": "http://llm-local.cumpleia:18080"}
+        )
+
+
+def test_local_transport_preflight_rejects_wildcard_listener(monkeypatch):
+    monkeypatch.setattr(
+        run_benchmark.socket,
+        "getaddrinfo",
+        lambda *args, **kwargs: [
+            (2, 1, 6, "", ("127.77.18.1", 0)),
+        ],
+    )
+
+    class Result:
+        stdout = "LISTEN 0 128 0.0.0.0:9000 0.0.0.0:*\n"
+
+    monkeypatch.setattr(
+        run_benchmark.subprocess,
+        "run",
+        lambda *args, **kwargs: Result(),
+    )
+
+    with pytest.raises(run_benchmark.HarnessError, match="wildcard listener"):
+        run_benchmark.validate_local_transport_preflight(
+            {"endpoint": "http://llm-local.cumpleia:18080"}
+        )
+
+
+def test_cloud_transport_preflight_skips_local_checks(monkeypatch):
+    def unexpected_local_preflight(_transport):
+        raise AssertionError("local preflight must not run for cloud transport")
+
+    monkeypatch.setattr(
+        run_benchmark,
+        "validate_local_transport_preflight",
+        unexpected_local_preflight,
+    )
+
+    run_benchmark.validate_transport_preflight(
+        {
+            "backendClass": "cloud",
+            "endpoint": "https://api.anthropic.com",
+        }
+    )
+
+
 def test_prepare_run_directories_allows_existing_tmp_root(monkeypatch, tmp_path: Path):
     runtime_root = tmp_path / "runtime"
     runtime_tmp_root = tmp_path / "runtime-tmp"

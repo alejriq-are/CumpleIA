@@ -1,0 +1,9 @@
+{
+  "candidateName": "claude-sonnet-5",
+  "backendClass": "cloud",
+  "provider": "anthropic",
+  "endpoint": "https://api.anthropic.com",
+  "modelId": "claude-sonnet-5",
+  "credentialEnv": "ANTHROPIC_API_KEY",
+  "timeoutSeconds": 1800
+}
