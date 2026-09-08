@@ -5,9 +5,9 @@ del benchmark reproducible de CumpleIA.
 
 ## Estado vigente
 
-- [Estado del benchmark](status.md): cierre documental hasta F1.24C; F1.24 continúa abierta.
+- [Estado del benchmark](status.md): F1.24 cerrada como evaluación del nivel LOCAL; el verificador escala los FAIL.
 - [F1.24E — Preflight Qwen2.5-Coder-14B](F1.24E_Preflight_qwen25_coder_14b_2026-09-07.md): gates técnicos hasta 24K, pero prefill 24K agotó el timeout; no seleccionado.
-- [F1.24 — Evaluación del candidato local](F1.24_Evaluacion_candidato_local_2026-09-07.md): Qwen3.5-9B, A/B PASS y C FAIL 1/4; no seleccionado como candidato local final.
+- [F1.24 — Evaluación del nivel local](F1.24_Evaluacion_candidato_local_2026-09-07.md): Qwen3.5-9B validado para tareas de bajo riesgo; el contrato C FAIL 1/4 debe escalar.
 - [F1.24D — Preflight del siguiente candidato local](F1.24D_Preflight_siguiente_candidato_local_2026-09-07.md): Qwen3-Coder-30B-A3B-Instruct superó gates técnicos, pero agotó el timeout funcional con contrato 1/4.
 
 ## Histórico
