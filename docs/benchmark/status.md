@@ -92,6 +92,28 @@ Por esta razón no se ejecutaron los gates posteriores de Claude Code/SRT, 16K, 
 A partir de F1.24G, las evaluaciones locales posteriores utilizan WSL con 24 GB de memoria asignada. Los resultados históricos anteriores permanecen válidos bajo las condiciones registradas en sus respectivas ejecuciones.
 
 Documento: `docs/benchmark/F1.24G_Preflight_devstral_small_2_24b_2026-09-08.md`.
+### F1.24H — Preflight Qwen3.6-35B-A3B
+
+**Estado:** CERRADO — CANDIDATO NO SELECCIONADO
+
+Se evaluó Qwen3.6-35B-A3B IQ4_XS como candidato local de mayor capacidad mediante un runtime llama.cpp paralelo con soporte `qwen35moe`.
+
+Resultados principales:
+
+- runtime llama.cpp b10837 / commit `5202104b59ada9005db079eea43882a2b7bf5802`: PASS;
+- integridad del artefacto GGUF: PASS;
+- offload CUDA 42/42 capas: PASS;
+- inferencia local 8K: PASS;
+- transporte SRT hacia `llm-local.cumpleia`: PASS;
+- Claude Code con template nativo: FAIL por `Jinja Exception: System message must be at the beginning`;
+- mitigación con `chatml`: FAIL, porque el modelo continúa generando `<think>` incluso con `--reasoning off` y `--reasoning-budget 0`;
+- pruebas 16K/24K/32K: NOT RUN;
+- benchmark funcional RAT: NOT RUN.
+
+**Decisión:** Qwen3.6-35B-A3B IQ4_XS no se selecciona como candidato local definitivo debido a incompatibilidad de integración con Claude Code. El descarte no se atribuye a falla de inferencia ni de transporte SRT.
+
+Documento: `docs/benchmark/F1.24H_Preflight_qwen36_35b_a3b_2026-09-08.md`.
+
 ## Histórico preservado
 
 [F1.23D — Ronda calibrada cerrada](F1.23D_Cierre_ronda_calibrada_RAT_2026-09-07.md):
