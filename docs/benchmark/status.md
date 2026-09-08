@@ -25,12 +25,13 @@ Qwen3-Coder-30B-A3B-Instruct. Los gates operativo y de transporte a 8K, 16K,
 agentExitCode `null`, contrato 1/4 y evidencia verificada. El candidato no
 queda seleccionado como local final; F1.24 continúa con otro candidato.
 
-## F1.24E — Siguiente candidato preparado
+## F1.24E — Preflight cerrado por rendimiento
 
 El siguiente preflight propone Qwen2.5-Coder-14B-Instruct Q4_K_M desde el GGUF
 oficial de Qwen (8.99 GB, contexto base 32K). El gate operativo local 8K pasó;
-el transporte SRT 8K, 16K y 24K también pasó. Falta el prefill limpio 24K,
-32K y la corrida funcional.
+el transporte SRT 8K, 16K y 24K también pasó. El prefill limpio 24K agotó
+1800 s tras procesar 14.336 tokens; no se prueban 32K ni la corrida funcional.
+El candidato no queda seleccionado como local final.
 
 **Pausa operativa:** servidor activo en 8K; reinicio a 16K pendiente. Ninguna
 prueba 16K o superior se ha iniciado para este candidato.
