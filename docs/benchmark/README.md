@@ -5,6 +5,13 @@ del benchmark reproducible de CumpleIA.
 
 ## Estado vigente
 
+- [Estado del benchmark](status.md): F1.24 cerrada como evaluación del nivel LOCAL; el verificador escala los FAIL.
+- [F1.24E — Preflight Qwen2.5-Coder-14B](F1.24E_Preflight_qwen25_coder_14b_2026-09-07.md): gates técnicos hasta 24K, pero prefill 24K agotó el timeout; no seleccionado.
+- [F1.24 — Evaluación del nivel local](F1.24_Evaluacion_candidato_local_2026-09-07.md): Qwen3.5-9B validado para tareas de bajo riesgo; el contrato C FAIL 1/4 debe escalar.
+- [F1.24D — Preflight del siguiente candidato local](F1.24D_Preflight_siguiente_candidato_local_2026-09-07.md): Qwen3-Coder-30B-A3B-Instruct superó gates técnicos, pero agotó el timeout funcional con contrato 1/4.
+
+## Histórico
+
 - [F1.23D — Cierre de ronda calibrada](F1.23D_Cierre_ronda_calibrada_RAT_2026-09-07.md): Claude PASS; Qwen y DeepSeek FAIL; evidencias verificadas.
 - [F1.23B — Verifier calibrado de selector](F1.23B_Verifier_calibrado_selector_2026-09-04.md): baseline rechazado y solución retenida aprobada por comportamiento.
 - [F1.23A — Calibración del verifier de selector](F1.23A_Calibracion_verifier_selector_2026-09-04.md): separa comportamiento observable de convenciones de nombres.
