@@ -7,9 +7,12 @@ del benchmark reproducible de CumpleIA.
 
 - [Estado del benchmark](status.md): F1.25 cerrada; viabilidad local confirmada y FAIL formal de F1.25-B preservado.
 - [F1.25 — Cierre local con Claude Code y RAT](F1.25_Cierre_LLM_local_Claude_Code_RAT_2026-09-10.md): metodología por capas, ncmoe=32, calibración A, resultado B, trazabilidad trusted y aclaración histórica de F1.24H.
+- [F1.24F — Preflight Qwen2.5-Coder-7B](F1.24F_Preflight_qwen25_coder_7b_2026-09-08.md): gate local 8K PASS y conectividad Claude Code/SRT PASS, pero compatibilidad exact-response FAIL; no seleccionado.
+- `F1.24G_Preflight_devstral_small_2_24b_2026-09-08.md`: preflight de Devstral-Small-2-24B-Instruct-2512 Q4_K_M; carga y respuesta exacta 8K PASS, pero rendimiento de generación ~0.54 tok/s insuficiente; candidato no seleccionado.
 - [F1.24E — Preflight Qwen2.5-Coder-14B](F1.24E_Preflight_qwen25_coder_14b_2026-09-07.md): gates técnicos hasta 24K, pero prefill 24K agotó el timeout; no seleccionado.
 - [F1.24 — Evaluación del nivel local](F1.24_Evaluacion_candidato_local_2026-09-07.md): Qwen3.5-9B validado para tareas de bajo riesgo; el contrato C FAIL 1/4 debe escalar.
 - [F1.24D — Preflight del siguiente candidato local](F1.24D_Preflight_siguiente_candidato_local_2026-09-07.md): Qwen3-Coder-30B-A3B-Instruct superó gates técnicos, pero agotó el timeout funcional con contrato 1/4.
+
 
 ## Histórico
 
