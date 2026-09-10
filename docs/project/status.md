@@ -1,5 +1,21 @@
 # Estado actual del proyecto
 
+## Benchmark — cierre F1.25 (2026-09-10)
+
+El estado vigente del benchmark está en [benchmark/status.md](../benchmark/status.md).
+El [cierre F1.25](../benchmark/F1.25_Cierre_LLM_local_Claude_Code_RAT_2026-09-10.md)
+confirma viabilidad de Qwen3.6-35B-A3B IQ4_XS en el OMEN con Claude Code,
+con revisión de integración. Conserva A como calibración (16K insuficiente y
+Docker apagado) y B como FAIL formal pese a exit 0 y checks generales PASS.
+Incluye los defectos reales, la validación posterior y la trazabilidad trusted.
+F1.24H conserva su hallazgo válido: 5.23 tok/s se obtuvo con MoE subóptimo
+y no representa el límite del hardware/modelo.
+
+No quedan ejecuciones pendientes para cerrar F1.25. Una futura calibración del
+verifier debe tener evidencia separada. Este avance documental no modifica
+capacidad del producto; los apartados anteriores del benchmark conservados
+más abajo describen su secuencia histórica, no el próximo paso vigente.
+
 ## Snapshot Git observado
 
 | Elemento | Valor observado |

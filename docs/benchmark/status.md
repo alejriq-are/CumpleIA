@@ -1,5 +1,34 @@
 # Estado del benchmark RAT
 
+## F1.25 — Cerrada: viabilidad operativa con revisión de integración
+
+El [cierre F1.25](F1.25_Cierre_LLM_local_Claude_Code_RAT_2026-09-10.md)
+consolida las pruebas por capas, RTX 5060 detectada, sweep con mejor punto
+`ncmoe=32`, pp/tg 16K y transporte/SRT sin degradación relevante. Claude Code
+con `--name` alcanzó 41.56 t/s al evitar la request auxiliar de título.
+Registra el parche Jinja, `CLAUDE_CODE_DISABLE_TERMINAL_TITLE=1`, los 16 tests
+aprobados y SHA-256 del harness histórico.
+
+| Etapa | Estado preservado | Interpretación |
+|---|---|---|
+| F1.25-A | HARNESS_ERROR | Calibración: request inicial 23315 tokens frente a 16K; Docker apagado |
+| F1.25-B | FAIL | 64K, agentExitCode 0, 630.223109 s, timedOut false; checks generales PASS y verifier contractual FAIL |
+
+En B, el rechazo nominal por `organizaciones[0]` frente a `memberships[0]`
+coexiste con defectos reales del selector y de sincronización de `organizationId`.
+`npm ci`, type-check y tests pasaron en una copia de validación, pero los tests
+duplican el helper en JS sin importar el TS real. El resultado funcional es
+parcial; no se modifica la RAT ni se convierte el FAIL en PASS.
+
+Qwen3.6-35B-A3B IQ4_XS en el OMEN es viable para desarrollo con Claude Code,
+con revisión de integración; conviene reservar Claude/DeepSeek para tareas
+críticas. F1.25 no requiere otra RAT para su cierre documental. Una futura
+calibración del verifier o mejora de pruebas se tratará como trabajo separado.
+
+**Nota histórica F1.24H:** produjo un hallazgo válido con configuración MoE
+subóptima; **5.23 tok/s NO representa el límite del hardware/modelo**.
+Se conserva esa medición y toda la historia anterior.
+
 ## F1.24 — Evaluación del nivel local cerrada
 
 El [documento F1.24](F1.24_Evaluacion_candidato_local_2026-09-07.md) registra
