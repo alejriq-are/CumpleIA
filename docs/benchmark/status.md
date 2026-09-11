@@ -1,5 +1,31 @@
 # Estado del benchmark RAT
 
+## F1.27 — Cerrada: performance PASS / agentic tool compatibility FAIL
+
+El [cierre F1.27](F1.27_Cierre_DeepSeek_Coder_V2_Lite_2026-09-11.md)
+consolida DeepSeek-Coder-V2-Lite-Instruct Q4_K_M (9.65 GiB, 15.71B parámetros),
+llama.cpp `5202104b5 (322)`, con **`-ngl 20` canónico** tras el cliff de VRAM:
+ngl21 tiene prefill muy inestable y ngl22+ degradación fuerte.
+pp512: 1439.40 ± 55.34; tg128: 74.27 ± 1.48; pp16384: 936.06 ± 70.01;
+tg256: 56.87 ± 10.13 tok/s. Benchmark largo: RSS 10,461,200 KB (~10.0 GiB),
+swap 0, elapsed 4:45.90, exit 0.
+
+`/v1/messages` directo PASS (58.69 tok/s, 2.53 s), SRT PASS sin degradación
+(58.36 tok/s, 1.56 s) y Claude Code básico PASS (57.78 tok/s, 2.62 s,
+una request). **Mini-agentic FAIL:** no modificó archivos, mantuvo 2 FAIL +
+1 ERROR y alucinó `calculate_something` y `Ran 10 tests`. El diagnóstico
+read-only produjo `functionread_file` textual, sin herramienta ejecutada,
+y contenido del README inventado.
+
+Hay tokens nativos de herramientas, pero el autoparser reporta `tool_mode: NONE`,
+`supports_tools: false`, `chat_format: peg-native`, `reasoning_format: deepseek`.
+**Performance PASS / agentic tool compatibility FAIL con el stack actual.
+RAT completa: no procede; no ejecutar. Candidato NO seleccionado.**
+Se mantiene **Qwen3.6-35B-A3B IQ4_XS como principal**, preservando F1.25-B FAIL.
+Seguimiento separado: reevaluar con build/template/parser de llama.cpp que
+soporte tool-calling de DeepSeek y nueva evidencia de herramientas ejecutadas.
+No quedan ejecuciones pendientes para cerrar F1.27.
+
 ## F1.26 — Cerrada: operational viability FAIL; no seleccionado
 
 El [cierre F1.26](F1.26_Cierre_Qwen3_Coder_recalibrado_RAT_2026-09-11.md)
