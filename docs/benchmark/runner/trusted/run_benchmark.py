@@ -276,6 +276,7 @@ def candidate_environment(
         "CLAUDE_CODE_TMPDIR": str(runtime_tmp),
         "DISABLE_UPDATES": "1",
         "CLAUDE_CODE_DISABLE_GIT_INSTRUCTIONS": "1",
+        "CLAUDE_CODE_DISABLE_TERMINAL_TITLE": "1",
         "ANTHROPIC_BASE_URL": transport["endpoint"],
         "ANTHROPIC_AUTH_TOKEN": credential,
         "ANTHROPIC_MODEL": transport["modelId"],
