@@ -1,5 +1,23 @@
 # Estado actual del proyecto
 
+## Benchmark — cierre F1.27 (2026-09-11)
+
+El [cierre F1.27](../benchmark/F1.27_Cierre_DeepSeek_Coder_V2_Lite_2026-09-11.md)
+registra DeepSeek-Coder-V2-Lite-Instruct Q4_K_M con `-ngl 20` canónico tras
+calibrar el cliff de VRAM. **Performance PASS**: pp16384 936.06 ± 70.01 y
+tg256 56.87 ± 10.13 tok/s; transporte directo, SRT y Claude Code básico PASS.
+**Agentic tool compatibility FAIL con el stack actual**: mini-agentic sin
+ediciones, 2 FAIL + 1 ERROR; intento textual de tool call sin ejecución real
+y contenido inventado. Aunque hay tokens de herramientas, llama.cpp
+`5202104b5 (322)` reporta `tool_mode: NONE` y `supports_tools: false`.
+
+**RAT completa: no procede; no ejecutar. DeepSeek no seleccionado. Se mantiene
+Qwen3.6-35B-A3B IQ4_XS como candidato local principal**, con las reservas de F1.25.
+F1.27 queda cerrada sin ejecuciones pendientes. La reevaluación futura requiere
+build/template/parser compatible con tool-calling de DeepSeek y evidencia nueva.
+El [estado del benchmark](../benchmark/status.md) concentra el estado vigente;
+este cierre es exclusivamente documental.
+
 ## Benchmark — cierre F1.26 (2026-09-11)
 
 El [cierre F1.26](../benchmark/F1.26_Cierre_Qwen3_Coder_recalibrado_RAT_2026-09-11.md)
