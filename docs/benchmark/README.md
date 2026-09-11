@@ -5,7 +5,8 @@ del benchmark reproducible de CumpleIA.
 
 ## Estado vigente
 
-- [Estado del benchmark](status.md): F1.27 cerrada; DeepSeek-Coder-V2-Lite no seleccionado. Qwen3.6-35B-A3B IQ4_XS continúa como candidato local principal; F1.25-B conserva FAIL.
+- [Estado del benchmark](status.md): F1.28 cerrada; selección comparativa de modelos locales finalizada. **Qwen3.6-35B-A3B IQ4_XS queda seleccionado como modelo local principal de CumpleIA.**
+- [F1.28 — Cierre de selección de modelos locales](F1.28_Cierre_seleccion_modelos_locales_2026-09-11.md): decisión final comparativa; Qwen3.6 seleccionado. Qwen3-Coder descartado por viabilidad operativa, DeepSeek-Coder-V2-Lite por incompatibilidad agentic/tool-calling con el stack actual y Ministral 3 14B por incompatibilidad de template con Claude Code.
 - [F1.27 — Cierre DeepSeek-Coder-V2-Lite](F1.27_Cierre_DeepSeek_Coder_V2_Lite_2026-09-11.md): `-ngl 20` canónico, performance PASS, transporte/SRT/Claude Code básico PASS, mini-agentic y tool compatibility FAIL con stack actual; RAT completa no procede. Seguimiento con build/template/parser compatible.
 - [F1.26 — Cierre Qwen3-Coder recalibrado y RAT](F1.26_Cierre_Qwen3_Coder_recalibrado_RAT_2026-09-11.md): ncmoe=32, resultados sintéticos y transporte, mini-agentic PASS fuerte, RAT TIMEOUT, FAIL funcional y operational viability FAIL.
 - [F1.25 — Cierre local con Claude Code y RAT](F1.25_Cierre_LLM_local_Claude_Code_RAT_2026-09-10.md): metodología por capas, ncmoe=32, calibración A, resultado B, trazabilidad trusted y aclaración histórica de F1.24H.

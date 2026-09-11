@@ -211,3 +211,74 @@ No ejecutar nuevas pruebas de modelos antes de esta decisión.
 Claude Sonnet 5 PASS 4/4; Qwen3-4B y DeepSeek V4 Pro FAIL 1/4.
 Sus resultados y evidencias se conservan. No se ejecutan benchmarks autoritativos
 ni se eliminan evidencias como parte de este cierre documental.
+
+## F1.28 — Cierre de selección de modelos locales — 2026-09-11
+
+**Estado:** CERRADO — MODELO LOCAL SELECCIONADO
+
+La fase comparativa de selección de modelos locales para CumpleIA queda formalmente cerrada.
+
+### Modelo seleccionado
+
+**Qwen3.6-35B-A3B IQ4_XS**
+
+Qwen3.6 queda como baseline y modelo local principal por ser el candidato que alcanzó el mejor equilibrio entre:
+
+- rendimiento operativo;
+- integración con Claude Code;
+- tool use funcional;
+- comportamiento agentic real;
+- capacidad de completar una RAT dentro de un tiempo operativo razonable.
+
+La configuración validada en F1.25 utiliza `-ncmoe 32`.
+
+### Candidatos no seleccionados
+
+**Qwen3-Coder-30B-A3B Q4_K_M**
+
+- recalibración MoE exitosa con `-ncmoe 32`;
+- mini-agentic PASS fuerte;
+- RAT completa: TIMEOUT a 1814.351633 s;
+- implementación incompleta;
+- dos errores TypeScript confirmados;
+- operational viability: FAIL.
+
+**DeepSeek-Coder-V2-Lite-Instruct Q4_K_M**
+
+- `-ngl 20` canónico;
+- mejor rendimiento bruto observado entre los candidatos;
+- `/v1/messages`, SRT y Claude Code básico: PASS;
+- mini-agentic: FAIL;
+- llama.cpp reporta `tool_mode: NONE` y `supports_tools: false`;
+- incompatibilidad de tool-calling con el stack actual;
+- RAT completa no procede.
+
+**Ministral-3-14B-Instruct-2512 Q4_K_M**
+
+Evaluación ejecutiva:
+
+- 7.67 GiB;
+- 13.51B parámetros;
+- pp512: 1298.91 t/s;
+- tg128: 39.39 t/s;
+- `/v1/messages`: PASS;
+- generación real en servidor: aproximadamente 15.39 t/s;
+- Claude Code: FAIL por template Jinja incompatible con mensajes `system`:
+  `Only user, assistant and tool roles are supported, got system`;
+- tool use y mini-agentic: no procede.
+
+### Decisión operativa
+
+Qwen3.6-35B-A3B IQ4_XS se adopta como modelo local principal para desarrollo cotidiano y tareas agentic de complejidad media.
+
+Claude y DeepSeek cloud se mantienen para arquitectura, cambios críticos, refactors complejos, revisión final y validación cruzada.
+
+DeepSeek-Coder-V2-Lite y Ministral 3 podrán reevaluarse si futuras versiones de llama.cpp, templates o parsers corrigen sus incompatibilidades actuales.
+
+### Próxima fase
+
+La próxima actividad será la operacionalización y hardening del runtime local seleccionado.
+
+Documento de cierre:
+
+`docs/benchmark/F1.28_Cierre_seleccion_modelos_locales_2026-09-11.md`
