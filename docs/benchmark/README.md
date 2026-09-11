@@ -5,7 +5,8 @@ del benchmark reproducible de CumpleIA.
 
 ## Estado vigente
 
-- [Estado del benchmark](status.md): F1.25 cerrada; viabilidad local confirmada y FAIL formal de F1.25-B preservado.
+- [Estado del benchmark](status.md): F1.26 cerrada; Qwen3-Coder no seleccionado. Qwen3.6-35B-A3B IQ4_XS continúa como candidato local principal; F1.25-B conserva FAIL.
+- [F1.26 — Cierre Qwen3-Coder recalibrado y RAT](F1.26_Cierre_Qwen3_Coder_recalibrado_RAT_2026-09-11.md): ncmoe=32, resultados sintéticos y transporte, mini-agentic PASS fuerte, RAT TIMEOUT, FAIL funcional y operational viability FAIL.
 - [F1.25 — Cierre local con Claude Code y RAT](F1.25_Cierre_LLM_local_Claude_Code_RAT_2026-09-10.md): metodología por capas, ncmoe=32, calibración A, resultado B, trazabilidad trusted y aclaración histórica de F1.24H.
 - [F1.24F — Preflight Qwen2.5-Coder-7B](F1.24F_Preflight_qwen25_coder_7b_2026-09-08.md): gate local 8K PASS y conectividad Claude Code/SRT PASS, pero compatibilidad exact-response FAIL; no seleccionado.
 - `F1.24G_Preflight_devstral_small_2_24b_2026-09-08.md`: preflight de Devstral-Small-2-24B-Instruct-2512 Q4_K_M; carga y respuesta exacta 8K PASS, pero rendimiento de generación ~0.54 tok/s insuficiente; candidato no seleccionado.

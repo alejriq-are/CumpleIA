@@ -1,5 +1,26 @@
 # Estado del benchmark RAT
 
+## F1.26 — Cerrada: operational viability FAIL; no seleccionado
+
+El [cierre F1.26](F1.26_Cierre_Qwen3_Coder_recalibrado_RAT_2026-09-11.md)
+consolida Qwen3-Coder-30B-A3B-Instruct Q4_K_M recalibrado con `-ncmoe 32`:
+pp512 518.83, tg128 37.86, pp16384 69.80 y tg256 30.89 tok/s.
+`/v1/messages`, template nativo, SRT y Claude Code funcionan. La mini-prueba
+agentic logró PASS fuerte (5/5 tests independientes, aproximadamente 5m43s).
+
+La RAT `f1.26-rat-active-org-qwen3-coder-30b-a3b-local`, baseline
+`c29ac90b7486a8ab02af282b6c0978eaccd5809c`, conserva **TIMEOUT**:
+límite 1800 s, duración 1814.351633 s. El verifier nominal dio FAIL por la
+regex `organizaciones[0]` frente a `memberships[0]`, pero hay **FAIL real**:
+prop `activeOrganization` no declarada y `OrganizacionForm` no importado
+(dos errores de type-check), helper con `null` ante parámetro ausente,
+selector reutilizable y tests frontend incompletos.
+
+**Operational viability: FAIL. No seleccionado.** Se mantiene
+**Qwen3.6-35B-A3B IQ4_XS como candidato local principal**, con revisión de
+integración y sin convertir F1.25-B en PASS. No quedan ejecuciones pendientes
+para cerrar F1.26; nuevas calibraciones requieren evidencia separada.
+
 ## F1.25 — Cerrada: viabilidad operativa con revisión de integración
 
 El [cierre F1.25](F1.25_Cierre_LLM_local_Claude_Code_RAT_2026-09-10.md)

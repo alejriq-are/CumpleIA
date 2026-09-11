@@ -1,5 +1,20 @@
 # Estado actual del proyecto
 
+## Benchmark — cierre F1.26 (2026-09-11)
+
+El [cierre F1.26](../benchmark/F1.26_Cierre_Qwen3_Coder_recalibrado_RAT_2026-09-11.md)
+registra Qwen3-Coder-30B-A3B-Instruct Q4_K_M con `-ncmoe 32`, pruebas
+sintéticas y transporte funcional, y mini-agentic PASS fuerte (~5m43s).
+La RAT conserva TIMEOUT (1814.351633 s; límite 1800 s) y FAIL funcional real:
+dos errores de type-check, fallback ausente incorrecto, selector reutilizable
+y tests frontend incompletos, además del falso negativo nominal del verifier.
+
+**Operational viability FAIL; no seleccionado. Qwen3.6-35B-A3B IQ4_XS sigue
+como candidato local principal**, con las reservas documentadas en F1.25.
+F1.26 está cerrada sin nuevas ejecuciones pendientes; el estado vigente se
+consolida en [benchmark/status.md](../benchmark/status.md). Este cierre sólo
+actualiza documentación y conserva los resultados históricos.
+
 ## Benchmark — cierre F1.25 (2026-09-10)
 
 El estado vigente del benchmark está en [benchmark/status.md](../benchmark/status.md).
