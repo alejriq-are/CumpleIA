@@ -1,5 +1,23 @@
 # Estado del benchmark RAT
 
+## F1.27-B — Cerrada: reevaluación con tool compatibility FAIL
+
+El [cierre F1.27-B](F1.27-B_Cierre_reevaluacion_DeepSeek_Coder_V2_Lite_2026-09-14.md)
+documenta el mismo DeepSeek-Coder-V2-Lite-Instruct Q4_K_M con llama.cpp
+mainline **build 453**, commit `41abbfd59`, y template externo
+`llama-cpp-deepseek-r1.jinja`. Las respuestas de `/v1/messages` y
+`/v1/chat/completions` contienen intentos de herramientas como texto, sin
+`tool_use`/`tool_calls` estructurados, y resultados de lectura simulados.
+Ambas agotan 256 tokens de salida; la sonda OpenAI indicó `tool_choice: "required"`.
+
+**Agentic tool compatibility FAIL en la configuración evaluada. No seleccionado.**
+No se ejecutaron mini-agentic ni RAT en esta reevaluación y no procede avanzar.
+Se cierra el seguimiento abierto en F1.27; no continuar con Q6 ni más variantes
+de template sin evidencia técnica nueva. No se determina una causa única ni
+se generaliza el fallo a todo stack posible.
+Se mantiene **Qwen3.6-35B-A3B IQ4_XS como principal**, preservando F1.25-B FAIL.
+F1.27 permanece como historial; F1.28 queda fuera de alcance.
+
 ## F1.27 — Cerrada: performance PASS / agentic tool compatibility FAIL
 
 El [cierre F1.27](F1.27_Cierre_DeepSeek_Coder_V2_Lite_2026-09-11.md)
