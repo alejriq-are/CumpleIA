@@ -1,5 +1,21 @@
 # Estado actual del proyecto
 
+## Benchmark — cierre F1.29A y F1.29B (2026-09-14)
+
+[F1.29A](../benchmark/F1.29A_Cierre_Ornith_1.5_9B_2026-09-14.md) cierra
+Ornith-1.5-9B Q5_K_M como **NO PROMOTE**: r1 INVALID por contexto/Docker,
+r2 FAIL funcional con overflow 64K (562.85 s) y siete errores TypeScript,
+r3 TIMEOUT 128K (1810.79 s), incompleta y con errores persistentes.
+[F1.29B](../benchmark/F1.29B_Cierre_Qwen3.5_9B_Q5_K_M_2026-09-14.md) cierra
+Qwen3.5-9B Q5_K_M con **Gate 1 PASS / Gate 2 FAIL / STOP**, sin mini-agentic,
+performance ni RAT: corregir HTTP 500 del template no logró un Read real.
+
+Se ratifica **Qwen3.6-35B-A3B IQ4_XS**, seleccionado en
+[F1.28](../benchmark/F1.28_Cierre_seleccion_modelos_locales_2026-09-11.md),
+como principal local, preservando F1.25-B FAIL y la evidencia histórica.
+El [estado del benchmark](../benchmark/status.md) consolida la decisión vigente.
+Este cierre es documental; no modifica capacidad del producto.
+
 ## Benchmark — cierre F1.27 (2026-09-11)
 
 El [cierre F1.27](../benchmark/F1.27_Cierre_DeepSeek_Coder_V2_Lite_2026-09-11.md)

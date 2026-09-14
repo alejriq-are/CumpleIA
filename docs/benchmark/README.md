@@ -6,10 +6,11 @@ del benchmark reproducible de CumpleIA.
 ## Estado vigente
 
 
-- [Estado del benchmark](status.md): F1.28 cerrada; selección comparativa de modelos locales finalizada. **Qwen3.6-35B-A3B IQ4_XS queda seleccionado como modelo local principal de CumpleIA.**
+- [Estado del benchmark](status.md): F1.29A y F1.29B cerradas. **Qwen3.6-35B-A3B IQ4_XS sigue como modelo local principal seleccionado en F1.28**, conservando F1.25-B FAIL.
+- [F1.29A — Cierre Ornith-1.5-9B Q5_K_M](F1.29A_Cierre_Ornith_1.5_9B_2026-09-14.md): r1 INVALID por contexto/Docker; r2 FAIL funcional y overflow 64K (562.85 s); r3 TIMEOUT 128K (1810.79 s), incompleta. **NO PROMOTE**.
+- [F1.29B — Cierre Qwen3.5-9B Q5_K_M](F1.29B_Cierre_Qwen3.5_9B_Q5_K_M_2026-09-14.md): Gate 1 PASS; patch mínimo elimina HTTP 500, pero Gate 2 FAIL sin Read real. **STOP**, sin mini-agentic, performance ni RAT.
 - [F1.28 — Cierre de selección de modelos locales](F1.28_Cierre_seleccion_modelos_locales_2026-09-11.md): decisión final comparativa; Qwen3.6 seleccionado. Qwen3-Coder descartado por viabilidad operativa, DeepSeek-Coder-V2-Lite por incompatibilidad agentic/tool-calling con el stack actual y Ministral 3 14B por incompatibilidad de template con Claude Code.
 
-- [Estado del benchmark](status.md): F1.27-B cerrada con tool compatibility FAIL; DeepSeek-Coder-V2-Lite no seleccionado. Qwen3.6-35B-A3B IQ4_XS continúa como candidato local principal; F1.25-B conserva FAIL.
 - [F1.27-B — Cierre de reevaluación DeepSeek-Coder-V2-Lite](F1.27-B_Cierre_reevaluacion_DeepSeek_Coder_V2_Lite_2026-09-14.md): mainline build 453 (`41abbfd59`) y template deepseek-r1; sin `tool_use`/`tool_calls` estructurados en ambos endpoints, con resultados simulados; no avanzar a mini-agentic ni RAT. Preserva F1.27.
 
 - [F1.27 — Cierre DeepSeek-Coder-V2-Lite](F1.27_Cierre_DeepSeek_Coder_V2_Lite_2026-09-11.md): `-ngl 20` canónico, performance PASS, transporte/SRT/Claude Code básico PASS, mini-agentic y tool compatibility FAIL con stack actual; RAT completa no procede. Seguimiento con build/template/parser compatible.

@@ -1,5 +1,26 @@
 # Estado del benchmark RAT
 
+## F1.29A y F1.29B — Cerradas (2026-09-14)
+
+**Qwen3.6-35B-A3B IQ4_XS sigue como modelo local principal seleccionado en
+[F1.28](F1.28_Cierre_seleccion_modelos_locales_2026-09-11.md).** La selección
+operativa conserva el FAIL formal de F1.25-B y sus reservas de integración.
+
+- [F1.29A — Ornith-1.5-9B Q5_K_M](F1.29A_Cierre_Ornith_1.5_9B_2026-09-14.md):
+  **NO PROMOTE**. r1 INVALID/no evaluable por contexto y Docker; r2 FAIL funcional,
+  overflow a 64K tras 562.85 s, siete errores TypeScript, tests propios defectuosos
+  y defectos funcionales; r3 TIMEOUT a 128K tras 1810.79 s, tarea incompleta y
+  errores persistentes. No se ejecuta r4.
+- [F1.29B — Qwen3.5-9B Q5_K_M](F1.29B_Cierre_Qwen3.5_9B_Q5_K_M_2026-09-14.md):
+  **Gate 1 tool_use directo PASS / Gate 2 Claude Code real FAIL / STOP**.
+  El template stock rechaza system intercalado; el patch mínimo elimina HTTP 500,
+  pero no ejecuta Read (`iterations: []`, `num_turns: 1`) e inventa que el probe
+  no existe. No se ejecutan mini-agentic, performance ni RAT.
+
+Los cierres enlazados conservan trazabilidad de runs/configs y distinguen los
+resultados reportados de verificaciones nuevas. No se modifica evidencia histórica.
+Los apartados siguientes conservan la secuencia de decisiones anteriores.
+
 ## F1.27-B — Cerrada: reevaluación con tool compatibility FAIL
 
 El [cierre F1.27-B](F1.27-B_Cierre_reevaluacion_DeepSeek_Coder_V2_Lite_2026-09-14.md)
