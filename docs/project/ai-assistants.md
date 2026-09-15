@@ -1,5 +1,15 @@
 # Continuar CumpleIA con otra plataforma de IA
 
+## Operación local de Qwen3.6
+
+Antes de iniciar una jornada con el modelo local, revisar:
+
+- [`qwen36-operacion-local.md`](qwen36-operacion-local.md) — inicio, parada, estado, logs, recuperación tras `wsl --shutdown` y flujo Claude Code → Qwen3.6.
+
+Comando rápido de verificación:
+
+`cumpleia-qwen status`
+
 ## Qué se transfiere automáticamente
 
 - código fuente;

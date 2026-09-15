@@ -48,6 +48,8 @@ Este directorio contiene la documentación técnica, funcional y de arquitectura
 
 \- \[Trabajo con asistentes de IA](project/ai-assistants.md)
 
+\- \[Operación local de Qwen3.6](project/qwen36-operacion-local.md)
+
 \- \[Benchmark RAT](benchmark/README.md)
 
 
