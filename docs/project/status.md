@@ -1,5 +1,96 @@
 # Estado actual del proyecto
 
+## Checkpoint operativo — cierre de jornada 2026-09-14
+
+### Estado Git
+
+- Rama vigente: `main`.
+- `main` sincronizado con `origin/main`.
+- Working tree limpio al cierre de la jornada.
+- Checkpoint Git previo a este registro: `b665035` — `benchmark: conserva configuraciones Ornith F1.29A`.
+- Commit previo de documentación operativa: `a52c853` — `docs: agrega runbook operativo de Qwen3.6 local`.
+
+### Benchmark y modelo local
+
+La exploración de modelos locales queda cerrada por ahora:
+
+- F1.29A — Ornith-1.5-9B Q5_K_M: **NO PROMOTE**.
+- F1.29B — Qwen3.5-9B Q5_K_M: **Gate 1 PASS / Gate 2 FAIL / STOP**.
+- Qwen3.6-35B-A3B IQ4_XS queda ratificado como **modelo local principal de CumpleIA**.
+
+No reabrir selección de modelos salvo que aparezca un candidato claramente superior, cambie el hardware/runtime o exista una limitación funcional concreta de Qwen3.6.
+
+### Qwen3.6 — operación local
+
+Se automatizó la operación diaria mediante:
+
+`cumpleia-qwen`
+
+Comandos principales:
+
+- `cumpleia-qwen status` — revisar estado del servidor, bridge y GPU.
+- `cumpleia-qwen start` — iniciar Qwen3.6 y el bridge local.
+- `cumpleia-qwen stop` — detener el entorno y liberar recursos.
+- `cumpleia-qwen restart` — reinicio completo.
+- `cumpleia-qwen log` — seguir el log de `llama-server`.
+
+Configuración operativa:
+
+- modelo: Qwen3.6-35B-A3B IQ4_XS;
+- contexto: 65536;
+- `-ngl 99`;
+- `-ncmoe 32`;
+- llama-server: `127.0.0.1:8080`;
+- endpoint operativo: `http://llm-local.cumpleia:18080`;
+- bridge: `socat`;
+- template Claude Code compatible: `qwen36-claude-code.jinja`.
+
+El arranque observado del modelo en el OMEN fue aproximadamente 3 min 49 s.
+
+La guía completa está en:
+
+[`qwen36-operacion-local.md`](qwen36-operacion-local.md)
+
+### Validación end-to-end
+
+Se validó exitosamente el flujo real:
+
+`Claude Code → llm-local.cumpleia:18080 → socat → llama-server → Qwen3.6 → Read tool → resultado`
+
+La prueba utilizó un archivo con UUID aleatorio no incluido en el prompt y produjo:
+
+- tool-use real;
+- dos turnos;
+- lectura correcta;
+- respuesta final exacta.
+
+Por tanto, el entorno local está operativo para desarrollo cotidiano con Claude Code.
+
+### Próxima sesión
+
+El benchmark deja de ser el foco principal. La próxima sesión debe volver al **desarrollo funcional de CumpleIA**.
+
+Antes de comenzar:
+
+1. Entrar a `~/projects/CumpleIA`.
+2. Ejecutar `git status -sb`.
+3. Ejecutar `cumpleia-qwen status`.
+4. Si Qwen está detenido, ejecutar `cumpleia-qwen start`.
+5. Confirmar:
+   - `llama-server : OK`;
+   - `SRT bridge : OK`.
+6. Revisar conjuntamente:
+   - `docs/project/status.md`;
+   - `docs/project/modules-roadmap.md`;
+   - `docs/project/risks-open-items.md`.
+7. Seleccionar la siguiente fase/tarea funcional concreta de CumpleIA.
+8. Usar Qwen3.6 para desarrollo cotidiano y Claude/DeepSeek cloud como segunda revisión en tareas críticas.
+
+**Próximo foco vigente:** retomar el roadmap funcional del producto, no continuar exploración de modelos.
+
+---
+
+
 ## Benchmark — cierre F1.29A y F1.29B (2026-09-14)
 
 [F1.29A](../benchmark/F1.29A_Cierre_Ornith_1.5_9B_2026-09-14.md) cierra
