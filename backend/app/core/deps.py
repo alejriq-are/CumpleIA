@@ -11,6 +11,10 @@ from app.core.security import extract_auth_identity
 from app.db.models import Membership, Profile
 from app.db.session import get_db
 from app.services.authorization import Permission, has_permission
+from app.services.subscriptions import (
+    get_subscription_status,
+    is_subscription_active,
+)
 
 # auto_error=False: si falta el header Authorization NO lanzamos 403 automático;
 # lo gestionamos abajo para devolver 401 (semántica HTTP correcta).
@@ -145,6 +149,48 @@ def require_permission(permission: Permission):
         return current_profile
 
     return _dependency
+
+
+async def require_active_subscription(
+    x_organization_id: Annotated[uuid.UUID, Header()],
+    current_profile: Profile = Depends(get_current_profile),
+    db: AsyncSession = Depends(get_db),
+) -> Profile:
+    """Exige acceso al tenant y una suscripción vigente para módulos M2+.
+
+    `active` y `grace` permiten acceso. `suspended` y `cancelled` lo
+    bloquean. El superadmin queda exento del gate comercial.
+
+    Antes de consultar la suscripción se verifica acceso mínimo de lectura
+    a la organización. Así una organización ajena devuelve 403 y no depende
+    del comportamiento de RLS sobre `subscriptions`.
+    """
+    if current_profile.is_superadmin:
+        return current_profile
+
+    if not await has_permission(
+        db,
+        current_profile,
+        Permission.view_content,
+        x_organization_id,
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Sin acceso a esta organización",
+        )
+
+    subscription_status = await get_subscription_status(
+        db,
+        x_organization_id,
+    )
+
+    if not is_subscription_active(subscription_status):
+        raise HTTPException(
+            status_code=status.HTTP_402_PAYMENT_REQUIRED,
+            detail="La organización requiere una suscripción activa",
+        )
+
+    return current_profile
 
 
 # Tipos anotados para inyección en endpoints
