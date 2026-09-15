@@ -1,5 +1,29 @@
 # Estado actual del proyecto
 
+## Checkpoint — cierre conceptual M2-T0 (2026-09-15)
+
+**M2-T0 — Descubrimiento y diseño conceptual del Inventario / RAT: DONE.**
+
+El [diseño del RAT](modulo2-rat-diseno.md) registra el cierre aprobado, alcance,
+matriz canónica resumida, decisiones, frontera M2/M3/M5 y modelo conceptual.
+`Treatment` representa una actividad; el objetivo incorpora catálogos, relaciones
+N:M con sistemas/terceros, encargos y transferencias internacionales explícitas.
+M3 determina, justifica y aprueba la base de legitimidad; M5 concentra el expediente
+probatorio. El documento identifica el alcance del extracto de conversación disponible.
+
+Se verificaron `CLAUDE.md` y `docs/backlog.md`: ambos reconocen el MVP del Módulo 1
+completado. Los riesgos documentales 1 y 2 quedan resueltos en
+[riesgos y asuntos abiertos](risks-open-items.md); los demás se conservan.
+
+**Siguiente paso vigente: M2-T1 — diseño técnico del modelo de datos y plan de
+migraciones**, conforme al [roadmap](modules-roadmap.md). Sustituye la selección
+genérica de próxima tarea del checkpoint anterior. Módulo 2 sigue sin implementar
+funcionalmente; este cierre no modifica código, API, UI ni migraciones.
+
+Base documental de trabajo: `origin/main` actualizado mediante fetch, commit
+`146428e`; rama `feature/m2-t0-cierre-conceptual`. Los checkpoints siguientes
+conservan su contexto histórico.
+
 ## Checkpoint operativo — cierre de jornada 2026-09-14
 
 ### Estado Git

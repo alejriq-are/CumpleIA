@@ -25,15 +25,20 @@
 - endpoint para `reference_documents`;
 - testing de frontend como decisión transversal.
 
-### Conflicto documental
+### Consistencia documental verificada (2026-09-15)
 
-`docs/backlog.md` conserva líneas antiguas que dicen que Tareas 4-6 siguen pendientes, aunque secciones posteriores del mismo archivo y el código muestran que ya fueron implementadas. Debe limpiarse.
+`docs/backlog.md` ya declara Tareas 0-6 completadas para el MVP y marca Tareas 4-6 como realizadas. El conflicto de estados anteriormente señalado queda resuelto.
 
 ## Módulo 2 - Inventario / RAT
 
 **Estado: no implementado como módulo funcional.**
 
-Hay scaffolding en los modelos (`Treatment`, `System`, `Vendor`). La instrucción más reciente recomienda comenzar con una **Tarea 0 de descubrimiento**: comparar la estructura objetivo del RAT con la guía CCS y la Ley 21.719 antes de crear endpoints o migraciones nuevas.
+Hay scaffolding en los modelos (`Treatment`, `System`, `Vendor`), que requiere rediseño/ampliación según el [diseño conceptual del RAT](modulo2-rat-diseno.md).
+
+- [x] **M2-T0 — Descubrimiento y diseño conceptual: DONE (2026-09-15).** Cierre conceptual, matriz canónica resumida, decisiones, fronteras M2/M3/M5 y modelo objetivo registrados.
+- [ ] **M2-T1 — Siguiente paso:** diseño técnico del modelo de datos y plan de migraciones; concretar catálogos, relaciones N:M, encargos, transferencias, auditoría, RLS y transición desde el scaffolding.
+
+El cierre de M2-T0 es documental. M2-T1 permanece pendiente y el módulo aún no dispone de implementación funcional.
 
 ## Módulo 3 - Bases de licitud
 
