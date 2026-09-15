@@ -3,7 +3,7 @@
 **Tarea:** M2-T0 — Descubrimiento y diseño conceptual del RAT.
 **Estado:** DONE — cierre conceptual.
 **Fecha de registro:** 2026-09-15.
-**Siguiente paso:** M2-T1 — diseño técnico del modelo de datos y plan de migraciones.
+**Siguiente paso:** M2-T3 — frontend del RAT e integración funcional end-to-end.
 
 ## Cierre y alcance
 
@@ -182,3 +182,70 @@ gate de suscripción definido para M2+.
 
 Seguimiento: [roadmap](modules-roadmap.md), [estado](status.md) y
 [riesgos y asuntos abiertos](risks-open-items.md).
+
+## Implementación técnica M2-T2 — 2026-09-15
+
+M2-T2 implementa la capa funcional de backend del RAT sobre la persistencia
+normalizada cerrada en M2-T1.
+
+### Componentes implementados
+
+- `app/schemas/rat.py`: contratos Pydantic del modelo normalizado; los campos
+  legacy conservados temporalmente en base de datos no forman parte del
+  contrato público nuevo.
+- `app/services/rat.py`: service layer tenant-aware para actividades de
+  tratamiento, finalidades, categorías de datos, titulares, fuentes, sistemas,
+  terceros y transferencias internacionales.
+- `app/api/rat.py`: API REST del RAT.
+- `app/core/deps.py`: gate server-side `require_active_subscription` para
+  módulos M2+, con acceso permitido para estados `active` y `grace`.
+- `app/api/router.py`: registro del router RAT.
+
+### Seguridad y autorización
+
+La API aplica defensa en profundidad:
+
+1. validación de acceso a la organización;
+2. gate de suscripción activa para M2+;
+3. permisos `view_content` para lectura y `edit_content` para escritura;
+4. filtrado explícito por `organization_id` en el service layer;
+5. RLS y FK tenant-aware en PostgreSQL.
+
+Una organización ajena se bloquea con HTTP 403 antes de consultar su
+suscripción. `suspended` y `cancelled` reciben HTTP 402. El superadmin queda
+exento del gate comercial para funciones de soporte/plataforma.
+
+### API expuesta
+
+Se implementaron 22 operaciones HTTP bajo `/rat`, incluyendo:
+
+- CRUD de actividades de tratamiento;
+- reemplazo explícito de finalidades, categorías, titulares y fuentes;
+- CRUD de sistemas y proveedores;
+- asociación Treatment-System y Treatment-Vendor;
+- creación, actualización y eliminación de transferencias internacionales;
+- detalle agregado del tratamiento.
+
+### Validación
+
+- tests del gate de suscripción: **6 passed**;
+- tests de contratos Pydantic RAT: **9 passed**;
+- tests del service layer RAT: **5 passed**;
+- tests HTTP end-to-end RAT: **6 passed**;
+- total específico M2-T2: **26 passed**;
+- suite backend completa: **162 passed**;
+- Ruff: **PASS**;
+- Black: **PASS**.
+
+Los tests HTTP ejecutan FastAPI contra `app_user` con RLS activo y validan
+permisos, gate comercial, aislamiento entre tenants y flujo funcional del RAT.
+
+### Alcance pendiente
+
+M2-T2 deja estabilizado el backend del RAT. Todavía no existe frontend para el
+usuario final. El siguiente paso es **M2-T3 — frontend del RAT e integración
+funcional end-to-end**.
+
+La selección de bases de licitud, consentimiento y LIA siguen perteneciendo a
+M3; generación documental y carpeta de evidencia permanecen fuera del alcance
+de M2-T2.

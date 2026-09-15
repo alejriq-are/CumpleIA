@@ -1,3 +1,43 @@
+## 2026-09-15 — M2-T2 cerrado: servicio/API del RAT
+
+Se completó M2-T2 del Módulo 2 — Inventario / RAT.
+
+El backend del RAT dispone ahora de contratos Pydantic normalizados, service
+layer, API REST, permisos y gate server-side de suscripción para módulos M2+.
+
+Implementado:
+
+- `require_active_subscription`: `active` y `grace` permiten acceso;
+  `suspended` y `cancelled` bloquean con HTTP 402;
+- validación previa de acceso al tenant para evitar consultar suscripciones de
+  organizaciones ajenas;
+- schemas RAT separados en `app/schemas/rat.py`;
+- service layer tenant-aware en `app/services/rat.py`;
+- router `/rat` con 22 operaciones HTTP;
+- lectura con `view_content` y escritura con `edit_content`;
+- CRUD de Treatment, System y Vendor;
+- finalidades, categorías de datos, titulares y fuentes normalizadas;
+- relaciones Treatment-System y Treatment-Vendor;
+- transferencias internacionales;
+- detalle agregado del tratamiento;
+- tests HTTP ejecutados contra `app_user` con RLS activo.
+
+Validación:
+
+- gate de suscripción: **6 passed**;
+- schemas RAT: **9 passed**;
+- services RAT: **5 passed**;
+- API RAT end-to-end: **6 passed**;
+- M2-T2 específico: **26 passed**;
+- suite backend completa: **162 passed**;
+- Ruff: **PASS**;
+- Black: **PASS**.
+
+**M2-T0: DONE. M2-T1: DONE. M2-T2: DONE.**
+
+M2 dispone de backend funcional, pero aún no de interfaz para el usuario.
+**Siguiente paso: M2-T3 — frontend del RAT e integración funcional end-to-end.**
+
 ## 2026-09-15 — M2-T1 cerrado: persistencia normalizada del RAT
 
 Se completó M2-T1 del Módulo 2 — Inventario / RAT.
@@ -27,8 +67,9 @@ Validación:
 - Ruff, Black y `git diff --check`: PASS.
 
 M2 sigue sin ser funcional de extremo a extremo: M2-T1 cubre persistencia.
-El siguiente paso es **M2-T2 — servicio/API RAT, contratos Pydantic, permisos
-y gate server-side de suscripción para M2+**.
+M2-T2 quedó cerrado con service layer, API RAT, contratos Pydantic,
+permisos y gate server-side de suscripción para M2+.
+El siguiente paso es **M2-T3 — frontend del RAT e integración funcional end-to-end**.
 
 # Estado actual del proyecto
 
@@ -47,7 +88,7 @@ Se verificaron `CLAUDE.md` y `docs/backlog.md`: ambos reconocen el MVP del Módu
 completado. Los riesgos documentales 1 y 2 quedan resueltos en
 [riesgos y asuntos abiertos](risks-open-items.md); los demás se conservan.
 
-**Siguiente paso vigente: M2-T1 — diseño técnico del modelo de datos y plan de
+**Siguiente paso vigente: M2-T3 — frontend del RAT e integración funcional end-to-end.**
 migraciones**, conforme al [roadmap](modules-roadmap.md). Sustituye la selección
 genérica de próxima tarea del checkpoint anterior. Módulo 2 sigue sin implementar
 funcionalmente; este cierre no modifica código, API, UI ni migraciones.
