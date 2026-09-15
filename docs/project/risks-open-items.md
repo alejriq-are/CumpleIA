@@ -2,17 +2,17 @@
 
 ## Prioridad alta - ordenar antes de seguir mucho más
 
-### 1. Drift de `CLAUDE.md`
+### 1. Drift de `CLAUDE.md` — RESUELTO (2026-09-15)
 
-El archivo raíz todavía dice que “Fase 0 (esta etapa)” construye solo cimientos y que no se debe construir la lógica de los módulos. Eso contradice el código actual, donde Módulo 1 está construido. Un agente nuevo podría recibir instrucciones equivocadas.
+Verificado en [`CLAUDE.md`](../../CLAUDE.md), secciones 1/2/8: remite a `AGENTS.md` y `docs/project/`, declara Fase 0 completada, reconoce el MVP funcional del Módulo 1 y distingue los Módulos 2-5 pendientes. La instrucción desactualizada que originó este riesgo ya fue corregida.
 
-**Acción:** reemplazarlo por una versión actualizada o reducirlo a instrucciones específicas de Claude que referencien `AGENTS.md` y `docs/PROJECT_STATUS.md`.
+**Cierre:** verificación documental sobre `origin/main` (`146428e`); no requiere cambios adicionales para resolver este riesgo específico.
 
-### 2. `docs/backlog.md` tiene estados contradictorios
+### 2. Estados contradictorios de `docs/backlog.md` — RESUELTO (2026-09-15)
 
-Una sección antigua marca Tareas 4, 5 y 6 como pendientes, pero otras secciones documentan su implementación.
+Verificado en [`docs/backlog.md`](../backlog.md): Autodiagnóstico declara Tareas 0-6 completadas para el MVP; Tareas 4/5 y Tarea 6 figuran con `[x]` y tienen secciones de implementación. La contradicción de estados señalada ya fue corregida.
 
-**Acción:** convertir el backlog en una lista única y actual, sin repetir el estado histórico.
+**Cierre:** verificación documental sobre `origin/main` (`146428e`). Se conservan las mejoras pendientes del backlog y los demás riesgos vigentes; este cierre no equivale a una depuración general del documento.
 
 ### 3. `schema.sql` quedó en Fase 0
 
