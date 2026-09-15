@@ -130,11 +130,55 @@ scaffolding de M3; su rediseño debe respetar la frontera definida arriba.
 - [x] Rediseño de entidades, multiplicidades y banderas identificado.
 - [x] Fronteras M2/M3/M5 y modelo conceptual documentados.
 - [x] Roadmap, checkpoint y riesgos documentales sincronizados.
-- [ ] **M2-T1:** traducir este diseño a entidades, catálogos, restricciones,
-  auditoría y RLS; definir transición desde el scaffolding, plan de migraciones
-  append-only y criterios de validación. Recuperar la matriz íntegra y sus
-  referencias antes de ampliar clasificaciones normativas o cerrar campos no
-  desarrollados en el extracto. Tarea siguiente, todavía no ejecutada.
+- [x] **M2-T1 — Persistencia RAT: DONE (2026-09-15).** El diseño conceptual
+  se tradujo a persistencia normalizada, relaciones tenant-aware, auditoría,
+  RLS y estrategia de transición compatible con el scaffolding existente.
+  La migración `0010_modulo2_rat_persistencia.py` fue validada con
+  upgrade → downgrade → re-upgrade y quedó en `e3f4a5b6c7d8 (head)`.
+
+## Implementación técnica M2-T1 — 2026-09-15
+
+M2-T1 materializa la persistencia del RAT sin implementar todavía endpoints,
+servicios de negocio ni frontend.
+
+Cambios principales:
+
+- `Treatment` permanece como raíz de la actividad de tratamiento y se amplía
+  con descripción, rol de la organización, área, flujo, revisión, estado,
+  conservación y decisiones automatizadas.
+- Se conservan temporalmente los campos legacy (`purpose`, arrays de categorías
+  y titulares, `has_sensitive`, `retention`, `is_international`) para una
+  transición compatible; dejan de ser el modelo objetivo.
+- Se incorporan `treatment_purposes`, `treatment_data_categories`,
+  `treatment_data_subjects` y `treatment_data_sources`.
+- Se implementan relaciones N:M explícitas `treatment_systems` y
+  `treatment_vendors`.
+- `international_transfers` representa transferencias internacionales como
+  entidad propia, separada del rol contractual de un tercero.
+- `System` y `Vendor` reciben auditoría completa; el rol de `Vendor` y sus
+  banderas legacy se preservan sólo por compatibilidad transitoria.
+- Las entidades raíz utilizan `UNIQUE(id, organization_id)` y las relaciones
+  usan claves foráneas compuestas para impedir vínculos entre objetos de tenants
+  distintos incluso cuando un usuario pertenece a ambas organizaciones.
+- Las tablas nuevas usan el patrón RLS existente basado en `auth_org_ids()`.
+- `LegalBase` conserva su semántica de M3; M2-T1 sólo refuerza la coherencia
+  tenant-aware del vínculo con `Treatment`.
+
+Validación ejecutada:
+
+- migración `0010`: upgrade PASS;
+- downgrade `0010 → 0009`: PASS;
+- re-upgrade `0009 → 0010`: PASS;
+- metadata SQLAlchemy: PASS;
+- tests específicos RAT/RLS/integridad: **7 passed**;
+- suite backend completa: **136 passed**;
+- `ruff`: PASS;
+- `black --check`: PASS;
+- `git diff --check`: PASS.
+
+M2-T1 no convierte todavía M2 en un módulo funcional para el usuario. La
+persistencia queda preparada para la siguiente tarea de servicio/API y para el
+gate de suscripción definido para M2+.
 
 Seguimiento: [roadmap](modules-roadmap.md), [estado](status.md) y
 [riesgos y asuntos abiertos](risks-open-items.md).

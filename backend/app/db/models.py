@@ -554,9 +554,18 @@ class ReferenceDocument(Base):
 
 class System(Base):
     __tablename__ = "systems"
+    __table_args__ = (
+        UniqueConstraint(
+            "id",
+            "organization_id",
+            name="uq_systems_id_organization_id",
+        ),
+    )
 
     id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid()
+        UUID(as_uuid=True),
+        primary_key=True,
+        server_default=func.gen_random_uuid(),
     )
     organization_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
@@ -566,19 +575,51 @@ class System(Base):
     name: Mapped[str] = mapped_column(Text, nullable=False)
     provider: Mapped[str | None] = mapped_column(Text, nullable=True)
     hosting_location: Mapped[str | None] = mapped_column(Text, nullable=True)
+    hosting_country: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    # Legacy: se conserva durante la transición a international_transfers.
     is_international: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, server_default="false"
+        Boolean,
+        nullable=False,
+        server_default="false",
     )
+
     created_at: Mapped[datetime] = mapped_column(
-        sa.TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
+        sa.TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        sa.TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+    created_by: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("profiles.id"),
+        nullable=True,
+    )
+    updated_by: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("profiles.id"),
+        nullable=True,
     )
 
 
 class Vendor(Base):
     __tablename__ = "vendors"
+    __table_args__ = (
+        UniqueConstraint(
+            "id",
+            "organization_id",
+            name="uq_vendors_id_organization_id",
+        ),
+    )
 
     id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid()
+        UUID(as_uuid=True),
+        primary_key=True,
+        server_default=func.gen_random_uuid(),
     )
     organization_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
@@ -586,26 +627,73 @@ class Vendor(Base):
         nullable=False,
     )
     name: Mapped[str] = mapped_column(Text, nullable=False)
+    country: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    # Legacy: la relación canónica vive en treatment_vendors.
     role: Mapped[ThirdPartyRole | None] = mapped_column(
-        sa.Enum(ThirdPartyRole, name="third_party_role", create_type=False),
+        sa.Enum(
+            ThirdPartyRole,
+            name="third_party_role",
+            create_type=False,
+        ),
         nullable=True,
     )
     is_international: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, server_default="false"
+        Boolean,
+        nullable=False,
+        server_default="false",
     )
     has_dpa: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, server_default="false"
+        Boolean,
+        nullable=False,
+        server_default="false",
     )
+
     created_at: Mapped[datetime] = mapped_column(
-        sa.TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
+        sa.TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        sa.TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+    created_by: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("profiles.id"),
+        nullable=True,
+    )
+    updated_by: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("profiles.id"),
+        nullable=True,
     )
 
 
 class Treatment(Base):
     __tablename__ = "treatments"
+    __table_args__ = (
+        UniqueConstraint(
+            "id",
+            "organization_id",
+            name="uq_treatments_id_organization_id",
+        ),
+        CheckConstraint(
+            "organization_role IS NULL OR "
+            "organization_role IN ('responsable', 'encargado')",
+            name="organization_role",
+        ),
+        CheckConstraint(
+            "status IN ('borrador', 'activo', 'archivado')",
+            name="status",
+        ),
+    )
 
     id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid()
+        UUID(as_uuid=True),
+        primary_key=True,
+        server_default=func.gen_random_uuid(),
     )
     organization_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
@@ -613,40 +701,109 @@ class Treatment(Base):
         nullable=False,
     )
     name: Mapped[str] = mapped_column(Text, nullable=False)
+
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    organization_role: Mapped[str | None] = mapped_column(Text, nullable=True)
+    business_area: Mapped[str | None] = mapped_column(Text, nullable=True)
+    data_flow_description: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    start_date: Mapped[date | None] = mapped_column(sa.Date, nullable=True)
+    last_reviewed_at: Mapped[datetime | None] = mapped_column(
+        sa.TIMESTAMP(timezone=True),
+        nullable=True,
+    )
+    next_review_at: Mapped[datetime | None] = mapped_column(
+        sa.TIMESTAMP(timezone=True),
+        nullable=True,
+    )
+
+    status: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+        server_default="borrador",
+    )
+
+    retention_rule: Mapped[str | None] = mapped_column(Text, nullable=True)
+    deletion_method: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    has_automated_decisions: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
+        server_default="false",
+    )
+    automated_decision_description: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True,
+    )
+
+    # Legacy: se conservan hasta completar transición funcional de M2.
     purpose: Mapped[str | None] = mapped_column(Text, nullable=True)
     data_categories: Mapped[list[str] | None] = mapped_column(
-        ARRAY(Text), nullable=True
+        ARRAY(Text),
+        nullable=True,
     )
-    data_subjects: Mapped[list[str] | None] = mapped_column(ARRAY(Text), nullable=True)
+    data_subjects: Mapped[list[str] | None] = mapped_column(
+        ARRAY(Text),
+        nullable=True,
+    )
     has_sensitive: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, server_default="false"
+        Boolean,
+        nullable=False,
+        server_default="false",
     )
     retention: Mapped[str | None] = mapped_column(Text, nullable=True)
     is_international: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, server_default="false"
+        Boolean,
+        nullable=False,
+        server_default="false",
     )
+
     created_at: Mapped[datetime] = mapped_column(
-        sa.TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
+        sa.TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=func.now(),
     )
     updated_at: Mapped[datetime] = mapped_column(
-        sa.TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
+        sa.TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=func.now(),
     )
     created_by: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("profiles.id"), nullable=True
+        UUID(as_uuid=True),
+        ForeignKey("profiles.id"),
+        nullable=True,
     )
     updated_by: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("profiles.id"), nullable=True
+        UUID(as_uuid=True),
+        ForeignKey("profiles.id"),
+        nullable=True,
     )
 
 
-# ── Módulo 3 — Bases de licitud ───────────────────────────────────────────────
-
-
-class LegalBase(Base):
-    __tablename__ = "legal_bases"
+class TreatmentPurpose(Base):
+    __tablename__ = "treatment_purposes"
+    __table_args__ = (
+        sa.ForeignKeyConstraint(
+            ["treatment_id", "organization_id"],
+            ["treatments.id", "treatments.organization_id"],
+            name="fk_treatment_purposes_treatment_tenant",
+            ondelete="CASCADE",
+        ),
+        UniqueConstraint(
+            "treatment_id",
+            "purpose",
+            name="uq_treatment_purposes_treatment_purpose",
+        ),
+        CheckConstraint(
+            "sort_order >= 0",
+            name="sort_order",
+        ),
+    )
 
     id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid()
+        UUID(as_uuid=True),
+        primary_key=True,
+        server_default=func.gen_random_uuid(),
     )
     organization_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
@@ -655,23 +812,523 @@ class LegalBase(Base):
     )
     treatment_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
+        nullable=False,
+    )
+    purpose: Mapped[str] = mapped_column(Text, nullable=False)
+    is_primary: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
+        server_default="false",
+    )
+    sort_order: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        server_default="0",
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        sa.TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        sa.TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+    created_by: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("profiles.id"),
+        nullable=True,
+    )
+    updated_by: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("profiles.id"),
+        nullable=True,
+    )
+
+
+class TreatmentDataCategory(Base):
+    __tablename__ = "treatment_data_categories"
+    __table_args__ = (
+        sa.ForeignKeyConstraint(
+            ["treatment_id", "organization_id"],
+            ["treatments.id", "treatments.organization_id"],
+            name="fk_treatment_data_categories_treatment_tenant",
+            ondelete="CASCADE",
+        ),
+        UniqueConstraint(
+            "treatment_id",
+            "category_code",
+            name="uq_treatment_data_categories_treatment_code",
+        ),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        server_default=func.gen_random_uuid(),
+    )
+    organization_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("organizations.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    treatment_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        nullable=False,
+    )
+    category_code: Mapped[str] = mapped_column(Text, nullable=False)
+    category_name: Mapped[str] = mapped_column(Text, nullable=False)
+    is_sensitive: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
+        server_default="false",
+    )
+    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        sa.TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        sa.TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+    created_by: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("profiles.id"),
+        nullable=True,
+    )
+    updated_by: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("profiles.id"),
+        nullable=True,
+    )
+
+
+class TreatmentDataSubject(Base):
+    __tablename__ = "treatment_data_subjects"
+    __table_args__ = (
+        sa.ForeignKeyConstraint(
+            ["treatment_id", "organization_id"],
+            ["treatments.id", "treatments.organization_id"],
+            name="fk_treatment_data_subjects_treatment_tenant",
+            ondelete="CASCADE",
+        ),
+        UniqueConstraint(
+            "treatment_id",
+            "category_code",
+            name="uq_treatment_data_subjects_treatment_code",
+        ),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        server_default=func.gen_random_uuid(),
+    )
+    organization_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("organizations.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    treatment_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        nullable=False,
+    )
+    category_code: Mapped[str] = mapped_column(Text, nullable=False)
+    category_name: Mapped[str] = mapped_column(Text, nullable=False)
+    includes_children: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
+        server_default="false",
+    )
+    includes_adolescents: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
+        server_default="false",
+    )
+    is_vulnerable_group: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
+        server_default="false",
+    )
+    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        sa.TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        sa.TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+    created_by: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("profiles.id"),
+        nullable=True,
+    )
+    updated_by: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("profiles.id"),
+        nullable=True,
+    )
+
+
+class TreatmentDataSource(Base):
+    __tablename__ = "treatment_data_sources"
+    __table_args__ = (
+        sa.ForeignKeyConstraint(
+            ["treatment_id", "organization_id"],
+            ["treatments.id", "treatments.organization_id"],
+            name="fk_treatment_data_sources_treatment_tenant",
+            ondelete="CASCADE",
+        ),
+        CheckConstraint(
+            "source_type IN "
+            "('titular', 'tercero', 'fuente_publica', "
+            "'recogida_automatica', 'otro')",
+            name="source_type",
+        ),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        server_default=func.gen_random_uuid(),
+    )
+    organization_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("organizations.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    treatment_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        nullable=False,
+    )
+    source_type: Mapped[str] = mapped_column(Text, nullable=False)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    is_public_source: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
+        server_default="false",
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        sa.TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        sa.TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+    created_by: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("profiles.id"),
+        nullable=True,
+    )
+    updated_by: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("profiles.id"),
+        nullable=True,
+    )
+
+
+class TreatmentSystem(Base):
+    __tablename__ = "treatment_systems"
+    __table_args__ = (
+        sa.ForeignKeyConstraint(
+            ["treatment_id", "organization_id"],
+            ["treatments.id", "treatments.organization_id"],
+            name="fk_treatment_systems_treatment_tenant",
+            ondelete="CASCADE",
+        ),
+        sa.ForeignKeyConstraint(
+            ["system_id", "organization_id"],
+            ["systems.id", "systems.organization_id"],
+            name="fk_treatment_systems_system_tenant",
+            ondelete="CASCADE",
+        ),
+        UniqueConstraint(
+            "treatment_id",
+            "system_id",
+            name="uq_treatment_systems_treatment_system",
+        ),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        server_default=func.gen_random_uuid(),
+    )
+    organization_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("organizations.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    treatment_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        nullable=False,
+    )
+    system_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        nullable=False,
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        sa.TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        sa.TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+    created_by: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("profiles.id"),
+        nullable=True,
+    )
+    updated_by: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("profiles.id"),
+        nullable=True,
+    )
+
+
+class TreatmentVendor(Base):
+    __tablename__ = "treatment_vendors"
+    __table_args__ = (
+        sa.ForeignKeyConstraint(
+            ["treatment_id", "organization_id"],
+            ["treatments.id", "treatments.organization_id"],
+            name="fk_treatment_vendors_treatment_tenant",
+            ondelete="CASCADE",
+        ),
+        sa.ForeignKeyConstraint(
+            ["vendor_id", "organization_id"],
+            ["vendors.id", "vendors.organization_id"],
+            name="fk_treatment_vendors_vendor_tenant",
+            ondelete="CASCADE",
+        ),
+        UniqueConstraint(
+            "treatment_id",
+            "vendor_id",
+            "relationship_type",
+            name="uq_treatment_vendors_relationship",
+        ),
+        CheckConstraint(
+            "relationship_type IN ('encargado', 'cesionario', 'otro')",
+            name="relationship_type",
+        ),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        server_default=func.gen_random_uuid(),
+    )
+    organization_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("organizations.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    treatment_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        nullable=False,
+    )
+    vendor_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        nullable=False,
+    )
+    relationship_type: Mapped[str] = mapped_column(Text, nullable=False)
+    purpose: Mapped[str | None] = mapped_column(Text, nullable=True)
+    has_data_access: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
+        server_default="true",
+    )
+    has_contract: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
+        server_default="false",
+    )
+    contract_reference: Mapped[str | None] = mapped_column(Text, nullable=True)
+    engagement_object: Mapped[str | None] = mapped_column(Text, nullable=True)
+    engagement_duration: Mapped[str | None] = mapped_column(Text, nullable=True)
+    has_subprocessors: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
+        server_default="false",
+    )
+    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        sa.TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        sa.TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+    created_by: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("profiles.id"),
+        nullable=True,
+    )
+    updated_by: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("profiles.id"),
+        nullable=True,
+    )
+
+
+class InternationalTransfer(Base):
+    __tablename__ = "international_transfers"
+    __table_args__ = (
+        sa.ForeignKeyConstraint(
+            ["treatment_id", "organization_id"],
+            ["treatments.id", "treatments.organization_id"],
+            name="fk_international_transfers_treatment_tenant",
+            ondelete="CASCADE",
+        ),
+        sa.ForeignKeyConstraint(
+            ["vendor_id", "organization_id"],
+            ["vendors.id", "vendors.organization_id"],
+            name="fk_international_transfers_vendor_tenant",
+            ondelete="RESTRICT",
+        ),
+        CheckConstraint(
+            "vendor_id IS NOT NULL OR recipient_name IS NOT NULL",
+            name="recipient",
+        ),
+        CheckConstraint(
+            "adequacy_status IN "
+            "('adecuado', 'no_adecuado', 'pendiente', 'no_determinado')",
+            name="adequacy_status",
+        ),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        server_default=func.gen_random_uuid(),
+    )
+    organization_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("organizations.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    treatment_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        nullable=False,
+    )
+    vendor_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        nullable=True,
+    )
+    recipient_name: Mapped[str | None] = mapped_column(Text, nullable=True)
+    destination_country: Mapped[str] = mapped_column(Text, nullable=False)
+    adequacy_status: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+        server_default="pendiente",
+    )
+    mechanism: Mapped[str | None] = mapped_column(Text, nullable=True)
+    guarantees_description: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True,
+    )
+    evidence_reference: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True,
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        sa.TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        sa.TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+    created_by: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("profiles.id"),
+        nullable=True,
+    )
+    updated_by: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("profiles.id"),
+        nullable=True,
+    )
+
+
+# ── Módulo 3 — Bases de licitud ───────────────────────────────────────────────
+
+
+class LegalBase(Base):
+    __tablename__ = "legal_bases"
+    __table_args__ = (
+        sa.ForeignKeyConstraint(
+            ["treatment_id", "organization_id"],
+            ["treatments.id", "treatments.organization_id"],
+            name="fk_legal_bases_treatment_tenant",
+            ondelete="CASCADE",
+        ),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        server_default=func.gen_random_uuid(),
+    )
+    organization_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("organizations.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+
+    # La FK simple se mantiene porque existe desde 0001.
+    treatment_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
         ForeignKey("treatments.id", ondelete="CASCADE"),
         nullable=False,
     )
+
     basis: Mapped[LegalBasis] = mapped_column(
-        sa.Enum(LegalBasis, name="legal_basis", create_type=False), nullable=False
+        sa.Enum(
+            LegalBasis,
+            name="legal_basis",
+            create_type=False,
+        ),
+        nullable=False,
     )
     justification: Mapped[str | None] = mapped_column(Text, nullable=True)
-    confidence: Mapped[float | None] = mapped_column(Numeric(4, 3), nullable=True)
+    confidence: Mapped[float | None] = mapped_column(
+        Numeric(4, 3),
+        nullable=True,
+    )
     approved: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, server_default="false"
+        Boolean,
+        nullable=False,
+        server_default="false",
     )
     lia: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
-        sa.TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
+        sa.TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=func.now(),
     )
     updated_at: Mapped[datetime] = mapped_column(
-        sa.TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
+        sa.TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=func.now(),
     )
 
 

@@ -36,9 +36,10 @@
 Hay scaffolding en los modelos (`Treatment`, `System`, `Vendor`), que requiere rediseño/ampliación según el [diseño conceptual del RAT](modulo2-rat-diseno.md).
 
 - [x] **M2-T0 — Descubrimiento y diseño conceptual: DONE (2026-09-15).** Cierre conceptual, matriz canónica resumida, decisiones, fronteras M2/M3/M5 y modelo objetivo registrados.
-- [ ] **M2-T1 — Siguiente paso:** diseño técnico del modelo de datos y plan de migraciones; concretar catálogos, relaciones N:M, encargos, transferencias, auditoría, RLS y transición desde el scaffolding.
+- [x] **M2-T1 — Persistencia RAT: DONE (2026-09-15).** Migración `0010`, modelo SQLAlchemy normalizado, relaciones N:M, transferencias internacionales, auditoría, FK compuestas tenant-aware, RLS y tests de aislamiento/integridad implementados. Validación: 7 tests RAT y 136 tests backend PASS.
+- [ ] **M2-T2 — Siguiente paso:** capa de servicio/API del RAT, contratos Pydantic, permisos y gate server-side de suscripción para M2+; frontend queda fuera hasta estabilizar la API.
 
-El cierre de M2-T0 es documental. M2-T1 permanece pendiente y el módulo aún no dispone de implementación funcional.
+M2 dispone ya de persistencia técnica, pero todavía no constituye un módulo funcional para el usuario: faltan servicio/API, reglas de aplicación y UI.
 
 ## Módulo 3 - Bases de licitud
 

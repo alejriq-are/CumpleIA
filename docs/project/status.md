@@ -1,3 +1,35 @@
+## 2026-09-15 — M2-T1 cerrado: persistencia normalizada del RAT
+
+Se completó M2-T1 del Módulo 2 — Inventario / RAT.
+
+Resultado: **PASS / DONE**.
+
+Implementación:
+
+- migración `0010_modulo2_rat_persistencia.py`;
+- ampliación de `Treatment`, `System` y `Vendor` manteniendo compatibilidad
+  transitoria con el scaffolding;
+- nuevas entidades `treatment_purposes`, `treatment_data_categories`,
+  `treatment_data_subjects`, `treatment_data_sources`, `treatment_systems`,
+  `treatment_vendors` e `international_transfers`;
+- FK compuestas con `organization_id` para impedir relaciones cross-tenant;
+- RLS en todas las tablas nuevas con el patrón `auth_org_ids()`;
+- coherencia tenant-aware agregada al vínculo `LegalBase → Treatment`;
+- tests específicos en `tests/test_rls_isolation_rat.py`.
+
+Validación:
+
+- Alembic upgrade: PASS;
+- downgrade a `d2e3f4a5b6c7`: PASS;
+- re-upgrade a `e3f4a5b6c7d8`: PASS;
+- tests específicos RAT: **7 passed**;
+- suite backend completa: **136 passed**;
+- Ruff, Black y `git diff --check`: PASS.
+
+M2 sigue sin ser funcional de extremo a extremo: M2-T1 cubre persistencia.
+El siguiente paso es **M2-T2 — servicio/API RAT, contratos Pydantic, permisos
+y gate server-side de suscripción para M2+**.
+
 # Estado actual del proyecto
 
 ## Checkpoint — cierre conceptual M2-T0 (2026-09-15)
