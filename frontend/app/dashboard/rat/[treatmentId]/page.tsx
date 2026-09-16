@@ -1,11 +1,36 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { TreatmentGeneralForm } from "@/components/rat/TreatmentGeneralForm";
+import { api } from "@/lib/api/client";
+import { createClient } from "@/lib/supabase/server";
 
 export default async function TratamientoPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ treatmentId: string }>;
+  searchParams: Promise<{ organizationId?: string }>;
 }) {
   const { treatmentId } = await params;
+
+  const supabase = await createClient();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  if (!session) {
+    redirect("/login");
+  }
+
+  const organizaciones = await api.me.organizations(session.access_token);
+
+  if (organizaciones.length === 0) {
+    redirect("/dashboard/organizacion");
+  }
+
+  const requested = (await searchParams).organizationId;
+  const initialOrganizationId =
+    organizaciones.find((org) => org.id === requested)?.id ?? organizaciones[0].id;
 
   return (
     <div className="space-y-6">
@@ -13,13 +38,18 @@ export default async function TratamientoPage({
         ← Volver al inventario
       </Link>
 
-      <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+      <div>
         <h1 className="text-2xl font-bold text-gray-900">Actividad de tratamiento</h1>
-        <p className="mt-2 text-sm text-gray-500">
-          La ficha de edición se implementará en M2-T3.2.
+        <p className="mt-1 text-sm text-gray-500">
+          Edita la información general de esta actividad.
         </p>
-        <p className="mt-4 text-xs text-gray-400">ID: {treatmentId}</p>
       </div>
+
+      <TreatmentGeneralForm
+        organizaciones={organizaciones}
+        initialOrganizationId={initialOrganizationId}
+        treatmentId={treatmentId}
+      />
     </div>
   );
 }

@@ -136,4 +136,26 @@ El anexo de respuestas crudas y, en general, cualquier bitácora de auditoría f
 - [x] TypeScript PASS.
 - [x] Next production build PASS.
 
-**Siguiente:** M2-T3.2 — creación/edición de información general del tratamiento.
+**M2-T3.2 completado. Siguiente:** M2-T3.3 — finalidades, categorías de datos, titulares y fuentes.
+
+## Módulo 2 — M2-T3.2, información general RAT
+
+**Estado:** DONE (2026-09-16)
+
+- [x] Crear actividad desde `/dashboard/rat/nuevo`.
+- [x] Cargar detalle desde `/dashboard/rat/[treatmentId]`.
+- [x] Editar y guardar información general.
+- [x] Integración con `POST`, `GET` y `PATCH /rat/treatments`.
+- [x] Nombre, descripción, área de negocio y rol de la organización.
+- [x] Descripción general del flujo de datos.
+- [x] Fecha de inicio y próxima revisión.
+- [x] Regla de conservación y método de eliminación.
+- [x] Decisiones automatizadas y descripción condicional.
+- [x] Barra de preparación basada en 10 requisitos de activación.
+- [x] Estado visual `borrador` → `Registro en preparación`.
+- [x] Advertencia de que el avance no representa cumplimiento legal.
+- [x] Prueba funcional de creación, edición y listado.
+- [x] TypeScript PASS.
+- [x] Next production build PASS.
+
+**Siguiente:** M2-T3.3 — finalidades, categorías de datos, titulares y fuentes.

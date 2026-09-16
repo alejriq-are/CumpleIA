@@ -216,6 +216,47 @@ export type TreatmentSummaryOut = {
   updated_at?: string | null;
 };
 
+export type OrganizationRole = "responsable" | "encargado";
+export type DeclarationStatus = "si" | "no" | "pendiente";
+
+export type TreatmentDetailOut = TreatmentSummaryOut & {
+  description: string | null;
+  data_flow_description: string | null;
+  start_date: string | null;
+  last_reviewed_at: string | null;
+  next_review_at: string | null;
+  retention_rule: string | null;
+  systems_declaration: DeclarationStatus | null;
+  vendors_declaration: DeclarationStatus | null;
+  international_transfers_declaration: DeclarationStatus | null;
+  deletion_method: string | null;
+  has_automated_decisions: boolean;
+  automated_decision_description: string | null;
+  purposes: unknown[];
+  data_categories: unknown[];
+  data_subjects: unknown[];
+  data_sources: unknown[];
+  systems: unknown[];
+  vendors: unknown[];
+  international_transfers: unknown[];
+};
+
+export type TreatmentCreate = {
+  name: string;
+  description?: string | null;
+  organization_role?: OrganizationRole | null;
+  business_area?: string | null;
+  data_flow_description?: string | null;
+  start_date?: string | null;
+  next_review_at?: string | null;
+  retention_rule?: string | null;
+  deletion_method?: string | null;
+  has_automated_decisions?: boolean;
+  automated_decision_description?: string | null;
+};
+
+export type TreatmentUpdate = Partial<TreatmentCreate>;
+
 export class ApiError extends Error {
   status: number;
 
@@ -404,6 +445,41 @@ export const api = {
       apiFetch<TreatmentSummaryOut[]>("/rat/treatments", {
         token,
         organizationId,
+      }),
+
+    getTreatment: (
+      token: string,
+      organizationId: string,
+      treatmentId: string
+    ): Promise<TreatmentDetailOut> =>
+      apiFetch<TreatmentDetailOut>(`/rat/treatments/${treatmentId}`, {
+        token,
+        organizationId,
+      }),
+
+    createTreatment: (
+      token: string,
+      organizationId: string,
+      body: TreatmentCreate
+    ): Promise<TreatmentDetailOut> =>
+      apiFetch<TreatmentDetailOut>("/rat/treatments", {
+        token,
+        organizationId,
+        method: "POST",
+        body,
+      }),
+
+    updateTreatment: (
+      token: string,
+      organizationId: string,
+      treatmentId: string,
+      body: TreatmentUpdate
+    ): Promise<TreatmentDetailOut> =>
+      apiFetch<TreatmentDetailOut>(`/rat/treatments/${treatmentId}`, {
+        token,
+        organizationId,
+        method: "PATCH",
+        body,
       }),
   },
 };
