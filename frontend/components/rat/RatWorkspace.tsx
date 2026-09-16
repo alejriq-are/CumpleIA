@@ -18,7 +18,7 @@ function statusLabel(status: TreatmentStatus) {
     case "archivado":
       return "Archivado";
     default:
-      return "Borrador";
+      return "Registro en preparación";
   }
 }
 

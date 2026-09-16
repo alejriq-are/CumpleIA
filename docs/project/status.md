@@ -1,3 +1,45 @@
+## 2026-09-16 — M2-T3.2: creación/edición de información general RAT
+
+Se completó M2-T3.2 del Módulo 2 — creación y edición de la información general
+de una actividad de tratamiento.
+
+Implementado:
+
+- formulario reutilizable de información general;
+- creación de actividades mediante `POST /rat/treatments`;
+- carga de detalle mediante `GET /rat/treatments/{treatment_id}`;
+- edición mediante `PATCH /rat/treatments/{treatment_id}`;
+- campos de nombre, descripción, área de negocio, rol de la organización,
+  descripción del flujo de datos, fechas, regla de conservación, método de
+  eliminación y decisiones automatizadas;
+- navegación desde `/dashboard/rat/nuevo` hacia la ficha creada;
+- reutilización de `/dashboard/rat/[treatmentId]` para edición;
+- manejo de errores de API y estados HTTP 402/403;
+- barra general de preparación basada en los 10 requisitos reales de activación;
+- estado visual `borrador` presentado al usuario como `Registro en preparación`,
+  sin modificar el estado interno del backend;
+- leyenda explícita indicando que el avance mide preparación del registro para
+  activación y no porcentaje de cumplimiento legal.
+
+Validación funcional:
+
+- creación de actividad: PASS;
+- carga del detalle creado: PASS;
+- edición y guardado de cambios: PASS;
+- reflejo de cambios en el listado RAT: PASS;
+- estado `Registro en preparación`: PASS;
+- barra de avance calculada correctamente: 3 de 10 requisitos en la actividad
+  de prueba;
+- `npm run type-check`: PASS;
+- `npm run build`: PASS.
+
+La actividad permanece en estado interno `borrador` mientras no cumpla los
+requisitos mínimos de activación. Las declaraciones de sistemas, proveedores y
+transferencias internacionales deben estar resueltas en `si` o `no`; el valor
+`pendiente` no satisface la validación de activación.
+
+**Siguiente paso: M2-T3.3 — finalidades, categorías de datos, titulares y fuentes.**
+
 ## 2026-09-16 — M2-T3.1: listado RAT y navegación frontend
 
 Se completó M2-T3.1 del Módulo 2 — frontend del Inventario / RAT.
@@ -24,10 +66,10 @@ Validación frontend:
 - warning no bloqueante: Node.js 20 está deprecado por la versión actual de
   `@supabase/supabase-js`; actualizar a Node 22+ queda como mantenimiento técnico.
 
-M2-T3.1 no implementa todavía el formulario de creación/edición; las páginas
-`nuevo` y `[treatmentId]` son destinos de navegación provisionales.
+M2-T3.1 y M2-T3.2 dejan operativo el flujo de listado, creación, consulta y
+edición de la información general de las actividades de tratamiento.
 
-**Siguiente paso: M2-T3.2 — creación/edición de información general del tratamiento.**
+**Siguiente paso: M2-T3.3 — finalidades, categorías de datos, titulares y fuentes.**
 
 ## 2026-09-16 — M2-T3.0: declaraciones y activación del RAT
 
@@ -42,15 +84,16 @@ los campos legacy.
 La transición a `activo`, tanto desde `borrador` como desde `archivado`, exige
 nombre y rol de la organización, al menos una finalidad, categoría de datos,
 categoría de titulares y fuente de datos, regla de conservación y las tres
-declaraciones. Una declaración `pendiente` cuenta como explícita: registra que la
-organización aún no ha resuelto ese punto. Las otras transiciones permitidas son
+declaraciones. Una declaración `pendiente` registra que la organización revisó el punto pero aún
+no lo ha resuelto, y por lo tanto no satisface la activación. Solo `si` o `no`
+cumplen ese requisito. Las otras transiciones permitidas son
 `activo → borrador`, `activo → archivado` y `borrador → archivado`. El service
 rechaza las demás con HTTP 400; los valores fuera de dominio se rechazan en el
 contrato HTTP y mediante restricciones de base de datos.
 
-Validación local: 23 tests específicos RAT, 165 tests backend, Ruff y Black PASS;
+Validación local: tests específicos RAT, 166 tests backend, Ruff y Black PASS;
 Alembic upgrade, downgrade y re-upgrade PASS. Módulo 1 freemium y benchmark no
-se modificaron. M2-T3.1 quedó completado; siguiente paso: M2-T3.2, creación/edición de información general del tratamiento.
+se modificaron. M2-T3.1 y M2-T3.2 quedaron completados; siguiente paso: M2-T3.3, finalidades, categorías de datos, titulares y fuentes.
 
 ## 2026-09-15 — M2-T2 cerrado: servicio/API del RAT
 

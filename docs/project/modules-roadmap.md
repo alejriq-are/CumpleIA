@@ -41,9 +41,10 @@ Hay scaffolding en los modelos (`Treatment`, `System`, `Vendor`), que requiere r
 - [x] **M2-T3.0 — Backend de activación RAT (2026-09-16).** Declaraciones explícitas de sistemas, terceros y transferencias; validación server-side de requisitos mínimos y transiciones de estado; migración `0011`.
 
 - [x] **M2-T3.1 — Listado RAT y navegación frontend: DONE (2026-09-16).** Vista `/dashboard/rat`, selector de organización, estados loading/empty/error, manejo UX de 402/403, CTA de nueva actividad y navegación a ficha. TypeScript y Next build PASS.
-- [ ] **M2-T3.2 — Siguiente paso:** creación/edición de información general del tratamiento.
+- [x] **M2-T3.2 — Creación/edición de información general: DONE (2026-09-16).** Formulario funcional conectado a POST/GET/PATCH RAT, validación funcional, barra general de preparación sobre 10 requisitos y estado visual `Registro en preparación`.
+- [ ] **M2-T3.3 — Siguiente paso:** finalidades, categorías de datos, titulares y fuentes.
 
-M2 dispone de persistencia, service/API y reglas de activación. Falta la interfaz para el usuario.
+M2 dispone de persistencia, service/API, reglas de activación y frontend para listado y datos generales. Continúa la construcción de las secciones funcionales del RAT.
 
 ## Módulo 3 - Bases de licitud
 
