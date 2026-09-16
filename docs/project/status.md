@@ -1,3 +1,34 @@
+## 2026-09-16 — M2-T3.1: listado RAT y navegación frontend
+
+Se completó M2-T3.1 del Módulo 2 — frontend del Inventario / RAT.
+
+Implementado:
+
+- nueva ruta `/dashboard/rat`;
+- listado de actividades de tratamiento consumiendo `GET /rat/treatments`;
+- selector de organización reutilizando el patrón del autodiagnóstico;
+- estados loading, empty y error;
+- UX específica para HTTP 402 (suscripción) y 403 (sin acceso);
+- CTA `Nueva actividad`;
+- navegación hacia `/dashboard/rat/nuevo`;
+- navegación hacia `/dashboard/rat/[treatmentId]`;
+- tarjeta Inventario (RAT) habilitada en el dashboard;
+- cliente API extendido con tipos RAT y `ApiError` con status HTTP.
+
+Validación frontend:
+
+- `npm run type-check`: PASS;
+- `npm run build`: PASS;
+- rutas `/dashboard/rat`, `/dashboard/rat/nuevo` y
+  `/dashboard/rat/[treatmentId]` incluidas en el build;
+- warning no bloqueante: Node.js 20 está deprecado por la versión actual de
+  `@supabase/supabase-js`; actualizar a Node 22+ queda como mantenimiento técnico.
+
+M2-T3.1 no implementa todavía el formulario de creación/edición; las páginas
+`nuevo` y `[treatmentId]` son destinos de navegación provisionales.
+
+**Siguiente paso: M2-T3.2 — creación/edición de información general del tratamiento.**
+
 ## 2026-09-16 — M2-T3.0: declaraciones y activación del RAT
 
 Se implementó el ajuste mínimo de backend previo a la interfaz M2-T3.1.
@@ -19,7 +50,7 @@ contrato HTTP y mediante restricciones de base de datos.
 
 Validación local: 23 tests específicos RAT, 165 tests backend, Ruff y Black PASS;
 Alembic upgrade, downgrade y re-upgrade PASS. Módulo 1 freemium y benchmark no
-se modificaron. Siguiente paso: M2-T3.1, listado RAT y navegación frontend.
+se modificaron. M2-T3.1 quedó completado; siguiente paso: M2-T3.2, creación/edición de información general del tratamiento.
 
 ## 2026-09-15 — M2-T2 cerrado: servicio/API del RAT
 

@@ -204,6 +204,28 @@ export type DiagnosticoActualOut = {
   informe: InformeOut | null;
 };
 
+// Módulo 2 — Inventario / RAT.
+export type TreatmentStatus = "borrador" | "activo" | "archivado";
+
+export type TreatmentSummaryOut = {
+  id: string;
+  name: string;
+  organization_role: "responsable" | "encargado" | null;
+  business_area: string | null;
+  status: TreatmentStatus;
+  updated_at?: string | null;
+};
+
+export class ApiError extends Error {
+  status: number;
+
+  constructor(status: number, message: string) {
+    super(message);
+    this.name = "ApiError";
+    this.status = status;
+  }
+}
+
 type FetchOptions = {
   token: string;
   organizationId?: string;
@@ -231,7 +253,10 @@ async function apiFetch<T>(path: string, opts: FetchOptions): Promise<T> {
 
   if (!res.ok) {
     const detail = await res.json().catch(() => ({ detail: res.statusText }));
-    throw new Error((detail as { detail?: string })?.detail ?? `Error ${res.status}`);
+    throw new ApiError(
+      res.status,
+      (detail as { detail?: string })?.detail ?? `Error ${res.status}`
+    );
   }
 
   return res.json() as Promise<T>;
@@ -255,7 +280,10 @@ async function apiFetchOrNull<T>(path: string, opts: FetchOptions): Promise<T | 
 
   if (!res.ok) {
     const detail = await res.json().catch(() => ({ detail: res.statusText }));
-    throw new Error((detail as { detail?: string })?.detail ?? `Error ${res.status}`);
+    throw new ApiError(
+      res.status,
+      (detail as { detail?: string })?.detail ?? `Error ${res.status}`
+    );
   }
 
   return res.json() as Promise<T>;
@@ -276,7 +304,10 @@ async function fetchBlob(
 
   if (!res.ok) {
     const detail = await res.json().catch(() => ({ detail: res.statusText }));
-    throw new Error((detail as { detail?: string })?.detail ?? `Error ${res.status}`);
+    throw new ApiError(
+      res.status,
+      (detail as { detail?: string })?.detail ?? `Error ${res.status}`
+    );
   }
 
   return res.blob();
@@ -365,5 +396,14 @@ export const api = {
     // Blob URL y dispara la descarga en el navegador.
     exportarInforme: (token: string, organizationId: string): Promise<Blob> =>
       fetchBlob("/diagnostico/informe/exportar", { token, organizationId }),
+  },
+
+  // Módulo 2 — Inventario / RAT. Requiere X-Organization-Id y suscripción M2+.
+  rat: {
+    treatments: (token: string, organizationId: string): Promise<TreatmentSummaryOut[]> =>
+      apiFetch<TreatmentSummaryOut[]>("/rat/treatments", {
+        token,
+        organizationId,
+      }),
   },
 };
