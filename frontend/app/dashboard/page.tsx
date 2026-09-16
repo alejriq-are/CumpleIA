@@ -9,8 +9,9 @@ const MODULOS = [
   },
   {
     titulo: "Inventario (RAT)",
-    descripcion: "Registro de Actividades de Tratamiento con detección de datos sensibles.",
-    href: null,
+    descripcion:
+      "Registro de Actividades de Tratamiento y gestión del inventario de datos personales.",
+    href: "/dashboard/rat",
   },
   {
     titulo: "Bases de licitud",

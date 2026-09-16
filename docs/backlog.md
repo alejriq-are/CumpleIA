@@ -118,4 +118,22 @@ El anexo de respuestas crudas y, en general, cualquier bitácora de auditoría f
 - [x] `Treatment` guarda declaraciones explícitas `si`/`no`/`pendiente` para sistemas, terceros/proveedores y transferencias internacionales; `null` representa ausencia de declaración.
 - [x] Activación server-side exige nombre, rol, una finalidad, categoría de datos, categoría de titulares, fuente de datos, regla de conservación y las tres declaraciones.
 - [x] Transiciones permitidas: borrador→activo, activo→borrador, activo→archivado, borrador→archivado y archivado→activo; ambas activaciones validan requisitos.
-- [ ] M2-T3.1: listado RAT y navegación frontend.
+- [x] M2-T3.1: listado RAT y navegación frontend.
+
+## Módulo 2 — M2-T3.1, listado RAT y navegación frontend
+
+**Estado:** DONE (2026-09-16)
+
+- [x] Vista `/dashboard/rat`.
+- [x] Integración con `GET /rat/treatments`.
+- [x] Selector de organización.
+- [x] Estados loading, empty y error.
+- [x] UX específica para HTTP 402 y 403.
+- [x] CTA `Nueva actividad`.
+- [x] Navegación a `/dashboard/rat/nuevo`.
+- [x] Navegación a `/dashboard/rat/[treatmentId]`.
+- [x] Tarjeta RAT habilitada en dashboard.
+- [x] TypeScript PASS.
+- [x] Next production build PASS.
+
+**Siguiente:** M2-T3.2 — creación/edición de información general del tratamiento.
