@@ -38,9 +38,10 @@ Hay scaffolding en los modelos (`Treatment`, `System`, `Vendor`), que requiere r
 - [x] **M2-T0 — Descubrimiento y diseño conceptual: DONE (2026-09-15).** Cierre conceptual, matriz canónica resumida, decisiones, fronteras M2/M3/M5 y modelo objetivo registrados.
 - [x] **M2-T1 — Persistencia RAT: DONE (2026-09-15).** Migración `0010`, modelo SQLAlchemy normalizado, relaciones N:M, transferencias internacionales, auditoría, FK compuestas tenant-aware, RLS y tests de aislamiento/integridad implementados. Validación: 7 tests RAT y 136 tests backend PASS.
 - [x] **M2-T2 — Servicio/API RAT: DONE (2026-09-15).** Contratos Pydantic normalizados, service layer, API REST, permisos `view_content`/`edit_content`, gate server-side de suscripción para M2+, aislamiento tenant-aware y tests HTTP end-to-end implementados. Validación: 26 tests específicos M2-T2 y 162 tests backend PASS.
-- [ ] **M2-T3 — Siguiente paso:** frontend del RAT e integración funcional end-to-end sobre la API estabilizada.
+- [x] **M2-T3.0 — Backend de activación RAT (2026-09-16).** Declaraciones explícitas de sistemas, terceros y transferencias; validación server-side de requisitos mínimos y transiciones de estado; migración `0011`.
+- [ ] **M2-T3.1 — Siguiente paso:** listado RAT y navegación frontend sobre la API estabilizada.
 
-M2 dispone ya de persistencia técnica, pero todavía no constituye un módulo funcional para el usuario: faltan servicio/API, reglas de aplicación y UI.
+M2 dispone de persistencia, service/API y reglas de activación. Falta la interfaz para el usuario.
 
 ## Módulo 3 - Bases de licitud
 

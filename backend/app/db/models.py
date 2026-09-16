@@ -688,6 +688,17 @@ class Treatment(Base):
             "status IN ('borrador', 'activo', 'archivado')",
             name="status",
         ),
+        *(
+            CheckConstraint(
+                f"{field} IS NULL OR {field} IN ('si', 'no', 'pendiente')",
+                name=field,
+            )
+            for field in (
+                "systems_declaration",
+                "vendors_declaration",
+                "international_transfers_declaration",
+            )
+        ),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(
@@ -724,6 +735,11 @@ class Treatment(Base):
     )
 
     retention_rule: Mapped[str | None] = mapped_column(Text, nullable=True)
+    systems_declaration: Mapped[str | None] = mapped_column(Text, nullable=True)
+    vendors_declaration: Mapped[str | None] = mapped_column(Text, nullable=True)
+    international_transfers_declaration: Mapped[str | None] = mapped_column(
+        Text, nullable=True
+    )
     deletion_method: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     has_automated_decisions: Mapped[bool] = mapped_column(

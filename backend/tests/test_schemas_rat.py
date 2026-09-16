@@ -92,3 +92,18 @@ def test_treatment_no_expone_campos_legacy():
     assert "has_sensitive" not in campos
     assert "retention" not in campos
     assert "is_international" not in campos
+
+
+def test_declarations_require_explicit_domain_values():
+    model = TreatmentCreate(
+        name="Clientes",
+        systems_declaration="no",
+        vendors_declaration="pendiente",
+        international_transfers_declaration="si",
+    )
+    assert model.systems_declaration == "no"
+    assert model.vendors_declaration == "pendiente"
+    assert model.international_transfers_declaration == "si"
+
+    with pytest.raises(ValidationError):
+        TreatmentUpdate(systems_declaration="desconocido")

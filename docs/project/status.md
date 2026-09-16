@@ -1,3 +1,26 @@
+## 2026-09-16 — M2-T3.0: declaraciones y activación del RAT
+
+Se implementó el ajuste mínimo de backend previo a la interfaz M2-T3.1.
+`Treatment` guarda ahora tres declaraciones explícitas: uso de sistemas,
+participación de terceros/proveedores y transferencias internacionales. Cada una
+acepta `si`, `no` o `pendiente`; `null` significa que todavía no fue declarada.
+La migración append-only `0011_treatment_declarations_activation.py` agrega las
+columnas y restricciones de dominio sin inferir valores desde relaciones o desde
+los campos legacy.
+
+La transición a `activo`, tanto desde `borrador` como desde `archivado`, exige
+nombre y rol de la organización, al menos una finalidad, categoría de datos,
+categoría de titulares y fuente de datos, regla de conservación y las tres
+declaraciones. Una declaración `pendiente` cuenta como explícita: registra que la
+organización aún no ha resuelto ese punto. Las otras transiciones permitidas son
+`activo → borrador`, `activo → archivado` y `borrador → archivado`. El service
+rechaza las demás con HTTP 400; los valores fuera de dominio se rechazan en el
+contrato HTTP y mediante restricciones de base de datos.
+
+Validación local: 23 tests específicos RAT, 165 tests backend, Ruff y Black PASS;
+Alembic upgrade, downgrade y re-upgrade PASS. Módulo 1 freemium y benchmark no
+se modificaron. Siguiente paso: M2-T3.1, listado RAT y navegación frontend.
+
 ## 2026-09-15 — M2-T2 cerrado: servicio/API del RAT
 
 Se completó M2-T2 del Módulo 2 — Inventario / RAT.

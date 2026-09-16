@@ -170,12 +170,12 @@ async def test_crud_basico_treatment(client_a, org_a_id):
             headers=headers,
             json={
                 "name": "Gestión comercial de clientes",
-                "status": "activo",
+                "status": "archivado",
             },
         )
         assert actualizado.status_code == 200
         assert actualizado.json()["name"] == "Gestión comercial de clientes"
-        assert actualizado.json()["status"] == "activo"
+        assert actualizado.json()["status"] == "archivado"
 
         eliminado = await client.delete(
             f"/rat/treatments/{treatment_id}",

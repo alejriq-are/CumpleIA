@@ -65,13 +65,13 @@ async def test_crear_listar_obtener_y_actualizar_tratamiento(
             profile_a_id,
             TreatmentUpdate(
                 name="Gestión comercial de clientes",
-                status="activo",
+                status="archivado",
             ),
         )
         await db.commit()
 
         assert actualizado.name == "Gestión comercial de clientes"
-        assert actualizado.status == "activo"
+        assert actualizado.status == "archivado"
 
     async with _session_factory() as db:
         await db.execute(delete(Treatment).where(Treatment.id == treatment_id))
