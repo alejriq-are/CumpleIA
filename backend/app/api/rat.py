@@ -95,6 +95,11 @@ async def _construir_detalle(
         organization_role=treatment.organization_role,
         business_area=treatment.business_area,
         status=treatment.status,
+        systems_declaration=treatment.systems_declaration,
+        vendors_declaration=treatment.vendors_declaration,
+        international_transfers_declaration=(
+            treatment.international_transfers_declaration
+        ),
         start_date=treatment.start_date,
         last_reviewed_at=treatment.last_reviewed_at,
         next_review_at=treatment.next_review_at,

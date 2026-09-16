@@ -112,3 +112,10 @@ Origen: `Claude_22_julio_2026/mejoras-informe-autodiagnostico.md` (revisión man
 ### Nota de estrategia — freemium vs. Carpeta de Evidencia (decisión del usuario, 2026-08-10)
 
 El anexo de respuestas crudas y, en general, cualquier bitácora de auditoría fina (quién respondió qué y cuándo) se reserva deliberadamente para la Carpeta de Evidencia (Módulo 5, de pago) en vez de incluirse gratis en el informe del Autodiagnóstico (Módulo 1, "gancho freemium"). El resumen + puntajes + hallazgos ya bastan para mostrarle a la PYME que tiene brechas; el valor probatorio detallado (evidencia formal ante la Agencia) es lo que debería empujar la conversión a suscripción. Los campos de auditoría (`created_by`/`updated_by`/`updated_at`) sí se construyeron ya en el modelo de datos porque son la base necesaria para que el Módulo 5 los explote más adelante — no se exponen todavía como anexo en el informe gratuito.
+
+## Módulo 2 — M2-T3.0, activación del RAT
+
+- [x] `Treatment` guarda declaraciones explícitas `si`/`no`/`pendiente` para sistemas, terceros/proveedores y transferencias internacionales; `null` representa ausencia de declaración.
+- [x] Activación server-side exige nombre, rol, una finalidad, categoría de datos, categoría de titulares, fuente de datos, regla de conservación y las tres declaraciones.
+- [x] Transiciones permitidas: borrador→activo, activo→borrador, activo→archivado, borrador→archivado y archivado→activo; ambas activaciones validan requisitos.
+- [ ] M2-T3.1: listado RAT y navegación frontend.

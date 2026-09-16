@@ -13,6 +13,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 OrganizationRole = Literal["responsable", "encargado"]
 TreatmentStatus = Literal["borrador", "activo", "archivado"]
+DeclarationStatus = Literal["si", "no", "pendiente"]
 DataSourceType = Literal[
     "titular",
     "tercero",
@@ -275,6 +276,9 @@ class TreatmentCreate(BaseModel):
     start_date: date | None = None
     next_review_at: datetime | None = None
     retention_rule: str | None = None
+    systems_declaration: DeclarationStatus | None = None
+    vendors_declaration: DeclarationStatus | None = None
+    international_transfers_declaration: DeclarationStatus | None = None
     deletion_method: str | None = None
     has_automated_decisions: bool = False
     automated_decision_description: str | None = None
@@ -291,6 +295,9 @@ class TreatmentUpdate(BaseModel):
     next_review_at: datetime | None = None
     status: TreatmentStatus | None = None
     retention_rule: str | None = None
+    systems_declaration: DeclarationStatus | None = None
+    vendors_declaration: DeclarationStatus | None = None
+    international_transfers_declaration: DeclarationStatus | None = None
     deletion_method: str | None = None
     has_automated_decisions: bool | None = None
     automated_decision_description: str | None = None
@@ -303,6 +310,9 @@ class TreatmentSummaryOut(ORMOut):
     organization_role: OrganizationRole | None
     business_area: str | None
     status: TreatmentStatus
+    systems_declaration: DeclarationStatus | None
+    vendors_declaration: DeclarationStatus | None
+    international_transfers_declaration: DeclarationStatus | None
     start_date: date | None
     last_reviewed_at: datetime | None
     next_review_at: datetime | None

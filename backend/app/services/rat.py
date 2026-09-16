@@ -10,7 +10,7 @@ transacción al finalizar cada request.
 import uuid
 
 from fastapi import HTTPException, status
-from sqlalchemy import delete, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import (
@@ -107,6 +107,58 @@ async def crear_tratamiento(
     return treatment
 
 
+_REQUIRED_RELATIONS = (
+    (TreatmentPurpose, "purposes"),
+    (TreatmentDataCategory, "data_categories"),
+    (TreatmentDataSubject, "data_subjects"),
+    (TreatmentDataSource, "data_sources"),
+)
+
+_ALLOWED_TRANSITIONS = {
+    "borrador": {"activo", "archivado"},
+    "activo": {"borrador", "archivado"},
+    "archivado": {"activo"},
+}
+
+
+async def _validate_activation(
+    db: AsyncSession, organization_id: uuid.UUID, treatment: Treatment
+) -> None:
+    missing = []
+
+    for field in (
+        "name",
+        "organization_role",
+        "retention_rule",
+    ):
+        value = getattr(treatment, field)
+        if value is None or (isinstance(value, str) and not value.strip()):
+            missing.append(field)
+
+    for field in (
+        "systems_declaration",
+        "vendors_declaration",
+        "international_transfers_declaration",
+    ):
+        if getattr(treatment, field) not in {"si", "no"}:
+            missing.append(field)
+
+    for model, field in _REQUIRED_RELATIONS:
+        count = await db.scalar(
+            select(func.count())
+            .select_from(model)
+            .where(
+                model.organization_id == organization_id,
+                model.treatment_id == treatment.id,
+            )
+        )
+        if not count:
+            missing.append(field)
+
+    if missing:
+        raise _bad_request("Faltan requisitos para activar: " + ", ".join(missing))
+
+
 async def actualizar_tratamiento(
     db: AsyncSession,
     organization_id: uuid.UUID,
@@ -119,9 +171,23 @@ async def actualizar_tratamiento(
 
     if "name" in changes and changes["name"] is None:
         raise _bad_request("name no puede ser null")
+    if "status" in changes and changes["status"] is None:
+        raise _bad_request("status no puede ser null")
 
-    for field, value in changes.items():
-        setattr(treatment, field, value)
+    target_status = changes.get("status", treatment.status)
+    if (
+        target_status != treatment.status
+        and target_status not in _ALLOWED_TRANSITIONS[treatment.status]
+    ):
+        raise _bad_request("Transición de status no permitida")
+
+    if target_status == "activo" and treatment.status != "activo":
+        for field, value in changes.items():
+            setattr(treatment, field, value)
+        await _validate_activation(db, organization_id, treatment)
+    else:
+        for field, value in changes.items():
+            setattr(treatment, field, value)
 
     treatment.updated_by = profile_id
     await db.flush()
