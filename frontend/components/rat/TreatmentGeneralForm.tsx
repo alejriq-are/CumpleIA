@@ -4,6 +4,8 @@ import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { TreatmentProgress } from "@/components/rat/TreatmentProgress";
+import { TreatmentPurposesSection } from "@/components/rat/TreatmentPurposesSection";
+import { TreatmentDataCategoriesSection } from "@/components/rat/TreatmentDataCategoriesSection";
 import {
   ApiError,
   api,
@@ -404,6 +406,27 @@ export function TreatmentGeneralForm({
           )}
         </div>
       </section>
+
+      {editing && detail && treatmentId && (
+        <TreatmentPurposesSection
+          organizationId={orgId}
+          treatmentId={treatmentId}
+          purposes={detail.purposes}
+          onSaved={(purposes) =>
+            setDetail((current) => (current ? { ...current, purposes } : current))
+          }
+        />
+      )}
+      {editing && detail && treatmentId && (
+        <TreatmentDataCategoriesSection
+          organizationId={orgId}
+          treatmentId={treatmentId}
+          categories={detail.data_categories}
+          onSaved={(data_categories) =>
+            setDetail((current) => (current ? { ...current, data_categories } : current))
+          }
+        />
+      )}
 
       <div className="flex justify-end">
         <button

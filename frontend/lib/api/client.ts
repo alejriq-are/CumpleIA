@@ -232,8 +232,8 @@ export type TreatmentDetailOut = TreatmentSummaryOut & {
   deletion_method: string | null;
   has_automated_decisions: boolean;
   automated_decision_description: string | null;
-  purposes: unknown[];
-  data_categories: unknown[];
+  purposes: TreatmentPurposeOut[];
+  data_categories: TreatmentDataCategoryOut[];
   data_subjects: unknown[];
   data_sources: unknown[];
   systems: unknown[];
@@ -481,5 +481,54 @@ export const api = {
         method: "PATCH",
         body,
       }),
+    replacePurposes: (
+      token: string,
+      organizationId: string,
+      treatmentId: string,
+      items: TreatmentPurposeIn[]
+    ): Promise<TreatmentPurposeOut[]> =>
+      apiFetch<TreatmentPurposeOut[]>(`/rat/treatments/${treatmentId}/purposes`, {
+        token,
+        organizationId,
+        method: "PUT",
+        body: { items },
+      }),
+    replaceDataCategories: (
+      token: string,
+      organizationId: string,
+      treatmentId: string,
+      items: TreatmentDataCategoryIn[]
+    ): Promise<TreatmentDataCategoryOut[]> =>
+      apiFetch<TreatmentDataCategoryOut[]>(`/rat/treatments/${treatmentId}/data-categories`, {
+        token,
+        organizationId,
+        method: "PUT",
+        body: { items },
+      }),
   },
+};
+
+export type TreatmentPurposeIn = {
+  purpose: string;
+  is_primary: boolean;
+  sort_order: number;
+};
+
+export type TreatmentPurposeOut = TreatmentPurposeIn & {
+  id: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export type TreatmentDataCategoryIn = {
+  category_code: string;
+  category_name: string;
+  is_sensitive: boolean;
+  notes: string | null;
+};
+
+export type TreatmentDataCategoryOut = TreatmentDataCategoryIn & {
+  id: string;
+  created_at: string;
+  updated_at: string;
 };
