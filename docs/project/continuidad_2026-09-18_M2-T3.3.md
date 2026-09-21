@@ -137,3 +137,103 @@ Configuración final:
 - Ctrl+Shift+C: enviar interrupción (^C).
 
 Esto quedó resuelto antes de continuar M2-T3.3.
+
+## Cierre M2-T3.3 — 21 septiembre 2026
+
+Se retomó la implementación y se completaron las dos secciones pendientes de M2-T3.3.
+
+### 4. Titulares de los datos
+
+Se creó:
+
+- `frontend/lib/rat/dataSubjects.ts`
+- `frontend/components/rat/TreatmentDataSubjectsSection.tsx`
+
+Se amplió el cliente API con:
+
+- `TreatmentDataSubjectIn`
+- `TreatmentDataSubjectOut`
+- `api.rat.replaceDataSubjects(...)`
+
+`TreatmentDetailOut.data_subjects` dejó de utilizar `unknown[]`.
+
+La sección permite:
+
+- seleccionar categorías guiadas de titulares;
+- agregar categorías personalizadas;
+- indicar inclusión de niños;
+- indicar inclusión de adolescentes;
+- marcar grupos vulnerables;
+- registrar notas;
+- guardar explícitamente mediante PUT.
+
+Prueba funcional con `Gestión de clientes`:
+
+- guardado: PASS
+- persistencia: PASS
+- actualización inmediata del progreso: PASS
+- progreso: 5/10 -> 6/10
+
+### 5. Fuentes de datos
+
+Se creó:
+
+- `frontend/components/rat/TreatmentDataSourcesSection.tsx`
+
+Se amplió el cliente API con:
+
+- `DataSourceType`
+- `TreatmentDataSourceIn`
+- `TreatmentDataSourceOut`
+- `api.rat.replaceDataSources(...)`
+
+`TreatmentDetailOut.data_sources` dejó de utilizar `unknown[]`.
+
+La sección admite múltiples fuentes de los tipos:
+
+- titular;
+- tercero;
+- fuente pública;
+- recogida automática;
+- otro.
+
+`is_public_source` se deriva en frontend cuando `source_type` es
+`fuente_publica`, manteniendo sin cambios el contrato backend actual.
+
+Prueba funcional con `Gestión de clientes`:
+
+- guardado: PASS
+- persistencia: PASS
+- actualización inmediata del progreso: PASS
+- progreso: 6/10 -> 7/10
+
+## Resultado funcional de M2-T3.3
+
+M2-T3.3 — finalidades, categorías de datos, titulares y fuentes queda
+funcionalmente completado.
+
+Progreso RAT validado con la actividad `Gestión de clientes`:
+
+`3/10 -> 4/10 -> 5/10 -> 6/10 -> 7/10`
+
+Las siete condiciones actualmente satisfechas son:
+
+1. nombre;
+2. rol de la organización;
+3. al menos una finalidad;
+4. al menos una categoría de datos;
+5. al menos una categoría de titulares;
+6. al menos una fuente de datos;
+7. regla de conservación.
+
+## Siguiente paso
+
+Continuar con M2-T3.4:
+
+**Sistemas utilizados -> potencial 8/10**
+
+Después:
+
+- proveedores/terceros -> potencial 9/10;
+- transferencias internacionales -> potencial 10/10;
+- revisión y activación.

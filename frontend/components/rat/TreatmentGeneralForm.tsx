@@ -6,6 +6,8 @@ import { createClient } from "@/lib/supabase/client";
 import { TreatmentProgress } from "@/components/rat/TreatmentProgress";
 import { TreatmentPurposesSection } from "@/components/rat/TreatmentPurposesSection";
 import { TreatmentDataCategoriesSection } from "@/components/rat/TreatmentDataCategoriesSection";
+import { TreatmentDataSubjectsSection } from "@/components/rat/TreatmentDataSubjectsSection";
+import { TreatmentDataSourcesSection } from "@/components/rat/TreatmentDataSourcesSection";
 import {
   ApiError,
   api,
@@ -424,6 +426,28 @@ export function TreatmentGeneralForm({
           categories={detail.data_categories}
           onSaved={(data_categories) =>
             setDetail((current) => (current ? { ...current, data_categories } : current))
+          }
+        />
+      )}
+
+      {editing && detail && treatmentId && (
+        <TreatmentDataSubjectsSection
+          organizationId={orgId}
+          treatmentId={treatmentId}
+          subjects={detail.data_subjects}
+          onSaved={(data_subjects) =>
+            setDetail((current) => (current ? { ...current, data_subjects } : current))
+          }
+        />
+      )}
+
+      {editing && detail && treatmentId && (
+        <TreatmentDataSourcesSection
+          organizationId={orgId}
+          treatmentId={treatmentId}
+          sources={detail.data_sources}
+          onSaved={(data_sources) =>
+            setDetail((current) => (current ? { ...current, data_sources } : current))
           }
         />
       )}

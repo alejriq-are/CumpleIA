@@ -234,8 +234,8 @@ export type TreatmentDetailOut = TreatmentSummaryOut & {
   automated_decision_description: string | null;
   purposes: TreatmentPurposeOut[];
   data_categories: TreatmentDataCategoryOut[];
-  data_subjects: unknown[];
-  data_sources: unknown[];
+  data_subjects: TreatmentDataSubjectOut[];
+  data_sources: TreatmentDataSourceOut[];
   systems: unknown[];
   vendors: unknown[];
   international_transfers: unknown[];
@@ -505,6 +505,30 @@ export const api = {
         method: "PUT",
         body: { items },
       }),
+    replaceDataSubjects: (
+      token: string,
+      organizationId: string,
+      treatmentId: string,
+      items: TreatmentDataSubjectIn[]
+    ): Promise<TreatmentDataSubjectOut[]> =>
+      apiFetch<TreatmentDataSubjectOut[]>(`/rat/treatments/${treatmentId}/data-subjects`, {
+        token,
+        organizationId,
+        method: "PUT",
+        body: { items },
+      }),
+    replaceDataSources: (
+      token: string,
+      organizationId: string,
+      treatmentId: string,
+      items: TreatmentDataSourceIn[]
+    ): Promise<TreatmentDataSourceOut[]> =>
+      apiFetch<TreatmentDataSourceOut[]>(`/rat/treatments/${treatmentId}/data-sources`, {
+        token,
+        organizationId,
+        method: "PUT",
+        body: { items },
+      }),
   },
 };
 
@@ -528,6 +552,36 @@ export type TreatmentDataCategoryIn = {
 };
 
 export type TreatmentDataCategoryOut = TreatmentDataCategoryIn & {
+  id: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export type TreatmentDataSubjectIn = {
+  category_code: string;
+  category_name: string;
+  includes_children: boolean;
+  includes_adolescents: boolean;
+  is_vulnerable_group: boolean;
+  notes: string | null;
+};
+
+export type TreatmentDataSubjectOut = TreatmentDataSubjectIn & {
+  id: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export type DataSourceType =
+  "titular" | "tercero" | "fuente_publica" | "recogida_automatica" | "otro";
+
+export type TreatmentDataSourceIn = {
+  source_type: DataSourceType;
+  description: string | null;
+  is_public_source: boolean;
+};
+
+export type TreatmentDataSourceOut = TreatmentDataSourceIn & {
   id: string;
   created_at: string;
   updated_at: string;
