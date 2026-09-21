@@ -237,7 +237,7 @@ export type TreatmentDetailOut = TreatmentSummaryOut & {
   data_subjects: TreatmentDataSubjectOut[];
   data_sources: TreatmentDataSourceOut[];
   systems: SystemOut[];
-  vendors: unknown[];
+  vendors: TreatmentVendorOut[];
   international_transfers: unknown[];
 };
 
@@ -251,6 +251,7 @@ export type TreatmentCreate = {
   next_review_at?: string | null;
   retention_rule?: string | null;
   systems_declaration?: DeclarationStatus | null;
+  vendors_declaration?: DeclarationStatus | null;
   deletion_method?: string | null;
   has_automated_decisions?: boolean;
   automated_decision_description?: string | null;
@@ -575,6 +576,49 @@ export const api = {
         method: "PUT",
         body: { system_ids: systemIds },
       }),
+    listVendors: (token: string, organizationId: string): Promise<VendorOut[]> =>
+      apiFetch<VendorOut[]>("/rat/vendors", { token, organizationId }),
+
+    createVendor: (token: string, organizationId: string, body: VendorCreate): Promise<VendorOut> =>
+      apiFetch<VendorOut>("/rat/vendors", {
+        token,
+        organizationId,
+        method: "POST",
+        body,
+      }),
+
+    updateVendor: (
+      token: string,
+      organizationId: string,
+      vendorId: string,
+      body: VendorUpdate
+    ): Promise<VendorOut> =>
+      apiFetch<VendorOut>(`/rat/vendors/${vendorId}`, {
+        token,
+        organizationId,
+        method: "PATCH",
+        body,
+      }),
+
+    deleteVendor: (token: string, organizationId: string, vendorId: string): Promise<void> =>
+      apiFetch<void>(`/rat/vendors/${vendorId}`, {
+        token,
+        organizationId,
+        method: "DELETE",
+      }),
+
+    replaceVendors: (
+      token: string,
+      organizationId: string,
+      treatmentId: string,
+      items: TreatmentVendorIn[]
+    ): Promise<TreatmentVendorOut[]> =>
+      apiFetch<TreatmentVendorOut[]>(`/rat/treatments/${treatmentId}/vendors`, {
+        token,
+        organizationId,
+        method: "PUT",
+        body: { items },
+      }),
   },
 };
 
@@ -648,6 +692,42 @@ export type SystemOut = {
   provider: string | null;
   hosting_location: string | null;
   hosting_country: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type VendorRelationshipType = "encargado" | "cesionario" | "otro";
+
+export type VendorCreate = {
+  name: string;
+  country?: string | null;
+};
+
+export type VendorUpdate = Partial<VendorCreate>;
+
+export type VendorOut = {
+  id: string;
+  name: string;
+  country: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type TreatmentVendorIn = {
+  vendor_id: string;
+  relationship_type: VendorRelationshipType;
+  purpose: string | null;
+  has_data_access: boolean;
+  has_contract: boolean;
+  contract_reference: string | null;
+  engagement_object: string | null;
+  engagement_duration: string | null;
+  has_subprocessors: boolean;
+  notes: string | null;
+};
+
+export type TreatmentVendorOut = TreatmentVendorIn & {
+  id: string;
   created_at: string;
   updated_at: string;
 };

@@ -379,6 +379,17 @@ async def test_componentes_normalizados_aparecen_en_detalle(
         )
         assert relation_vendor.status_code == 200
 
+        delete_vendor_in_use = await client.delete(
+            f"/rat/vendors/{vendor_id}",
+            headers=headers,
+        )
+        assert delete_vendor_in_use.status_code == 409
+        assert delete_vendor_in_use.json()["detail"] == (
+            "No puedes eliminar esta organización porque está asociada "
+            "a una o más actividades de tratamiento. Elimina primero "
+            "esas relaciones."
+        )
+
         transfer = await client.post(
             f"/rat/treatments/{treatment_id}/international-transfers",
             headers=headers,

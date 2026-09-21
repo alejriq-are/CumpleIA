@@ -56,6 +56,13 @@ def _bad_request(detail: str) -> HTTPException:
     )
 
 
+def _conflict(detail: str) -> HTTPException:
+    return HTTPException(
+        status_code=status.HTTP_409_CONFLICT,
+        detail=detail,
+    )
+
+
 # ── Treatments ────────────────────────────────────────────────────────────────
 
 
@@ -639,6 +646,25 @@ async def eliminar_vendor(
     vendor_id: uuid.UUID,
 ) -> None:
     vendor = await obtener_vendor(db, organization_id, vendor_id)
+
+    relation_id = (
+        await db.execute(
+            select(TreatmentVendor.id)
+            .where(
+                TreatmentVendor.organization_id == organization_id,
+                TreatmentVendor.vendor_id == vendor_id,
+            )
+            .limit(1)
+        )
+    ).scalar_one_or_none()
+
+    if relation_id is not None:
+        raise _conflict(
+            "No puedes eliminar esta organización porque está asociada "
+            "a una o más actividades de tratamiento. Elimina primero "
+            "esas relaciones."
+        )
+
     await db.delete(vendor)
     await db.flush()
 
