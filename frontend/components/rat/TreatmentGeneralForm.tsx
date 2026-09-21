@@ -8,6 +8,7 @@ import { TreatmentPurposesSection } from "@/components/rat/TreatmentPurposesSect
 import { TreatmentDataCategoriesSection } from "@/components/rat/TreatmentDataCategoriesSection";
 import { TreatmentDataSubjectsSection } from "@/components/rat/TreatmentDataSubjectsSection";
 import { TreatmentDataSourcesSection } from "@/components/rat/TreatmentDataSourcesSection";
+import { TreatmentSystemsSection } from "@/components/rat/TreatmentSystemsSection";
 import {
   ApiError,
   api,
@@ -449,6 +450,15 @@ export function TreatmentGeneralForm({
           onSaved={(data_sources) =>
             setDetail((current) => (current ? { ...current, data_sources } : current))
           }
+        />
+      )}
+
+      {editing && detail && treatmentId && (
+        <TreatmentSystemsSection
+          organizationId={orgId}
+          treatmentId={treatmentId}
+          treatment={detail}
+          onSaved={(updated) => setDetail(updated)}
         />
       )}
 

@@ -236,7 +236,7 @@ export type TreatmentDetailOut = TreatmentSummaryOut & {
   data_categories: TreatmentDataCategoryOut[];
   data_subjects: TreatmentDataSubjectOut[];
   data_sources: TreatmentDataSourceOut[];
-  systems: unknown[];
+  systems: SystemOut[];
   vendors: unknown[];
   international_transfers: unknown[];
 };
@@ -250,6 +250,7 @@ export type TreatmentCreate = {
   start_date?: string | null;
   next_review_at?: string | null;
   retention_rule?: string | null;
+  systems_declaration?: DeclarationStatus | null;
   deletion_method?: string | null;
   has_automated_decisions?: boolean;
   automated_decision_description?: string | null;
@@ -299,6 +300,8 @@ async function apiFetch<T>(path: string, opts: FetchOptions): Promise<T> {
       (detail as { detail?: string })?.detail ?? `Error ${res.status}`
     );
   }
+
+  if (res.status === 204) return undefined as T;
 
   return res.json() as Promise<T>;
 }
@@ -529,6 +532,49 @@ export const api = {
         method: "PUT",
         body: { items },
       }),
+    listSystems: (token: string, organizationId: string): Promise<SystemOut[]> =>
+      apiFetch<SystemOut[]>("/rat/systems", { token, organizationId }),
+
+    createSystem: (token: string, organizationId: string, body: SystemCreate): Promise<SystemOut> =>
+      apiFetch<SystemOut>("/rat/systems", {
+        token,
+        organizationId,
+        method: "POST",
+        body,
+      }),
+
+    updateSystem: (
+      token: string,
+      organizationId: string,
+      systemId: string,
+      body: SystemUpdate
+    ): Promise<SystemOut> =>
+      apiFetch<SystemOut>(`/rat/systems/${systemId}`, {
+        token,
+        organizationId,
+        method: "PATCH",
+        body,
+      }),
+
+    deleteSystem: (token: string, organizationId: string, systemId: string): Promise<void> =>
+      apiFetch<void>(`/rat/systems/${systemId}`, {
+        token,
+        organizationId,
+        method: "DELETE",
+      }),
+
+    replaceSystems: (
+      token: string,
+      organizationId: string,
+      treatmentId: string,
+      systemIds: string[]
+    ): Promise<void> =>
+      apiFetch<void>(`/rat/treatments/${treatmentId}/systems`, {
+        token,
+        organizationId,
+        method: "PUT",
+        body: { system_ids: systemIds },
+      }),
   },
 };
 
@@ -583,6 +629,25 @@ export type TreatmentDataSourceIn = {
 
 export type TreatmentDataSourceOut = TreatmentDataSourceIn & {
   id: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export type SystemCreate = {
+  name: string;
+  provider?: string | null;
+  hosting_location?: string | null;
+  hosting_country?: string | null;
+};
+
+export type SystemUpdate = Partial<SystemCreate>;
+
+export type SystemOut = {
+  id: string;
+  name: string;
+  provider: string | null;
+  hosting_location: string | null;
+  hosting_country: string | null;
   created_at: string;
   updated_at: string;
 };
