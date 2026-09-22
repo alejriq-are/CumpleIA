@@ -1,3 +1,25 @@
+## M2-T3.8 — infraestructura E2E autenticada del RAT
+
+Playwright/Chromium incorporado al frontend con login real de Supabase, fixture
+E2E existente y limpieza de las actividades creadas por cada prueba. Se verifica
+acceso sin sesión, preparación completa, rechazo server-side de activación
+incompleta, activación, invalidación por requisito pendiente, retorno a
+preparación, archivo, reactivación y persistencia en detalle/listado.
+
+Validación en `feature/m2-t3-8-rat-finalization`:
+
+- ejecución inicial corregida: **2 passed**;
+- dos repeticiones consecutivas: **4 passed**, incluida limpieza API (204/404);
+- type-check, lint, Prettier y `git diff --check`: **PASS**;
+- backend `/health`: base de datos disponible.
+
+Sesión solo en memoria, sin archivos de autenticación; capturas, trazas y vídeo
+desactivados. Los escenarios afirmativos de relaciones y otros roles no forman
+parte de esta suite mínima. No se modifican backend, migraciones ni comportamiento
+de la aplicación. El seed existente se conserva sin cambios.
+
+Preparación y límites: [E2E del frontend](frontend-e2e.md).
+
 ## 2026-09-16 — M2-T3.2: creación/edición de información general RAT
 
 Se completó M2-T3.2 del Módulo 2 — creación y edición de la información general

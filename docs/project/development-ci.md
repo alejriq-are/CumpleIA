@@ -30,7 +30,9 @@ El historial muestra PRs incrementales para RLS, scoring, API, IA, exportación 
 - `npm run lint`
 - `npm run type-check`
 
-No hay test runner frontend.
+Playwright cubre el flujo E2E mínimo del RAT con Supabase Auth real. Ver
+[preparación y ejecución](frontend-e2e.md). Requiere servicios y fixture locales;
+no se ejecuta automáticamente en el CI genérico.
 
 ## Checklist recomendado antes de una nueva tarea
 

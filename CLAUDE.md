@@ -85,3 +85,10 @@ README.md
 - No inventar contenido legal: los textos de la ley y la guía CCS los provee la usuaria; el sistema los ingesta y cita, no los redacta de memoria.
 - No crear cuentas de terceros ni manejar claves reales; dejar `.env.example` y pedir a la usuaria que complete.
 - No usar `localStorage`/`sessionStorage` para datos sensibles.
+
+### Testing frontend
+
+`@playwright/test` es una dependencia de desarrollo para verificar el login real
+y el ciclo del RAT en Chromium, comportamientos que type-check y lint no cubren.
+No añade servicios de pago ni dependencias runtime. Configuración y operación:
+`docs/project/frontend-e2e.md`.

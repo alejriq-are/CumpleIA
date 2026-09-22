@@ -35,3 +35,9 @@ coverage/
 
 # ── Docker ───────────────────────────────────────────────────────────────────
 docker-compose.override.yml
+
+# Playwright: resultados y sesiones locales
+frontend/test-results/
+frontend/playwright-report/
+frontend/blob-report/
+frontend/playwright/.auth/
