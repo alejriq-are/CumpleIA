@@ -7,6 +7,8 @@ from sqlalchemy import delete
 
 from app.db.models import Treatment
 from app.schemas.rat import (
+    InternationalTransferCreate,
+    InternationalTransferUpdate,
     TreatmentCreate,
     TreatmentDataCategoryIn,
     TreatmentDataSourceIn,
@@ -259,6 +261,199 @@ async def test_activation_rejects_pending_declaration(
                 treatment_id,
             )
             assert row.status == "borrador"
+
+    finally:
+        async with _session_factory() as db:
+            await db.execute(delete(Treatment).where(Treatment.id == treatment_id))
+            await db.commit()
+
+
+
+@pytest.mark.asyncio
+async def test_activation_validates_international_transfer_adequacy_status(
+    _session_factory, org_a_id, profile_a_id, _seed_test_data
+):
+    async with _session_factory() as db:
+        treatment = await rat_service.crear_tratamiento(
+            db,
+            org_a_id,
+            profile_a_id,
+            TreatmentCreate(name="Clientes con transferencia internacional"),
+        )
+        treatment_id = treatment.id
+        await db.commit()
+
+    try:
+        # Dejar completos los otros 9 requisitos y declarar que sí existen
+        # transferencias internacionales.
+        async with _session_factory() as db:
+            await rat_service.reemplazar_finalidades(
+                db,
+                org_a_id,
+                treatment_id,
+                profile_a_id,
+                [TreatmentPurposeIn(purpose="Prestar servicio")],
+            )
+            await rat_service.reemplazar_categorias_datos(
+                db,
+                org_a_id,
+                treatment_id,
+                profile_a_id,
+                [
+                    TreatmentDataCategoryIn(
+                        category_code="contacto",
+                        category_name="Contacto",
+                    )
+                ],
+            )
+            await rat_service.reemplazar_titulares_datos(
+                db,
+                org_a_id,
+                treatment_id,
+                profile_a_id,
+                [
+                    TreatmentDataSubjectIn(
+                        category_code="cliente",
+                        category_name="Cliente",
+                    )
+                ],
+            )
+            await rat_service.reemplazar_fuentes_datos(
+                db,
+                org_a_id,
+                treatment_id,
+                profile_a_id,
+                [TreatmentDataSourceIn(source_type="titular")],
+            )
+            await rat_service.actualizar_tratamiento(
+                db,
+                org_a_id,
+                treatment_id,
+                profile_a_id,
+                TreatmentUpdate(
+                    organization_role="responsable",
+                    retention_rule="Cinco años",
+                    systems_declaration="no",
+                    vendors_declaration="no",
+                    international_transfers_declaration="si",
+                ),
+            )
+            await db.commit()
+
+        # "Sí existen" pero sin ninguna transferencia registrada: no activa.
+        async with _session_factory() as db:
+            with pytest.raises(HTTPException) as exc:
+                await rat_service.actualizar_tratamiento(
+                    db,
+                    org_a_id,
+                    treatment_id,
+                    profile_a_id,
+                    TreatmentUpdate(status="activo"),
+                )
+            assert exc.value.status_code == 400
+            assert "international_transfers" in exc.value.detail
+            await db.rollback()
+
+        # Crear una transferencia pendiente.
+        async with _session_factory() as db:
+            transfer = await rat_service.crear_transferencia(
+                db,
+                org_a_id,
+                treatment_id,
+                profile_a_id,
+                InternationalTransferCreate(
+                    recipient_name="Proveedor extranjero",
+                    destination_country="Estados Unidos",
+                    adequacy_status="pendiente",
+                ),
+            )
+            transfer_id = transfer.id
+            await db.commit()
+
+        # Una transferencia pendiente mantiene el RAT no activable.
+        async with _session_factory() as db:
+            with pytest.raises(HTTPException) as exc:
+                await rat_service.actualizar_tratamiento(
+                    db,
+                    org_a_id,
+                    treatment_id,
+                    profile_a_id,
+                    TreatmentUpdate(status="activo"),
+                )
+            assert exc.value.status_code == 400
+            assert "international_transfers" in exc.value.detail
+            await db.rollback()
+
+        # Adecuado: requisito resuelto y permite activar.
+        async with _session_factory() as db:
+            await rat_service.actualizar_transferencia(
+                db,
+                org_a_id,
+                transfer_id,
+                profile_a_id,
+                InternationalTransferUpdate(adequacy_status="adecuado"),
+            )
+            row = await rat_service.actualizar_tratamiento(
+                db,
+                org_a_id,
+                treatment_id,
+                profile_a_id,
+                TreatmentUpdate(status="activo"),
+            )
+            assert row.status == "activo"
+            await db.commit()
+
+        # No adecuado también es un estado evaluado, no "pendiente".
+        async with _session_factory() as db:
+            await rat_service.actualizar_tratamiento(
+                db,
+                org_a_id,
+                treatment_id,
+                profile_a_id,
+                TreatmentUpdate(status="borrador"),
+            )
+            await rat_service.actualizar_transferencia(
+                db,
+                org_a_id,
+                transfer_id,
+                profile_a_id,
+                InternationalTransferUpdate(adequacy_status="no_adecuado"),
+            )
+            row = await rat_service.actualizar_tratamiento(
+                db,
+                org_a_id,
+                treatment_id,
+                profile_a_id,
+                TreatmentUpdate(status="activo"),
+            )
+            assert row.status == "activo"
+            await db.commit()
+
+        # No determinado también representa una revisión ya realizada.
+        async with _session_factory() as db:
+            await rat_service.actualizar_tratamiento(
+                db,
+                org_a_id,
+                treatment_id,
+                profile_a_id,
+                TreatmentUpdate(status="borrador"),
+            )
+            await rat_service.actualizar_transferencia(
+                db,
+                org_a_id,
+                transfer_id,
+                profile_a_id,
+                InternationalTransferUpdate(adequacy_status="no_determinado"),
+            )
+            row = await rat_service.actualizar_tratamiento(
+                db,
+                org_a_id,
+                treatment_id,
+                profile_a_id,
+                TreatmentUpdate(status="activo"),
+            )
+            assert row.status == "activo"
+            await db.commit()
 
     finally:
         async with _session_factory() as db:

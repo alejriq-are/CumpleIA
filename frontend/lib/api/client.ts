@@ -238,7 +238,7 @@ export type TreatmentDetailOut = TreatmentSummaryOut & {
   data_sources: TreatmentDataSourceOut[];
   systems: SystemOut[];
   vendors: TreatmentVendorOut[];
-  international_transfers: unknown[];
+  international_transfers: InternationalTransferOut[];
 };
 
 export type TreatmentCreate = {
@@ -252,6 +252,7 @@ export type TreatmentCreate = {
   retention_rule?: string | null;
   systems_declaration?: DeclarationStatus | null;
   vendors_declaration?: DeclarationStatus | null;
+  international_transfers_declaration?: DeclarationStatus | null;
   deletion_method?: string | null;
   has_automated_decisions?: boolean;
   automated_decision_description?: string | null;
@@ -619,6 +620,43 @@ export const api = {
         method: "PUT",
         body: { items },
       }),
+
+    createInternationalTransfer: (
+      token: string,
+      organizationId: string,
+      treatmentId: string,
+      body: InternationalTransferCreate
+    ): Promise<InternationalTransferOut> =>
+      apiFetch<InternationalTransferOut>(`/rat/treatments/${treatmentId}/international-transfers`, {
+        token,
+        organizationId,
+        method: "POST",
+        body,
+      }),
+
+    updateInternationalTransfer: (
+      token: string,
+      organizationId: string,
+      transferId: string,
+      body: InternationalTransferUpdate
+    ): Promise<InternationalTransferOut> =>
+      apiFetch<InternationalTransferOut>(`/rat/international-transfers/${transferId}`, {
+        token,
+        organizationId,
+        method: "PATCH",
+        body,
+      }),
+
+    deleteInternationalTransfer: (
+      token: string,
+      organizationId: string,
+      transferId: string
+    ): Promise<void> =>
+      apiFetch<void>(`/rat/international-transfers/${transferId}`, {
+        token,
+        organizationId,
+        method: "DELETE",
+      }),
   },
 };
 
@@ -692,6 +730,34 @@ export type SystemOut = {
   provider: string | null;
   hosting_location: string | null;
   hosting_country: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type AdequacyStatus = "adecuado" | "no_adecuado" | "pendiente" | "no_determinado";
+
+export type InternationalTransferCreate = {
+  vendor_id?: string | null;
+  recipient_name?: string | null;
+  destination_country: string;
+  adequacy_status?: AdequacyStatus;
+  mechanism?: string | null;
+  guarantees_description?: string | null;
+  evidence_reference?: string | null;
+};
+
+export type InternationalTransferUpdate = Partial<InternationalTransferCreate>;
+
+export type InternationalTransferOut = {
+  id: string;
+  treatment_id: string;
+  vendor_id: string | null;
+  recipient_name: string | null;
+  destination_country: string;
+  adequacy_status: AdequacyStatus;
+  mechanism: string | null;
+  guarantees_description: string | null;
+  evidence_reference: string | null;
   created_at: string;
   updated_at: string;
 };

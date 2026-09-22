@@ -10,6 +10,7 @@ import { TreatmentDataSubjectsSection } from "@/components/rat/TreatmentDataSubj
 import { TreatmentDataSourcesSection } from "@/components/rat/TreatmentDataSourcesSection";
 import { TreatmentSystemsSection } from "@/components/rat/TreatmentSystemsSection";
 import { TreatmentVendorsSection } from "@/components/rat/TreatmentVendorsSection";
+import { TreatmentInternationalTransfersSection } from "@/components/rat/TreatmentInternationalTransfersSection";
 import {
   ApiError,
   api,
@@ -465,6 +466,15 @@ export function TreatmentGeneralForm({
 
       {editing && detail && treatmentId && (
         <TreatmentVendorsSection
+          organizationId={orgId}
+          treatmentId={treatmentId}
+          treatment={detail}
+          onSaved={(updated) => setDetail(updated)}
+        />
+      )}
+
+      {editing && detail && treatmentId && (
+        <TreatmentInternationalTransfersSection
           organizationId={orgId}
           treatmentId={treatmentId}
           treatment={detail}

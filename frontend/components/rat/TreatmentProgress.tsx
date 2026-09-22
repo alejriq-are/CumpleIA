@@ -13,6 +13,23 @@ function declarationResolved(value: string | null) {
   return value === "si" || value === "no";
 }
 
+function internationalTransfersResolved(treatment: TreatmentDetailOut) {
+  const declaration = treatment.international_transfers_declaration;
+
+  if (declaration === "no") {
+    return true;
+  }
+
+  if (declaration !== "si") {
+    return false;
+  }
+
+  return (
+    treatment.international_transfers.length > 0 &&
+    treatment.international_transfers.every((transfer) => transfer.adequacy_status !== "pendiente")
+  );
+}
+
 function statusLabel(status: TreatmentDetailOut["status"]) {
   switch (status) {
     case "borrador":
@@ -64,7 +81,7 @@ export function TreatmentProgress({ treatment }: Props) {
     },
     {
       label: "Transferencias internacionales declaradas",
-      complete: declarationResolved(treatment.international_transfers_declaration),
+      complete: internationalTransfersResolved(treatment),
     },
   ];
 

@@ -145,10 +145,26 @@ async def _validate_activation(
     for field in (
         "systems_declaration",
         "vendors_declaration",
-        "international_transfers_declaration",
     ):
         if getattr(treatment, field) not in {"si", "no"}:
             missing.append(field)
+
+    international_declaration = treatment.international_transfers_declaration
+
+    if international_declaration not in {"si", "no"}:
+        missing.append("international_transfers_declaration")
+    elif international_declaration == "si":
+        transfer_statuses = (
+            await db.execute(
+                select(InternationalTransfer.adequacy_status).where(
+                    InternationalTransfer.organization_id == organization_id,
+                    InternationalTransfer.treatment_id == treatment.id,
+                )
+            )
+        ).scalars().all()
+
+        if not transfer_statuses or "pendiente" in transfer_statuses:
+            missing.append("international_transfers")
 
     for model, field in _REQUIRED_RELATIONS:
         count = await db.scalar(
