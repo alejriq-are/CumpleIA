@@ -8,6 +8,7 @@ transacción al finalizar cada request.
 """
 
 import uuid
+from datetime import UTC, datetime
 
 from fastapi import HTTPException, status
 from sqlalchemy import delete, func, select
@@ -61,6 +62,31 @@ def _conflict(detail: str) -> HTTPException:
         status_code=status.HTTP_409_CONFLICT,
         detail=detail,
     )
+
+
+def _mark_treatment_updated(
+    treatment: Treatment,
+    profile_id: uuid.UUID,
+) -> None:
+    treatment.updated_at = datetime.now(UTC)
+    treatment.updated_by = profile_id
+
+
+async def _revalidate_active_treatment(
+    db: AsyncSession,
+    organization_id: uuid.UUID,
+    treatment: Treatment,
+) -> None:
+    if treatment.status != "activo":
+        return
+
+    try:
+        await _validate_activation(db, organization_id, treatment)
+    except HTTPException as exc:
+        if exc.status_code != status.HTTP_400_BAD_REQUEST:
+            raise
+        treatment.status = "borrador"
+        treatment.status_changed_at = datetime.now(UTC)
 
 
 # ── Treatments ────────────────────────────────────────────────────────────────
@@ -197,14 +223,16 @@ async def actualizar_tratamiento(
     if "status" in changes and changes["status"] is None:
         raise _bad_request("status no puede ser null")
 
-    target_status = changes.get("status", treatment.status)
+    current_status = treatment.status
+    target_status = changes.get("status", current_status)
+
     if (
-        target_status != treatment.status
-        and target_status not in _ALLOWED_TRANSITIONS[treatment.status]
+        target_status != current_status
+        and target_status not in _ALLOWED_TRANSITIONS[current_status]
     ):
         raise _bad_request("Transición de status no permitida")
 
-    if target_status == "activo" and treatment.status != "activo":
+    if target_status == "activo" and current_status != "activo":
         for field, value in changes.items():
             setattr(treatment, field, value)
         await _validate_activation(db, organization_id, treatment)
@@ -212,7 +240,29 @@ async def actualizar_tratamiento(
         for field, value in changes.items():
             setattr(treatment, field, value)
 
-    treatment.updated_by = profile_id
+    if changes:
+        now = datetime.now(UTC)
+
+        if target_status != current_status:
+            treatment.status_changed_at = now
+
+            if target_status == "activo":
+                # Representa la activación más reciente.
+                treatment.activated_at = now
+                treatment.archived_at = None
+            elif target_status == "archivado":
+                treatment.archived_at = now
+
+        treatment.updated_at = now
+        treatment.updated_by = profile_id
+
+    if (
+        current_status == "activo"
+        and target_status == "activo"
+        and "status" not in changes
+    ):
+        await _revalidate_active_treatment(db, organization_id, treatment)
+
     await db.flush()
     return treatment
 
@@ -255,7 +305,7 @@ async def reemplazar_finalidades(
     profile_id: uuid.UUID,
     items: list[TreatmentPurposeIn],
 ) -> list[TreatmentPurpose]:
-    await obtener_tratamiento(db, organization_id, treatment_id)
+    treatment = await obtener_tratamiento(db, organization_id, treatment_id)
 
     purposes = [item.purpose for item in items]
     if len(purposes) != len(set(purposes)):
@@ -282,6 +332,8 @@ async def reemplazar_finalidades(
         for item in items
     ]
     db.add_all(rows)
+    _mark_treatment_updated(treatment, profile_id)
+    await _revalidate_active_treatment(db, organization_id, treatment)
     await db.flush()
     return rows
 
@@ -314,7 +366,7 @@ async def reemplazar_categorias_datos(
     profile_id: uuid.UUID,
     items: list[TreatmentDataCategoryIn],
 ) -> list[TreatmentDataCategory]:
-    await obtener_tratamiento(db, organization_id, treatment_id)
+    treatment = await obtener_tratamiento(db, organization_id, treatment_id)
 
     codes = [item.category_code for item in items]
     if len(codes) != len(set(codes)):
@@ -338,6 +390,8 @@ async def reemplazar_categorias_datos(
         for item in items
     ]
     db.add_all(rows)
+    _mark_treatment_updated(treatment, profile_id)
+    await _revalidate_active_treatment(db, organization_id, treatment)
     await db.flush()
     return rows
 
@@ -370,7 +424,7 @@ async def reemplazar_titulares_datos(
     profile_id: uuid.UUID,
     items: list[TreatmentDataSubjectIn],
 ) -> list[TreatmentDataSubject]:
-    await obtener_tratamiento(db, organization_id, treatment_id)
+    treatment = await obtener_tratamiento(db, organization_id, treatment_id)
 
     codes = [item.category_code for item in items]
     if len(codes) != len(set(codes)):
@@ -394,6 +448,8 @@ async def reemplazar_titulares_datos(
         for item in items
     ]
     db.add_all(rows)
+    _mark_treatment_updated(treatment, profile_id)
+    await _revalidate_active_treatment(db, organization_id, treatment)
     await db.flush()
     return rows
 
@@ -426,7 +482,7 @@ async def reemplazar_fuentes_datos(
     profile_id: uuid.UUID,
     items: list[TreatmentDataSourceIn],
 ) -> list[TreatmentDataSource]:
-    await obtener_tratamiento(db, organization_id, treatment_id)
+    treatment = await obtener_tratamiento(db, organization_id, treatment_id)
 
     await db.execute(
         delete(TreatmentDataSource).where(
@@ -446,6 +502,8 @@ async def reemplazar_fuentes_datos(
         for item in items
     ]
     db.add_all(rows)
+    _mark_treatment_updated(treatment, profile_id)
+    await _revalidate_active_treatment(db, organization_id, treatment)
     await db.flush()
     return rows
 
@@ -539,7 +597,7 @@ async def reemplazar_sistemas_tratamiento(
     profile_id: uuid.UUID,
     system_ids: list[uuid.UUID],
 ) -> list[TreatmentSystem]:
-    await obtener_tratamiento(db, organization_id, treatment_id)
+    treatment = await obtener_tratamiento(db, organization_id, treatment_id)
 
     if len(system_ids) != len(set(system_ids)):
         raise _bad_request("No se permiten system_id duplicados")
@@ -580,6 +638,8 @@ async def reemplazar_sistemas_tratamiento(
         for system_id in system_ids
     ]
     db.add_all(rows)
+    _mark_treatment_updated(treatment, profile_id)
+    await _revalidate_active_treatment(db, organization_id, treatment)
     await db.flush()
     return rows
 
@@ -692,7 +752,7 @@ async def reemplazar_vendors_tratamiento(
     profile_id: uuid.UUID,
     items: list[TreatmentVendorIn],
 ) -> list[TreatmentVendor]:
-    await obtener_tratamiento(db, organization_id, treatment_id)
+    treatment = await obtener_tratamiento(db, organization_id, treatment_id)
 
     keys = [(item.vendor_id, item.relationship_type) for item in items]
     if len(keys) != len(set(keys)):
@@ -735,6 +795,8 @@ async def reemplazar_vendors_tratamiento(
         for item in items
     ]
     db.add_all(rows)
+    _mark_treatment_updated(treatment, profile_id)
+    await _revalidate_active_treatment(db, organization_id, treatment)
     await db.flush()
     return rows
 
@@ -789,7 +851,7 @@ async def crear_transferencia(
     profile_id: uuid.UUID,
     payload: InternationalTransferCreate,
 ) -> InternationalTransfer:
-    await obtener_tratamiento(db, organization_id, treatment_id)
+    treatment = await obtener_tratamiento(db, organization_id, treatment_id)
 
     if payload.vendor_id is not None:
         await obtener_vendor(db, organization_id, payload.vendor_id)
@@ -802,6 +864,8 @@ async def crear_transferencia(
         **payload.model_dump(),
     )
     db.add(transfer)
+    _mark_treatment_updated(treatment, profile_id)
+    await _revalidate_active_treatment(db, organization_id, treatment)
     await db.flush()
     return transfer
 
@@ -817,6 +881,11 @@ async def actualizar_transferencia(
         db,
         organization_id,
         transfer_id,
+    )
+    treatment = await obtener_tratamiento(
+        db,
+        organization_id,
+        transfer.treatment_id,
     )
     changes = payload.model_dump(exclude_unset=True)
 
@@ -838,6 +907,8 @@ async def actualizar_transferencia(
         setattr(transfer, field, value)
 
     transfer.updated_by = profile_id
+    _mark_treatment_updated(treatment, profile_id)
+    await _revalidate_active_treatment(db, organization_id, treatment)
     await db.flush()
     return transfer
 
@@ -846,13 +917,23 @@ async def eliminar_transferencia(
     db: AsyncSession,
     organization_id: uuid.UUID,
     transfer_id: uuid.UUID,
+    profile_id: uuid.UUID,
 ) -> None:
     transfer = await obtener_transferencia(
         db,
         organization_id,
         transfer_id,
     )
+    treatment = await obtener_tratamiento(
+        db,
+        organization_id,
+        transfer.treatment_id,
+    )
+
+    _mark_treatment_updated(treatment, profile_id)
     await db.delete(transfer)
+    await db.flush()
+    await _revalidate_active_treatment(db, organization_id, treatment)
     await db.flush()
 
 

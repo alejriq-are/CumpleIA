@@ -108,6 +108,10 @@ async def test_activation_requires_all_fields_and_revalidates_archived(
             )
             assert active.status == "activo"
             assert active.vendors_declaration == "si"
+            assert active.activated_at is not None
+            assert active.archived_at is None
+            assert active.updated_at == active.activated_at
+            first_activated_at = active.activated_at
             await db.commit()
 
         async with _session_factory() as db:
@@ -119,6 +123,12 @@ async def test_activation_requires_all_fields_and_revalidates_archived(
                 TreatmentUpdate(status="archivado"),
             )
             assert row.status == "archivado"
+            assert row.activated_at == first_activated_at
+            assert row.archived_at is not None
+            assert row.updated_at == row.archived_at
+
+            archived_at = row.archived_at
+
             row = await rat_service.actualizar_tratamiento(
                 db,
                 org_a_id,
@@ -127,6 +137,11 @@ async def test_activation_requires_all_fields_and_revalidates_archived(
                 TreatmentUpdate(status="activo"),
             )
             assert row.status == "activo"
+            assert row.activated_at is not None
+            assert row.activated_at >= first_activated_at
+            assert row.archived_at is None
+            assert row.updated_at == row.activated_at
+            assert row.updated_at >= archived_at
             await db.commit()
 
         async with _session_factory() as db:

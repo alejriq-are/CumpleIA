@@ -733,6 +733,18 @@ class Treatment(Base):
         nullable=False,
         server_default="borrador",
     )
+    activated_at: Mapped[datetime | None] = mapped_column(
+        sa.TIMESTAMP(timezone=True),
+        nullable=True,
+    )
+    archived_at: Mapped[datetime | None] = mapped_column(
+        sa.TIMESTAMP(timezone=True),
+        nullable=True,
+    )
+    status_changed_at: Mapped[datetime | None] = mapped_column(
+        sa.TIMESTAMP(timezone=True),
+        nullable=True,
+    )
 
     retention_rule: Mapped[str | None] = mapped_column(Text, nullable=True)
     systems_declaration: Mapped[str | None] = mapped_column(Text, nullable=True)

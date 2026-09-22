@@ -310,6 +310,9 @@ class TreatmentSummaryOut(ORMOut):
     organization_role: OrganizationRole | None
     business_area: str | None
     status: TreatmentStatus
+    activated_at: datetime | None
+    archived_at: datetime | None
+    status_changed_at: datetime | None
     systems_declaration: DeclarationStatus | None
     vendors_declaration: DeclarationStatus | None
     international_transfers_declaration: DeclarationStatus | None

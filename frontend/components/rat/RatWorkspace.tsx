@@ -196,7 +196,13 @@ export function RatWorkspace({ organizaciones }: { organizaciones: OrganizationM
                     Estado
                   </th>
                   <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
-                    Actualización
+                    Creado
+                  </th>
+                  <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
+                    Último cambio de estado
+                  </th>
+                  <th className="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
+                    Última actualización
                   </th>
                 </tr>
               </thead>
@@ -222,6 +228,12 @@ export function RatWorkspace({ organizaciones }: { organizaciones: OrganizationM
                       >
                         {statusLabel(tratamiento.status)}
                       </span>
+                    </td>
+                    <td className="px-5 py-4 text-sm text-gray-500">
+                      {formatDate(tratamiento.created_at)}
+                    </td>
+                    <td className="px-5 py-4 text-sm text-gray-500">
+                      {formatDate(tratamiento.status_changed_at)}
                     </td>
                     <td className="px-5 py-4 text-sm text-gray-500">
                       {formatDate(tratamiento.updated_at)}

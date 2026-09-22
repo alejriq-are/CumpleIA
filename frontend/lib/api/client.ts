@@ -213,6 +213,10 @@ export type TreatmentSummaryOut = {
   organization_role: "responsable" | "encargado" | null;
   business_area: string | null;
   status: TreatmentStatus;
+  created_at: string;
+  activated_at: string | null;
+  archived_at: string | null;
+  status_changed_at: string | null;
   updated_at?: string | null;
 };
 
@@ -258,7 +262,9 @@ export type TreatmentCreate = {
   automated_decision_description?: string | null;
 };
 
-export type TreatmentUpdate = Partial<TreatmentCreate>;
+export type TreatmentUpdate = Partial<TreatmentCreate> & {
+  status?: TreatmentStatus | null;
+};
 
 export class ApiError extends Error {
   status: number;

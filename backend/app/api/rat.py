@@ -95,6 +95,9 @@ async def _construir_detalle(
         organization_role=treatment.organization_role,
         business_area=treatment.business_area,
         status=treatment.status,
+        activated_at=treatment.activated_at,
+        archived_at=treatment.archived_at,
+        status_changed_at=treatment.status_changed_at,
         systems_declaration=treatment.systems_declaration,
         vendors_declaration=treatment.vendors_declaration,
         international_transfers_declaration=(
@@ -562,11 +565,10 @@ async def eliminar_transferencia(
     current_profile: Profile = Depends(require_permission(Permission.edit_content)),
     db: AsyncSession = Depends(get_db),
 ) -> Response:
-    del current_profile
-
     await rat_service.eliminar_transferencia(
         db,
         x_organization_id,
         transfer_id,
+        current_profile.id,
     )
     return Response(status_code=status.HTTP_204_NO_CONTENT)
