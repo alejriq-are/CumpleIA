@@ -55,14 +55,6 @@ class FindingStatus(str, enum.Enum):
     no_aplica = "no_aplica"
 
 
-class LegalBasis(str, enum.Enum):
-    consentimiento = "consentimiento"
-    contrato = "contrato"
-    obligacion_legal = "obligacion_legal"
-    interes_legitimo = "interes_legitimo"
-    otra = "otra"
-
-
 class ThirdPartyRole(str, enum.Enum):
     encargado = "encargado"
     cesion = "cesion"
@@ -1300,14 +1292,30 @@ class InternationalTransfer(Base):
 # ── Módulo 3 — Bases de licitud ───────────────────────────────────────────────
 
 
-class LegalBase(Base):
-    __tablename__ = "legal_bases"
+class LegalAssessmentSeries(Base):
+    __tablename__ = "legal_assessment_series"
     __table_args__ = (
         sa.ForeignKeyConstraint(
             ["treatment_id", "organization_id"],
             ["treatments.id", "treatments.organization_id"],
-            name="fk_legal_bases_treatment_tenant",
+            name="fk_legal_assessment_series_treatment_tenant",
             ondelete="CASCADE",
+        ),
+        UniqueConstraint(
+            "id",
+            "treatment_id",
+            "organization_id",
+            name="uq_legal_assessment_series_identity_tenant",
+        ),
+        UniqueConstraint(
+            "organization_id",
+            "treatment_id",
+            "purpose_key",
+            name="uq_legal_assessment_series_treatment_purpose",
+        ),
+        CheckConstraint(
+            "next_version >= 1",
+            name="ck_legal_assessment_series_next_version",
         ),
     )
 
@@ -1320,34 +1328,20 @@ class LegalBase(Base):
         UUID(as_uuid=True),
         ForeignKey("organizations.id", ondelete="CASCADE"),
         nullable=False,
+        index=True,
     )
-
-    # La FK simple se mantiene porque existe desde 0001.
     treatment_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
-        ForeignKey("treatments.id", ondelete="CASCADE"),
         nullable=False,
+        index=True,
     )
-
-    basis: Mapped[LegalBasis] = mapped_column(
-        sa.Enum(
-            LegalBasis,
-            name="legal_basis",
-            create_type=False,
-        ),
+    purpose_key: Mapped[str] = mapped_column(Text, nullable=False)
+    purpose_text: Mapped[str] = mapped_column(Text, nullable=False)
+    next_version: Mapped[int] = mapped_column(
+        Integer,
         nullable=False,
+        server_default="1",
     )
-    justification: Mapped[str | None] = mapped_column(Text, nullable=True)
-    confidence: Mapped[float | None] = mapped_column(
-        Numeric(4, 3),
-        nullable=True,
-    )
-    approved: Mapped[bool] = mapped_column(
-        Boolean,
-        nullable=False,
-        server_default="false",
-    )
-    lia: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         sa.TIMESTAMP(timezone=True),
         nullable=False,
@@ -1357,6 +1351,198 @@ class LegalBase(Base):
         sa.TIMESTAMP(timezone=True),
         nullable=False,
         server_default=func.now(),
+    )
+    created_by: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("profiles.id"),
+        nullable=True,
+    )
+    updated_by: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("profiles.id"),
+        nullable=True,
+    )
+
+
+class LegalAssessment(Base):
+    __tablename__ = "legal_assessments"
+    __table_args__ = (
+        sa.ForeignKeyConstraint(
+            ["series_id", "treatment_id", "organization_id"],
+            [
+                "legal_assessment_series.id",
+                "legal_assessment_series.treatment_id",
+                "legal_assessment_series.organization_id",
+            ],
+            name="fk_legal_assessments_series_treatment_tenant",
+            ondelete="CASCADE",
+        ),
+        UniqueConstraint(
+            "id",
+            "series_id",
+            "organization_id",
+            name="uq_legal_assessments_identity_series_tenant",
+        ),
+        sa.ForeignKeyConstraint(
+            ["replaced_by_assessment_id", "series_id", "organization_id"],
+            [
+                "legal_assessments.id",
+                "legal_assessments.series_id",
+                "legal_assessments.organization_id",
+            ],
+            name="fk_legal_assessments_replaced_by_same_series",
+        ),
+        UniqueConstraint(
+            "series_id",
+            "version",
+            name="uq_legal_assessments_series_version",
+        ),
+        CheckConstraint("version >= 1", name="ck_legal_assessments_version"),
+        CheckConstraint(
+            "schema_version >= 1",
+            name="ck_legal_assessments_schema_version",
+        ),
+        CheckConstraint(
+            "rat_context_schema_version >= 1",
+            name="ck_legal_assessments_rat_context_schema_version",
+        ),
+        CheckConstraint(
+            "status IN ('borrador', 'confirmado', 'reemplazado')",
+            name="ck_legal_assessments_status",
+        ),
+        CheckConstraint(
+            "legal_basis IS NULL OR legal_basis IN ("
+            "'consentimiento_art12', "
+            "'obligaciones_economicas_art13a', "
+            "'obligacion_legal_art13b', "
+            "'contrato_precontractual_art13c', "
+            "'interes_legitimo_art13d', "
+            "'defensa_derechos_art13e'"
+            ")",
+            name="ck_legal_assessments_legal_basis",
+        ),
+        CheckConstraint(
+            "replaced_by_assessment_id IS NULL "
+            "OR replaced_by_assessment_id <> id",
+            name="ck_legal_assessments_not_self_replaced",
+        ),
+        CheckConstraint(
+            "("
+            "status = 'borrador' "
+            "AND confirmed_at IS NULL "
+            "AND confirmed_by IS NULL "
+            "AND replaced_at IS NULL "
+            "AND replaced_by_assessment_id IS NULL"
+            ") OR ("
+            "status = 'confirmado' "
+            "AND confirmed_at IS NOT NULL "
+            "AND confirmed_by IS NOT NULL "
+            "AND replaced_at IS NULL "
+            "AND replaced_by_assessment_id IS NULL"
+            ") OR ("
+            "status = 'reemplazado' "
+            "AND confirmed_at IS NOT NULL "
+            "AND confirmed_by IS NOT NULL "
+            "AND replaced_at IS NOT NULL "
+            "AND replaced_by_assessment_id IS NOT NULL"
+            ")",
+            name="ck_legal_assessments_lifecycle_fields",
+        ),
+        sa.Index(
+            "uq_legal_assessments_one_draft_per_series",
+            "series_id",
+            unique=True,
+            postgresql_where=sa.text("status = 'borrador'"),
+        ),
+        sa.Index(
+            "uq_legal_assessments_one_confirmed_per_series",
+            "series_id",
+            unique=True,
+            postgresql_where=sa.text("status = 'confirmado'"),
+        ),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        server_default=func.gen_random_uuid(),
+    )
+    organization_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("organizations.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    series_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        nullable=False,
+        index=True,
+    )
+    treatment_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        nullable=False,
+        index=True,
+    )
+    version: Mapped[int] = mapped_column(Integer, nullable=False)
+    status: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+        server_default="borrador",
+    )
+    legal_basis: Mapped[str | None] = mapped_column(Text, nullable=True)
+    justification: Mapped[str | None] = mapped_column(Text, nullable=True)
+    purpose_snapshot: Mapped[str] = mapped_column(Text, nullable=False)
+    rat_context_hash: Mapped[str] = mapped_column(Text, nullable=False)
+    rat_context_snapshot: Mapped[dict] = mapped_column(JSONB, nullable=False)
+    consent_assessment: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    lia_assessment: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    special_conditions: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    schema_version: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        server_default="1",
+    )
+    rat_context_schema_version: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        server_default="1",
+    )
+    confirmed_at: Mapped[datetime | None] = mapped_column(
+        sa.TIMESTAMP(timezone=True),
+        nullable=True,
+    )
+    confirmed_by: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("profiles.id"),
+        nullable=True,
+    )
+    replaced_at: Mapped[datetime | None] = mapped_column(
+        sa.TIMESTAMP(timezone=True),
+        nullable=True,
+    )
+    replaced_by_assessment_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        nullable=True,
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        sa.TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        sa.TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+    created_by: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("profiles.id"),
+        nullable=True,
+    )
+    updated_by: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("profiles.id"),
+        nullable=True,
     )
 
 
