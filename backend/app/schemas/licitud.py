@@ -5,6 +5,7 @@ contexto RAT utilizado por M3. Los identificadores técnicos de M2 no forman
 parte de la identidad semántica histórica del contexto.
 """
 
+import uuid
 from typing import Literal
 
 from pydantic import BaseModel, Field, model_validator
@@ -41,6 +42,29 @@ class LegalAssessmentScopeIn(BaseModel):
             raise ValueError("data_category_codes no admite códigos duplicados")
         if len(self.data_subject_codes) != len(set(self.data_subject_codes)):
             raise ValueError("data_subject_codes no admite códigos duplicados")
+        return self
+
+
+class LegalAssessmentDraftCreate(BaseModel):
+    """Entrada para crear una nueva versión en estado borrador."""
+
+    purpose_id: uuid.UUID
+    scope: LegalAssessmentScopeIn
+    legal_basis: LegalBasis | None = None
+    justification: str | None = None
+
+
+class LegalAssessmentDraftUpdate(BaseModel):
+    """Actualización parcial de un borrador existente."""
+
+    scope: LegalAssessmentScopeIn | None = None
+    legal_basis: LegalBasis | None = None
+    justification: str | None = None
+
+    @model_validator(mode="after")
+    def validar_scope_null_explicito(self):
+        if "scope" in self.model_fields_set and self.scope is None:
+            raise ValueError("scope no puede ser null")
         return self
 
 

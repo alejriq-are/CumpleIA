@@ -5,13 +5,17 @@ import json
 import unicodedata
 import uuid
 from dataclasses import dataclass
+from datetime import UTC, datetime
 
 from fastapi import HTTPException, status
 from sqlalchemy import select
+from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import (
     InternationalTransfer,
+    LegalAssessment,
+    LegalAssessmentSeries,
     System,
     Treatment,
     TreatmentDataCategory,
@@ -22,6 +26,8 @@ from app.db.models import (
     Vendor,
 )
 from app.schemas.licitud import (
+    LegalAssessmentDraftCreate,
+    LegalAssessmentDraftUpdate,
     LegalAssessmentScopeIn,
     RatCanonicalAutomatedDecisionsV1,
     RatCanonicalContextV1,
@@ -57,6 +63,20 @@ class RatContextBundleV1:
 def _bad_request(detail: str) -> HTTPException:
     return HTTPException(
         status_code=status.HTTP_400_BAD_REQUEST,
+        detail=detail,
+    )
+
+
+def _not_found(detail: str) -> HTTPException:
+    return HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail=detail,
+    )
+
+
+def _conflict(detail: str) -> HTTPException:
+    return HTTPException(
+        status_code=status.HTTP_409_CONFLICT,
         detail=detail,
     )
 
@@ -373,6 +393,81 @@ async def build_third_parties_from_m2_v1(
         relationships,
         vendors_by_id,
     )
+
+
+async def _get_or_create_series_for_update_v1(
+    db: AsyncSession,
+    organization_id: uuid.UUID,
+    treatment_id: uuid.UUID,
+    purpose: TreatmentPurpose,
+    profile_id: uuid.UUID,
+) -> LegalAssessmentSeries:
+    """Obtiene o crea la serie lógica y la bloquea para la transacción actual."""
+
+    purpose_key = build_purpose_key_v1(purpose.purpose)
+
+    await db.execute(
+        pg_insert(LegalAssessmentSeries)
+        .values(
+            organization_id=organization_id,
+            treatment_id=treatment_id,
+            purpose_key=purpose_key,
+            purpose_text=purpose.purpose,
+            created_by=profile_id,
+            updated_by=profile_id,
+        )
+        .on_conflict_do_nothing(
+            index_elements=[
+                "organization_id",
+                "treatment_id",
+                "purpose_key",
+            ]
+        )
+    )
+
+    result = await db.execute(
+        select(LegalAssessmentSeries)
+        .where(
+            LegalAssessmentSeries.organization_id == organization_id,
+            LegalAssessmentSeries.treatment_id == treatment_id,
+            LegalAssessmentSeries.purpose_key == purpose_key,
+        )
+        .with_for_update()
+    )
+    return result.scalar_one()
+
+
+def _reserve_next_version_v1(series: LegalAssessmentSeries) -> int:
+    """Reserva la siguiente versión sobre una serie previamente bloqueada."""
+
+    version = series.next_version
+    series.next_version = version + 1
+    return version
+
+
+async def resolve_purpose_by_id_from_m2_v1(
+    db: AsyncSession,
+    organization_id: uuid.UUID,
+    treatment_id: uuid.UUID,
+    purpose_id: uuid.UUID,
+) -> TreatmentPurpose:
+    """Resuelve el selector operativo actual de finalidad dentro del tenant."""
+
+    result = await db.execute(
+        select(TreatmentPurpose).where(
+            TreatmentPurpose.id == purpose_id,
+            TreatmentPurpose.organization_id == organization_id,
+            TreatmentPurpose.treatment_id == treatment_id,
+        )
+    )
+    purpose = result.scalar_one_or_none()
+
+    if purpose is None:
+        raise _bad_request(
+            "La finalidad indicada no pertenece a la actividad de tratamiento"
+        )
+
+    return purpose
 
 
 def resolve_purpose_from_m2_v1(
@@ -817,6 +912,194 @@ async def build_rat_context_bundle_from_m2_v1(
         canonical=canonical,
         snapshot=snapshot,
     )
+
+
+async def get_legal_assessment_draft_v1(
+    db: AsyncSession,
+    organization_id: uuid.UUID,
+    treatment_id: uuid.UUID,
+    assessment_id: uuid.UUID,
+) -> LegalAssessment:
+    """Obtiene una evaluación editable del tenant y exige estado borrador."""
+
+    result = await db.execute(
+        select(LegalAssessment).where(
+            LegalAssessment.id == assessment_id,
+            LegalAssessment.organization_id == organization_id,
+            LegalAssessment.treatment_id == treatment_id,
+        )
+    )
+    assessment = result.scalar_one_or_none()
+
+    if assessment is None:
+        raise _not_found("Evaluación jurídica no encontrada")
+
+    if assessment.status != "borrador":
+        raise _conflict("La evaluación jurídica ya no está en estado borrador")
+
+    return assessment
+
+
+def _scope_from_snapshot_v1(
+    snapshot: dict,
+) -> LegalAssessmentScopeIn:
+    """Recupera el alcance semántico persistido en un snapshot documental v1."""
+
+    parsed = RatContextSnapshotV1.model_validate(snapshot)
+    return LegalAssessmentScopeIn(
+        data_category_codes=[item.category_code for item in parsed.data_categories],
+        data_subject_codes=[item.category_code for item in parsed.data_subjects],
+    )
+
+
+async def update_legal_assessment_draft_v1(
+    db: AsyncSession,
+    organization_id: uuid.UUID,
+    treatment_id: uuid.UUID,
+    assessment_id: uuid.UUID,
+    profile_id: uuid.UUID,
+    payload: LegalAssessmentDraftUpdate,
+) -> LegalAssessment:
+    """Actualiza parcialmente un borrador y recompone su contexto RAT v1."""
+
+    assessment = await get_legal_assessment_draft_v1(
+        db,
+        organization_id,
+        treatment_id,
+        assessment_id,
+    )
+
+    changes = payload.model_dump(exclude_unset=True)
+    scope_was_provided = "scope" in changes
+    changes.pop("scope", None)
+
+    series_result = await db.execute(
+        select(LegalAssessmentSeries)
+        .where(
+            LegalAssessmentSeries.id == assessment.series_id,
+            LegalAssessmentSeries.organization_id == organization_id,
+            LegalAssessmentSeries.treatment_id == treatment_id,
+        )
+        .with_for_update()
+    )
+    series = series_result.scalar_one()
+
+    assessment_result = await db.execute(
+        select(LegalAssessment)
+        .where(
+            LegalAssessment.id == assessment_id,
+            LegalAssessment.organization_id == organization_id,
+            LegalAssessment.treatment_id == treatment_id,
+            LegalAssessment.series_id == series.id,
+        )
+        .execution_options(populate_existing=True)
+    )
+    assessment = assessment_result.scalar_one_or_none()
+
+    if assessment is None:
+        raise _not_found("Evaluación jurídica no encontrada")
+
+    if assessment.status != "borrador":
+        raise _conflict("La evaluación jurídica ya no está en estado borrador")
+
+    scope = (
+        payload.scope
+        if scope_was_provided
+        else _scope_from_snapshot_v1(assessment.rat_context_snapshot)
+    )
+
+    bundle = await build_rat_context_bundle_from_m2_v1(
+        db,
+        organization_id,
+        treatment_id,
+        purpose_key=series.purpose_key,
+        scope=scope,
+    )
+
+    for field, value in changes.items():
+        setattr(assessment, field, value)
+
+    assessment.purpose_snapshot = bundle.snapshot.purpose
+    assessment.rat_context_hash = build_rat_context_hash_v1(bundle.canonical)
+    assessment.rat_context_snapshot = bundle.snapshot.model_dump(mode="json")
+    assessment.updated_at = datetime.now(UTC)
+    assessment.updated_by = profile_id
+
+    await db.flush()
+    return assessment
+
+
+async def create_legal_assessment_draft_v1(
+    db: AsyncSession,
+    organization_id: uuid.UUID,
+    treatment_id: uuid.UUID,
+    profile_id: uuid.UUID,
+    payload: LegalAssessmentDraftCreate,
+) -> LegalAssessment:
+    """Crea una nueva versión borrador con contexto RAT v1 persistido."""
+
+    purpose = await resolve_purpose_by_id_from_m2_v1(
+        db,
+        organization_id,
+        treatment_id,
+        payload.purpose_id,
+    )
+    purpose_key = build_purpose_key_v1(purpose.purpose)
+
+    bundle = await build_rat_context_bundle_from_m2_v1(
+        db,
+        organization_id,
+        treatment_id,
+        purpose_key=purpose_key,
+        scope=payload.scope,
+    )
+
+    series = await _get_or_create_series_for_update_v1(
+        db,
+        organization_id,
+        treatment_id,
+        purpose,
+        profile_id,
+    )
+
+    result = await db.execute(
+        select(LegalAssessment).where(
+            LegalAssessment.organization_id == organization_id,
+            LegalAssessment.treatment_id == treatment_id,
+            LegalAssessment.series_id == series.id,
+            LegalAssessment.status == "borrador",
+        )
+    )
+    if result.scalar_one_or_none() is not None:
+        raise _conflict("Ya existe un borrador para esta finalidad")
+
+    version = _reserve_next_version_v1(series)
+    now = datetime.now(UTC)
+    series.updated_at = now
+    series.updated_by = profile_id
+
+    assessment = LegalAssessment(
+        organization_id=organization_id,
+        series_id=series.id,
+        treatment_id=treatment_id,
+        version=version,
+        status="borrador",
+        legal_basis=payload.legal_basis,
+        justification=payload.justification,
+        purpose_snapshot=bundle.snapshot.purpose,
+        rat_context_hash=build_rat_context_hash_v1(bundle.canonical),
+        rat_context_snapshot=bundle.snapshot.model_dump(mode="json"),
+        consent_assessment=None,
+        lia_assessment=None,
+        special_conditions=None,
+        schema_version=1,
+        rat_context_schema_version=1,
+        created_by=profile_id,
+        updated_by=profile_id,
+    )
+    db.add(assessment)
+    await db.flush()
+    return assessment
 
 
 async def build_rat_context_from_m2_v1(

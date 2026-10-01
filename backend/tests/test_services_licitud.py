@@ -8,6 +8,8 @@ from fastapi import HTTPException
 
 from app.db.models import (
     InternationalTransfer,
+    LegalAssessment,
+    LegalAssessmentSeries,
     System,
     Treatment,
     TreatmentDataCategory,
@@ -17,7 +19,11 @@ from app.db.models import (
     TreatmentVendor,
     Vendor,
 )
-from app.schemas.licitud import LegalAssessmentScopeIn
+from app.schemas.licitud import (
+    LegalAssessmentDraftCreate,
+    LegalAssessmentDraftUpdate,
+    LegalAssessmentScopeIn,
+)
 from app.services import licitud as licitud_service
 from app.services.licitud import (
     _load_vendors_by_id,
@@ -695,6 +701,127 @@ async def test_build_third_parties_from_m2_v1_rechaza_vendor_faltante():
         "Uno o más proveedores asociados no pertenecen a la organización"
     )
     db.execute.assert_awaited_once()
+
+
+def test_reserve_next_version_v1_incrementa_y_devuelve_version_asignada():
+    series = LegalAssessmentSeries(
+        organization_id=uuid.uuid4(),
+        treatment_id=uuid.uuid4(),
+        purpose_key="purpose-key",
+        purpose_text="Gestión de clientes",
+        next_version=3,
+    )
+
+    version = licitud_service._reserve_next_version_v1(series)
+
+    assert version == 3
+    assert series.next_version == 4
+
+
+async def test_get_or_create_series_for_update_v1_inserta_idempotente_y_bloquea():
+    organization_id = uuid.uuid4()
+    treatment_id = uuid.uuid4()
+    profile_id = uuid.uuid4()
+    purpose = TreatmentPurpose(
+        organization_id=organization_id,
+        treatment_id=treatment_id,
+        purpose=" Gestión de clientes ",
+    )
+    series = LegalAssessmentSeries(
+        id=uuid.uuid4(),
+        organization_id=organization_id,
+        treatment_id=treatment_id,
+        purpose_key=build_purpose_key_v1(purpose.purpose),
+        purpose_text=purpose.purpose,
+        next_version=1,
+    )
+
+    insert_result = MagicMock()
+    select_result = MagicMock()
+    select_result.scalar_one.return_value = series
+
+    db = AsyncMock()
+    db.execute.side_effect = [insert_result, select_result]
+
+    result = await licitud_service._get_or_create_series_for_update_v1(
+        db,
+        organization_id,
+        treatment_id,
+        purpose,
+        profile_id,
+    )
+
+    assert result is series
+    assert db.execute.await_count == 2
+
+    insert_stmt = db.execute.await_args_list[0].args[0]
+    compiled_insert = insert_stmt.compile()
+    assert organization_id in compiled_insert.params.values()
+    assert treatment_id in compiled_insert.params.values()
+    assert profile_id in compiled_insert.params.values()
+    assert build_purpose_key_v1(purpose.purpose) in compiled_insert.params.values()
+
+    select_stmt = db.execute.await_args_list[1].args[0]
+    compiled_select = select_stmt.compile()
+    assert organization_id in compiled_select.params.values()
+    assert treatment_id in compiled_select.params.values()
+    assert build_purpose_key_v1(purpose.purpose) in compiled_select.params.values()
+    assert select_stmt._for_update_arg is not None
+
+
+async def test_resolve_purpose_by_id_from_m2_v1_resuelve_selector_operativo():
+    organization_id = uuid.uuid4()
+    treatment_id = uuid.uuid4()
+    purpose_id = uuid.uuid4()
+    purpose = TreatmentPurpose(
+        id=purpose_id,
+        organization_id=organization_id,
+        treatment_id=treatment_id,
+        purpose="Gestión de clientes",
+    )
+
+    result = MagicMock()
+    result.scalar_one_or_none.return_value = purpose
+    db = AsyncMock()
+    db.execute.return_value = result
+
+    resolved = await licitud_service.resolve_purpose_by_id_from_m2_v1(
+        db,
+        organization_id,
+        treatment_id,
+        purpose_id,
+    )
+
+    assert resolved is purpose
+    db.execute.assert_awaited_once()
+    params = db.execute.call_args.args[0].compile().params
+    assert organization_id in params.values()
+    assert treatment_id in params.values()
+    assert purpose_id in params.values()
+
+
+async def test_resolve_purpose_by_id_from_m2_v1_rechaza_selector_ajeno():
+    organization_id = uuid.uuid4()
+    treatment_id = uuid.uuid4()
+    purpose_id = uuid.uuid4()
+
+    result = MagicMock()
+    result.scalar_one_or_none.return_value = None
+    db = AsyncMock()
+    db.execute.return_value = result
+
+    with pytest.raises(HTTPException) as exc:
+        await licitud_service.resolve_purpose_by_id_from_m2_v1(
+            db,
+            organization_id,
+            treatment_id,
+            purpose_id,
+        )
+
+    assert exc.value.status_code == 400
+    assert exc.value.detail == (
+        "La finalidad indicada no pertenece a la actividad de tratamiento"
+    )
 
 
 def test_resolve_purpose_from_m2_v1_resuelve_por_identidad_canonica():
@@ -1502,6 +1629,706 @@ def m2_context_reader(monkeypatch):
         readers[name] = AsyncMock(return_value=value)
         monkeypatch.setattr(licitud_service.rat_service, name, readers[name])
     return org_id, treatment_id, readers
+
+
+async def test_update_legal_assessment_draft_v1_reutiliza_scope_y_no_consume_version(
+    monkeypatch,
+):
+    organization_id = uuid.uuid4()
+    treatment_id = uuid.uuid4()
+    assessment_id = uuid.uuid4()
+    profile_id = uuid.uuid4()
+    series_id = uuid.uuid4()
+
+    snapshot = {
+        "purpose": "Gestión de clientes",
+        "organization_role": "responsable",
+        "data_categories": [
+            {
+                "category_code": "ID",
+                "category_name": "Identidad",
+                "is_sensitive": False,
+                "notes": None,
+            }
+        ],
+        "data_subjects": [
+            {
+                "category_code": "CLIENTES",
+                "category_name": "Clientes",
+                "includes_children": False,
+                "includes_adolescents": False,
+                "is_vulnerable_group": False,
+                "notes": None,
+            }
+        ],
+        "data_sources": [],
+        "retention": {
+            "retention_rule": None,
+            "deletion_method": None,
+        },
+        "automated_decisions": {
+            "has_automated_decisions": False,
+            "description": None,
+        },
+        "systems": [],
+        "third_parties": [],
+        "international_transfers": [],
+        "special_regimes": {
+            "has_sensitive_data": False,
+            "includes_children": False,
+            "includes_adolescents": False,
+            "has_vulnerable_groups": False,
+        },
+    }
+    assessment = LegalAssessment(
+        id=assessment_id,
+        organization_id=organization_id,
+        series_id=series_id,
+        treatment_id=treatment_id,
+        version=2,
+        status="borrador",
+        legal_basis=None,
+        justification=None,
+        purpose_snapshot="Gestión de clientes",
+        rat_context_hash="hash-anterior",
+        rat_context_snapshot=snapshot,
+    )
+    series = LegalAssessmentSeries(
+        id=series_id,
+        organization_id=organization_id,
+        treatment_id=treatment_id,
+        purpose_key=build_purpose_key_v1("Gestión de clientes"),
+        purpose_text="Gestión de clientes",
+        next_version=3,
+    )
+
+    get_draft = AsyncMock(return_value=assessment)
+    monkeypatch.setattr(
+        licitud_service,
+        "get_legal_assessment_draft_v1",
+        get_draft,
+    )
+
+    updated_snapshot = licitud_service.RatContextSnapshotV1.model_validate(snapshot)
+    bundle = licitud_service.RatContextBundleV1(
+        canonical=_context_m3([], []),
+        snapshot=updated_snapshot,
+    )
+    build_bundle = AsyncMock(return_value=bundle)
+    monkeypatch.setattr(
+        licitud_service,
+        "build_rat_context_bundle_from_m2_v1",
+        build_bundle,
+    )
+
+    series_result = MagicMock()
+    series_result.scalar_one.return_value = series
+    assessment_result = MagicMock()
+    assessment_result.scalar_one_or_none.return_value = assessment
+
+    fresh_snapshot = {
+        **snapshot,
+        "data_categories": [
+            {
+                "category_code": "EMAIL",
+                "category_name": "Correo electrónico",
+                "is_sensitive": False,
+                "notes": None,
+            }
+        ],
+        "data_subjects": [
+            {
+                "category_code": "PROVEEDORES",
+                "category_name": "Proveedores",
+                "includes_children": False,
+                "includes_adolescents": False,
+                "is_vulnerable_group": False,
+                "notes": None,
+            }
+        ],
+    }
+
+    execute_results = iter([series_result, assessment_result])
+
+    async def execute_side_effect(*args, **kwargs):
+        result = next(execute_results)
+        if result is assessment_result:
+            assessment.rat_context_snapshot = fresh_snapshot
+        return result
+
+    db = AsyncMock()
+    db.execute.side_effect = execute_side_effect
+
+    payload = LegalAssessmentDraftUpdate(
+        justification="Justificación actualizada",
+    )
+
+    result = await licitud_service.update_legal_assessment_draft_v1(
+        db,
+        organization_id,
+        treatment_id,
+        assessment_id,
+        profile_id,
+        payload,
+    )
+
+    assert result is assessment
+    assert assessment.version == 2
+    assert series.next_version == 3
+    assert assessment.justification == "Justificación actualizada"
+    assert assessment.updated_by == profile_id
+    assert assessment.rat_context_hash == (
+        licitud_service.build_rat_context_hash_v1(bundle.canonical)
+    )
+    assert assessment.rat_context_snapshot == updated_snapshot.model_dump(mode="json")
+
+    build_bundle.assert_awaited_once_with(
+        db,
+        organization_id,
+        treatment_id,
+        purpose_key=series.purpose_key,
+        scope=LegalAssessmentScopeIn(
+            data_category_codes=["EMAIL"],
+            data_subject_codes=["PROVEEDORES"],
+        ),
+    )
+    db.flush.assert_awaited_once()
+    db.commit.assert_not_awaited()
+    db.rollback.assert_not_awaited()
+
+
+async def test_update_legal_assessment_draft_v1_revalida_estado_despues_del_lock(
+    monkeypatch,
+):
+    organization_id = uuid.uuid4()
+    treatment_id = uuid.uuid4()
+    assessment_id = uuid.uuid4()
+    profile_id = uuid.uuid4()
+    series_id = uuid.uuid4()
+
+    snapshot = {
+        "purpose": "Gestión de clientes",
+        "organization_role": "responsable",
+        "data_categories": [],
+        "data_subjects": [],
+        "data_sources": [],
+        "retention": {
+            "retention_rule": None,
+            "deletion_method": None,
+        },
+        "automated_decisions": {
+            "has_automated_decisions": False,
+            "description": None,
+        },
+        "systems": [],
+        "third_parties": [],
+        "international_transfers": [],
+        "special_regimes": {
+            "has_sensitive_data": False,
+            "includes_children": False,
+            "includes_adolescents": False,
+            "has_vulnerable_groups": False,
+        },
+    }
+
+    assessment = LegalAssessment(
+        id=assessment_id,
+        organization_id=organization_id,
+        series_id=series_id,
+        treatment_id=treatment_id,
+        version=1,
+        status="borrador",
+        purpose_snapshot="Gestión de clientes",
+        rat_context_hash="hash",
+        rat_context_snapshot=snapshot,
+    )
+    refreshed_assessment = LegalAssessment(
+        id=assessment_id,
+        organization_id=organization_id,
+        series_id=series_id,
+        treatment_id=treatment_id,
+        version=1,
+        status="confirmado",
+        purpose_snapshot="Gestión de clientes",
+        rat_context_hash="hash",
+        rat_context_snapshot=snapshot,
+    )
+    series = LegalAssessmentSeries(
+        id=series_id,
+        organization_id=organization_id,
+        treatment_id=treatment_id,
+        purpose_key=build_purpose_key_v1("Gestión de clientes"),
+        purpose_text="Gestión de clientes",
+        next_version=2,
+    )
+
+    monkeypatch.setattr(
+        licitud_service,
+        "get_legal_assessment_draft_v1",
+        AsyncMock(return_value=assessment),
+    )
+    build_bundle = AsyncMock()
+    monkeypatch.setattr(
+        licitud_service,
+        "build_rat_context_bundle_from_m2_v1",
+        build_bundle,
+    )
+
+    series_result = MagicMock()
+    series_result.scalar_one.return_value = series
+    assessment_result = MagicMock()
+    assessment_result.scalar_one_or_none.return_value = refreshed_assessment
+
+    db = AsyncMock()
+    db.execute.side_effect = [series_result, assessment_result]
+
+    with pytest.raises(HTTPException) as exc:
+        await licitud_service.update_legal_assessment_draft_v1(
+            db,
+            organization_id,
+            treatment_id,
+            assessment_id,
+            profile_id,
+            LegalAssessmentDraftUpdate(justification="No debe persistir"),
+        )
+
+    assert exc.value.status_code == 409
+    assert exc.value.detail == "La evaluación jurídica ya no está en estado borrador"
+    build_bundle.assert_not_awaited()
+    db.flush.assert_not_awaited()
+
+
+async def test_update_legal_assessment_draft_v1_usa_scope_nuevo(
+    monkeypatch,
+):
+    organization_id = uuid.uuid4()
+    treatment_id = uuid.uuid4()
+    assessment_id = uuid.uuid4()
+    profile_id = uuid.uuid4()
+    series_id = uuid.uuid4()
+
+    old_snapshot = {
+        "purpose": "Gestión de clientes",
+        "organization_role": "responsable",
+        "data_categories": [],
+        "data_subjects": [],
+        "data_sources": [],
+        "retention": {
+            "retention_rule": None,
+            "deletion_method": None,
+        },
+        "automated_decisions": {
+            "has_automated_decisions": False,
+            "description": None,
+        },
+        "systems": [],
+        "third_parties": [],
+        "international_transfers": [],
+        "special_regimes": {
+            "has_sensitive_data": False,
+            "includes_children": False,
+            "includes_adolescents": False,
+            "has_vulnerable_groups": False,
+        },
+    }
+    assessment = LegalAssessment(
+        id=assessment_id,
+        organization_id=organization_id,
+        series_id=series_id,
+        treatment_id=treatment_id,
+        version=1,
+        status="borrador",
+        purpose_snapshot="Gestión de clientes",
+        rat_context_hash="hash",
+        rat_context_snapshot=old_snapshot,
+    )
+    series = LegalAssessmentSeries(
+        id=series_id,
+        organization_id=organization_id,
+        treatment_id=treatment_id,
+        purpose_key=build_purpose_key_v1("Gestión de clientes"),
+        purpose_text="Gestión de clientes",
+        next_version=2,
+    )
+
+    monkeypatch.setattr(
+        licitud_service,
+        "get_legal_assessment_draft_v1",
+        AsyncMock(return_value=assessment),
+    )
+
+    bundle = licitud_service.RatContextBundleV1(
+        canonical=_context_m3([], []),
+        snapshot=licitud_service.RatContextSnapshotV1.model_validate(old_snapshot),
+    )
+    build_bundle = AsyncMock(return_value=bundle)
+    monkeypatch.setattr(
+        licitud_service,
+        "build_rat_context_bundle_from_m2_v1",
+        build_bundle,
+    )
+
+    series_result = MagicMock()
+    series_result.scalar_one.return_value = series
+    assessment_result = MagicMock()
+    assessment_result.scalar_one_or_none.return_value = assessment
+    db = AsyncMock()
+    db.execute.side_effect = [series_result, assessment_result]
+
+    new_scope = LegalAssessmentScopeIn(
+        data_category_codes=["salud"],
+        data_subject_codes=["clientes"],
+    )
+    payload = LegalAssessmentDraftUpdate(scope=new_scope)
+
+    await licitud_service.update_legal_assessment_draft_v1(
+        db,
+        organization_id,
+        treatment_id,
+        assessment_id,
+        profile_id,
+        payload,
+    )
+
+    build_bundle.assert_awaited_once_with(
+        db,
+        organization_id,
+        treatment_id,
+        purpose_key=series.purpose_key,
+        scope=new_scope,
+    )
+    assert series.next_version == 2
+
+
+async def test_get_legal_assessment_draft_v1_devuelve_borrador_tenant_aware():
+    organization_id = uuid.uuid4()
+    treatment_id = uuid.uuid4()
+    assessment_id = uuid.uuid4()
+
+    assessment = LegalAssessment(
+        id=assessment_id,
+        organization_id=organization_id,
+        series_id=uuid.uuid4(),
+        treatment_id=treatment_id,
+        version=1,
+        status="borrador",
+        purpose_snapshot="Gestión de clientes",
+        rat_context_hash="hash",
+        rat_context_snapshot={},
+    )
+
+    result = MagicMock()
+    result.scalar_one_or_none.return_value = assessment
+    db = AsyncMock()
+    db.execute.return_value = result
+
+    resolved = await licitud_service.get_legal_assessment_draft_v1(
+        db,
+        organization_id,
+        treatment_id,
+        assessment_id,
+    )
+
+    assert resolved is assessment
+    db.execute.assert_awaited_once()
+    params = db.execute.call_args.args[0].compile().params
+    assert organization_id in params.values()
+    assert treatment_id in params.values()
+    assert assessment_id in params.values()
+
+
+async def test_get_legal_assessment_draft_v1_rechaza_inexistente():
+    db = AsyncMock()
+    result = MagicMock()
+    result.scalar_one_or_none.return_value = None
+    db.execute.return_value = result
+
+    with pytest.raises(HTTPException) as exc:
+        await licitud_service.get_legal_assessment_draft_v1(
+            db,
+            uuid.uuid4(),
+            uuid.uuid4(),
+            uuid.uuid4(),
+        )
+
+    assert exc.value.status_code == 404
+    assert exc.value.detail == "Evaluación jurídica no encontrada"
+
+
+async def test_get_legal_assessment_draft_v1_rechaza_no_borrador():
+    organization_id = uuid.uuid4()
+    treatment_id = uuid.uuid4()
+
+    assessment = LegalAssessment(
+        id=uuid.uuid4(),
+        organization_id=organization_id,
+        series_id=uuid.uuid4(),
+        treatment_id=treatment_id,
+        version=1,
+        status="confirmado",
+        purpose_snapshot="Gestión de clientes",
+        rat_context_hash="hash",
+        rat_context_snapshot={},
+        confirmed_at=datetime.now(UTC),
+        confirmed_by=uuid.uuid4(),
+    )
+
+    result = MagicMock()
+    result.scalar_one_or_none.return_value = assessment
+    db = AsyncMock()
+    db.execute.return_value = result
+
+    with pytest.raises(HTTPException) as exc:
+        await licitud_service.get_legal_assessment_draft_v1(
+            db,
+            organization_id,
+            treatment_id,
+            assessment.id,
+        )
+
+    assert exc.value.status_code == 409
+    assert exc.value.detail == ("La evaluación jurídica ya no está en estado borrador")
+
+
+async def test_create_legal_assessment_draft_v1_rechaza_segundo_borrador(
+    monkeypatch,
+):
+    organization_id = uuid.uuid4()
+    treatment_id = uuid.uuid4()
+    profile_id = uuid.uuid4()
+    purpose_id = uuid.uuid4()
+
+    purpose = TreatmentPurpose(
+        id=purpose_id,
+        organization_id=organization_id,
+        treatment_id=treatment_id,
+        purpose="Gestión de clientes",
+    )
+    treatment = Treatment(
+        id=treatment_id,
+        organization_id=organization_id,
+        organization_role="responsable",
+        retention_rule=None,
+        deletion_method=None,
+        has_automated_decisions=False,
+        automated_decision_description=None,
+    )
+    snapshot = licitud_service.build_rat_context_snapshot_v1(
+        treatment=treatment,
+        purpose=purpose,
+        data_categories=[],
+        data_subjects=[],
+        data_sources=[],
+        systems=[],
+        relationships=[],
+        vendors_by_id={},
+        international_transfers=[],
+    )
+    bundle = licitud_service.RatContextBundleV1(
+        canonical=_context_m3([], []),
+        snapshot=snapshot,
+    )
+    series = LegalAssessmentSeries(
+        id=uuid.uuid4(),
+        organization_id=organization_id,
+        treatment_id=treatment_id,
+        purpose_key=build_purpose_key_v1(purpose.purpose),
+        purpose_text=purpose.purpose,
+        next_version=4,
+    )
+    existing_draft = LegalAssessment(
+        id=uuid.uuid4(),
+        organization_id=organization_id,
+        series_id=series.id,
+        treatment_id=treatment_id,
+        version=3,
+        status="borrador",
+        purpose_snapshot=purpose.purpose,
+        rat_context_hash="hash-existente",
+        rat_context_snapshot={},
+    )
+
+    monkeypatch.setattr(
+        licitud_service,
+        "resolve_purpose_by_id_from_m2_v1",
+        AsyncMock(return_value=purpose),
+    )
+    monkeypatch.setattr(
+        licitud_service,
+        "build_rat_context_bundle_from_m2_v1",
+        AsyncMock(return_value=bundle),
+    )
+    monkeypatch.setattr(
+        licitud_service,
+        "_get_or_create_series_for_update_v1",
+        AsyncMock(return_value=series),
+    )
+
+    draft_result = MagicMock()
+    draft_result.scalar_one_or_none.return_value = existing_draft
+
+    db = AsyncMock()
+    db.execute.return_value = draft_result
+    db.add = MagicMock()
+
+    payload = LegalAssessmentDraftCreate(
+        purpose_id=purpose_id,
+        scope=LegalAssessmentScopeIn(),
+    )
+
+    with pytest.raises(HTTPException) as exc:
+        await licitud_service.create_legal_assessment_draft_v1(
+            db,
+            organization_id,
+            treatment_id,
+            profile_id,
+            payload,
+        )
+
+    assert exc.value.status_code == 409
+    assert exc.value.detail == "Ya existe un borrador para esta finalidad"
+    assert series.next_version == 4
+    db.add.assert_not_called()
+    db.flush.assert_not_awaited()
+    db.commit.assert_not_awaited()
+    db.rollback.assert_not_awaited()
+
+
+async def test_create_legal_assessment_draft_v1_persiste_contexto_y_reserva_version(
+    monkeypatch,
+):
+    organization_id = uuid.uuid4()
+    treatment_id = uuid.uuid4()
+    profile_id = uuid.uuid4()
+    purpose_id = uuid.uuid4()
+    series_id = uuid.uuid4()
+
+    purpose = TreatmentPurpose(
+        id=purpose_id,
+        organization_id=organization_id,
+        treatment_id=treatment_id,
+        purpose=" Gestión de clientes ",
+    )
+    treatment = Treatment(
+        id=treatment_id,
+        organization_id=organization_id,
+        organization_role="responsable",
+        retention_rule=None,
+        deletion_method=None,
+        has_automated_decisions=False,
+        automated_decision_description=None,
+    )
+    snapshot = licitud_service.build_rat_context_snapshot_v1(
+        treatment=treatment,
+        purpose=purpose,
+        data_categories=[],
+        data_subjects=[],
+        data_sources=[],
+        systems=[],
+        relationships=[],
+        vendors_by_id={},
+        international_transfers=[],
+    )
+    bundle = licitud_service.RatContextBundleV1(
+        canonical=_context_m3([], []),
+        snapshot=snapshot,
+    )
+    series = LegalAssessmentSeries(
+        id=series_id,
+        organization_id=organization_id,
+        treatment_id=treatment_id,
+        purpose_key=build_purpose_key_v1(purpose.purpose),
+        purpose_text=purpose.purpose,
+        next_version=2,
+    )
+
+    resolve_purpose = AsyncMock(return_value=purpose)
+    build_bundle = AsyncMock(return_value=bundle)
+    get_series = AsyncMock(return_value=series)
+    monkeypatch.setattr(
+        licitud_service,
+        "resolve_purpose_by_id_from_m2_v1",
+        resolve_purpose,
+    )
+    monkeypatch.setattr(
+        licitud_service,
+        "build_rat_context_bundle_from_m2_v1",
+        build_bundle,
+    )
+    monkeypatch.setattr(
+        licitud_service,
+        "_get_or_create_series_for_update_v1",
+        get_series,
+    )
+
+    no_draft_result = MagicMock()
+    no_draft_result.scalar_one_or_none.return_value = None
+
+    db = AsyncMock()
+    db.execute.return_value = no_draft_result
+    db.add = MagicMock()
+
+    payload = LegalAssessmentDraftCreate(
+        purpose_id=purpose_id,
+        scope=LegalAssessmentScopeIn(),
+        legal_basis="contrato_precontractual_art13c",
+        justification="Necesario para la relación contractual.",
+    )
+
+    assessment = await licitud_service.create_legal_assessment_draft_v1(
+        db,
+        organization_id,
+        treatment_id,
+        profile_id,
+        payload,
+    )
+
+    assert isinstance(assessment, LegalAssessment)
+    assert assessment.organization_id == organization_id
+    assert assessment.treatment_id == treatment_id
+    assert assessment.series_id == series_id
+    assert assessment.version == 2
+    assert assessment.status == "borrador"
+    assert assessment.legal_basis == "contrato_precontractual_art13c"
+    assert assessment.justification == "Necesario para la relación contractual."
+    assert assessment.purpose_snapshot == " Gestión de clientes "
+    assert assessment.rat_context_hash == (
+        licitud_service.build_rat_context_hash_v1(bundle.canonical)
+    )
+    assert assessment.rat_context_snapshot == snapshot.model_dump(mode="json")
+    assert assessment.schema_version == 1
+    assert assessment.rat_context_schema_version == 1
+    assert assessment.created_by == profile_id
+    assert assessment.updated_by == profile_id
+
+    assert series.next_version == 3
+    assert series.updated_by == profile_id
+    assert series.updated_at is not None
+
+    resolve_purpose.assert_awaited_once_with(
+        db,
+        organization_id,
+        treatment_id,
+        purpose_id,
+    )
+    build_bundle.assert_awaited_once_with(
+        db,
+        organization_id,
+        treatment_id,
+        purpose_key=build_purpose_key_v1(purpose.purpose),
+        scope=payload.scope,
+    )
+    get_series.assert_awaited_once_with(
+        db,
+        organization_id,
+        treatment_id,
+        purpose,
+        profile_id,
+    )
+    db.add.assert_called_once_with(assessment)
+    db.flush.assert_awaited_once()
+    db.commit.assert_not_awaited()
+    db.rollback.assert_not_awaited()
 
 
 async def test_m2_composicion_propaga_tenant_y_seleccion(m2_context_reader):

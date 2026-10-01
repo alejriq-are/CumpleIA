@@ -1,7 +1,12 @@
 import pytest
 from pydantic import ValidationError
 
-from app.schemas.licitud import RatCanonicalContextV1, RatContextSnapshotV1
+from app.schemas.licitud import (
+    LegalAssessmentDraftCreate,
+    LegalAssessmentDraftUpdate,
+    RatCanonicalContextV1,
+    RatContextSnapshotV1,
+)
 
 
 def canonical_context_v1(**overrides):
@@ -161,3 +166,58 @@ def test_rat_context_snapshot_v1_acepta_trazabilidad_documental():
     assert snapshot.systems[0].name == "CRM"
     assert snapshot.third_parties[0].vendor_name == "Proveedor"
     assert snapshot.international_transfers[0].evidence_reference == "EV-001"
+
+
+def test_legal_assessment_draft_create_acepta_borrador_incompleto():
+    payload = LegalAssessmentDraftCreate.model_validate(
+        {
+            "purpose_id": "11111111-1111-1111-1111-111111111111",
+            "scope": {
+                "data_category_codes": ["identificacion"],
+                "data_subject_codes": ["clientes"],
+            },
+            "legal_basis": None,
+            "justification": None,
+        }
+    )
+
+    assert str(payload.purpose_id) == "11111111-1111-1111-1111-111111111111"
+    assert payload.legal_basis is None
+    assert payload.justification is None
+
+
+def test_legal_assessment_draft_create_rechaza_base_fuera_de_catalogo():
+    with pytest.raises(ValidationError):
+        LegalAssessmentDraftCreate.model_validate(
+            {
+                "purpose_id": "11111111-1111-1111-1111-111111111111",
+                "scope": {
+                    "data_category_codes": [],
+                    "data_subject_codes": [],
+                },
+                "legal_basis": "otra",
+            }
+        )
+
+
+def test_legal_assessment_draft_update_preserva_campos_omitidos():
+    payload = LegalAssessmentDraftUpdate.model_validate(
+        {"justification": "Pendiente de revisión"}
+    )
+
+    assert payload.model_dump(exclude_unset=True) == {
+        "justification": "Pendiente de revisión"
+    }
+
+
+def test_legal_assessment_draft_update_admite_null_explicito():
+    payload = LegalAssessmentDraftUpdate.model_validate({"legal_basis": None})
+
+    assert payload.model_dump(exclude_unset=True) == {"legal_basis": None}
+
+
+def test_legal_assessment_draft_update_rechaza_scope_null_explicito():
+    with pytest.raises(ValidationError) as exc:
+        LegalAssessmentDraftUpdate.model_validate({"scope": None})
+
+    assert "scope no puede ser null" in str(exc.value)

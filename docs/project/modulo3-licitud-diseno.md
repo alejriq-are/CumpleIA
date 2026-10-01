@@ -1056,6 +1056,14 @@ Campos preliminares:
 - `created_by`;
 - `updated_by`.
 
+`purpose_text` conservará el texto factual de la finalidad con el que se creó
+la serie. No se actualizará por cambios posteriores que sean canónicamente
+equivalentes y, por tanto, mantengan el mismo `purpose_key`.
+
+El texto factual vigente utilizado por cada versión quedará registrado en
+`purpose_snapshot`. Un cambio material del texto canonizado generará un
+`purpose_key` diferente y, por tanto, una nueva serie según §20.4.
+
 Restricciones preliminares:
 
 - FK tenant-safe `(treatment_id, organization_id)` hacia `treatments`;
@@ -1154,6 +1162,17 @@ reemplazada.
 `next_version` en `legal_assessment_series` permitirá asignar versiones
 de forma transaccional y proporcionará una fila estable que pueda bloquearse
 durante operaciones concurrentes.
+
+La versión se asignará al crear una nueva evaluación en estado `borrador`.
+Dentro de la misma transacción se bloqueará la serie, se utilizará el valor
+actual de `next_version` como `version` de la nueva evaluación y se incrementará
+`next_version` antes de liberar el bloqueo.
+
+Actualizar un borrador existente no consumirá una nueva versión. Una versión
+que haya sido asignada y persistida no se reutilizará aunque posteriormente el
+borrador sea descartado. Si la transacción de creación falla completamente y
+no llega a persistirse, no se considerará que exista una versión histórica
+asignada.
 
 ### 20.8 Unicidad de borrador y confirmado
 
@@ -1531,11 +1550,26 @@ El borrador deberá identificar explícitamente:
 Los códigos seleccionados deberán existir actualmente en el tratamiento de la
 misma organización al guardar el borrador y nuevamente al confirmarlo.
 
+En una actualización parcial de un borrador, si la solicitud no envía un nuevo
+alcance, M3 reutilizará los `category_code` de datos y titulares conservados en
+el `rat_context_snapshot` vigente del borrador y volverá a validarlos contra M2
+antes de persistir el guardado.
+
 La selección no modificará M2 y quedará materializada en
 `rat_context_snapshot`.
 
 No se persistirán UUID de las filas seleccionadas como identidad histórica del
 alcance.
+
+Para seleccionar operativamente la finalidad actual, una solicitud podrá
+referenciar el `TreatmentPurpose.id` vigente de M2. Ese UUID se utilizará
+únicamente para resolver, dentro del mismo tenant y tratamiento, la fila actual
+de la finalidad.
+
+Una vez resuelta la fila, M3 derivará `purpose_key` desde `purpose` aplicando
+la canonización definida para v1. El UUID de `TreatmentPurpose` no se
+persistirá en la serie, en la evaluación ni en el snapshot documental, y no
+formará parte de la identidad histórica de la finalidad.
 
 ### 23.3 Estructura lógica del snapshot v1
 
