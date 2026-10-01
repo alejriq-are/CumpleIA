@@ -1075,7 +1075,13 @@ por ejemplo:
 - colapso de espacios consecutivos;
 - normalización de mayúsculas/minúsculas.
 
-El algoritmo concreto y sus tests se fijarán en M3-T1.
+Para M3 v1, la entrada de `purpose_key` será el resultado de la función
+canónica textual definida en §23.14 y el digest será **SHA-256** calculado
+sobre su codificación UTF-8.
+
+Los tests deberán demostrar que textos canónicamente equivalentes producen
+el mismo `purpose_key` y que un cambio material del texto canonizado produce
+una clave diferente.
 
 El hash no incorporará categorías de datos, titulares u otros elementos
 del RAT. Esos elementos pertenecen a `rat_context_hash`.
@@ -1495,3 +1501,849 @@ porque:
 Si en el futuro M2 adopta identidades lógicas estables por finalidad,
 categoría y titular, esta decisión podrá revisarse mediante una migración
 posterior sin alterar los snapshots históricos.
+
+## 23. Contrato canónico del contexto RAT v1
+
+### 23.1 Objetivo
+
+M3-T1 fija `rat_context_schema_version = 1` como el primer contrato
+operativo para construir `rat_context_snapshot` y `rat_context_hash`.
+
+El snapshot conservará el contexto factual necesario para explicar y
+reconstruir la evaluación jurídica de una finalidad.
+
+El hash se calculará únicamente sobre el subconjunto canónico de hechos
+jurídicamente relevantes definido en esta sección.
+
+La existencia de información en el snapshot no implica por sí sola que dicha
+información participe en el hash.
+
+### 23.2 Alcance seleccionado por finalidad
+
+Cada evaluación corresponde a una única finalidad de un tratamiento.
+
+El borrador deberá identificar explícitamente:
+
+- la finalidad evaluada;
+- los `category_code` de las categorías de datos aplicables;
+- los `category_code` de las categorías de titulares aplicables.
+
+Los códigos seleccionados deberán existir actualmente en el tratamiento de la
+misma organización al guardar el borrador y nuevamente al confirmarlo.
+
+La selección no modificará M2 y quedará materializada en
+`rat_context_snapshot`.
+
+No se persistirán UUID de las filas seleccionadas como identidad histórica del
+alcance.
+
+### 23.3 Estructura lógica del snapshot v1
+
+`rat_context_snapshot` utilizará una estructura versionada que represente, al
+menos, los siguientes bloques lógicos:
+
+- `purpose`;
+- `organization_role`;
+- `data_categories`;
+- `data_subjects`;
+- `data_sources`;
+- `retention`;
+- `automated_decisions`;
+- `systems`;
+- `third_parties`;
+- `international_transfers`;
+- `special_regimes`.
+
+El snapshot podrá contener información documental adicional cuando sea útil
+para trazabilidad, siempre que se mantenga explícita la separación entre esa
+información y el contexto utilizado para el hash.
+
+### 23.4 Finalidad
+
+La finalidad se representará mediante su texto semántico.
+
+El UUID de `TreatmentPurpose`, `sort_order` e `is_primary` no formarán parte
+del hash.
+
+`is_primary` describe la organización del RAT y no modifica por sí solo la
+evaluación jurídica de la finalidad seleccionada.
+
+La finalidad utilizada al confirmar deberá coincidir con
+`purpose_snapshot`.
+
+### 23.5 Categorías de datos
+
+Para cada categoría de datos seleccionada, el snapshot conservará:
+
+- `category_code`;
+- `category_name`;
+- `is_sensitive`;
+- los indicadores adicionales de regímenes especiales que M2 exponga en el
+  futuro y que M3 reconozca explícitamente.
+
+El hash utilizará esos valores semánticos y no el UUID de
+`TreatmentDataCategory`.
+
+`notes` podrá conservarse como información documental cuando resulte útil,
+pero no formará parte del hash v1.
+
+Las categorías se ordenarán canónicamente por `category_code` normalizado y,
+cuando sea necesario para desempate determinista, por su representación
+semántica completa.
+
+### 23.6 Categorías de titulares
+
+Para cada categoría de titulares seleccionada, el snapshot conservará:
+
+- `category_code`;
+- `category_name`;
+- `includes_children`;
+- `includes_adolescents`;
+- `is_vulnerable_group`;
+- otros indicadores jurídicamente relevantes que M2 exponga en el futuro y
+  que M3 reconozca explícitamente.
+
+El hash utilizará esos valores semánticos y no el UUID de
+`TreatmentDataSubject`.
+
+`notes` podrá conservarse como información documental, pero no formará parte
+del hash v1.
+
+Las categorías se ordenarán canónicamente por `category_code` normalizado y,
+cuando sea necesario, por su representación semántica completa.
+
+### 23.7 Fuentes de datos
+
+M2 no dispone actualmente de un código lógico estable para
+`TreatmentDataSource`.
+
+Por ello, cada fuente se representará canónicamente mediante:
+
+- `source_type`;
+- `description` normalizada cuando exista;
+- `is_public_source`.
+
+El UUID, fechas de auditoría y orden de creación quedarán excluidos.
+
+Las fuentes se ordenarán por la combinación semántica de esos campos.
+
+### 23.8 Conservación
+
+El contexto canónico incluirá `retention_rule` normalizada.
+
+`deletion_method` podrá conservarse en el snapshot para trazabilidad
+operativa, pero no participará inicialmente en el hash v1 salvo que una regla
+jurídica de M3 dependa explícitamente de ella.
+
+### 23.9 Decisiones automatizadas
+
+El contexto canónico incluirá:
+
+- `has_automated_decisions`;
+- `automated_decision_description` normalizada cuando existan decisiones
+  automatizadas.
+
+Cuando `has_automated_decisions` sea falso, la descripción no deberá producir
+diferencias en el hash.
+
+### 23.10 Sistemas
+
+Los UUID, nombres, proveedores y sustituciones puramente técnicas de sistemas
+no participarán por sí mismos en el hash.
+
+El snapshot podrá conservar información de sistemas para trazabilidad.
+
+M3 incorporará al contexto canónico únicamente hechos jurídicamente
+relevantes derivados de sistemas cuando M2 disponga de datos estructurados que
+los representen, por ejemplo biometría, geolocalización, decisiones
+automatizadas o transferencias.
+
+En v1 no se inferirán esos hechos a partir del nombre del sistema, proveedor,
+`hosting_location` o texto libre equivalente.
+
+### 23.11 Terceros y proveedores
+
+Para cada relación con un tercero, el contexto canónico representará los
+hechos semánticos disponibles que puedan afectar la evaluación, incluyendo:
+
+- `relationship_type`;
+- `has_data_access`;
+- país del proveedor cuando esté disponible;
+- `has_subprocessors`;
+- finalidad de la relación normalizada cuando esté informada.
+
+El UUID y el nombre administrativo del proveedor no participarán por sí solos
+en el hash.
+
+`contract_reference`, `engagement_object`, `engagement_duration` y `notes`
+podrán conservarse en el snapshot para trazabilidad, pero no participarán en
+el hash v1.
+
+`has_contract` podrá conservarse en el snapshot y no formará parte del hash v1
+mientras ninguna regla jurídica de M3 dependa explícitamente de ese dato.
+
+### 23.12 Transferencias internacionales
+
+Para cada transferencia, el contexto canónico incluirá:
+
+- `destination_country`;
+- `adequacy_status`;
+- `mechanism` normalizado cuando exista;
+- `guarantees_description` normalizada cuando exista.
+
+Cuando el destinatario esté vinculado a un proveedor, su UUID no participará
+en el hash.
+
+`recipient_name` podrá conservarse en el snapshot para trazabilidad y para
+explicar el destinatario, pero el nombre por sí solo no será una identidad
+técnica estable ni la única señal de cambio.
+
+`evidence_reference` quedará fuera del hash v1.
+
+Las transferencias se ordenarán mediante su representación semántica
+canónica.
+
+### 23.13 Regímenes especiales
+
+`special_regimes` será un bloque derivado de hechos explícitos disponibles en
+M2 y del alcance seleccionado.
+
+En v1 deberá representar, como mínimo, cuando corresponda:
+
+- existencia de datos sensibles;
+- inclusión de niños;
+- inclusión de adolescentes;
+- existencia de grupos vulnerables.
+
+No se inferirán biometría, salud, perfil biológico, geolocalización u otros
+regímenes especiales desde nombres, notas o descripciones libres mientras M2
+no disponga de indicadores estructurados suficientes.
+
+La incorporación futura de nuevos indicadores requerirá una decisión explícita
+sobre compatibilidad y versionado del contexto.
+
+### 23.14 Canonización de texto
+
+La función canónica v1 aplicará a los textos que participan en el hash, como
+mínimo:
+
+- normalización Unicode;
+- eliminación de espacios al inicio y al final;
+- colapso de secuencias internas de espacios en un único espacio.
+
+La canonización deberá evitar que diferencias puramente de formato produzcan
+una revisión.
+
+No se eliminarán ni transformarán palabras con significado jurídico.
+
+Para `rat_context_schema_version = 1`, la canonización textual queda fijada
+en este orden:
+
+1. normalización Unicode **NFC**;
+2. eliminación de whitespace al inicio y al final;
+3. colapso de cualquier secuencia interna de whitespace Unicode en un único
+   espacio ASCII;
+4. normalización de mayúsculas/minúsculas mediante `casefold()`.
+
+No se eliminarán puntuación, tildes, diacríticos ni otros caracteres con
+posible significado semántico o jurídico.
+
+Esta misma función canónica v1 se reutilizará para derivar `purpose_key` y
+para los textos incluidos en el objeto canónico de `rat_context_hash`.
+
+Para los campos textuales opcionales del objeto canónico, un valor `null` de
+M2 permanecerá como `null`. Si un valor no nulo, después de aplicar la
+canonización textual v1, produce la cadena vacía `""`, su representación
+canónica será también `null`. De este modo, `null`, `""` y texto compuesto
+exclusivamente por whitespace no producirán hashes distintos por una
+diferencia meramente técnica de captura.
+
+Esta equivalencia se aplicará únicamente a campos textuales opcionales. No
+modifica la identidad de `purpose`, cuyo texto es semánticamente obligatorio.
+
+Las reglas anteriores deberán quedar congeladas mediante tests deterministas
+antes de considerar cerrado M3-T1.
+
+### 23.15 Objeto canónico v1
+
+Para `rat_context_schema_version = 1`, `rat_context_hash` se calculará sobre
+un objeto canónico con una estructura fija y distinta del snapshot documental.
+
+La estructura canónica contendrá exclusivamente hechos jurídicamente
+relevantes definidos en las subsecciones anteriores. No contendrá UUID,
+timestamps, campos de auditoría ni información meramente documental.
+
+Los bloques de primer nivel serán:
+
+- `purpose`;
+- `organization_role`;
+- `data_categories`;
+- `data_subjects`;
+- `data_sources`;
+- `retention`;
+- `automated_decisions`;
+- `systems`;
+- `third_parties`;
+- `international_transfers`;
+- `special_regimes`.
+
+La representación exacta de los bloques simples será:
+
+```json
+{
+  "purpose": "gestión de clientes",
+  "organization_role": "responsable",
+  "retention": {
+    "retention_rule": "5 años"
+  },
+  "automated_decisions": {
+    "has_automated_decisions": false,
+    "description": null
+  }
+}
+```
+
+`purpose` será el texto de la finalidad después de aplicar la canonización v1.
+
+`organization_role` conservará el valor estructurado de M2 o `null` cuando no
+esté informado.
+
+`retention.retention_rule` será la regla de conservación canonizada o
+`null`.
+
+En `automated_decisions`, `description` será el texto canonizado únicamente
+cuando `has_automated_decisions` sea `true`. Cuando sea `false`,
+`description` será canónicamente `null`, aunque M2 conserve accidentalmente
+texto en ese campo.
+
+La representación exacta de las categorías seleccionadas será:
+
+```json
+{
+  "data_categories": [
+    {
+      "category_code": "identificacion",
+      "category_name": "datos de identificación",
+      "is_sensitive": false
+    }
+  ],
+  "data_subjects": [
+    {
+      "category_code": "clientes",
+      "category_name": "clientes",
+      "includes_children": false,
+      "includes_adolescents": false,
+      "is_vulnerable_group": false
+    }
+  ]
+}
+```
+
+`category_code` y `category_name` se canonizarán mediante la función de
+texto v1 definida en §23.14.
+
+Las listas `data_categories` y `data_subjects` contendrán exclusivamente
+las categorías seleccionadas para la finalidad evaluada. No contendrán UUID,
+`notes` ni campos de auditoría.
+
+Las listas se ordenarán primero por `category_code` canónico y, cuando sea
+necesario para un desempate determinista, por la representación semántica
+completa del elemento.
+
+La representación exacta de las fuentes de datos será:
+
+```json
+{
+  "data_sources": [
+    {
+      "source_type": "titular",
+      "description": null,
+      "is_public_source": false
+    }
+  ]
+}
+```
+
+`source_type` conservará uno de los valores estructurados definidos por M2:
+`titular`, `tercero`, `fuente_publica`, `recogida_automatica` u
+`otro`.
+
+`description` se canonizará mediante §23.14 y, al ser un campo textual
+opcional, se representará como `null` cuando M2 contenga `null`, una cadena
+vacía o únicamente whitespace.
+
+`is_public_source` conservará su valor booleano estructurado.
+
+La lista `data_sources` se ordenará determinísticamente por la tupla semántica
+(`source_type`, `description`, `is_public_source`). No contendrá UUID,
+campos de auditoría ni orden de creación.
+
+La representación exacta de sistemas en el objeto canónico v1 será:
+
+```json
+{
+  "systems": []
+}
+```
+
+Para `rat_context_schema_version = 1`, `systems` será siempre una lista
+vacía. El modelo M2 actual no expone en `System` hechos jurídicamente relevantes
+estructurados que deban participar en el hash.
+
+Los identificadores, `name`, `provider`, `hosting_location`,
+`hosting_country` e `is_international` no se incorporarán al objeto
+canónico v1. `is_international` es un atributo legacy y las transferencias
+internacionales se representarán mediante su bloque estructurado específico.
+
+El snapshot documental podrá conservar los sistemas asociados y sus datos de
+trazabilidad sin que ello modifique `rat_context_hash`.
+
+La representación exacta de terceros será:
+
+```json
+{
+  "third_parties": [
+    {
+      "relationship_type": "encargado",
+      "has_data_access": true,
+      "country": "chile",
+      "has_subprocessors": false,
+      "purpose": "prestación del servicio"
+    }
+  ]
+}
+```
+
+`relationship_type` conservará uno de los valores estructurados definidos por
+M2: `encargado`, `cesionario` u `otro`.
+
+`has_data_access` y `has_subprocessors` conservarán sus valores booleanos
+estructurados.
+
+`country` se obtendrá de `Vendor.country` y `purpose` de
+`TreatmentVendor.purpose`. Ambos se canonizarán mediante §23.14 y, al ser
+textos opcionales, se representarán como `null` cuando estén ausentes,
+vacíos o contengan únicamente whitespace.
+
+La lista `third_parties` se ordenará determinísticamente por la
+representación semántica completa de esos cinco campos.
+
+No participarán en el objeto canónico v1 el UUID ni el nombre administrativo
+del proveedor, `has_contract`, `contract_reference`,
+`engagement_object`, `engagement_duration`, `notes`, ni los
+atributos legacy `Vendor.role`, `Vendor.is_international` y
+`Vendor.has_dpa`. Esos datos podrán conservarse en el snapshot documental
+cuando corresponda.
+
+La representación exacta de transferencias internacionales será:
+
+```json
+{
+  "international_transfers": [
+    {
+      "destination_country": "estados unidos",
+      "adequacy_status": "pendiente",
+      "mechanism": null,
+      "guarantees_description": null
+    }
+  ]
+}
+```
+
+`destination_country` se canonizará mediante §23.14 y deberá conservar un
+valor no vacío, coherente con su carácter obligatorio en M2.
+
+`adequacy_status` conservará uno de los valores estructurados definidos por
+M2: `adecuado`, `no_adecuado`, `pendiente` o
+`no_determinado`.
+
+`mechanism` y `guarantees_description` se canonizarán mediante §23.14.
+Al ser textos opcionales, se representarán como `null` cuando estén
+ausentes, vacíos o contengan únicamente whitespace.
+
+La lista `international_transfers` se ordenará determinísticamente por la
+representación semántica completa de esos cuatro campos.
+
+No participarán en el objeto canónico v1 `vendor_id`,
+`recipient_name`, `evidence_reference`, UUID ni campos de auditoría.
+`recipient_name` y `evidence_reference` podrán conservarse en el
+snapshot documental para trazabilidad.
+
+La representación exacta de regímenes especiales será:
+
+```json
+{
+  "special_regimes": {
+    "has_sensitive_data": false,
+    "includes_children": false,
+    "includes_adolescents": false,
+    "has_vulnerable_groups": false
+  }
+}
+```
+
+`special_regimes` será un bloque derivado exclusivamente del alcance
+seleccionado para la finalidad evaluada.
+
+`has_sensitive_data` será `true` cuando al menos una categoría de datos
+seleccionada tenga `is_sensitive = true`.
+
+`includes_children` será `true` cuando al menos una categoría de titulares
+seleccionada tenga `includes_children = true`.
+
+`includes_adolescents` será `true` cuando al menos una categoría de
+titulares seleccionada tenga `includes_adolescents = true`.
+
+`has_vulnerable_groups` será `true` cuando al menos una categoría de
+titulares seleccionada tenga `is_vulnerable_group = true`.
+
+Cuando ninguna fila seleccionada satisfaga una condición, el valor derivado
+correspondiente será `false`. No se utilizarán nombres, notas,
+descripciones libres ni filas de M2 que estén fuera del alcance seleccionado
+para inferir estos indicadores.
+
+### 23.16 Serialización y hash
+
+El hash se calculará sobre un objeto canónico separado conceptualmente del
+snapshot documental.
+
+La serialización será JSON determinista:
+
+- claves ordenadas lexicográficamente;
+- listas previamente ordenadas por sus representaciones semánticas canónicas;
+- separadores compactos `(",", ":")`, sin whitespace añadido por el serializador;
+- caracteres Unicode conservados sin escape ASCII (`ensure_ascii=False`);
+- representación JSON estándar de booleanos y valores nulos (`true`, `false`, `null`);
+- codificación final UTF-8;
+- sin BOM ni salto de línea final;
+- sin UUID, timestamps ni valores técnicos volátiles.
+
+La referencia de implementación para v1 será equivalente a
+`json.dumps(obj, sort_keys=True, separators=(",", ":"), ensure_ascii=False)`.
+El digest SHA-256 se calculará sobre los bytes UTF-8 exactos producidos por
+esa serialización, sin transformaciones posteriores.
+
+La misma información semántica deberá producir exactamente el mismo
+`rat_context_hash` independientemente del orden de entrada, UUID de las filas
+o recreación técnica de registros equivalentes.
+
+La ordenación canónica v1 utilizará claves específicas por bloque:
+
+- `data_categories`: (`category_code`, `category_name`, `is_sensitive`);
+- `data_subjects`: (`category_code`, `category_name`, `includes_children`,
+  `includes_adolescents`, `is_vulnerable_group`);
+- `data_sources`: (`source_type`, clave opcional de `description`,
+  `is_public_source`);
+- `third_parties`: (`relationship_type`, `has_data_access`, clave opcional de
+  `country`, `has_subprocessors`, clave opcional de `purpose`);
+- `international_transfers`: (`destination_country`, `adequacy_status`,
+  clave opcional de `mechanism`, clave opcional de
+  `guarantees_description`).
+
+Para ordenar un texto opcional, `null` tendrá la clave `(0, "")` y un texto
+no nulo tendrá la clave `(1, valor_canonico)`. Esta regla existe únicamente
+para obtener una comparación total y determinista; no modifica el valor
+JSON almacenado, que continuará siendo `null` o el texto canónico según
+corresponda.
+
+La ordenación no deduplicará elementos. Si dos elementos tienen una
+representación semántica canónica idéntica, ambos permanecerán en la lista y
+su multiplicidad formará parte de los bytes utilizados para el hash.
+
+
+### 23.17 Comparación y motivos de revisión
+
+La comparación entre una evaluación confirmada y el contexto actual utilizará
+el contrato correspondiente a `rat_context_schema_version`.
+
+Una diferencia de hash indicará que existe al menos un cambio material en el
+contexto canónico.
+
+La comparación estructurada deberá permitir derivar los motivos definidos en
+la sección 21.10 sin modificar el snapshot histórico.
+
+### 23.18 Inmutabilidad y evolución
+
+El snapshot de una evaluación confirmada será inmutable.
+
+Una nueva versión del algoritmo de canonización, composición del contexto o
+semántica de campos no reescribirá snapshots históricos.
+
+Los cambios incompatibles deberán introducir una nueva
+`rat_context_schema_version`.
+
+La implementación de M3-T1 deberá incluir tests que congelen el comportamiento
+de la versión 1 antes de utilizarla para confirmar evaluaciones.
+
+### 23.19 Snapshot documental v1
+
+Para `rat_context_schema_version = 1`, `rat_context_snapshot` será una copia
+estructurada del contexto factual de M2 utilizado para construir la evaluación
+jurídica de una finalidad.
+
+El snapshot documental será distinto del objeto canónico definido en §23.15.
+Podrá conservar información adicional de trazabilidad expresamente definida en
+esta sección, aunque dicha información no participe en `rat_context_hash`.
+
+El snapshot utilizará los mismos bloques lógicos de primer nivel que el objeto
+canónico v1:
+
+- `purpose`;
+- `organization_role`;
+- `data_categories`;
+- `data_subjects`;
+- `data_sources`;
+- `retention`;
+- `automated_decisions`;
+- `systems`;
+- `third_parties`;
+- `international_transfers`;
+- `special_regimes`.
+
+No se persistirán UUID de filas operativas de M2, timestamps ni campos de
+auditoría dentro del snapshot documental. La identidad histórica del alcance
+seleccionado se expresará mediante sus valores semánticos y no mediante
+identificadores técnicos.
+
+Los valores documentales conservarán el valor factual capturado en M2. La
+canonización definida en §23.14 se aplicará únicamente al objeto canónico
+utilizado para `rat_context_hash`, salvo que una regla específica de esta
+sección indique lo contrario.
+
+La construcción del snapshot y del objeto canónico deberá realizarse a partir
+de la misma lectura lógica de M2 dentro de la operación de guardado o
+confirmación, evitando combinar estados de contexto pertenecientes a momentos
+distintos.
+
+#### 23.19.1 Finalidad y rol de la organización
+
+`purpose` conservará el texto factual de la finalidad seleccionada en M2.
+
+`organization_role` conservará el valor estructurado de M2 o `null` cuando no
+esté informado.
+
+No se conservarán en el snapshot el UUID de `TreatmentPurpose`, `sort_order`
+ni `is_primary`.
+
+#### 23.19.2 Categorías de datos
+
+`data_categories` contendrá exclusivamente las categorías seleccionadas para
+la finalidad evaluada.
+
+Para cada categoría se conservarán:
+
+- `category_code`;
+- `category_name`;
+- `is_sensitive`;
+- `notes`.
+
+No se conservará el UUID de `TreatmentDataCategory`.
+
+`notes` es información documental y no participa en el objeto canónico ni en
+`rat_context_hash` v1.
+
+#### 23.19.3 Categorías de titulares
+
+`data_subjects` contendrá exclusivamente las categorías de titulares
+seleccionadas para la finalidad evaluada.
+
+Para cada categoría se conservarán:
+
+- `category_code`;
+- `category_name`;
+- `includes_children`;
+- `includes_adolescents`;
+- `is_vulnerable_group`;
+- `notes`.
+
+No se conservará el UUID de `TreatmentDataSubject`.
+
+`notes` es información documental y no participa en el objeto canónico ni en
+`rat_context_hash` v1.
+
+#### 23.19.4 Fuentes de datos
+
+Para cada elemento de `data_sources` se conservarán:
+
+- `source_type`;
+- `description`;
+- `is_public_source`.
+
+M2 no dispone actualmente de información documental adicional para este
+bloque que deba incorporarse al snapshot v1.
+
+No se conservará el UUID de `TreatmentDataSource`.
+
+#### 23.19.5 Conservación
+
+`retention` conservará:
+
+- `retention_rule`;
+- `deletion_method`.
+
+`deletion_method` tendrá finalidad documental y de trazabilidad operativa y no
+participará en `rat_context_hash` v1.
+
+#### 23.19.6 Decisiones automatizadas
+
+`automated_decisions` conservará:
+
+- `has_automated_decisions`;
+- `description`.
+
+`description` corresponderá al valor factual de
+`automated_decision_description` de M2. El snapshot podrá conservarlo aunque
+`has_automated_decisions` sea `false`; en ese caso el objeto canónico seguirá
+aplicando la regla de §23.15 y utilizará `description = null` para el hash.
+
+#### 23.19.7 Sistemas
+
+`systems` conservará una representación documental de los sistemas asociados
+al tratamiento en M2.
+
+Para cada sistema se conservarán:
+
+- `name`;
+- `provider`;
+- `hosting_location`;
+- `hosting_country`;
+- `is_international`.
+
+No se conservarán el UUID de `System` ni el UUID de `TreatmentSystem`.
+
+Todos los campos de `systems` tendrán finalidad exclusivamente documental en
+v1. Conforme a §23.15, el bloque `systems` del objeto canónico utilizado para
+`rat_context_hash` continuará siendo siempre `[]`.
+
+`is_international` se conservará únicamente como dato legacy de trazabilidad
+de M2 y no se utilizará para inferir la existencia ni las características de
+una transferencia internacional.
+
+#### 23.19.8 Terceros
+
+`third_parties` conservará la relación factual entre el tratamiento y cada
+tercero asociado en M2.
+
+Para cada relación se conservarán:
+
+- `vendor_name`;
+- `country`;
+- `relationship_type`;
+- `purpose`;
+- `has_data_access`;
+- `has_contract`;
+- `contract_reference`;
+- `engagement_object`;
+- `engagement_duration`;
+- `has_subprocessors`;
+- `notes`.
+
+No se conservarán los UUID de `Vendor` ni de `TreatmentVendor`.
+
+De estos campos, únicamente los definidos en §23.15 formarán parte del objeto
+canónico y del hash v1:
+
+- `relationship_type`;
+- `has_data_access`;
+- `country`;
+- `has_subprocessors`;
+- `purpose`.
+
+`vendor_name`, `has_contract`, `contract_reference`, `engagement_object`,
+`engagement_duration` y `notes` serán exclusivamente documentales.
+
+Los atributos legacy de `Vendor` distintos de `name` y `country` no se
+incorporarán al snapshot v1.
+
+#### 23.19.9 Transferencias internacionales
+
+Para cada elemento de `international_transfers` se conservarán:
+
+- `recipient_name`;
+- `destination_country`;
+- `adequacy_status`;
+- `mechanism`;
+- `guarantees_description`;
+- `evidence_reference`.
+
+No se conservarán los UUID de `InternationalTransfer` ni `vendor_id`.
+
+De estos campos, únicamente los definidos en §23.15 formarán parte del objeto
+canónico y del hash v1:
+
+- `destination_country`;
+- `adequacy_status`;
+- `mechanism`;
+- `guarantees_description`.
+
+`recipient_name` y `evidence_reference` serán exclusivamente documentales.
+
+La identidad documental del receptor se expresará mediante `recipient_name`;
+no se utilizará un UUID de `Vendor` como identidad histórica.
+
+Para componer `recipient_name` en el snapshot v1 se aplicará la siguiente regla:
+
+- si `InternationalTransfer.recipient_name` tiene valor, se conservará ese valor
+  factual;
+- si `InternationalTransfer.recipient_name` es `null` y existe `vendor_id`, se
+  utilizará como `recipient_name` documental el `Vendor.name` correspondiente
+  del mismo tenant.
+
+Esta resolución mediante `Vendor.name` es exclusivamente documental. El
+`vendor_id` no se incorporará al snapshot y esta regla no modificará el objeto
+canónico ni el hash v1.
+
+#### 23.19.10 Regímenes especiales
+
+`special_regimes` conservará:
+
+- `has_sensitive_data`;
+- `includes_children`;
+- `includes_adolescents`;
+- `has_vulnerable_groups`.
+
+Estos valores se derivarán exclusivamente de las categorías de datos y de
+titulares seleccionadas para la finalidad evaluada, aplicando las reglas de
+§23.15.
+
+El snapshot no inferirá regímenes especiales a partir de nombres, notas,
+descripciones libres, sistemas, terceros, transferencias ni filas de M2 que
+estén fuera del alcance seleccionado.
+
+Los valores de este bloque serán los mismos utilizados por el objeto canónico
+v1.
+
+#### 23.19.11 Ordenación documental determinista
+
+Las listas del snapshot documental se almacenarán en un orden determinista
+para facilitar pruebas, inspección y comparación histórica. Esta ordenación
+documental no modificará los valores factuales capturados ni determinará el
+`rat_context_hash`.
+
+Se utilizarán las siguientes claves:
+
+- `data_categories`: (`category_code`, `category_name`, `is_sensitive`,
+  clave opcional de `notes`);
+- `data_subjects`: (`category_code`, `category_name`, `includes_children`,
+  `includes_adolescents`, `is_vulnerable_group`, clave opcional de `notes`);
+- `data_sources`: (`source_type`, clave opcional de `description`,
+  `is_public_source`);
+- `systems`: (`name`, clave opcional de `provider`, clave opcional de
+  `hosting_location`, clave opcional de `hosting_country`,
+  `is_international`);
+- `third_parties`: (`relationship_type`, `has_data_access`, clave opcional de
+  `country`, `has_subprocessors`, clave opcional de `purpose`,
+  `vendor_name`, `has_contract`, clave opcional de `contract_reference`,
+  clave opcional de `engagement_object`, clave opcional de
+  `engagement_duration`, clave opcional de `notes`);
+- `international_transfers`: (`destination_country`, `adequacy_status`,
+  clave opcional de `mechanism`, clave opcional de
+  `guarantees_description`, clave opcional de `recipient_name`,
+  clave opcional de `evidence_reference`).
+
+Para la ordenación documental, un texto opcional `null` tendrá la clave
+`(0, "")` y un texto no nulo la clave `(1, valor factual)`. No se aplicará
+canonización al valor factual para esta ordenación.
+
+La ordenación no deduplicará filas. La multiplicidad observada en M2 se
+conservará en el snapshot.
