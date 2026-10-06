@@ -251,4 +251,18 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] M3-T1 §65: evaluador puro de preparacion documental EIPD; 159 pruebas nuevas y 455 focalizadas aprobadas, sin habilitar confirmacion.
 - [x] M3-T1 §66: readiness documental y vigencia de ultima revision EIPD; 18 pruebas nuevas aprobadas, sin habilitar confirmacion.
 - [x] M3-T1 §67: prerequisitos puros de revision EIPD; 38 pruebas nuevas y 215 focalizadas aprobadas; continuar bloqueado por frontera/fuentes pendientes.
-- [ ] M3-T1: accion de revision EIPD, frontera/gates, concurrencia y fuentes pendientes antes de habilitar confirmacion.
+- [x] M3-T1 §68: accion autenticada de revision EIPD, campos de servidor, historial y relectura bajo lock; 15 pruebas nuevas aprobadas.
+- [ ] M3-T1: frontera/gates, concurrencia ampliada y fuentes pendientes antes de habilitar confirmacion.
+
+- [x] M3-T1 §69: registro trazable de busqueda/fuentes EIPD y propuesta temporal; listas/orientaciones no verificadas, requisito global pendiente.
+
+- [x] M3-T1 §70: base normativa fija autorizada por usuario y matriz/contrato de primera frontera EIPD, sin dependencia de fecha de entrada en vigor.
+- [x] M3-T1 §71: evaluador puro de frontera §70 implementado; 106 pruebas nuevas y 695 focalizadas aprobadas, screening v1 preservado.
+- [x] M3-T1 §72: deteccion EIPD v2 pura y nucleo compartido con v1; positivos e historia conservados, 56 pruebas nuevas.
+- [x] M3-T1 §73: readiness v2/frontera separado y versionado, contexto RAT actual y contratos cerrados; 14 pruebas nuevas.
+- [ ] M3-T1: composicion compartida, fuentes complementarias/aceptacion antes de habilitar continuar.
+
+- [x] M3-T1 §74: contrato/matriz de composicion comun EIPD y separacion revision/confirmacion, sin circularidad.
+- [x] M3-T1 §75: composicion pura §74 implementada; 80 pruebas nuevas y 468 focalizadas aprobadas, sin habilitar gates.
+- [x] M3-T1 §76: composicion orientativa en readiness, contratos cerrados y 17 pruebas nuevas; bloqueos conservados.
+- [ ] M3-T1: integrar composicion bajo lock en revision positiva/confirmacion, conservando barreras de fuentes/aceptacion.

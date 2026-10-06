@@ -857,6 +857,7 @@ EipdIssueCode = Literal[
     "automatizacion_no_documentada",
     "ruta_especial_pendiente",
     "excepcion_especial_no_validada",
+    "excepcion_especial_preparada",
     "excepcion_consentimiento_discordante",
     "excepcion_consentimiento_no_documentada",
 ]
@@ -905,6 +906,45 @@ def evaluate_eipd_screening_v1(
     biometric=None,
     sensitive_rights_exception=None,
     biometric_rights_exception=None,
+) -> EipdReadinessV1:
+    """Evaluador historico v1: ninguna excepcion habilitada."""
+    return _evaluate_eipd_screening(
+        screening,
+        snapshot,
+        lia,
+        special_conditions,
+        contract,
+        legal_obligation,
+        rights_defense,
+        economic_obligations,
+        geolocation,
+        sensitive_consent,
+        consent_assessment,
+        health,
+        biometric,
+        sensitive_rights_exception,
+        biometric_rights_exception,
+    )
+
+
+def _evaluate_eipd_screening(
+    screening: EipdScreeningV1 | dict | None,
+    snapshot: RatContextSnapshotV1 | dict | None,
+    lia: LiaAssessmentV1 | dict | None,
+    special_conditions: SpecialConditionsV1 | dict | None = None,
+    contract: ContractAssessmentV1 | dict | None = None,
+    legal_obligation: LegalObligationAssessmentV1 | dict | None = None,
+    rights_defense: RightsDefenseAssessmentV1 | dict | None = None,
+    economic_obligations: EconomicObligationsAssessmentV1 | dict | None = None,
+    geolocation: GeolocationAssessmentV1 | dict | None = None,
+    sensitive_consent=None,
+    consent_assessment=None,
+    health=None,
+    biometric=None,
+    sensitive_rights_exception=None,
+    biometric_rights_exception=None,
+    *,
+    prepared_exceptions: frozenset[str] = frozenset(),
 ) -> EipdReadinessV1:
     """Deriva detección EIPD conservando también los motivos históricos."""
     parsed = (
@@ -1346,15 +1386,25 @@ def evaluate_eipd_screening_v1(
             )
             force_review = True
         for condition in sorted(exceptions, key=lambda c: c.regime_id):
-            issues.append(
-                EipdIssueV1(
-                    f"special_conditions.conditions.{condition.regime_id}.authorization_route",
-                    "excepcion_especial_no_validada",
-                    "pendiente_revision",
-                    question_id,
+            if condition.regime_id in prepared_exceptions:
+                issues.append(
+                    EipdIssueV1(
+                        f"special_conditions.conditions.{condition.regime_id}.authorization_route",
+                        "excepcion_especial_preparada",
+                        "supuesto_declarado",
+                        question_id,
+                    )
                 )
-            )
-            force_review = True
+            else:
+                issues.append(
+                    EipdIssueV1(
+                        f"special_conditions.conditions.{condition.regime_id}.authorization_route",
+                        "excepcion_especial_no_validada",
+                        "pendiente_revision",
+                        question_id,
+                    )
+                )
+                force_review = True
         if declaration is not None and declaration.answer == "no" and exceptions:
             issues.append(
                 EipdIssueV1(

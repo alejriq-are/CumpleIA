@@ -1,3 +1,108 @@
+## 2026-10-06 — M3-T1: composicion EIPD en readiness
+
+§76 publica eipd_controls version 1 y deteccion anidada version 2.
+Preparacion documental, bloqueos de revision y confirmacion separados.
+Contexto/fecha actuales e identidad del servidor; consultas sin escrituras,
+historial conservado y aislamiento entre organizaciones verificado.
+17 pruebas nuevas; suite completa 2998 passed en 248.05 s, incluyendo §75.
+Black/Ruff/diff --check correctos. Proximo: composicion bajo lock en revision
+positiva/confirmacion, manteniendo barreras de fuentes complementarias/aceptacion.
+Ley fija sin dependencia temporal. M3-T1 EN PROGRESO integral;
+continuar/confirmacion excepcional bloqueados, sin migracion, nuevo commit o push.
+
+## 2026-10-06 — M3-T1: composicion pura EIPD implementada
+
+§75 compone estado/RAT, seis bases ordinarias, frontera/v2 y resolucion.
+Preparacion documental separada de fuentes/aceptacion y decision humana.
+Revision positiva no exige otra previa; confirmacion exige ultimo evento continuar
+vigente y del mismo tenant/expediente. Barreras globales conservadas en ambas.
+80 pruebas nuevas; 468 focalizadas aprobadas; Black/Ruff/diff correctos.
+Ultima suite completa 2901 passed (§73), no reejecutada para servicio aislado.
+Proximo: readiness orientativo de composicion; despues lock/fuentes/aceptacion.
+Ley fija sin dependencia temporal. M3-T1 EN PROGRESO integral;
+sin nueva conexion API/gates, migracion, commit o push.
+
+## 2026-10-06 — M3-T1: contrato de composicion compartida EIPD
+
+§74 cierra entrada interna/matriz/salida de composicion pura. Seis bases ordinarias,
+RAT/estado/version, frontera/v2, resolucion y fuentes se componen por etapa;
+confirmacion agrega ultimo evento continuar del mismo tenant/expediente y vigente.
+Revision positiva no exige evento positivo previo; negativas conservan parcialidad.
+preparation_result documental separado de verificacion global/decision humana.
+Proximo: implementacion pura y pruebas, sin gates nuevos. Ley como base fija;
+fuentes/aceptacion pendientes. M3-T1 EN PROGRESO integral. Paso documental,
+ultima suite 2901 passed (§73), diff correcto; sin commit/push ni migracion.
+
+## 2026-10-06 — M3-T1: readiness de frontera y deteccion v2
+
+§73 expone eipd_v2 versionado y cerrado, incluyendo frontera y diagnostico v1.
+Contexto final desde RAT actual; no usa snapshot almacenado cuando no puede
+reconstruirse finalidad/alcance. V1/bloqueos permanecen; GET no escribe ni reasocia.
+14 pruebas nuevas; suite completa 2901 passed en 247.30 s; Black/Ruff/diff correctos.
+Dos rutas preparadas conservan requiere_eipd y v1 pendiente; parciales/obsoletos
+mantienen bloqueo. Proximo: contrato/matriz de composicion compartida de controles
+para revision y gate, sin habilitar continuar mientras fuentes/aceptacion pendientes.
+Ley como base fija sin dependencia temporal. M3-T1 EN PROGRESO integral;
+sin migracion, nuevo commit ni push.
+
+## 2026-10-06 — M3-T1: deteccion EIPD v2 implementada
+
+§72 agrega deteccion pura v2 y nucleo compartido con v1 historico. Frontera
+completa genera motivo de excepcion preparada conservando supuesto positivo y
+requiere_eipd; diagnostico v1 entero permanece visible en resultado de frontera.
+Fuera de frontera mantiene v1 integro, sin filtrar blockers. API/gates aun en v1.
+56 pruebas nuevas; suite completa 2887 passed en 243.26 s; Black/Ruff/diff correctos.
+Incluye las 106 pruebas de frontera §71. Proximo: readiness con v2/frontera
+separados y versionados; despues composicion/fuentes/aceptacion antes de continuar.
+Ley como base fija sin dependencia temporal. M3-T1 EN PROGRESO integral;
+sin migracion, nuevo commit ni push.
+
+## 2026-10-06 — M3-T1: evaluador de primera frontera EIPD
+
+§71 implementa servicio puro de preparacion sensible de derechos, sola o con
+biometria dependiente. Rol/rutas, especiales, residuos, asociaciones y cinco
+respuestas fundadas; screening v1 entero conservado como diagnostico separado.
+Preparado no confirma; ordinarios/documento/revision/fuentes siguen separados.
+106 pruebas nuevas, 695 focalizadas aprobadas; Black/Ruff/diff correctos.
+Ultima suite completa 2725 passed (§68), no reejecutada para servicio aislado.
+Proximo: deteccion v2 explicita y despues composicion, manteniendo positivo EIPD.
+Ley como base fija sin dependencia temporal. M3-T1 EN PROGRESO integral;
+sin gates nuevos, migracion, commit o push.
+
+## 2026-10-06 — M3-T1: base normativa fija y contrato de frontera
+
+Decision explicita: ley adoptada como base fija del proyecto, sin condicionar
+controles a fecha de vigencia o eventual postergacion. §70 define matriz/contrato
+puro de primera ruta sensible de derechos, sola o con biometria dependiente.
+Preparacion de frontera separada de ordinarios/documento/revision/fuentes/gate;
+screening positivo preservado, v1 historico intacto y v2 pendiente.
+Proximo: evaluador puro y pruebas de frontera. Fuentes complementarias pendientes
+se mantienen separadas; continuar aun bloqueado. M3-T1 EN PROGRESO integral.
+Paso documental; ultima suite 2725 passed (§68), sin nueva corrida ni commit/push.
+
+## 2026-10-06 — M3-T1: registro de fuentes EIPD
+
+§69 registra busqueda acotada y evidencias en m3-t1-eipd-fuentes.md.
+Texto legal comprobado; listas/orientaciones concretas no verificadas, sin inferir
+inexistencia. Anuncio ministerial de postergacion registrado como propuesta.
+Verificacion global pendiente y barreras actuales conservadas. Proximo: matriz y
+contrato versionado de primera frontera, sin habilitar continuar hasta resolver
+fuentes/aceptacion. Ultima suite 2725 passed (§68); paso documental, diff correcto.
+M3-T1 EN PROGRESO integral; sin commit/push, codigo ni migracion nuevos.
+
+## 2026-10-06 — M3-T1: accion autenticada de revision EIPD
+
+Alcance integral, EN PROGRESO. §68 agrega POST eipd-resolution/reviews con
+edit_content/suscripcion, tenant validado, bloqueo de serie y relectura de borrador.
+Reconstruye RAT/contexto y aplica prerequisitos; hashes/actor/fecha son de servidor.
+Historial append-only; documento y assessment sin cambios. Decisiones negativas
+admitidas sobre parcial vigente; continuar sigue bloqueado por frontera/fuentes.
+15 pruebas nuevas, incluidas dos sesiones app_user con RAT real y commit/rollback;
+suite completa 2725 passed en 242.75 s. Black/Ruff/diff --check correctos.
+Proximo: frontera versionada y verificacion oficial de fuentes; gates, seis bases y
+concurrencia ampliada antes de habilitar confirmaciones. Sin migracion, commit ni push.
+Base actual 4095622, sincronizada con origin antes de este paso.
+
 ## 2026-10-06 — M3-T1: checkpoint EIPD autorizado para commit
 
 Se registra avance §65–§67: evaluador documental, readiness y vigencia de ultima

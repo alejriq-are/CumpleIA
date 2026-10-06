@@ -1305,6 +1305,61 @@ class SpecialReadinessOut(BaseModel):
     issues: list[ReadinessIssueOut]
 
 
+class EipdFrontierReadinessOut(BaseModel):
+    """Preparacion acotada, separada de permiso de confirmar."""
+
+    model_config = ConfigDict(extra="forbid")
+    result: Literal["incompleto", "requiere_revision", "preparado"]
+    route: Literal["sensible_derechos", "sensible_biometrica_derechos", "sin_resolver"]
+    issues: list[ReadinessIssueOut]
+    applicability: list[ReadinessApplicabilityOut]
+    special: SpecialReadinessOut | None
+    screening: EipdReadinessOut | None
+
+
+class EipdReadinessV2Out(EipdReadinessOut):
+    """Deteccion versionada; exige EIPD aunque la frontera este preparada."""
+
+    model_config = ConfigDict(extra="forbid")
+    evaluation_version: Literal[2]
+    frontier: EipdFrontierReadinessOut
+
+
+class EipdCompositionIssueOut(ReadinessIssueOut):
+    model_config = ConfigDict(extra="forbid")
+    stage: Literal[
+        "state",
+        "rat",
+        "ordinary",
+        "frontier",
+        "detection",
+        "resolution",
+        "sources",
+        "activation",
+        "review",
+    ]
+
+
+class EipdOrdinaryControlOut(DocumentaryReadinessOut):
+    model_config = ConfigDict(extra="forbid")
+    legal_basis: LegalBasis
+
+
+class EipdControlCompositionOut(BaseModel):
+    """Diagnostico por etapas; no habilita revision ni confirmacion."""
+
+    model_config = ConfigDict(extra="forbid")
+    evaluation_version: Literal[1]
+    preparation_result: Literal["preparado", "incompleto", "requiere_revision"]
+    ordinary: EipdOrdinaryControlOut | None
+    detection_v2: EipdReadinessV2Out
+    resolution: EipdResolutionDocumentReadinessOut
+    review_state: EipdResolutionReviewStateOut
+    preparation_issues: list[EipdCompositionIssueOut]
+    review_blockers: list[EipdCompositionIssueOut]
+    confirmation_blockers: list[EipdCompositionIssueOut]
+
+
 class ConfirmationBlockerOut(BaseModel):
     field: str
     code: str
@@ -1337,6 +1392,8 @@ class LegalAssessmentReadinessOut(BaseModel):
         )
     )
     eipd: EipdReadinessOut
+    eipd_v2: EipdReadinessV2Out | None = None
+    eipd_controls: EipdControlCompositionOut | None = None
     special: SpecialReadinessOut
     confirmation_blockers: list[ConfirmationBlockerOut]
     pending_controls: list[str]
