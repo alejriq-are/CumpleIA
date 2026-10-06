@@ -2,7 +2,7 @@
 
 Fecha: 2026-10-06. Estado: EN PROGRESO. Revisión documental y de código;
 no modifica reglas ni amplía el alcance. Última suite completa registrada:
-2998 passed (§76), posterior a exposicion readiness de composicion EIPD.
+3012 passed (§78), posterior a HTTP seis bases y concurrencia de confirmacion.
 Checkpoints inferiores son históricos; el total no acredita cierre integral.
 
 ## Fuentes y criterio
@@ -2010,3 +2010,70 @@ Proximo: integrar composicion compartida bajo lock en revision positiva y
 confirmacion, conservando barreras de fuentes complementarias/aceptacion.
 Ley fija sin dependencia temporal. M3-T1 EN PROGRESO integral; continuar y
 confirmacion excepcional bloqueados. Sin migracion, nuevo commit ni push.
+
+
+## 77. Composicion compartida integrada bajo lock
+
+2026-10-06. Readiness y operaciones mutadoras reutilizan el mismo constructor
+interno de composicion y lector del ultimo evento, filtrado por tenant/assessment.
+La salida cerrada se valida y serializa en modo JSON para los errores HTTP.
+No recibe indicadores de habilitacion del cliente ni modifica hashes/documentos.
+
+Revision continuar reconstruye RAT/contexto despues del lock de serie y relectura
+populate_existing; calcula vigencia RAT real y comparte fecha con prerequisitos.
+Rechaza antes de insertar cuando faltan prerequisitos o review_blockers, incluyendo
+fuentes/aceptacion. Conserva codigo/issues previos y agrega eipd_controls. Negativas
+mantienen prerequisitos parciales §67/§68 sin exigir composicion documental completa
+ni evento positivo previo. Ultimo evento negativo no habilita confirmacion.
+
+Confirmacion conserva orden de validadores ordinarios, vigencia RAT y motivos
+transversales. Ante documento EIPD/deteccion positiva o pendiente/excepcion de
+derechos, compone bajo el lock existente antes de consultar/reemplazar confirmado
+o hacer flush. confirmation_blockers impiden escritura; error transversal conserva
+codigo/diagnosticos previos y agrega eipd_controls. No elimina motivos v1 ni cambia
+resultados ordinarios. Los rechazos previos de base/estado/RAT conservan precedencia.
+
+Seis casos nuevos: cuatro HTTP comparan composicion del rechazo con readiness,
+con/sin ultimo evento negativo, sin cambios en borrador/historial; dos amplian
+concurrencia real app_user de revision positiva con retirada documental confirmada
+o revertida. Al esperar se usa documento refrescado y la barrera permanece; no se
+inserta evento. Casos negativos previos siguen probando insercion tras rollback.
+Doble unitario de confirmacion declara ausencia de historial para la nueva lectura.
+227 pruebas focalizadas aprobadas. Suite completa: 3004 passed en 253.18 s. Black/Ruff/diff --check correctos.
+
+Proximo: ampliar concurrencia real de confirmacion y cobertura HTTP de seis bases
+para esta composicion antes de resolver fuentes complementarias/aceptacion y
+habilitar cualquier frontera. Ley como base fija sin dependencia temporal.
+M3-T1 EN PROGRESO integral; continuar/confirmacion excepcional bloqueados.
+Sin migracion, nuevo commit ni push.
+
+
+## 78. HTTP seis bases y concurrencia real de confirmacion
+
+2026-10-06. Ampliada matriz HTTP de resolucion EIPD: seis bases ordinarias con
+expediente ordinario completo, con/sin ultimo evento negativo. Revision continuar
+y confirmacion rechazan conservando composicion identica a readiness, motivos
+previos, borrador, historial y confirmado anterior. review_blockers no exige evento
+positivo previo. Tras retirar documento EIPD en flujo ordinario sin supuesto
+positivo, se conserva confirmacion ordinaria y proteccion del confirmado.
+Esta evidencia no certifica seis bases con excepciones protegidas: el escenario
+es ordinario y algunas bases excluyen datos sensibles por sus propios controles.
+
+Dos casos nuevos de concurrencia PostgreSQL/app_user, RAT real y lock de serie:
+transaccion titular cambia referencia documental y registra decision no_continuar;
+confirmacion en otra conexion tiene borrador precargado y espera lock real,
+verificado mediante pg_blocking_pids. Tras commit relee documento/ultimo evento
+vigente negativo; tras rollback usa documento original sin evento. Rechazos 409
+antes de reemplazar confirmado, sin insertar eventos adicionales ni confirmar
+borrador; diagnostico final coincide con GET y confirmado anterior intacto.
+
+Ocho casos adicionales (seis combinaciones con evento previo y dos concurrencias),
+mas verificaciones ampliadas en los seis casos existentes. 54 focalizadas aprobadas.
+Suite completa: 3012 passed en 295.88 s. Black/Ruff/diff --check correctos.
+Sin cambios de logica productiva en este paso, migracion, nuevo commit ni push.
+M3-T1 EN PROGRESO integral; continuar/confirmacion excepcional bloqueados.
+Ley como base normativa fija, sin condicion por fecha de entrada en vigor.
+
+Proximo: revisar matriz de aceptacion de primera frontera EIPD y verificar fuentes
+complementarias oficiales con registro de evidencia. No habilitar gates por el
+numero de pruebas ni interpretar una busqueda sin resultados como inexistencia.

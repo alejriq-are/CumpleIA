@@ -320,6 +320,7 @@ async def test_api_rejects_server_fields_and_invalid_contract(
         "obligaciones_economicas_art13a",
     ],
 )
+@pytest.mark.parametrize("prior_negative", [False, True])
 async def test_resolution_keeps_confirmation_blocked_six_bases(
     client_a,
     resolution_rat,
@@ -332,6 +333,7 @@ async def test_resolution_keeps_confirmation_blocked_six_bases(
     complete_economic_obligations,
     _session_factory,
     basis,
+    prior_negative,
 ):
     tid, payload = resolution_rat
     if basis == "interes_legitimo_art13d":
@@ -377,7 +379,29 @@ async def test_resolution_keeps_confirmation_blocked_six_bases(
         assert created.status_code == 201
         draft = created.json()
         detail = url + "/" + draft["id"]
+        if prior_negative:
+            response = await client.post(
+                detail + "/eipd-resolution/reviews",
+                json={
+                    "decision": "no_continuar",
+                    "rationale": "Revision negativa",
+                    "review_reference": "REV78",
+                },
+            )
+            assert response.status_code == 201, response.text
+        from tests.test_api_eipd_resolution_reviews import events, review
+
+        event_ids = [e.id for e in await events(_session_factory, draft["id"])]
         ready = (await client.get(detail + "/readiness")).json()
+        controls = ready["eipd_controls"]
+        assert controls["ordinary"]["legal_basis"] == basis
+        assert controls["ordinary"]["result"] == "completo"
+        rejected_review = await client.post(
+            detail + "/eipd-resolution/reviews", json=review("continuar")
+        )
+        assert rejected_review.status_code == 409, rejected_review.text
+        assert rejected_review.json()["detail"]["eipd_controls"] == controls
+        assert not any(i["stage"] == "review" for i in controls["review_blockers"])
         assert {b["code"] for b in ready["confirmation_blockers"]} == {
             "resolucion_eipd_no_validada"
         }
@@ -387,6 +411,8 @@ async def test_resolution_keeps_confirmation_blocked_six_bases(
             failed.json()["detail"]["confirmation_blockers"]
             == ready["confirmation_blockers"]
         )
+        assert failed.json()["detail"]["eipd_controls"] == controls
+        assert [e.id for e in await events(_session_factory, draft["id"])] == event_ids
         assert (await client.get(first_url)).json() == confirmed
         assert (await client.get(detail)).json() == draft
         cleared = await client.patch(detail, json={"eipd_resolution_assessment": None})

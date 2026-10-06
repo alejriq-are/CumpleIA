@@ -265,4 +265,6 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] M3-T1 §74: contrato/matriz de composicion comun EIPD y separacion revision/confirmacion, sin circularidad.
 - [x] M3-T1 §75: composicion pura §74 implementada; 80 pruebas nuevas y 468 focalizadas aprobadas, sin habilitar gates.
 - [x] M3-T1 §76: composicion orientativa en readiness, contratos cerrados y 17 pruebas nuevas; bloqueos conservados.
-- [ ] M3-T1: integrar composicion bajo lock en revision positiva/confirmacion, conservando barreras de fuentes/aceptacion.
+- [x] M3-T1 §77: composicion compartida bajo lock en revision positiva/confirmacion; barreras conservadas y seis casos nuevos.
+- [x] M3-T1 §78: concurrencia real de confirmacion y HTTP seis bases ordinarias para composicion; ocho casos adicionales.
+- [ ] M3-T1: revisar aceptacion de primera frontera EIPD y verificar/registrar fuentes complementarias antes de habilitar.

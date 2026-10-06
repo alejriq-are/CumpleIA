@@ -127,6 +127,7 @@ def confirmation(monkeypatch, complete_payload, negative_controls):
         confirmed_by=actor,
     )
     db = AsyncMock()
+    db.scalar.return_value = None  # Sin historial EIPD en este doble.
     results = []
     for value in (draft, series, draft, previous):
         result = MagicMock()

@@ -28,6 +28,7 @@ from app.db.models import (
     Vendor,
 )
 from app.schemas.licitud import (
+    EipdControlCompositionOut,
     EipdResolutionReviewIn,
     LegalAssessmentDraftCreate,
     LegalAssessmentDraftUpdate,
@@ -1698,6 +1699,71 @@ def evaluate_transversal_readiness_v1(assessment, snapshot):
     return special, eipd, blockers
 
 
+async def _latest_eipd_review_payload_v1(db, organization_id, assessment_id):
+    """Lee ultimo evento del tenant; operaciones mutadoras llaman bajo lock."""
+    latest_review = await db.scalar(
+        select(EipdResolutionReview)
+        .where(
+            EipdResolutionReview.assessment_id == assessment_id,
+            EipdResolutionReview.organization_id == organization_id,
+        )
+        .order_by(
+            EipdResolutionReview.created_at.desc(), EipdResolutionReview.id.desc()
+        )
+        .limit(1)
+    )
+    review_payload = (
+        {
+            name: getattr(latest_review, name)
+            for name in (
+                "id",
+                "organization_id",
+                "assessment_id",
+                "decision",
+                "rationale",
+                "review_reference",
+                "document_hash",
+                "context_hash",
+                "created_by",
+                "created_at",
+            )
+        }
+        if latest_review is not None
+        else None
+    )
+    return review_payload
+
+
+def _compose_assessment_eipd_controls_v1(
+    assessment, organization_id, context, rat_current, latest_review, evaluated_on
+):
+    composition = compose_eipd_controls_v1(
+        {
+            "organization_id": organization_id,
+            "assessment_id": assessment.id,
+            "assessment_status": assessment.status,
+            "assessment_schema_version": assessment.schema_version,
+            "rat_context_schema_version": assessment.rat_context_schema_version,
+            "justification": assessment.justification,
+            "rat_context_current": rat_current,
+            "context": context,
+            "resolution": assessment.eipd_resolution_assessment,
+            "latest_review": latest_review,
+        },
+        evaluated_on=evaluated_on,
+    )
+    return EipdControlCompositionOut.model_validate(
+        {
+            **asdict(composition),
+            "evaluation_version": 1,
+            "detection_v2": {
+                **asdict(composition.detection_v2),
+                "evaluation_version": composition.detection_v2.evaluation_version,
+            },
+        }
+    ).model_dump(mode="json")
+
+
 async def confirm_legal_assessment_v1(
     db: AsyncSession,
     organization_id: uuid.UUID,
@@ -1849,11 +1915,30 @@ async def confirm_legal_assessment_v1(
         )
     except ValidationError:
         raise _bad_request("Contrato documental transversal inválido") from None
-    if blockers:
+    eipd_controls = None
+    if (
+        draft.eipd_resolution_assessment is not None
+        or eipd.result in ("requiere_eipd", "requiere_revision")
+        or draft.sensitive_rights_exception_assessment is not None
+        or draft.biometric_rights_exception_assessment is not None
+    ):
+        latest_review = await _latest_eipd_review_payload_v1(
+            db, organization_id, draft.id
+        )
+        eipd_controls = _compose_assessment_eipd_controls_v1(
+            draft,
+            organization_id,
+            build_eipd_resolution_context_from_assessment_v1(draft, bundle.snapshot),
+            True,
+            latest_review,
+            datetime.now(UTC).date(),
+        )
+    if blockers or (eipd_controls and eipd_controls["confirmation_blockers"]):
         raise HTTPException(
-            status_code=max(item["status_code"] for item in blockers),
+            status_code=max((item["status_code"] for item in blockers), default=409),
             detail={
                 "code": "controles_transversales_no_preparados",
+                **({"eipd_controls": eipd_controls} if eipd_controls else {}),
                 "special": asdict(special),
                 "eipd": asdict(eipd),
                 "confirmation_blockers": [
@@ -2157,35 +2242,8 @@ async def get_legal_assessment_readiness_v1(
                     evaluated_on=evaluated_on,
                 )
             )
-        latest_review = await db.scalar(
-            select(EipdResolutionReview)
-            .where(
-                EipdResolutionReview.assessment_id == assessment.id,
-                EipdResolutionReview.organization_id == organization_id,
-            )
-            .order_by(
-                EipdResolutionReview.created_at.desc(), EipdResolutionReview.id.desc()
-            )
-            .limit(1)
-        )
-        review_payload = (
-            {
-                name: getattr(latest_review, name)
-                for name in (
-                    "id",
-                    "organization_id",
-                    "assessment_id",
-                    "decision",
-                    "rationale",
-                    "review_reference",
-                    "document_hash",
-                    "context_hash",
-                    "created_by",
-                    "created_at",
-                )
-            }
-            if latest_review is not None
-            else None
+        review_payload = await _latest_eipd_review_payload_v1(
+            db, organization_id, assessment.id
         )
         eipd_resolution_review = derive_eipd_resolution_review_state_v1(
             resolution_document, resolution_context, review_payload
@@ -2203,29 +2261,14 @@ async def get_legal_assessment_readiness_v1(
             or getattr(assessment, "biometric_rights_exception_assessment", None)
             is not None
         ):
-            composition = compose_eipd_controls_v1(
-                {
-                    "organization_id": organization_id,
-                    "assessment_id": assessment.id,
-                    "assessment_status": assessment.status,
-                    "assessment_schema_version": assessment.schema_version,
-                    "rat_context_schema_version": assessment.rat_context_schema_version,
-                    "justification": assessment.justification,
-                    "rat_context_current": rat_current,
-                    "context": resolution_context,
-                    "resolution": resolution_document,
-                    "latest_review": review_payload,
-                },
-                evaluated_on=evaluated_on,
+            eipd_controls = _compose_assessment_eipd_controls_v1(
+                assessment,
+                organization_id,
+                resolution_context,
+                rat_current,
+                review_payload,
+                evaluated_on,
             )
-            eipd_controls = {
-                **asdict(composition),
-                "evaluation_version": 1,
-                "detection_v2": {
-                    **asdict(composition.detection_v2),
-                    "evaluation_version": composition.detection_v2.evaluation_version,
-                },
-            }
         blockers.extend(
             {k: v for k, v in item.items() if k != "status_code"}
             for item in transversal_blockers
@@ -2317,20 +2360,37 @@ async def record_eipd_resolution_review_v1(
         context = build_eipd_resolution_context_from_assessment_v1(
             draft, bundle.snapshot
         )
+        evaluated_on = datetime.now(UTC).date()
         result = evaluate_eipd_resolution_review_prerequisites_v1(
             draft.status,
             draft.eipd_resolution_assessment,
             context,
             payload,
-            evaluated_on=datetime.now(UTC).date(),
+            evaluated_on=evaluated_on,
         )
     except ValidationError:
         raise _bad_request("Contrato documental de revision EIPD invalido") from None
-    if not result.prerequisites_met:
+    eipd_controls = None
+    if result.decision == "continuar":
+        latest_review = await _latest_eipd_review_payload_v1(
+            db, organization_id, draft.id
+        )
+        eipd_controls = _compose_assessment_eipd_controls_v1(
+            draft,
+            organization_id,
+            context,
+            build_rat_context_hash_v1(bundle.canonical) == draft.rat_context_hash,
+            latest_review,
+            evaluated_on,
+        )
+    if not result.prerequisites_met or (
+        eipd_controls and eipd_controls["review_blockers"]
+    ):
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail={
                 "code": "revision_eipd_no_preparada",
+                **({"eipd_controls": eipd_controls} if eipd_controls else {}),
                 "issues": [asdict(i) for i in result.issues],
             },
         )

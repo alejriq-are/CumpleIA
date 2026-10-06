@@ -1,3 +1,27 @@
+## 2026-10-06 — M3-T1: HTTP seis bases y concurrencia EIPD
+
+§78 amplia seis bases ordinarias con/sin revision negativa y diagnosticos de
+revision positiva/confirmacion iguales a readiness; borrador/historial/confirmado
+anterior intactos. Dos conexiones app_user con RAT real verifican espera de lock
+y relectura de documento/evento tras commit o rollback mediante pg_blocking_pids.
+Ocho casos adicionales; 54 focalizadas y suite completa 3012 passed en 295.88 s.
+Black/Ruff/diff --check correctos. Sin nueva logica productiva en este paso.
+Proximo: matriz de aceptacion de primera frontera y fuentes complementarias
+oficiales con evidencia; barreras permanecen. Ley fija sin dependencia temporal.
+M3-T1 EN PROGRESO integral; sin migracion, nuevo commit ni push.
+
+## 2026-10-06 — M3-T1: composicion EIPD bajo lock
+
+§77 integra composicion comun en revision continuar y confirmacion antes de
+insertar/reemplazar/flush; contexto actual y ultimo evento del tenant releidos.
+Errores conservan diagnosticos previos y agregan composicion por etapa.
+Negativas mantienen documentacion parcial; fuentes/aceptacion siguen bloqueando.
+Seis casos nuevos HTTP/concurrencia real; 227 focalizadas y suite completa
+3004 passed en 253.18 s. Black/Ruff/diff --check correctos.
+Proximo: ampliar concurrencia de confirmacion y HTTP seis bases para composicion.
+Ley fija sin dependencia temporal. M3-T1 EN PROGRESO integral;
+sin habilitar frontera, migracion, nuevo commit ni push.
+
 ## 2026-10-06 — M3-T1: composicion EIPD en readiness
 
 §76 publica eipd_controls version 1 y deteccion anidada version 2.
