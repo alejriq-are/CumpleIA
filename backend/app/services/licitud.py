@@ -4,10 +4,11 @@ import hashlib
 import json
 import unicodedata
 import uuid
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
 
 from fastapi import HTTPException, status
+from pydantic import ValidationError
 from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -28,6 +29,7 @@ from app.db.models import (
 from app.schemas.licitud import (
     LegalAssessmentDraftCreate,
     LegalAssessmentDraftUpdate,
+    LegalAssessmentReadinessOut,
     LegalAssessmentScopeIn,
     RatCanonicalAutomatedDecisionsV1,
     RatCanonicalContextV1,
@@ -50,6 +52,42 @@ from app.schemas.licitud import (
     RatSnapshotThirdPartyV1,
 )
 from app.services import rat as rat_service
+from app.services.biometric import evaluate_biometric_assessment_v1
+from app.services.biometric_rights_exception import (
+    evaluate_biometric_rights_exception_v1,
+)
+from app.services.consentimiento import evaluate_consent_assessment_v1
+from app.services.contract import evaluate_contract_assessment_v1
+from app.services.economic_obligations import (
+    evaluate_economic_obligations_assessment_v1,
+)
+from app.services.eipd import bind_eipd_screening_v11, evaluate_eipd_screening_v1
+from app.services.eipd_resolution import (
+    EipdResolutionContextV1,
+    bind_eipd_resolution_v1,
+)
+from app.services.geolocation import evaluate_geolocation_assessment_v1
+from app.services.health import evaluate_health_assessment_v1
+from app.services.legal_obligation import evaluate_legal_obligation_assessment_v1
+from app.services.lia import evaluate_lia_assessment_v1
+from app.services.rights_defense import evaluate_rights_defense_assessment_v1
+from app.services.sensitive_consent import evaluate_sensitive_consent_assessment_v1
+from app.services.sensitive_rights_exception import (
+    evaluate_sensitive_rights_exception_v1,
+)
+from app.services.special_conditions import (
+    bind_special_conditions_v10,
+    evaluate_special_conditions_v1,
+)
+
+CONFIRMABLE_ORDINARY_BASES = (
+    "consentimiento_art12",
+    "interes_legitimo_art13d",
+    "contrato_precontractual_art13c",
+    "obligacion_legal_art13b",
+    "defensa_derechos_art13e",
+    "obligaciones_economicas_art13a",
+)
 
 
 @dataclass(frozen=True)
@@ -433,6 +471,7 @@ async def _get_or_create_series_for_update_v1(
             LegalAssessmentSeries.purpose_key == purpose_key,
         )
         .with_for_update()
+        .execution_options(populate_existing=True)
     )
     return result.scalar_one()
 
@@ -914,13 +953,13 @@ async def build_rat_context_bundle_from_m2_v1(
     )
 
 
-async def get_legal_assessment_draft_v1(
+async def get_legal_assessment_v1(
     db: AsyncSession,
     organization_id: uuid.UUID,
     treatment_id: uuid.UUID,
     assessment_id: uuid.UUID,
 ) -> LegalAssessment:
-    """Obtiene una evaluación editable del tenant y exige estado borrador."""
+    """Obtiene una versión del expediente acotada al tenant y tratamiento."""
 
     result = await db.execute(
         select(LegalAssessment).where(
@@ -934,9 +973,21 @@ async def get_legal_assessment_draft_v1(
     if assessment is None:
         raise _not_found("Evaluación jurídica no encontrada")
 
+    return assessment
+
+
+async def get_legal_assessment_draft_v1(
+    db: AsyncSession,
+    organization_id: uuid.UUID,
+    treatment_id: uuid.UUID,
+    assessment_id: uuid.UUID,
+) -> LegalAssessment:
+    """Obtiene una evaluación editable y exige estado borrador."""
+    assessment = await get_legal_assessment_v1(
+        db, organization_id, treatment_id, assessment_id
+    )
     if assessment.status != "borrador":
         raise _conflict("La evaluación jurídica ya no está en estado borrador")
-
     return assessment
 
 
@@ -949,6 +1000,34 @@ def _scope_from_snapshot_v1(
     return LegalAssessmentScopeIn(
         data_category_codes=[item.category_code for item in parsed.data_categories],
         data_subject_codes=[item.category_code for item in parsed.data_subjects],
+    )
+
+
+def build_eipd_resolution_context_from_assessment_v1(assessment, snapshot):
+    """Contexto final del expediente; no contiene resolucion ni eventos."""
+    return EipdResolutionContextV1.model_validate(
+        {
+            "rat_context_snapshot": snapshot.model_dump(mode="json"),
+            "legal_basis": assessment.legal_basis,
+            "consent_assessment": assessment.consent_assessment,
+            "lia_assessment": assessment.lia_assessment,
+            "contract_assessment": assessment.contract_assessment,
+            "legal_obligation_assessment": assessment.legal_obligation_assessment,
+            "rights_defense_assessment": assessment.rights_defense_assessment,
+            "economic_obligations_assessment": assessment.economic_obligations_assessment,
+            "geolocation_assessment": assessment.geolocation_assessment,
+            "sensitive_consent_assessment": assessment.sensitive_consent_assessment,
+            "health_assessment": assessment.health_assessment,
+            "biometric_assessment": getattr(assessment, "biometric_assessment", None),
+            "sensitive_rights_exception_assessment": getattr(
+                assessment, "sensitive_rights_exception_assessment", None
+            ),
+            "biometric_rights_exception_assessment": getattr(
+                assessment, "biometric_rights_exception_assessment", None
+            ),
+            "special_conditions": assessment.special_conditions,
+            "eipd_screening": assessment.eipd_screening,
+        }
     )
 
 
@@ -969,9 +1048,15 @@ async def update_legal_assessment_draft_v1(
         assessment_id,
     )
 
-    changes = payload.model_dump(exclude_unset=True)
+    changes = payload.model_dump(mode="json", exclude_unset=True)
     scope_was_provided = "scope" in changes
     changes.pop("scope", None)
+    screening_was_provided = "eipd_screening" in changes
+    screening_input = changes.pop("eipd_screening", None)
+    special_was_provided = "special_conditions" in changes
+    special_input = changes.pop("special_conditions", None)
+    resolution_was_provided = "eipd_resolution_assessment" in changes
+    resolution_input = changes.pop("eipd_resolution_assessment", None)
 
     series_result = await db.execute(
         select(LegalAssessmentSeries)
@@ -1022,6 +1107,70 @@ async def update_legal_assessment_draft_v1(
     assessment.purpose_snapshot = bundle.snapshot.purpose
     assessment.rat_context_hash = build_rat_context_hash_v1(bundle.canonical)
     assessment.rat_context_snapshot = bundle.snapshot.model_dump(mode="json")
+    if special_was_provided:
+        try:
+            assessment.special_conditions = (
+                bind_special_conditions_v10(
+                    special_input,
+                    bundle.snapshot,
+                    assessment.legal_basis,
+                    assessment.consent_assessment,
+                    assessment.lia_assessment,
+                    assessment.contract_assessment,
+                    assessment.legal_obligation_assessment,
+                    assessment.rights_defense_assessment,
+                    assessment.economic_obligations_assessment,
+                    assessment.geolocation_assessment,
+                    assessment.sensitive_consent_assessment,
+                    assessment.health_assessment,
+                    getattr(assessment, "biometric_assessment", None),
+                    getattr(assessment, "sensitive_rights_exception_assessment", None),
+                    getattr(assessment, "biometric_rights_exception_assessment", None),
+                ).model_dump(mode="json")
+                if special_input is not None
+                else None
+            )
+        except ValueError:
+            raise _bad_request(
+                "Contrato o alcance de condiciones especiales inválido"
+            ) from None
+    if screening_was_provided:
+        assessment.eipd_screening = (
+            bind_eipd_screening_v11(
+                screening_input,
+                bundle.snapshot,
+                assessment.lia_assessment,
+                assessment.special_conditions,
+                assessment.contract_assessment,
+                assessment.legal_obligation_assessment,
+                assessment.rights_defense_assessment,
+                assessment.economic_obligations_assessment,
+                assessment.geolocation_assessment,
+                assessment.sensitive_consent_assessment,
+                assessment.health_assessment,
+                getattr(assessment, "biometric_assessment", None),
+                getattr(assessment, "sensitive_rights_exception_assessment", None),
+                getattr(assessment, "biometric_rights_exception_assessment", None),
+            ).model_dump(mode="json")
+            if screening_input is not None
+            else None
+        )
+    if resolution_was_provided:
+        try:
+            assessment.eipd_resolution_assessment = (
+                bind_eipd_resolution_v1(
+                    resolution_input,
+                    build_eipd_resolution_context_from_assessment_v1(
+                        assessment, bundle.snapshot
+                    ),
+                ).model_dump(mode="json")
+                if resolution_input is not None
+                else None
+            )
+        except ValidationError:
+            raise _bad_request(
+                "Contrato de resolucion EIPD o contexto final invalido"
+            ) from None
     assessment.updated_at = datetime.now(UTC)
     assessment.updated_by = profile_id
 
@@ -1089,14 +1238,124 @@ async def create_legal_assessment_draft_v1(
         purpose_snapshot=bundle.snapshot.purpose,
         rat_context_hash=build_rat_context_hash_v1(bundle.canonical),
         rat_context_snapshot=bundle.snapshot.model_dump(mode="json"),
-        consent_assessment=None,
-        lia_assessment=None,
+        consent_assessment=(
+            payload.consent_assessment.model_dump(mode="json")
+            if payload.consent_assessment is not None
+            else None
+        ),
+        lia_assessment=(
+            payload.lia_assessment.model_dump(mode="json")
+            if payload.lia_assessment is not None
+            else None
+        ),
+        geolocation_assessment=(
+            payload.geolocation_assessment.model_dump(mode="json")
+            if payload.geolocation_assessment is not None
+            else None
+        ),
+        sensitive_consent_assessment=(
+            payload.sensitive_consent_assessment.model_dump(mode="json")
+            if payload.sensitive_consent_assessment is not None
+            else None
+        ),
+        sensitive_rights_exception_assessment=(
+            payload.sensitive_rights_exception_assessment.model_dump(mode="json")
+            if payload.sensitive_rights_exception_assessment is not None
+            else None
+        ),
+        biometric_rights_exception_assessment=(
+            payload.biometric_rights_exception_assessment.model_dump(mode="json")
+            if payload.biometric_rights_exception_assessment is not None
+            else None
+        ),
+        biometric_assessment=(
+            payload.biometric_assessment.model_dump(mode="json")
+            if payload.biometric_assessment is not None
+            else None
+        ),
+        health_assessment=(
+            payload.health_assessment.model_dump(mode="json")
+            if payload.health_assessment is not None
+            else None
+        ),
+        economic_obligations_assessment=(
+            payload.economic_obligations_assessment.model_dump(mode="json")
+            if payload.economic_obligations_assessment is not None
+            else None
+        ),
+        rights_defense_assessment=(
+            payload.rights_defense_assessment.model_dump(mode="json")
+            if payload.rights_defense_assessment is not None
+            else None
+        ),
+        legal_obligation_assessment=(
+            payload.legal_obligation_assessment.model_dump(mode="json")
+            if payload.legal_obligation_assessment is not None
+            else None
+        ),
+        contract_assessment=(
+            payload.contract_assessment.model_dump(mode="json")
+            if payload.contract_assessment is not None
+            else None
+        ),
         special_conditions=None,
         schema_version=1,
         rat_context_schema_version=1,
         created_by=profile_id,
         updated_by=profile_id,
     )
+    if payload.special_conditions is not None:
+        try:
+            assessment.special_conditions = bind_special_conditions_v10(
+                payload.special_conditions,
+                bundle.snapshot,
+                assessment.legal_basis,
+                assessment.consent_assessment,
+                assessment.lia_assessment,
+                assessment.contract_assessment,
+                assessment.legal_obligation_assessment,
+                assessment.rights_defense_assessment,
+                assessment.economic_obligations_assessment,
+                assessment.geolocation_assessment,
+                assessment.sensitive_consent_assessment,
+                assessment.health_assessment,
+                getattr(assessment, "biometric_assessment", None),
+                getattr(assessment, "sensitive_rights_exception_assessment", None),
+                getattr(assessment, "biometric_rights_exception_assessment", None),
+            ).model_dump(mode="json")
+        except ValueError:
+            raise _bad_request(
+                "Contrato o alcance de condiciones especiales inválido"
+            ) from None
+    if payload.eipd_screening is not None:
+        assessment.eipd_screening = bind_eipd_screening_v11(
+            payload.eipd_screening,
+            bundle.snapshot,
+            assessment.lia_assessment,
+            assessment.special_conditions,
+            assessment.contract_assessment,
+            assessment.legal_obligation_assessment,
+            assessment.rights_defense_assessment,
+            assessment.economic_obligations_assessment,
+            assessment.geolocation_assessment,
+            assessment.sensitive_consent_assessment,
+            assessment.health_assessment,
+            getattr(assessment, "biometric_assessment", None),
+            getattr(assessment, "sensitive_rights_exception_assessment", None),
+            getattr(assessment, "biometric_rights_exception_assessment", None),
+        ).model_dump(mode="json")
+    if payload.eipd_resolution_assessment is not None:
+        try:
+            assessment.eipd_resolution_assessment = bind_eipd_resolution_v1(
+                payload.eipd_resolution_assessment,
+                build_eipd_resolution_context_from_assessment_v1(
+                    assessment, bundle.snapshot
+                ),
+            ).model_dump(mode="json")
+        except ValidationError:
+            raise _bad_request(
+                "Contrato de resolucion EIPD o contexto final invalido"
+            ) from None
     db.add(assessment)
     await db.flush()
     return assessment
@@ -1119,3 +1378,779 @@ async def build_rat_context_from_m2_v1(
         scope=scope,
     )
     return bundle.canonical
+
+
+def evaluate_economic_obligations_gate_v1(assessment, snapshot):
+    result = evaluate_economic_obligations_assessment_v1(
+        assessment.economic_obligations_assessment, snapshot
+    )
+    blocker = (
+        None
+        if result.can_confirm
+        else {
+            "field": "economic_obligations_assessment",
+            "code": "obligaciones_economicas_no_preparadas",
+            "message": "Revise los motivos del expediente económico",
+            "status_code": 400 if result.result == "incompleto" else 409,
+        }
+    )
+    return result, blocker
+
+
+def evaluate_rights_defense_gate_v1(assessment, snapshot):
+    result = evaluate_rights_defense_assessment_v1(
+        assessment.rights_defense_assessment, snapshot
+    )
+    blocker = (
+        None
+        if result.can_confirm
+        else {
+            "field": "rights_defense_assessment",
+            "code": "defensa_derechos_no_preparada",
+            "message": "Revise los motivos del expediente de derechos",
+            "status_code": 400 if result.result == "incompleto" else 409,
+        }
+    )
+    return result, blocker
+
+
+def evaluate_legal_obligation_gate_v1(assessment, snapshot):
+    result = evaluate_legal_obligation_assessment_v1(
+        assessment.legal_obligation_assessment, snapshot
+    )
+    blocker = (
+        None
+        if result.can_confirm
+        else {
+            "field": "legal_obligation_assessment",
+            "code": "obligacion_legal_no_preparada",
+            "message": "Revise los motivos del expediente normativo",
+            "status_code": 400 if result.result == "incompleto" else 409,
+        }
+    )
+    return result, blocker
+
+
+def evaluate_contract_gate_v1(assessment, snapshot):
+    result = evaluate_contract_assessment_v1(assessment.contract_assessment, snapshot)
+    blocker = (
+        None
+        if result.can_confirm
+        else {
+            "field": "contract_assessment",
+            "code": "contrato_no_preparado",
+            "message": "Revise los motivos del expediente contractual",
+            "status_code": 400 if result.result == "incompleto" else 409,
+        }
+    )
+    return result, blocker
+
+
+def evaluate_lia_gate_v1(assessment, snapshot):
+    result = evaluate_lia_assessment_v1(assessment.lia_assessment, snapshot)
+    blocker = (
+        None
+        if result.can_confirm
+        else {
+            "field": "lia_assessment",
+            "code": "lia_no_preparada",
+            "message": "Revise los motivos de la evaluación LIA",
+            "status_code": 400 if result.result == "incompleto" else 409,
+        }
+    )
+    return result, blocker
+
+
+def sensitive_consent_is_proposed_v1(assessment):
+    return assessment.sensitive_consent_assessment is not None or (
+        assessment.special_conditions is not None
+        and any(
+            item.get("regime_id") == "sensibles_art16"
+            and (
+                item.get("authorization_route") == "consentimiento"
+                or item.get("sensitive_condition_id") == "consentimiento_expreso_art16"
+            )
+            for item in assessment.special_conditions.get("conditions", [])
+        )
+    )
+
+
+def sensitive_rights_exception_is_proposed_v1(assessment):
+    return getattr(
+        assessment, "sensitive_rights_exception_assessment", None
+    ) is not None or (
+        assessment.special_conditions is not None
+        and any(
+            item.get("regime_id") == "sensibles_art16"
+            and (
+                item.get("authorization_route") == "excepcion_legal"
+                or item.get("sensitive_condition_id") == "defensa_derechos_art16d"
+            )
+            for item in assessment.special_conditions.get("conditions", [])
+        )
+    )
+
+
+def biometric_rights_exception_is_proposed_v1(assessment):
+    return getattr(
+        assessment, "biometric_rights_exception_assessment", None
+    ) is not None or (
+        assessment.special_conditions is not None
+        and any(
+            item.get("regime_id") == "biometricos_art16ter"
+            and item.get("authorization_route") == "excepcion_legal"
+            for item in assessment.special_conditions.get("conditions", [])
+        )
+    )
+
+
+def biometric_consent_is_proposed_v1(assessment, detected_regimes):
+    if getattr(assessment, "biometric_assessment", None) is not None:
+        return True
+    condition = next(
+        (
+            item
+            for item in (assessment.special_conditions or {}).get("conditions", [])
+            if item.get("regime_id") == "biometricos_art16ter"
+        ),
+        None,
+    )
+    return "biometricos_art16ter" in detected_regimes and (
+        condition is None or condition.get("authorization_route") != "excepcion_legal"
+    )
+
+
+def evaluate_transversal_readiness_v1(assessment, snapshot):
+    """Mismas barreras documentales para lectura y confirmación transaccional."""
+    special = evaluate_special_conditions_v1(
+        assessment.special_conditions,
+        snapshot,
+        assessment.legal_basis,
+        assessment.consent_assessment,
+        assessment.lia_assessment,
+        assessment.contract_assessment,
+        assessment.legal_obligation_assessment,
+        assessment.rights_defense_assessment,
+        assessment.economic_obligations_assessment,
+        assessment.geolocation_assessment,
+        assessment.sensitive_consent_assessment,
+        assessment.health_assessment,
+        getattr(assessment, "biometric_assessment", None),
+        getattr(assessment, "sensitive_rights_exception_assessment", None),
+        getattr(assessment, "biometric_rights_exception_assessment", None),
+    )
+    eipd = evaluate_eipd_screening_v1(
+        assessment.eipd_screening,
+        snapshot,
+        assessment.lia_assessment,
+        assessment.special_conditions,
+        assessment.contract_assessment,
+        assessment.legal_obligation_assessment,
+        assessment.rights_defense_assessment,
+        assessment.economic_obligations_assessment,
+        assessment.geolocation_assessment,
+        assessment.sensitive_consent_assessment,
+        assessment.consent_assessment,
+        assessment.health_assessment,
+        getattr(assessment, "biometric_assessment", None),
+        getattr(assessment, "sensitive_rights_exception_assessment", None),
+        getattr(assessment, "biometric_rights_exception_assessment", None),
+    )
+    blockers = []
+    if getattr(assessment, "eipd_resolution_assessment", None) is not None:
+        blockers.append(
+            {
+                "field": "eipd_resolution_assessment",
+                "code": "resolucion_eipd_no_validada",
+                "message": "La resolución EIPD está pendiente de evaluación y revisión",
+                "status_code": 409,
+            }
+        )
+    if (
+        special.result not in ("sin_regimenes_declarados", "regimenes_preparados")
+        or not special.context_current
+    ):
+        blockers.append(
+            {
+                "field": "special_conditions",
+                "code": "condiciones_especiales_no_preparadas",
+                "message": "Revise los motivos de detección especial",
+                "status_code": 400 if special.result == "incompleto" else 409,
+            }
+        )
+    if eipd.result != "sin_supuestos_declarados" or not eipd.context_current:
+        incomplete_codes = {
+            "screening_ausente",
+            "pregunta_omitida",
+            "respuesta_pendiente",
+            "fundamento_ausente",
+        }
+        review = any(i.code not in incomplete_codes for i in eipd.issues)
+        blockers.append(
+            {
+                "field": "eipd_screening",
+                "code": "screening_eipd_no_preparado",
+                "message": "Revise los motivos del screening EIPD",
+                "status_code": 409 if review or eipd.result == "requiere_eipd" else 400,
+            }
+        )
+    if sensitive_consent_is_proposed_v1(assessment):
+        sensitive_result = evaluate_sensitive_consent_assessment_v1(
+            assessment.sensitive_consent_assessment,
+            snapshot,
+            assessment.special_conditions,
+            assessment.consent_assessment,
+        )
+        if not sensitive_result.can_confirm:
+            blockers.append(
+                {
+                    "field": "sensitive_consent_assessment",
+                    "code": "consentimiento_sensible_no_preparado",
+                    "message": "Revise los motivos del consentimiento expreso sensible",
+                    "status_code": (
+                        400 if sensitive_result.result == "incompleto" else 409
+                    ),
+                }
+            )
+    if (
+        assessment.health_assessment is not None
+        or "salud_perfil_biologico_art16bis" in special.detected_regimes
+    ):
+        health_result = evaluate_health_assessment_v1(
+            assessment.health_assessment,
+            snapshot,
+            assessment.special_conditions,
+            assessment.consent_assessment,
+            assessment.sensitive_consent_assessment,
+        )
+        if not health_result.can_confirm:
+            blockers.append(
+                {
+                    "field": "health_assessment",
+                    "code": "salud_no_preparada",
+                    "message": "Revise los motivos del expediente de salud",
+                    "status_code": 400 if health_result.result == "incompleto" else 409,
+                }
+            )
+    biometric_document = getattr(assessment, "biometric_assessment", None)
+    if biometric_consent_is_proposed_v1(assessment, special.detected_regimes):
+        biometric_result = evaluate_biometric_assessment_v1(
+            biometric_document,
+            snapshot,
+            assessment.special_conditions,
+            assessment.consent_assessment,
+            assessment.sensitive_consent_assessment,
+        )
+        if not biometric_result.can_confirm:
+            blockers.append(
+                {
+                    "field": "biometric_assessment",
+                    "code": "biometria_no_preparada",
+                    "message": "Revise los motivos del expediente biométrico",
+                    "status_code": (
+                        400 if biometric_result.result == "incompleto" else 409
+                    ),
+                }
+            )
+    if sensitive_rights_exception_is_proposed_v1(assessment):
+        exception_result = evaluate_sensitive_rights_exception_v1(
+            getattr(assessment, "sensitive_rights_exception_assessment", None),
+            snapshot,
+            assessment.special_conditions,
+        )
+        if not exception_result.can_confirm:
+            blockers.append(
+                {
+                    "field": "sensitive_rights_exception_assessment",
+                    "code": "excepcion_derechos_no_preparada",
+                    "message": "Revise los motivos de la excepción sensible de derechos",
+                    "status_code": (
+                        400 if exception_result.result == "incompleto" else 409
+                    ),
+                }
+            )
+    if biometric_rights_exception_is_proposed_v1(assessment):
+        exception_result = evaluate_biometric_rights_exception_v1(
+            getattr(assessment, "biometric_rights_exception_assessment", None),
+            snapshot,
+            assessment.special_conditions,
+            getattr(assessment, "sensitive_rights_exception_assessment", None),
+        )
+        if not exception_result.can_confirm:
+            blockers.append(
+                {
+                    "field": "biometric_rights_exception_assessment",
+                    "code": "excepcion_derechos_no_preparada",
+                    "message": "Revise los motivos de la excepción biométrica de derechos",
+                    "status_code": (
+                        400 if exception_result.result == "incompleto" else 409
+                    ),
+                }
+            )
+    return special, eipd, blockers
+
+
+async def confirm_legal_assessment_v1(
+    db: AsyncSession,
+    organization_id: uuid.UUID,
+    treatment_id: uuid.UUID,
+    assessment_id: uuid.UUID,
+    profile_id: uuid.UUID,
+) -> LegalAssessment:
+    """Confirma las bases ordinarias implementadas dentro de la transacción.
+
+    El caller debe validar permisos y tenant, y hacer commit o rollback de la
+    unidad de trabajo. Los regímenes sin validador implementado siguen bloqueados.
+    """
+    draft = await get_legal_assessment_draft_v1(
+        db, organization_id, treatment_id, assessment_id
+    )
+    series_result = await db.execute(
+        select(LegalAssessmentSeries)
+        .where(
+            LegalAssessmentSeries.id == draft.series_id,
+            LegalAssessmentSeries.organization_id == organization_id,
+            LegalAssessmentSeries.treatment_id == treatment_id,
+        )
+        .with_for_update()
+        .execution_options(populate_existing=True)
+    )
+    series = series_result.scalar_one_or_none()
+    if series is None:
+        raise _not_found("Serie de evaluación jurídica no encontrada")
+
+    # La lectura anterior al lock no es fuente de verdad del estado/payload.
+    draft_result = await db.execute(
+        select(LegalAssessment)
+        .where(
+            LegalAssessment.id == assessment_id,
+            LegalAssessment.series_id == series.id,
+            LegalAssessment.organization_id == organization_id,
+            LegalAssessment.treatment_id == treatment_id,
+        )
+        .execution_options(populate_existing=True)
+    )
+    draft = draft_result.scalar_one_or_none()
+    if draft is None:
+        raise _not_found("Evaluación jurídica no encontrada")
+    if draft.status != "borrador":
+        raise _conflict("La evaluación jurídica ya no está en estado borrador")
+    if draft.schema_version != 1 or draft.rat_context_schema_version != 1:
+        raise _conflict("Versión de evaluación o contexto RAT no admitida")
+    if draft.legal_basis not in CONFIRMABLE_ORDINARY_BASES:
+        raise _conflict(
+            "La confirmación de esta base jurídica aún no está implementada"
+        )
+    if not draft.justification or not draft.justification.strip():
+        raise _bad_request("Se requiere una justificación para confirmar")
+
+    try:
+        scope = _scope_from_snapshot_v1(draft.rat_context_snapshot)
+        readiness = (
+            evaluate_consent_assessment_v1(draft.consent_assessment)
+            if draft.legal_basis == "consentimiento_art12"
+            else None
+        )
+    except ValidationError:
+        raise _bad_request(
+            "Contrato de consentimiento o snapshot RAT inválido"
+        ) from None
+    if readiness is not None and not readiness.can_confirm:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={
+                "code": "consentimiento_no_preparado",
+                "result": readiness.result,
+                "issues": [asdict(issue) for issue in readiness.issues],
+                "applicability": [asdict(item) for item in readiness.applicability],
+            },
+        )
+    if not scope.data_category_codes or not scope.data_subject_codes:
+        raise _bad_request("El alcance requiere categorías de datos y titulares")
+
+    bundle = await build_rat_context_bundle_from_m2_v1(
+        db,
+        organization_id,
+        treatment_id,
+        purpose_key=series.purpose_key,
+        scope=scope,
+    )
+    if build_rat_context_hash_v1(bundle.canonical) != draft.rat_context_hash:
+        raise _conflict("El contexto RAT cambió; revise y actualice el borrador")
+    if bundle.canonical.organization_role is None:
+        raise _bad_request("El contexto RAT requiere el rol de la organización")
+    try:
+        if draft.legal_basis == "interes_legitimo_art13d":
+            lia_result, lia_blocker = evaluate_lia_gate_v1(draft, bundle.snapshot)
+            if lia_blocker is not None:
+                raise HTTPException(
+                    status_code=lia_blocker["status_code"],
+                    detail={
+                        "code": lia_blocker["code"],
+                        **asdict(lia_result),
+                        "issues": [
+                            {**asdict(i), "question_id": None}
+                            for i in lia_result.issues
+                        ],
+                    },
+                )
+        elif draft.legal_basis == "contrato_precontractual_art13c":
+            contract_result, contract_blocker = evaluate_contract_gate_v1(
+                draft, bundle.snapshot
+            )
+            if contract_blocker is not None:
+                raise HTTPException(
+                    status_code=contract_blocker["status_code"],
+                    detail={
+                        "code": contract_blocker["code"],
+                        **asdict(contract_result),
+                    },
+                )
+        elif draft.legal_basis == "obligacion_legal_art13b":
+            legal_result, legal_blocker = evaluate_legal_obligation_gate_v1(
+                draft, bundle.snapshot
+            )
+            if legal_blocker is not None:
+                raise HTTPException(
+                    status_code=legal_blocker["status_code"],
+                    detail={"code": legal_blocker["code"], **asdict(legal_result)},
+                )
+        elif draft.legal_basis == "defensa_derechos_art13e":
+            rights_result, rights_blocker = evaluate_rights_defense_gate_v1(
+                draft, bundle.snapshot
+            )
+            if rights_blocker is not None:
+                raise HTTPException(
+                    status_code=rights_blocker["status_code"],
+                    detail={"code": rights_blocker["code"], **asdict(rights_result)},
+                )
+        elif draft.legal_basis == "obligaciones_economicas_art13a":
+            economic_result, economic_blocker = evaluate_economic_obligations_gate_v1(
+                draft, bundle.snapshot
+            )
+            if economic_blocker is not None:
+                raise HTTPException(
+                    status_code=economic_blocker["status_code"],
+                    detail={
+                        "code": economic_blocker["code"],
+                        **asdict(economic_result),
+                    },
+                )
+        special, eipd, blockers = evaluate_transversal_readiness_v1(
+            draft, bundle.snapshot
+        )
+    except ValidationError:
+        raise _bad_request("Contrato documental transversal inválido") from None
+    if blockers:
+        raise HTTPException(
+            status_code=max(item["status_code"] for item in blockers),
+            detail={
+                "code": "controles_transversales_no_preparados",
+                "special": asdict(special),
+                "eipd": asdict(eipd),
+                "confirmation_blockers": [
+                    {k: v for k, v in item.items() if k != "status_code"}
+                    for item in blockers
+                ],
+            },
+        )
+
+    previous_result = await db.execute(
+        select(LegalAssessment)
+        .where(
+            LegalAssessment.series_id == series.id,
+            LegalAssessment.organization_id == organization_id,
+            LegalAssessment.treatment_id == treatment_id,
+            LegalAssessment.status == "confirmado",
+        )
+        .execution_options(populate_existing=True)
+    )
+    previous = previous_result.scalar_one_or_none()
+    now = datetime.now(UTC)
+    if previous is not None:
+        previous.status = "reemplazado"
+        previous.replaced_at = now
+        previous.replaced_by_assessment_id = draft.id
+        previous.updated_at = now
+        previous.updated_by = profile_id
+        # Liberar el índice parcial antes de confirmar la sucesora.
+        await db.flush()
+
+    draft.status = "confirmado"
+    draft.confirmed_at = now
+    draft.confirmed_by = profile_id
+    draft.updated_at = now
+    draft.updated_by = profile_id
+    series.updated_at = now
+    series.updated_by = profile_id
+    await db.flush()
+    return draft
+
+
+async def get_legal_assessment_readiness_v1(
+    db: AsyncSession,
+    organization_id: uuid.UUID,
+    treatment_id: uuid.UUID,
+    assessment_id: uuid.UUID,
+) -> LegalAssessmentReadinessOut:
+    """Consulta orientativa del contexto actual, sin locks ni escrituras."""
+    assessment = await get_legal_assessment_v1(
+        db, organization_id, treatment_id, assessment_id
+    )
+    blockers: list[dict] = []
+
+    def block(field, code, message):
+        blockers.append({"field": field, "code": code, "message": message})
+
+    if assessment.status != "borrador":
+        block("status", "evaluacion_no_editable", "Esta versión no es un borrador")
+    if assessment.schema_version != 1 or assessment.rat_context_schema_version != 1:
+        block(
+            "schema_version",
+            "version_no_admitida",
+            "Versión de evaluación o contexto no admitida",
+        )
+    if assessment.legal_basis not in CONFIRMABLE_ORDINARY_BASES:
+        block(
+            "legal_basis",
+            "base_no_implementada",
+            "La confirmación de esta base aún no está implementada",
+        )
+    if not assessment.justification or not assessment.justification.strip():
+        block(
+            "justification",
+            "justificacion_ausente",
+            "Falta justificar la base seleccionada",
+        )
+
+    series = (
+        await db.execute(
+            select(LegalAssessmentSeries).where(
+                LegalAssessmentSeries.id == assessment.series_id,
+                LegalAssessmentSeries.organization_id == organization_id,
+                LegalAssessmentSeries.treatment_id == treatment_id,
+            )
+        )
+    ).scalar_one_or_none()
+    if series is None:
+        raise _not_found("Serie de evaluación jurídica no encontrada")
+
+    try:
+        scope = _scope_from_snapshot_v1(assessment.rat_context_snapshot)
+    except ValidationError:
+        raise _bad_request("Snapshot RAT inválido") from None
+    if not scope.data_category_codes or not scope.data_subject_codes:
+        block(
+            "scope",
+            "alcance_incompleto",
+            "Faltan categorías de datos o titulares en el alcance",
+        )
+    current_snapshot = None
+    rat_current = None
+    try:
+        bundle = await build_rat_context_bundle_from_m2_v1(
+            db,
+            organization_id,
+            treatment_id,
+            purpose_key=series.purpose_key,
+            scope=scope,
+        )
+        current_snapshot = bundle.snapshot
+        rat_current = (
+            build_rat_context_hash_v1(bundle.canonical) == assessment.rat_context_hash
+        )
+        if not rat_current:
+            block(
+                "rat_context_hash",
+                "contexto_rat_desactualizado",
+                "El contexto RAT cambió; revise el borrador",
+            )
+        if bundle.canonical.organization_role is None:
+            block(
+                "rat_context_snapshot.organization_role",
+                "rol_ausente",
+                "Falta el rol de la organización",
+            )
+    except HTTPException as exc:
+        if exc.status_code not in (400, 404):
+            raise
+        block(
+            "rat_context_snapshot",
+            "contexto_rat_no_disponible",
+            "No se pudo recomponer el contexto actual; revise finalidad y alcance",
+        )
+    consent = None
+    lia = None
+    contract = None
+    legal_obligation = None
+    health = None
+    biometric = None
+    sensitive_consent = None
+    sensitive_rights_exception = None
+    biometric_rights_exception = None
+    geolocation = None
+    economic_obligations = None
+    rights_defense = None
+    try:
+        if assessment.legal_basis == "consentimiento_art12":
+            result = evaluate_consent_assessment_v1(assessment.consent_assessment)
+            consent = {
+                "result": result.result,
+                "issues": [asdict(item) for item in result.issues],
+                "applicability": [
+                    {
+                        "field": f"answers.{item.question_id}",
+                        "applicability": item.applicability,
+                    }
+                    for item in result.applicability
+                ],
+            }
+            if not result.can_confirm:
+                block(
+                    "consent_assessment",
+                    "consentimiento_no_preparado",
+                    "Revise los motivos del checklist de consentimiento",
+                )
+        elif assessment.legal_basis == "interes_legitimo_art13d":
+            result, lia_blocker = evaluate_lia_gate_v1(assessment, current_snapshot)
+            lia = asdict(result)
+            if lia_blocker is not None:
+                blockers.append(
+                    {k: v for k, v in lia_blocker.items() if k != "status_code"}
+                )
+        elif assessment.legal_basis == "contrato_precontractual_art13c":
+            result, contract_blocker = evaluate_contract_gate_v1(
+                assessment, current_snapshot
+            )
+            contract = asdict(result)
+            if contract_blocker is not None:
+                blockers.append(
+                    {k: v for k, v in contract_blocker.items() if k != "status_code"}
+                )
+        elif assessment.legal_basis == "obligacion_legal_art13b":
+            result, legal_blocker = evaluate_legal_obligation_gate_v1(
+                assessment, current_snapshot
+            )
+            legal_obligation = asdict(result)
+            if legal_blocker is not None:
+                blockers.append(
+                    {k: v for k, v in legal_blocker.items() if k != "status_code"}
+                )
+        elif assessment.legal_basis == "defensa_derechos_art13e":
+            result, rights_blocker = evaluate_rights_defense_gate_v1(
+                assessment, current_snapshot
+            )
+            rights_defense = asdict(result)
+            if rights_blocker is not None:
+                blockers.append(
+                    {k: v for k, v in rights_blocker.items() if k != "status_code"}
+                )
+        elif assessment.legal_basis == "obligaciones_economicas_art13a":
+            result, economic_blocker = evaluate_economic_obligations_gate_v1(
+                assessment, current_snapshot
+            )
+            economic_obligations = asdict(result)
+            if economic_blocker is not None:
+                blockers.append(
+                    {k: v for k, v in economic_blocker.items() if k != "status_code"}
+                )
+        special, eipd, transversal_blockers = evaluate_transversal_readiness_v1(
+            assessment, current_snapshot
+        )
+        if (
+            assessment.geolocation_assessment is not None
+            or "geolocalizacion_art16sexies" in special.detected_regimes
+        ):
+            geo_result = evaluate_geolocation_assessment_v1(
+                assessment.geolocation_assessment,
+                current_snapshot,
+                assessment.special_conditions,
+            )
+            geolocation = asdict(geo_result)
+            if not geo_result.can_confirm:
+                block(
+                    "geolocation_assessment",
+                    "geolocalizacion_no_preparada",
+                    "Revise los motivos del aviso de geolocalización",
+                )
+        if sensitive_consent_is_proposed_v1(assessment):
+            sensitive_result = evaluate_sensitive_consent_assessment_v1(
+                assessment.sensitive_consent_assessment,
+                current_snapshot,
+                assessment.special_conditions,
+                assessment.consent_assessment,
+            )
+            sensitive_consent = asdict(sensitive_result)
+        if (
+            assessment.health_assessment is not None
+            or "salud_perfil_biologico_art16bis" in special.detected_regimes
+        ):
+            health_result = evaluate_health_assessment_v1(
+                assessment.health_assessment,
+                current_snapshot,
+                assessment.special_conditions,
+                assessment.consent_assessment,
+                assessment.sensitive_consent_assessment,
+            )
+            health = asdict(health_result)
+        biometric_document = getattr(assessment, "biometric_assessment", None)
+        if biometric_consent_is_proposed_v1(assessment, special.detected_regimes):
+            biometric = asdict(
+                evaluate_biometric_assessment_v1(
+                    biometric_document,
+                    current_snapshot,
+                    assessment.special_conditions,
+                    assessment.consent_assessment,
+                    assessment.sensitive_consent_assessment,
+                )
+            )
+        if sensitive_rights_exception_is_proposed_v1(assessment):
+            sensitive_rights_exception = asdict(
+                evaluate_sensitive_rights_exception_v1(
+                    getattr(assessment, "sensitive_rights_exception_assessment", None),
+                    current_snapshot,
+                    assessment.special_conditions,
+                )
+            )
+        if biometric_rights_exception_is_proposed_v1(assessment):
+            biometric_rights_exception = asdict(
+                evaluate_biometric_rights_exception_v1(
+                    getattr(assessment, "biometric_rights_exception_assessment", None),
+                    current_snapshot,
+                    assessment.special_conditions,
+                    getattr(assessment, "sensitive_rights_exception_assessment", None),
+                )
+            )
+        blockers.extend(
+            {k: v for k, v in item.items() if k != "status_code"}
+            for item in transversal_blockers
+        )
+    except ValidationError:
+        raise _bad_request("Contrato documental de la evaluación inválido") from None
+    return LegalAssessmentReadinessOut.model_validate(
+        {
+            "assessment_id": assessment.id,
+            "status": assessment.status,
+            "legal_basis": assessment.legal_basis,
+            "rat_context_current": rat_current,
+            "consent": consent,
+            "lia": lia,
+            "contract": contract,
+            "legal_obligation": legal_obligation,
+            "geolocation": geolocation,
+            "sensitive_consent": sensitive_consent,
+            "sensitive_rights_exception": sensitive_rights_exception,
+            "health": health,
+            "biometric": biometric,
+            "biometric_rights_exception": biometric_rights_exception,
+            "economic_obligations": economic_obligations,
+            "rights_defense": rights_defense,
+            "eipd": asdict(eipd),
+            "special": asdict(special),
+            "confirmation_blockers": blockers,
+            "pending_controls": [
+                "validacion_otros_regimenes_especiales",
+                "expediente_eipd_y_revision",
+            ],
+        }
+    )

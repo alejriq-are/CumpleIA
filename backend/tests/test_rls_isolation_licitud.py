@@ -14,6 +14,7 @@ import uuid
 
 import pytest
 import pytest_asyncio
+from fastapi import HTTPException
 from sqlalchemy import delete, select, text
 from sqlalchemy.exc import DBAPIError, IntegrityError
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
@@ -21,7 +22,7 @@ from sqlalchemy.pool import NullPool
 
 from app.core.config import get_settings
 from app.db.models import LegalAssessment, LegalAssessmentSeries, Treatment
-
+from app.services.licitud import confirm_legal_assessment_v1
 
 settings = get_settings()
 
@@ -175,9 +176,7 @@ async def licitud_base_data(
             )
         )
         await session.execute(
-            delete(Treatment).where(
-                Treatment.id.in_([treatment_a_id, treatment_b_id])
-            )
+            delete(Treatment).where(Treatment.id.in_([treatment_a_id, treatment_b_id]))
         )
         await session.commit()
 
@@ -196,8 +195,7 @@ async def test_rls_licitud_permite_lectura_de_series_propias(
 
     result = await app_role_session.execute(
         text(
-            "SELECT id FROM legal_assessment_series "
-            "WHERE organization_id = :org_id"
+            "SELECT id FROM legal_assessment_series " "WHERE organization_id = :org_id"
         ),
         {"org_id": str(org_a_id)},
     )
@@ -217,8 +215,7 @@ async def test_rls_licitud_bloquea_lectura_de_series_ajenas(
 
     result = await app_role_session.execute(
         text(
-            "SELECT id FROM legal_assessment_series "
-            "WHERE organization_id = :org_id"
+            "SELECT id FROM legal_assessment_series " "WHERE organization_id = :org_id"
         ),
         {"org_id": str(org_a_id)},
     )
@@ -236,10 +233,7 @@ async def test_rls_licitud_bloquea_lectura_de_evaluaciones_ajenas(
     await _set_auth_user(app_role_session, auth_b_id)
 
     result = await app_role_session.execute(
-        text(
-            "SELECT id FROM legal_assessments "
-            "WHERE organization_id = :org_id"
-        ),
+        text("SELECT id FROM legal_assessments " "WHERE organization_id = :org_id"),
         {"org_id": str(org_a_id)},
     )
 
@@ -463,3 +457,25 @@ async def test_licitud_persistencia_valida_mismo_tenant(
         assert assessment.legal_basis == "contrato_precontractual_art13c"
         assert assessment.schema_version == 1
         assert assessment.rat_context_schema_version == 1
+
+
+@pytest.mark.parametrize("requested_tenant", ["a", "b"])
+async def test_confirmacion_no_accede_a_evaluacion_otro_tenant(
+    app_role_session,
+    licitud_base_data,
+    auth_a_id,
+    org_a_id,
+    org_b_id,
+    profile_a_id,
+    requested_tenant,
+):
+    await _set_auth_user(app_role_session, auth_a_id)
+    with pytest.raises(HTTPException) as exc:
+        await confirm_legal_assessment_v1(
+            app_role_session,
+            org_a_id if requested_tenant == "a" else org_b_id,
+            licitud_base_data["treatment_b"],
+            licitud_base_data["assessment_b"],
+            profile_a_id,
+        )
+    assert exc.value.status_code == 404

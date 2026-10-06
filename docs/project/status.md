@@ -1,3 +1,1242 @@
+## 2026-10-06 — M3-T1: checkpoint local autorizado
+
+Se registra el avance acumulado de M3-T1: seis bases ordinarias, controles
+especiales soportados, preparacion de excepciones de derechos y resolucion EIPD
+documental con asociaciones, persistencia, historial protegido y API (§64).
+68 archivos revisados; formato/lint correctos y sin patrones sensibles detectados.
+Validacion: suite integral 2495 passed; 25 HTTP revalidados tras ajuste de mensaje.
+El usuario autoriza expresamente este commit local. EN PROGRESO, alcance integral;
+evaluador/revision/vigencia EIPD, fuentes y demas rutas pendientes, sin cierre DONE.
+
+## 2026-10-06 — M3-T1: API documental de resolucion EIPD
+
+Alcance integral, EN PROGRESO. §64 integra CREATE/PATCH/GET y binding al contexto
+final tras especiales/screening. Omision conserva, null vacia, objeto reemplaza;
+historial intacto y GET sin escritura. Metadata de servidor no editable.
+Barrera provisional compartida mantiene confirmaciones bloqueadas con resolucion.
+25 HTTP nuevos; 225 focalizadas aprobadas. Suite integral 2495 passed en 233.70 s;
+25 HTTP revalidados tras ajuste de redaccion. Black/Ruff/whitespace correctos.
+Proximo: evaluador puro de completitud/aplicabilidad; luego revision/vigencia/gates.
+Fuentes oficiales pendientes; head b51d3f6a9c20, sin migracion nueva ni commit.
+
+## 2026-10-06 — M3-T1: persistencia de resolucion e historial EIPD
+
+Alcance integral, EN PROGRESO. §63 agrega JSONB de resolucion y eventos de revision,
+FK tenant-aware sin borrado en cascada, RLS/identidad y permisos append-only runtime.
+Migracion local b51d3f6a9c20 aplicada; Alembic check sin diferencias.
+36 pruebas PostgreSQL nuevas; regresion integral 2470 passed en 221.64 s.
+Black/Ruff/whitespace correctos. Sin API/revision funcional ni apertura de gates;
+fuentes oficiales pendientes. Proximo: exposicion CREATE/PATCH/GET y binding final,
+conservando historial; despues evaluador/revision. Sin commit.
+
+## 2026-10-06 — M3-T1: asociacion/hash de resolucion EIPD implementados
+
+Alcance integral, EN PROGRESO. §62 agrega servicio puro con contexto final completo,
+base/consentimiento y todos los expedientes; hash documental separado incluye binding.
+Comparacion sin escritura, revalidacion de modelos, entradas internas cerradas.
+89 pruebas nuevas; 296 focalizadas aprobadas. Black/Ruff y whitespace correctos.
+Ultima suite integral 2234 passed (§58), no reejecutada para funciones aisladas.
+Sin API/DB/gates nuevos; fuentes pendientes. Proximo: persistencia JSONB y eventos
+append-only/RLS; luego exposicion documental y revision. Sin migracion ni commit.
+
+## 2026-10-06 — M3-T1: schemas de resolucion/revision EIPD implementados
+
+Alcance integral, EN PROGRESO. §61 implementa documento editable parcial cerrado,
+forma interna con binding y revision humana separada de campos de servidor.
+111 pruebas nuevas aprobadas; 231 focalizadas y 419 de schemas. Black/Ruff y
+whitespace correctos. Ultima suite integral 2234 passed (§58), no reejecutada.
+Sin persistencia/API/evaluador ni apertura de gates; fuentes oficiales pendientes.
+Proximo: asociacion/hash de resolucion v1; luego persistencia/eventos/RLS/API.
+Sin migracion nueva ni commit.
+
+## 2026-10-06 — M3-T1: contratos/matriz de resolucion EIPD definidos
+
+Alcance integral, EN PROGRESO. §60 concreta documento parcial cerrado, riesgos,
+medidas, fuentes/consulta condicionales y revision humana con metadata de servidor.
+Matriz separa incompleto/revision y preparacion/decision/vigencia; hashes y eventos
+no editables por cliente. Confirmaciones siguen bloqueadas; fuentes pendientes.
+Proximo: schemas separados y pruebas de contrato. Solo documentacion; ultima
+suite 2234 passed (§58), no reejecutada. Sin migracion nueva ni commit.
+
+## 2026-10-06 — M3-T1: resolucion EIPD acotada disenada
+
+Alcance integral, EN PROGRESO. §59 delimita registro de EIPD externa, analisis,
+revision humana/eventos trazables y gate separado; positivo EIPD se conserva.
+Primer soporte previsto: excepciones sensibles de derechos solas/con biometria,
+sin otros positivos/rutas pendientes ni riesgo residual alto. Frontera de producto,
+sin aprobacion regulatoria automatica; workflow completo sigue diferido.
+Fuentes legales verificadas; orientaciones especificas no verificadas, tarea pendiente
+antes de habilitar confirmaciones. Proximo: contratos/matriz de resolucion y eventos.
+Solo documentacion, gates actuales bloqueados; ultima suite 2234 passed (§58),
+no reejecutada aqui. Sin migracion nueva ni commit.
+
+## 2026-10-06 — M3-T1: integracion biometrica de derechos
+
+Alcance integral, EN PROGRESO. Readiness nullable, detector y barreras biometricas
+integrados con dependencia sensible y residualidad en ambos sentidos (§58).
+Ruta de excepcion no exige expediente de consentimiento; mezcla mantiene revision.
+Doce casos nuevos, seis HTTP con RAT real; 251 verificaciones focalizadas aprobadas.
+Regresion integral: 2234 passed en 218.12 s; formato/lint/whitespace correctos.
+Completo documental no confirma excepcion: EIPD conserva bloqueo/positivo.
+Proximo: definir resolucion EIPD antes de habilitar estas confirmaciones.
+Sin migracion nueva ni commit.
+
+## 2026-10-06 — M3-T1: evaluador puro biometrico de derechos
+
+Alcance integral, EN PROGRESO. Preparacion biometrica, dependencia sensible,
+vinculos de contexto/alcance e informacion por sistema implementados (§57).
+208 pruebas nuevas aprobadas; formato/lint/whitespace correctos.
+Evaluador aislado: todavia no expuesto ni integrado en detector/gates API.
+Proximo: readiness e integracion biometrica con residualidad y EIPD conservado.
+Ultima suite integral anterior 2014 passed (§56), no reejecutada en este paso.
+Sin cambios de asociaciones/migracion ni commit.
+
+## 2026-10-06 — M3-T1: readiness e integracion sensible de derechos
+
+Alcance integral, EN PROGRESO. Evaluador sensible conectado a detector, readiness
+nullable y barreras compartidas; residualidad explicita en ambos sentidos (§56).
+Completo documental no confirma excepcion: EIPD conserva bloqueo/positivo y
+rechaza falso negativo. Doce casos nuevos, incluidos seis HTTP con RAT real.
+209 verificaciones focalizadas y seis HTTP ampliadas aprobadas; regresion
+integral: 2014 passed en 199.23 s. Formato/lint/whitespace correctos.
+Proximo: evaluador biometrico de derechos y vinculos; despues integracion.
+Sin migracion nueva ni commit.
+
+## 2026-10-06 — M3-T1: evaluador puro de excepcion sensible
+
+Alcance integral, EN PROGRESO. Preparacion/aplicabilidad de derechos sensible
+implementada segun §51/§55: contexto, etapa, foro, necesidad, evidencia y alcance.
+172 pruebas nuevas aprobadas; formato/lint/whitespace correctos.
+Evaluador aislado: todavia no expuesto ni integrado en detector/gates API.
+Controles transversales y EIPD siguen bloqueando, incluso completo documental.
+Proximo: integracion/readiness sensible con residualidad; despues biometrico.
+Ultima suite integral anterior 1830 passed (§54), no reejecutada en este paso.
+Sin migracion nueva ni commit.
+
+## 2026-10-06 — M3-T1: asociaciones de excepciones implementadas
+
+Alcance integral, EN PROGRESO. Especiales v10/EIPD v11 incluyen ambos expedientes;
+comparadores historicos conservados. Presencia no cubierta tiene motivos propios;
+mutaciones invalidan asociaciones y el reaporte es explicito (§54).
+118 casos nuevos: 96 servicios y 22 HTTP. Regresion integral: 1830 passed en 184.29 s.
+Confirmacion sigue bloqueada por excepcion_derechos_no_preparada y barreras EIPD.
+Proximo: evaluador de excepcion sensible de derechos; despues biometrico/vinculos.
+Sin migracion nueva ni commit.
+
+## 2026-10-06 — M3-T1: persistencia/API de excepciones
+
+Alcance integral, EN PROGRESO. Ambos expedientes almacenados y expuestos;
+migracion local a40c2e5f8b19 aplicada, Alembic check sin diferencias.
+Tres casos HTTP aprobados; regresion integral 1712 passed en 169.95 s (§53).
+Presencia de expediente bloquea confirmacion y preserva borrador/vigente.
+Proximo: asociaciones especiales v10/EIPD v11; despues evaluadores propios.
+EIPD conserva bloqueo; sin commit.
+
+## 2026-10-06 — M3-T1: schemas de excepciones implementados
+
+Alcance integral, EN PROGRESO. RightsExceptionContextV1 y documentos sensible/
+biométrico de derechos cerrados, parciales y separados de consentimiento.
+102 casos nuevos; 252 pruebas seleccionadas de contratos aprobadas. Diseño §52.
+
+Sin persistencia/API/asociaciones ni evaluador/gate; EIPD conserva bloqueo.
+Próximo: persistencia/exposición de ambos expedientes y asociaciones compatibles.
+Última suite integral anterior 1585 passed, no reejecutada aquí.
+Formato/lint/whitespace correctos; sin migración nueva ni commit.
+
+## 2026-10-06 — M3-T1: contratos de excepción de derechos diseñados
+
+Alcance integral, EN PROGRESO. §51 fija RightsExceptionContextV1 y expedientes
+sensible/biométrico independientes; foro administrativo, etapa/condicionales,
+necesidad y evidencia, vínculos/scopes, información conservadora y residualidad.
+Sin dependencia artificial de consentimiento. EIPD conserva positivo y bloqueo.
+
+Próximo: implementar schemas y pruebas de contrato. Solo documentación;
+última suite 1585 passed y 58 verificaciones posteriores, no reejecutadas aquí.
+Sin migración ni commit; resolución EIPD/confirmación de excepción pendientes.
+
+## 2026-10-06 — M3-T1: primera excepción biométrica delimitada
+
+Alcance integral, EN PROGRESO. Se prioriza formulación/ejercicio/defensa de derechos
+por remisión art16ter a art16bis(d); dependencia sensible art16d necesita validador
+propio. Base ordinaria no aprueba excepción automáticamente. Diseño §50.
+
+EIPD positivo conserva bloqueo: preparación documental no habilita confirmación
+sin resolver esa dependencia. No alterar screening para eludirla. Próximo:
+contratos/matriz de excepción sensible y biométrica, con scopes y foro específicos.
+
+Solo documentación; última suite 1585 passed y 58 verificaciones posteriores.
+Sin pruebas reejecutadas, migraciones ni commit.
+
+## 2026-10-06 — M3-T1: evidencia biométrica ampliada
+
+Alcance integral, EN PROGRESO. Seis casos HTTP de bases ordinarias y dieciséis
+concurrentes nuevos con RAT real y cuatro regímenes preparados. Conservación
+íntegra del vigente/documentos históricos ante rechazo. Diseño §49.
+
+58 verificaciones focalizadas aprobadas: concurrencia 41, HTTP biométrico 17.
+Concurrencia real biométrica cubre consentimiento_art12; no extrapolar otras bases.
+Última suite integral anterior 1585 passed (§48), no reejecutada en este paso de
+pruebas/documentación. Formato/lint/whitespace correctos; sin migración ni commit.
+Próximo: delimitar primera excepción biométrica sin consentimiento dentro del
+alcance integral, con contrato propio y remisión normativa revisada.
+
+## 2026-10-06 — M3-T1: confirmación biométrica integrada
+
+Alcance integral, EN PROGRESO. Primera ruta biométrica por consentimiento
+preparado integrada con detector/gate y EIPD. Régimen conserva dependencias,
+restricciones y asociaciones; excepciones siguen bloqueadas. Diseño §48.
+
+Suite integral **1585 passed en 155.13s**; 19 casos transversales nuevos, 176
+pruebas seleccionadas biometría/salud y once HTTP biométricos aprobados.
+Black/Ruff/whitespace y Alembic check correctos. Sin migración nueva ni commit.
+Próximo: HTTP biométrico de seis bases y concurrencia con constructor RAT real.
+
+## 2026-10-06 — M3-T1: preparación biométrica implementada
+
+Alcance integral, EN PROGRESO. Evaluador puro y biometric nullable en readiness;
+motivos compartidos de preparación GET/POST. Completo sigue bloqueado por régimen
+sin validador integrado. Diseño §47. Próximo: integración detector/gate y EIPD.
+
+Suite integral **1566 passed en 154.38s**, incluidas 73 pruebas puras y un caso
+HTTP nuevos. Black/Ruff/whitespace y Alembic check correctos.
+Sin migración nueva ni commit; excepciones y regímenes restantes siguen pendientes.
+
+## 2026-10-06 — M3-T1: persistencia biométrica implementada
+
+Alcance integral, EN PROGRESO. Expediente biométrico en CREATE/PATCH/GET y JSONB
+nullable; asociaciones especiales v9/EIPD v10 compatibles. Head f39b1d4e7a08
+aplicado; Alembic check aprobado. Diseño §46. Régimen sigue bloqueado.
+
+Suite integral 1492 passed en 150.93s; diez casos HTTP focalizados aprobados tras
+ampliación final de protección del confirmado. Formato/lint/whitespace correctos.
+Sin commit. Próximo: evaluador puro y readiness, antes de habilitar gate/EIPD.
+
+## 2026-10-06 — M3-T1: schemas biométricos implementados
+
+Alcance integral, EN PROGRESO. BiometricSystemV1/BiometricAssessmentV1 y 53 casos
+nuevos; 150 pruebas seleccionadas de contratos aprobadas. Formato/lint correctos.
+Sin persistencia/API/asociaciones ni evaluador/gate; biometría sigue bloqueada.
+Diseño §45. Próximo: persistencia/exposición y asociaciones compatibles.
+
+Última suite integral anterior: 1429 passed (§41), no reejecutada aquí.
+Sin migración nueva ni commit.
+
+## 2026-10-06 — M3-T1: contrato biométrico diseñado
+
+Alcance integral, EN PROGRESO. §44 define BiometricAssessmentV1/BiometricSystemV1,
+matriz por sistema, dependencias sensibles, scopes, asociaciones futuras y
+aceptación. No habilita biometría ni sus excepciones. Próximo: schemas y pruebas.
+
+Solo documentación; última suite 1429 passed y Alembic check aprobado (§41),
+no reejecutados. Sin migración nueva ni commit.
+
+## 2026-10-06 — M3-T1: alcance integral confirmado
+
+El usuario decide continuar alcance integral; no se adopta entrega inicial para
+cierre. M3-T1 EN PROGRESO. Siguiente régimen: biometría, diseño §43.
+Próximo paso: contrato y matriz de completitud/aplicabilidad para primera ruta
+por consentimiento expreso. Excepciones y otros regímenes siguen pendientes
+funcionales dentro del alcance integral, sin habilitación automática.
+
+Solo documentación. Última suite 1429 passed; Alembic check aprobado (§41).
+Sin pruebas reejecutadas, migraciones ni commit.
+
+## 2026-10-06 — M3-T1: propuesta de entrega preparada
+
+M3-T1 EN PROGRESO. Propuesta revisable en m3-t1-propuesta-entrega.md:
+backend de seis bases ordinarias, sensible titular, geolocalización y primer
+alcance de salud. Pendientes funcionales explicitados; no diferidos automáticamente.
+Decisión pendiente: entrega inicial o continuar alcance integral. Diseño §42.
+
+Solo documentación. Última suite 1429 passed; Alembic check aprobado (§41).
+Sin pruebas reejecutadas, migraciones ni commit; no se declara DONE.
+
+## 2026-10-06 — M3-T1: drift global corregido
+
+M3-T1 EN PROGRESO. Modelos alineados con índices históricos y nombre de unique:
+29 índices declarados, sin eliminar índices ni modificar la base de datos.
+Alembic check global aprobado, sin operaciones nuevas. Diseño §41.
+
+Suite integral posterior: **1429 passed en 140.69s**. Black/Ruff/whitespace
+correctos. Sin migración nueva ni commit. Próximo: propuesta explícita de alcance
+de entrega y tratamiento de regímenes pendientes antes del cierre.
+
+## 2026-10-06 — M3-T1: cadena de migraciones revisada
+
+M3-T1 EN PROGRESO. Head único e28a0c3f6d97 aplicado localmente; cadena lineal.
+Formato/lint aprobados para 46 archivos Python nuevos/modificados. Comparación
+Alembic limitada a tablas M3 sin diferencias; última suite integral 1429 passed.
+
+Hallazgo pendiente: alembic check global falla por índices/nombres de restricciones
+fuera de M3. No se modificó la base ni se generó migración correctiva. Próximo:
+inventariar procedencia del drift y definir corrección que conserve los índices.
+Regímenes especiales restantes siguen pendientes de decisión explícita de alcance.
+Diseño §40; revisión focalizada, sin commit.
+
+## 2026-10-06 — M3-T1: representación HTTP verificada
+
+M3-T1 EN PROGRESO. Cuatro casos HTTP aprobados para representante legal y
+mandatario, con y sin salud: asociaciones, rechazo sin alterar el vigente,
+reparación a titular, reemplazo y protección posterior. Representación sensible
+sigue requiriendo revisión; mandato completo no evita ese límite de producto.
+
+Suite completa: **1429 passed en 140.16s**. Black/Ruff/whitespace correctos.
+Solo pruebas y documentación; sin migración nueva ni commit. Diseño §39.
+Próximo: revisión final de diff/cadena Alembic y decisión explícita del alcance
+de regímenes pendientes antes de declarar DONE.
+
+## 2026-10-06 — M3-T1: representación y criterios de cierre revisados
+
+M3-T1 EN PROGRESO. Diseño §38 consolida el límite actual de representación
+sensible y los criterios de cierre. Representante legal/mandatario conservan
+revisión; soporte específico y alcance granular siguen pendientes.
+
+Próximo paso: comprobar por HTTP ambos valores, con y sin salud, conservación
+del vigente ante rechazo y reparación a titular. Después: validación integral,
+revisión final de cambios y delimitación explícita de regímenes pendientes.
+
+Solo documentación; sin pruebas reejecutadas, migraciones ni commit.
+Última suite completa: 1407 passed; después, 35 verificaciones focalizadas.
+
+## 2026-10-06 — M3-T1: evidencia conjunta con RAT real
+
+M3-T1 EN PROGRESO. Salud, consentimiento sensible y geolocalización preparados
+juntos: seis casos HTTP nuevos y doce concurrentes con constructor RAT real,
+PostgreSQL/app_user/RLS. Cambios durante bloqueo se revalidan; rechazo conserva
+el vigente y reparación permite reemplazo. Se mantienen asociaciones y EIPD.
+
+Validación focalizada: 25 pruebas de concurrencia y 10 HTTP conjuntas aprobadas.
+Alcance nuevo: consentimiento_art12, salud en contexto otro. Otras cinco bases
+conservan concurrencia de salud con RAT simulado. Última suite completa anterior:
+1407 passed; no reejecutada en este paso de pruebas/documentación.
+
+Sin cambios de implementación, migración nueva ni commit. Diseño §37.
+Próximo: revisar representación sensible y criterios de cierre M3-T1.
+
+## 2026-10-06 — M3-T1: integración de confirmación de salud preparada
+
+M3-T1 EN PROGRESO. Detector admite salud_perfil_biologico_art16bis por
+consentimiento preparado, junto al consentimiento sensible preparado. Contextos
+restringidos siguen revisión; excepciones/rutas no soportadas y representación
+no se habilitan. EIPD evalúa preparación de la propuesta de salud; pendiente
+mantiene ruta_especial_pendiente. No interpreta la base art13 como excepción.
+
+Gate GET/POST comparte salud_no_preparada; POST revalida tras bloqueo. Se conservan
+regímenes detectados, asociaciones, bases ordinarias y screening EIPD negativo.
+Preparación documental no verifica externamente normas o evidencia.
+
+Validación: **1407 passed**. HTTP seis bases con contexto otro/laboral, preparación
+pendiente, EIPD positivo, conservación del vigente, reemplazo y protección de
+confirmado. Transversal: salud/sensible/geolocalización simultáneos, cada supuesto
+EIPD y regímenes concurrentes bloqueados. PostgreSQL/app_user/RLS con RAT simulado:
+rollback/fallo de flush y concurrencia de salud con seis bases, incluida relectura
+del expediente cambiado a pendiente durante bloqueo. No afirmar RAT real en estos
+nuevos casos transaccionales. Black/Ruff/whitespace correctos.
+
+Sin migración nueva ni commit. Próximo paso: cubrir HTTP conjunto salud/sensible/
+geolocalización y ampliar concurrencia de salud con constructor RAT real.
+
+## 2026-10-06 — M3-T1: evaluador y readiness de salud
+
+M3-T1 EN PROGRESO. Evaluador puro de salud revalida contratos y propaga motivos
+checklist/sensible. Completitud de referencias sanitarias, evidencia, contexto,
+finalidad/rol/alcance y condicionales de cesión/muestras. Contextos restringidos
+mantienen revisión incluso con referencias y respuestas completas. No verifica
+jurídicamente las normas ni consulta URLs. Orden determinista e inmutabilidad.
+
+Readiness añade health nullable cuando hay documento o régimen detectado;
+preparación pendiente agrega salud_no_preparada. Completo no habilita confirmación:
+detector mantiene validador_no_implementado de salud. GET no cambia asociaciones.
+
+Validación: suite completa **1354 passed**, incluidas 65 pruebas puras y dos HTTP
+nuevas. Ajuste final del motivo de condición ausente verificado con las **65
+pruebas puras** tras la ejecución general. Black/Ruff/whitespace correctos.
+Sin migración ni commit; head local e28a0c3f6d97. Próximo paso: integrar gate de
+salud exclusivamente para la ruta preparada del primer soporte, conservando
+restricciones, regímenes concurrentes y EIPD.
+
+## 2026-10-06 — M3-T1: persistencia y asociaciones de salud
+
+M3-T1 EN PROGRESO. Health_assessment disponible en CREATE/PATCH/GET; JSONB
+nullable con SQL NULL/check objeto. Migración aditiva e28a0c3f6d97 aplicada local
+tras d17f9b2e5c86. Omisión conserva, objeto reemplaza y null borra borrador.
+
+Guardados actuales usan especiales v8/EIPD v9 incluyendo documento final de
+salud. Comparadores anteriores se conservan; documento no nulo con especiales
+v1–v7/EIPD v1–v8 requiere asociacion_salud_no_cubierta. Cambio sin reaporte deja
+asociaciones obsoletas. Residual de salud bloquea; régimen declarado sigue con
+validador_no_implementado. No se añade evaluador/readiness específico ni gate.
+
+Validación: **1287 passed** en suite completa. Nueve casos HTTP nuevos de salud:
+versiones históricas con/sin documento, tenant, fechas/URL, omisión/borrado SQL,
+check objeto, guardado conjunto, obsolescencia y rechazo sin mutación. Caso de
+salud con sensible sin expediente rechaza 400 por precedencia de incompletitud.
+Black/Ruff/whitespace correctos. Sin commit. Próximo paso: evaluador puro de salud
+y preparación nullable en readiness, conservando bloqueo de confirmación.
+
+## 2026-10-06 — M3-T1: schema del expediente de salud
+
+M3-T1 EN PROGRESO. Implementados HealthAssessmentV1, HealthLegalReferenceV1 y
+HealthCollectionContextV1 según §32. Contratos cerrados, borradores parciales,
+route consentimiento_expreso, listas independientes y contextos duplicados
+rechazados. Referencias usan HttpUrl (http/https) con serialización JSON textual;
+no verifican fuente/contenido/vigencia externamente. Fechas factuales conservadas.
+
+Validación focalizada **107 passed**, incluidas 49 pruebas nuevas y compatibilidad
+con schemas previos. Black/Ruff/whitespace correctos. Última suite completa
+anterior 1217 passed, no repetida para contrato aislado. Salud sigue bloqueada;
+no exposición HTTP, persistencia ni evaluador añadidos. Sin migración ni commit.
+Próximo paso: persistencia/exposición y asociaciones especiales v8/EIPD v9.
+
+## 2026-10-06 — M3-T1: contrato y matriz documental de salud
+
+M3-T1 EN PROGRESO. Definido diseño §32 HealthAssessmentV1, referencias sanitarias,
+contextos de recolección, cesión/muestras, evidencia y condicionales. Ruta inicial
+con consentimiento preparado; contextos restringidos conservan revisión incluso
+con documentación, hasta validador propio. Alcance conservador coincide con
+consentimiento sensible; no se infiere clasificación sanitaria desde flags M2.
+
+Fuente oficial artículo 16 bis revisada completa. Solo documentación: salud sigue
+bloqueada, sin schema/persistencia/gate nuevos ni commit. Próximo paso: schema y
+pruebas de contrato. Última suite completa anterior 1217 passed; última ampliación
+concurrencia 13 passed. No se repiten pruebas por diseño documental.
+
+## 2026-10-06 — M3-T1: priorización de salud/perfil biológico
+
+M3-T1 EN PROGRESO. Diseño §31 prioriza salud_perfil_biologico_art16bis con primer
+alcance documental por consentimiento expreso. Prerrequisito sensible no sustituye
+fundamento sanitario/contexto propios. Excepciones y regímenes concurrentes no se
+habilitan. Fuente oficial referenciada; contrato físico/matriz quedan como próximo
+paso. No se confunde delimitación con implementación.
+
+Cambio exclusivamente documental, sin repetir pruebas. Última suite completa
+anterior 1217 passed; última ampliación de concurrencia 13 passed (8 nuevos).
+Sin código/migración ni commit. Régimen de salud continúa bloqueado.
+
+## 2026-10-06 — M3-T1: concurrencia con constructor RAT real
+
+M3-T1 EN PROGRESO. Ampliada evidencia con base consentimiento y coexistencia
+sensible/geolocalización: dos conexiones PostgreSQL/app_user/RLS, filas M2 y
+constructor reales, espera observada por pg_blocking_pids y borrador precargado
+en segunda sesión. Commit/rollback de primera confirmación, cambios pendientes
+de ambos documentos y cambio de sensibilidad M2 durante espera; rechazo conserva
+confirmado y snapshots. No se extrapola RAT real a las otras cinco bases.
+
+Validación: 8 casos nuevos aprobados; módulo test_concurrent_creation_licitud.py
+completo **13 passed**. Black/Ruff/whitespace correctos. Última suite completa
+anterior **1217 passed**, no repetida por ampliación focalizada de pruebas.
+Matriz/backlog actualizados. Sin implementación/migración nueva ni commit.
+Siguiente paso: priorizar y delimitar próximo régimen especial pendiente.
+
+## 2026-10-06 — M3-T1: coexistencia HTTP sensible/geolocalización
+
+M3-T1 EN PROGRESO. Cerrada brecha HTTP conjunta de la matriz de aceptación;
+backlog actualizado. Cuatro casos contra PostgreSQL/app_user/RLS con RAT real:
+confirmación preparada, no/pendiente de cualquiera, obsolescencia/reaporte,
+coherencia GET/POST especial/EIPD, rechazo sin modificar confirmado ni borrador,
+EIPD positivo, reparación/reemplazo y protección de confirmado.
+
+Validación focalizada: **4 passed, 85 deselected**; Black/Ruff/whitespace correctos.
+Última suite completa anterior: **1217 passed**, no repetida porque esta etapa
+solo añade cobertura y documentación. Sin cambios de implementación, migración
+ni commit. Próximo paso: revisar concurrencia con constructor RAT real.
+
+## 2026-10-06 — M3-T1: revisión de aceptación, paso 1
+
+M3-T1 EN PROGRESO. Contrastados diseño, código y pruebas; matriz en
+m3-t1-revision-aceptacion.md y referencia añadida a docs/backlog.md, que carecía
+de entrada M3-T1. Distingue implementación probada, funcionalidad pendiente,
+límites de evidencia y diferidos explícitos. EIPD completo no es brecha de esta
+etapa; frontend requiere delimitación de roadmap.
+
+Siguiente recomendado: evidencia HTTP conjunta sensible/geolocalización, después
+revisión del límite RAT simulado en concurrencia y priorización de régimen.
+Última suite completa anterior 1217 passed; revisión solo documental, sin repetir
+suite. Sin cambios de código/migración ni commit.
+
+## 2026-10-06 — M3-T1: confirmación por consentimiento expreso sensible
+
+M3-T1 permanece **EN PROGRESO**. Integrada exclusivamente la condición
+sensibles_art16/consentimiento_expreso_art16 por consentimiento preparado.
+Detector conserva todos los regímenes detectados; otras rutas sensibles y
+regímenes sin validador siguen bloqueados. Coexistencia con geolocalización
+preparada conserva las barreras concurrentes y el screening EIPD negativo.
+
+Gate compartido GET/POST incluye consentimiento_sensible_no_preparado y vuelve
+a evaluar checklist, alcance, evidencia, medio y representación. EIPD requiere
+revisión de consentimiento sensible propuesto sin preparación; no lo convierte
+en excepción ni omite respuestas. Bases art13 conservan sus propios requisitos.
+
+Validación: **1217 passed** en suite completa. HTTP con seis bases/tres medios,
+EIPD positivo, preparación pendiente, protegido confirmado, conservación del
+vigente ante rechazo y reemplazo sensible/ordinario. PostgreSQL con app_user/RLS:
+rollback, fallo de flush y concurrencia sensible con seis bases; relectura tras
+bloqueo ante cambio de prueba a pendiente. RAT simulado en pruebas transaccionales,
+RAT real en HTTP. Regímenes concurrentes y coexistencia sensible/geolocalización
+cubiertos en evaluador transversal. Black/Ruff/whitespace correctos.
+
+Sin commit ni migración nueva; head local d17f9b2e5c86. Siguiente paso: revisar
+brechas de aceptación restantes de M3-T1 y priorizar el próximo régimen pendiente.
+
+## 2026-10-06 — M3-T1: preparación del consentimiento expreso sensible
+
+M3-T1 permanece **EN PROGRESO**. Implementado evaluador puro del expediente
+sensible según §24: checklist general reutilizado, medios coherentes, evidencia,
+finalidad/rol, representación pendiente y selectores independientes. Requiere
+cobertura de categorías sensibles y todos los grupos del alcance RAT; no infiere
+una matriz de pares. Tecnología tiene aplicabilidad condicional y residuales.
+Fechas/versiones son apoyos opcionales; no deciden vigencia automáticamente.
+
+Readiness añade sensitive_consent nullable al existir expediente o propuesta de
+ruta sensible por consentimiento. Preparación pendiente agrega
+consentimiento_sensible_no_preparado; contrato inválido conserva rechazo.
+No se habilita el gate sensible: incluso preparado mantiene el validador especial
+pendiente y POST confirm rechaza sin alterar el borrador.
+
+Validación: **1159 passed** en suite completa, incluidas 74 pruebas del evaluador
+más HTTP con tres medios, preparación completa, obsolescencia y borrado.
+Black/Ruff/whitespace correctos. Sin commit ni migración nueva; head local sigue
+d17f9b2e5c86. Siguiente paso: integración transversal de la ruta sensible preparada,
+con controles concurrentes, EIPD y compatibilidad GET/POST.
+
+## 2026-10-06 — M3-T1: persistencia y asociaciones del consentimiento sensible
+
+M3-T1 permanece **EN PROGRESO**. Sensitive_consent_assessment disponible en
+CREATE/PATCH/GET con JSONB nullable, SQL NULL y restricción de objeto.
+Omisión conserva; objeto reemplaza; null borra únicamente borrador.
+Migración aditiva d17f9b2e5c86 aplicada localmente después de c06e8a1d4b75.
+
+Nuevos guardados usan asociaciones especiales v7/EIPD v8 incluyendo expediente
+sensible final. Comparadores históricos se conservan: documento no nulo con
+especiales v1–v6/EIPD v1–v7 requiere revisión por asociación no cubierta.
+Cambios sin reaporte dejan asociaciones obsoletas; GET no las reescribe.
+Expediente residual bloquea y sensibles declarados siguen con validador pendiente.
+
+Validación: **1082 passed** en suite completa, Black/Ruff/whitespace correctos.
+Cobertura HTTP: tenant, fechas, contratos inválidos, omisión/borrado SQL NULL,
+check objeto, guardado conjunto, obsolescencia, versiones históricas con/sin
+expediente y rechazo de confirmación sensible preservando borrador.
+Sin commit. Siguiente paso: evaluador puro y preparación sensible en readiness;
+la habilitación transversal permanece pendiente.
+
+## 2026-10-06 — M3-T1: contrato del expediente de consentimiento sensible
+
+M3-T1 permanece **EN PROGRESO**. Añadido SensitiveConsentAssessmentV1 según
+§24: borradores parciales, tres medios expresos, fechas factuales, alcance,
+respuestas y evidencia. Contrato cerrado; no admite aprobación del cliente.
+Los contratos anteriores se conservan. Esta etapa todavía no expone el nuevo
+expediente en CREATE/PATCH/GET ni añade persistencia o asociaciones.
+
+Validación focalizada: **58 passed** (30 pruebas nuevas y esquemas existentes);
+Black y Ruff correctos. Última suite completa anterior: **1044 passed**.
+Sin commit ni nueva migración; ruta sensible continúa bloqueada.
+
+Siguiente paso: persistencia y exposición del expediente junto con asociaciones
+especiales v7/EIPD v8 y protección de expedientes residuales.
+
+## 2026-10-06 — M3-T1: diseño de consentimiento expreso sensible
+
+M3-T1 permanece **EN PROGRESO**. Definido §24 para sensibles_art16 por
+consentimiento_expreso_art16: declaración/medios expresos, prueba y cobertura
+sensible coherente con checklist/RAT. Expediente independiente y asociaciones
+especiales v7/EIPD v8 propuestas preservan históricos. Primer soporte titular;
+representación y otros regímenes requieren validadores propios. EIPD no se omite.
+
+Paso documental; ruta sensible sigue bloqueada. Última suite **1044 passed**;
+no se repite por cambios solo documentales. Whitespace correcto. Sin commit ni
+migraciones nuevas. Fuente oficial citada en diseño.
+
+Siguiente paso: schemas/persistencia/asociaciones de consentimiento sensible,
+manteniendo bloqueo; después evaluador y gate transversal.
+
+## 2026-10-06 — M3-T1: confirmación especial de geolocalización
+
+M3-T1 permanece **EN PROGRESO**. Geolocalización preparada integra el detector
+especial y la coherencia EIPD. Resultado regimenes_preparados conserva regímenes;
+gate compartido admite geolocalización completa con asociación vigente, base
+preparada y screening EIPD negativo. Otros regímenes/vulnerabilidad/EIPD positivos
+siguen bloqueando. Pending_controls distingue validadores especiales restantes.
+
+Validación: **1044 passed**. HTTP con seis bases, motivos GET/POST, rechazo con
+conservación de vigente, EIPD positivo y reemplazo en ambas direcciones;
+rollback/fallo de flush y concurrencia PostgreSQL con/sin geolocalización para
+las seis bases, incluido cambio del aviso a pendiente tras espera de bloqueo.
+Cada supuesto EIPD y régimen concurrente, residuales/contexto obsoleto y reglas
+no implementadas siguen bloqueados. Formato/lint/whitespace correctos.
+Sin commit ni nuevas migraciones.
+
+Siguiente paso: definir documentalmente el validador de consentimiento expreso
+para datos sensibles art16, preservando regímenes concurrentes y controles EIPD.
+No cerrar M3-T1: otros validadores especiales y gestión EIPD pendientes.
+
+## 2026-10-06 — M3-T1: preparación de geolocalización
+
+M3-T1 permanece **EN PROGRESO**. Evaluador puro de geolocalización implementado:
+aviso/entrega, respuestas fundadas, terceros condicionales, evidencia y scope
+coherente con RAT/declaración/condición. Readiness expone geolocation cuando hay
+expediente o régimen; null si ambos ausentes. Preparación completa no elimina
+bloqueos especiales/EIPD; confirmación especial sigue pendiente.
+
+Validación: **996 passed**. Faltantes/negativas/pendientes, ambas declaraciones
+factuales, condicionales/residuales, alcance propio/externo, finalidad/rol,
+referencias/evidencia, contratos inválidos, canonización, orden/inmutabilidad y
+HTTP con tenant/contexto actual. Formato/lint/whitespace correctos.
+Sin commit ni nuevas migraciones. No se certifica aviso/entrega desde fechas.
+
+Siguiente paso: integrar resultado en detector especial y coherencia EIPD,
+admitiendo solo geolocalización preparada y manteniendo bloqueos concurrentes;
+probar gates compartidos, rollback/relectura/concurrencia y seis bases.
+
+## 2026-10-06 — M3-T1: persistencia de geolocalización
+
+M3-T1 permanece **EN PROGRESO**. GeolocationAssessmentV1 admite borradores
+cerrados/parciales de aviso, entrega, scope, respuestas y evidencia factual.
+Migración c06e8a1d4b75 aplicada localmente, check SQL NULL/objeto. Nuevas
+asociaciones especiales v6/EIPD v7 incluyen expediente final; comparadores
+históricos preservados, documento no nulo exige revisión en versiones anteriores.
+Documento residual y régimen declarado siguen bloqueando confirmación.
+
+Validación: **931 passed**. Fechas, campos/respuestas/versiones inválidos,
+omisión/null SQL/check objeto, protección tenant, cambio sin reaporte, guardado
+conjunto y todas las asociaciones históricas; prueba explícita de régimen
+persistido sin habilitar confirmación. Bases anteriores/concurrencia preservadas.
+Formato/lint/whitespace correctos. Sin commit.
+
+Siguiente paso: evaluador de preparación de geolocalización y salida específica
+en readiness; después integrar gate especial y coherencia EIPD.
+
+## 2026-10-06 — M3-T1: cobertura ordinaria y diseño de geolocalización
+
+M3-T1 permanece **EN PROGRESO**. Revisados gates y cobertura real de las seis
+bases ordinarias. Definido §23: primer validador especial de geolocalización
+art16sexies, información específica, scope, condicionales y contrato documental.
+Columna independiente/asociaciones especiales v6/EIPD v7 propuestas preservan
+históricos. Integración futura debe mantener bloqueos EIPD y otros regímenes.
+
+Paso documental, ninguna confirmación especial habilitada. Última suite
+**914 passed**; sin repetirla por cambios solo documentales. Whitespace correcto.
+Sin commit ni migraciones nuevas. Fuente oficial citada en diseño.
+
+Siguiente paso: schemas/persistencia/asociaciones de geolocalización, manteniendo
+bloqueo especial; después evaluador y gate transversal.
+
+## 2026-10-06 — M3-T1: confirmación ordinaria de obligaciones económicas
+
+M3-T1 permanece **EN PROGRESO**. Art13a confirma con expediente económico
+completo, RAT actual y controles especiales/EIPD negativos vigentes. Gate
+compartido con readiness: incompleto400/revisión409 y mismos motivos.
+Ambas rutas/cuatro tipos, sin exigir expedientes de otras bases. No certifica
+admisibilidad de una deuda ni verifica fuentes externas.
+
+Validación: **914 passed**. HTTP rechazo/conservación/reemplazo y protección del
+confirmado; rollback/fallo de flush y concurrencia PostgreSQL para seis bases,
+incluido cambio pendiente mientras otro confirmador espera el bloqueo.
+Formato/lint/whitespace correctos. Sin nuevas migraciones ni commit.
+
+Las seis bases ordinarias tienen gate; regímenes especiales positivos, gestión
+EIPD y excepciones judiciales económicas siguen pendientes. No cerrar M3-T1.
+Siguiente paso: revisar cobertura conjunta de las seis bases y definir el primer
+validador especial pendiente con su alcance documental antes de habilitarlo.
+
+## 2026-10-06 — M3-T1: preparación de obligaciones económicas
+
+M3-T1 permanece **EN PROGRESO**. Evaluador económico puro implementado con
+completitud/aplicabilidad, declaración factual coherente con ruta, referencias,
+evidencia y motivos ordenados. Readiness expone economic_obligations contra RAT
+actual; confirmación art13a permanece bloqueada aun con preparación completa.
+No verifica fuentes externas ni calcula prescripción/exigibilidad.
+
+Validación: **885 passed**. Ambas rutas/cuatro tipos, faltantes, respuestas y
+precedencia, declaración factual, condicionales/residuales, referencias/evidencia,
+finalidad/rol, canonización, orden/inmutabilidad y HTTP con tenant/contexto actual.
+Formato/lint/whitespace correctos. Sin commit ni nuevas migraciones.
+
+Siguiente paso: gate económico compartido en confirmación, con controles
+transversales negativos vigentes; probar rechazo/reemplazo, rollback,
+relectura tras lock y concurrencia PostgreSQL para seis bases.
+
+## 2026-10-06 — M3-T1: persistencia de obligaciones económicas
+
+M3-T1 permanece **EN PROGRESO**. EconomicObligationsAssessmentV1 permite
+borradores cerrados/parciales, con rutas/tipos, referencias y evidencia factual.
+Migración bf5d7f9c3a64 aplicada localmente, check SQL NULL/objeto. Nuevas
+asociaciones especiales v5/EIPD v6 incluyen expediente final; históricos no se
+reescriben y versiones anteriores requieren revisión con económico no nulo.
+Evaluador/readiness específicos pendientes; confirmación art13a bloqueada.
+
+Validación: **813 passed**. Dos rutas/cuatro tipos, campos/enums/respuestas
+inválidos, fechas, omisión/null SQL/check objeto, protección tenant, cambios sin
+reaporte, guardado conjunto y todas las versiones históricas. Formato/lint/
+whitespace correctos. Bases anteriores y concurrencia conservadas. Sin commit.
+
+Siguiente paso: evaluador económico de completitud/aplicabilidad y motivos en
+readiness; después gate transaccional compartido.
+
+## 2026-10-06 — M3-T1: contrato documental de obligaciones económicas
+
+M3-T1 permanece **EN PROGRESO**. Definido §22 para art13a: obligación concreta,
+revisión de Título III, rutas con/sin comunicación y requisitos condicionales.
+Diseño de EconomicObligationsAssessmentV1, persistencia, asociaciones especiales
+v5/EIPD v6, evaluador/readiness y gate posterior. Situación socioeconómica no
+elimina controles sensibles; excepciones judiciales requieren revisión específica.
+Fuente oficial art13a y versión diferida BCN referenciadas en diseño.
+
+Paso documental: art13a sigue bloqueado en código. Última suite **793 passed**;
+no se repite por cambios únicamente documentales. Whitespace verificado.
+Sin commit ni nuevas migraciones.
+
+Siguiente paso: implementar schemas/persistencia y asociaciones v5/v6
+compatibles; luego evaluador y confirmación transaccional.
+
+## 2026-10-06 — M3-T1: confirmación ordinaria de defensa de derechos
+
+M3-T1 permanece **EN PROGRESO**. Art13e confirma con expediente de derechos
+completo, contexto RAT actual y controles especiales/EIPD negativos vigentes.
+Gate compartido con readiness: incompleto 400, revisión 409 y mismos motivos.
+Tres rutas y dos tipos de foro; no valida competencia jurídica ni exige
+expedientes de otras bases. Art13a y controles especiales positivos siguen
+bloqueados; gestión EIPD pendiente.
+
+Validación: **793 passed**. Flujo HTTP real con rechazo/conservación/reemplazo,
+protección de confirmados; rollback, fallo de flush y concurrencia PostgreSQL
+para cinco bases, con relectura de cambios después del bloqueo. Formato/lint/
+whitespace correctos. Migración vigente ae4c6e8b2f53; sin nuevas migraciones ni
+commit.
+
+Siguiente paso: definir documentalmente el expediente de obligaciones económicas
+art13a y su aplicabilidad antes de schemas, persistencia y confirmación.
+
+## 2026-10-06 — M3-T1: preparación de defensa de derechos
+
+M3-T1 permanece **EN PROGRESO**. Implementado evaluador puro de derechos con
+completitud, aplicabilidad por etapa y motivos ordenados. Readiness expone
+rights_defense contra RAT actual; preparación completa no habilita todavía
+confirmación art13e. No se infieren competencia jurídica ni plazos.
+
+Validación: **769 passed**. Tres rutas/dos foros, etapas y condicionales,
+faltantes, negativas/pendientes/fundamentos, residuales, evidencia, precedencia,
+canonización, orden/inmutabilidad y API con tenant/contexto actual. Formato,
+lint y whitespace correctos. Sin commit ni migraciones nuevas.
+
+Siguiente paso: integrar gate de derechos compartido en confirmación, con
+controles transversales negativos vigentes; probar rechazo/reemplazo,
+rollback, relectura tras lock y concurrencia PostgreSQL.
+
+## 2026-10-06 — M3-T1: persistencia de defensa de derechos
+
+M3-T1 permanece **EN PROGRESO**. RightsDefenseAssessmentV1 guarda borradores
+cerrados/parciales con rutas, foros, etapas y metadata de evidencia.
+Migración ae4c6e8b2f53 aplicada localmente, check SQL NULL/objeto.
+Asociación especial v4/EIPD v5 incluye expediente final; históricos no se
+reescriben y versiones anteriores requieren revisión con derechos no nulos.
+Evaluador y readiness específicos pendientes; confirmación art13e bloqueada.
+
+Validación: **727 passed**. Persistencia/fechas, campos/enums/respuestas inválidos,
+omisión/null SQL, check objeto, protección tenant, cambios sin reaporte,
+guardado conjunto y compatibilidad histórica. Formato/lint/whitespace correctos.
+Sin commit. Bases ordinarias habilitadas y concurrencia siguen pasando.
+
+Siguiente paso: evaluador de preparación de derechos con completitud,
+aplicabilidad por etapa y motivos en readiness; después gate transaccional.
+
+## 2026-10-06 — M3-T1: contrato documental de defensa de derechos
+
+M3-T1 permanece **EN PROGRESO**. Definido §21 para defensa_derechos_art13e:
+formulación/ejercicio/defensa ante tribunal u órgano público, derecho concreto,
+conexión, necesidad, etapas y documentación condicional. Texto oficial art13(e)
+verificado en Diario Oficial. Preparación para formular no exige causa iniciada.
+Se fijan schemas, persistencia, asociaciones especiales v4/EIPD v5 compatibles,
+evaluador/readiness y gate posterior; régimen sensible art16d sigue separado.
+
+Paso documental: la base continúa bloqueada en código. Última suite **721 passed**;
+no se repite por cambios solo de diseño. Whitespace correcto. Sin commit.
+
+Siguiente paso: implementar schemas/persistencia y asociaciones nuevas,
+manteniendo confirmación bloqueada; después evaluador y gate transaccional.
+
+## 2026-10-06 — M3-T1: confirmación ordinaria de obligación legal
+
+M3-T1 permanece **EN PROGRESO**. Obligación legal confirma con expediente
+normativo completo y controles especiales/EIPD negativos vigentes. Gate
+compartido con readiness, catálogo de bases habilitadas común y motivos
+GET/POST compatibles. Incompleto 400, revisión 409. No exige expedientes de
+otras bases ni verifica contenido/vigencia externa de fuentes normativas.
+
+Validación: **721 passed**. Ambas rutas, rechazo/reemplazo HTTP, conservación
+de anterior, cambio sin reaporte, controles positivos y rollback/fallo de flush/
+concurrencia PostgreSQL para cuatro bases. Formato/lint/whitespace correctos.
+Sin commit ni migraciones nuevas. Art13a/art13e y regímenes positivos siguen
+bloqueados; gestión EIPD pendiente.
+
+Siguiente paso: definir el expediente de defensa de derechos art13e, con
+alcance/documentación y controles antes de habilitarlo.
+
+## 2026-10-06 — M3-T1: preparación normativa en readiness
+
+M3-T1 permanece **EN PROGRESO**. Implementado evaluador puro de obligación
+legal con completitud/aplicabilidad, referencias, respuestas fundadas y motivos
+ordenados; readiness expone legal_obligation contra RAT actual. No verifica
+contenido, autenticidad o vigencia externa de fuentes. Confirmación sigue
+bloqueada incluso con expediente preparado.
+
+Validación: **705 passed**. Ambas rutas, faltantes, negativas/pendientes,
+referencias/evidencias incompletas, residuales, precedencia, canonización,
+orden/inmutabilidad y API con tenant/contexto actual. Formato/lint/whitespace
+correctos. Sin commit ni nuevas migraciones.
+
+Siguiente paso: integrar gate normativo compartido en confirmación, exigiendo
+completo y controles transversales negativos vigentes; probar reemplazo,
+rechazo, rollback, relectura tras lock y concurrencia PostgreSQL.
+
+## 2026-10-05 — M3-T1: persistencia de obligación legal
+
+M3-T1 permanece **EN PROGRESO**. LegalObligationAssessmentV1 guarda borradores
+cerrados/parciales con referencias normativas, URLs sintácticas y fechas.
+Migración 9e3b5d7f1a42 aplicada localmente con check SQL NULL/objeto.
+Nuevo guardado vincula asociación especial v3/EIPD v4 al expediente final;
+históricos no se reescriben y las versiones no cubiertas requieren revisión.
+Obligación legal sigue bloqueada en confirmación; evaluador específico pendiente.
+
+Validación: **670 passed**. Persistencia, campos/URL/respuestas inválidas,
+SQL NULL/check objeto, protección tenant, cambio sin reaporte, asociaciones
+finales y compatibilidad de versiones. Formato/lint/whitespace correctos.
+Sin commit. No se accede a red desde las URLs del expediente.
+
+Siguiente paso: evaluador puro de preparación normativa y salida específica
+en readiness, manteniendo confirmación bloqueada hasta integrar su gate.
+
+## 2026-10-05 — M3-T1: contrato documental de obligación legal
+
+M3-T1 permanece **EN PROGRESO**. Definido §20 para obligacion_legal_art13b,
+rutas obligación legal/tratamiento dispuesto por ley y referencias normativas
+con versión, disposición, fuente y análisis. Verificado artículo 13(b) en
+Diario Oficial. Se definen schemas cerrados, preparación/aplicabilidad,
+asociaciones especiales v3/EIPD v4 y compatibilidad sin reescribir históricos.
+No se afirma validación automática de autenticidad/vigencia de fuentes.
+
+Paso documental; la base sigue bloqueada en el código. Última suite ejecutada:
+**665 passed**; no se repite por cambios solo de diseño. Whitespace correcto.
+Sin commit.
+
+Siguiente paso: schemas/persistencia y nuevas asociaciones, manteniendo
+confirmación bloqueada; después evaluador/readiness y gate transaccional.
+
+## 2026-10-05 — M3-T1: confirmación contractual ordinaria
+
+M3-T1 permanece **EN PROGRESO**. Contrato/precontractual confirma con expediente
+completo y controles especiales/EIPD negativos vigentes. Gate compartido con
+readiness, motivos GET/POST coherentes; incompleto 400 y revisión 409.
+No exige consentimiento o LIA. Evalúa después de lock/refresco y antes de
+reemplazar, sin modificar documentos/asociaciones. Otras bases/regímenes
+positivos y continuación tras EIPD afirmativa siguen bloqueados.
+
+Validación: **665 passed**. Tres rutas completas; rechazo/obsolescencia,
+reemplazo API consentimiento -> precontractual -> consentimiento, conservación
+de anterior, rollback/fallo de flush y concurrencia PostgreSQL para tres bases.
+Formato/lint/whitespace correctos. Sin commit ni migraciones adicionales.
+
+Siguiente paso: definir el expediente de obligación legal art13b y su referencia
+normativa verificable, antes de implementar o habilitar esa base.
+
+## 2026-10-05 — M3-T1: preparación contractual en readiness
+
+M3-T1 permanece **EN PROGRESO**. Implementado evaluador contractual puro con
+completitud, aplicabilidad y motivos ordenados/inmutables. Readiness expone
+contract para la base contractual contra RAT actual. Distingue celebración,
+ejecución y medidas solicitadas; precontractual no exige contrato firmado.
+Referencias opcionales de apoyo se conservan; evidencia aportada incompleta y
+respuestas residuales se señalan. Confirmación contractual sigue bloqueada.
+
+Validación: **650 passed**; rutas completas, faltantes, negativas/pendientes,
+fundamentos, residuales, evidencia, contexto, rol, canonización, orden y lectura
+HTTP sin mutaciones/otro tenant. Formato/lint/whitespace correctos. Sin commit.
+No se añaden migraciones en este paso.
+
+Siguiente paso: integrar gate contractual compartido en confirmación ordinaria
+cuando completo y con controles transversales negativos vigentes; verificar
+reemplazo, rechazo, rollback, relectura tras lock y concurrencia.
+
+## 2026-10-05 — M3-T1: persistencia contractual y asociaciones nuevas
+
+M3-T1 permanece **EN PROGRESO**. ContractAssessmentV1 guarda borradores cerrados
+y parciales en contract_assessment; CREATE/PATCH/GET admiten fechas, omisión y
+null SQL. Migración 8d2f4a6c9e31 aplicada localmente con check NULL/objeto.
+Nuevo guardado usa asociación especial v2/EIPD v3 con contrato final; conserva
+históricos y señala asociaciones anteriores no cubiertas cuando hay contrato.
+La confirmación contractual continúa bloqueada; evaluador sigue pendiente.
+
+Validación: **616 passed**. Incluye persistencia, fechas, invalidaciones,
+SQL NULL/check objeto, protección tenant, cambio sin reasociar, guardado conjunto
+y versiones históricas. Flujos consentimiento/LIA y concurrencia siguen pasando.
+Formato/lint/whitespace correctos. Sin commit.
+
+Siguiente paso: evaluador contractual puro con completitud, aplicabilidad y
+motivos según §19.3; integrarlo en readiness antes de habilitar confirmación.
+
+## 2026-10-05 — M3-T1: contrato de la siguiente base ordinaria
+
+M3-T1 permanece **EN PROGRESO**. Definido §19 para contrato_precontractual_art13c:
+rutas celebración/ejecución/medidas solicitadas por titular, expediente cerrado,
+completitud/aplicabilidad y matriz de aceptación. Referencia oficial BCN revisada.
+Se propone columna contractual propia y evolución de asociaciones especiales
+v2/EIPD v3, sin reescribir históricos. Implementación dividida en persistencia,
+evaluador y confirmación.
+
+Paso documental: la nueva base sigue bloqueada en el código. Última suite:
+**612 passed**; no se repite por cambios solo documentales. Whitespace correcto.
+Sin commit.
+
+Siguiente paso: schemas/persistencia contractual y asociaciones nuevas con
+compatibilidad histórica, manteniendo confirmación contractual bloqueada.
+
+## 2026-10-05 — M3-T1: confirmación ordinaria de interés legítimo
+
+M3-T1 permanece **EN PROGRESO**. Interés legítimo ya confirma con LIA completo
+recalculado contra RAT actual y controles especiales/EIPD negativos completos
+y vigentes. Barrera LIA compartida con readiness; incompleto 400, revisión 409.
+Consentimiento preparado no se exige para esta base. Otras bases y regímenes
+positivos siguen bloqueados; EIPD afirmativa no permite continuar.
+
+Validación: **612 passed**. Flujo API real consentimiento -> LIA -> consentimiento,
+motivos GET/POST, rechazo sin reemplazo y bloqueo EIPD con LIA completa.
+Rollback/fallo de flush y concurrencia PostgreSQL parametrizados para ambas
+bases, incluida relectura tras actualización LIA. Formato/lint/whitespace
+correctos. Sin commit, sin nuevas migraciones ni permisos.
+
+Siguiente paso: revisar cobertura residual de M3-T1 y definir el contrato de
+la siguiente base jurídica ordinaria antes de habilitarla; validadores
+especiales y expediente EIPD siguen pendientes.
+
+## 2026-10-05 — M3-T1: contrato de habilitación LIA ordinaria
+
+M3-T1 permanece **EN PROGRESO**. Revisada cobertura real y definido §18.29:
+interés legítimo requerirá LIA completo con RAT actual, detección especial
+negativa y EIPD negativo, ambos vigentes. Decisión favorable aislada no basta.
+Se fijan rechazos, asociaciones, expediente residual de consentimiento,
+coherencia readiness/POST y aceptación de reemplazo/concurrencia/rollback.
+
+Paso documental: LIA sigue bloqueada en el código actual. No se habilitan otras
+bases ni regímenes especiales. Última suite ejecutada: **600 passed**; no se
+repite por cambios solo documentales. Whitespace correcto. Sin commit.
+
+Siguiente paso: implementar selección de base y barrera LIA compartida, adaptar
+readiness y verificar los casos de §18.29 con PostgreSQL/app_user.
+
+## 2026-10-05 — M3-T1: confirmación ordinaria con controles transversales
+
+M3-T1 permanece **EN PROGRESO**. Implementado gate compartido para readiness
+y confirmación: exige detección especial y screening EIPD negativos completos
+con asociaciones vigentes, además del consentimiento. Ausencia bloquea; rutas
+especiales positivas, LIA y continuación tras EIPD afirmativa siguen pendientes.
+Los controles se evalúan después del lock/refresco y antes de reemplazar la
+confirmada anterior. Los motivos transversales GET/POST coinciden.
+
+Validación: **600 passed**. Incluye rechazo por ausencia, asociación obsoleta
+con hash RAT igual, EIPD afirmativa, v1 no cubierto, relectura tras lock,
+rollback HTTP con anterior conservada, reemplazo y concurrencia PostgreSQL.
+Fixtures ordinarias actualizadas con declaraciones negativas explícitas;
+PATCH que cambia contexto debe reaportar controles para actualizar asociaciones.
+Formato, lint y whitespace correctos. Sin commit.
+
+Siguiente paso: revisar cobertura residual y definir el contrato para habilitar
+interés legítimo; no se habilitará únicamente por una conclusión LIA favorable.
+
+## 2026-10-05 — M3-T1: contrato de confirmación transversal ordinaria
+
+M3-T1 permanece **EN PROGRESO**. §15.13 fija la próxima integración:
+consentimiento preparado, detección especial y EIPD negativos completos y
+vigentes. Ausencia no será una alternativa para confirmar borradores; históricos
+confirmados no cambian. Se definen rechazos 400/409, evaluación compartida con
+readiness, relectura tras lock, un bundle RAT y validación antes de reemplazo.
+
+Paso documental: la confirmación actual mantiene sus bloqueos globales.
+No se habilitan rutas especiales, LIA ni continuación tras EIPD afirmativa.
+Última suite ejecutada: **590 passed**; no se repite por cambios solo de diseño.
+Sin commit.
+
+Siguiente paso: implementar el gate transversal compartido y adaptar pruebas
+ordinarias/de concurrencia con expedientes negativos completos, además de los
+casos de rechazo y rollback definidos en §15.13.
+
+## 2026-10-05 — M3-T1: contraste EIPD/condiciones especiales
+
+M3-T1 permanece **EN PROGRESO**. El evaluador EIPD contrasta la respuesta sobre
+excepción al consentimiento con rutas especiales explícitas: excepciones no
+validadas, rutas sin resolver y declaraciones discordantes/no documentadas.
+Los motivos fuerzan pendiente_revision y conservan los supuestos afirmativos.
+No se deducen excepciones desde legal_basis ni se habilitan autorizaciones.
+Readiness expone los motivos; no hay cambios de persistencia o confirmación.
+
+Validación: **590 passed**, incluidas matriz de rutas/respuestas, coexistencia,
+contexto obsoleto, orden determinista y consulta API sin mutaciones. Formato,
+lint y revisión de whitespace correctos. Sin commit.
+
+Siguiente paso: definir la integración de preparación transversal en la
+confirmación ordinaria, antes de sustituir los bloqueos globales existentes.
+Validadores especiales positivos, LIA y expediente EIPD siguen pendientes.
+
+## 2026-10-05 — M3-T1: evaluación de preparación especial
+
+M3-T1 permanece **EN PROGRESO**. Implementado evaluador puro especial y salida
+special en GET readiness: motivos, asociación vigente y regímenes coexistentes.
+Compara declaraciones con RAT, exige nueve respuestas fundadas, revisa alcance,
+expedientes faltantes/residuales y referencias a consentimiento. No infiere el
+cruce sensible/adolescente ni habilita rutas positivas; todos sus validadores
+jurídicos continúan pendientes. La confirmación conserva sus bloqueos.
+
+Validación: **581 passed**; formato y lint correctos. Pruebas de precedencia,
+coherencia RAT, contexto desactualizado, pluralidad de regímenes, ausencia,
+alcance, referencias y exposición API. Sin commit.
+
+Siguiente paso: contraste transversal EIPD/condiciones especiales, con motivos
+sobre excepción al consentimiento, sin inferir autorización desde legal_basis.
+
+## 2026-10-05 — M3-T1: persistencia especial y asociación EIPD v2
+
+M3-T1 permanece **EN PROGRESO**. Implementados schemas cerrados de
+special_conditions, guardado parcial, alcance validado contra RAT y asociación
+calculada por servidor sobre snapshot/base/consentimiento/LIA finales.
+CREATE/PATCH generan asociación EIPD v2 al recibir screening; omitir conserva
+la asociación anterior y null elimina condiciones especiales como SQL NULL.
+
+Los screenings v1 históricos se conservan; con condiciones especiales su
+evaluación requiere revisión por asociacion_especial_no_cubierta. Las rutas
+especiales siguen bloqueadas y no se acredita autorización al guardar.
+
+Validación: **566 passed**, incluidas pruebas API de guardado, rechazo de
+alcance, rollback, obsolescencia EIPD y borrado; contrato especial y
+compatibilidad v1/v2. Sin commit.
+
+Siguiente paso: evaluador de detección y preparación especial, con motivos de
+completitud, aplicabilidad y contexto; después integración en readiness.
+
+## 2026-10-05 — M3-T1: contrato de detección y condiciones especiales
+
+M3-T1 permanece **EN PROGRESO**. §§15.6–15.9 definen declaraciones factuales,
+regímenes, expedientes propuestos, motivos y asociación calculada por servidor
+en special_conditions existente. Ninguna ruta jurídica positiva se habilita:
+los validadores específicos permanecen no implementados.
+
+Se fija la dependencia con EIPD: asociación v2 incluirá las condiciones
+especiales finales, sin reescribir screenings v1 históricos. Un screening v1
+con condiciones nuevas deberá revisarse, no reasociarse silenciosamente.
+
+Revisión normativa contra texto oficial BCN, enlazado en el diseño. Paso solo
+documental; whitespace pasa y no se repiten tests. Última suite: **558 passed**.
+Sin commit. Interés legítimo y condiciones especiales continúan bloqueados.
+
+Siguiente paso: implementar schemas y persistencia del contrato especial,
+con asociación EIPD v2 y pruebas; después, evaluador de detección/preparación.
+
+## 2026-10-05 — M3-T1: consulta API de preparación
+
+M3-T1 permanece **EN PROGRESO**. GET /licitud/.../readiness expone resultados
+consentimiento/LIA/EIPD, motivos, contexto actual, bloqueos del flujo existente
+y controles transversales pendientes. Es de solo lectura con view_content,
+suscripción y tenant validados. No confirma ni altera el expediente.
+
+Los resultados se calculan con contexto RAT recompuesto. Se detecta screening
+desactualizado incluso cuando el hash semántico RAT no cambia. No se presenta
+la ausencia de bloqueos actuales como aprobación o cobertura completa.
+Interés legítimo y screening no nulo mantienen sus barreras de confirmación.
+
+Archivo API: **11 passed**; suite completa backend: **558 passed**. Pruebas
+HTTP usan PostgreSQL/RLS y comprueban permisos, contexto, historial y ausencia
+de modificaciones. Formato, lint y whitespace pasan. Sin migraciones nuevas,
+sin cambios al lifecycle y sin commit.
+
+Siguiente paso: definir detección y contrato de condiciones especiales antes
+de integrar las barreras pendientes y habilitar confirmación LIA.
+
+## 2026-10-05 — M3-T1: evaluador puro EIPD v1
+
+M3-T1 permanece **EN PROGRESO**. evaluate_eipd_screening_v1 implementa los
+tres resultados derivados, fundamentos, contexto desactualizado y revisión
+de automatización declarada frente al indicador RAT. La salida es inmutable,
+con motivos y observaciones LIA separados, sin persistir ni modificar entradas.
+
+Validación: **36 casos nuevos**, archivo EIPD **47 passed**, suite completa
+backend **555 passed**. Formato, lint y whitespace pasan. Sin cambios de
+migraciones, API o confirmación en este bloque. Trabajo sin commit.
+
+La API todavía no expone preparación; interés legítimo sigue bloqueado.
+Siguiente paso: exponer resultados LIA/EIPD y motivos para preparar la evaluación,
+manteniendo barreras de condiciones especiales antes de habilitar confirmación.
+
+## 2026-10-05 — M3-T1: migración y persistencia screening EIPD
+
+M3-T1 permanece **EN PROGRESO**. Migración append-only 7c9e1a3b5d20 aplicada
+en desarrollo: columna nullable eipd_screening y restricción de objeto. Se
+implementaron schemas, asociación documental calculada por servidor y
+creación/edición/lectura API. Null elimina mediante SQL NULL; omisión conserva
+la asociación anterior y permite identificar cambios de contexto posteriores.
+
+El screening no nulo bloquea confirmación mientras falte el evaluador integrado,
+para no ignorar declaraciones. Interés legítimo permanece bloqueado. No se
+alteraron migraciones históricas ni el hash canónico RAT v1.
+
+Upgrade/downgrade/re-upgrade probados en schema PostgreSQL transaccional
+isolado; pruebas HTTP usan app_user con RLS. Suite específica: **49 passed**;
+suite completa: **519 passed**. Formato, lint y whitespace pasan. Sin commit.
+El drift global histórico de Alembic sigue fuera del alcance de este bloque.
+
+Siguiente paso: implementar el evaluador EIPD y sus resultados/motivos,
+incluyendo contexto desactualizado y contradicciones estructuradas.
+
+## 2026-10-05 — M3-T1: contrato físico del screening EIPD
+
+M3-T1 permanece **EN PROGRESO**. Se fija eipd_screening como JSONB nullable
+independiente en legal_assessments, mediante futura migración append-only.
+El contrato v1 admite declaraciones parciales en borrador y una asociación
+documental calculada por servidor sobre snapshot RAT completo y LIA vigente.
+No modifica el hash canónico RAT v1 ni reinterpreta versiones históricas.
+
+Se definieron entrada/salida, reemplazo/omisión/null y detección de screening
+desactualizado. La asociación no se actualiza silenciosamente al cambiar hechos.
+La confirmación LIA sigue bloqueada. Columna, modelos y evaluador aún pendientes.
+
+Paso solo documental; diff sin errores de whitespace. Última suite completa:
+**506 passed**; no se repitió. Sin commit.
+
+Siguiente paso: implementar migración, modelos y guardado del screening EIPD,
+con pruebas de asociación y persistencia antes del evaluador/integración.
+
+## 2026-10-05 — M3-T1: revisión EIPD y condiciones especiales
+
+M3-T1 permanece **EN PROGRESO**. Se revisaron diseño, campos RAT/LIA y barreras
+de confirmación. Los hechos actuales no resuelven todos los supuestos EIPD ni
+los regímenes especiales; no se desbloquea interés legítimo.
+
+Se documentaron las brechas, un screening EIPD propuesto con declaraciones
+fundadas y resultados derivados, y la secuencia de integración con condiciones
+especiales. La ubicación física del screening sigue pendiente de diseño.
+La confirmación ordinaria de consentimiento conserva cobertura parcial y no
+se presenta como verificación completa de EIPD/regímenes especiales.
+
+Referencia normativa: texto oficial BCN de Ley 21.719, art. 15 ter del régimen
+previsto para diciembre de 2026, enlazado en el diseño. No se afirma existencia
+ni cobertura de orientaciones regulatorias futuras.
+
+Paso únicamente documental, diff sin errores de whitespace; no se repitieron
+pruebas de código. Última suite completa: **506 passed**. Sin commit.
+
+Siguiente paso: fijar el contrato físico/persistencia del screening EIPD antes
+de implementar sus modelos y evaluador.
+
+## 2026-10-05 — M3-T1: evaluador puro LIA v1
+
+M3-T1 permanece **EN PROGRESO**. evaluate_lia_assessment_v1 implementa
+aplicabilidad, faltantes y motivos de revisión de LIA sobre el snapshot RAT,
+con salida inmutable, orden determinista y sin persistir ni alterar entradas.
+Revalida contratos, incluyendo instancias modificadas, antes de evaluar.
+
+Validación: **129 casos nuevos** y **506 passed** en la suite completa backend;
+formato, lint y whitespace pasan. No se modificaron API, lifecycle, migraciones
+ni hash v1. La confirmación de interés legítimo permanece bloqueada. Sin commit.
+
+Siguiente paso: revisar EIPD y condiciones especiales y definir la integración
+transaccional de LIA manteniendo los controles aún no implementados.
+
+## 2026-10-05 — M3-T1: reglas operativas de completitud LIA v1
+
+M3-T1 permanece **EN PROGRESO**. Se definieron en §§18.15–18.18 del diseño
+los campos mínimos, condiciones derivadas del snapshot RAT, disparadores de
+documentación de mitigación, motivos de revisión y precedencia de resultados.
+Las reglas no infieren suficiencia jurídica desde textos ni producen scoring.
+
+La aplicabilidad de información directa/de terceros utiliza source_type; los
+hechos de categorías y titulares provienen del snapshot. Una decisión favorable
+no sustituye faltantes ni elimina motivos de revisión. Solo completo podrá
+superar el control LIA cuando se implemente su integración.
+
+Este paso modifica únicamente documentación; no se ejecutaron pruebas de código.
+La última suite backend permanece en **377 passed**. La confirmación de interés
+legítimo sigue bloqueada y el trabajo está sin commit.
+
+Siguiente paso: implementar el evaluador puro LIA y sus casos de aceptación;
+revisar controles EIPD/condiciones especiales antes de habilitar confirmación.
+
+## 2026-10-05 — M3-T1: contrato documental LIA v1
+
+M3-T1 permanece **EN PROGRESO**. Se implementaron las ocho secciones de
+LiaAssessmentV1 con respuestas estructuradas, claves estables, textos
+preservados y rechazo de campos/versiones/valores desconocidos. Las categorías
+y los indicadores de datos/titulares se reutilizan desde el snapshot RAT.
+
+La API admite LIA en creación/edición/lectura de borradores: omisión conserva,
+objeto reemplaza íntegramente y null elimina. Interés legítimo sigue bloqueado
+al confirmar; una decisión propuesta favorable no habilita la transición.
+
+Suite completa backend: **377 passed**; formato, lint y whitespace pasan.
+Pruebas HTTP usan PostgreSQL, RLS y contexto RAT real. Sin migraciones ni
+cambios al hash v1. El trabajo permanece sin commit.
+
+Siguiente paso: definir aplicabilidad, completitud y motivos derivados de LIA
+antes de implementar el evaluador y conectarlo a la confirmación.
+
+## 2026-10-05 — M3-T1: creación concurrente de series y versiones
+
+M3-T1 permanece **EN PROGRESO**. Cinco pruebas con dos sesiones PostgreSQL,
+RLS como app_user y contexto RAT real validan creación sobre serie nueva o
+existente, commit/rollback de la primera solicitud y asignación de versiones.
+
+Se reprodujo y corrigió una regresión del identity map: una sesión con la
+serie previamente cargada podía reservar una versión ya usada por la sesión
+concurrente. La lectura bajo FOR UPDATE ahora refresca la serie con
+populate_existing=True antes de usar next_version.
+
+Se comprueban una única serie, un único borrador, conflicto sin consumo de
+versiones, reserva revertida sin salto y contador actualizado después del
+bloqueo. Suite completa backend: **355 passed**; formato, lint y whitespace
+pasan. No se modificaron migraciones ni hash v1. Sin commit.
+
+Siguiente bloque: contratos y validaciones LIA/condiciones especiales,
+manteniendo bloqueada su confirmación hasta completar esos controles.
+
+## 2026-10-05 — M3-T1: API inicial y concurrencia de confirmación
+
+M3-T1 permanece **EN PROGRESO**. La API `/licitud` expone creación, lectura,
+edición de borradores y confirmación de consentimiento ordinario. Exige
+suscripción activa/grace, tenant validado y permisos existentes de lectura o
+edición; la confirmación utiliza `edit_content`. Las versiones históricas
+pueden leerse y no pueden editarse.
+
+Se verificaron con dos sesiones PostgreSQL la confirmación simultánea,
+la confirmación tras rollback de la primera sesión y la revalidación de un
+checklist modificado durante la espera del bloqueo. Se usa `app_user` con RLS;
+la espera se comprueba mediante `pg_blocking_pids`.
+
+Las pruebas HTTP usan contexto RAT real y cubren guardado, confirmación,
+reemplazo, contexto desactualizado, permisos viewer/editor, suscripción y
+acceso entre organizaciones. Suite completa: **350 passed**; formato, lint
+y whitespace pasan. No se modificaron migraciones ni hash v1. Sin commit.
+
+Pendiente: contratos LIA/condiciones especiales, validaciones de las demás
+bases, concurrencia en creación de series/versiones e interfaz M3. Las bases
+y regímenes especiales todavía no soportados siguen bloqueados al confirmar.
+
+## 2026-10-05 — M3-T1: consentimiento v1 y confirmación inicial
+
+M3-T1 permanece **EN PROGRESO**. Se incorporaron los contratos del checklist
+de consentimiento v1, el evaluador puro de aplicabilidad/completitud y el
+guardado del expediente en borradores. La confirmación inicial del service
+layer bloquea la serie, relee el borrador, revalida consentimiento y contexto
+RAT y reemplaza la versión anterior sin commits internos.
+
+Alcance actual: consentimiento ordinario. Las demás bases y los regímenes
+especiales permanecen bloqueados hasta implementar sus validaciones.
+Todavía no hay endpoint M3 de confirmación; el caller debe validar permisos
+y cerrar o revertir la transacción. No se modificaron migraciones ni hash v1.
+
+Validación: **341 pruebas backend aprobadas**, formato y lint de los archivos
+Python modificados, y revisión de whitespace sin errores. Incluye reemplazo
+y rollback en PostgreSQL con app_user y rechazo cross-tenant con RLS.
+El constructor RAT se simula en la prueba transaccional de reemplazo;
+concurrencia entre sesiones y flujo API completo siguen pendientes.
+
+El trabajo está sin commit. Continuar por concurrencia del lifecycle y por
+las validaciones/contratos faltantes antes de exponer la confirmación por API.
+
 ## 2026-10-01 — M3-T1 Bases de Licitud: contexto RAT v1 canónico + snapshot documental
 
 M3-T1 permanece **EN PROGRESO**. No debe considerarse cerrado.
