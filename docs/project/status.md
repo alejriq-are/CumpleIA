@@ -1,3 +1,48 @@
+## 2026-10-06 — M3-T1: checkpoint EIPD autorizado para commit
+
+Se registra avance §65–§67: evaluador documental, readiness y vigencia de ultima
+revision, y prerequisitos puros de decision humana. No abre confirmaciones ni
+agrega accion API de revision. M3-T1 EN PROGRESO, alcance integral.
+Validacion previa al commit: suite completa 2710 passed en 238.18 s;
+Black/Ruff sobre seis archivos Python y git diff --check correctos.
+Commit local expresamente solicitado por el usuario. Proximo: accion autenticada
+de revision, manteniendo continuar bloqueado hasta frontera/fuentes verificadas.
+
+## 2026-10-06 — M3-T1: prerequisitos de revision humana EIPD
+
+Alcance integral, EN PROGRESO. §67 agrega evaluador puro para registrar revision:
+borrador, documento y asociacion vigentes exigidos para todas las decisiones.
+Rechazos admiten documento parcial; continuar conserva motivos documentales y
+barreras de frontera/fuentes no verificadas, sin bandera cliente de aprobacion.
+38 pruebas nuevas; 215 focalizadas aprobadas; Black/Ruff correctos.
+Ultima suite integral 2672 passed (§66), no reejecutada para servicio aislado.
+Sin API/escritura ni cambio de confirmacion. Proximo: accion humana autenticada,
+relectura bajo lock, campos de servidor e historial, manteniendo continuar bloqueado.
+Checkpoint base 6d9bb76; sin migracion ni nuevo commit.
+
+## 2026-10-06 — M3-T1: readiness documental y vigencia EIPD
+
+Alcance integral, EN PROGRESO. §66 expone preparacion documental y vigencia de
+ultima revision como resultados separados del screening y la confirmacion.
+Contexto RAT actual; hashes documental/contextual; ultimo evento por fecha/id.
+Cambios vuelven obsoleta la revision y reaportar no renueva el evento anterior.
+Lecturas sin escritura, aislamiento tenant y barrera provisional conservados.
+18 pruebas nuevas; suite completa 2672 passed en 237.06 s; Black/Ruff correctos.
+Proximo: frontera de revision y accion humana autenticada, fuentes oficiales y
+concurrencia antes de habilitar confirmaciones. Checkpoint base 6d9bb76;
+sin migracion ni nuevo commit.
+
+## 2026-10-06 — M3-T1: evaluador documental EIPD implementado
+
+Alcance integral, EN PROGRESO. §65 agrega evaluador puro de completitud/aplicabilidad:
+riesgos/medidas, evidencia, scope RAT, fuentes/consulta y binding vigente.
+Fecha explicita, resultados inmutables, revision prevalece preservando faltantes.
+159 pruebas nuevas; 455 focalizadas aprobadas, Black/Ruff/whitespace correctos.
+Ultima suite integral 2495 passed (§64), no reejecutada para evaluador aislado.
+Preparacion no aprueba frontera ni revision humana. Sin API/gates nuevos;
+fuentes verificadas pendientes. Proximo: readiness documental y vigencia separadas.
+Checkpoint base 6d9bb76; sin migracion ni nuevo commit.
+
 ## 2026-10-06 — M3-T1: checkpoint local autorizado
 
 Se registra el avance acumulado de M3-T1: seis bases ordinarias, controles

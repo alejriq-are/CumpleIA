@@ -1274,6 +1274,13 @@ class DocumentaryReadinessOut(BaseModel):
     applicability: list[ReadinessApplicabilityOut]
 
 
+class EipdResolutionDocumentReadinessOut(DocumentaryReadinessOut):
+    """Preparacion documental aislada de revision y frontera de confirmacion."""
+
+    model_config = ConfigDict(extra="forbid")
+    context_current: bool
+
+
 class EipdObservationOut(BaseModel):
     field: str
     code: Literal["valoracion_lia_alta"]
@@ -1323,6 +1330,12 @@ class LegalAssessmentReadinessOut(BaseModel):
     geolocation: DocumentaryReadinessOut | None
     economic_obligations: DocumentaryReadinessOut | None
     rights_defense: DocumentaryReadinessOut | None
+    eipd_resolution: EipdResolutionDocumentReadinessOut | None = None
+    eipd_resolution_review: EipdResolutionReviewStateOut = Field(
+        default_factory=lambda: EipdResolutionReviewStateOut(
+            review_status="sin_revision", latest_review=None
+        )
+    )
     eipd: EipdReadinessOut
     special: SpecialReadinessOut
     confirmation_blockers: list[ConfirmationBlockerOut]

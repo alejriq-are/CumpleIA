@@ -6866,3 +6866,130 @@ Proximo: evaluador puro de completitud/aplicabilidad de resolucion segun §60;
 despues readiness/vigencia, accion humana autenticada, concurrencia/relectura y
 screening versionado/gate separado con fuentes verificadas antes de desbloqueo.
 Fuentes y demas pendientes integrales permanecen abiertos. EN PROGRESO; sin commit.
+
+
+## 65. Evaluador puro de preparacion documental EIPD
+
+2026-10-06. Continua checkpoint local 6d9bb76. Implementado
+evaluate_eipd_resolution_document_v1 en eipd_resolution.py para los bloques
+documentales de §60.2: referencias/analisis, respuestas fundadas, evaluacion previa,
+fechas, scope completo RAT, riesgos/medidas/evidencia, conclusion, fuentes/consulta
+condicionales y binding. Fecha evaluated_on date explicita: sin reloj interno, DB,
+LLM, comunicacion externa ni escritura. Revalida modelos/dicts y no reasocia.
+
+Resultado inmutable con issues/applicability ordenados y deduplicados, context_current
+y is_document_prepared. No can_confirm: completo expresa preparacion documental,
+no revision humana ni autorizacion de tratamiento. Requiere_revision prevalece
+sobre incompleto segun §60, preservando todos los motivos de ambas categorias.
+Esto no cambia precedencia de otros evaluadores historicos ni sus comparadores.
+
+Riesgos/medidas con IDs canonicos unicos, referencias no vacias/conocidas/unicas,
+cobertura de todos los riesgos e implemented si fundada/evidencia propia.
+Planes pendientes no son implementacion. Sin puntaje ni umbral juridico calculado;
+alto conserva revision como frontera conservadora del producto. No inferir EIPD
+previa por fecha de informe/evidencia. Fechas requeridas de informe y consulta de
+fuentes no futuras; obtained_on sigue metadata factual opcional, sin regla nueva.
+
+Scope coincide con categorias/grupos completos del snapshot, incluso no sensibles;
+scopes de excepciones presentes deben estar contenidos, sin exigir igualdad de
+alcances de distinta funcion. Completitud juridica propia de excepciones, rol/rutas,
+controles ordinarios/especiales y frontera §59.1 son comprobaciones separadas,
+aun pendientes de componer antes de gate/revision. No presentarlas como ejecutadas
+por este evaluador documental; presencia de documento preparado no las supera.
+
+Fuentes identificado exige publicacion/version documentada y aplicabilidad resuelta;
+no_identificado permite busqueda documentada sin version ficticia de publicacion,
+pero contradiccion con fuente declarada aplicable requiere revision. Ninguno de
+estos estados acredita verificacion oficial global ni inexistencia de orientaciones.
+Consulta no_solicitada exige analisis; referencias/respuestas residuales requieren
+revision. En_curso mantiene revision y exige referencia/evidencia, con conclusion
+residual marcada. Concluida exige referencias, recomendaciones/reassessment,
+respuesta fundada y evidencia; no convierte recomendaciones en aprobacion.
+
+159 pruebas nuevas: faltantes individuales, respuestas/evidencia por elemento,
+riesgos/medidas/refs/duplicados semanticos, cobertura, prior assessment no inferido,
+fechas explicitas, estados/condicionales de fuentes/consulta, scope RAT/subconjunto
+de excepciones, binding ausente/obsoleto, todos los motivos/precedencia, orden
+numerico, inmutabilidad, JSON/modelos y revalidacion. 455 focalizadas aprobadas,
+incluidos contratos y asociaciones previas; Black/Ruff/whitespace correctos.
+Ultima suite integral 2495 passed (§64), no reejecutada para evaluador puro aislado;
+no sumar focalizadas como evidencia de una suite integral nueva.
+
+Sin conexion API/readiness ni cambio de gates: resolucion_eipd_no_validada sigue
+bloqueando, EIPD positivo y resto de controles se conservan. Fuentes pendientes.
+Proximo: exposicion de preparacion documental en readiness y vigencia de revision
+como resultados separados, usando contexto RAT actual; despues accion humana,
+frontera versionada y concurrencia/aceptacion antes de habilitacion.
+M3-T1 EN PROGRESO integral; sin migracion ni nuevo commit en este paso.
+
+
+## 66. Readiness documental y vigencia de revision EIPD
+
+2026-10-06. Readiness expone eipd_resolution (preparacion documental y
+context_current) y eipd_resolution_review (sin_revision/vigente/obsoleta y ultimo
+evento). Resultados separados de screening, decision humana y confirmacion.
+Documento ausente se evalua cuando hay supuesto EIPD positivo; ruta ordinaria
+sin documento conserva preparacion null y estado sin_revision.
+
+El contexto se reconstruye desde RAT actual y documentos finales, sin modificar
+snapshot, asociaciones ni historial. Contexto no disponible impide acreditar
+vigencia. Ultimo evento tenant-aware por created_at descendente e id descendente:
+no seleccionar una decision continuar anterior cuando existe otra posterior.
+Vigencia requiere binding actual y coincidencia de hashes documental/contextual;
+las tres decisiones conservan su contenido sin convertir vigencia en aprobacion.
+Cambiar documento/contexto vuelve obsoleta la revision; reaportar al contexto
+cambiado actualiza el documento, pero no renueva los hashes del evento anterior.
+
+18 pruebas nuevas: diez puras y ocho HTTP con RAT/PostgreSQL real. Cubren las
+tres decisiones, ausencia de documento/contexto/binding, hashes distintos,
+cambios de consentimiento/especiales/screening/RAT, contexto no reconstruible,
+reaporte, orden determinista con fecha empatada, aislamiento y GET sin escritura.
+La confirmacion conserva resolucion_eipd_no_validada y el screening positivo;
+no existe accion API para emitir revisiones ni nueva habilitacion de excepciones.
+
+Validacion: suite completa 2672 passed en 237.06 s; Black/Ruff correctos.
+Incluye las 159 pruebas del evaluador §65 y las 18 nuevas de este paso.
+
+Proximo: frontera de revision y accion humana autenticada con controles vigentes,
+fuentes oficiales y concurrencia, antes de habilitar confirmaciones. La preparacion
+documental no acredita verificacion oficial global ni reemplaza controles propios.
+M3-T1 EN PROGRESO, alcance integral; sin migracion ni nuevo commit.
+
+
+## 67. Prerequisitos puros para registrar revision humana EIPD
+
+2026-10-06. Implementado evaluate_eipd_resolution_review_prerequisites_v1,
+con entrada ReviewIn cerrada/revalidada, estado, documento, contexto y fecha
+explicita. Resultado inmutable conserva decision y todos los motivos; propiedad
+prerequisites_met describe solo estos requisitos documentales, sin autorizacion,
+confirmacion ni escritura. No sustituye permisos/suscripcion, tenant, bloqueo de
+serie, relectura ni actor/fecha/hashes de servidor que debe resolver la accion API.
+
+Cualquier decision exige borrador, documento presente y binding vigente frente
+al contexto RAT actual disponible. Requiere_cambios/no_continuar permiten documento
+parcial actual, incluso riesgo alto, para registrar una decision negativa concreta.
+Esto no habilita tratamiento. Confirmado/reemplazado, documento ausente, binding
+ausente/obsoleto o contexto no disponible conservan motivos de rechazo.
+
+Continuar incorpora todos los motivos del evaluador documental y mantiene barreras
+explicitas frontera_revision_no_validada y fuentes_oficiales_no_verificadas.
+No hay bandera aportable por cliente para superar controles aun no implementados;
+ni documento completo ni fuentes declaradas en su payload acreditan la verificacion
+global de §59.6. Esta version no permite continuar. Componer/verificar controles
+de frontera en una version posterior antes de habilitar esa decision.
+
+38 pruebas nuevas cubren tres decisiones, parcialidad, riesgo alto, inmutabilidad,
+ausencia/obsolescencia, estados no editables, metadatos falsificados y banderas de
+aprobacion rechazadas, modelos revalidados, fecha explicita y estado desconocido.
+215 focalizadas aprobadas, incluyendo evaluador documental y readiness HTTP previos;
+Black/Ruff correctos. Ultima suite integral 2672 passed (§66); no reejecutada para
+este servicio aislado y no sumar focalizadas como nueva evidencia integral.
+
+Sin nueva ruta API, migracion, gate ni commit. Proximo: accion autenticada de revision
+con edit_content/suscripcion, relectura bajo bloqueo de serie, hashes/actor/fecha de
+servidor e historial append-only; conservar barreras de continuar de esta version.
+Luego frontera verificada, fuentes y concurrencia antes de abrir confirmaciones.
+M3-T1 EN PROGRESO, alcance integral.
+
+Validacion de checkpoint §65–§67 previa al commit autorizado: suite completa
+2710 passed en 238.18 s; Black/Ruff y diff --check correctos. M3-T1 EN PROGRESO.

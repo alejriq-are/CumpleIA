@@ -248,4 +248,7 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] M3-T1 §62: asociacion/hash de resolucion v1 puros implementados; 89 pruebas nuevas y 296 focalizadas aprobadas.
 - [x] M3-T1 §63: persistencia JSONB y eventos append-only/RLS de resolucion EIPD; migracion b51d3f6a9c20 y 36 casos PostgreSQL, suite integral 2470 passed.
 - [x] M3-T1 §64: API documental/binding de resolucion EIPD; 25 HTTP con RAT real y suite integral 2495 passed, historial conservado.
-- [ ] M3-T1: evaluador puro/readiness, accion de revision EIPD, vigencia/gates, concurrencia y fuentes pendientes antes de habilitar confirmacion.
+- [x] M3-T1 §65: evaluador puro de preparacion documental EIPD; 159 pruebas nuevas y 455 focalizadas aprobadas, sin habilitar confirmacion.
+- [x] M3-T1 §66: readiness documental y vigencia de ultima revision EIPD; 18 pruebas nuevas aprobadas, sin habilitar confirmacion.
+- [x] M3-T1 §67: prerequisitos puros de revision EIPD; 38 pruebas nuevas y 215 focalizadas aprobadas; continuar bloqueado por frontera/fuentes pendientes.
+- [ ] M3-T1: accion de revision EIPD, frontera/gates, concurrencia y fuentes pendientes antes de habilitar confirmacion.

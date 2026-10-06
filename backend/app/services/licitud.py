@@ -14,6 +14,7 @@ from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import (
+    EipdResolutionReview,
     InternationalTransfer,
     LegalAssessment,
     LegalAssessmentSeries,
@@ -65,6 +66,8 @@ from app.services.eipd import bind_eipd_screening_v11, evaluate_eipd_screening_v
 from app.services.eipd_resolution import (
     EipdResolutionContextV1,
     bind_eipd_resolution_v1,
+    derive_eipd_resolution_review_state_v1,
+    evaluate_eipd_resolution_document_v1,
 )
 from app.services.geolocation import evaluate_geolocation_assessment_v1
 from app.services.health import evaluate_health_assessment_v1
@@ -1991,6 +1994,7 @@ async def get_legal_assessment_readiness_v1(
     geolocation = None
     economic_obligations = None
     rights_defense = None
+    eipd_resolution = None
     try:
         if assessment.legal_basis == "consentimiento_art12":
             result = evaluate_consent_assessment_v1(assessment.consent_assessment)
@@ -2121,6 +2125,59 @@ async def get_legal_assessment_readiness_v1(
                     getattr(assessment, "sensitive_rights_exception_assessment", None),
                 )
             )
+        resolution_document = getattr(assessment, "eipd_resolution_assessment", None)
+        resolution_context = (
+            build_eipd_resolution_context_from_assessment_v1(
+                assessment, current_snapshot
+            )
+            if current_snapshot is not None
+            else None
+        )
+        if (
+            resolution_document is not None
+            or eipd.result == "requiere_eipd"
+            or any(i.category == "supuesto_declarado" for i in eipd.issues)
+        ):
+            eipd_resolution = asdict(
+                evaluate_eipd_resolution_document_v1(
+                    resolution_document,
+                    resolution_context,
+                    evaluated_on=datetime.now(UTC).date(),
+                )
+            )
+        latest_review = await db.scalar(
+            select(EipdResolutionReview)
+            .where(
+                EipdResolutionReview.assessment_id == assessment.id,
+                EipdResolutionReview.organization_id == organization_id,
+            )
+            .order_by(
+                EipdResolutionReview.created_at.desc(), EipdResolutionReview.id.desc()
+            )
+            .limit(1)
+        )
+        review_payload = (
+            {
+                name: getattr(latest_review, name)
+                for name in (
+                    "id",
+                    "organization_id",
+                    "assessment_id",
+                    "decision",
+                    "rationale",
+                    "review_reference",
+                    "document_hash",
+                    "context_hash",
+                    "created_by",
+                    "created_at",
+                )
+            }
+            if latest_review is not None
+            else None
+        )
+        eipd_resolution_review = derive_eipd_resolution_review_state_v1(
+            resolution_document, resolution_context, review_payload
+        )
         blockers.extend(
             {k: v for k, v in item.items() if k != "status_code"}
             for item in transversal_blockers
@@ -2145,6 +2202,8 @@ async def get_legal_assessment_readiness_v1(
             "biometric_rights_exception": biometric_rights_exception,
             "economic_obligations": economic_obligations,
             "rights_defense": rights_defense,
+            "eipd_resolution": eipd_resolution,
+            "eipd_resolution_review": eipd_resolution_review,
             "eipd": asdict(eipd),
             "special": asdict(special),
             "confirmation_blockers": blockers,
