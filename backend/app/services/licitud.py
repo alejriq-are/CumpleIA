@@ -1978,29 +1978,58 @@ async def confirm_legal_assessment_v1(
     except ValidationError:
         raise _bad_request("Contrato documental transversal inválido") from None
     eipd_controls = None
+    eipd_controls_v2 = None
+    evaluated_on = datetime.now(UTC).date()
+    latest_review, identity = await _latest_eipd_review_snapshot_v1(
+        db, organization_id, draft.id
+    )
     if (
         draft.eipd_resolution_assessment is not None
         or eipd.result in ("requiere_eipd", "requiere_revision")
         or draft.sensitive_rights_exception_assessment is not None
         or draft.biometric_rights_exception_assessment is not None
     ):
-        latest_review = await _latest_eipd_review_payload_v1(
-            db, organization_id, draft.id
+        context = build_eipd_resolution_context_from_assessment_v1(
+            draft, bundle.snapshot
         )
         eipd_controls = _compose_assessment_eipd_controls_v1(
             draft,
             organization_id,
-            build_eipd_resolution_context_from_assessment_v1(draft, bundle.snapshot),
+            context,
             True,
             latest_review,
-            datetime.now(UTC).date(),
+            evaluated_on,
         )
-    if blockers or (eipd_controls and eipd_controls["confirmation_blockers"]):
+        eipd_controls_v2 = _compose_assessment_eipd_controls_v2(
+            draft,
+            organization_id,
+            context,
+            True,
+            latest_review,
+            identity,
+            evaluated_on,
+        )
+    # La composicion v2 evalua la frontera delimitada y rechaza las restantes.
+    # Fuera del ambito EIPD se conservan las barreras transversales existentes.
+    decision_blocked = (
+        bool(eipd_controls_v2["confirmation_blockers"])
+        if eipd_controls_v2 is not None
+        else bool(blockers)
+    )
+    if decision_blocked:
         raise HTTPException(
             status_code=max((item["status_code"] for item in blockers), default=409),
             detail={
                 "code": "controles_transversales_no_preparados",
-                **({"eipd_controls": eipd_controls} if eipd_controls else {}),
+                **(
+                    {
+                        "eipd_controls": eipd_controls,
+                        "eipd_controls_v2": eipd_controls_v2,
+                        "evaluation_version": 2,
+                    }
+                    if eipd_controls_v2 is not None
+                    else {}
+                ),
                 "special": asdict(special),
                 "eipd": asdict(eipd),
                 "confirmation_blockers": [

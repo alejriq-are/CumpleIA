@@ -1,3 +1,37 @@
+## 2026-10-07 — M3-T1: contratos/evaluadores puros de auditoria
+
+§90 implementa publicacion, cadena/selector revisionados, plan de seleccion y
+constructor de evidencia que recompone controles v2. Cerrados/revalidados, hashes,
+StrictInt y fechas UTC; no DB, autorizacion, locks ni resolver activo.
+65 pruebas nuevas, 169 focalizadas; suite completa 3385 passed en 293.55 s.
+Black/Ruff/diff correctos. Proximo: migracion append-only de control global y
+evidencia tenant, privilegios/RLS; luego resolver/servicios y orden de locks.
+Fuentes/aceptacion y concurrencia/exitos reales pendientes; resolver deshabilitado.
+Ley fija; M3-T1 EN PROGRESO integral. Sin migracion, commit ni push.
+
+## 2026-10-07 — M3-T1: contrato de auditoria de politica real
+
+§89 define publicacion inmutable, selector revisionado y auditoria atomica;
+orden futuro selector compartido -> serie exclusiva, revocacion y evidencia tenant
+de confirmacion. Contrato: m3-t1-eipd-politica-auditoria.md; aun sin implementacion.
+Proximo: contratos/evaluadores puros de publicacion/seleccion/evidencia, luego
+migraciones/RLS, resolver/locks y concurrencia/exitos antes de habilitar.
+Fuentes/aceptacion pendientes; resolver fijo deshabilitado. Solo documentacion,
+diff correcto; ultima suite §88: 3320 passed, no reejecutada.
+Ley fija; M3-T1 EN PROGRESO integral. Sin migracion, commit ni push.
+
+## 2026-10-07 — M3-T1: decision transversal de confirmacion v2
+
+§88 integra confirmation_blockers v2 bajo lock para el ambito EIPD actual.
+Validadores ordinarios/RAT previos y diagnosticos v1 conservados; politica fija
+sigue deshabilitada. Una consulta de ultimo evento/identidad y fecha/contexto comunes.
+Historia sola no amplia gate ordinario: seis regresiones detectadas/corregidas.
+Once HTTP nuevos y concurrencia protegida ampliada; 54 focalizadas aprobadas.
+Suite completa final 3320 passed en 287.70 s; Black/Ruff/diff correctos.
+Proximo: contrato/auditoria y atomicidad de cambios de politica real; exitos de
+frontera habilitada, concurrencia de politica y fuentes/aceptacion pendientes.
+Ley fija; M3-T1 EN PROGRESO integral. Sin migracion, commit ni push.
+
 ## 2026-10-07 — M3-T1: revision autenticada con prerrequisitos v2
 
 §87 integra decision v2 bajo lock de serie y relectura de contexto M2/documento.

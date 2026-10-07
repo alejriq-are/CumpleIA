@@ -2,7 +2,7 @@
 
 Fecha: 2026-10-07. Estado: EN PROGRESO. Revisión documental y de código;
 no modifica reglas ni amplía el alcance. Última suite completa registrada:
-3309 passed (§87), posterior a integracion autenticada de revision v2.
+3385 passed (§90), posterior a contratos/evaluadores puros de auditoria.
 Checkpoints inferiores son históricos; el total no acredita cierre integral.
 
 ## Fuentes y criterio
@@ -2539,3 +2539,116 @@ Proximo: decision transversal/confirmacion v2 bajo lock sin filtrar reglas v1;
 auditoria/politica real, exitos y concurrencia de politica antes de habilitar.
 Fuentes complementarias/aceptacion siguen pendientes. Ley fija; M3-T1 EN PROGRESO
 integral. Sin nueva migracion, commit ni push.
+
+
+## §88 — Decision transversal de confirmacion v2 bajo lock
+
+2026-10-07. confirm_legal_assessment_v1 conserva endpoint/permisos/suscripcion,
+FOR UPDATE de serie, relectura del borrador/versiones, justificacion, alcance,
+vigencia RAT y validadores propios de las seis bases ordinarias. Antes de consultar
+o reemplazar confirmado previo obtiene ultimo evento/identidad en una consulta y
+construye composiciones v1/v2 con mismo contexto actual y fecha explicita.
+
+Dentro del ambito EIPD (resolucion actual, detector positivo/revision o excepciones
+de derechos), confirmation_blockers de v2 determinan la
+decision. La composicion valida la frontera delimitada y rechaza las restantes;
+no borra ni filtra codigos v1. Fuera de ese ambito las barreras transversales v1
+siguen decidiendo. Validadores ordinarios y contexto RAT se ejecutan antes del gate.
+Diagnosticos legacy special/eipd/confirmation_blockers/eipd_controls permanecen;
+error agrega evaluation_version 2 y eipd_controls_v2. Politica exclusivamente del
+resolver fijo deshabilitado; query del cliente no activa gates.
+
+Identidad vigente por si sola no acredita decision positiva ni documentacion actual.
+Eventos positivos historicos con identidad actual/anterior o sin identidad no
+superan fuentes/aceptacion/activacion pendientes. Negativas conservan decision;
+retirar documento mantiene historial y readiness v2 obsoleta/incompleta. El historial
+por si solo no amplia el gate ordinario cuando no hay supuestos EIPD actuales.
+Rechazo ocurre antes de escrituras/reemplazo del confirmado previo; sin migracion.
+
+Once pruebas HTTP nuevas cubren ambas rutas y cinco historias (ausente, positiva
+legacy, positiva con politica actual/anterior y negativa), coincidencia con readiness,
+una consulta, query ignorada y preservacion de borrador/historial; caso ordinario
+con historial y sin documento confirma sin ampliar el gate. La suite inicial
+detecto seis regresiones de ese alcance y se corrigieron conservando el flujo previo. Concurrencia real preparada amplia aserciones v2 tambien
+para confirmar tras commit/rollback, manteniendo confirmado previo y negativa.
+61 pruebas previas aprobadas; 23 focalizadas posteriores aprobadas, once nuevas.
+Tras corregir alcance/fixture: 54 focalizadas aprobadas. Suite completa final:
+3320 passed en 287.70 s; Black/Ruff/diff --check correctos.
+
+Proximo: contrato/auditoria de politica real y atomicidad de cambios de politica,
+con evidencia de fuentes complementarias y aceptacion antes de habilitar. Resolver
+continua deshabilitado; exitos de frontera habilitada y concurrencia de politica
+siguen pendientes. Ley fija; M3-T1 EN PROGRESO integral. Sin commit ni push.
+
+
+## §89 — Contrato de auditoria y seleccion transaccional de politica real
+
+2026-10-07. Contrato detallado en m3-t1-eipd-politica-auditoria.md (DISENO).
+Publicaciones inmutables con referencia unica/hash de servidor; selector global
+revisionado y eventos append-only atomicos. Schema version 1 distinto de revision
+del selector; publicar no selecciona. Reseleccion/revocacion requieren nueva
+publicacion/referencia, sin promover revisiones historicas ni seleccionar vieja
+politica habilitada. Canal administrativo separado del runtime/tenant.
+
+Orden futuro selector FOR SHARE -> serie FOR UPDATE -> relecturas; seleccion usa
+FOR UPDATE del selector sin locks de serie. Politica permanece estable hasta
+commit/rollback. Requiere modificar uniformemente el orden actual antes de conectar
+resolver real; §87/88 todavia usan artefacto fijo y lock de serie solamente.
+Readiness orientativo coherente; integridad desconocida falla cerrado en ambito EIPD.
+Historia sola no amplia gate ordinario. Negativas parciales admitidas con politica
+valida deshabilitada, sin inventar identidad ante corrupcion del resolver.
+
+Evidencia append-only de confirmacion excepcional futura asocia tenant/assessment,
+evento humano, publicacion/revision/seleccion y hashes, atomicamente con reemplazo;
+requiere contrato/migracion y RLS propios antes de habilitar exitos. Revocacion
+conserva evidencia historica y bloquea acciones nuevas, sin mutar confirmados previos.
+Matriz incluye privilegios, conflictos de revision, commit/rollback, cambios y
+revocacion concurrentes, ambos sentidos de espera, tenants y ambas rutas.
+
+Proximo: contratos/evaluadores puros de publicacion/seleccion/evidencia; despues
+persistencia, privilegios/RLS, resolver/orden de locks y concurrencia/exitos antes
+de fuentes/aceptacion y habilitacion real. Paso documental; diff --check correcto.
+No se reejecuta suite por diseno sin codigo; ultima completa §88: 3320 passed.
+Resolver deshabilitado. Ley fija; M3-T1 EN PROGRESO integral.
+Sin nueva migracion, commit ni push.
+
+
+## §90 — Contratos y evaluadores puros de auditoria de politica
+
+2026-10-07. eipd_policy_audit.py implementa contratos internos cerrados/revalidados:
+publicacion, evento de seleccion, selector, snapshot de auditoria, solicitud/plan
+y evidencia de confirmacion. Modelos frozen, revisiones StrictInt y fechas con zona
+normalizadas a UTC; constructores reciben id/actor/fecha explicitos de servidor.
+Politica anidada conserva contrato §83; hash canonico calculado/comprobado, referencias
+de publicacion unicas. Revalidacion desde python detecta modelos anidados mutados.
+
+Snapshot valida publicaciones/eventos sin duplicados, cadena completa ordenada desde
+bootstrap revision 1, hashes/identidad anterior, tiempos y selector igual al ultimo
+evento. Sin eventos admite selector null solo como estado previo a bootstrap; no
+es politica disponible para confirmar. Constructor de seleccion compara revision
+esperada, exige publicacion registrada y no seleccionada previamente, genera evento
+con revision consecutiva/identidad previa y selector coherente sin mutar entradas.
+Publicar no selecciona; plan no escribe ni acredita permiso administrativo.
+
+Evidencia pura exige selector coherente y recompone controles v2 con politica de la
+publicacion actual, assessment/revision humana e identidad revalidados. Sin motivos
+de confirmacion y sin tiempos invertidos, construye evidencia con tenant/assessment,
+evento humano, publicacion/revision/seleccion, politica, hashes, actor y fecha.
+Identidad sola o documento preparado no eluden negativos, obsolescencia, faltantes
+ordinarios, politica deshabilitada ni otro tenant/assessment. Exito sintetico prueba
+contrato; no confirma assessment real ni persiste evidencia.
+
+65 pruebas nuevas: bootstrap/revocacion puros, contratos cerrados/hash/versiones,
+StrictInt, falta de zona, duplicados/modelos mutados, revision esperada obsoleta,
+publicacion desconocida/reseleccion, cadenas multiples/corrupcion/tiempos/plan,
+evidencia de ambas rutas y rechazo de controles incompletos/historia impropia.
+169 focalizadas aprobadas junto a 104 de politica/composicion §83.
+Suite completa: 3385 passed en 293.55 s; Black/Ruff/diff --check correctos.
+
+Pendiente persistencia/privilegios/RLS, autenticacion administrativa, historia completa
+obtenida de DB, locks/atomicidad y resolver real. Modelos frozen no convierten objetos
+anidados en almacenamiento inmutable; revalidacion protege fronteras puras, DB debera
+impedir UPDATE/DELETE. Next: migracion append-only de control global y evidencia tenant
+con pruebas PostgreSQL/RLS antes de servicios/resolver y cambio de orden de locks.
+Fuentes/aceptacion pendientes, resolver fijo deshabilitado. Ley fija;
+M3-T1 EN PROGRESO integral. Sin migracion, commit ni push.

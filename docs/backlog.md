@@ -276,4 +276,7 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] M3-T1 §85: resolver fijo deshabilitado y readiness v2/identidad; una consulta de historial y 26 pruebas nuevas, gates v1 conservados.
 - [x] M3-T1 §86: prerequisitos puros de revision v2, negativos parciales y positivos con composicion/politica; 110 pruebas nuevas y suite completa 3299 passed.
 - [x] M3-T1 §87: revision autenticada v2 bajo lock con politica deshabilitada/metadatos de servidor; diez HTTP nuevos y suite completa 3309 passed.
-- [ ] M3-T1: decision transversal/confirmacion v2 bajo lock; auditoria/politica real, exitos/concurrencia y fuentes/aceptacion antes de habilitar.
+- [x] M3-T1 §88: decision transversal/confirmacion v2 bajo lock, alcance ordinario conservado; once HTTP nuevos, concurrencia ampliada y suite completa 3320 passed.
+- [x] M3-T1 §89: contrato de publicacion inmutable/selector auditado, orden de locks, revocacion y evidencia atomica de confirmacion; solo diseno.
+- [x] M3-T1 §90: contratos/evaluadores puros de publicacion/seleccion/evidencia, coherencia/hash y 65 pruebas nuevas; suite completa 3385 passed.
+- [ ] M3-T1: persistencia append-only de control global/evidencia tenant y privilegios/RLS; resolver/locks, exitos/concurrencia y fuentes/aceptacion antes de habilitar.
