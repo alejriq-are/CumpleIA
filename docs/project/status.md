@@ -1,3 +1,61 @@
+## 2026-10-07 — M3-T1: revision autenticada con prerrequisitos v2
+
+§87 integra decision v2 bajo lock de serie y relectura de contexto M2/documento.
+Politica fija de servidor deshabilitada; negativos parciales guardan identidad de
+politica sin activar confirmacion. Diagnosticos v1 conservados y error v2 agregado;
+una consulta de ultimo evento/identidad, contratos publicos previos preservados.
+Diez HTTP nuevos, 71 focalizados aprobados; suite completa 3309 passed en 290.08 s,
+incluida concurrencia protegida con aserciones v2 ampliadas. Black/Ruff/diff correctos.
+Proximo: decision transversal/confirmacion v2 bajo lock; auditoria/politica real,
+exitos/concurrencia de politica y fuentes/aceptacion antes de habilitar.
+Ley fija; M3-T1 EN PROGRESO integral. Sin nueva migracion, commit ni push.
+
+## 2026-10-07 — M3-T1: prerrequisitos puros de revision v2
+
+§86 comparte requisitos parciales con v1 y conserva su comportamiento.
+Negativas admiten documentacion parcial con asociacion vigente; continuar exige
+review_blockers de composicion/politica v2 sin requerir revision positiva previa.
+110 pruebas nuevas; 148 focalizadas y suite completa 3299 passed en 281.10 s.
+Black/Ruff/diff correctos. Acciones/gates reales siguen v1 bloqueados.
+Proximo: revision autenticada v2 bajo lock con politica de servidor deshabilitada;
+luego decision transversal, auditoria/politica real, concurrencia y fuentes/aceptacion.
+Ley fija; M3-T1 EN PROGRESO integral. Sin nueva migracion, commit ni push.
+
+## 2026-10-07 — M3-T1: readiness de politica/composicion v2
+
+§85 agrega eipd_controls_v2 versionado/cerrado junto a v1. Resolver de servidor fijo
+con fuentes/aceptacion pendientes y activacion deshabilitada; sin flags de cliente/env.
+Una consulta obtiene ultimo evento/identidad del tenant, sin fallback a positivos
+anteriores. GET conserva documentos/historial; vigencia documental/politica separadas.
+26 pruebas nuevas; suite completa 3189 passed en 279.29 s, Black/Ruff/diff correctos.
+Acciones/gates siguen v1/bloqueados. Proximo: prerequisitos puros de revision v2,
+luego acciones/decision/auditoria/politica real y fuentes/aceptacion antes de habilitar.
+Ley fija; M3-T1 EN PROGRESO integral. Sin nueva migracion, commit ni push.
+
+## 2026-10-07 — M3-T1: identidad de politica en eventos
+
+§84 agrega policy_version/reference/hash opcionales y CHECK todo NULL o identidad
+completa valida; migracion append-only c62e407bad31 aplicada localmente.
+Contratos/mapper historicos no promueven eventos sin politica; RLS/permisos intactos.
+35 pruebas nuevas, 71 focalizadas y suite completa 3163 passed en 277.43 s.
+Alembic check aprobado; Black/Ruff/diff correctos. Comparacion de migracion sobre
+0 eventos locales previos, compatibilidad historica cubierta con fixtures.
+Proximo: resolver deshabilitado y lectura v2 de composicion/identidad antes de
+politica real/auditoria/acciones v2. API/gates siguen v1/bloqueados; fuentes/aceptacion
+pendientes. Ley fija; M3-T1 EN PROGRESO integral. Sin nuevo commit ni push.
+
+## 2026-10-07 — M3-T1: politica pura y composicion v2
+
+§83 implementa politica interna cerrada/revalidada, fuentes/aceptacion/rutas,
+hash canonico y metadatos de ultimo evento. Composicion v2 comparte nucleo v1,
+separa vigencia documental/politica y conserva positivos/faltantes/decisiones.
+104 pruebas nuevas; 184 puras aprobadas; suite completa 3128 passed en 276.34 s.
+Black/Ruff/diff --check correctos. API/gates reales permanecen v1/bloqueados;
+no resolver habilitado ni verificacion real de fuentes en estos evaluadores puros.
+Proximo: contrato/persistencia append-only de identidad de politica en eventos,
+historicos/RLS antes de resolver/auditoria/acciones v2. Fuentes/aceptacion pendientes.
+Ley fija; M3-T1 EN PROGRESO integral. Sin migracion, nuevo commit ni push.
+
 ## 2026-10-07 — M3-T1: aceptacion y politica de habilitacion
 
 §82 actualiza evidencia §§80-81: HTTP/concurrencia preparada cubiertos en dos rutas

@@ -7697,3 +7697,223 @@ completa y revision tecnica requeridas antes de cualquier habilitacion efectiva.
 
 Paso documental, diff --check correcto; no reejecutar pruebas por diseno sin codigo.
 Sin migracion, nuevo commit ni push; frontera no habilitada y M3-T1 EN PROGRESO integral.
+
+
+## 83. Politica pura y composicion v2 implementadas
+
+2026-10-07. eipd_policy.py implementa EipdGatePolicyV1, SourceRecordV1 y
+EipdReviewPolicyIdentityV1 exclusivos del servidor; no se agregan a API/input del
+tenant ni se implementa resolver real. Schema cerrado, StrictInt version 1 y
+revalidate_instances always en politica/fuentes/identidad; normaliza textos y exige
+referencias, URL HTTP(S), fecha/version, cobertura de rutas, responsables y evidencia.
+URL valida no acredita emisor/autenticidad: verificacion real pendiente en resolver.
+
+Rechaza rutas/instrumentos duplicados, rutas desconocidas, habilitacion sin rutas,
+fuentes verificadas sin instrumentos/cobertura y aceptacion sin referencia, commit
+Git completo, evidencia/responsable. Fuentes pendientes/aceptacion pendiente y
+activacion deshabilitada siguen estados validos. No introduce fecha de vigencia
+legal; fecha explicita date permite detectar publicaciones futuras, sin reloj interno.
+
+build_eipd_policy_hash_v1 SHA256 canonico de todos los datos validados, ordenando
+rutas/instrumentos y rutas de aplicabilidad; cambios de evidencia/aceptacion/emisor
+responsable/activacion producen otra identidad. evaluate_eipd_policy_v1 devuelve
+snapshot congelado y motivos sources/activation ordenados/deduplicados. Politica
+None conserva fuentes/gate pendientes y politica_no_disponible; ruta fuera de
+politica no queda habilitada. Politicas sinteticas de test no autorizan el producto.
+
+EipdControlCompositionInputV2 agrega assessment v1, politica nullable explicita y
+ultima identidad humana nullable; identidad sin evento rechazada. Salida congelada
+EipdControlCompositionV2 version 2 agrega politica y review_policy_status, separado
+de review_state documental. Mismo nucleo privado compone documentacion y etapas
+para v1/v2; v1 mantiene barreras constantes sin cambio de firma/resultados.
+V2 calcula etapas de politica durante evaluacion, sin filtrar motivos de v1.
+
+review_blockers no exige evento humano previo. confirmation_blockers agrega
+identidad de politica de ultimo evento: id de evento, version, referencia y hash
+actuales; sin identidad/otra revision/hash previo bloquean. Vigencia documental
+se conserva separada: politica coincidente no elimina obsolescencia del documento,
+contexto, otro tenant/assessment ni decision negativa. Deteccion requiere_eipd y
+screening v1 entero permanecen. Sin can_confirm ni permiso externo de evaluadores.
+
+104 pruebas nuevas: estados/campos/tipos/cobertura/tipos URL, hashes canonicos y
+cambios relevantes, rutas limitadas, politica ausente/deshabilitada/futura, fecha
+explicita, entradas/ReviewIn cerrados, ambas rutas preparadas sin circularidad,
+tres decisiones, politica anterior/otro evento/documento/tenant, faltantes comunes,
+inmutabilidad y modelos anidados modificados revalidados. Se corrigio durante
+pruebas la aceptacion por defecto de instancia anidada ya validada pero mutada;
+revalidacion always evita confiar en ese estado. No se altera modelo cliente v1.
+184 pruebas puras aprobadas (104 nuevas + 80 composicion v1). Suite completa: 3128 passed en 276.34 s, incluyendo §§80-81 y nuevas pruebas
+de politica; Black/Ruff/diff --check correctos.
+
+API/readiness/acciones/confirmacion siguen en v1 y barreras actuales. Sin persistir
+metadatos ni activar resolver/gate v2. Fuentes complementarias/aceptacion pendientes;
+M3-T1 EN PROGRESO integral y ley fija. Sin migracion, nuevo commit ni push.
+Proximo: contrato/persistencia append-only de identidad de politica en eventos,
+compatibilidad con historicos y RLS antes de resolver/auditoria/accion v2. Politica
+real permanece deshabilitada mientras faltan fuentes/aceptacion y evidencia final.
+
+
+## 84. Identidad de politica persistible en eventos EIPD
+
+2026-10-07. Nueva migracion append-only c62e407bad31 sobre b51d3f6a9c20;
+EipdResolutionReview incorpora policy_version Integer, policy_reference Text y
+policy_hash Text, todos nullable y sin defaults/backfill. Restriccion CHECK exige
+los tres NULL para historia sin identidad, o todos NOT NULL con version 1,
+referencia no vacia y hash hexadecimal minusculo de 64 caracteres. NOT NULL
+explicitos en rama completa impiden aceptar identidad parcial por logica SQL NULL.
+Convencion de nombres del repo se conserva, incluido nombre generado/truncado;
+pruebas identifican el constraint real desde catalogo PostgreSQL.
+
+No modifica RLS SELECT/INSERT, FK compuesta tenant/assessment, actor autenticado,
+requisito de borrador/documento, ni prohibicion UPDATE/DELETE/TRUNCATE app_user.
+Eventos antiguos no se reescriben ni reciben una politica supuesta. Continuar
+historico sin identidad sigue legible y no acredita composicion v2. No se exige
+identidad a negativas antiguas ni se inventa autorizacion para nuevos positivos.
+
+EipdResolutionReviewWithPolicyOut agrega lectura cerrada/nullable con version
+estricta y coherencia de los tres campos, heredando UTC y metadatos de servidor.
+No sustituye respuesta API v1 en este paso. ReviewIn sigue rechazando los tres
+campos; caller no puede aportar hashes/version/referencia de politica.
+
+build_eipd_review_policy_metadata_v1 calcula campos desde politica interna validada;
+no autoriza insercion positiva ni verifica fuente externa. derive_eipd_review_policy_identity_v1
+mapea id del evento persistido junto a identidad validada; historicos todos NULL
+producen None. Metadatos parciales, version/hash invalidos o identidad sin id se rechazan, sin
+promover revisiones viejas a politica actual. No resolver habilitado ni conexion de
+acciones v2; POST actual conserva barreras y eventos sin identidad.
+
+35 pruebas nuevas: insercion/lectura runtime con identidad, legacy intacto y mapper,
+12 parciales/formatos invalidos rechazados por CHECK real, spoof tenant/actor/parent/
+sin auth rechazado por RLS, UPDATE de identidad prohibido, tres decisiones legacy
+sin promocion, salida cerrada/tipos estrictos, ReviewIn rechaza metadatos y mapper
+rechaza identidad incompleta. 71 pruebas de persistencia/contratos aprobadas,
+incluyendo 36 anteriores. Alembic check: No new upgrade operations detected.
+Migracion aplicada localmente; comparacion de contenido anterior a/post upgrade
+sobre 0 eventos existentes (no constituye prueba de conversion de historial poblado).
+Fixtures de eventos sin politica verifican compatibilidad nullable y lectura.
+Suite completa: 3163 passed en 277.43 s; Black/Ruff/diff --check correctos.
+
+Proximo: resolver de servidor deshabilitado y lectura de composicion/identidad v2,
+antes de auditoria/politica real y acciones v2. Habilitacion efectiva aun requiere
+fuentes complementarias/aceptacion, decision transversal v2 sin filtrar v1 y
+concurrencia de politica. Ley fija; M3-T1 EN PROGRESO integral; gates bloqueados.
+Sin nuevo commit ni push; ninguna migracion historica reescrita o downgrade ejecutado.
+
+
+## 85. Resolver deshabilitado y lectura de composicion v2
+
+2026-10-07. resolve_eipd_gate_policy_v1 devuelve instancia nueva/revalidada de
+artefacto fijo m3-t1-eipd-deshabilitada-v1, version 1, ambas rutas delimitadas,
+fuentes/aceptacion pendientes, sin instrumentos/evidencia supuestos y activacion
+deshabilitada. Sin parametro de cliente, flags/env, reloj normativo, red o DB;
+no acredita auditoria de politicas habilitadas ni permite cambios de politica en
+produccion. Una instancia mutada no altera la siguiente resolucion.
+
+LegalAssessmentReadinessOut agrega eipd_controls_v2 nullable junto a v1 conservado.
+Salida cerrada/version 2 incluye policy, review_policy_status y latest_review_policy
+nullable (id del evento + version/referencia/hash). Policy snapshot valida identidad
+completa, estados de activacion coherentes y rutas sin duplicados; tipos/versiones
+estrictos, campos extra rechazados. Deteccion anidada version 2 y politica version 1
+permanecen conceptos separados. No incluye can_confirm ni permiso de tratamiento.
+
+Readiness construye ambas composiciones con mismo contexto RAT actual, vigencia,
+fecha explicita y ultimo evento. Constructor de entrada comun evita drift. Consulta
+unica de historial obtiene payload legacy e identidad desde la misma fila filtrada
+por tenant/assessment y ordenada created_at/id; acciones v1 reutilizan wrapper legacy.
+No busca evento anterior si ultimo carece de politica o es negativo. Ambito de
+exposicion igual a §76: EIPD/documento/excepcion/historia; flujo ordinario sin estos
+antecedentes mantiene ambas composiciones null.
+
+GET no escribe ni reasocia; retirar documento conserva historial y separa vigencia
+documental obsoleta de identidad de politica coincidente/anterior. Politica vigente
+no elimina negativa ni bloqueos globales. Metadatos guardados no verifican fuentes
+reales; datos editables del tenant tampoco. Root v1/confirmation_blockers permanecen
+intactos y POST continuar/confirmar siguen rechazados por reglas v1. No conecta
+composicion v2 a autorizacion o accion mutadora, ni activa gates por politica de test.
+
+26 pruebas nuevas: resolver fijo/instancias independientes/env ignorada, contratos
+cerrados y versiones/coherencia (ambas rutas), HTTP preparado con una sola consulta
+real de historial, GET repetido/parametros ignorados, aislamiento tenant, acciones
+bloqueadas y borrador/historial intactos. Historia positiva se crea solo como fixture:
+sin identidad/current/anterior; politica actual deshabilitada impide usarla para
+confirmar. Retiro documental conserva identidad/evento; ultima negativa legacy
+prevalece sobre positiva anterior con identidad. Flujo ordinario null verificado.
+26 pruebas aprobadas; 29 HTTP previas aprobadas en validacion inicial.
+Suite completa: 3189 passed en 279.29 s; Black/Ruff/diff --check correctos.
+
+Proximo: prerequisitos puros versionados v2 de revision, separando negativos
+parciales de positivos con composicion/politica actual; luego accion y decision
+transversal v2 sin filtrar codigos v1, auditoria/politica real y concurrencia de
+politica antes de habilitar. Fuentes complementarias/aceptacion siguen pendientes.
+Ley fija; M3-T1 EN PROGRESO integral. Sin nueva migracion, commit ni push.
+
+
+## §86 — Prerrequisitos puros de revision EIPD v2
+
+2026-10-07. eipd_review_v2 implementa evaluador puro versionado con entrada
+interna cerrada y revalidacion de modelos anidados mutados. Resultado inmutable:
+decision, motivos ordenados/deduplicados y composicion opcional. Sin DB, permisos,
+accion, resolver activo ni can_confirm.
+
+Nucleo parcial compartido con v1 valida fecha explicita, request cerrado, borrador,
+documento/contexto presentes y asociacion vigente. V1 conserva motivos, orden y
+bloqueos fijos de positivos. requiere_cambios/no_continuar usan estos requisitos
+parciales y no ejecutan composicion completa: faltantes ordinarios/documentales,
+alto riesgo o politica deshabilitada no impiden registrar una negativa valida.
+
+continuar compone v2 y conserva todos sus review_blockers, incluida politica,
+fuentes, aceptacion, ruta, versiones y preparacion documental. No usa
+confirmation_blockers ni exige revision positiva anterior: evita circularidad;
+una negativa anterior o identidad de politica obsoleta no sustituye ni impide
+por si sola la nueva revision. Confirmacion conserva sus controles propios.
+
+110 pruebas nuevas cubren ambas rutas, negativos parciales, condiciones comunes,
+positivos incompletos/deshabilitados, politica sintetica preparada, ausencia de
+revision previa, historia negativa/obsoleta, contratos cerrados/modelos mutados,
+fecha explicita e inmutabilidad. 148 pruebas focalizadas aprobadas, incluidas 38
+v1; suite completa 3299 passed en 281.10 s. Black/Ruff/diff --check correctos.
+Politica sintetica preparada solo prueba el evaluador; no activa producto real.
+
+Proximo: integrar revision autenticada v2 con relectura bajo lock y politica
+exclusiva de servidor deshabilitada, preservando negativos y metadatos; despues
+decision transversal v2, auditoria/politica real y concurrencia de politica.
+Fuentes complementarias/aceptacion pendientes; acciones/gates reales siguen v1
+bloqueados en este paso. Ley fija; M3-T1 EN PROGRESO integral.
+Sin nueva migracion, commit ni push.
+
+
+## §87 — Revision autenticada con prerrequisitos v2 y politica de servidor
+
+2026-10-07. La accion existente record_eipd_resolution_review_v1 conserva endpoint,
+autenticacion/permiso edit_content, suscripcion, tenant y transaccion; usa ahora
+prerrequisitos v2 para decidir. Bajo FOR UPDATE de serie relee borrador/versiones,
+contexto actual desde M2 y documento antes de resolver politica fija deshabilitada.
+Una consulta obtiene ultimo evento e identidad; fecha explicita comun. Los controles
+v1 permanecen diagnosticos sin filtrar sus codigos; no determinan la nueva decision.
+
+Negativas conservan requisitos parciales y pueden registrarse aun con documentos
+incompletos o politica deshabilitada. Eventos nuevos guardan version/referencia/hash
+de politica desde el servidor, junto a actor y hashes documentales existentes.
+Identidad vigente no convierte una negativa en aprobacion ni habilita confirmacion.
+Eventos historicos sin politica permanecen sin identidad; no backfill ni fallback.
+Salida publica de evento conserva contrato previo; readiness expone su identidad v2.
+
+continuar exige review_blockers v2 y sigue rechazado por fuentes/aceptacion pendientes
+y activacion deshabilitada. Error 409 conserva issues/eipd_controls legacy y agrega
+evaluation_version 2, issues_v2 y eipd_controls_v2. No exige positiva previa y no
+escribe evento/documento al rechazar. Confirmacion y decision transversal siguen v1.
+Cliente no aporta politica ni activa servidor mediante query o payload.
+
+Diez pruebas HTTP nuevas: negativas parciales con identidad/actor de servidor,
+ambas rutas preparadas con/sin negativa previa, composicion identica a readiness,
+una consulta de historial, preservacion y cuatro rechazos de politica de cliente.
+Prueba historica legacy conserva evento negativo sin identidad mediante fixture;
+concurrencia real preparada ampliada con contexto/ultimo evento/identidad v2 tras
+commit o rollback. 71 focalizadas aprobadas antes de ampliar aserciones concurrentes.
+Suite completa: 3309 passed en 290.08 s, incluidas las aserciones concurrentes
+ampliadas. Black/Ruff/diff --check correctos.
+
+Proximo: decision transversal/confirmacion v2 bajo lock sin filtrar reglas v1;
+auditoria/politica real, exitos y concurrencia de politica antes de habilitar.
+Fuentes complementarias/aceptacion siguen pendientes. Ley fija; M3-T1 EN PROGRESO
+integral. Sin nueva migracion, commit ni push.

@@ -29,6 +29,7 @@ from app.db.models import (
 )
 from app.schemas.licitud import (
     EipdControlCompositionOut,
+    EipdControlCompositionV2Out,
     EipdResolutionReviewIn,
     LegalAssessmentDraftCreate,
     LegalAssessmentDraftUpdate,
@@ -65,7 +66,15 @@ from app.services.economic_obligations import (
     evaluate_economic_obligations_assessment_v1,
 )
 from app.services.eipd import bind_eipd_screening_v11, evaluate_eipd_screening_v1
-from app.services.eipd_controls import compose_eipd_controls_v1
+from app.services.eipd_controls import (
+    compose_eipd_controls_v1,
+    compose_eipd_controls_v2,
+)
+from app.services.eipd_policy import (
+    build_eipd_review_policy_metadata_v1,
+    derive_eipd_review_policy_identity_v1,
+    resolve_eipd_gate_policy_v1,
+)
 from app.services.eipd_resolution import (
     EipdResolutionContextV1,
     bind_eipd_resolution_v1,
@@ -74,6 +83,7 @@ from app.services.eipd_resolution import (
     evaluate_eipd_resolution_document_v1,
     evaluate_eipd_resolution_review_prerequisites_v1,
 )
+from app.services.eipd_review_v2 import evaluate_eipd_resolution_review_prerequisites_v2
 from app.services.eipd_screening_v2 import evaluate_eipd_screening_v2
 from app.services.geolocation import evaluate_geolocation_assessment_v1
 from app.services.health import evaluate_health_assessment_v1
@@ -1699,7 +1709,7 @@ def evaluate_transversal_readiness_v1(assessment, snapshot):
     return special, eipd, blockers
 
 
-async def _latest_eipd_review_payload_v1(db, organization_id, assessment_id):
+async def _latest_eipd_review_snapshot_v1(db, organization_id, assessment_id):
     """Lee ultimo evento del tenant; operaciones mutadoras llaman bajo lock."""
     latest_review = await db.scalar(
         select(EipdResolutionReview)
@@ -1731,25 +1741,43 @@ async def _latest_eipd_review_payload_v1(db, organization_id, assessment_id):
         if latest_review is not None
         else None
     )
-    return review_payload
+    identity = (
+        derive_eipd_review_policy_identity_v1(latest_review) if latest_review else None
+    )
+    return review_payload, identity
+
+
+async def _latest_eipd_review_payload_v1(db, organization_id, assessment_id):
+    payload, _ = await _latest_eipd_review_snapshot_v1(
+        db, organization_id, assessment_id
+    )
+    return payload
+
+
+def _assessment_eipd_composition_input_v1(
+    assessment, organization_id, context, rat_current, latest_review
+):
+    return {
+        "organization_id": organization_id,
+        "assessment_id": assessment.id,
+        "assessment_status": assessment.status,
+        "assessment_schema_version": assessment.schema_version,
+        "rat_context_schema_version": assessment.rat_context_schema_version,
+        "justification": assessment.justification,
+        "rat_context_current": rat_current,
+        "context": context,
+        "resolution": assessment.eipd_resolution_assessment,
+        "latest_review": latest_review,
+    }
 
 
 def _compose_assessment_eipd_controls_v1(
     assessment, organization_id, context, rat_current, latest_review, evaluated_on
 ):
     composition = compose_eipd_controls_v1(
-        {
-            "organization_id": organization_id,
-            "assessment_id": assessment.id,
-            "assessment_status": assessment.status,
-            "assessment_schema_version": assessment.schema_version,
-            "rat_context_schema_version": assessment.rat_context_schema_version,
-            "justification": assessment.justification,
-            "rat_context_current": rat_current,
-            "context": context,
-            "resolution": assessment.eipd_resolution_assessment,
-            "latest_review": latest_review,
-        },
+        _assessment_eipd_composition_input_v1(
+            assessment, organization_id, context, rat_current, latest_review
+        ),
         evaluated_on=evaluated_on,
     )
     return EipdControlCompositionOut.model_validate(
@@ -1760,6 +1788,40 @@ def _compose_assessment_eipd_controls_v1(
                 **asdict(composition.detection_v2),
                 "evaluation_version": composition.detection_v2.evaluation_version,
             },
+        }
+    ).model_dump(mode="json")
+
+
+def _compose_assessment_eipd_controls_v2(
+    assessment,
+    organization_id,
+    context,
+    rat_current,
+    latest_review,
+    identity,
+    evaluated_on,
+):
+    result = compose_eipd_controls_v2(
+        {
+            "assessment": _assessment_eipd_composition_input_v1(
+                assessment, organization_id, context, rat_current, latest_review
+            ),
+            "policy": resolve_eipd_gate_policy_v1(),
+            "latest_review_policy": identity,
+        },
+        evaluated_on=evaluated_on,
+    )
+    return EipdControlCompositionV2Out.model_validate(
+        {
+            **asdict(result),
+            "evaluation_version": result.evaluation_version,
+            "detection_v2": {
+                **asdict(result.detection_v2),
+                "evaluation_version": result.detection_v2.evaluation_version,
+            },
+            "latest_review_policy": (
+                identity.model_dump(mode="json") if identity else None
+            ),
         }
     ).model_dump(mode="json")
 
@@ -2086,6 +2148,7 @@ async def get_legal_assessment_readiness_v1(
     rights_defense = None
     eipd_resolution = None
     eipd_controls = None
+    eipd_controls_v2 = None
     evaluated_on = datetime.now(UTC).date()
     try:
         if assessment.legal_basis == "consentimiento_art12":
@@ -2242,7 +2305,7 @@ async def get_legal_assessment_readiness_v1(
                     evaluated_on=evaluated_on,
                 )
             )
-        review_payload = await _latest_eipd_review_payload_v1(
+        review_payload, review_identity = await _latest_eipd_review_snapshot_v1(
             db, organization_id, assessment.id
         )
         eipd_resolution_review = derive_eipd_resolution_review_state_v1(
@@ -2267,6 +2330,15 @@ async def get_legal_assessment_readiness_v1(
                 resolution_context,
                 rat_current,
                 review_payload,
+                evaluated_on,
+            )
+            eipd_controls_v2 = _compose_assessment_eipd_controls_v2(
+                assessment,
+                organization_id,
+                resolution_context,
+                rat_current,
+                review_payload,
+                review_identity,
                 evaluated_on,
             )
         blockers.extend(
@@ -2298,6 +2370,7 @@ async def get_legal_assessment_readiness_v1(
             "eipd": asdict(eipd),
             "eipd_v2": eipd_v2,
             "eipd_controls": eipd_controls,
+            "eipd_controls_v2": eipd_controls_v2,
             "special": asdict(special),
             "confirmation_blockers": blockers,
             "pending_controls": [
@@ -2370,11 +2443,34 @@ async def record_eipd_resolution_review_v1(
         )
     except ValidationError:
         raise _bad_request("Contrato documental de revision EIPD invalido") from None
-    eipd_controls = None
-    if result.decision == "continuar":
-        latest_review = await _latest_eipd_review_payload_v1(
-            db, organization_id, draft.id
+    # Politica exclusiva del servidor resuelta despues de la relectura bajo lock.
+    # v1 se conserva como diagnostico; v2 decide los prerrequisitos de esta accion.
+    policy = resolve_eipd_gate_policy_v1()
+    latest_review, identity = await _latest_eipd_review_snapshot_v1(
+        db, organization_id, draft.id
+    )
+    try:
+        result_v2 = evaluate_eipd_resolution_review_prerequisites_v2(
+            {
+                "assessment": _assessment_eipd_composition_input_v1(
+                    draft,
+                    organization_id,
+                    context,
+                    build_rat_context_hash_v1(bundle.canonical)
+                    == draft.rat_context_hash,
+                    latest_review,
+                ),
+                "policy": policy,
+                "latest_review_policy": identity,
+            },
+            payload,
+            evaluated_on=evaluated_on,
         )
+    except ValidationError:
+        raise _bad_request("Contrato documental de revision EIPD invalido") from None
+    eipd_controls = None
+    eipd_controls_v2 = None
+    if result_v2.decision == "continuar":
         eipd_controls = _compose_assessment_eipd_controls_v1(
             draft,
             organization_id,
@@ -2383,15 +2479,36 @@ async def record_eipd_resolution_review_v1(
             latest_review,
             evaluated_on,
         )
-    if not result.prerequisites_met or (
-        eipd_controls and eipd_controls["review_blockers"]
-    ):
+        composition = result_v2.composition
+        eipd_controls_v2 = EipdControlCompositionV2Out.model_validate(
+            {
+                **asdict(composition),
+                "evaluation_version": 2,
+                "detection_v2": {
+                    **asdict(composition.detection_v2),
+                    "evaluation_version": 2,
+                },
+                "latest_review_policy": (
+                    identity.model_dump(mode="json") if identity else None
+                ),
+            }
+        ).model_dump(mode="json")
+    if not result_v2.prerequisites_met:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail={
                 "code": "revision_eipd_no_preparada",
-                **({"eipd_controls": eipd_controls} if eipd_controls else {}),
+                **(
+                    {
+                        "eipd_controls": eipd_controls,
+                        "eipd_controls_v2": eipd_controls_v2,
+                    }
+                    if eipd_controls
+                    else {}
+                ),
                 "issues": [asdict(i) for i in result.issues],
+                "evaluation_version": 2,
+                "issues_v2": [asdict(i) for i in result_v2.issues],
             },
         )
     request = EipdResolutionReviewIn.model_validate(
@@ -2412,6 +2529,7 @@ async def record_eipd_resolution_review_v1(
             "context_hash"
         ],
         created_by=profile_id,
+        **build_eipd_review_policy_metadata_v1(policy),
     )
     db.add(event)
     await db.flush()

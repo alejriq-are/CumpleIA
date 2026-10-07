@@ -1702,6 +1702,10 @@ class EipdResolutionReview(Base):
             "context_hash ~ '^[0-9a-f]{64}$'",
             name="ck_eipd_resolution_reviews_context_hash",
         ),
+        CheckConstraint(
+            "(policy_version IS NULL AND policy_reference IS NULL AND policy_hash IS NULL) OR (policy_version IS NOT NULL AND policy_reference IS NOT NULL AND policy_hash IS NOT NULL AND policy_version = 1 AND policy_reference ~ '[^[:space:]]' AND policy_hash ~ '^[0-9a-f]{64}$')",
+            name="ck_eipd_resolution_reviews_policy_identity",
+        ),
         sa.Index("ix_eipd_resolution_reviews_organization_id", "organization_id"),
         sa.Index(
             "ix_eipd_resolution_reviews_assessment_history",
@@ -1724,6 +1728,9 @@ class EipdResolutionReview(Base):
     review_reference: Mapped[str] = mapped_column(Text, nullable=False)
     document_hash: Mapped[str] = mapped_column(Text, nullable=False)
     context_hash: Mapped[str] = mapped_column(Text, nullable=False)
+    policy_version: Mapped[int | None] = mapped_column(sa.Integer, nullable=True)
+    policy_reference: Mapped[str | None] = mapped_column(Text, nullable=True)
+    policy_hash: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_by: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("profiles.id"), nullable=False
     )

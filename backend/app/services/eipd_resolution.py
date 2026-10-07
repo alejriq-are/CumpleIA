@@ -576,6 +576,36 @@ def evaluate_eipd_resolution_review_prerequisites_v1(
     no sustituye esos controles. No acepta banderas de aprobacion de frontera o
     fuentes: aun no existe verificacion implementada que pueda acreditarlas.
     """
+    partial, parsed, ctx = _evaluate_eipd_review_partial_prerequisites(
+        assessment_status, document, context, review, evaluated_on=evaluated_on
+    )
+    issues = list(partial.issues)
+    if partial.decision == "continuar":
+        readiness = evaluate_eipd_resolution_document_v1(
+            parsed, ctx, evaluated_on=evaluated_on
+        )
+        issues.extend(readiness.issues)
+        issues.append(
+            EipdResolutionIssueV1(
+                "review.decision", "frontera_revision_no_validada", "requiere_revision"
+            )
+        )
+        issues.append(
+            EipdResolutionIssueV1(
+                "official_sources",
+                "fuentes_oficiales_no_verificadas",
+                "requiere_revision",
+            )
+        )
+    return EipdResolutionReviewPrerequisitesV1(
+        partial.decision, tuple(dict.fromkeys(issues))
+    )
+
+
+def _evaluate_eipd_review_partial_prerequisites(
+    assessment_status, document, context, review, *, evaluated_on: date
+):
+    """Nucleo parcial compartido; no decide habilitacion de positivos."""
     if type(evaluated_on) is not date:
         raise ValueError("evaluated_on exige date explicita")
     if assessment_status not in ("borrador", "confirmado", "reemplazado"):
@@ -613,14 +643,10 @@ def evaluate_eipd_resolution_review_prerequisites_v1(
             block("context_binding", "asociacion_ausente", "incompleto")
         elif ctx is not None and not eipd_resolution_context_is_current_v1(parsed, ctx):
             block("context_binding.context_hash", "asociacion_obsoleta")
-    if request.decision == "continuar":
-        readiness = evaluate_eipd_resolution_document_v1(
-            parsed, ctx, evaluated_on=evaluated_on
-        )
-        issues.extend(readiness.issues)
-        block("review.decision", "frontera_revision_no_validada")
-        block("official_sources", "fuentes_oficiales_no_verificadas")
-    # Conserva orden de controles y todos los motivos, sin duplicados.
-    return EipdResolutionReviewPrerequisitesV1(
-        request.decision, tuple(dict.fromkeys(issues))
+    return (
+        EipdResolutionReviewPrerequisitesV1(
+            request.decision, tuple(dict.fromkeys(issues))
+        ),
+        parsed,
+        ctx,
     )

@@ -278,6 +278,22 @@ async def test_protected_preparation_reread_after_dependency_lock(
                     await asyncio.wait_for(task, timeout=5)
                 assert exc.value.status_code == 409
                 controls = exc.value.detail["eipd_controls"]
+                if operation == "review":
+                    controls_v2 = exc.value.detail["eipd_controls_v2"]
+                    assert exc.value.detail["evaluation_version"] == 2
+                    assert controls_v2["policy"]["activation"] == "deshabilitada"
+                    assert controls_v2["resolution"]["context_current"] is (
+                        not commit_change
+                    )
+                    assert (
+                        controls_v2["review_state"]["latest_review"]["id"]
+                        == negative.json()["id"]
+                    )
+                    assert (
+                        controls_v2["latest_review_policy"]["review_id"]
+                        == negative.json()["id"]
+                    )
+                    assert controls_v2["review_policy_status"] == "vigente"
                 if commit_change:
                     assert controls["preparation_result"] != "preparado"
                     assert any(

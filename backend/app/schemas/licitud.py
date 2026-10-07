@@ -646,6 +646,27 @@ class EipdResolutionReviewOut(EipdResolutionReviewIn):
         return self
 
 
+class EipdResolutionReviewWithPolicyOut(EipdResolutionReviewOut):
+    """Lectura futura de servidor; historicos mantienen identidad nullable."""
+
+    policy_version: int | None = Field(default=None, strict=True, ge=1, le=1)
+    policy_reference: str | None = None
+    policy_hash: str | None = Field(default=None, pattern=r"^[0-9a-f]{64}$")
+
+    @model_validator(mode="after")
+    def validar_identidad_politica(self):
+        values = (self.policy_version, self.policy_reference, self.policy_hash)
+        if any(value is not None for value in values):
+            if (
+                any(value is None for value in values)
+                or not self.policy_reference.strip()
+            ):
+                raise ValueError(
+                    "Identidad de politica exige version, referencia y hash"
+                )
+        return self
+
+
 class EipdResolutionReviewStateOut(BaseModel):
     """Estado derivado de lectura; no evalua ni autoriza confirmacion."""
 
@@ -1360,6 +1381,72 @@ class EipdControlCompositionOut(BaseModel):
     confirmation_blockers: list[EipdCompositionIssueOut]
 
 
+class EipdPolicyIssueOut(ReadinessIssueOut):
+    model_config = ConfigDict(extra="forbid")
+    stage: Literal["sources", "activation"]
+
+
+class EipdPolicyReadinessOut(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    policy_version: int | None = Field(strict=True, ge=1, le=1)
+    policy_reference: str | None
+    policy_hash: str | None = Field(pattern=r"^[0-9a-f]{64}$")
+    routes: list[Literal["sensible_derechos", "sensible_biometrica_derechos"]]
+    sources_status: Literal["pendiente", "verificadas"]
+    acceptance_status: Literal["pendiente", "aceptada"]
+    activation: Literal["deshabilitada", "habilitada"]
+    issues: list[EipdPolicyIssueOut]
+
+    @model_validator(mode="after")
+    def validar_snapshot_politica(self):
+        identity = (self.policy_version, self.policy_reference, self.policy_hash)
+        if any(value is not None for value in identity):
+            if (
+                any(value is None for value in identity)
+                or not self.policy_reference.strip()
+            ):
+                raise ValueError("Snapshot exige identidad de politica completa")
+        elif (
+            self.routes
+            or self.sources_status != "pendiente"
+            or self.acceptance_status != "pendiente"
+            or self.activation != "deshabilitada"
+        ):
+            raise ValueError("Politica ausente no acredita fuentes ni activacion")
+        if len(set(self.routes)) != len(self.routes):
+            raise ValueError("Rutas duplicadas")
+        if self.activation == "habilitada" and (
+            self.sources_status != "verificadas"
+            or self.acceptance_status != "aceptada"
+            or not self.routes
+        ):
+            raise ValueError("Activacion incoherente")
+        return self
+
+
+class EipdReviewPolicyIdentityOut(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    review_id: uuid.UUID
+    policy_version: int = Field(strict=True, ge=1, le=1)
+    policy_reference: str = Field(min_length=1)
+    policy_hash: str = Field(pattern=r"^[0-9a-f]{64}$")
+
+    @model_validator(mode="after")
+    def validar_referencia_politica(self):
+        if not self.policy_reference.strip():
+            raise ValueError("Referencia de politica vacia")
+        return self
+
+
+class EipdControlCompositionV2Out(EipdControlCompositionOut):
+    evaluation_version: Literal[2]
+    policy: EipdPolicyReadinessOut
+    review_policy_status: Literal[
+        "sin_revision", "sin_identidad", "vigente", "obsoleta"
+    ]
+    latest_review_policy: EipdReviewPolicyIdentityOut | None
+
+
 class ConfirmationBlockerOut(BaseModel):
     field: str
     code: str
@@ -1394,6 +1481,7 @@ class LegalAssessmentReadinessOut(BaseModel):
     eipd: EipdReadinessOut
     eipd_v2: EipdReadinessV2Out | None = None
     eipd_controls: EipdControlCompositionOut | None = None
+    eipd_controls_v2: EipdControlCompositionV2Out | None = None
     special: SpecialReadinessOut
     confirmation_blockers: list[ConfirmationBlockerOut]
     pending_controls: list[str]
