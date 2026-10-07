@@ -134,11 +134,17 @@ superar controles y preparar esta evidencia; fallo revierte ambas escrituras.
 Contratos §90, persistencia §§91–92 y servicios internos/lectura auditada §93
 implementados. Canal interno solo admite politica deshabilitada; rol DB acredita
 canal, no autentica persona. Resolver transaccional con lock compatible con runtime SELECT implementado §94,
-sin conexion a acciones. Siguiente: cambio uniforme de orden de locks en acciones;
-HTTP/concurrencia PostgreSQL real y casos exitosos con politica sintetica de test.
+revision humana conectada §95 con orden selector -> serie y politica deshabilitada.
+Preparacion/confirmacion conectadas §96 al mismo selector deshabilitado; ordinario
+sin EIPD no lo exige. Evidencia atomica conectada §97 antes de reemplazo;
+exitos/fallos reales PostgreSQL bajo override pytest local de guardia productiva.
+Concurrencia de exitos de misma serie/revocacion validada §98, ambas rutas,
+commit/rollback y evidencia original conservada. Siguiente: series/tenants
+independientes y PATCH concurrentes, autoridad personal.
 
 Antes de habilitar politica real: fuentes complementarias verificadas con evidencia,
 aceptacion tecnica trazable al commit, suite completa y matriz anterior aprobadas.
 Publicar objeto que declare verificadas no verifica fuentes reales. Fechas o eventual
-postergacion legal no activan politica. Hasta entonces resolver fijo deshabilitado;
+postergacion legal no activan politica. Revision exige selector deshabilitado explicito
+y rechaza habilitadas; confirmacion/readiness usan misma politica auditada deshabilitada;
 M3-T1 EN PROGRESO dentro del alcance integral.

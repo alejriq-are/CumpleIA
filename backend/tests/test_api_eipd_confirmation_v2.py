@@ -9,6 +9,9 @@ from app.services.eipd_policy import (
 )
 from tests import test_api_eipd_prepared_frontier as protected
 from tests import test_api_eipd_resolution as fixtures
+from tests.eipd_selected_policy_fixtures import (
+    explicit_review_policy as explicit_review_policy,
+)
 from tests.test_api_eipd_controls_v2_readiness import insert_historical_positive
 from tests.test_api_eipd_resolution_reviews import events, review, setup
 

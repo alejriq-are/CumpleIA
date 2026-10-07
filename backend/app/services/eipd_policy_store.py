@@ -1,6 +1,6 @@
 """Servicios internos §93; caller autentica actor y gestiona commit/rollback.
 
-Sin API administrativa ni conexion al resolver de las acciones de licitud.
+Sin API administrativa. Revision/preparacion/confirmacion conectadas en §§95–96.
 """
 
 from uuid import uuid4
@@ -17,7 +17,7 @@ from app.services.eipd_policy_audit import (
 )
 
 # Serializa bootstrap (no existe fila para FOR UPDATE) y selecciones administrativas.
-# Solo este canal adquiere advisory antes del selector; nunca adquiere series.
+# Canal administrativo exclusivo; nunca adquiere series.
 _SELECTION_LOCK = 719_093
 _SNAPSHOT_SQL = """SELECT jsonb_build_object(
   'publications', COALESCE((SELECT jsonb_agg(to_jsonb(p) ORDER BY p.id)
@@ -162,24 +162,29 @@ async def select_eipd_policy_v1(
     return plan
 
 
-async def lock_eipd_policy_selector_v1(db):
+async def lock_eipd_policy_selector_v1(db, *, require_selector=True):
     """Advisory compartido -> selector FOR SHARE; nunca llamar tras lock de serie.
 
     Funcion DB limitada comprueba actor registrado. Caller conserva transaccion y
     permisos de accion; no cambia privilegios ni politica. Selector ausente falla
-    cerrado, incluso durante bootstrap. Locks se liberan solo al commit/rollback.
+    cerrado por defecto, incluso durante bootstrap. require_selector=False mantiene
+    el advisory compartido aunque falte selector: confirmacion revalida bajo serie
+    y exige politica solo en ambito EIPD. Locks hasta commit/rollback.
     """
     if await db.scalar(text("SHOW transaction_isolation")) != "read committed":
         raise ValueError("Resolver transaccional EIPD exige READ COMMITTED")
-    if not await db.scalar(text("SELECT public.lock_eipd_policy_selector_v1()")):
+    present = await db.scalar(text("SELECT public.lock_eipd_policy_selector_v1()"))
+    if require_selector and not present:
         raise ValueError("Politica seleccionada no disponible")
+    return present
 
 
 async def resolve_eipd_policy_snapshot_for_transaction_v1(db):
     """Snapshot validado tras espera, con locks retenidos hasta commit/rollback.
 
-    Sin cache, fallback, bootstrap ni activacion. Acciones actuales aun no usan este
-    resolver; caller debe adoptar orden selector -> serie y revalidar sus controles.
+    Sin cache, fallback, bootstrap ni activacion. Acciones conectadas §§95–96;
+    caller debe adoptar orden selector -> serie
+    y revalidar sus controles.
     """
     await lock_eipd_policy_selector_v1(db)
     state = await read_eipd_policy_audit_snapshot_v1(db)

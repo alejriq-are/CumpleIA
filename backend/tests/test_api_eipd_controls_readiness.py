@@ -9,6 +9,9 @@ from app.schemas.licitud import EipdControlCompositionOut
 from app.services.eipd_controls import compose_eipd_controls_v1
 from tests import test_api_eipd_resolution as api_fixtures
 from tests import test_services_eipd_controls as control_fixtures
+from tests.eipd_selected_policy_fixtures import (
+    explicit_review_policy as explicit_review_policy,
+)
 
 rat_m3 = api_fixtures.rat_m3
 resolution_rat = api_fixtures.resolution_rat

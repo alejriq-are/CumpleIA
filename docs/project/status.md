@@ -1,3 +1,50 @@
+## 2026-10-07 — M3-T1: concurrencia exitosa y revocacion con evidencia
+
+§98 agrega 12 PostgreSQL reales (ambas rutas, pg_blocking_pids): confirmaciones de
+misma serie commit/rollback dejan una evidencia; revocacion espera fin de transaccion,
+conserva evidencia exacta tras commit y bloquea accion futura; confirmacion que espera
+revocacion relee nueva politica tras commit o anterior tras rollback.
+Exitos solo sinteticos con override pytest §97; guardia productiva conservada.
+12 aprobadas en 5.78 s. Suite completa: 3543 passed en 343.50 s; Black/Ruff/Alembic check/diff correctos.
+Proximo: series/tenants independientes y PATCH concurrentes; autoridad personal,
+fuentes/aceptacion antes de activar. Ley fija; EN PROGRESO integral. Sin commit/push.
+
+## 2026-10-07 — M3-T1: evidencia atomica de confirmacion conectada
+
+§97 inserta evidencia solo tras controles v2 y antes de reemplazar confirmado;
+relectura auditada/recomposicion pura, UUID/fecha servidor, FK/RLS y misma transaccion.
+Guardia de habilitadas conservada; exitos exclusivamente sinteticos en pytest con
+override local de guardia, sin bypass/configuracion/endpoint de produccion.
+12 PostgreSQL nuevas aprobadas: ambas rutas, reemplazo, cuatro fallos/rollback,
+identidad exacta y ausencia de evidencia ante guardia/controles fallidos.
+Suite completa: 3531 passed en 334.47 s; Black/Ruff/Alembic check/diff correctos.
+Proximo: concurrencia de exitos/revocacion/tenants; autoridad personal, fuentes y
+aceptacion antes de activar. Ley fija; EN PROGRESO integral. Sin commit ni push.
+
+## 2026-10-07 — M3-T1: preparacion/confirmacion con selector auditado
+
+§96 unifica politica de revision, readiness y confirmacion. Consulta orientativa sin
+locks; accion advisory compartido -> selector compartido -> serie, relectura M2 y
+politica auditada. Ausencia/incoherencia bloquea EIPD sin fallback. Ordinario sin
+EIPD no exige selector ni crea bootstrap; historia sola conserva ambito §88.
+Solo politicas deshabilitadas admitidas; evidencia atomica aun no conectada.
+13 PostgreSQL nuevas aprobadas, cuatro concurrencias reales; 221 focalizadas.
+Suite completa: 3519 passed en 329.62 s; Black/Ruff/Alembic check/diff correctos.
+Proximo: evidencia atomica/fallos/exitos sinteticos, autoridad personal/fuentes/
+aceptacion antes de habilitar. Ley fija; EN PROGRESO integral. Sin commit ni push.
+
+## 2026-10-07 — M3-T1: revision humana con selector auditado
+
+§95 conecta POST revision EIPD: advisory compartido -> selector FOR SHARE -> serie,
+relectura de contexto y politica tras locks. Negativas guardan identidad seleccionada;
+selector ausente/incoherente falla 409 sin escrituras/fallback/bootstrap. Habilitadas
+rechazadas; permisos tenant/suscripcion y diagnostico v1 conservados.
+Nueve PostgreSQL nuevas, cuatro concurrencias reales; 33 HTTP previas aprobadas.
+Suite completa: 3506 passed en 313.64 s; Black/Ruff/Alembic check/diff correctos.
+Confirmacion/readiness aun fijas deshabilitadas: siguiente integrar mismo selector
+preservando ordinario sin EIPD; luego evidencia atomica/exitos/autoridad personal.
+Fuentes/aceptacion pendientes, ley fija; EN PROGRESO integral. Sin commit ni push.
+
 ## 2026-10-07 — M3-T1: resolver transaccional de politica con lock compartido
 
 §94 agrega funcion limitada de bloqueo, migracion f95b73aed064 aplicada localmente.

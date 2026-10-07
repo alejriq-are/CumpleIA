@@ -10,6 +10,9 @@ from app.schemas.licitud import EipdReadinessV2Out
 from app.services.eipd_screening_v2 import evaluate_eipd_screening_v2
 from tests import test_api_eipd_resolution as api_fixtures
 from tests import test_services_eipd_frontier as frontier_fixtures
+from tests.eipd_selected_policy_fixtures import (
+    explicit_review_policy as explicit_review_policy,
+)
 
 rat_m3 = api_fixtures.rat_m3
 resolution_rat = api_fixtures.resolution_rat

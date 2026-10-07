@@ -66,6 +66,7 @@ from app.services.economic_obligations import (
     evaluate_economic_obligations_assessment_v1,
 )
 from app.services.eipd import bind_eipd_screening_v11, evaluate_eipd_screening_v1
+from app.services.eipd_confirmation import record_eipd_confirmation_evidence_v1
 from app.services.eipd_controls import (
     compose_eipd_controls_v1,
     compose_eipd_controls_v2,
@@ -73,7 +74,11 @@ from app.services.eipd_controls import (
 from app.services.eipd_policy import (
     build_eipd_review_policy_metadata_v1,
     derive_eipd_review_policy_identity_v1,
-    resolve_eipd_gate_policy_v1,
+)
+from app.services.eipd_policy_store import (
+    lock_eipd_policy_selector_v1,
+    read_selected_eipd_policy_v1,
+    resolve_eipd_policy_snapshot_for_transaction_v1,
 )
 from app.services.eipd_resolution import (
     EipdResolutionContextV1,
@@ -1792,6 +1797,20 @@ def _compose_assessment_eipd_controls_v1(
     ).model_dump(mode="json")
 
 
+async def _selected_disabled_eipd_policy_v1(db):
+    try:
+        publication = await read_selected_eipd_policy_v1(db)
+    except ValueError:
+        raise HTTPException(
+            status_code=409, detail={"code": "politica_eipd_no_disponible"}
+        ) from None
+    if publication.policy.activation != "deshabilitada":
+        raise HTTPException(
+            status_code=409, detail={"code": "politica_eipd_habilitada_no_admitida"}
+        )
+    return publication.policy
+
+
 def _compose_assessment_eipd_controls_v2(
     assessment,
     organization_id,
@@ -1800,13 +1819,14 @@ def _compose_assessment_eipd_controls_v2(
     latest_review,
     identity,
     evaluated_on,
+    policy,
 ):
     result = compose_eipd_controls_v2(
         {
             "assessment": _assessment_eipd_composition_input_v1(
                 assessment, organization_id, context, rat_current, latest_review
             ),
-            "policy": resolve_eipd_gate_policy_v1(),
+            "policy": policy,
             "latest_review_policy": identity,
         },
         evaluated_on=evaluated_on,
@@ -1841,6 +1861,9 @@ async def confirm_legal_assessment_v1(
     draft = await get_legal_assessment_draft_v1(
         db, organization_id, treatment_id, assessment_id
     )
+    # Incluso sin selector, el advisory compartido serializa bootstrap antes de
+    # serie. Su ausencia solo bloquea si el contexto revalidado exige EIPD.
+    await lock_eipd_policy_selector_v1(db, require_selector=False)
     series_result = await db.execute(
         select(LegalAssessmentSeries)
         .where(
@@ -2008,6 +2031,7 @@ async def confirm_legal_assessment_v1(
             latest_review,
             identity,
             evaluated_on,
+            await _selected_disabled_eipd_policy_v1(db),
         )
     # La composicion v2 evalua la frontera delimitada y rechaza las restantes.
     # Fuera del ambito EIPD se conservan las barreras transversales existentes.
@@ -2038,6 +2062,21 @@ async def confirm_legal_assessment_v1(
                 ],
             },
         )
+
+    if eipd_controls_v2 is not None:
+        try:
+            await record_eipd_confirmation_evidence_v1(
+                db,
+                _assessment_eipd_composition_input_v1(
+                    draft, organization_id, context, True, latest_review
+                ),
+                identity,
+                actor_id=profile_id,
+            )
+        except ValueError:
+            raise HTTPException(
+                status_code=409, detail={"code": "evidencia_eipd_no_preparada"}
+            ) from None
 
     previous_result = await db.execute(
         select(LegalAssessment)
@@ -2369,6 +2408,7 @@ async def get_legal_assessment_readiness_v1(
                 review_payload,
                 review_identity,
                 evaluated_on,
+                await _selected_disabled_eipd_policy_v1(db),
             )
         blockers.extend(
             {k: v for k, v in item.items() if k != "status_code"}
@@ -2422,6 +2462,14 @@ async def record_eipd_resolution_review_v1(
     draft = await get_legal_assessment_draft_v1(
         db, organization_id, treatment_id, assessment_id
     )
+    # Orden global: advisory compartido -> selector FOR SHARE -> serie.
+    # No existe fallback a la politica fija ni bootstrap desde una accion tenant.
+    try:
+        await resolve_eipd_policy_snapshot_for_transaction_v1(db)
+    except ValueError:
+        raise HTTPException(
+            status_code=409, detail={"code": "politica_eipd_no_disponible"}
+        ) from None
     series = await db.scalar(
         select(LegalAssessmentSeries)
         .where(
@@ -2472,9 +2520,9 @@ async def record_eipd_resolution_review_v1(
         )
     except ValidationError:
         raise _bad_request("Contrato documental de revision EIPD invalido") from None
-    # Politica exclusiva del servidor resuelta despues de la relectura bajo lock.
+    # Identidad auditada revalidada tras adquirir ambos locks, hasta commit.
     # v1 se conserva como diagnostico; v2 decide los prerrequisitos de esta accion.
-    policy = resolve_eipd_gate_policy_v1()
+    policy = await _selected_disabled_eipd_policy_v1(db)
     latest_review, identity = await _latest_eipd_review_snapshot_v1(
         db, organization_id, draft.id
     )

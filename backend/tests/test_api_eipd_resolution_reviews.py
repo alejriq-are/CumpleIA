@@ -15,6 +15,9 @@ from app.db.models import (
 )
 from app.services.eipd_resolution import build_eipd_resolution_document_hash_v1
 from tests import test_api_eipd_resolution as fixtures
+from tests.eipd_selected_policy_fixtures import (
+    explicit_review_policy as explicit_review_policy,
+)
 
 rat_m3 = fixtures.rat_m3
 resolution_rat = fixtures.resolution_rat

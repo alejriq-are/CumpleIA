@@ -18,6 +18,9 @@ from app.services.eipd_resolution import build_eipd_resolution_document_hash_v1
 from tests import test_api_eipd_prepared_frontier as protected_fixtures
 from tests import test_api_eipd_resolution as api_fixtures
 from tests import test_services_eipd_controls as control_fixtures
+from tests.eipd_selected_policy_fixtures import (
+    explicit_review_policy as explicit_review_policy,
+)
 from tests.test_api_eipd_resolution_reviews import events, review
 
 rat_m3 = api_fixtures.rat_m3

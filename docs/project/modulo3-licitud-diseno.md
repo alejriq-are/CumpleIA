@@ -8213,3 +8213,155 @@ con selector deshabilitado explicitamente registrado y errores cerrados si falta
 evidencia atomica, concurrencia de acciones, autoridad administrativa personal y
 fuentes/aceptacion antes de habilitar. No bootstrap supuesto ni promocion de historia.
 Ley fija; M3-T1 EN PROGRESO integral. Sin commit ni push.
+
+
+## §95 — Revision humana conectada al selector auditado deshabilitado
+
+2026-10-07. POST eipd-resolution/reviews adquiere advisory compartido y selector
+FOR SHARE mediante §94 antes del lock FOR UPDATE de serie. Despues de ambos locks
+relee borrador, contexto M2 y auditoria completa, y evalua v2 con la publicacion
+seleccionada. Historial y diagnostico v1 conservados. Evento negativo guarda version,
+referencia y hash de esa publicacion; nunca politica del cliente ni identidad fija
+como fallback. Permisos/tenant/suscripcion siguen en dependencias autenticadas.
+Locks permanecen hasta commit/rollback del caller; no commits internos.
+
+Selector ausente o auditoria/hash/payload incoherentes devuelve 409 con codigo
+politica_eipd_no_disponible, sin evento ni cambio de borrador. Publicacion habilitada
+rechazada explicitamente (politica_eipd_habilitada_no_admitida): este paso no habilita
+positivas ni excepciones. Runtime no publica/selecciona ni hace bootstrap. Para usar
+revision se requiere selector deshabilitado registrado por canal autorizado; ninguna
+migracion o accion tenant crea ese selector automaticamente.
+
+Nueve pruebas nuevas con PostgreSQL/app_user: dos decisiones negativas/identidad real,
+orden SQL selector antes de serie y lectura posterior, tres fallos cerrados, cuatro
+concurrencias reales observadas por pg_blocking_pids: revision espera seleccion
+administrativa commit/rollback y registra nueva/anterior identidad; administrador
+espera fin de transaccion de revision commit/rollback, con evento persistido/revertido.
+Fixtures HTTP existentes registran explicitamente artefacto deshabilitado conocido
+por canal interno de test y limpian solo su publicacion/selector; no simulan fallback
+ni credenciales administrativas de produccion. 33 HTTP anteriores y nueve nuevas
+aprobadas focalmente. Suite completa: 3506 passed en 313.64 s; Black/Ruff/Alembic check/diff correctos.
+
+Alcance de este checkpoint: revision humana exclusivamente. Confirmacion y readiness
+v2 aun usan artefacto fijo deshabilitado; cuando selector tiene identidad diferente,
+readiness puede mostrar revision obsoleta respecto de su politica fija. Esa consulta
+es orientativa y no acredita vigencia contra selector real hasta siguiente integracion.
+No cierre del control global ni activacion. Proximo: conectar readiness y confirmacion
+al mismo selector con orden compatible, preservando ordinario sin EIPD/historia sola;
+luego evidencia atomica, autoridad personal, matriz de exitos y fuentes/aceptacion.
+Ley fija; M3-T1 EN PROGRESO integral. Sin migracion, commit ni push.
+
+
+## §96 — Preparacion y confirmacion con el mismo selector auditado
+
+2026-10-07. Readiness v2 lee publicacion seleccionada mediante snapshot SQL completo
+validado y sin locks/escrituras. Ya no compone con artefacto fijo: politica, hash y
+estado de identidad humana corresponden al selector real. Es consulta orientativa,
+no garantiza estabilidad hasta una accion. Selector ausente/corrupto en su ambito
+EIPD devuelve 409 politica_eipd_no_disponible, sin fallback ni bootstrap.
+
+Confirmacion adquiere advisory compartido -> selector FOR SHARE si existe -> serie
+FOR UPDATE, antes de releer borrador/contexto M2/controles. Helper exige READ COMMITTED;
+require_selector=False solo permite adquirir advisory aun sin fila para conservar
+ordinarios sin EIPD. Ambito de gate revalidado bajo serie conserva §88: documento,
+deteccion requiere EIPD/revision o expedientes de excepcion; historia sola no amplía
+ambito de confirmacion. Si entra al ambito, exige snapshot seleccionado validado
+tras ambos locks; ausencia/incoherencia bloquea antes de reemplazar confirmado.
+Bootstrap/seleccion administrativos esperan advisory; PATCH solo serie, sin inversion.
+
+Revisiones, readiness y confirmacion usan helper compartido que admite unicamente
+activacion deshabilitada. Politica habilitada aun rechazada con codigo
+politica_eipd_habilitada_no_admitida, aunque una fixture privilegiada la insertase.
+Sin politica client-side, nueva migracion, seed productivo ni commits internos.
+Todavia no se conecta escritura de evidencia de confirmacion EIPD: ninguna ruta
+excepcional se habilita en este checkpoint. No promociona revisiones historicas.
+
+Trece PostgreSQL/app_user nuevas: ambas rutas coinciden entre revision/consulta/error
+de confirmacion; reseleccion cambia hash y vuelve obsoleta revision; seis casos de
+selector ausente/hash/extra en preparacion/confirmacion conservan borrador/eventos;
+ordinario sin selector confirma y no crea selector/evidencia; cuatro concurrencias
+reales observadas con pg_blocking_pids, confirmacion esperando admin commit/rollback
+y admin esperando fin de transaccion de confirmacion bloqueada commit/rollback.
+13 aprobadas en 5.68 s; 221 focalizadas de confirmacion/preparacion aprobadas en
+20.40 s. Dobles unitarios de confirmacion declaran politica/lock simulados, mientras
+HTTP y PostgreSQL verifican comportamiento real. API Licitud historica tambien
+registra selector explicito; 53 regresiones verificadas en 76.42 s. Suite completa: 3519 passed en 329.62 s; Black/Ruff/Alembic check/diff correctos.
+
+Proximo: conectar evidencia de confirmacion atomica y validar fallos/reemplazo y
+exitos sinteticos antes de habilitar; autoridad administrativa personal, fuentes
+complementarias y aceptacion tecnica trazable pendientes. Ley fija; EN PROGRESO
+integral. Sin commit ni push. §95 tambien sigue pendiente de commit.
+
+
+## §97 — Evidencia de confirmacion conectada a la transaccion
+
+2026-10-07. Servicio interno eipd_confirmation.record_eipd_confirmation_evidence_v1
+relee snapshot auditado, recompone controles con constructor puro §90 y genera UUID
+y fecha UTC de servidor (clock_timestamp). Inserta EipdConfirmationEvidence y flush,
+sin commit, endpoint ni parametros de evidencia del cliente. Caller conserva locks
+selector -> serie y arma contexto actual; DB §92 verifica tenant/JWT/borrador/ultima
+revision positiva y FK exactas de politica/documento/contexto/seleccion.
+
+Confirmacion llama servicio solo tras aprobar controles v2 en ambito EIPD y antes
+de leer/modificar confirmado anterior. Borrador debe seguir borrador al insertar
+por RLS; evidencia, reemplazo y confirmacion quedan en misma transaccion del caller.
+ValueError/contrato no preparado devuelve 409 evidencia_eipd_no_preparada; errores
+DB/flush propagan para rollback. Si cualquier paso falla, no conserva evidencia ni
+reemplazo parcial. Ordinario fuera de EIPD no inserta evidencia. No commits internos.
+
+Guardia §96 se conserva: politica habilitada rechazada en la aplicacion. Exitos
+excepcionales solo se ejercitan en pytest con politica/positiva sinteticas insertadas
+por owner de fixtures y override local de _selected_disabled_eipd_policy_v1. No flag,
+variable de entorno, endpoint o bypass de produccion. Constructor/relectura/gates,
+RLS y persistencia real no se simulan; ninguna fuente de fixture acredita verificacion
+real ni aceptacion tecnica de politica productiva.
+
+Doce pruebas PostgreSQL/app_user nuevas: dos guardias reales rechazan habilitada sin
+evidencia; cuatro exitos sinteticos (ambas rutas, con/sin confirmado previo) conservan
+identidad exacta/actor/fecha y evidencia unica, segundo intento no duplica; cuatro
+fallos con anterior confirmado revierten evidencia/borrador/anterior (FK real de
+insercion, fallo tras evidencia, tras reemplazo y tras flush final); dos controles
+fallidos (negativa/identidad obsoleta) prueban que no se intenta insertar evidencia.
+12 aprobadas en 4.59 s. Fixtures limpian evidencia antes de revision/politica y RAT.
+Suite completa: 3531 passed en 334.47 s; Black/Ruff/Alembic check/diff correctos.
+
+Proximo: concurrencia de confirmaciones exitosas y revocacion tras exito con evidencia
+historica preservada, dos series/tenants, y autoridad administrativa personal antes
+de fuentes complementarias/aceptacion/activacion. M3-T1 EN PROGRESO integral, ley fija.
+Sin migracion, commit ni push; §§95–97 pendientes de commit.
+
+
+## §98 — Concurrencia exitosa y revocacion con evidencia preservada
+
+2026-10-07. Se amplía matriz PostgreSQL/app_user; sin cambio de comportamiento ni
+activacion productiva. Reutiliza politica/positiva owner sinteticas y override local
+de guardia de pytest de §97. Servicios de confirmacion, constructor, RLS/FK, locks,
+seleccion administrativa deshabilitada y commits/rollbacks son reales.
+
+Doce pruebas nuevas, ambas rutas sensible/sensible-biometrica, con pg_blocking_pids
+para demostrar espera efectiva y timeout acotado, no inferir bloqueo por sleep:
+
+- Dos confirmaciones de misma evaluacion/serie con anterior confirmado: primer commit
+  deja segunda en 409 al releer status; primer rollback permite exito de segunda.
+  En ambos casos queda una evidencia exacta y un reemplazo, sin duplicacion. Evidencia
+  no es visible desde otra transaccion antes de commit.
+- Administrador intenta seleccionar nueva politica deshabilitada mientras confirmacion
+  exitosa conserva locks: espera hasta commit/rollback. Tras commit evidencia original
+  se conserva campo por campo y confirmado mantiene status; tras rollback no queda
+  evidencia. Seleccion deshabilitada posterior bloquea accion siguiente con identidad
+  humana obsoleta y gate_eipd_no_habilitado. Sucesor/positiva historica de test no se
+  promocionan ni reemplazan confirmado tras revocacion.
+- Confirmacion comienza mientras revocacion tiene lock exclusivo: tras commit revalida
+  politica deshabilitada y rechaza sin evidencia/status; tras rollback usa seleccion
+  original habilitada sintetica y confirma con evidencia de revision 1.
+
+12 aprobadas en 5.78 s. Fixtures restauran selector previo solo mediante owner para
+limpieza tras aserciones, borran publicacion/evento sucesor de test y luego limpian
+estado original. Esa restauracion no es canal de rollback/reseleccion productivo:
+contrato real sigue exigiendo publicacion nueva. Sin flags/env/endpoints nuevos.
+Suite completa: 3543 passed en 343.50 s; Black/Ruff/Alembic check/diff correctos.
+
+Proximo: ampliar exitos concurrentes a series independientes/tenants y PATCH, despues
+resolver autoridad personal administrativa; fuentes complementarias y aceptacion
+tecnica trazable pendientes antes de habilitar. M3-T1 EN PROGRESO integral; ley fija.
+Sin migracion ni cambio de servicios, commit o push; §§95–98 pendientes de commit.
