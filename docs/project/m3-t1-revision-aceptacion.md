@@ -2,7 +2,7 @@
 
 Fecha: 2026-10-07. Estado: EN PROGRESO. Revisión documental y de código;
 no modifica reglas ni amplía el alcance. Última suite completa registrada:
-3458 passed (§92), posterior a persistencia/RLS de evidencia tenant.
+3482 passed (§93), posterior a servicios internos de politica auditada.
 Checkpoints inferiores son históricos; el total no acredita cierre integral.
 
 ## Fuentes y criterio
@@ -2743,3 +2743,53 @@ Proximo: servicio administrativo de publicacion/seleccion y resolver de lectura
 validada, aun sin politica real habilitada; despues locks compartidos/orden uniforme
 y evidencia atomica en confirmacion, concurrencia/exitos y fuentes/aceptacion.
 Ley fija; M3-T1 EN PROGRESO integral. Sin commit ni push.
+
+
+## §93 — Servicios internos de publicacion/seleccion y lectura auditada
+
+2026-10-07. eipd_policy_store.py implementa publish_eipd_policy_v1,
+select_eipd_policy_v1, read_eipd_policy_audit_snapshot_v1 y
+read_selected_eipd_policy_v1. Sin endpoint administrativo, migracion nueva ni
+conexion al resolver de acciones/readiness actuales. Solo canal DB current_user
+exacto eipd_policy_admin escribe mediante estos servicios; app_user y owner normal
+rechazados en la frontera del servicio. Ese rol acredita canal, no identidad personal:
+caller administrativo futuro debe autenticar actor de plataforma y gestionar
+commit/rollback. Actor explicito validado por contrato/FK, no tomado del tenant.
+
+Publicar genera UUID/fecha de servidor (clock_timestamp), hash canonico y payload
+cerrado via §90; referencia repetida rechazada antes de escritura. No selecciona.
+Seleccionar valida solicitud cerrada/revision esperada, adquiere advisory lock
+transaccional 719093 y luego FOR UPDATE del selector, relee auditoria, genera plan,
+inserta evento y cambia selector en la misma transaccion. No commit interno ni locks
+de serie. Advisory serializa tambien bootstrap cuando fila de selector no existe;
+siempre precede selector en este canal. Error/rollback no deja evento parcial.
+
+Lectura usa una sola sentencia SQL con aggregates del catalogo completo, cadena
+ordenada y selector, bajo snapshot MVCC comun; mapea columnas explicitas a contratos
+§90 y comprueba identidad/payload/hash/cadena/tiempos. Datos corruptos, selector
+faltante o lectura runtime sin autenticacion no generan fallback habilitado.
+Publicacion sin selector es estado de bootstrap, no politica disponible. Leer no
+escribe/cachea ni garantiza estabilidad posterior hasta commit. No usar esta lectura
+orientativa como resolver transaccional de confirmacion sin locks compatibles.
+
+El canal de publicacion/seleccion admite exclusivamente activacion deshabilitada;
+objetos sinteticos habilitados rechazados aun si cumplen schema/evidencia declarada.
+No comprueba fuentes reales ni interpreta fechas como activacion. Artefacto fijo
+resolve_eipd_gate_policy_v1 permanece intacto/deshabilitado en acciones actuales.
+
+24 PostgreSQL nuevas: publicacion/bootstrap y campos servidor, permisos de canal,
+una consulta y autenticacion, extra/StrictInt/target desconocido/revision obsoleta/
+reseleccion/referencia repetida/activacion, corrupcion catalogo/hash/payload/tiempos/
+selector, rollback y cuatro concurrencias reales con pg_blocking_pids: bootstrap y
+seleccion existentes, commit y rollback. Segundo escritor relee revision despues de
+espera; commit hace solicitud obsoleta, rollback permite plan sucesor. Fixtures
+limpian controles TEST del actor sintetico por prueba, ademas de limpieza de sesion.
+24 aprobadas en 2.37 s; Black/Ruff correctos.
+Suite completa: 3482 passed en 315.74 s; Black/Ruff/diff --check correctos.
+
+Proximo: resolver transaccional de lectura con bloqueo compartido seguro y orden
+selector -> serie en acciones, manteniendo politica deshabilitada; integrar evidencia
+atomica despues y validar concurrencia/exitos antes de fuentes/aceptacion/activacion.
+Privilegios runtime solo SELECT se conservan: resolver con lock requiere mecanismo
+limitado compatible con esos privilegios, no conceder UPDATE global al runtime.
+Ley fija; M3-T1 EN PROGRESO integral. Sin migracion, commit ni push.

@@ -1,3 +1,15 @@
+## 2026-10-07 — M3-T1: servicios internos de politica auditada
+
+§93 implementa publicacion/seleccion deshabilitada y lectura coherente validada.
+Canal DB separado; ids/fecha/hash servidor, advisory -> selector exclusivo,
+bootstrap serializado y relectura tras espera. Sin commit interno ni endpoint.
+24 PostgreSQL nuevas (cuatro concurrencias reales); suite completa 3482 passed
+en 315.74 s; Black/Ruff/diff correctos. Resolver actual fijo conservado.
+Proximo: resolver transaccional con bloqueo compartido compatible con runtime
+SELECT y orden selector -> serie; luego evidencia atomica/concurrencia/exitos.
+Autoridad personal administrativa, fuentes/aceptacion y activacion real pendientes.
+Ley fija; M3-T1 EN PROGRESO integral. Sin migracion, commit ni push.
+
 ## 2026-10-07 — M3-T1: persistencia de evidencia de confirmacion tenant
 
 §92 agrega evidencia append-only tenant, migracion e84a629dcf53 aplicada localmente.

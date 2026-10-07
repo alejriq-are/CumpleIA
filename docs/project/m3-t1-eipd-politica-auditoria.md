@@ -1,7 +1,7 @@
 # M3-T1 — Contrato de auditoria y seleccion transaccional de politica EIPD
 
-Fecha: 2026-10-07. Checkpoint §89. Estado: contratos puros §90, persistencia global §91 y evidencia tenant §92
-implementados; servicios/resolver y coordinacion transaccional pendientes.
+Fecha: 2026-10-07. Checkpoint §89. Estado: contratos §90, persistencia §§91–92 y servicios internos §93 implementados;
+resolver transaccional, autoridad personal y coordinacion con acciones pendientes.
 Base: §§82–88; Ley 21.719 / Ley 19.628 reformada fija por instruccion del usuario.
 Este contrato describe controles de producto; no introduce requisitos legales ni
 acredita verificacion de fuentes. Resolver actual fijo sigue deshabilitado.
@@ -66,9 +66,11 @@ relee su publicacion y se valida payload/hash/evento con una fecha comun explici
 No usar hash capturado antes de una espera como fuente de verdad. Mantener ambos
 locks hasta commit/rollback del caller; no liberar entre evaluar, flush y commit.
 
-Seleccion administrativa: selector FOR UPDATE, revision esperada, validacion de
+Seleccion administrativa (§93): advisory xact lock 719093 -> selector FOR UPDATE,
+revision esperada, validacion de
 nueva publicacion, append de evento y actualizacion del selector, commit conjunto.
-No adquiere locks de series. Publicaciones inmutables no requieren UPDATE locks.
+No adquiere locks de series. Advisory serializa bootstrap sin fila; siempre se
+adquiere antes del selector. Publicaciones inmutables no requieren UPDATE locks.
 PATCH de assessment conserva lock de serie y no adquiere despues lock de selector.
 Ningun camino adquiere selector despues de serie. Operaciones con multiples series
 ordenan sus UUID; este alcance no introduce tales operaciones.
@@ -126,10 +128,10 @@ superar controles y preparar esta evidencia; fallo revierte ambas escrituras.
 
 ## 6. Secuencia de implementacion y condicion de habilitacion
 
-Contratos/evaluadores puros §90, persistencia global/RLS §91 y evidencia tenant
-con FK/RLS §92 implementados. Siguiente: servicios de publicacion/seleccion y
-resolver validado sin habilitar politica real. Secuencia restante: servicio de
-seleccion y resolver transaccional; cambio uniforme de orden de locks en acciones;
+Contratos §90, persistencia §§91–92 y servicios internos/lectura auditada §93
+implementados. Canal interno solo admite politica deshabilitada; rol DB acredita
+canal, no autentica persona. Siguiente: resolver transaccional con lock compatible
+con privilegios runtime SELECT; cambio uniforme de orden de locks en acciones;
 HTTP/concurrencia PostgreSQL real y casos exitosos con politica sintetica de test.
 
 Antes de habilitar politica real: fuentes complementarias verificadas con evidencia,

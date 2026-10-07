@@ -281,4 +281,5 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] M3-T1 §90: contratos/evaluadores puros de publicacion/seleccion/evidencia, coherencia/hash y 65 pruebas nuevas; suite completa 3385 passed.
 - [x] M3-T1 §91: persistencia de control global, migracion d73f518cbe42, privilegios/RLS y consistencia diferida; 44 PostgreSQL nuevas y suite completa 3429 passed.
 - [x] M3-T1 §92: evidencia append-only tenant, migracion e84a629dcf53, FK/RLS y 29 PostgreSQL nuevas; suite completa 3458 passed.
-- [ ] M3-T1: servicio administrativo de publicacion/seleccion y resolver validado; locks/evidencia atomica, exitos/concurrencia y fuentes/aceptacion antes de habilitar.
+- [x] M3-T1 §93: servicios internos de publicacion/seleccion deshabilitada y lectura validada, bootstrap/seleccion concurrentes; 24 PostgreSQL nuevas y suite completa 3482 passed.
+- [ ] M3-T1: resolver transaccional/bloqueo compartido y orden selector -> serie; evidencia atomica, autoridad administrativa, exitos/concurrencia y fuentes/aceptacion antes de habilitar.
