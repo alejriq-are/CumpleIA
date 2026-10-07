@@ -1,7 +1,7 @@
 # M3-T1 — Contrato de auditoria y seleccion transaccional de politica EIPD
 
-Fecha: 2026-10-07. Checkpoint §89. Estado: contratos/evaluadores puros implementados en §90; persistencia y
-coordinacion transaccional pendientes.
+Fecha: 2026-10-07. Checkpoint §89. Estado: contratos puros §90, persistencia global §91 y evidencia tenant §92
+implementados; servicios/resolver y coordinacion transaccional pendientes.
 Base: §§82–88; Ley 21.719 / Ley 19.628 reformada fija por instruccion del usuario.
 Este contrato describe controles de producto; no introduce requisitos legales ni
 acredita verificacion de fuentes. Resolver actual fijo sigue deshabilitado.
@@ -126,9 +126,9 @@ superar controles y preparar esta evidencia; fallo revierte ambas escrituras.
 
 ## 6. Secuencia de implementacion y condicion de habilitacion
 
-Contratos/evaluadores puros y pruebas de coherencia implementados en §90, sin
-autorizacion, DB ni locks. Siguiente:
-migracion append-only/control global y evidencia tenant, permisos/RLS; servicio de
+Contratos/evaluadores puros §90, persistencia global/RLS §91 y evidencia tenant
+con FK/RLS §92 implementados. Siguiente: servicios de publicacion/seleccion y
+resolver validado sin habilitar politica real. Secuencia restante: servicio de
 seleccion y resolver transaccional; cambio uniforme de orden de locks en acciones;
 HTTP/concurrencia PostgreSQL real y casos exitosos con politica sintetica de test.
 

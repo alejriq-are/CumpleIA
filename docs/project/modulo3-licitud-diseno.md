@@ -8030,3 +8030,94 @@ impedir UPDATE/DELETE. Next: migracion append-only de control global y evidencia
 con pruebas PostgreSQL/RLS antes de servicios/resolver y cambio de orden de locks.
 Fuentes/aceptacion pendientes, resolver fijo deshabilitado. Ley fija;
 M3-T1 EN PROGRESO integral. Sin migracion, commit ni push.
+
+
+## §91 — Persistencia y privilegios de auditoria global EIPD
+
+2026-10-07. Migracion append-only d73f518cbe42 sobre c62e407bad31 aplicada localmente:
+eipd_policy_publications, eipd_policy_selections y eipd_policy_selector. Modelos ORM
+alineados. Son controles globales, no datos de organizacion: sin tenant ficticio;
+eventos humanos conservan sus tablas/RLS. Sin bootstrap ni politica activa insertada.
+
+Publicacion almacena payload JSONB, version/referencia/hash, actor/fecha y evidencia.
+Referencia unica; CHECK identidad/version/formato/textos y objeto JSONB con identidad
+explicita. DB no recompone hash canonico ni verifica fuentes: futuro canal servidor
+debe usar contratos puros §90 para validar payload completo/hash/fechas/autoridad.
+FK de seleccion exige publicacion/hash registrados; revision unica/consecutiva,
+identidad anterior completa y FK propia a revision/publicacion/hash anteriores.
+Publicacion solo puede seleccionarse una vez. Selector singleton exige triple
+revision/publicacion/evento coherente. Triggers de constraint diferidos comparan
+selector con ultimo evento al finalizar transaccion: evento sin selector actualizado
+falla al commit y rollback conserva estado anterior.
+
+Rol eipd_policy_admin NOLOGIN/NOSUPERUSER/NOBYPASSRLS/NOCREATEROLE/NOCREATEDB,
+separado y no asumible por app_user; sin concesion de membresia runtime. Migracion
+rechaza rol preexistente incompatible o membresia runtime. Admin SELECT/INSERT en
+control y UPDATE solo selector; sin UPDATE/DELETE/TRUNCATE de publicaciones/eventos.
+RLS explicito de administracion y lectura autenticada global; app_user SELECT solo,
+sin escritura/TRUNCATE. PUBLIC sin privilegios. Owner de migracion sigue privilegiado
+para mantenimiento; append-only se exige a runtime/canal administrativo, no al owner.
+Downgrade de esta migracion elimina tablas/triggers/funcion, conserva rol NOLOGIN
+porque puede pertenecer a gestion de despliegue externa. No se reescriben migraciones
+historicas ni eventos tenant. Rol no se expone como canal/API administrativa.
+
+44 pruebas nuevas PostgreSQL: privilegios/flags/RLS, lectura sin/con autenticacion
+y otro tenant, escrituras runtime y SET ROLE denegados, admin append-only y seleccion
+atomica con rollback, trece corrupciones de publicacion/cadena/selector, fallo real
+al commit por selector pendiente e inexistencia de publicacion tras rollback.
+Fixtures solo datos sinteticos; limpieza owner elimina esos ids, no datos ajenos.
+44 aprobadas en 2.98 s; Alembic check sin operaciones nuevas.
+Suite completa: 3429 passed en 297.19 s; Black/Ruff/diff --check correctos.
+
+Paso acotado al control global. Evidencia por tenant requiere siguiente migracion,
+FK compuestas al assessment/evento humano/publicacion/seleccion y RLS/append-only;
+no habilitar confirmacion excepcional antes de esa evidencia atomica. Resolver,
+servicio administrativo, relectura/orden de locks y concurrencia de politica quedan
+pendientes. Actualmente solo artefacto fijo deshabilitado, sin fuentes/aceptacion
+verificadas. Ley fija; M3-T1 EN PROGRESO integral. Sin commit ni push.
+
+
+## §92 — Persistencia append-only de evidencia de confirmacion tenant
+
+2026-10-07. Migracion e84a629dcf53 sobre d73f518cbe42 aplicada localmente, sin editar
+migraciones anteriores ni rellenar historicos. EipdConfirmationEvidence almacena
+identidades tenant/assessment/review/publication/selection, revision del selector,
+politica, hashes documento/contexto, actor y fecha. Una evidencia por assessment.
+review_decision interno constante continuar permite FK a decision humana positiva;
+no es input publico ni modifica el contrato puro §90.
+
+Nuevas UNIQUE de soporte en publicaciones/eventos humanos y FK compuestas exigen:
+assessment del tenant, review del mismo tenant/assessment con politica/hashes exactos
+y decision continuar, publicacion con version/referencia/hash coincidentes y triple
+revision/publicacion/evento de seleccion auditado. Metadatos legacy null o revision
+negativa no pueden acreditar evidencia; claves no reescriben eventos existentes.
+CHECK version/revision/referencia/hashes; FK sin cascadas conservan procedencia.
+
+RLS SELECT tenant via auth_org_ids. app_user SELECT/INSERT, sin UPDATE/DELETE/TRUNCATE;
+PUBLIC y eipd_policy_admin sin privilegios sobre evidencia. INSERT exige actor JWT,
+tenant accesible, assessment borrador con documento, ultima revision humana y
+selector actual con publicacion declarada habilitada. Actor de publicacion no recibe
+por ello acceso a evidencia tenant. Lectura historica no depende del selector actual:
+revocacion conserva evidencia original. Owner de mantenimiento permanece privilegiado.
+
+Estas barreras de DB no recomponen controles documentales/hash ni verifican fuentes,
+roles de API o atomicidad de la seleccion durante espera. Servicio futuro debe usar
+constructor puro §90, permisos, relecturas y orden de locks §89; no existe endpoint
+para insertar evidencia ni conexion de confirmacion real en este paso. Fixtures
+siembran politica/positivas sinteticas mediante owner, no mediante accion continuar.
+Sin evidencia atomica integrada y fuentes/aceptacion, resolver fijo deshabilitado.
+
+29 PostgreSQL nuevas: lectura/escritura runtime y tenant cruzado, UTC, append-only,
+actor suplantado, borrador/documento/revision posterior/anonimo, trece enlaces falsos,
+unicidad, rollback conjunto de evidencia/estado y revocacion con historia intacta.
+Negativas/legacy fallan FK incluso usando owner sin RLS. Ajuste de limpieza de
+fixtures elimina evidencia antes de reviews y controles sinteticos TEST de actores
+de prueba antes de perfiles; scope asíncrono y campos lifecycle alineados.
+105 focalizadas aprobadas antes de los tres casos finales; 29 nuevas finales
+aprobadas en 3.70 s. Alembic check sin operaciones nuevas.
+Suite completa: 3458 passed en 302.51 s; Black/Ruff/diff --check correctos.
+
+Proximo: servicio administrativo de publicacion/seleccion y resolver de lectura
+validada, aun sin politica real habilitada; despues locks compartidos/orden uniforme
+y evidencia atomica en confirmacion, concurrencia/exitos y fuentes/aceptacion.
+Ley fija; M3-T1 EN PROGRESO integral. Sin commit ni push.

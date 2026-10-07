@@ -1678,6 +1678,18 @@ class EipdResolutionReview(Base):
 
     __tablename__ = "eipd_resolution_reviews"
     __table_args__ = (
+        UniqueConstraint(
+            "id",
+            "assessment_id",
+            "organization_id",
+            "document_hash",
+            "context_hash",
+            "policy_version",
+            "policy_reference",
+            "policy_hash",
+            "decision",
+            name="uq_eipd_reviews_confirmation_binding",
+        ),
         sa.ForeignKeyConstraint(
             ["assessment_id", "organization_id"],
             ["legal_assessments.id", "legal_assessments.organization_id"],
@@ -1831,4 +1843,235 @@ class KnowledgeChunk(Base):
     embedding: Mapped[list | None] = mapped_column(Vector(1024), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         sa.TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
+    )
+
+
+class EipdPolicyPublication(Base):
+    """Control global; escritura solo por canal administrativo separado."""
+
+    __tablename__ = "eipd_policy_publications"
+    __table_args__ = (
+        UniqueConstraint(
+            "id",
+            "policy_version",
+            "policy_reference",
+            "policy_hash",
+            name="uq_eipd_publications_confirmation_binding",
+        ),
+        UniqueConstraint("policy_reference"),
+        UniqueConstraint("id", "policy_hash"),
+        CheckConstraint("policy_version = 1", name="policy_version"),
+        CheckConstraint("policy_reference ~ '[^[:space:]]'", name="reference"),
+        CheckConstraint("policy_hash ~ '^[0-9a-f]{64}$'", name="hash"),
+        CheckConstraint(
+            "rationale ~ '[^[:space:]]' AND evidence_reference ~ '[^[:space:]]'",
+            name="evidence",
+        ),
+        CheckConstraint(
+            "jsonb_typeof(payload) = 'object' AND payload ? 'policy_version' AND payload ? 'policy_reference' AND payload->>'policy_version' = '1' AND payload->>'policy_reference' = policy_reference",
+            name="payload_identity",
+        ),
+    )
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid()
+    )
+    policy_version: Mapped[int] = mapped_column(Integer, nullable=False)
+    policy_reference: Mapped[str] = mapped_column(Text, nullable=False)
+    policy_hash: Mapped[str] = mapped_column(Text, nullable=False)
+    payload: Mapped[dict] = mapped_column(JSONB, nullable=False)
+    created_by: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("profiles.id"), nullable=False
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        sa.TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=func.clock_timestamp(),
+    )
+    rationale: Mapped[str] = mapped_column(Text, nullable=False)
+    evidence_reference: Mapped[str] = mapped_column(Text, nullable=False)
+
+
+class EipdPolicySelection(Base):
+    __tablename__ = "eipd_policy_selections"
+    __table_args__ = (
+        UniqueConstraint("revision"),
+        UniqueConstraint("publication_id"),
+        UniqueConstraint(
+            "revision",
+            "publication_id",
+            "policy_hash",
+            name="uq_eipd_policy_selections_revision_publication_hash",
+        ),
+        UniqueConstraint(
+            "revision",
+            "publication_id",
+            "id",
+            name="uq_eipd_policy_selections_revision_publication_id",
+        ),
+        sa.ForeignKeyConstraint(
+            ["publication_id", "policy_hash"],
+            ["eipd_policy_publications.id", "eipd_policy_publications.policy_hash"],
+        ),
+        sa.ForeignKeyConstraint(
+            ["previous_revision", "previous_publication_id", "previous_policy_hash"],
+            [
+                "eipd_policy_selections.revision",
+                "eipd_policy_selections.publication_id",
+                "eipd_policy_selections.policy_hash",
+            ],
+        ),
+        CheckConstraint(
+            "revision > 0 AND previous_revision >= 0 AND revision = previous_revision + 1",
+            name="revision",
+        ),
+        CheckConstraint(
+            "(previous_revision = 0 AND previous_publication_id IS NULL AND previous_policy_hash IS NULL) OR (previous_revision > 0 AND previous_publication_id IS NOT NULL AND previous_policy_hash IS NOT NULL)",
+            name="previous_identity",
+        ),
+        CheckConstraint(
+            "publication_id IS DISTINCT FROM previous_publication_id",
+            name="no_reselection",
+        ),
+        CheckConstraint(
+            "rationale ~ '[^[:space:]]' AND evidence_reference ~ '[^[:space:]]'",
+            name="evidence",
+        ),
+    )
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid()
+    )
+    previous_revision: Mapped[int] = mapped_column(Integer, nullable=False)
+    revision: Mapped[int] = mapped_column(Integer, nullable=False)
+    previous_publication_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), nullable=True
+    )
+    previous_policy_hash: Mapped[str | None] = mapped_column(Text, nullable=True)
+    publication_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), nullable=False
+    )
+    policy_hash: Mapped[str] = mapped_column(Text, nullable=False)
+    created_by: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("profiles.id"), nullable=False
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        sa.TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=func.clock_timestamp(),
+    )
+    rationale: Mapped[str] = mapped_column(Text, nullable=False)
+    evidence_reference: Mapped[str] = mapped_column(Text, nullable=False)
+
+
+class EipdPolicySelector(Base):
+    __tablename__ = "eipd_policy_selector"
+    __table_args__ = (
+        CheckConstraint("id = 1", name="singleton"),
+        CheckConstraint("revision > 0", name="revision"),
+        sa.ForeignKeyConstraint(
+            ["revision", "publication_id", "selection_id"],
+            [
+                "eipd_policy_selections.revision",
+                "eipd_policy_selections.publication_id",
+                "eipd_policy_selections.id",
+            ],
+        ),
+    )
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    revision: Mapped[int] = mapped_column(Integer, nullable=False)
+    publication_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), nullable=False
+    )
+    selection_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
+
+
+class EipdConfirmationEvidence(Base):
+    """Evidencia tenant append-only; no habilita por si misma la confirmacion."""
+
+    __tablename__ = "eipd_confirmation_evidence"
+    __table_args__ = (
+        UniqueConstraint("assessment_id"),
+        sa.ForeignKeyConstraint(
+            ["assessment_id", "organization_id"],
+            ["legal_assessments.id", "legal_assessments.organization_id"],
+        ),
+        sa.ForeignKeyConstraint(
+            [
+                "review_id",
+                "assessment_id",
+                "organization_id",
+                "document_hash",
+                "context_hash",
+                "policy_version",
+                "policy_reference",
+                "policy_hash",
+                "review_decision",
+            ],
+            [
+                "eipd_resolution_reviews.id",
+                "eipd_resolution_reviews.assessment_id",
+                "eipd_resolution_reviews.organization_id",
+                "eipd_resolution_reviews.document_hash",
+                "eipd_resolution_reviews.context_hash",
+                "eipd_resolution_reviews.policy_version",
+                "eipd_resolution_reviews.policy_reference",
+                "eipd_resolution_reviews.policy_hash",
+                "eipd_resolution_reviews.decision",
+            ],
+        ),
+        sa.ForeignKeyConstraint(
+            ["publication_id", "policy_version", "policy_reference", "policy_hash"],
+            [
+                "eipd_policy_publications.id",
+                "eipd_policy_publications.policy_version",
+                "eipd_policy_publications.policy_reference",
+                "eipd_policy_publications.policy_hash",
+            ],
+        ),
+        sa.ForeignKeyConstraint(
+            ["selector_revision", "publication_id", "selection_id"],
+            [
+                "eipd_policy_selections.revision",
+                "eipd_policy_selections.publication_id",
+                "eipd_policy_selections.id",
+            ],
+        ),
+        CheckConstraint("review_decision = 'continuar'", name="positive_review"),
+        CheckConstraint(
+            "policy_version = 1 AND selector_revision > 0", name="versions"
+        ),
+        CheckConstraint("policy_reference ~ '[^[:space:]]'", name="policy_reference"),
+        CheckConstraint(
+            "policy_hash ~ '^[0-9a-f]{64}$' AND document_hash ~ '^[0-9a-f]{64}$' AND context_hash ~ '^[0-9a-f]{64}$'",
+            name="hashes",
+        ),
+        sa.Index("ix_eipd_confirmation_evidence_organization_id", "organization_id"),
+    )
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid()
+    )
+    organization_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("organizations.id"), nullable=False
+    )
+    assessment_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
+    review_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
+    publication_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), nullable=False
+    )
+    selector_revision: Mapped[int] = mapped_column(Integer, nullable=False)
+    selection_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
+    policy_version: Mapped[int] = mapped_column(Integer, nullable=False)
+    policy_reference: Mapped[str] = mapped_column(Text, nullable=False)
+    policy_hash: Mapped[str] = mapped_column(Text, nullable=False)
+    document_hash: Mapped[str] = mapped_column(Text, nullable=False)
+    context_hash: Mapped[str] = mapped_column(Text, nullable=False)
+    review_decision: Mapped[str] = mapped_column(
+        Text, nullable=False, server_default="continuar"
+    )
+    created_by: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("profiles.id"), nullable=False
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        sa.TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=func.clock_timestamp(),
     )

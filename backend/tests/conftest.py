@@ -129,6 +129,30 @@ async def _seed_test_data(_session_factory):
         # Limpiar datos previos en orden FK-seguro (sin ORM cascade)
         # Historial protegido: limpieza administrativa explicita solo para tenants de test.
         await session.execute(
+            text(
+                "DELETE FROM eipd_confirmation_evidence WHERE organization_id IN (:a,:b)"
+            ),
+            {"a": _ORG_A_ID, "b": _ORG_B_ID},
+        )
+        await session.execute(
+            text(
+                "DELETE FROM eipd_policy_selector WHERE publication_id IN (SELECT id FROM eipd_policy_publications WHERE created_by IN (:a,:b) AND policy_reference LIKE 'TEST:%')"
+            ),
+            {"a": _PROFILE_A_ID, "b": _PROFILE_B_ID},
+        )
+        await session.execute(
+            text(
+                "DELETE FROM eipd_policy_selections WHERE publication_id IN (SELECT id FROM eipd_policy_publications WHERE created_by IN (:a,:b) AND policy_reference LIKE 'TEST:%')"
+            ),
+            {"a": _PROFILE_A_ID, "b": _PROFILE_B_ID},
+        )
+        await session.execute(
+            text(
+                "DELETE FROM eipd_policy_publications WHERE created_by IN (:a,:b) AND policy_reference LIKE 'TEST:%'"
+            ),
+            {"a": _PROFILE_A_ID, "b": _PROFILE_B_ID},
+        )
+        await session.execute(
             delete(EipdResolutionReview).where(
                 EipdResolutionReview.organization_id.in_([_ORG_A_ID, _ORG_B_ID])
             )
@@ -215,6 +239,30 @@ async def _seed_test_data(_session_factory):
     # Teardown: eliminar en orden FK-seguro via DELETE bulk (sin ORM cascade)
     async with _session_factory() as session:
         # Historial protegido: limpieza administrativa explicita solo para tenants de test.
+        await session.execute(
+            text(
+                "DELETE FROM eipd_confirmation_evidence WHERE organization_id IN (:a,:b)"
+            ),
+            {"a": _ORG_A_ID, "b": _ORG_B_ID},
+        )
+        await session.execute(
+            text(
+                "DELETE FROM eipd_policy_selector WHERE publication_id IN (SELECT id FROM eipd_policy_publications WHERE created_by IN (:a,:b) AND policy_reference LIKE 'TEST:%')"
+            ),
+            {"a": _PROFILE_A_ID, "b": _PROFILE_B_ID},
+        )
+        await session.execute(
+            text(
+                "DELETE FROM eipd_policy_selections WHERE publication_id IN (SELECT id FROM eipd_policy_publications WHERE created_by IN (:a,:b) AND policy_reference LIKE 'TEST:%')"
+            ),
+            {"a": _PROFILE_A_ID, "b": _PROFILE_B_ID},
+        )
+        await session.execute(
+            text(
+                "DELETE FROM eipd_policy_publications WHERE created_by IN (:a,:b) AND policy_reference LIKE 'TEST:%'"
+            ),
+            {"a": _PROFILE_A_ID, "b": _PROFILE_B_ID},
+        )
         await session.execute(
             delete(EipdResolutionReview).where(
                 EipdResolutionReview.organization_id.in_([_ORG_A_ID, _ORG_B_ID])

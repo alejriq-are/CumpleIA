@@ -1,3 +1,29 @@
+## 2026-10-07 — M3-T1: persistencia de evidencia de confirmacion tenant
+
+§92 agrega evidencia append-only tenant, migracion e84a629dcf53 aplicada localmente.
+FK compuestas vinculan assessment/revision positiva/politica/seleccion/hashes;
+RLS limita lectura tenant e insercion actor JWT/borrador/ultima revision/selector
+actual habilitado. Sin endpoint ni integracion de evidencia en confirmacion real.
+29 PostgreSQL nuevas; 105 focalizadas previas y suite completa 3458 passed en 302.51 s.
+Alembic check sin operaciones nuevas; Black/Ruff/diff correctos. Fixtures ajustadas
+al orden FK y ciclo asíncrono, sin reescribir migraciones/eventos historicos.
+Proximo: servicio administrativo de publicacion/seleccion y resolver validado;
+luego locks/evidencia atomica/concurrencia antes de fuentes/aceptacion y habilitacion.
+Resolver fijo deshabilitado. Ley fija; M3-T1 EN PROGRESO integral.
+Sin commit ni push.
+
+## 2026-10-07 — M3-T1: persistencia de auditoria global de politica
+
+§91 agrega publicaciones/selecciones/selector globales, migracion d73f518cbe42
+aplicada localmente; rol administrativo NOLOGIN separado, runtime lectura autenticada
+sin escritura, RLS y constraints de cadena/selector. Consistencia diferida al commit.
+44 PostgreSQL nuevas aprobadas; suite completa 3429 passed en 297.19 s.
+Alembic check sin operaciones nuevas; Black/Ruff/diff correctos.
+Proximo: persistencia append-only de evidencia tenant con FK compuestas/RLS;
+luego servicios/resolver y locks. Sin bootstrap/activacion ni API administrativa.
+Fuentes/aceptacion pendientes; resolver fijo deshabilitado. Ley fija;
+M3-T1 EN PROGRESO integral. Sin commit ni push.
+
 ## 2026-10-07 — M3-T1: contratos/evaluadores puros de auditoria
 
 §90 implementa publicacion, cadena/selector revisionados, plan de seleccion y

@@ -279,4 +279,6 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] M3-T1 §88: decision transversal/confirmacion v2 bajo lock, alcance ordinario conservado; once HTTP nuevos, concurrencia ampliada y suite completa 3320 passed.
 - [x] M3-T1 §89: contrato de publicacion inmutable/selector auditado, orden de locks, revocacion y evidencia atomica de confirmacion; solo diseno.
 - [x] M3-T1 §90: contratos/evaluadores puros de publicacion/seleccion/evidencia, coherencia/hash y 65 pruebas nuevas; suite completa 3385 passed.
-- [ ] M3-T1: persistencia append-only de control global/evidencia tenant y privilegios/RLS; resolver/locks, exitos/concurrencia y fuentes/aceptacion antes de habilitar.
+- [x] M3-T1 §91: persistencia de control global, migracion d73f518cbe42, privilegios/RLS y consistencia diferida; 44 PostgreSQL nuevas y suite completa 3429 passed.
+- [x] M3-T1 §92: evidencia append-only tenant, migracion e84a629dcf53, FK/RLS y 29 PostgreSQL nuevas; suite completa 3458 passed.
+- [ ] M3-T1: servicio administrativo de publicacion/seleccion y resolver validado; locks/evidencia atomica, exitos/concurrencia y fuentes/aceptacion antes de habilitar.
