@@ -1,3 +1,14 @@
+## 2026-10-07 — M3-T1: series/tenants independientes y PATCH
+
+§99 agrega 12 PostgreSQL reales: series de misma/diferente org confirman sin espera
+mutua, evidencia/actor aislados por RLS y lectura cruzada denegada; PATCH de A bloquea
+solo serie A, B confirma mientras A espera con selector compartido; commit/rollback
+del PATCH invalida/permite confirmacion A despues de releer, ambas rutas.
+12 aprobadas en 6.64 s. Suite completa: 3555 passed en 345.51 s; Black/Ruff/Alembic check/diff correctos.
+Exitos exclusivamente sinteticos/override pytest; guardia productiva conservada.
+Proximo: autoridad personal administrativa separada de tenant; fuentes/aceptacion
+antes de activar. Ley fija; EN PROGRESO integral. Sin commit ni push.
+
 ## 2026-10-07 — M3-T1: concurrencia exitosa y revocacion con evidencia
 
 §98 agrega 12 PostgreSQL reales (ambas rutas, pg_blocking_pids): confirmaciones de

@@ -2,7 +2,7 @@
 
 Fecha: 2026-10-07. Estado: EN PROGRESO. Revisión documental y de código;
 no modifica reglas ni amplía el alcance. Última suite completa registrada:
-3543 passed (§98), posterior a concurrencia exitosa/revocacion con evidencia.
+3555 passed (§99), posterior a series/tenants independientes y PATCH concurrente.
 Checkpoints inferiores son históricos; el total no acredita cierre integral.
 
 ## Fuentes y criterio
@@ -2987,3 +2987,37 @@ Proximo: ampliar exitos concurrentes a series independientes/tenants y PATCH, de
 resolver autoridad personal administrativa; fuentes complementarias y aceptacion
 tecnica trazable pendientes antes de habilitar. M3-T1 EN PROGRESO integral; ley fija.
 Sin migracion ni cambio de servicios, commit o push; §§95–98 pendientes de commit.
+
+
+## §99 — Exitos de series/tenants independientes y PATCH concurrente
+
+2026-10-07. Ampliacion de pruebas PostgreSQL/app_user, sin cambios de servicios,
+privilegios, migraciones ni activacion. Politica/positivas sinteticas y override
+pytest local de guardia §97 conservados. Fixture owner prepara segundo RAT real
+(tratamiento/finalidad/categorias/titulares), serie y borrador documental equivalentes
+en misma organizacion o en organizacion B; contexto se valida con constructor M2 real,
+no sustitucion de builder/gates/RLS. IDs/actores/revisiones diferentes por serie.
+
+Doce nuevas, ambas rutas sensible/sensible-biometrica:
+
+- Cuatro exitos de series independientes (misma org/dos orgs): segunda confirma antes
+  de terminar transaccion de primera, ambas conservan locks compartidos de selector.
+  Evidencia de cada una invisible antes de commit; despues existe una por evaluacion,
+  con actor correspondiente. RLS muestra ambas al mismo tenant o solo propia entre
+  tenants, y servicio cruzado devuelve 404 sin acceso.
+- Ocho PATCH/confirmacion (misma org/dos orgs, commit/rollback): PATCH parcial toma
+  serie A; confirmacion A espera realmente (pg_blocking_pids) manteniendo selector
+  compartido. Confirmacion B avanza y hace commit mientras A sigue esperando. Commit
+  de PATCH invalida controles revalidados de A y bloquea sin evidencia; rollback
+  permite exito de A con evidencia. No se revierte ni sobrescribe evidencia de B.
+
+12 aprobadas en 6.64 s; timeout acotado para detectar espera indebida. Fixtures limpian
+primero evidencia/revision y despues borrador/serie/RAT B antes de limpiar politica A.
+Clonado owner es preparacion sintetica de pruebas, no via nueva de producto ni
+promocion de positivos historicos. Guardia de habilitadas en aplicacion conservada.
+Suite completa: 3555 passed en 345.51 s; Black/Ruff/Alembic check/diff correctos.
+
+Proximo: definir/implementar autoridad personal del canal administrativo de politica,
+con permisos separados de roles tenant; fuentes complementarias y aceptacion tecnica
+trazable antes de habilitar. No cierre integral ni validacion juridica por total de
+pruebas. M3-T1 EN PROGRESO integral; ley fija. Sin commit ni push.

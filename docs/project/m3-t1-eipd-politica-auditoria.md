@@ -139,8 +139,9 @@ Preparacion/confirmacion conectadas §96 al mismo selector deshabilitado; ordina
 sin EIPD no lo exige. Evidencia atomica conectada §97 antes de reemplazo;
 exitos/fallos reales PostgreSQL bajo override pytest local de guardia productiva.
 Concurrencia de exitos de misma serie/revocacion validada §98, ambas rutas,
-commit/rollback y evidencia original conservada. Siguiente: series/tenants
-independientes y PATCH concurrentes, autoridad personal.
+commit/rollback y evidencia original conservada. Series/tenants independientes
+y PATCH concurrentes validados §99, con RLS y relectura M2 reales. Siguiente:
+autoridad personal administrativa separada de roles tenant.
 
 Antes de habilitar politica real: fuentes complementarias verificadas con evidencia,
 aceptacion tecnica trazable al commit, suite completa y matriz anterior aprobadas.
