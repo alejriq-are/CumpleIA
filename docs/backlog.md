@@ -270,4 +270,5 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] M3-T1 §79: revision de aceptacion acotada y revalidacion registrada de fuentes; frontera no habilitada, instrumento complementario no verificado.
 - [x] M3-T1 §80: HTTP preparado de ambas rutas protegidas con/sin negativa previa; cuatro casos nuevos y barreras conservadas.
 - [x] M3-T1 §81: concurrencia real de ambas rutas protegidas preparadas, revision/confirmacion y commit/rollback; ocho casos nuevos.
-- [ ] M3-T1: actualizar aceptacion §§80-81 y contrato de habilitacion del servidor; fuentes complementarias y alcance integral pendientes.
+- [x] M3-T1 §82: aceptacion §§80-81 actualizada y contrato de politica/gate v2 exclusivo de servidor, sin habilitar.
+- [ ] M3-T1: schemas/evaluador puro de politica y composicion v2; persistencia/auditoria y decision compartida antes de gates/fuentes/aceptacion.

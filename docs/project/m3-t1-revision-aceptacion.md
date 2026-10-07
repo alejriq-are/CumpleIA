@@ -2194,3 +2194,128 @@ Proximo: actualizar aceptacion con evidencia §§80-81 y delimitar contrato de
 habilitacion del servidor, incluyendo transicion de diagnostico historico v1 sin
 filtrado de codigos y verificacion complementaria auditable. Mantener bloqueos
 mientras faltan fuentes/aceptacion; el alcance integral restante sigue pendiente.
+
+
+## 82. Aceptacion actualizada y contrato de habilitacion del servidor
+
+2026-10-07. HEAD revisado 91a71cd26ca3ab9e2960d0c4f1ffb3f28de973fc, limpio.
+Paso de diseno/documentacion; no autoriza habilitacion ni afirma verificacion de
+fuentes distinta de §79. Ley como base fija §70, sin fecha de activacion normativa.
+
+### 82.1 Aceptacion de evidencia y pendientes
+
+| Criterio §79 | Actualizacion comprobada | Alcance y pendiente |
+| --- | --- | --- |
+| HTTP protegido completo | §80: cuatro casos, dos rutas con/sin negativa; preparation_result preparado y solo barreras globales en review_blockers | Cubierto con contrato ordinario; no seis bases protegidas ni habilitacion |
+| Concurrencia protegida preparada | §81: ocho casos, dos rutas x revision/confirmacion x commit/rollback, dos app_user y RAT real | Cubierto para retiro de dependencia sensible y ultima negativa; no cambio concurrente de politica ni confirmacion exitosa |
+| Bases ordinarias y confirmado anterior | §78: seis bases ordinarias, rechazo conserva confirmado | No extrapolar a bases que excluyen sensibles |
+| Instrumento complementario aplicable/versionado | §79 no verificado | PENDIENTE; busqueda acotada no acredita inexistencia |
+| Decision versionada de habilitacion/compatibilidad | Controles actuales §67/§75 y transversal v1 incondicionales | PENDIENTE implementacion/pruebas; no retirar codigos por lista |
+| Revision positiva y confirmacion exitosa | Ninguna autorizada por producto actual | PENDIENTE evidencia tecnica, fuentes y aceptacion explicita de frontera |
+
+Se cierra el pendiente de evidencia HTTP/concurrencia preparada del escenario
+acotado, no la aceptacion final de habilitacion. Ultima suite integral 3012 passed
+§78; §§80-81: 97 HTTP focalizadas, no nuevo total integral. M3-T1 EN PROGRESO.
+
+### 82.2 Contrato interno propuesto EipdGatePolicyV1
+
+Entrada exclusivamente del servidor, cerrada/revalidada e inmutable tras evaluar.
+No forma parte de Create/PATCH/ReviewIn; rechazar campos approved/can_confirm,
+policy, flags de fuentes/aceptacion y fechas de activacion enviados por cliente.
+Resolver inicialmente devuelve politica deshabilitada; ninguna variable de entorno
+booleana, texto del tenant, fecha legal o busqueda sin resultados la habilita.
+
+Campos requeridos (nullable explicitos donde corresponda):
+
+- policy_version: StrictInt literal 1; policy_reference: identificador de revision
+  controlada del servidor, no referencia libre de usuario.
+- routes: conjunto cerrado de sensible_derechos/sensible_biometrica_derechos,
+  sin rutas repetidas; no habilitacion global de excepciones por comodin.
+- sources_status: pendiente/verificadas; source_records: instrumentos con emisor,
+  referencia/URL primaria, version/fecha y analisis de aplicabilidad a cada ruta,
+  junto a evidencia de verificacion y responsable del registro del servidor.
+- acceptance_status: pendiente/aceptada; acceptance_reference y validation_commit:
+  evidencia de revision tecnica de esta frontera/version, no total de pruebas solo.
+- activation: deshabilitada/habilitada; cambios versionados/auditables de politica.
+
+Combinaciones contradictorias o incompletas son errores de contrato, nunca permiso.
+Fuentes verificadas exige instrumentos y trazabilidad comprobados del servidor;
+aceptada exige referencia/commit/evidencia para las rutas seleccionadas. Habilitada
+exige ambas condiciones y al menos una ruta. Pendiente/deshabilitada es valido y
+conserva barreras. No inventar instrumento ni declarar verificadas por ausencia
+inferida de busqueda. No incorporar en este contrato una obligacion legal general
+de aprobacion de Agencia: consulta y limites de riesgo mantienen contrato §59/§65.
+
+Hash canonico policy_hash cubre version/referencia, rutas, fuentes/aplicabilidad,
+aceptacion y activation; calcular del objeto validado en servidor. Cualquier cambio
+relevante produce otra identidad de politica. La evidencia real se registra/revisa
+antes de aceptar fuentes, no se acredita porque un objeto interno diga verificadas.
+
+### 82.3 Composicion y decision versionadas, sin circularidad
+
+Nueva composicion v2 prevista recibe contexto §74 y politica interna explicita;
+v1 y todos los bindings documentales/RAT conservan contratos actuales. Diagnostico
+v1 entero permanece visible. Version de politica (1), composicion/gate (2), deteccion
+(2) y bindings actuales son conceptos distintos; no aceptar version desde cliente.
+
+Motivos documentales/frontier/ordinarios se calculan aun con politica deshabilitada.
+Etapa sources depende de evidencia de politica; activation exige ruta incluida y
+aceptacion/habilitacion. Resultado documental preparado sigue sin otorgar permiso.
+review_blockers nunca exige ultima revision positiva; negativas siguen contrato
+parcial §67/§68. confirmation_blockers agrega ultima continuar vigente, misma
+organizacion/assessment y hashes documento/contexto/politica actuales.
+
+Prerrequisitos de revision positivos v2 componen controles en vez de sumar barreras
+fijas §67 despues de composicion habilitada. V1 conserva su comportamiento entero.
+Sin politica resuelta/valida, ruta fuera de alcance, fuentes o aceptacion pendientes:
+continuar y confirmacion excepcional siguen rechazados. Faltantes/revision se
+reportan por etapa, sin ocultar positivos ni convertir requiere_eipd en negativo.
+
+### 82.4 Transicion de controles transversales
+
+Confirmacion v2 futura debe construir decision semantica propia compartiendo los
+validadores actuales: base ordinaria, rol/RAT/vigencia, especiales, dependencias,
+residuos, deteccion v2, resolucion, politica y revision. No llamar v1 y sustraer
+screening_eipd_no_preparado/resolucion_eipd_no_validada u otros codigos. No reutilizar
+un can_continue de deteccion como permiso de confirmacion. Motivos historicos v1
+quedan como diagnostico con version explicita, separados de decision activa v2.
+
+Fuera de primera frontera/politica habilitada, conservar el rechazo ordinario y
+transversal correspondiente, incluidas rutas mixtas, otros positivos, contextos
+incompletos y bases incompatibles. Antes de conectar decision activa: pruebas de
+equivalencia del flujo ordinario y de cada rechazo historico, no solo caso feliz.
+GET consulta sin escribir/reescribir bindings, mismas entradas que operaciones.
+
+### 82.5 Vigencia humana y atomicidad de politica
+
+Revision positiva futura registra tambien policy_reference/version/hash actuales
+como metadatos de servidor. Requiere contrato/persistencia append-only nuevo y
+migracion propia antes de conexion: no reescribir eventos ni migraciones antiguas.
+Eventos negativos existentes permanecen legibles. Evento positivo sin identidad
+de politica no acredita gate v2 aunque documento/contexto coincidan; una nueva
+politica requiere nueva revision humana, no promover evento viejo automaticamente.
+
+Bajo lock de serie: releer borrador/RAT/ultimo evento y resolver politica actual
+antes de insertar/reemplazar/flush. Politica debe permanecer estable hasta commit:
+si es artefacto inmutable del proceso, impedir cambio durante transaccion; si se
+persiste, adoptar revision/lock compatible con actualizacion de politica y probar
+concurrencia/revocacion. No basta comparar un hash antes de esperar lock. Caller
+maneja rollback. No introducir segundo orden de locks sin diseño de no-deadlock.
+
+### 82.6 Implementacion secuenciada y validacion
+
+Siguiente paso: schema/evaluador puro de politica y composicion v2, sin resolver
+habilitada en produccion ni migracion/API/gates nuevos. Pruebas: cierres/StrictInt,
+modelos mutados, rutas/dependencias, estados contradictorios, trazabilidad ausente,
+hash estable/sensible a cambios, fuentes pendientes, habilitacion limitada a ruta,
+revision ausente/negativa/politica vieja y cero circularidad. Mantener v1 sin cambios.
+
+Luego persistencia de metadatos de politica en eventos y resolver/auditoria;
+prerrequisitos/decision transversal v2 compartidos; HTTP/concurrencia real de cambio
+de politica y dependencias, confirmado previo, tenant/roles/suscripcion y hashes.
+Resolver real queda deshabilitado mientras fuentes/aceptacion faltan. Cubrir exitos
+con politica sintetica de test no autoriza habilitar politica real. Ultima suite
+completa y revision tecnica requeridas antes de cualquier habilitacion efectiva.
+
+Paso documental, diff --check correcto; no reejecutar pruebas por diseno sin codigo.
+Sin migracion, nuevo commit ni push; frontera no habilitada y M3-T1 EN PROGRESO integral.

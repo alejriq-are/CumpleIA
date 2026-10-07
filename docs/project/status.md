@@ -1,3 +1,15 @@
+## 2026-10-07 — M3-T1: aceptacion y politica de habilitacion
+
+§82 actualiza evidencia §§80-81: HTTP/concurrencia preparada cubiertos en dos rutas
+con contrato ordinario; habilitacion final sigue pendiente. Define politica cerrada
+exclusiva de servidor, fuentes/aceptacion trazables, rutas y hash; composicion/gate
+v2 futuro sin filtrar codigos v1, identidad de politica en revision y atomicidad.
+Proximo: schemas/evaluador puro de politica y composicion v2 sin activar resolver
+ni gates. Fuentes complementarias, persistencia/versiones y exitos/concurrencia de
+politica siguen pendientes. Ley fija; M3-T1 EN PROGRESO integral.
+Paso documental; ultima suite 3012 passed (§78), 97 HTTP focalizadas (§81), no
+reejecutadas. Diff correcto; sin codigo, migracion, nuevo commit ni push.
+
 ## 2026-10-07 — M3-T1: concurrencia protegida preparada
 
 §81 cubre ambas rutas x revision positiva/confirmacion x commit/rollback: ocho
