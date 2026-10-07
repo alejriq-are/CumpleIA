@@ -1,7 +1,7 @@
 # M3-T1 — Contrato de auditoria y seleccion transaccional de politica EIPD
 
-Fecha: 2026-10-07. Checkpoint §89. Estado: contratos §90, persistencia §§91–92 y servicios internos §93 implementados;
-resolver transaccional, autoridad personal y coordinacion con acciones pendientes.
+Fecha: 2026-10-07. Checkpoint §89. Estado: contratos §90, persistencia §§91–92, servicios §93 y resolver limitado §94
+implementados; autoridad personal e integracion/coordinacion con acciones pendientes.
 Base: §§82–88; Ley 21.719 / Ley 19.628 reformada fija por instruccion del usuario.
 Este contrato describe controles de producto; no introduce requisitos legales ni
 acredita verificacion de fuentes. Resolver actual fijo sigue deshabilitado.
@@ -59,7 +59,8 @@ sin asegurar estado vigente despues de la respuesta orientativa.
 
 ## 3. Orden de bloqueos y estabilidad hasta commit
 
-Orden futuro unico para revisar y confirmar: selector global FOR SHARE, despues
+Orden futuro unico para revisar y confirmar: advisory xact compartido 719093,
+selector global FOR SHARE, despues
 serie FOR UPDATE, despues relecturas de borrador/contexto M2/ultimo evento.
 La lectura inicial del selector obtiene solo lock; tras adquirir ambos locks se
 relee su publicacion y se valida payload/hash/evento con una fecha comun explicita.
@@ -78,7 +79,9 @@ ordenan sus UUID; este alcance no introduce tales operaciones.
 La lectura compartida permite revisiones/confirmaciones de series distintas en
 paralelo y bloquea cambios de selector hasta terminar. Si cambio de politica gana
 el lock, la operacion lee la politica nueva; si operacion gana, el cambio espera
-su commit. READ COMMITTED y relecturas explicitas son el contrato inicial; no
+su commit. Funcion limitada §94 permite lock compartido sin conceder UPDATE de control a
+app_user; exige JWT/perfil y no escribe. Helper exige READ COMMITTED.
+READ COMMITTED y relecturas explicitas son el contrato inicial; no
 suponer snapshot actualizado bajo otra isolation ni adoptar cache entre operaciones.
 Timeout/deadlock se revierte completo; no reintentar solo flush ni escribir auditoria
 fuera de la transaccion fallida.
@@ -130,8 +133,8 @@ superar controles y preparar esta evidencia; fallo revierte ambas escrituras.
 
 Contratos §90, persistencia §§91–92 y servicios internos/lectura auditada §93
 implementados. Canal interno solo admite politica deshabilitada; rol DB acredita
-canal, no autentica persona. Siguiente: resolver transaccional con lock compatible
-con privilegios runtime SELECT; cambio uniforme de orden de locks en acciones;
+canal, no autentica persona. Resolver transaccional con lock compatible con runtime SELECT implementado §94,
+sin conexion a acciones. Siguiente: cambio uniforme de orden de locks en acciones;
 HTTP/concurrencia PostgreSQL real y casos exitosos con politica sintetica de test.
 
 Antes de habilitar politica real: fuentes complementarias verificadas con evidencia,

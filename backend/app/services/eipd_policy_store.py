@@ -160,3 +160,29 @@ async def select_eipd_policy_v1(
             setattr(selector, key, value)
     await db.flush()
     return plan
+
+
+async def lock_eipd_policy_selector_v1(db):
+    """Advisory compartido -> selector FOR SHARE; nunca llamar tras lock de serie.
+
+    Funcion DB limitada comprueba actor registrado. Caller conserva transaccion y
+    permisos de accion; no cambia privilegios ni politica. Selector ausente falla
+    cerrado, incluso durante bootstrap. Locks se liberan solo al commit/rollback.
+    """
+    if await db.scalar(text("SHOW transaction_isolation")) != "read committed":
+        raise ValueError("Resolver transaccional EIPD exige READ COMMITTED")
+    if not await db.scalar(text("SELECT public.lock_eipd_policy_selector_v1()")):
+        raise ValueError("Politica seleccionada no disponible")
+
+
+async def resolve_eipd_policy_snapshot_for_transaction_v1(db):
+    """Snapshot validado tras espera, con locks retenidos hasta commit/rollback.
+
+    Sin cache, fallback, bootstrap ni activacion. Acciones actuales aun no usan este
+    resolver; caller debe adoptar orden selector -> serie y revalidar sus controles.
+    """
+    await lock_eipd_policy_selector_v1(db)
+    state = await read_eipd_policy_audit_snapshot_v1(db)
+    if state.selector is None:
+        raise ValueError("Politica seleccionada no disponible")
+    return state

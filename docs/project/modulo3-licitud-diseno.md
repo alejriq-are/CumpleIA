@@ -8171,3 +8171,45 @@ atomica despues y validar concurrencia/exitos antes de fuentes/aceptacion/activa
 Privilegios runtime solo SELECT se conservan: resolver con lock requiere mecanismo
 limitado compatible con esos privilegios, no conceder UPDATE global al runtime.
 Ley fija; M3-T1 EN PROGRESO integral. Sin migracion, commit ni push.
+
+
+## §94 — Resolver transaccional con bloqueo compartido limitado
+
+2026-10-07. Migracion append-only f95b73aed064 sobre e84a629dcf53 aplicada localmente.
+Funcion public.lock_eipd_policy_selector_v1() sin argumentos, SECURITY DEFINER,
+search_path fijo pg_catalog y objetos de dominio calificados. Comprueba JWT auth.uid
+con perfil registrado antes de bloquear; advisory xact lock compartido 719093 y
+selector singleton FOR SHARE. Devuelve solo existencia; no escribe/publica/selecciona
+ni revela datos tenant. EXECUTE solo app_user, retirado de PUBLIC/admin; runtime
+conserva SELECT y no recibe UPDATE, INSERT de control ni BYPASSRLS.
+
+Helper lock_eipd_policy_selector_v1 exige READ COMMITTED, invoca funcion y rechaza
+selector ausente sin fallback/bootstrap. resolve_eipd_policy_snapshot_for_transaction_v1
+lee y revalida auditoria despues de esperar, manteniendo locks hasta commit/rollback
+del caller. Sin cache ni commits internos. READINESS orientativo §93 sigue separado.
+Advisory compartido serializa tambien frente al bootstrap administrativo exclusivo;
+lectores de distintos tenants pueden coexistir. Orden previsto de acciones pasa a
+advisory compartido -> selector compartido -> serie exclusiva. Canal administrativo
+§93 advisory exclusivo -> selector exclusivo, sin series; PATCH solo serie.
+
+Garantia frente al canal administrativo que respeta ese protocolo y publicaciones
+append-only; owner de mantenimiento permanece privilegiado. Actor registrado solo
+acredita acceso a bloqueo global, no permisos de accion/tenant ni revision humana.
+Resolver transaccional aun no conectado a acciones; estas siguen con artefacto fijo
+deshabilitado y lock de serie actual. No introducir lock de selector despues de serie:
+conexion siguiente debera cambiar orden uniformemente y releer controles/contexto.
+
+15 PostgreSQL nuevas: atributos/permisos de funcion, anonimo/UUID sin perfil, selector
+ausente, aislamiento no admitido, lectores compartidos entre tenants, dos variantes
+admin esperando a lector y cuatro lector esperando a admin (bootstrap/seleccion,
+commit/rollback), corrupción de hash/payload sin fallback. pg_blocking_pids demuestra
+espera real; commit/rollback libera locks y relectura coincide con seleccion nueva/
+anterior o ausencia. 39 focalizadas aprobadas con 24 del servicio §93 en 3.66 s.
+Alembic check sin operaciones nuevas; Black/Ruff correctos.
+Suite completa: 3497 passed en 309.60 s; Black/Ruff/diff --check correctos.
+
+Proximo: integrar orden de locks y snapshot auditado en revision/confirmacion,
+con selector deshabilitado explicitamente registrado y errores cerrados si falta;
+evidencia atomica, concurrencia de acciones, autoridad administrativa personal y
+fuentes/aceptacion antes de habilitar. No bootstrap supuesto ni promocion de historia.
+Ley fija; M3-T1 EN PROGRESO integral. Sin commit ni push.

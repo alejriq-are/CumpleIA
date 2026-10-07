@@ -1,3 +1,16 @@
+## 2026-10-07 — M3-T1: resolver transaccional de politica con lock compartido
+
+§94 agrega funcion limitada de bloqueo, migracion f95b73aed064 aplicada localmente.
+JWT/perfil, search_path seguro, advisory compartido -> selector FOR SHARE sin
+UPDATE/BYPASSRLS runtime. Helper READ COMMITTED y snapshot revalidado tras espera;
+locks hasta commit/rollback, sin fallback/bootstrap ni conexion a acciones actuales.
+15 PostgreSQL nuevas (seis concurrencias reales), 39 focalizadas aprobadas;
+suite completa 3497 passed en 309.60 s; Alembic check/Black/Ruff/diff correctos.
+Proximo: integrar orden selector -> serie y snapshot auditado en revision/confirmacion,
+con selector deshabilitado explicito; luego evidencia atomica/concurrencia/exitos.
+Autoridad personal/fuentes/aceptacion pendientes. Resolver fijo de acciones conservado.
+Ley fija; M3-T1 EN PROGRESO integral. Sin commit ni push.
+
 ## 2026-10-07 — M3-T1: servicios internos de politica auditada
 
 §93 implementa publicacion/seleccion deshabilitada y lectura coherente validada.
