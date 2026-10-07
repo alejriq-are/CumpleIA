@@ -267,4 +267,7 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] M3-T1 §76: composicion orientativa en readiness, contratos cerrados y 17 pruebas nuevas; bloqueos conservados.
 - [x] M3-T1 §77: composicion compartida bajo lock en revision positiva/confirmacion; barreras conservadas y seis casos nuevos.
 - [x] M3-T1 §78: concurrencia real de confirmacion y HTTP seis bases ordinarias para composicion; ocho casos adicionales.
-- [ ] M3-T1: revisar aceptacion de primera frontera EIPD y verificar/registrar fuentes complementarias antes de habilitar.
+- [x] M3-T1 §79: revision de aceptacion acotada y revalidacion registrada de fuentes; frontera no habilitada, instrumento complementario no verificado.
+- [x] M3-T1 §80: HTTP preparado de ambas rutas protegidas con/sin negativa previa; cuatro casos nuevos y barreras conservadas.
+- [x] M3-T1 §81: concurrencia real de ambas rutas protegidas preparadas, revision/confirmacion y commit/rollback; ocho casos nuevos.
+- [ ] M3-T1: actualizar aceptacion §§80-81 y contrato de habilitacion del servidor; fuentes complementarias y alcance integral pendientes.

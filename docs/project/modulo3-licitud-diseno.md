@@ -7455,3 +7455,120 @@ Ley como base normativa fija, sin condicion por fecha de entrada en vigor.
 Proximo: revisar matriz de aceptacion de primera frontera EIPD y verificar fuentes
 complementarias oficiales con registro de evidencia. No habilitar gates por el
 numero de pruebas ni interpretar una busqueda sin resultados como inexistencia.
+
+
+## 79. Revision de aceptacion de primera frontera y fuentes
+
+2026-10-06. Revision documental/codigo en HEAD 792c935; no cambia gates.
+Base normativa fija §70; fuentes complementarias revalidadas en registro §79/F4.
+BCN art15ter y PDF Diario Oficial comprobados, sin instrumento complementario
+especifico verificado. Busqueda acotada no demuestra inexistencia ni certifica
+inventario de actos de Agencia. Riesgo no_alto y bloqueos globales son limites de
+producto, no atribucion de aprobacion obligatoria de Agencia o prohibicion legal
+general de riesgo alto. No usar campos editables del tenant como verificacion.
+
+### Matriz de aceptacion acotada
+
+| Criterio | Evidencia comprobada | Conclusion actual |
+| --- | --- | --- |
+| Sensible de derechos y sensible+biometrica, dependencias/rol/residuos | test_services_eipd_frontier.py, §71; test_api_eipd_v2_readiness.py, §73 | Preparacion especial probada; no autorizacion |
+| Deteccion v2 positiva y diagnostico v1 integro | test_services_eipd_screening_v2.py y HTTP v2 | requiere_eipd preservado; gate v1 sigue bloqueando |
+| Composicion documental preparada en ambas rutas | test_services_eipd_controls.py, prepared_controls, §75 | Evidencia pura; separacion documental/fuentes/revision |
+| Resolucion y ultima decision vigente/obsoleta/negativa | servicios/pruebas §65-68 y composicion §75 | Evaluadores e historial probados; ninguna positiva aceptada actualmente |
+| HTTP seis bases ordinarias y confirmado anterior | test_resolution_keeps_confirmation_blocked_six_bases, §78 | No acredita EIPD completa de rutas protegidas; economica conserva exclusion propia |
+| Concurrencia revision/confirmacion app_user y RAT real | test_rereads_document_after_series_lock y test_confirmation_rereads_document_and_latest_review_under_real_lock, §77-78 | Documento parcial ordinario; commit/rollback y ultima negativa probados |
+| HTTP de ambas rutas protegidas con ordinario/resolucion completos | Aun falta escenario combinado de preparation_result preparado y solo barreras globales | PENDIENTE; ampliar antes de aceptar frontera |
+| Concurrencia de expediente protegido preparado/cambio de dependencia | No acreditada por las pruebas ordinarias anteriores | PENDIENTE; no extrapolar cobertura |
+| Instrumento complementario de Agencia versionado/aplicable | Registro de fuentes §79: no verificado | PENDIENTE; conservar barrera |
+| Habilitacion de revision positiva/confirmacion | §67 agrega frontera_revision_no_validada/fuentes; §75 agrega gate_eipd_no_habilitado; confirmacion conserva v1 | NO HABILITADA; retiro futuro requiere contrato/evidencia, sin filtrar codigos v1 |
+
+Conclusion: primera frontera NO aceptada para habilitacion. Esto no deshace
+implementacion/readiness probados; identifica pendientes diferentes del total de
+pruebas. M3-T1 EN PROGRESO integral; no cierre DONE ni aprobacion juridica externa.
+
+Proximo paso implementable independiente de publicaciones: HTTP de ambas rutas
+protegidas con expediente ordinario/resolucion completos, usando RAT real y
+confirmando preparation_result preparado sin habilitar continuar; luego cambio de
+dependencia y concurrencia protegida. Conservar positivos, todos los motivos,
+borrador/historial/confirmado y controles de base propia. No forzar seis bases
+compatibles con sensibles si su evaluador propio lo excluye.
+
+Paso documental: ultima suite integral 3012 passed en 295.88 s (§78), no
+reejecutada. Diff --check correcto. Sin codigo, migracion, nuevo commit o push.
+
+
+## 80. HTTP de ambas rutas protegidas con composicion preparada
+
+2026-10-07. test_api_eipd_prepared_frontier.py agrega cuatro casos HTTP con RAT
+real/PostgreSQL: sensible de derechos y sensible+biometrica de derechos, con/sin
+ultima revision no_continuar. Base ordinaria contrato con expediente propio completo;
+no extrapola a seis bases ni elimina restricciones economicas sobre sensibles.
+Resolucion completa usa finalidad y alcance integral del snapshot real de M2,
+se aporta por PATCH y recibe binding del servidor. Referencias de fuentes son
+sinteticas de test y editables del tenant; no acreditan verificacion global.
+
+Readiness acredita preparation_result preparado, cero preparation_issues,
+ordinario/resolucion completos y contexto vigente. Deteccion v2 requiere_eipd;
+diagnostico v1 pendiente_revision permanece integro. review_blockers contiene
+exclusivamente fuentes_oficiales_no_verificadas y gate_eipd_no_habilitado: no exige
+revision positiva previa. confirmation_blockers agrega revision ausente o ultima
+decision negativa. POST continuar y confirmar rechazan 409 con la misma composicion,
+sin modificar borrador/historial; GET repetido identico y tenant ajeno 403.
+
+Retirar dependencia sensible invalida frontera/composicion, vuelve obsoleta
+resolucion y, cuando existe, ultima revision humana; ambas acciones siguen
+rechazadas y no crean eventos ni cambian borrador tras rechazo. No reescribe
+asociaciones al consultar ni borra los antecedentes historicos.
+
+Cuatro pruebas nuevas aprobadas. 89 pruebas HTTP focalizadas aprobadas en 34.89 s, incluyendo readiness v2,
+composicion, documentos y revision previos. Black/Ruff/diff --check correctos.
+Paso de pruebas/documentacion; sin cambios de logica productiva o migracion.
+Ultima suite completa 3012 passed (§78), no reejecutada; no sumar pruebas focalizadas
+como nueva evidencia integral. M3-T1 EN PROGRESO integral, primera frontera aun
+no aceptada para habilitacion; fuentes complementarias pendientes §79.
+Ley como base fija sin dependencia temporal. Sin nuevo commit ni push.
+
+Proximo: concurrencia real de ambas rutas protegidas preparadas, cambiando
+dependencia/documento bajo lock con commit/rollback; conservar relectura actual,
+historial y rechazo antes de escritura. Luego completar aceptacion/fuentes.
+
+
+## 81. Concurrencia real de ambas rutas protegidas preparadas
+
+2026-10-07. Ocho casos nuevos en test_api_eipd_prepared_frontier.py:
+sensible/sensible+biometrica x revision continuar/confirmacion x commit/rollback.
+Fixture asincrona compartida construye via HTTP expediente ordinario contrato,
+frontera y resolucion completos con RAT real; prepara ultima revision negativa
+vigente por accion autenticada. No usa mocks del RAT ni del evaluador.
+
+Dos conexiones runtime app_user con identidad autenticada y lock de serie real.
+Transaccion titular retira dependencia sensible usando update_legal_assessment_draft_v1,
+con contrato normalizado y flush real. Otra conexion precarga borrador y solicita
+revision positiva/confirmacion; pg_blocking_pids acredita espera antes de liberar.
+Tras commit se relee dependencia incompleta: preparacion/frontera no preparadas,
+resolucion y revision obsoletas. Tras rollback se recupera composicion preparada
+identica a readiness anterior, incluida ultima decision negativa vigente.
+
+Ambas operaciones rechazan 409 en los ocho escenarios, conservan barreras globales
+y mismo evento historico; no insertan nuevos eventos ni confirman borrador. GET
+final coincide con diagnostico calculado tras lock. Resolucion almacenada permanece
+intacta; rollback conserva borrador original completo y commit solo cambios de la
+actualizacion autorizada. Expectativa documental usa normalizacion del schema,
+no supone que input vacio persista literalmente como objeto vacio.
+
+97 HTTP focalizadas aprobadas en 36.68 s incluyendo §§80, v2, composicion,
+documentos y revision previos. Black/Ruff/diff --check correctos. Ultima suite
+completa 3012 passed (§78), no reejecutada para este paso de pruebas; no sumar
+focalizadas como nuevo total integral. No cambia logica productiva ni migraciones.
+
+Pendiente tecnico de concurrencia preparada identificado en §79 cubierto para
+ambas rutas con contrato ordinario y negativa previa. No extrapola a otras bases,
+regimenes o confirmacion excepcional exitosa. No modifica fronteras ni retira
+controles v1/§67/globales. M3-T1 EN PROGRESO integral; fuentes complementarias y
+aceptacion final de habilitacion pendientes. Ley fija sin dependencia temporal.
+Sin nuevo commit ni push.
+
+Proximo: actualizar aceptacion con evidencia §§80-81 y delimitar contrato de
+habilitacion del servidor, incluyendo transicion de diagnostico historico v1 sin
+filtrado de codigos y verificacion complementaria auditable. Mantener bloqueos
+mientras faltan fuentes/aceptacion; el alcance integral restante sigue pendiente.

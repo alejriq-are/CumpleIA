@@ -1,3 +1,38 @@
+## 2026-10-07 — M3-T1: concurrencia protegida preparada
+
+§81 cubre ambas rutas x revision positiva/confirmacion x commit/rollback: ocho
+casos nuevos con dos conexiones app_user, RAT/servicios reales y pg_blocking_pids.
+Commit relee dependencia incompleta y obsolescencia documental/humana; rollback
+mantiene composicion preparada. Rechazos conservan borrador/resolucion/historial.
+97 HTTP focalizadas aprobadas en 36.68 s; Black/Ruff/diff --check correctos.
+Ultima suite completa 3012 passed (§78), no reejecutada en este paso de pruebas.
+Proximo: actualizar aceptacion §§80-81 y contrato de habilitacion de servidor;
+fuentes complementarias/aceptacion y alcance integral restante siguen pendientes.
+Ley fija; M3-T1 EN PROGRESO integral. Sin logica nueva, migracion, commit ni push.
+
+## 2026-10-07 — M3-T1: HTTP protegido documentalmente preparado
+
+§80 verifica sensible de derechos y sensible+biometrica con contrato/resolucion
+completos y RAT real; cuatro casos con/sin ultima negativa. Preparacion completa
+no levanta fuentes/aceptacion ni diagnostico v1; continuar/confirmar 409 sin cambios.
+Retirar dependencia invalida frontera/resolucion/revision; tenant ajeno 403.
+89 HTTP focalizadas aprobadas en 34.89 s; Black/Ruff/diff --check correctos.
+Ultima suite completa 3012 passed (§78), no reejecutada para este paso de pruebas.
+Proximo: concurrencia real protegida preparada, commit/rollback y dependencia.
+Ley fija; fuentes/aceptacion pendientes. M3-T1 EN PROGRESO integral;
+sin logica productiva nueva, migracion, commit ni push.
+
+## 2026-10-06 — M3-T1: aceptacion acotada y fuentes EIPD
+
+§79 contrasta evidencia pura/HTTP/concurrencia y deja primera frontera no aceptada
+para habilitacion. Pendientes: HTTP preparado y concurrencia de ambas rutas
+protegidas, ademas de instrumento complementario de Agencia no verificado.
+BCN art15ter y Diario Oficial Ley21.719 revalidados; busqueda acotada no demuestra
+inexistencia de listas/orientaciones. Base normativa fija §70 y bloqueos intactos.
+Proximo: HTTP de expediente protegido preparado con RAT real, sin abrir continuar.
+Paso documental; ultima suite 3012 passed (§78), no reejecutada, diff correcto.
+M3-T1 EN PROGRESO integral; sin codigo, migracion, nuevo commit ni push.
+
 ## 2026-10-06 — M3-T1: HTTP seis bases y concurrencia EIPD
 
 §78 amplia seis bases ordinarias con/sin revision negativa y diagnosticos de

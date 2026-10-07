@@ -55,3 +55,35 @@ El usuario fija la ley como base del proyecto independientemente de diciembre o
 eventual postergacion. F3 es solo antecedente informativo: no condiciona desarrollo
 ni desactiva controles. Las publicaciones complementarias no verificadas siguen
 pendientes por separado; implementar frontera segun §70 sin habilitar continuar.
+
+
+## Revalidacion §79 — 2026-10-06
+
+Base comprobada: HEAD 792c9352ba95175f8e80b9fb5a9ed59bf6567300, limpio.
+F1 reabierta en BCN: art15ter conserva EIPD previa, supuestos obligatorios,
+lista/orientaciones de Agencia y consulta facultativa para recomendaciones.
+Se agrega F4: [Diario Oficial, Ley 21.719, 13-12-2024, CVE 2583630](https://www.diariooficial.interior.gob.cl/publicaciones/2024/12/13/44023/01/2583630.pdf).
+PDF oficial de 34 paginas abierto/texto recuperado; corrobora publicacion del
+marco legal. No se realizo revision visual integral ni se certifica con este PDF
+original el estado exhaustivo de modificaciones posteriores. No sustituye un
+instrumento complementario de la Agencia.
+
+Consultas reproducibles dirigidas mediante filtro de dominios:
+
+- "proteccion de datos" "lista orientativa": gob.cl, diariooficial.interior.gob.cl, bcn.cl.
+- "Agencia de Proteccion de Datos Personales" orientaciones evaluacion impacto: gob.cl, diariooficial.interior.gob.cl.
+- "evaluacion de impacto" "orientaciones minimas": economia.gob.cl, minsegpres.gob.cl, diariooficial.interior.gob.cl.
+- "proteccion de datos personales" "lista" "resolucion" "2026": economia.gob.cl, diariooficial.interior.gob.cl.
+- Agencia Proteccion Datos Personales sitio oficial Chile: gob.cl.
+
+Resultados relevantes: ley BCN/Diario Oficial y antecedentes de otras entidades
+(CAIGG, DIPRES, Gobierno Digital). No se verifico instrumento EIPD emitido por la
+Agencia con referencia/version/aplicabilidad; no se adopta como sustituto una guia
+de otra entidad o un resultado comercial. No se verifico un portal propio de la
+Agencia ni inventario exhaustivo de actos; ausencia en buscador no acredita
+inexistencia. Estado global sigue PENDIENTE, sin nueva version de instrumento.
+
+La ley sigue siendo base fija del producto por decision §70, independiente de
+vigencia temporal. Fuentes complementarias pendientes no desactivan desarrollo;
+fuentes_oficiales_no_verificadas/gate_eipd_no_habilitado y barrera positiva §67
+siguen vigentes. No contactar autoridades ni crear seguimiento automatico.
