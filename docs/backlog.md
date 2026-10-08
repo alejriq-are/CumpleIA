@@ -293,4 +293,5 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] M3-T1 §102: barrera personal limitada perfil/rol/lock, migracion b17d95c0286f y nueve PostgreSQL nuevas; 45 focalizadas aprobadas, sin conexion a escritores.
 - [x] M3-T1 §103: escritores personales con actor derivado y 11 PostgreSQL nuevas; 44 focalizadas aprobadas; Suite completa: 3587 passed en 348.04 s; Black/Ruff/Alembic check/diff correctos.
 - [x] M3-T1 §104: pool separado y dependencia JWT/sub local/autoridad, 17 pruebas nuevas; 47 focalizadas aprobadas. Suite completa: 3604 passed en 352.09 s; Black/Ruff/Alembic check/diff correctos.
-- [ ] M3-T1: endpoints administrativos y validacion HTTP/JWT/revocacion; fuentes/aceptacion tecnica y provision controlada antes de habilitar.
+- [x] M3-T1 §105: endpoints administrativos con JWT verificado/pool real, 38 HTTP nuevas; 85 focalizadas aprobadas. Suite completa: 3642 passed en 355.96 s; Black/Ruff/Alembic check/diff correctos.
+- [ ] M3-T1: matriz concurrente HTTP/revocacion y fallos; fuentes/aceptacion tecnica y provision controlada antes de habilitar.

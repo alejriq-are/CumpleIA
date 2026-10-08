@@ -1,4 +1,4 @@
-"""Pool administrativo separado y dependencia personal; sin rutas publicadas."""
+"""Pool administrativo separado y dependencia personal para rutas EIPD."""
 
 from collections.abc import AsyncGenerator
 from functools import lru_cache

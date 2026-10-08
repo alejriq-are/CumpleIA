@@ -1,3 +1,12 @@
+## 2026-10-08 — M3-T1: API administrativa EIPD autenticada
+
+§105 POST /admin/eipd/publications y /selections conectados a JWT verificado/pool
+separado/barrera personal; actor derivado, esquemas cerrados, errores controlados,
+solo politicas deshabilitadas. 38 HTTP nuevas con ES256/JWKS sintetico y PostgreSQL
+real, 85 focalizadas aprobadas en 9.03 s. Suite completa: 3642 passed en 355.96 s; Black/Ruff/Alembic check/diff correctos.
+Proximo matriz concurrente HTTP/revocacion y fallos, luego fuentes/aceptacion y
+provision operativa. Ley fija, EN PROGRESO; activacion bloqueada. Sin commit/push.
+
 ## 2026-10-08 — M3-T1: pool administrativo y dependencia autenticada
 
 §104 configuracion EIPD separada opcional/secreta, sin fallback owner/runtime;

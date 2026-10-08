@@ -2,7 +2,7 @@
 
 Fecha: 2026-10-07. Estado: EN PROGRESO. Revisión documental y de código;
 no modifica reglas ni amplía el alcance. Última suite completa registrada:
-3604 passed (§104), posterior a pool separado y dependencia autenticada EIPD.
+3642 passed (§105), posterior a rutas administrativas EIPD autenticadas.
 Checkpoints inferiores son históricos; el total no acredita cierre integral.
 
 ## Fuentes y criterio
@@ -3203,3 +3203,37 @@ seleccion a esta dependencia, validar HTTP/JWT real y concurrencia de revocacion
 por transporte; luego fuentes/aceptacion y despliegue/provision controlados.
 Ley 21.719/19.628 reformada sigue base fija; M3-T1 EN PROGRESO integral y
 activacion excepcional bloqueada. Sin commit/push en este paso.
+
+## §105 — Rutas administrativas EIPD con JWT/pool real (2026-10-08)
+
+Se registran POST /admin/eipd/publications y POST /admin/eipd/selections en la API.
+PublicationRequest exige policy/rationale/evidence_reference; SelectionRequest exige
+publication_id/expected_revision/rationale/evidence_reference. Esquemas cerrados,
+revision StrictInt; actor/UUID/reloj/hash/evento se generan o derivan en servidor.
+Se reutilizan entradas personales §103 y dependencia §104, nunca primitivas privadas
+ni require_superadmin/JIT/DB tenant. Organizacion del header no concede autoridad.
+
+201 devuelve publicacion o plan evento/selector; cada request tiene su propia
+transaccion. Publicar no selecciona automaticamente. 401 token ausente/invalido;
+403 identidad verificada sin perfil superadmin vigente; 503 JWKS/pool ausente o
+canal inapropiado. 422 cuerpo/campos adicionales; 409 rechazo de dominio/revision
+obsoleta/referencia repetida. Unique violation de publicacion tambien se traduce
+a 409 para la carrera potencial, sin exponer mensajes SQL. Esa carrera concurrente
+queda pendiente de matriz HTTP del siguiente paso; no acreditada por test secuencial.
+
+38 pruebas HTTP nuevas usan app registrada, JWT ES256 real con par de claves y
+JWKS sintetico, y pool PostgreSQL/login limitado reales. Cubren publicacion seguida
+de seleccion y visibilidad de commit con actor derivado, pool limpio, seis formas
+de token invalido por ambas rutas antes de pool, tenant/desconocido/revocado,
+campos auditables de cliente rechazados, duplicado/revision obsoleta/desconocido,
+publicacion habilitada bloqueada, fallo de commit con rollback sin respuesta exitosa,
+JWKS caido, configuracion ausente y owner/app_user rechazados. Sin reemplazar
+extract_auth_user_id ni dependencias de autoridad/escritores en pruebas HTTP.
+85 focalizadas con pool/autoridad/escritores/autenticacion anteriores: 9.03 s.
+Suite completa: 3642 passed en 355.96 s; Black/Ruff/Alembic check/diff correctos.
+
+No migracion nueva ni provision/despliegue con credenciales reales. Ambas operaciones
+conservan guardias de habilitadas; sin activacion excepcional. Pendiente concurrencia
+HTTP de revocacion/seleccion/publicacion y fallos transaccionales adicionales,
+fuentes oficiales/aceptacion y provision operativa controlada. Ley 21.719/19.628
+reformada base fija; M3-T1 EN PROGRESO integral. Sin commit/push en este paso.

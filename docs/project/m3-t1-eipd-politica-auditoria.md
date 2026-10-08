@@ -177,3 +177,14 @@ activar LOGIN en el rol de grupo eipd_policy_admin ni reutilizar owner/app_user.
 READ COMMITTED, SET LOCAL ROLE/sub, barrera personal FOR SHARE hasta commit/rollback;
 47 focalizadas con pool real/autoridad/escritores/auth existentes aprobadas.
 No implica API operativa, JWT HTTP integrado, despliegue ni habilitacion excepcional.
+
+### Transporte registrado (§105)
+
+POST /admin/eipd/publications: policy/rationale/evidence_reference -> 201 publicacion.
+POST /admin/eipd/selections: publication_id/expected_revision/rationale/evidence_reference
+-> 201 evento/selector. Actor/IDs/reloj/hash de servidor; extra forbid, sin permiso tenant.
+get_eipd_admin_db -> escritores personales, transaccion por request; publicar no selecciona.
+401/403/503 segun autenticacion/autoridad/canal; 422 esquema; 409 conflicto de dominio.
+38 HTTP nuevas prueban JWT ES256 con JWKS sintetico + login/pool PostgreSQL real,
+conservando rechazos de habilitadas y rollback ante commit fallido. Sin despliegue/
+credenciales reales. Concurrencia HTTP y provision operativa quedan pendientes.

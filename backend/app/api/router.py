@@ -2,6 +2,7 @@ from fastapi import APIRouter
 
 from app.api.cuestionario_config import router as cuestionario_config_router
 from app.api.diagnostico import router as diagnostico_router
+from app.api.eipd_admin import router as eipd_admin_router
 from app.api.health import router as health_router
 from app.api.licitud import router as licitud_router
 from app.api.me import router as me_router
@@ -19,3 +20,5 @@ api_router.include_router(diagnostico_router)
 api_router.include_router(rat_router)
 
 api_router.include_router(licitud_router)
+
+api_router.include_router(eipd_admin_router)
