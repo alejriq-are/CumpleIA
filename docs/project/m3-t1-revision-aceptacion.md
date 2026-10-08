@@ -2,7 +2,7 @@
 
 Fecha: 2026-10-07. Estado: EN PROGRESO. Revisión documental y de código;
 no modifica reglas ni amplía el alcance. Última suite completa registrada:
-3587 passed (§103), posterior a integracion de escritores con autoridad personal.
+3604 passed (§104), posterior a pool separado y dependencia autenticada EIPD.
 Checkpoints inferiores son históricos; el total no acredita cierre integral.
 
 ## Fuentes y criterio
@@ -3172,3 +3172,34 @@ credenciales nuevas ni activacion real. Proximo: transporte administrativo auten
 con canal DB separado/contexto transaccional local y pruebas de permiso/revocacion/
 pool; despues fuentes complementarias y aceptacion tecnica trazable. Ley fija;
 EN PROGRESO integral. Sin commit ni push; §102 tambien pendiente de commit.
+
+## §104 — Pool separado y dependencia autenticada EIPD (2026-10-08)
+
+Se incorpora `EIPD_ADMIN_DATABASE_URL` opcional y secreta, sin valor por defecto ni
+fallback a DATABASE_URL/APP_DATABASE_URL. El pool se crea de forma diferida,
+READ COMMITTED, sin echo y con parametros ocultos. No se cambia .env ni se
+provisionan credenciales reales: el login debe provisionarse por mantenimiento.
+
+`get_eipd_admin_db` valida el bearer con extract_auth_user_id (JWT existente)
+antes de obtener el pool. Requiere login dedicado LOGIN/NOINHERIT, sin superuser,
+BYPASSRLS, CREATEDB, CREATEROLE, REPLICATION, propiedad de relaciones ni membresias
+directas adicionales; miembro de eipd_policy_admin. Rechaza owner y app_user.
+SET LOCAL ROLE eipd_policy_admin y sub parametrizado/local preceden la barrera
+personal FOR SHARE. No usa JIT, organizacion del header ni actor del payload.
+La dependencia gestiona commit/rollback; el lock personal dura la transaccion.
+
+17 pruebas nuevas, con login/password sinteticos efimeros y pool real de una
+conexion: JWT ausente/invalido antes de pool, configuracion ausente/invalida,
+identidad derivada, reutilizacion del mismo backend tras commit/rollback sin
+sub/rol residual, tenant/desconocido/revocado rechazados, owner/app_user rechazados,
+y privilegios excesivos bloqueados. Las pruebas de JWT del modulo existente y
+las barreras/escritores anteriores se ejecutan juntas: 47 passed en 3.18 s.
+Suite completa: 3604 passed en 352.09 s; Black/Ruff/Alembic check/diff correctos.
+
+No nueva migracion, rutas administrativas ni activacion operativa. La validacion
+criptografica se reutiliza; los tests de pool inyectan la identidad extraida y
+no acreditan una ruta HTTP integrada. Pendiente conectar endpoints publicacion/
+seleccion a esta dependencia, validar HTTP/JWT real y concurrencia de revocacion
+por transporte; luego fuentes/aceptacion y despliegue/provision controlados.
+Ley 21.719/19.628 reformada sigue base fija; M3-T1 EN PROGRESO integral y
+activacion excepcional bloqueada. Sin commit/push en este paso.

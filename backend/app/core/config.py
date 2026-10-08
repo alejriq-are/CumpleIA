@@ -1,7 +1,7 @@
 from functools import lru_cache
 from pathlib import Path
 
-from pydantic import model_validator
+from pydantic import SecretStr, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # Ancla al .env de la raíz del repo (no al cwd): así docker compose (cwd=raíz)
@@ -29,6 +29,10 @@ class Settings(BaseSettings):
     app_database_url: str = (
         "postgresql+asyncpg://app_user:app_dev_password@localhost:5432/cumpleia"
     )
+
+    # Canal EIPD independiente, sin fallback al owner ni al runtime tenant.
+    # Login dedicado NOINHERIT, miembro solo de eipd_policy_admin; provision externa.
+    eipd_admin_database_url: SecretStr | None = None
 
     # Supabase
     # supabase_url es OBLIGATORIO: de él se deriva la URL del JWKS y el emisor (iss)

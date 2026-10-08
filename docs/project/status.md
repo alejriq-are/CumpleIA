@@ -1,3 +1,12 @@
+## 2026-10-08 — M3-T1: pool administrativo y dependencia autenticada
+
+§104 configuracion EIPD separada opcional/secreta, sin fallback owner/runtime;
+JWT antes del pool, login dedicado limitado, rol/sub locales y barrera personal
+hasta commit/rollback. Sin rutas ni provision de credenciales reales. 17 nuevas,
+47 focalizadas aprobadas en 3.18 s. Suite completa: 3604 passed en 352.09 s; Black/Ruff/Alembic check/diff correctos.
+Proximo: endpoints administrativos y matriz HTTP/JWT/revocacion; luego fuentes/
+aceptacion. Ley fija, EN PROGRESO; activacion bloqueada. Sin commit/push.
+
 ## 2026-10-08 — M3-T1: escritores con autoridad personal
 
 §103 entradas personales de publicacion/seleccion derivan actor, rechazan actor_id

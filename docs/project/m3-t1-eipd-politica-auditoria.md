@@ -166,3 +166,14 @@ bajo FOR SHARE, helper exige rol separado/READ COMMITTED. Todavia no conectada a
 publicacion/seleccion ni transporte autenticado en §102; conexion a entradas
 personales implementada §103. Actor derivado, sin argumento de cliente; primitivas
 privadas restringidas a caller interno confiable. Transporte/pool aun pendientes.
+
+### Canal autenticado preparado (§104)
+
+Dependencia `app/db/eipd_admin.py::get_eipd_admin_db`, aun sin rutas: JWT verificado
+antes del pool separado EIPD_ADMIN_DATABASE_URL (SecretStr opcional, sin fallback).
+Login dedicado LOGIN NOINHERIT, miembro solo de eipd_policy_admin, sin privilegios
+administrativos amplios ni propiedad de relaciones. Provision externa, nunca
+activar LOGIN en el rol de grupo eipd_policy_admin ni reutilizar owner/app_user.
+READ COMMITTED, SET LOCAL ROLE/sub, barrera personal FOR SHARE hasta commit/rollback;
+47 focalizadas con pool real/autoridad/escritores/auth existentes aprobadas.
+No implica API operativa, JWT HTTP integrado, despliegue ni habilitacion excepcional.
