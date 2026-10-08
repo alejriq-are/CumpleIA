@@ -1,10 +1,11 @@
 # M3-T1 — Contrato de auditoria y seleccion transaccional de politica EIPD
 
 Fecha: 2026-10-07. Checkpoint §89. Estado: contratos §90, persistencia §§91–92, servicios §93 y resolver limitado §94
-implementados; autoridad personal e integracion/coordinacion con acciones pendientes.
+implementados; acciones/evidencia y concurrencia §§95–99 conectadas; autoridad
+personal pendiente, contrato §100.
 Base: §§82–88; Ley 21.719 / Ley 19.628 reformada fija por instruccion del usuario.
 Este contrato describe controles de producto; no introduce requisitos legales ni
-acredita verificacion de fuentes. Resolver actual fijo sigue deshabilitado.
+acredita verificacion de fuentes. Acciones admiten solo politica auditada deshabilitada.
 
 ## 1. Identidad, publicacion y seleccion
 
@@ -149,3 +150,13 @@ Publicar objeto que declare verificadas no verifica fuentes reales. Fechas o eve
 postergacion legal no activan politica. Revision exige selector deshabilitado explicito
 y rechaza habilitadas; confirmacion/readiness usan misma politica auditada deshabilitada;
 M3-T1 EN PROGRESO dentro del alcance integral.
+
+## 7. Autoridad personal (§100)
+
+Exigir JWT verificado, superadmin global vigente y canal DB separado; actor derivado
+del servidor. Antes de implementar, auditar/proteger columnas de identidad/autoridad
+de profiles frente a escritura runtime, manteniendo JIT legitimo. Precondicion local
+implementada §101 con migracion a06c84bf175e: grants de columnas y trigger de identidad.
+SELECT anterior conservado; no es RLS completo de perfiles. Revocacion personal
+y contexto de pool requieren pruebas transaccionales. Detalle y matriz en diseño
+§100. Contrato documental, autoridad personal aun no implementada.

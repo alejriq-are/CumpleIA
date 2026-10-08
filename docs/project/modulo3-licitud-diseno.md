@@ -8399,3 +8399,88 @@ Proximo: definir/implementar autoridad personal del canal administrativo de poli
 con permisos separados de roles tenant; fuentes complementarias y aceptacion tecnica
 trazable antes de habilitar. No cierre integral ni validacion juridica por total de
 pruebas. M3-T1 EN PROGRESO integral; ley fija. Sin commit ni push.
+
+
+## §100 — Contrato de autoridad personal administrativa
+
+2026-10-07. Paso documental previo a implementar autorizacion personal. ADR 0001
+establece profiles.is_superadmin como autoridad global, independiente de membresias.
+get_current_profile valida JWT mediante extract_auth_identity, establece sub local y
+aprovisiona perfil sin promoverlo; require_superadmin comprueba bandera. Canal EIPD
+actual _require_admin solo verifica current_user=eipd_policy_admin; actor_id recibido
+por servicios internos no acredita por si mismo identidad personal autenticada.
+
+Contrato elegido: exigir simultaneamente identidad JWT verificada por servidor,
+perfil global superadmin vigente y conexion administrativa separada. Actor de auditoria
+se deriva del perfil autorizado; nunca de actor_id/client payload, accepted_by,
+verified_by, X-Organization-Id ni roles owner/admin/editor de organizacion. app_user
+no recibe membresia del rol administrativo ni credenciales owner. JIT no promueve;
+sin identidad, perfil, permiso o canal adecuado, rechazar antes de publicar/seleccionar.
+No crear API administrativa operativa hasta completar barreras y pruebas.
+
+Precondicion descubierta en codigo: migracion 0001 otorga CRUD de todas las tablas
+public a app_user y no incluye profiles en lista RLS; 0002 agrega is_superadmin.
+Las migraciones revisadas no acreditan proteccion suficiente de columnas de identidad/
+autoridad. Esto es hallazgo de codigo, no prueba de explotacion ni comprobacion de
+privilegios efectivos en despliegues. Proximo paso debe auditar privilegios reales y
+proteger auth_user_id/id/is_superadmin frente a insercion/actualizacion suplantada,
+promocion y borrado runtime. Mantener JIT legitimo y cambios de datos de perfil
+permitidos; no conceder promocion por rol tenant. Migracion nueva append-only.
+
+Orden administrativo previsto: autoridad personal estabilizada (lectura protegida de
+perfil) -> advisory exclusivo -> selector exclusivo; nunca serie. Revocacion personal
+concurrente debe tener resultado definido: aplicada antes de autorizar rechaza, o
+espera fin de operacion ya autorizada bajo lock. No confiar solo en objeto ORM/cache
+anterior a espera. Funcion DB limitada, si se utiliza, exige canal administrativo,
+search_path seguro y permisos minimos; no autentica criptograficamente JWT por si sola.
+Caller debe propagar sub verificado a conexion administrativa en transaccion local,
+sin fuga de identidad entre conexiones de pool. Actor/fecha/hash siempre servidor.
+
+Matriz obligatoria: anonimo/JWT invalido/perfil ausente; tenant owner/admin sin bandera;
+actor suplantado; superadmin autenticado por canal incorrecto; canal correcto sin
+identidad; JIT sin autopromocion; SQL runtime no altera autoridad/identidad; revocacion
+personal commit/rollback antes/durante espera; aislamiento del contexto local del pool;
+auditoria exacta del actor; rollback sin publicacion/seleccion parcial. Superadmin
+legitimo sin membresia tenant puede administrar solo por canal separado autorizado.
+
+Sin cambio de servicios, permisos, migraciones, pruebas ejecutables ni activacion en
+este checkpoint. Ultima suite ejecutada: 3555 passed §99; no se presenta como prueba
+del contrato nuevo. Autoridad personal todavia NO implementada. Fuentes/aceptacion
+pendientes; ley fija; M3-T1 EN PROGRESO integral. Sin commit ni push.
+
+
+## §101 — Proteccion de identidad y autoridad de perfiles
+
+2026-10-07. Auditoria local efectiva antes del cambio con conexion app_user confirma
+INSERT/UPDATE/DELETE de profiles y UPDATE de is_superadmin permitidos. Hallazgo §100
+confirmado para base local; no se extrapola a despliegues externos. Migracion nueva
+append-only a06c84bf175e sobre f95b73aed064 aplicada localmente.
+
+Revoca INSERT/UPDATE/DELETE/TRUNCATE de tabla profiles para app_user; conserva SELECT
+existente y concede INSERT solo auth_user_id/email/full_name, UPDATE solo email/
+full_name/updated_at. ID por default DB y is_superadmin=false por default; no INSERT
+explicito de ID/autoridad ni UPDATE identidad/autoridad. Sin concesiones al canal EIPD.
+Trigger SECURITY INVOKER/search_path pg_catalog exige auth.uid() no nulo y matching
+NEW.auth_user_id para runtime; UPDATE ademas acredita identidad OLD y rechaza cambio
+de ID/auth_user_id/is_superadmin. Cambios basicos de perfil ajeno rechazados. Funcion
+no obtiene privilegios elevados; EXECUTE retirado de PUBLIC/app_user/eipd_policy_admin,
+trigger realiza validacion. Owner de mantenimiento conserva atribuciones explicitas.
+
+JIT get_current_profile conserva INSERT de columnas permitidas/ON CONFLICT DO NOTHING,
+perfil nuevo sin promocion y RETURNING/SELECT. No cambia API/autenticacion/JWT ni
+activa canal administrativo. Proteccion no representa RLS completo de perfiles:
+SELECT anterior se conserva y administracion personal EIPD aun pendiente. Downgrade
+restaura grants anteriores de CRUD y retira trigger/permisos de columna nuevos;
+es reversion de seguridad, no necesaria para operar upgrade.
+
+Doce PostgreSQL/app_user nuevas: privilegios efectivos, JIT idempotente y update basico
+propio, cuatro INSERT forjados (anonimo/otra identidad/promocion/ID explicito), seis
+mutaciones denegadas (promocion/auth_user_id/ID/borrado/truncate/datos ajenos).
+22 focalizadas con autenticacion aprobadas en 0.51 s. No datos reales alterados por
+pruebas; insercion/actualizacion propia de test revertida por rollback.
+Suite completa: 3567 passed en 431.30 s; Black/Ruff/Alembic check/diff correctos.
+
+Proximo: implementar autorizacion personal transaccional del canal EIPD (JWT verificado,
+perfil superadmin vigente, actor derivado y rol separado), locks/revocacion/pool y
+pruebas; fuentes/aceptacion antes de activar. Ley fija; EN PROGRESO integral.
+Sin commit ni push; §100 documental tambien pendiente de commit.

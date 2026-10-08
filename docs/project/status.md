@@ -1,3 +1,25 @@
+## 2026-10-07 — M3-T1: identidad/autoridad de perfiles protegidas
+
+§101 auditoria local confirma permisos amplios; migracion a06c84bf175e aplicada.
+app_user INSERT/UPDATE limitados por columnas; identidad/autoridad/DELETE/TRUNCATE
+protegidos, trigger exige identidad propia autenticada. SELECT anterior conservado,
+JIT idempotente sin promocion y update basico propio funcionando; owner mantenimiento
+separado. 12 PostgreSQL nuevas, 22 focalizadas con auth aprobadas.
+Suite completa: 3567 passed en 431.30 s; Black/Ruff/Alembic check/diff correctos.
+Proximo: autorizacion personal transaccional EIPD/revocacion/pool, luego fuentes y
+aceptacion. Canal personal aun pendiente; ley fija, EN PROGRESO. Sin commit/push.
+
+## 2026-10-07 — M3-T1: contrato de autoridad personal administrativa
+
+§100 fija identidad JWT verificada + superadmin global + canal DB separado;
+actor auditado derivado de perfil, sin permisos tenant ni identidad de payload.
+Hallazgo de codigo: grants amplios de profiles requieren auditoria de privilegios
+reales/proteccion de identidad y bandera antes de usarla en canal EIPD. No se afirma
+explotacion ni estado efectivo de despliegues. Proximo: endurecimiento append-only,
+JIT conservado y pruebas; luego revalidacion/locks personales y canal autenticado.
+Solo documentacion; autoridad personal aun no implementada. Ultima suite 3555 §99,
+no evidencia del contrato nuevo. Ley fija; EN PROGRESO integral. Sin commit/push.
+
 ## 2026-10-07 — M3-T1: series/tenants independientes y PATCH
 
 §99 agrega 12 PostgreSQL reales: series de misma/diferente org confirman sin espera
