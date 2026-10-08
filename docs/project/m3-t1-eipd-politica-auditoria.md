@@ -188,3 +188,13 @@ get_eipd_admin_db -> escritores personales, transaccion por request; publicar no
 38 HTTP nuevas prueban JWT ES256 con JWKS sintetico + login/pool PostgreSQL real,
 conservando rechazos de habilitadas y rollback ante commit fallido. Sin despliegue/
 credenciales reales. Concurrencia HTTP y provision operativa quedan pendientes.
+
+### Matriz concurrente HTTP acreditada (§106)
+
+Doce casos con PostgreSQL/pools limitados y JWT ES256/JWKS sintetico, sin mocks de
+locks/escritores: revocacion previa commit/rollback en ambas rutas; revocacion tras
+autorizar espera commit/rollback/cancelacion de la peticion. Peticion posterior sin
+autoridad -> 403, pool sin identidad residual. Dos selecciones revision 0 -> 201/409
+con un evento/selector; dos publicaciones referencia identica -> 201/409 con una
+fila, incluyendo conflicto real 23505. 97 focalizadas conjuntas aprobadas.
+Fuentes/aceptacion/provision operativa aun pendientes, activacion bloqueada.

@@ -8615,3 +8615,37 @@ conservan guardias de habilitadas; sin activacion excepcional. Pendiente concurr
 HTTP de revocacion/seleccion/publicacion y fallos transaccionales adicionales,
 fuentes oficiales/aceptacion y provision operativa controlada. Ley 21.719/19.628
 reformada base fija; M3-T1 EN PROGRESO integral. Sin commit/push en este paso.
+
+## §106 — Concurrencia administrativa por HTTP (2026-10-08)
+
+Doce pruebas nuevas, sin cambios en rutas/servicios/migraciones. App registrada,
+JWT ES256 firmado con JWKS sintetico, login/pools PostgreSQL restringidos reales.
+Las pausas de test controlan flush/commit; no reemplazan SQL, barrera personal,
+validacion JWT, escritores ni rollback. Se observan bloqueos efectivos mediante
+pg_blocking_pids; pg_stat_clear_snapshot evita cache de pg_stat_activity en el
+observador transaccional. Timeouts acotados y limpieza de tasks/pools/roles/perfiles.
+
+Cuatro casos (publicacion/seleccion x commit/rollback de revocacion previa):
+peticion HTTP espera UPDATE del perfil; revocacion confirmada -> 403 sin escrituras;
+revocacion revertida -> 201. Se relee autoridad despues de esperar.
+Seis casos (ambas rutas x commit/rollback/cancelacion de la peticion autorizada):
+UPDATE de revocacion espera FOR SHARE hasta cierre. Commit -> 201/cambio persistido;
+fallo de commit -> 500/rollback sin cambio; cancelacion -> rollback sin cambio.
+Despues de confirmar revocacion, siguiente peticion -> 403; pool sin sub/rol residual.
+
+Seleccion concurrente: dos conexiones esperando advisory, publicaciones diferentes
+con expected_revision=0 -> un 201 y un 409; exactamente un evento/selector revision 1.
+Publicacion duplicada concurrente: ambas pasan precheck y se encuentran en flush;
+se observa espera real por unicidad mientras ganador retiene commit. Un 201 y un
+409 (SQLSTATE 23505), una sola publicacion y ningun evento/selector. Esto acredita
+la traduccion de conflicto de DB implementada en §105, antes solo secuencial.
+
+Doce nuevas aprobadas en 2.98 s; 97 focalizadas con API/pool/autoridad/escritores/auth
+aprobadas en 11.73 s. Suite completa: 3654 passed en 369.30 s; Black/Ruff/Alembic check/diff correctos.
+No migracion ni datos/credenciales reales alterados; fixtures usan identidades y
+roles temporales propios. Sin habilitacion excepcional ni despliegue operativo.
+
+Proximo: revisar fuentes oficiales y trazabilidad de aceptacion tecnica para el
+control EIPD, sin habilitar mientras falten requisitos; registrar/probar provision
+operativa por separado. Ley 21.719/19.628 reformada base fija independiente del
+calendario; M3-T1 sigue EN PROGRESO integral. Sin commit/push en este paso.

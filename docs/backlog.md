@@ -294,4 +294,5 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] M3-T1 §103: escritores personales con actor derivado y 11 PostgreSQL nuevas; 44 focalizadas aprobadas; Suite completa: 3587 passed en 348.04 s; Black/Ruff/Alembic check/diff correctos.
 - [x] M3-T1 §104: pool separado y dependencia JWT/sub local/autoridad, 17 pruebas nuevas; 47 focalizadas aprobadas. Suite completa: 3604 passed en 352.09 s; Black/Ruff/Alembic check/diff correctos.
 - [x] M3-T1 §105: endpoints administrativos con JWT verificado/pool real, 38 HTTP nuevas; 85 focalizadas aprobadas. Suite completa: 3642 passed en 355.96 s; Black/Ruff/Alembic check/diff correctos.
-- [ ] M3-T1: matriz concurrente HTTP/revocacion y fallos; fuentes/aceptacion tecnica y provision controlada antes de habilitar.
+- [x] M3-T1 §106: doce HTTP concurrentes (revocacion/rollback/cancelacion/seleccion/unicidad); 97 focalizadas aprobadas. Suite completa: 3654 passed en 369.30 s; Black/Ruff/Alembic check/diff correctos.
+- [ ] M3-T1: fuentes oficiales/trazabilidad de aceptacion tecnica y provision operativa controlada antes de habilitar.

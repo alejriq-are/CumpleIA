@@ -1,3 +1,12 @@
+## 2026-10-08 — M3-T1: concurrencia administrativa HTTP
+
+§106 doce pruebas reales de revocacion previa/posterior, commit/rollback/cancelacion,
+selecciones competidoras y referencia duplicada concurrente. Sin cambios productivos;
+locks observados en PostgreSQL, JWT ES256/JWKS sintetico, pools limitados reales.
+97 focalizadas aprobadas en 11.73 s. Suite completa: 3654 passed en 369.30 s; Black/Ruff/Alembic check/diff correctos.
+Proximo fuentes oficiales/trazabilidad de aceptacion y provision operativa separada;
+Ley fija, EN PROGRESO, activacion bloqueada. Sin commit/push.
+
 ## 2026-10-08 — M3-T1: API administrativa EIPD autenticada
 
 §105 POST /admin/eipd/publications y /selections conectados a JWT verificado/pool
