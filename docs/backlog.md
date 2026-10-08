@@ -290,4 +290,6 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] M3-T1 §99: exitos independientes/aislamiento y PATCH concurrente; 12 PostgreSQL nuevas; Suite completa: 3555 passed en 345.51 s; Black/Ruff/Alembic check/diff correctos.
 - [x] M3-T1 §100: contrato de autoridad personal (JWT/superadmin/canal separado), precondicion de proteger perfiles y matriz; solo documentacion.
 - [x] M3-T1 §101: auditoria efectiva local y proteccion de identidad/autoridad de perfiles, migracion a06c84bf175e; 12 PostgreSQL nuevas; Suite completa: 3567 passed en 431.30 s; Black/Ruff/Alembic check/diff correctos.
-- [ ] M3-T1: implementar canal personal administrativo transaccional/revocacion/pool y fuentes/aceptacion tecnica antes de habilitar.
+- [x] M3-T1 §102: barrera personal limitada perfil/rol/lock, migracion b17d95c0286f y nueve PostgreSQL nuevas; 45 focalizadas aprobadas, sin conexion a escritores.
+- [x] M3-T1 §103: escritores personales con actor derivado y 11 PostgreSQL nuevas; 44 focalizadas aprobadas; Suite completa: 3587 passed en 348.04 s; Black/Ruff/Alembic check/diff correctos.
+- [ ] M3-T1: transporte administrativo autenticado/pool separado y fuentes/aceptacion tecnica antes de habilitar.

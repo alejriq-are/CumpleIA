@@ -2,7 +2,7 @@
 
 Fecha: 2026-10-07. Estado: EN PROGRESO. Revisión documental y de código;
 no modifica reglas ni amplía el alcance. Última suite completa registrada:
-3567 passed (§101), posterior a proteccion de identidad/autoridad de perfiles.
+3587 passed (§103), posterior a integracion de escritores con autoridad personal.
 Checkpoints inferiores son históricos; el total no acredita cierre integral.
 
 ## Fuentes y criterio
@@ -3106,3 +3106,69 @@ Proximo: implementar autorizacion personal transaccional del canal EIPD (JWT ver
 perfil superadmin vigente, actor derivado y rol separado), locks/revocacion/pool y
 pruebas; fuentes/aceptacion antes de activar. Ley fija; EN PROGRESO integral.
 Sin commit ni push; §100 documental tambien pendiente de commit.
+
+
+## §102 — Barrera personal transaccional limitada
+
+2026-10-08. Migracion append-only b17d95c0286f sobre a06c84bf175e aplicada localmente.
+public.lock_eipd_personal_authority_v1() sin argumentos retorna UUID de perfil derivado
+de auth.uid(); exige perfil existente con is_superadmin=true. SELECT perfil FOR SHARE
+antes de evaluar autoridad; retiene lock hasta commit/rollback. Funcion SECURITY
+DEFINER con search_path pg_catalog y referencias calificadas, EXECUTE solo rol
+administrativo EIPD (owner mantenimiento privilegiado); app_user sin EXECUTE, canal
+administrativo sin UPDATE de perfiles ni elevacion nueva. No publica ni selecciona.
+
+Helper authorize_eipd_personal_actor_v1 exige current_user=eipd_policy_admin y
+READ COMMITTED; invoca funcion, sin actor del cliente/cache/commit. Sub debe provenir
+de JWT verificado por caller y propagarse localmente a conexion separada. Funcion SQL
+no verifica criptografia del JWT. Orden previsto perfil -> advisory -> selector,
+sin series. No endpoints, configuracion de pool/credenciales ni bootstrap nuevos.
+
+Nueve PostgreSQL nuevas: anonimo/perfil desconocido/owner tenant rechazados; superadmin
+por canal runtime rechazado incluso al invocar funcion directamente; atributos,
+privilegios y actor exacto derivados; sub local desaparece tras rollback. Cuatro
+concurrencias con pg_blocking_pids: revocacion previa commit rechaza tras esperar,
+rollback permite autorizacion; revocacion posterior espera fin de transaccion personal
+(commit/rollback). Actor global dedicado sintetico sin membresia tenant, limpiado
+por owner; no se promueven perfiles de usuarios reales. 45 focalizadas con proteccion
+de perfiles/servicios de politica aprobadas en 3.37 s; Black/Ruff/Alembic check correctos.
+Ultima suite completa sigue 3567 §101; no se registra total nuevo sin ejecutarla.
+
+Limite: barrera todavia NO conectada a publish/select ni a API/canal autenticado.
+Servicios internos conservan contrato confiable anterior actor_id; rol DB solo aun
+no acredita persona para escritores. Proximo: integrar barrera antes de locks/global
+writes, actor derivado y rechazo de suplantacion, ajustar fixtures y suite completa;
+despues transporte autenticado/pool y fuentes/aceptacion antes de habilitar.
+Ley fija; EN PROGRESO integral. Sin commit ni push.
+
+
+## §103 — Escritores con entrada personal y actor derivado
+
+2026-10-08. publish_eipd_policy_v1/select_eipd_policy_v1 ya no aceptan actor_id.
+Invocan authorize_eipd_personal_actor_v1 antes de escribir/adquirir locks globales;
+actor auditable se deriva de perfil superadmin bloqueado. Seleccion: perfil FOR SHARE
+-> advisory exclusivo -> selector FOR UPDATE, sin serie ni commit interno. Solicitud
+sin identidad/canal/autoridad falla antes de mutaciones; actor forjado no es argumento
+admitido. Politicas habilitadas siguen rechazadas por el canal de publicacion/seleccion.
+
+Primitivas anteriores se renombran _publish_eipd_policy_v1/_select_eipd_policy_v1,
+privadas de persistencia para caller confiable. No endpoints ni entrada personal;
+DB rol sigue canal privilegiado y no valida criptograficamente sub por si solo.
+Fixtures antiguas usan explicitamente primitivas privadas para preparar politica/
+metadatos sinteticos, sin promover perfiles tenant ni simular nuevas barreras. Las
+pruebas nuevas ejercitan entradas personales reales y actor global dedicado sin
+membresia tenant. Transporte futuro debe usar exclusivamente entradas personales y
+propagar sub de JWT verificado, con conexion separada y contexto local del pool.
+
+Once PostgreSQL nuevas: publicacion/seleccion exactas con actor derivado, seis rechazos
+(anonimo/desconocido/tenant para ambos escritores) conservan catalogo, superadmin por
+runtime rechazado, dos argumentos actor_id forjados rechazados sin escritura, rollback
+conjunto de publicacion/evento/selector. 44 focalizadas con autoridad personal y
+servicios de persistencia aprobadas en 4.41 s.
+Suite completa: 3587 passed en 348.04 s; Black/Ruff/Alembic check/diff correctos.
+
+Sin nueva migracion sobre b17d95c0286f. No API administrativa operativa, pool/config/
+credenciales nuevas ni activacion real. Proximo: transporte administrativo autenticado
+con canal DB separado/contexto transaccional local y pruebas de permiso/revocacion/
+pool; despues fuentes complementarias y aceptacion tecnica trazable. Ley fija;
+EN PROGRESO integral. Sin commit ni push; §102 tambien pendiente de commit.

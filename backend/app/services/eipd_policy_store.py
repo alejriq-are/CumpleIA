@@ -29,7 +29,8 @@ _SNAPSHOT_SQL = """SELECT jsonb_build_object(
 
 async def _require_admin(db):
     # Rol DB separado acredita canal, no identidad personal del actor.
-    # Caller debe autenticar el actor de plataforma; nunca tomar actor del tenant.
+    # Entradas personales derivan actor via barrera; primitivas privadas requieren
+    # caller interno confiable y no son endpoints ni entrada de payload tenant.
     if await db.scalar(text("SELECT current_user")) != "eipd_policy_admin":
         raise PermissionError("Canal administrativo EIPD requerido")
 
@@ -78,7 +79,7 @@ async def read_selected_eipd_policy_v1(db):
     return next(p for p in state.publications if p.id == state.selector.publication_id)
 
 
-async def publish_eipd_policy_v1(
+async def _publish_eipd_policy_v1(
     db, policy, *, actor_id, rationale, evidence_reference
 ):
     await _require_admin(db)
@@ -119,7 +120,7 @@ async def publish_eipd_policy_v1(
     return publication
 
 
-async def select_eipd_policy_v1(
+async def _select_eipd_policy_v1(
     db, request, *, actor_id, rationale, evidence_reference
 ):
     """Advisory -> selector FOR UPDATE; caller conserva transaccion hasta commit."""
@@ -191,3 +192,41 @@ async def resolve_eipd_policy_snapshot_for_transaction_v1(db):
     if state.selector is None:
         raise ValueError("Politica seleccionada no disponible")
     return state
+
+
+async def authorize_eipd_personal_actor_v1(db):
+    """Sub verificado por caller; perfil -> advisory -> selector en pasos siguientes.
+
+    Retiene FOR SHARE hasta commit/rollback, sin cache ni actor del cliente.
+    SQL no autentica criptograficamente JWT; conexion separada de servidor requerida.
+    Conectado a entradas personales publish/select; primitivas privadas para setup
+    confiable/interno, nunca sustituir entrada personal en transporte administrativo.
+    """
+    await _require_admin(db)
+    if await db.scalar(text("SHOW transaction_isolation")) != "read committed":
+        raise ValueError("Autoridad personal exige READ COMMITTED")
+    return await db.scalar(text("SELECT public.lock_eipd_personal_authority_v1()"))
+
+
+async def publish_eipd_policy_v1(db, policy, *, rationale, evidence_reference):
+    """Entrada personal: actor derivado, perfil bloqueado antes de escribir."""
+    actor = await authorize_eipd_personal_actor_v1(db)
+    return await _publish_eipd_policy_v1(
+        db,
+        policy,
+        actor_id=actor,
+        rationale=rationale,
+        evidence_reference=evidence_reference,
+    )
+
+
+async def select_eipd_policy_v1(db, request, *, rationale, evidence_reference):
+    """Perfil autorizado -> advisory exclusivo -> selector exclusivo; sin commit."""
+    actor = await authorize_eipd_personal_actor_v1(db)
+    return await _select_eipd_policy_v1(
+        db,
+        request,
+        actor_id=actor,
+        rationale=rationale,
+        evidence_reference=evidence_reference,
+    )

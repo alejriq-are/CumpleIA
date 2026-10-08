@@ -11,10 +11,14 @@ from sqlalchemy import event, text
 from app.db.models import EipdPolicyPublication
 from app.services.eipd_policy import resolve_eipd_gate_policy_v1
 from app.services.eipd_policy_store import (
-    publish_eipd_policy_v1,
+    _publish_eipd_policy_v1 as publish_eipd_policy_v1,
+)
+from app.services.eipd_policy_store import (
+    _select_eipd_policy_v1 as select_eipd_policy_v1,
+)
+from app.services.eipd_policy_store import (
     read_eipd_policy_audit_snapshot_v1,
     read_selected_eipd_policy_v1,
-    select_eipd_policy_v1,
 )
 from tests import test_rls_isolation_licitud as rls
 from tests import test_services_eipd_policy as policy_fixtures

@@ -160,3 +160,9 @@ implementada §101 con migracion a06c84bf175e: grants de columnas y trigger de i
 SELECT anterior conservado; no es RLS completo de perfiles. Revocacion personal
 y contexto de pool requieren pruebas transaccionales. Detalle y matriz en diseño
 §100. Contrato documental, autoridad personal aun no implementada.
+
+Barrera limitada implementada §102 (b17d95c0286f): perfil superadmin derivado de sub
+bajo FOR SHARE, helper exige rol separado/READ COMMITTED. Todavia no conectada a
+publicacion/seleccion ni transporte autenticado en §102; conexion a entradas
+personales implementada §103. Actor derivado, sin argumento de cliente; primitivas
+privadas restringidas a caller interno confiable. Transporte/pool aun pendientes.

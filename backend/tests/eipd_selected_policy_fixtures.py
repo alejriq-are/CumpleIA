@@ -4,7 +4,12 @@ import pytest_asyncio
 from sqlalchemy import text
 
 from app.services.eipd_policy import resolve_eipd_gate_policy_v1
-from app.services.eipd_policy_store import publish_eipd_policy_v1, select_eipd_policy_v1
+from app.services.eipd_policy_store import (
+    _publish_eipd_policy_v1 as publish_eipd_policy_v1,
+)
+from app.services.eipd_policy_store import (
+    _select_eipd_policy_v1 as select_eipd_policy_v1,
+)
 
 
 @pytest_asyncio.fixture(autouse=True)

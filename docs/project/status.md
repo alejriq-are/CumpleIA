@@ -1,3 +1,23 @@
+## 2026-10-08 — M3-T1: escritores con autoridad personal
+
+§103 entradas personales de publicacion/seleccion derivan actor, rechazan actor_id
+cliente y requieren perfil superadmin/canal separado antes de escribir. Orden
+perfil -> advisory -> selector, sin serie; guardia de habilitadas conservada.
+Primitivas privadas solo setup/caller interno confiable; fixtures existentes explicitas.
+11 PostgreSQL nuevas, 44 focalizadas aprobadas. Suite completa: 3587 passed en 348.04 s; Black/Ruff/Alembic check/diff correctos.
+Transporte autenticado/pool aun pendiente; proximo conectar canal verificado/local,
+fuentes/aceptacion antes de activar. Ley fija; EN PROGRESO. Sin commit/push.
+
+## 2026-10-08 — M3-T1: barrera personal transaccional limitada
+
+§102 funcion de autoridad personal, migracion b17d95c0286f aplicada: UUID derivado
+sub/perfil superadmin, FOR SHARE hasta commit/rollback, EXECUTE solo canal admin;
+helper exige rol y READ COMMITTED. Nueve PostgreSQL nuevas (cuatro concurrencias),
+45 focalizadas aprobadas; formato/esquema correctos. Ultima suite completa 3567 §101.
+NO conectada a escritores ni transporte/pool autenticado. Proximo integrar en
+publish/select con actor derivado y rechazo de suplantacion; luego canal/pool y
+fuentes/aceptacion. Ley fija; EN PROGRESO integral. Sin commit ni push.
+
 ## 2026-10-07 — M3-T1: identidad/autoridad de perfiles protegidas
 
 §101 auditoria local confirma permisos amplios; migracion a06c84bf175e aplicada.
