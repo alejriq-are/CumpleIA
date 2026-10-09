@@ -94,6 +94,7 @@ from app.services.geolocation import evaluate_geolocation_assessment_v1
 from app.services.health import evaluate_health_assessment_v1
 from app.services.legal_obligation import evaluate_legal_obligation_assessment_v1
 from app.services.lia import evaluate_lia_assessment_v1
+from app.services.research_binding import bind_research_assessment_v1
 from app.services.rights_defense import evaluate_rights_defense_assessment_v1
 from app.services.sensitive_consent import evaluate_sensitive_consent_assessment_v1
 from app.services.sensitive_rights_exception import (
@@ -1073,6 +1074,8 @@ async def update_legal_assessment_draft_v1(
     )
 
     changes = payload.model_dump(mode="json", exclude_unset=True)
+    research_was_provided = "research_assessment" in payload.model_fields_set
+    research_input = changes.pop("research_assessment", None)
     scope_was_provided = "scope" in changes
     changes.pop("scope", None)
     screening_was_provided = "eipd_screening" in changes
@@ -1131,6 +1134,17 @@ async def update_legal_assessment_draft_v1(
     assessment.purpose_snapshot = bundle.snapshot.purpose
     assessment.rat_context_hash = build_rat_context_hash_v1(bundle.canonical)
     assessment.rat_context_snapshot = bundle.snapshot.model_dump(mode="json")
+    if research_was_provided:
+        assessment.research_assessment = (
+            bind_research_assessment_v1(
+                research_input,
+                bundle.snapshot,
+                assessment.legal_basis,
+                assessment.lia_assessment,
+            ).model_dump(mode="json")
+            if research_input is not None
+            else None
+        )
     if special_was_provided:
         try:
             assessment.special_conditions = (
@@ -1320,6 +1334,16 @@ async def create_legal_assessment_draft_v1(
         contract_assessment=(
             payload.contract_assessment.model_dump(mode="json")
             if payload.contract_assessment is not None
+            else None
+        ),
+        research_assessment=(
+            bind_research_assessment_v1(
+                payload.research_assessment,
+                bundle.snapshot,
+                payload.legal_basis,
+                payload.lia_assessment,
+            ).model_dump(mode="json")
+            if payload.research_assessment is not None
             else None
         ),
         special_conditions=None,

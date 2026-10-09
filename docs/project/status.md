@@ -1,3 +1,33 @@
+## 2026-10-09 — M3-T1 §134: expediente de investigacion en API de borrador
+
+Create/PATCH aceptan ResearchAssessmentV1 nullable; salida GET/POST/PATCH expone
+BoundResearchAssessmentV1 nullable. Servidor genera hashes con RAT/base/LIA finales.
+PATCH model_fields_set distingue omision (preserva objeto/binding), null (retira)
+y reaporte (revalida/vincula). Base/LIA cambiadas sin reaporte conservan asociacion
+anterior, detectable como obsoleta sin renovacion en GET. No cambios a contratos,
+hashes ni gates historicos especiales/EIPD. No nueva migracion.
+
+Seis casos HTTP/OpenAPI nuevos contra PostgreSQL aislado: crear/consultar, cambio
+simultaneo LIA/base/reaporte, obsolescencia sin reaporte, retiro, rechazo de binding
+cliente en create/PATCH, acceso con organizacion ajena rechazado y PATCH bloqueado
+en confirmado/reemplazado con expediente conservado. Estados historicos preparados
+por fixture con metadatos validos; no equivale a habilitar confirmacion investigacion.
+La prueba de acceso usa identidad A con cabecera B (403); no afirma por si sola una
+prueba SQL directa de RLS. Las pruebas HTTP existentes verifican compatibilidad.
+
+Primera suite ampliada: 297 aprobadas y tres fallos de preparacion de pruebas nuevas
+(dict LIA y overrides de identidad). Corregidos; segundo intento detecto metadatos
+obligatorios de ciclo de vida en fixtures, corregidos sin cambiar restricciones.
+Resultado final: 127 pruebas focalizadas aprobadas en 11.78 s; los 174 casos HTTP
+existentes de licitud ya aprobaron en la ejecucion ampliada. Black/Ruff aprobados.
+Runner incluye ambas suites para siguientes ejecuciones. Sin pruebas en base
+operacional, cambios de politica/credenciales ni despliegue remoto.
+
+Proximo: integrar readiness documental y estado de asociacion de investigacion,
+con bloqueo conservador e inmutabilidad; luego versiones especiales/EIPD nuevas.
+Ley fija, M3-T1 EN PROGRESO, confirmacion de investigacion y activacion EIPD
+bloqueadas. Sin commit/push en este paso.
+
 ## 2026-10-09 — M3-T1 §133: almacenamiento nullable de investigacion
 
 Migracion append-only c28f1a9d730b sobre b17d95c0286f agrega research_assessment

@@ -17,6 +17,8 @@ TARGETS = (
     "tests/test_services_research.py",
     "tests/test_research_binding.py",
     "tests/test_research_storage.py",
+    "tests/test_api_research.py",
+    "tests/test_api_licitud.py",
     "tests/test_eipd_channel_lifecycle.py",
     "tests/test_api_eipd_admin.py",
     "tests/test_api_eipd_admin_concurrency.py",

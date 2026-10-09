@@ -1036,6 +1036,7 @@ class LegalAssessmentDraftCreate(BaseModel):
     justification: str | None = None
     consent_assessment: ConsentAssessmentV1 | None = None
     lia_assessment: LiaAssessmentV1 | None = None
+    research_assessment: ResearchAssessmentV1 | None = None
     geolocation_assessment: GeolocationAssessmentV1 | None = None
     sensitive_consent_assessment: SensitiveConsentAssessmentV1 | None = None
     health_assessment: HealthAssessmentV1 | None = None
@@ -1063,6 +1064,7 @@ class LegalAssessmentDraftUpdate(BaseModel):
     justification: str | None = None
     consent_assessment: ConsentAssessmentV1 | None = None
     lia_assessment: LiaAssessmentV1 | None = None
+    research_assessment: ResearchAssessmentV1 | None = None
     geolocation_assessment: GeolocationAssessmentV1 | None = None
     sensitive_consent_assessment: SensitiveConsentAssessmentV1 | None = None
     health_assessment: HealthAssessmentV1 | None = None
@@ -1291,6 +1293,7 @@ class LegalAssessmentOut(BaseModel):
     rat_context_snapshot: dict
     consent_assessment: ConsentAssessmentV1 | None
     lia_assessment: LiaAssessmentV1 | None
+    research_assessment: BoundResearchAssessmentV1 | None = None
     special_conditions: SpecialConditionsV1 | None
     contract_assessment: ContractAssessmentV1 | None
     legal_obligation_assessment: LegalObligationAssessmentV1 | None

@@ -365,3 +365,9 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] Delimitar persistencia/API §132 en docs/project/m3-t1-investigacion-integracion.md.
 - [x] Schema/modelo/migracion nullable sin backfill §133; 121 pruebas aisladas, upgrade/check en ambas bases y auditoria EIPD intacta.
 - [ ] Integrar servicios/API create/GET/PATCH con binding de servidor y pruebas tenant; nuevas asociaciones especiales/EIPD posteriores.
+
+### M3-T1 §134 — API del expediente de investigacion
+
+- [x] Create/GET/PATCH con binding de servidor y omision/null/reaporte; contratos cliente cerrados.
+- [x] 127 pruebas focalizadas aprobadas y 174 HTTP existentes de compatibilidad aprobadas; estados historicos protegidos.
+- [ ] Readiness documental/asociacion de investigacion y versiones especiales/EIPD posteriores. Confirmacion sigue bloqueada; M3-T1 EN PROGRESO.
