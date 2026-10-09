@@ -66,6 +66,7 @@ def evaluate_eipd_screening_v2(context) -> EipdReadinessV2:
             ctx.sensitive_rights_exception_assessment,
             ctx.biometric_rights_exception_assessment,
             prepared_exceptions=prepared,
+            legal_basis=ctx.legal_basis,
         )
     return EipdReadinessV2(
         screening.result,

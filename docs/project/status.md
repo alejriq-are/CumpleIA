@@ -1,3 +1,30 @@
+## 2026-10-09 — M3-T1 §139: asociaciones sucesoras en escritura API
+
+Create/PATCH generan especiales V11 y screening V12 cuando sus respectivos documentos
+se aportan. Orden existente conservado: RAT/base/LIA y documentos finales, research
+vinculado explicitamente, especiales con research final, screening con especiales y
+research finales/base explicita. Omision conserva el binding previo y null retira,
+sin renovacion indirecta ni promocion de historicos. Sin backfill ni migracion.
+
+Consumidores de screening en frontera V1 y screening V2 propagan ctx.legal_basis para
+comparar V12, incluyendo casos ordinarios sin research. Contexto de resolucion V1 no
+se amplia con investigacion: su cobertura sigue pendiente y el gate §135 permanece
+bloqueado. No se atribuye aceptacion de investigacion a revisiones antiguas.
+
+Dos casos HTTP parametrizados aportan/retiran research sin especiales/screening,
+verifican conservacion y obsolescencia, luego aporte conjunto recupera asociaciones
+vigentes usando valores finales. Reaportar solo especiales no renueva screening;
+actualizacion invalida conserva expediente previo. GET no muta y el bloqueo permanece.
+Pruebas HTTP existentes actualizan expectativas de versiones/hashes de documentos
+nuevos a V11/V12, sin alterar fixtures historicas de funciones puras.
+
+Suite focalizada 155 aprobadas en 17.34 s. Validacion ampliada aislada: 329 aprobadas en 219.37 s. Ademas 162 regresiones
+de frontera EIPD/screening V2 aprobadas en 0.75 s. Black/Ruff/diff check aprobados.
+Sin suite operacional ni cambio de migracion/registro/politica. Proximo: revisar cobertura versionada del contexto
+resolucion/revision EIPD para investigacion, sin ampliar contratos historicos ni
+habilitar confirmacion antes de aceptacion revisada. Ley fija, M3-T1 EN PROGRESO,
+confirmacion investigacion y activacion EIPD bloqueadas. Sin commit/push.
+
 ## 2026-10-09 — M3-T1 §138: dispatch y cobertura de investigacion
 
 Evaluadores especiales/screening aceptan research por argumento keyword opcional;

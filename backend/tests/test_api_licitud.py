@@ -19,7 +19,7 @@ from app.db.models import (
     TreatmentPurpose,
     UserRole,
 )
-from app.services.eipd import build_eipd_context_binding_hash_v11
+from app.services.eipd import build_eipd_context_binding_hash_v12
 from tests.eipd_selected_policy_fixtures import (
     explicit_review_policy as explicit_review_policy,
 )
@@ -382,7 +382,7 @@ async def test_api_screening_binding_revalidacion_y_null(
         detail_url = url + "/" + created.json()["id"]
         original = created.json()
         binding = original["eipd_screening"]["context_binding"]["hash"]
-        assert binding == build_eipd_context_binding_hash_v11(
+        assert binding == build_eipd_context_binding_hash_v12(
             original["rat_context_snapshot"],
             None,
             original["special_conditions"],
@@ -394,6 +394,7 @@ async def test_api_screening_binding_revalidacion_y_null(
             None,
             None,
             None,
+            legal_basis=original["legal_basis"],
         )
         assert (
             await client.get(detail_url, headers={"X-Organization-Id": str(org_b_id)})
@@ -415,7 +416,7 @@ async def test_api_screening_binding_revalidacion_y_null(
         assert changed["rat_context_hash"] == original["rat_context_hash"]
         assert changed["eipd_screening"]["context_binding"]["hash"] == binding
         assert (
-            build_eipd_context_binding_hash_v11(
+            build_eipd_context_binding_hash_v12(
                 changed["rat_context_snapshot"],
                 None,
                 changed["special_conditions"],
@@ -427,6 +428,7 @@ async def test_api_screening_binding_revalidacion_y_null(
                 None,
                 None,
                 None,
+                legal_basis=changed["legal_basis"],
             )
             != binding
         )
@@ -441,7 +443,7 @@ async def test_api_screening_binding_revalidacion_y_null(
         final = combined.json()
         assert final["eipd_screening"]["context_binding"][
             "hash"
-        ] == build_eipd_context_binding_hash_v11(
+        ] == build_eipd_context_binding_hash_v12(
             final["rat_context_snapshot"],
             final["lia_assessment"],
             final["special_conditions"],
@@ -453,6 +455,7 @@ async def test_api_screening_binding_revalidacion_y_null(
             None,
             None,
             None,
+            legal_basis=final["legal_basis"],
         )
         assert (await client.get(detail_url)).json()["eipd_screening"] == final[
             "eipd_screening"
@@ -663,11 +666,11 @@ async def test_api_condiciones_especiales_guardado_asociacion_y_borrado(
         assert created.status_code == 201, created.text
         original = created.json()
         detail = url + "/" + original["id"]
-        assert original["special_conditions"]["context_binding"]["schema_version"] == 10
-        assert original["eipd_screening"]["context_binding"]["schema_version"] == 11
+        assert original["special_conditions"]["context_binding"]["schema_version"] == 11
+        assert original["eipd_screening"]["context_binding"]["schema_version"] == 12
         assert original["eipd_screening"]["context_binding"][
             "hash"
-        ] == build_eipd_context_binding_hash_v11(
+        ] == build_eipd_context_binding_hash_v12(
             original["rat_context_snapshot"],
             original["lia_assessment"],
             original["special_conditions"],
@@ -679,6 +682,7 @@ async def test_api_condiciones_especiales_guardado_asociacion_y_borrado(
             None,
             None,
             None,
+            legal_basis=original["legal_basis"],
         )
         assert (await client.post(detail + "/confirm")).status_code == 400
         bad = await client.patch(
@@ -1147,7 +1151,7 @@ async def test_api_obligacion_legal_persistencia_y_compatibilidad(
 
     from app.services.eipd import (
         bind_eipd_screening_v3,
-        build_eipd_context_binding_hash_v11,
+        build_eipd_context_binding_hash_v12,
     )
     from app.services.special_conditions import bind_special_conditions_v2
 
@@ -1179,11 +1183,11 @@ async def test_api_obligacion_legal_persistencia_y_compatibilidad(
             original["legal_obligation_assessment"]["evidence"][0]["obtained_on"]
             == "2026-10-05"
         )
-        assert original["special_conditions"]["context_binding"]["schema_version"] == 10
-        assert original["eipd_screening"]["context_binding"]["schema_version"] == 11
+        assert original["special_conditions"]["context_binding"]["schema_version"] == 11
+        assert original["eipd_screening"]["context_binding"]["schema_version"] == 12
         assert original["eipd_screening"]["context_binding"][
             "hash"
-        ] == build_eipd_context_binding_hash_v11(
+        ] == build_eipd_context_binding_hash_v12(
             original["rat_context_snapshot"],
             None,
             original["special_conditions"],
@@ -1195,6 +1199,7 @@ async def test_api_obligacion_legal_persistencia_y_compatibilidad(
             None,
             None,
             None,
+            legal_basis=original["legal_basis"],
         )
         assert (await client.post(detail + "/confirm")).status_code == 400
         for invalid in (
@@ -1489,8 +1494,8 @@ async def test_api_derechos_persistencia_compatibilidad_y_sql_null(
             original["rights_defense_assessment"]["evidence"][0]["obtained_on"]
             == "2026-10-06"
         )
-        assert original["special_conditions"]["context_binding"]["schema_version"] == 10
-        assert original["eipd_screening"]["context_binding"]["schema_version"] == 11
+        assert original["special_conditions"]["context_binding"]["schema_version"] == 11
+        assert original["eipd_screening"]["context_binding"]["schema_version"] == 12
         assert (await client.post(detail + "/confirm")).status_code == 400
         for invalid in (
             {"route": "otra"},
@@ -1791,8 +1796,8 @@ async def test_api_economico_persistencia_compatibilidad_y_sql_null(
             original["economic_obligations_assessment"]["evidence"][0]["obtained_on"]
             == "2026-10-06"
         )
-        assert original["special_conditions"]["context_binding"]["schema_version"] == 10
-        assert original["eipd_screening"]["context_binding"]["schema_version"] == 11
+        assert original["special_conditions"]["context_binding"]["schema_version"] == 11
+        assert original["eipd_screening"]["context_binding"]["schema_version"] == 12
         assert (await client.post(detail + "/confirm")).status_code == 400
         for invalid in (
             {"route": "otra"},
@@ -2125,8 +2130,8 @@ async def test_api_geolocalizacion_persistencia_compatibilidad_y_sql_null(
             original["geolocation_assessment"]["evidence"][0]["obtained_on"]
             == "2026-10-06"
         )
-        assert original["special_conditions"]["context_binding"]["schema_version"] == 10
-        assert original["eipd_screening"]["context_binding"]["schema_version"] == 11
+        assert original["special_conditions"]["context_binding"]["schema_version"] == 11
+        assert original["eipd_screening"]["context_binding"]["schema_version"] == 12
         assert (await client.post(detail + "/confirm")).status_code == 409
         for invalid in (
             {"schema_version": 2},
@@ -2563,8 +2568,8 @@ async def test_api_consentimiento_sensible_persistencia_compatibilidad_y_sql_nul
             original["sensitive_consent_assessment"]["evidence"][0]["obtained_on"]
             == "2026-10-06"
         )
-        assert original["special_conditions"]["context_binding"]["schema_version"] == 10
-        assert original["eipd_screening"]["context_binding"]["schema_version"] == 11
+        assert original["special_conditions"]["context_binding"]["schema_version"] == 11
+        assert original["eipd_screening"]["context_binding"]["schema_version"] == 12
         assert (await client.post(detail + "/confirm")).status_code == 409
         for invalid in (
             {"schema_version": 2},
@@ -3207,8 +3212,8 @@ async def test_api_salud_persistencia_compatibilidad_y_sql_null(
         assert (
             original["health_assessment"]["evidence"][0]["obtained_on"] == "2026-10-06"
         )
-        assert original["special_conditions"]["context_binding"]["schema_version"] == 10
-        assert original["eipd_screening"]["context_binding"]["schema_version"] == 11
+        assert original["special_conditions"]["context_binding"]["schema_version"] == 11
+        assert original["eipd_screening"]["context_binding"]["schema_version"] == 12
         assert (await client.post(detail + "/confirm")).status_code == 409
         for invalid in (
             {"schema_version": 2},
@@ -4149,8 +4154,8 @@ async def test_api_biometria_persistencia_compatibilidad_y_sql_null(
             original["biometric_assessment"]["evidence"][0]["obtained_on"]
             == "2026-10-06"
         )
-        assert original["special_conditions"]["context_binding"]["schema_version"] == 10
-        assert original["eipd_screening"]["context_binding"]["schema_version"] == 11
+        assert original["special_conditions"]["context_binding"]["schema_version"] == 11
+        assert original["eipd_screening"]["context_binding"]["schema_version"] == 12
         assert (await client.post(detail + "/confirm")).status_code == 409
         for invalid in (
             {"schema_version": 2},
@@ -4872,8 +4877,8 @@ async def test_api_rights_exceptions_storage_and_protection(
         assert created.status_code == 201, created.text
         detail = url + "/" + created.json()["id"]
         original = (await client.get(detail)).json()
-        assert original["special_conditions"]["context_binding"]["schema_version"] == 10
-        assert original["eipd_screening"]["context_binding"]["schema_version"] == 11
+        assert original["special_conditions"]["context_binding"]["schema_version"] == 11
+        assert original["eipd_screening"]["context_binding"]["schema_version"] == 12
         initial_ready = (await client.get(detail + "/readiness")).json()
         assert initial_ready["special"]["context_current"]
         assert initial_ready["eipd"]["context_current"]

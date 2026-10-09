@@ -395,4 +395,10 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 
 - [x] Dispatch especiales V11/screening V12 y falta de cobertura independiente para versiones anteriores con investigacion.
 - [x] 8 casos nuevos; suite ampliada aislada 327 aprobadas, Black/Ruff aprobados.
-- [ ] Generacion API de asociaciones sucesoras y pruebas de orden PATCH. Confirmacion investigacion/EIPD bloqueadas.
+- [x] Generacion API de asociaciones sucesoras y pruebas de orden PATCH §139. Confirmacion investigacion/EIPD bloqueadas.
+
+### M3-T1 §139 — API de asociaciones sucesoras
+
+- [x] Create/PATCH especiales V11/screening V12 con valores finales y conservacion de asociaciones omitidas.
+- [x] Dos casos HTTP nuevos; 329 ampliadas y 162 regresiones frontera/screening V2 aprobadas.
+- [ ] Revisar cobertura versionada del contexto de resolucion/revision EIPD de investigacion; gates bloqueados.

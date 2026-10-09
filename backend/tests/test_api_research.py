@@ -299,3 +299,100 @@ async def test_declared_research_missing_document(client_a, rat_m3, org_a_id):
             i["code"] for i in ready["confirmation_blockers"]
         }
         assert (await client.get(url)).json()["research_assessment"] is None
+
+
+@pytest.mark.parametrize("remove", [False, True])
+async def test_successor_api_final_context_and_omission(
+    client_a, rat_m3, org_a_id, complete_lia_context, negative_controls, remove
+):
+    treatment, payload = rat_m3
+    lia, _ = complete_lia_context
+    document = {
+        "purpose_type": "cientifico",
+        "purpose_description": "Gestión de clientes",
+    }
+    payload.update(
+        research_assessment=document,
+        legal_basis="interes_legitimo_art13d",
+        lia_assessment=lia,
+    )
+    async with AsyncClient(
+        transport=ASGITransport(app=client_a),
+        base_url="http://test",
+        headers={"X-Organization-Id": str(org_a_id)},
+    ) as client:
+        created = await client.post(
+            f"/licitud/treatments/{treatment}/assessments", json=payload
+        )
+        assert created.status_code == 201, created.text
+        initial = created.json()
+        url = f"/licitud/treatments/{treatment}/assessments/{initial['id']}"
+        assert initial["special_conditions"]["context_binding"]["schema_version"] == 11
+        assert initial["eipd_screening"]["context_binding"]["schema_version"] == 12
+        ready = (await client.get(url + "/readiness")).json()
+        assert ready["special"]["context_current"] and ready["eipd"]["context_current"]
+        replacement = (
+            None if remove else {**document, "public_interest_analysis": "Revision"}
+        )
+        changed = await client.patch(
+            url,
+            json={
+                "research_assessment": replacement,
+                "legal_basis": "consentimiento_art12",
+                "lia_assessment": None,
+            },
+        )
+        assert changed.status_code == 200, changed.text
+        result = changed.json()
+        assert result["special_conditions"] == initial["special_conditions"]
+        assert result["eipd_screening"] == initial["eipd_screening"]
+        ready = (await client.get(url + "/readiness")).json()
+        assert (
+            not ready["special"]["context_current"]
+            and not ready["eipd"]["context_current"]
+        )
+        combined = await client.patch(
+            url,
+            json={
+                "research_assessment": document,
+                "legal_basis": "interes_legitimo_art13d",
+                "lia_assessment": lia,
+                **negative_controls,
+            },
+        )
+        assert combined.status_code == 200, combined.text
+        final = combined.json()
+        ready = (await client.get(url + "/readiness")).json()
+        assert ready["special"]["context_current"] and ready["eipd"]["context_current"]
+        assert "investigacion_confirmacion_bloqueada" in {
+            i["code"] for i in ready["confirmation_blockers"]
+        }
+        assert (await client.get(url)).json() == final
+        specials = dict(
+            negative_controls["special_conditions"], notes="Revision documental"
+        )
+        single = await client.patch(url, json={"special_conditions": specials})
+        assert single.status_code == 200
+        assert single.json()["eipd_screening"] == final["eipd_screening"]
+        assert not (await client.get(url + "/readiness")).json()["eipd"][
+            "context_current"
+        ]
+        before = (await client.get(url)).json()
+        invalid = await client.patch(
+            url,
+            json={
+                "research_assessment": None,
+                "special_conditions": {
+                    "conditions": [
+                        {
+                            "regime_id": "investigacion_art16quinquies",
+                            "authorization_route": "excepcion_legal",
+                            "data_category_codes": ["fuera"],
+                            "data_subject_codes": ["clientes"],
+                        }
+                    ]
+                },
+            },
+        )
+        assert invalid.status_code in (400, 422), invalid.text
+        assert (await client.get(url)).json() == before

@@ -66,7 +66,7 @@ from app.services.contract import evaluate_contract_assessment_v1
 from app.services.economic_obligations import (
     evaluate_economic_obligations_assessment_v1,
 )
-from app.services.eipd import bind_eipd_screening_v11, evaluate_eipd_screening_v1
+from app.services.eipd import bind_eipd_screening_v12, evaluate_eipd_screening_v1
 from app.services.eipd_confirmation import record_eipd_confirmation_evidence_v1
 from app.services.eipd_controls import (
     compose_eipd_controls_v1,
@@ -106,7 +106,7 @@ from app.services.sensitive_rights_exception import (
     evaluate_sensitive_rights_exception_v1,
 )
 from app.services.special_conditions import (
-    bind_special_conditions_v10,
+    bind_special_conditions_v11,
     evaluate_special_conditions_v1,
 )
 
@@ -1153,7 +1153,7 @@ async def update_legal_assessment_draft_v1(
     if special_was_provided:
         try:
             assessment.special_conditions = (
-                bind_special_conditions_v10(
+                bind_special_conditions_v11(
                     special_input,
                     bundle.snapshot,
                     assessment.legal_basis,
@@ -1169,6 +1169,7 @@ async def update_legal_assessment_draft_v1(
                     getattr(assessment, "biometric_assessment", None),
                     getattr(assessment, "sensitive_rights_exception_assessment", None),
                     getattr(assessment, "biometric_rights_exception_assessment", None),
+                    research=assessment.research_assessment,
                 ).model_dump(mode="json")
                 if special_input is not None
                 else None
@@ -1179,7 +1180,7 @@ async def update_legal_assessment_draft_v1(
             ) from None
     if screening_was_provided:
         assessment.eipd_screening = (
-            bind_eipd_screening_v11(
+            bind_eipd_screening_v12(
                 screening_input,
                 bundle.snapshot,
                 assessment.lia_assessment,
@@ -1194,6 +1195,8 @@ async def update_legal_assessment_draft_v1(
                 getattr(assessment, "biometric_assessment", None),
                 getattr(assessment, "sensitive_rights_exception_assessment", None),
                 getattr(assessment, "biometric_rights_exception_assessment", None),
+                research=assessment.research_assessment,
+                legal_basis=assessment.legal_basis,
             ).model_dump(mode="json")
             if screening_input is not None
             else None
@@ -1359,7 +1362,7 @@ async def create_legal_assessment_draft_v1(
     )
     if payload.special_conditions is not None:
         try:
-            assessment.special_conditions = bind_special_conditions_v10(
+            assessment.special_conditions = bind_special_conditions_v11(
                 payload.special_conditions,
                 bundle.snapshot,
                 assessment.legal_basis,
@@ -1375,13 +1378,14 @@ async def create_legal_assessment_draft_v1(
                 getattr(assessment, "biometric_assessment", None),
                 getattr(assessment, "sensitive_rights_exception_assessment", None),
                 getattr(assessment, "biometric_rights_exception_assessment", None),
+                research=assessment.research_assessment,
             ).model_dump(mode="json")
         except ValueError:
             raise _bad_request(
                 "Contrato o alcance de condiciones especiales inválido"
             ) from None
     if payload.eipd_screening is not None:
-        assessment.eipd_screening = bind_eipd_screening_v11(
+        assessment.eipd_screening = bind_eipd_screening_v12(
             payload.eipd_screening,
             bundle.snapshot,
             assessment.lia_assessment,
@@ -1396,6 +1400,8 @@ async def create_legal_assessment_draft_v1(
             getattr(assessment, "biometric_assessment", None),
             getattr(assessment, "sensitive_rights_exception_assessment", None),
             getattr(assessment, "biometric_rights_exception_assessment", None),
+            research=assessment.research_assessment,
+            legal_basis=assessment.legal_basis,
         ).model_dump(mode="json")
     if payload.eipd_resolution_assessment is not None:
         try:

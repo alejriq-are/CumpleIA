@@ -184,6 +184,7 @@ def evaluate_eipd_frontier_v1(context):
             ctx.biometric_assessment,
             ctx.sensitive_rights_exception_assessment,
             ctx.biometric_rights_exception_assessment,
+            legal_basis=ctx.legal_basis,
         )
         applies("eipd_screening")
         if ctx.eipd_screening is None:
