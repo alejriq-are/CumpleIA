@@ -1,3 +1,12 @@
+## 2026-10-09 — M3-T1: preflight administrativo readonly
+
+§109 script de diagnostico limitado READ ONLY/rollback, login/rol/perfiles y snapshot
+validados, sin sub/JWT/barrera personal ni escrituras. JSON ok/pending_selector/failed
+sin secretos; no acredita activacion/provision integral. Seis nuevas y 23 focalizadas
+aprobadas en 1.84 s; ultima completa 3654 §106. Sin ejecucion operativa real. Proximo
+ampliar diagnostico de permisos/evidencia de entorno. Fuentes/aceptacion pendientes;
+ley fija, EN PROGRESO, activacion bloqueada. Sin commit/push.
+
 ## 2026-10-09 — M3-T1: procedimiento de provision deshabilitada
 
 §108 runbook operativo preparado con expediente, login/pool/staff separados,

@@ -187,3 +187,16 @@ siguen siendo requisitos separados (§107); este procedimiento no los completa.
 §108 prepara este documento y valida el esquema del JSON de ejemplo. No crea roles,
 credenciales, perfiles, publicaciones o selecciones reales. Sin migracion/despliegue,
 sin nueva suite completa. Ultima suite 3654 (§106); M3-T1 EN PROGRESO integral.
+
+## 7. Preflight disponible (§109)
+
+Desde backend ejecutar `python -m scripts.eipd_admin_preflight` con configuracion
+segura ya provisionada. Script no acepta URL/JWT por argumentos ni imprime secretos.
+Exit 0/JSON ok: canal y selector deshabilitado coherentes; exit 2/pending_selector:
+canal/auditoria validos sin selector, sin bootstrap; exit 1/failed: revisar por canal
+operativo seguro, no volcar secretos a logs para diagnosticar. Transaccion READ ONLY,
+rollback siempre. Salida no acredita autenticacion personal, aceptacion o activacion.
+No verifica exhaustivamente grupo/grants de dominio/red/entorno; las comprobaciones
+del resto del procedimiento siguen pendientes. No sustituir smoke JWT/HTTP por
+preflight ni usar su ok como permiso de habilitar. §109 probado con fixtures locales,
+no ejecutado contra un entorno operativo real.

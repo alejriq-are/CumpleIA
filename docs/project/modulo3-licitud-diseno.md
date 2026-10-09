@@ -8702,3 +8702,29 @@ Provision real, instrumento complementario y decision de aceptacion permanecen
 PENDIENTES. Proximo: preparar preflight verificable de solo lectura del canal,
 sin reemplazar JWT/autoridad ni emitir publicacion/seleccion. Activacion bloqueada;
 ley reformada base fija; M3-T1 EN PROGRESO integral. Sin commit/push.
+
+## §109 — Preflight administrativo de solo lectura (2026-10-09)
+
+Se agrega backend/scripts/eipd_admin_preflight.py, ejecutable desde backend con
+python -m scripts.eipd_admin_preflight. Usa solo EIPD_ADMIN_DATABASE_URL/pool §104;
+transaccion READ ONLY, chequeo de login/rol, identidad residual vacia, READ COMMITTED,
+EXECUTE de barrera y ausencia de UPDATE de perfiles/is_superadmin. Lee y valida
+snapshot completo; rechaza politicas habilitadas incluso no seleccionadas.
+Siempre rollback. No setea sub ni llama a barrera FOR SHARE ni publica/selecciona.
+
+Salida JSON limitada: ok (exit 0) si canal y selector deshabilitado coherentes;
+pending_selector (exit 2) si canal/auditoria validos sin selector; failed (exit 1)
+ante fallo, sin excepcion/URL/secretos. Informe indica expresamente autenticacion
+personal no verificada y activacion no autorizada. No acredita provision integral,
+JWT HTTP, grupo/permisos completos ni aceptacion real; completar runbook §108.
+
+Seis pruebas nuevas: ausencia de selector sin bootstrap, seleccion deshabilitada
+sin cambios y pool limpio, owner/tenant rechazados, escritura accidental bloqueada
+por PostgreSQL READ ONLY (25006), error CLI sin divulgar texto sensible. 23 focalizadas
+con canal/pool aprobadas en 1.84 s; Black/Ruff/diff correctos. Sin nueva suite completa;
+ultima 3654 §106. No migracion/configuracion/roles/credenciales reales modificados.
+No preflight ejecutado contra entorno operativo; pruebas usan login/roles sinteticos.
+Proximo: ampliar diagnostico de permisos de grupo/dominio y evidencia de entorno
+sin secretos; ejecutar provision solo sobre destino/identidad acreditados. Fuentes/
+aceptacion real pendientes, activacion bloqueada, ley fija, M3-T1 EN PROGRESO.
+Sin commit/push.

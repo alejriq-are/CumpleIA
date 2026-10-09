@@ -297,4 +297,5 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] M3-T1 §106: doce HTTP concurrentes (revocacion/rollback/cancelacion/seleccion/unicidad); 97 focalizadas aprobadas. Suite completa: 3654 passed en 369.30 s; Black/Ruff/Alembic check/diff correctos.
 - [x] M3-T1 §107: revalidacion documental de fuentes base/busqueda complementaria y matriz de trazabilidad a commits; sin cambio de gates ni nueva suite.
 - [x] M3-T1 §108: procedimiento de provision deshabilitada preparado, JSON de ejemplo validado; sin provision real ni cambios de gates.
-- [ ] M3-T1: preflight de solo lectura y evidencia de provision real; completar instrumentos complementarios y decision de aceptacion real antes de habilitar.
+- [x] M3-T1 §109: preflight readonly limitado y seis pruebas nuevas; 23 focalizadas aprobadas, sin escrituras/provision operativa.
+- [ ] M3-T1: ampliar diagnostico de permisos/evidencia y acreditar provision real; completar instrumentos complementarios y decision de aceptacion real antes de habilitar.
