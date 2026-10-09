@@ -450,3 +450,9 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] Readiness V3 con RAT actual/research persistido y politica real o ausencia explicita.
 - [x] Contratos de salida cerrados, lectura sin escritura y bloqueo conservador.
 - [ ] Escritor de resolucion versionado, metadatos auditables de eventos y aceptacion.
+
+### M3-T1 §148 — Escritor puro versionado
+
+- [x] Seleccion V1/V2 por contexto final y antecedente persistido, sin downgrade V2.
+- [x] Research declarado sin documento conserva cobertura V2; ordinario mantiene binding V1.
+- [ ] Integrar POST/PATCH y consumidores, metadatos auditables y aceptacion.

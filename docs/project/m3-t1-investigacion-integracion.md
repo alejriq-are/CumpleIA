@@ -446,3 +446,28 @@ regresion pura de expediente research incompleto. Black/Ruff aprobados.
 Proximo: integracion versionada del escritor de resolucion y metadatos auditables
 sin activar EIPD ni confirmar investigacion; aceptacion revisada pendiente.
 Ley fija; M3-T1 EN PROGRESO. Activacion EIPD bloqueada. Sin commit/push.
+
+## 2026-10-09 — M3-T1 §148: escritor puro de resolucion versionada
+
+Nuevo eipd_resolution_writer.py selecciona binding con material de servidor:
+ContextV2 cerrado y resolucion previa persistida opcional. Research presente o
+investigacion declarada exige V2 aun sin documento research; una resolucion V2
+previa conserva V2 despues de retirar documento/declaracion. Ordinario sin research
+ni antecedente V2 mantiene binding V1 exacto. Reaporte explicito genera asociacion
+sobre contexto final; no muta ni repara documentos anteriores. Version desconocida
+y binding aportado dentro del documento de cliente se rechazan.
+
+Funcion pura aun no conectada a POST/PATCH. Omision conserva y null retira deben
+seguir resueltos por el caller, bajo locks existentes. Revision/confirmacion y lector
+historico esperan V1: integrar esos consumidores antes de habilitar persistencia V2,
+sin convertir eventos antiguos ni permitir decisiones positivas. Metadatos auditables
+requieren documentar version de binding y cobertura del contexto de cada evento.
+
+Cinco pruebas nuevas: research vigente sin mutacion/determinista, research declarado
+sin documento, retirada sin downgrade, ordinario identico V1, contratos rechazados.
+375 pruebas focalizadas aisladas aprobadas en 28.97 s; Black/Ruff aprobados.
+Suite HTTP ampliada no repetida: helper puro sin conexion API. Ultima suite
+completa mas readiness V2: 570 aprobadas en §147.
+Proximo: conectar escritor/lectores mediante dispatch y bloqueo explicito de revision
+V2 hasta incorporar metadatos auditables. No migracion ni cambio operacional.
+Ley fija; M3-T1 EN PROGRESO. Activacion EIPD bloqueada. Sin commit/push.

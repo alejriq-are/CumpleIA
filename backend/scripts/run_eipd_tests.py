@@ -20,6 +20,7 @@ TARGETS = (
     "tests/test_eipd_frontier_v2.py",
     "tests/test_eipd_screening_v3.py",
     "tests/test_eipd_controls_v3.py",
+    "tests/test_eipd_resolution_writer.py",
     "tests/test_api_eipd_controls_v3_readiness.py",
     "tests/test_services_eipd_resolution.py",
     "tests/test_research_transversal_binding.py",
