@@ -355,3 +355,8 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 
 - [x] Drenar canal real, comprobar NOLOGIN con conexion nueva, restaurar LOGIN y verificar snapshot completo intacto/revision 1.
 - [x] Acceso personal tras reinicio de recuperacion confirmado por captura §127. Retiro definitivo no ejecutado.
+
+## M3-T1 §128 — investigacion documental
+
+- [x] Delimitar primer incremento de investigacion con datos no sensibles/adultos y LIA, completitud/aplicabilidad y fuente primaria.
+- [ ] Implementar schema/evaluador puro segun docs/project/m3-t1-investigacion-diseno.md; integracion y confirmacion siguen pendientes.

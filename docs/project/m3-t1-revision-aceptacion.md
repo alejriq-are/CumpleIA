@@ -3835,3 +3835,17 @@ Ensayo reversible real y acceso posterior confirmados. Canal activo restaurado;
 no retiro definitivo, nuevas credenciales ni cambios de politica. No nueva suite.
 Fuentes/aceptacion y alcance integral pendientes; ley fija, M3-T1 EN PROGRESO,
 activacion EIPD bloqueada. Sin commit/push.
+
+## 2026-10-09 — M3-T1 §128: siguiente brecha funcional delimitada
+
+Tras cerrar ciclo local del canal, se revisa codigo actual: salud/biometria por
+consentimiento ya tienen evaluadores; investigacion_art16quinquies aun deriva a
+validador_no_implementado. Se elige preparacion documental inicial para datos no
+sensibles/adultos con LIA vigente, decision de producto sin atribuirla como limite
+juridico universal. Fuente primaria BCN Ley 21.719/art16quinquies consultada.
+
+Diseno, completitud/aplicabilidad, integracion por pasos y criterios de aceptacion
+en docs/project/m3-t1-investigacion-diseno.md. Proximo: schema y evaluador puro,
+sin persistir ni levantar bloqueos hasta integrar/aceptar. Sin cambios de codigo,
+politicas ni secretos; sin nueva suite. Ley fija, M3-T1 EN PROGRESO y activacion
+EIPD bloqueada. Sin commit/push.
