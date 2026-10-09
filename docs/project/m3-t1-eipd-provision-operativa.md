@@ -315,3 +315,20 @@ procesos, verificar rechazo de clave anterior con conexion nueva y ejecutar pref
 mas comprobacion personal. No asumir revocacion instantanea de una solicitud ya
 autorizada. Mantener publicaciones/eventos y verificar snapshot antes/despues.
 Ese cambio real no se ejecuto en §124; el canal actual sigue intacto en revision 1.
+
+## 2026-10-09 — M3-T1 §125: rotacion real local preparada
+
+Plan concreto en docs/project/m3-t1-eipd-plan-rotacion-local.md. Lectura previa:
+archivo externo 0600, destino development/loopback y login dedicado esperado;
+preflight ok, revision 1, head b17d95c0286f. Dos conexiones idle durante diagnostico
+(incluida la propia); pool del diagnostico dispuesto al terminar. Requerir nueva
+comprobacion de drenaje antes de ejecutar. No se cambia clave/archivo/rol/proceso.
+
+Secuencia preparada: snapshot previo, detener solo validacion 8001 y drenar,
+reemplazo privado/recuperacion 0600, cambio de clave y sustitucion atomica con
+recuperacion ante fallo, conexiones nuevas antigua rechazada/nueva aceptada,
+comparacion exacta de auditoria, reinicio y comprobacion personal. Backend 8000 y
+perfil permanecen fuera del cambio. Rotacion REAL pendiente, no acreditada por
+ensayo aislado §124 ni por este plan. Sin nueva suite; ultima focalizada 63 §124.
+Fuentes/aceptacion y alcance integral pendientes; ley fija, M3-T1 EN PROGRESO y
+activacion bloqueada. Sin commit/push.

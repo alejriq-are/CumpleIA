@@ -344,3 +344,8 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] Ejecutar suite focalizada mediante guardas de destino/head/roles/estado, con 60 aprobadas.
 - [x] Ejecutar ensayo aislado de rotacion/retiro y recuperacion §124: 63 pruebas aprobadas; snapshot de pruebas sin cambios.
 - [ ] Validar ciclo de vida del canal provisionado con historial real y renovacion segura de procesos; no ejecutado en §124.
+
+## M3-T1 §125 — rotacion real preparada
+
+- [x] Verificar canal/destino/head y preparar drenaje, reemplazo privado, recuperacion y comprobacion posterior.
+- [ ] Ejecutar rotacion real local segun docs/project/m3-t1-eipd-plan-rotacion-local.md y confirmar acceso personal; pendiente.
