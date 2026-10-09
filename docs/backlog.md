@@ -413,4 +413,10 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 
 - [x] Contexto cerrado con investigacion explicitamente nullable, binding/Stored V2 separados y hashes nuevos sin reparacion.
 - [x] 323 focalizadas aisladas aprobadas (9 nuevas y regresiones V1); Black/Ruff aprobados.
-- [ ] Dispatch documental/readiness/revision de investigacion; frontera/composicion/escritor posteriores. Gates bloqueados.
+- [x] Dispatch documental/readiness/revision puro de investigacion §142; frontera/composicion/escritor pendientes. Gates bloqueados.
+
+### M3-T1 §142 — Resolucion/revision evaluadas por version
+
+- [x] Dispatch puro V1/V2 y cobertura research explicita; evento historico visible sin autoridad sintetica.
+- [x] 327 focalizadas y 272 regresiones de frontera/screening/revision aprobadas; Black/Ruff aprobados.
+- [ ] Frontera/composicion research y posterior lectura/escritura API V2; gates bloqueados.

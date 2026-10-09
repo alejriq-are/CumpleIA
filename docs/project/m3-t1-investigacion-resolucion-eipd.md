@@ -113,3 +113,32 @@ cobertura research; posterior frontera/composicion, metadatos y escritor API V2.
 No migracion/backfill, eventos/revisiones nuevas ni cambios de politica/credenciales.
 Ley fija, M3-T1 EN PROGRESO; confirmacion investigacion y activacion EIPD bloqueadas.
 Sin commit/push.
+
+## 2026-10-09 — M3-T1 §142: evaluacion y vigencia por version
+
+Nuevo eipd_resolution_readiness_v2.py agrega funciones puras de dispatch documental
+y vigencia de revision. Valida Stored/contexto segun binding_version 1/2; version
+no admitida rechazada. V2 compara hashes sucesores; V1 conserva comparador/hashes.
+Reglas documentales comunes extraidas a helper parametrizado por modelos/comparador;
+wrapper V1 conserva comportamiento y regresiones. No cambios en hashes V1.
+
+Research en contexto V2 con resolucion V1 agrega asociacion_investigacion_no_cubierta
+y context_current false. Proyeccion de campos V1 solo aplica reglas historicas con
+falta de cobertura explicita, sin conversion/reasociacion del documento. V2 conserva
+comparacion completa; readiness agrega completitud y vigencia research independientes,
+sin reparar metadatos. can_confirm permanece false incluso con hashes coincidentes.
+Revision anterior sigue visible; V1 con research resulta obsoleta aunque sus hashes
+historicos coincidan. Estado vigente V2 describe coincidencia de hashes, no aprobacion
+ni completitud juridica. Cambios research invalidan vigencia sin modificar evento.
+
+Cuatro casos nuevos verifican dispatch V1/V2 y evento conservado/obsoleto, ausencia de
+contexto, version desconocida y compatibilidad V1 sin research. Suite focalizada
+327 aprobadas en 30.33 s, con 159 regresiones documentales V1. Ademas 272 regresiones
+frontera/screening/prerequisitos de revision V2 aprobadas en 2.92 s. Black/Ruff/diff
+check aprobados. No repetida suite HTTP ampliada: funciones nuevas no estan conectadas
+a API, tipos de salida ni escritores; wrapper historico mantiene resultados verificados.
+
+Proximo: definir/integrar cobertura research en frontera y composicion versionadas,
+y luego lectura/escritura API V2 y metadatos de eventos. No migracion/backfill,
+revision/evento/politica nueva ni cambios de credenciales. Ley fija, M3-T1 EN PROGRESO;
+confirmacion investigacion y activacion EIPD bloqueadas. Sin commit/push.

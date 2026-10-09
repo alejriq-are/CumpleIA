@@ -117,3 +117,109 @@ def test_historical_hashes_and_null_distinction(complete_resolution):
     assert build_eipd_resolution_document_hash_v2(
         bind_eipd_resolution_v2(document, new_context)
     ) != build_eipd_resolution_document_hash_v1(v1)
+
+
+@pytest.mark.parametrize("version", [1, 2])
+def test_versioned_readiness_and_review_preserves_history(materials, version):
+    from datetime import UTC, date, datetime
+    from uuid import uuid4
+
+    from app.services.eipd_resolution_readiness_v2 import (
+        derive_eipd_resolution_review_state_versioned,
+        evaluate_eipd_resolution_document_versioned,
+    )
+
+    document, ctx = materials
+    old_context = {
+        k: v for k, v in ctx.items() if k in EipdResolutionContextV1.model_fields
+    }
+    bound = (
+        bind_eipd_resolution_v2(document, ctx)
+        if version == 2
+        else bind_eipd_resolution_v1(document, old_context)
+    )
+    identity = (
+        build_eipd_resolution_document_hash_v2(bound)
+        if version == 2
+        else build_eipd_resolution_document_hash_v1(bound)
+    )
+    review = dict(
+        id=uuid4(),
+        organization_id=uuid4(),
+        assessment_id=uuid4(),
+        decision="continuar",
+        rationale="Revision",
+        review_reference="Evidencia",
+        document_hash=identity,
+        context_hash=bound.context_binding.context_hash,
+        created_by=uuid4(),
+        created_at=datetime(2026, 10, 9, tzinfo=UTC),
+    )
+    before = deepcopy((document, ctx, bound, review))
+    ready = evaluate_eipd_resolution_document_versioned(
+        bound, ctx, evaluated_on=date(2026, 10, 9)
+    )
+    assert ready.can_confirm is False
+    codes = {i.code for i in ready.issues}
+    assert ("asociacion_investigacion_no_cubierta" in codes) is (version == 1)
+    assert ready.context_current is (version == 2)
+    state = derive_eipd_resolution_review_state_versioned(bound, ctx, review)
+    assert state.review_status == ("vigente" if version == 2 else "obsoleta")
+    assert state.latest_review.document_hash == identity
+    assert (document, ctx, bound, review) == before
+    ctx["research_assessment"]["assessment"]["public_interest_analysis"] += " cambio"
+    assert (
+        derive_eipd_resolution_review_state_versioned(bound, ctx, review).review_status
+        == "obsoleta"
+    )
+    assert (
+        evaluate_eipd_resolution_document_versioned(
+            bound, ctx, evaluated_on=date(2026, 10, 9)
+        ).can_confirm
+        is False
+    )
+
+
+def test_versioned_v1_without_research_compatible(complete_resolution):
+    from datetime import date
+
+    from app.services.eipd_resolution import evaluate_eipd_resolution_document_v1
+    from app.services.eipd_resolution_readiness_v2 import (
+        evaluate_eipd_resolution_document_versioned,
+    )
+
+    doc, ctx = complete_resolution
+    bound = bind_eipd_resolution_v1(doc, ctx)
+    old = evaluate_eipd_resolution_document_v1(
+        bound, ctx, evaluated_on=date(2026, 10, 9)
+    )
+    new = evaluate_eipd_resolution_document_versioned(
+        bound, ctx, evaluated_on=date(2026, 10, 9)
+    )
+    assert (new.result, new.context_current, new.issues) == (
+        old.result,
+        old.context_current,
+        tuple(sorted(old.issues, key=lambda i: (i.field, i.code, i.category))),
+    )
+    assert new.applicability == old.applicability
+
+
+def test_versioned_unknown_and_missing_context(materials):
+    from datetime import date
+
+    from app.services.eipd_resolution_readiness_v2 import (
+        evaluate_eipd_resolution_document_versioned,
+    )
+
+    doc, ctx = materials
+    bound = bind_eipd_resolution_v2(doc, ctx)
+    ready = evaluate_eipd_resolution_document_versioned(
+        bound, None, evaluated_on=date(2026, 10, 9)
+    )
+    assert not ready.context_current and not ready.can_confirm
+    raw = bound.model_dump(mode="json")
+    raw["context_binding"]["binding_version"] = 99
+    with pytest.raises(ValueError):
+        evaluate_eipd_resolution_document_versioned(
+            raw, ctx, evaluated_on=date(2026, 10, 9)
+        )

@@ -154,6 +154,26 @@ class EipdResolutionDocumentReadinessV1:
 
 
 def evaluate_eipd_resolution_document_v1(assessment, context, *, evaluated_on: date):
+    """Evaluacion historica V1; conserva reglas y comparador originales."""
+    return _evaluate_eipd_resolution_document(
+        assessment,
+        context,
+        evaluated_on=evaluated_on,
+        document_model=EipdResolutionAssessmentStoredV1,
+        context_model=EipdResolutionContextV1,
+        context_is_current=eipd_resolution_context_is_current_v1,
+    )
+
+
+def _evaluate_eipd_resolution_document(
+    assessment,
+    context,
+    *,
+    evaluated_on: date,
+    document_model,
+    context_model,
+    context_is_current,
+):
     """Matriz documental §60: pura, sin DB/clock/LLM ni gate de frontera.
 
     La fecha de evaluacion es explicita para resultados reproducibles. El servicio
@@ -164,16 +184,12 @@ def evaluate_eipd_resolution_document_v1(assessment, context, *, evaluated_on: d
     if type(evaluated_on) is not date:
         raise ValueError("evaluated_on exige date explicita")
     document = (
-        EipdResolutionAssessmentStoredV1.model_validate(
-            _validated_json(EipdResolutionAssessmentStoredV1, assessment)
-        )
+        document_model.model_validate(_validated_json(document_model, assessment))
         if assessment is not None
         else EipdResolutionAssessmentStoredV1()
     )
     ctx = (
-        EipdResolutionContextV1.model_validate(
-            _validated_json(EipdResolutionContextV1, context)
-        )
+        context_model.model_validate(_validated_json(context_model, context))
         if context is not None
         else None
     )
@@ -492,7 +508,7 @@ def evaluate_eipd_resolution_document_v1(assessment, context, *, evaluated_on: d
     if document.context_binding is None:
         issue("context_binding", "asociacion_ausente")
     elif ctx is not None:
-        current = eipd_resolution_context_is_current_v1(document, ctx)
+        current = context_is_current(document, ctx)
         if not current:
             issue(
                 "context_binding.context_hash",
@@ -504,7 +520,7 @@ def evaluate_eipd_resolution_document_v1(assessment, context, *, evaluated_on: d
 
     roots = (
         ["context", "rat_context_snapshot", "eipd_resolution_assessment"]
-        + list(EipdResolutionAssessmentStoredV1.model_fields)
+        + list(document_model.model_fields)
         + [
             "sensitive_rights_exception_assessment",
             "biometric_rights_exception_assessment",
