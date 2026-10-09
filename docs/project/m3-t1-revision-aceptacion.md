@@ -4223,3 +4223,22 @@ Proximo: screening V3 sobre frontera/contexto V2 y composicion V3 conservadora,
 antes de integrar lectura/escritura API/metadatos de eventos y aceptacion revisada.
 Ley fija, M3-T1 EN PROGRESO; confirmacion investigacion y activacion EIPD bloqueadas.
 Sin commit/push.
+
+## 2026-10-09 — M3-T1 §145: screening V3 conservador
+
+Nuevo eipd_screening_v3.py consume frontera V2, que revalida ContextV2 cerrado.
+Preserva sin reclasificar resultado, vigencia, issues y observaciones del screening
+original. evaluation_version=3 es independiente de schema_version=12 del binding.
+can_continue exige frontera preparada y ausencia de supuestos declarados;
+can_confirm permanece false. La frontera actual nunca declara preparacion, por lo
+que investigacion sigue bloqueada aunque el expediente este completo y vigente.
+Contexto ausente conserva screening pendiente; version desconocida, campos extra
+y research omitido se rechazan. Screening V2 historico no acepta ContextV2.
+
+Once casos nuevos cubren conservacion/determinismo/sin mutacion, obsolescencia,
+retiro, sensible/menores, contexto ausente y contrato cerrado. Modulo puro sin
+conexion API, eventos, politica ni migracion. 348 pruebas focalizadas aisladas aprobadas en 27.49 s; Ruff y Black aprobados.
+La suite HTTP ampliada no se repitio porque este modulo aun no se conecta a API.
+Proximo: composicion V3 con diagnosticos de investigacion y bloqueo conservador;
+luego integracion API/metadatos de eventos y aceptacion revisada.
+Ley fija; M3-T1 EN PROGRESO. Activacion EIPD bloqueada. Sin commit/push.

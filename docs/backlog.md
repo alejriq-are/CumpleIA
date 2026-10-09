@@ -432,3 +432,9 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] Evaluacion documental/asociacion y motivos especiales/screening completos; discordancias y falta de cobertura historica detectadas.
 - [x] 10 casos nuevos y 337 focalizados aislados aprobados; Black/Ruff aprobados.
 - [ ] Screening/composicion V3 y luego API/metadatos de eventos/aceptacion. Gates bloqueados.
+
+### M3-T1 §145 — Screening V3 conservador
+
+- [x] Screening sobre ContextV2/frontera V2 conserva todos los motivos y bloquea continuacion/confirmacion.
+- [x] Contratos historicos separados; once casos nuevos.
+- [ ] Composicion V3 y posterior API/metadatos de eventos/aceptacion.
