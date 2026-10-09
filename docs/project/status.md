@@ -1,3 +1,54 @@
+## 2026-10-09 — M3-T1: UID contrastado y HTTP anonimo probado
+
+§116 UID aportado coincide con perfil local unico/superadmin=true. Backend local
+health/OpenAPI 200, ambas rutas EIPD registradas y 401 sin token. No acredita JWT
+personal ni carga de secreto/SHA del proceso. Proximo configurar proceso y validar
+solicitud autenticada sin compartir tokens por chat; consulta Supabase previa
+ConnectError aun no resuelta. Sin nuevas escrituras/politicas/suite. EN PROGRESO,
+activacion bloqueada. Sin commit/push.
+
+## 2026-10-09 — M3-T1: autoridad global local autorizada
+
+§115 usuario autoriza; perfil local unico/vinculado, is_superadmin=true confirmado
+tras commit de mantenimiento. Sin usuario nuevo ni cambios Supabase/politicas.
+Identidad externa/JWT/HTTP siguen pendientes; User UID solicitado. Canal tecnico
+§113 permanece, sin selector. Sin nueva suite, EN PROGRESO, activacion bloqueada.
+Sin commit/push.
+
+## 2026-10-09 — M3-T1: perfil staff local sin autoridad global
+
+§114 correo staff indicado coincide con un perfil local vinculado, superadmin=false.
+Consulta externa readonly Supabase falla ConnectError; no verifica identidad externa.
+Perfil sin cambios. Pendientes ID Supabase/contraste y autorizacion concreta de
+superadmin global local; luego JWT/HTTP configurado. Canal tecnico §113 listo sin
+selector. Sin nueva suite; EN PROGRESO, activacion bloqueada. Sin commit/push.
+
+## 2026-10-09 — M3-T1: canal tecnico local provisionado
+
+§113 autorizacion explicita; eipd_backend_local creado limitado y credencial nueva
+externa privada 0600. Preflight local: canal/permisos/auditoria validos, pending_selector
+codigo 2, sin selector/bootstrap. Solo diagnostico carga secreto; .env/backend HTTP
+no cambiados. Identidad staff pendiente; proximo vincular staff y validar HTTP
+configurado con politica deshabilitada. Sin nueva suite. Fuentes/aceptacion pendientes,
+ley fija, EN PROGRESO; activacion bloqueada. Sin commit/push.
+
+## 2026-10-09 — M3-T1: destino local elegido, provision pendiente
+
+§112 usuario selecciona desarrollo local; canal/login dedicados ausentes, head
+b17d95c0286f. Identidad staff solicitada, pendiente. Revision automatica bloquea
+creacion persistente de login/membresia/credencial; se solicita aprobacion concreta.
+No ejecucion ni secretos/roles/archivos nuevos. Expediente actualizado; ultima suite
+3654 §106/focalizadas 31 §110. EN PROGRESO, activacion bloqueada. Sin commit/push.
+
+## 2026-10-09 — M3-T1: expediente inicial de entorno
+
+§111 configuracion observada development/hosts loopback; canal EIPD no configurado.
+CLI preflight ejecutado: exit 1/failed, sin conexion dedicada; head local b17d95c0286f
+readonly. Expediente con resultados y campos pendientes; destino solicitado al usuario.
+Sin provision/secreto/actor/politica real, sin nueva suite. Proximo depende de destino
+acreditado para provision deshabilitada y humo JWT/HTTP. Fuentes/aceptacion pendientes;
+ley fija, EN PROGRESO integral, activacion bloqueada. Sin commit/push.
+
 ## 2026-10-09 — M3-T1: permisos efectivos de preflight
 
 §110 grupo/login/RLS/privilegios de tres tablas y acceso fuera de alcance public,

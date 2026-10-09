@@ -299,4 +299,9 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] M3-T1 §108: procedimiento de provision deshabilitada preparado, JSON de ejemplo validado; sin provision real ni cambios de gates.
 - [x] M3-T1 §109: preflight readonly limitado y seis pruebas nuevas; 23 focalizadas aprobadas, sin escrituras/provision operativa.
 - [x] M3-T1 §110: permisos efectivos de grupo/login/public/RLS en preflight e informe v1; ocho nuevas, 31 focalizadas aprobadas.
-- [ ] M3-T1: expediente y validacion de provision real sobre destino/staff/responsable acreditados; instrumentos complementarios y decision de aceptacion real antes de habilitar.
+- [x] M3-T1 §111: expediente inicial con configuracion ausente/preflight failed esperado y head local comprobados; sin provision real.
+- [x] M3-T1 §112: usuario selecciona local; inspeccion readonly y accion de provision concreta preparada, sin ejecutar tras rechazo automatico.
+- [x] M3-T1 §113: provision tecnica local explicitamente autorizada, login limitado/credencial privada; preflight pending_selector (2), sin bootstrap.
+- [x] M3-T1 §115: superadmin global local explicitamente autorizado y confirmado en perfil existente; sin cambios Supabase/politicas.
+- [x] M3-T1 §116: UID aportado contrastado con perfil local autorizado; backend/rutas registrados, rechazo anonimo 401 probado.
+- [ ] M3-T1: proceso con secreto y JWT personal real; publicacion/seleccion deshabilitada y validacion/retirada operativas; fuentes/aceptacion pendientes.

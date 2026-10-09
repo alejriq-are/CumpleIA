@@ -1,6 +1,6 @@
 # M3-T1 — Revisión de aceptación
 
-Fecha de actualizacion: 2026-10-09 (§110). Estado: EN PROGRESO. Revisión documental y de código;
+Fecha de actualizacion: 2026-10-09 (§116). Estado: EN PROGRESO. Revisión documental y de código;
 no modifica reglas ni amplía el alcance. Última suite completa registrada:
 3654 passed (§106), posterior a concurrencia administrativa HTTP.
 Checkpoints inferiores son históricos; el total no acredita cierre integral.
@@ -3381,3 +3381,94 @@ registrar resultados del preflight/HTTP en entorno acordado. No ampliar privileg
 para hacer pasar el informe; corregir provision conforme contrato. Fuentes oficiales
 complementarias/aceptacion real aun pendientes, activacion bloqueada. Ley reformada
 base fija; M3-T1 EN PROGRESO integral. Sin commit/push.
+
+## §111 — Expediente inicial y comprobacion de configuracion (2026-10-09)
+
+Base limpia d57b2206b2ae432ae93e6a278e24483d4db1ece9. Se agrega
+m3-t1-eipd-expediente-operativo.md con evidencia ejecutada: environment development,
+hosts configurados loopback (sin inferir ubicacion fisica), EIPD_ADMIN_DATABASE_URL
+ausente, preflight CLI exit 1/failed sin canal inicializado y head local b17d95c0286f
+via mantenimiento readonly. No URLs/JWT/passwords impresos ni datos tenant consultados.
+No provision de roles/perfiles/secreto/politica; sin fallback owner ni .env modificado.
+
+Destino operativo solicitado al usuario, pendiente. Continuar provision depende
+de destino acreditado y del expediente; no crear actor staff ni credenciales ficticias
+para simular resultado operativo. No nueva suite; ultima completa 3654 §106,
+focalizadas 31 §110. Diff correcto. Fuentes/aceptacion/provision pendientes;
+activacion bloqueada, ley fija, M3-T1 EN PROGRESO. Sin commit/push.
+
+## §112 — Seleccion de desarrollo local y accion de provision pendiente
+
+Fecha 2026-10-09. Usuario elige local. Comprobaciones readonly: head b17d95c0286f,
+canal EIPD ausente, eipd_backend_local inexistente; un superadmin contado sin identificar
+ni modificar. Identidad staff solicitada sin secretos, pendiente. Accion concreta
+preparada para login limitado y archivo privado externo al repo; revision automatica
+la rechaza antes de ejecucion por falta de autorizacion explicita de persistencia.
+No roles/secreto/archivo nuevos ni configuracion/politica modificados. Se pide
+aprobacion de provision exacta, sin reintentar por alternativa. Solo documentacion;
+ultima suite completa 3654 §106, focalizadas 31 §110. EN PROGRESO; activacion bloqueada.
+
+## §113 — Canal tecnico local provisionado y preflight ejecutado
+
+Fecha 2026-10-09. Autorizacion explicita del usuario tras §112. Login
+ eipd_backend_local limitado, miembro solo eipd_policy_admin; credencial nueva
+fuera del repo en ~/.config/cumpleia-local-eipd/admin.env 0600, sin valor impreso.
+.env habitual/perfiles/politicas intactos. Carga solo en proceso de diagnostico.
+Preflight local pending_selector, codigo logico 2 confirmado: canal/permisos/auditoria
+coherentes, selector ausente, sin bootstrap. No acredita backend HTTP/JWT personal
+ni provision integral. Staff solicitado pendiente; proximo vincular identidad real
+y validar proceso HTTP configurado. Sin nueva suite; ultima 3654 §106, focalizadas
+31 §110. Ley fija, EN PROGRESO, activacion bloqueada. Sin commit/push.
+
+## §114 — Staff indicado y verificacion pendiente (2026-10-09)
+
+Usuario informa correo de staff (no se reproduce PII en evidencia versionada).
+Consulta parametrizada readonly: exactamente un perfil local, auth_user_id presente,
+is_superadmin=false. No se modifica ni promueve perfil. Configuracion de autenticacion
+presente; GET administrativo readonly del usuario por ID no se completa: ConnectError
+en etapa auth_request. No respuesta de Supabase ni identidad externa/JWT acreditados.
+Metodo GET consultado en fuente primaria de Supabase auth-js GoTrueAdminApi.
+No secretos/URL/JWT/respuestas privadas impresos, ni mensajes enviados al usuario.
+
+Pendientes: identificador de Supabase aportado por usuario para contrastar el vinculo,
+autorizacion explicita de superadmin global del perfil local indicado, y humo JWT/HTTP
+con proceso configurado. Permiso global permite acceso a organizaciones del entorno
+local; elegir staff/correo no se interpreta como promocion autorizada. Canal tecnico
+§113 disponible, selector ausente; sin nuevas politicas ni activacion. Sin nueva suite;
+ultima 3654 §106/focalizadas 31 §110. EN PROGRESO; sin commit/push.
+
+## §115 — Superadmin local explicitamente autorizado (2026-10-09)
+
+Usuario autoriza superadmin global en base local para el perfil del correo indicado.
+Mantenimiento verifica entorno development/host loopback, exactamente un perfil y
+vinculo auth_user_id presente, toma FOR UPDATE y cambia solo is_superadmin=true
+por id/auth_user_id existentes. Commit realizado y lectura posterior confirma true.
+No se crea usuario, cambia email/sub ni modifica Supabase. PII/IDs no se imprimen
+ni se incorporan a evidencia versionada. Alcance: organizaciones de base local.
+
+Autoridad local provisionada por autorizacion humana; identidad externa de Supabase
+/JWT personal sigue sin verificar (ConnectError previo; User UID aun pendiente).
+No declarar humo HTTP aprobado ni sources_status/aceptacion/activacion habilitadas.
+Canal tecnico §113 permanece; selector/politica sin cambios. No nueva suite ni
+migracion; ultima 3654 §106, focalizadas 31 §110. Proximo contrastar User UID y
+completar autenticacion/proceso HTTP configurado. EN PROGRESO; sin commit/push.
+
+## §116 — UID contrastado y rechazo HTTP anonimo (2026-10-09)
+
+Usuario aporta User UID de Supabase; consulta local readonly confirma un perfil
+unico por correo, auth_user_id coincide exactamente con UID aportado y superadmin=true.
+No se reproduce PII/UID en evidencia versionada. Este contraste usa dato aportado
+por usuario y base local; no acredita respuesta externa de Supabase ni JWT firmado.
+
+Backend local 127.0.0.1:8000 responde health 200; OpenAPI 200 registra POST
+/admin/eipd/publications y /admin/eipd/selections. Ambas solicitudes sin token
+(cuerpo vacio) -> 401. No filas/identidad/canal de DB mutados. Prueba negativa
+real acreditada; no acredita SHA del proceso, carga del secreto EIPD o prueba positiva.
+
+Pendiente proceso HTTP configurado con secreto privado del canal y solicitud
+personal JWT validada por issuer/JWKS, seguida de publicacion/seleccion deshabilitada
+y auditoria/retirada. No solicitar tokens/passwords por chat; usar inicio de sesion
+local y canal seguro. ConnectError previo en consulta de autenticacion externa
+no se considera resuelto por el contraste UID. Canal tecnico y autoridad local
+estan provisionados; selector ausente. Fuentes/aceptacion pendientes, activacion
+bloqueada; EN PROGRESO. Sin nueva suite ni commit/push.

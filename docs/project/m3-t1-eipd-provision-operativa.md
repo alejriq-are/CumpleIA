@@ -218,3 +218,19 @@ mantenimiento, fecha/responsable y resultados HTTP. No conceder SELECT sobre
 alembic_version al canal solo para completar evidencia: comprobar head por mantenimiento.
 Un ok no acredita el destino correcto ni acepta una politica. Si faltan expediente,
 identidad o resultados reales, conservar PENDIENTE. §110 no ejecuta provision real.
+
+## 9. Primera evidencia del entorno (§111)
+
+Resultados reales iniciales en m3-t1-eipd-expediente-operativo.md. Configuracion
+administrativa ausente; preflight exit 1/failed esperado, sin pool dedicado.
+Head local consultado por mantenimiento b17d95c0286f. Provisión no acreditada;
+destino solicitado al usuario y pendiente, sin credenciales/actor real disponibles.
+No confundir etiqueta development/loopback con identificacion operativa completa.
+
+## 10. Canal local provisionado (§113)
+
+Autorizacion concreta recibida; login limitado creado y credencial privada externa
+0600. Evidencia en expediente §113: preflight pending_selector/codigo 2, canal/
+permisos/auditoria verificados sin selector. .env habitual no alterado; solo proceso
+de diagnostico carga secreto. Backend HTTP, identidad staff, humo/seleccion y retirada
+pendientes. No trasladar valor del archivo privado a evidencia ni commitearlo.
