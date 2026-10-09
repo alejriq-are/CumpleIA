@@ -424,5 +424,11 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 ### M3-T1 §143 — Frontera/composicion investigacion
 
 - [x] Delimitar FrontierV2/ScreeningV3/CompositionV3 y cobertura ContextV2 sin reinterpretar historicos.
-- [ ] Implementar frontera V2 pura y pruebas con bloqueo conservador.
+- [x] Implementar frontera V2 pura y pruebas con bloqueo conservador §144; 337 focalizadas aprobadas.
 - [ ] Screening/composicion, luego API/metadatos de eventos y aceptacion revisada. Gates bloqueados.
+
+### M3-T1 §144 — Frontera pura investigacion V2
+
+- [x] Evaluacion documental/asociacion y motivos especiales/screening completos; discordancias y falta de cobertura historica detectadas.
+- [x] 10 casos nuevos y 337 focalizados aislados aprobados; Black/Ruff aprobados.
+- [ ] Screening/composicion V3 y luego API/metadatos de eventos/aceptacion. Gates bloqueados.

@@ -94,3 +94,30 @@ frontera V2 informa ausencia/ruta sin resolver; caller selecciona dispatcher exp
 Este paso documental no ejecuta suite nueva. Ultima validacion §142: 327 focalizadas
 y 272 regresiones aprobadas. Sin codigo nuevo, migracion, cambio operacional ni
 commit/push. Proximo: implementar frontera V2 pura con bloqueo conservador.
+
+## 2026-10-09 — M3-T1 §144: frontera V2 pura de investigacion
+
+Nuevo eipd_frontier_v2.py revalida ContextV2 cerrado y evalua research documental y
+asociacion, rol responsable, especiales/screening con research y base finales.
+Conserva motivos completos de evaluadores; detecta discordancia de declaracion y
+alcance del expediente especial. Ruta investigacion_no_sensible_adultos identifica
+candidato de alcance, no permiso ni preparacion; sensible/menores/null/base/rol fuera
+de alcance mantienen sin_resolver. Contexto ausente produce incompleto.
+
+Resultado mantiene can_confirm e is_frontier_prepared fijos false, y agrega bloqueo
+investigacion_confirmacion_bloqueada aun con documento completo/asociaciones vigentes.
+validador_no_implementado historico permanece visible. Ningun cambio al FrontierV1,
+screening/composicion anteriores, API, eventos, politica o datos operacionales.
+
+Diez casos nuevos: completo pero bloqueado/determinista/sin mutacion, cambios de
+cuerpo o binding obsoletos, null, sensible, menores, declaracion negativa discordante,
+alcance discordante, contexto ausente/version desconocida/extra/campo omitido y
+asociaciones historicas especiales/screening con falta de cobertura acumulada.
+Suite final focalizada aislada 337 aprobadas en 30.43 s. Black/Ruff/diff check aprobados.
+No nueva suite HTTP ampliada porque modulo puro aun no conectado a API; ultimas
+regresiones adicionales 272 §142. No migracion ni reparacion de hashes.
+
+Proximo: screening V3 sobre frontera/contexto V2 y composicion V3 conservadora,
+antes de integrar lectura/escritura API/metadatos de eventos y aceptacion revisada.
+Ley fija, M3-T1 EN PROGRESO; confirmacion investigacion y activacion EIPD bloqueadas.
+Sin commit/push.
