@@ -378,3 +378,9 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] Completitud, aplicabilidad y asociacion vigentes/obsoletas expuestas sin escrituras; bloqueo compartido de confirmacion incluso con expediente completo.
 - [x] 303 pruebas ampliadas aisladas aprobadas; Black/Ruff aprobados.
 - [ ] Nuevas versiones de binding especial/EIPD e integracion posterior; M3-T1 EN PROGRESO y activacion bloqueada.
+
+### M3-T1 §136 — Asociaciones para investigacion
+
+- [x] Delimitar versiones sucesoras especiales V11/EIPD V12, material, compatibilidad y orden PATCH.
+- [ ] Implementar contratos/funciones puras nuevos con pruebas de hashes historicos intactos.
+- [ ] Dispatch y servicio/API, luego contexto de resolucion/revision y aceptacion. Confirmacion investigacion/EIPD bloqueadas.

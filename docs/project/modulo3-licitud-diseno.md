@@ -9287,3 +9287,19 @@ Proximo: delimitar nuevas versiones de asociaciones especiales/EIPD que cubran e
 expediente de investigacion sin reinterpretar material historico. Mantener el gate
 bloqueado hasta integracion completa y aceptacion revisada. Ley fija, M3-T1 EN
 PROGRESO, activacion EIPD bloqueada. Sin migracion/despliegue ni commit/push.
+
+## 2026-10-09 — M3-T1 §136: asociaciones de investigacion delimitadas
+
+Plan concreto en docs/project/m3-t1-investigacion-asociaciones.md. Sucesores previstos:
+SpecialContextBindingV11 y EipdContextBindingV12, envelope de dominio/version nuevo
+con hash anterior intacto y expediente BoundResearchAssessmentV1 completo o null;
+screening incluye base explicita. No regenerar binding research ni hashes historicos.
+Dispatch por version; asociaciones antiguas con research requieren revision por falta
+de cobertura. PATCH respeta orden RAT/base/LIA, research, especiales, screening y
+solo renueva los documentos reaportados. GET sin escrituras e historicos inmutables.
+
+Se delimita tambien la deuda de contexto de resolucion/revision EIPD para no atribuir
+aceptacion historica a investigacion antes de ampliar esa frontera explicitamente.
+Proximo: contratos y funciones puras nuevos, luego dispatch/API. Sin implementacion,
+migracion ni suite nueva; ultima validacion 303 §135. Ley fija, M3-T1 EN PROGRESO,
+confirmacion investigacion y activacion EIPD bloqueadas. Sin commit/push.
