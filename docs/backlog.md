@@ -336,5 +336,10 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 
 - [x] Consolidar secuencia personal deshabilitada, coherencia persistida y preflight posterior ok; head verificado.
 - [x] Separar pendientes operacionales y juridicos en docs/project/m3-t1-eipd-cierre-validacion-local.md.
-- [ ] Preparar ejecutor de pruebas que exija base aislada antes de nuevas suites de escritura.
+- [x] Preparar ejecutor focalizado que exige base aislada antes de pytest: §123, 60 pruebas aprobadas. Pytest directo no queda protegido por el wrapper.
 - [ ] Validar rotacion/retiro y recuperacion, fuentes/aceptacion y alcance integral; M3-T1 EN PROGRESO.
+
+## M3-T1 §123 — pruebas aisladas
+
+- [x] Ejecutar suite focalizada mediante guardas de destino/head/roles/estado, con 60 aprobadas.
+- [ ] Preparar ensayo de rotacion/retiro y recuperacion local preservando historial.

@@ -287,3 +287,16 @@ APP_DATABASE_URL apuntando a esa base solo en el proceso de pruebas, conservando
 respectivamente roles mantenimiento/app_user. No copiar credenciales a documentos
 ni cambiar el entorno del backend operacional. Base vacia creada/migrada en §121;
 las pruebas no deben ejecutarse contra el registro personal de desarrollo.
+
+## §123 — entrada de pruebas focalizadas
+
+Desde backend, usar `../.venv/bin/python -m scripts.run_eipd_tests` sin argumentos.
+El ejecutor exige la base local aislada cumpleia_eipd_tests_20261009 existente,
+head b17d95c0286f, registro EIPD vacio y runtime app_user restringido; redirige URLs
+solo en el proceso hijo. No cambia .env ni crea o vacia bases. Ante bloqueo revisar
+el diagnostico y preservar datos; no borrar historial para hacer pasar las guardas.
+
+Targets fijos: tests/test_eipd_test_runner.py, tests/test_api_eipd_admin.py y
+tests/test_api_eipd_admin_concurrency.py. `pytest` directo no recibe la proteccion
+del wrapper: no usarlo contra la base operacional. Para otra suite/head, revisar
+primero alcance y guardas. Resultado §123: 60 aprobadas.

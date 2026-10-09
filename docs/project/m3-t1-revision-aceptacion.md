@@ -3696,3 +3696,29 @@ Pendientes separados: (1) asegurar ejecucion de futuras suites solo en base aisl
 No se identifica una fuente nueva ni se cambia una regla legal en esta revision.
 Ley 21.719/19.628 reformada fija. M3-T1 EN PROGRESO; activacion EIPD bloqueada.
 Sin commit/push.
+
+## 2026-10-09 — M3-T1 §123: ejecutor focalizado de pruebas aisladas
+
+backend/scripts/run_eipd_tests.py proporciona python -m scripts.run_eipd_tests.
+Deriva ambas URLs solo en entorno hijo hacia cumpleia_eipd_tests_20261009, mantiene
+roles separados y exige development, hosts loopback iguales, sin parametros URL,
+runtime app_user. Antes de pytest consulta readonly current_database/head y registro
+EIPD vacio, confirma runtime sin superuser/BYPASSRLS. Rechaza destino/head/roles/estado
+incompatibles con salida logica 2 y mensaje sin secretos. No crea/borra DB ni copia
+datos; no imprime URLs. Elimina overrides heredados de pytest y credenciales Supabase/
+canal administrativo; usa emisor sintetico de pruebas y targets fijos sin argumentos.
+
+Guardas probadas: URLs a base fija y roles intactos, entorno padre sin cambios,
+rechazo remoto/query/produccion, runtime owner/destinos distintos, DB/head/registro
+no vacio y privilegios runtime incompatibles. Ejecucion por el runner: 60 aprobadas
+en 9.45 s (56 API/concurrencia + 4 guardas); Black/Ruff aprobados. Invocacion con
+argumento extra bloqueada antes de pytest. Sin nuevas escrituras operacionales ni
+cambios de perfil/secretos/backend. No suite completa nueva.
+
+Alcance: protege las invocaciones mediante este ejecutor; pytest directo sigue
+resolviendo DATABASE_URL habitual y no queda protegido por este wrapper. Usar este
+punto de entrada para la suite EIPD focalizada, sin ejecutar pytest directo contra
+la base operacional. Cambios de head requieren revision explicita de la guarda.
+Siguiente: preparar ensayo de rotacion/retiro y recuperacion local preservando
+historial. Fuentes/aceptacion y alcance integral pendientes; ley fija, M3-T1 EN
+PROGRESO y activacion bloqueada. Sin commit/push.
