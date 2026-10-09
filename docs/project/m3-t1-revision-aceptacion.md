@@ -4182,3 +4182,17 @@ Proximo: definir/integrar cobertura research en frontera y composicion versionad
 y luego lectura/escritura API V2 y metadatos de eventos. No migracion/backfill,
 revision/evento/politica nueva ni cambios de credenciales. Ley fija, M3-T1 EN PROGRESO;
 confirmacion investigacion y activacion EIPD bloqueadas. Sin commit/push.
+
+## 2026-10-09 — M3-T1 §143: frontera/composicion de investigacion delimitadas
+
+Plan en m3-t1-investigacion-frontera-composicion.md tras revisar contratos: sucesores
+FrontierV2, ScreeningV3 y CompositionV3 reciben ContextV2/research explicitos, sin
+ampliar contratos V1/V2 ni proyectar material para simular cobertura. Diferenciar
+version de evaluacion de version de binding. Mantener motivos de deteccion completos,
+validador_no_implementado y bloqueo conservador hasta integracion/aceptacion revisadas.
+
+Primer incremento previsto frontera V2 pura no declara preparada la ruta mientras
+el validador especial este pendiente. Posterior screening/composicion y luego lectura/
+escritura API/metadatos de eventos. Paso documental sin suite nueva: ultima 327
+focalizadas y 272 regresiones §142. Ley fija, M3-T1 EN PROGRESO; confirmacion de
+investigacion/activacion EIPD bloqueadas. Sin commit/push.

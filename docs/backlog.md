@@ -420,3 +420,9 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] Dispatch puro V1/V2 y cobertura research explicita; evento historico visible sin autoridad sintetica.
 - [x] 327 focalizadas y 272 regresiones de frontera/screening/revision aprobadas; Black/Ruff aprobados.
 - [ ] Frontera/composicion research y posterior lectura/escritura API V2; gates bloqueados.
+
+### M3-T1 §143 — Frontera/composicion investigacion
+
+- [x] Delimitar FrontierV2/ScreeningV3/CompositionV3 y cobertura ContextV2 sin reinterpretar historicos.
+- [ ] Implementar frontera V2 pura y pruebas con bloqueo conservador.
+- [ ] Screening/composicion, luego API/metadatos de eventos y aceptacion revisada. Gates bloqueados.
