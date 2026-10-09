@@ -342,4 +342,5 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 ## M3-T1 §123 — pruebas aisladas
 
 - [x] Ejecutar suite focalizada mediante guardas de destino/head/roles/estado, con 60 aprobadas.
-- [ ] Preparar ensayo de rotacion/retiro y recuperacion local preservando historial.
+- [x] Ejecutar ensayo aislado de rotacion/retiro y recuperacion §124: 63 pruebas aprobadas; snapshot de pruebas sin cambios.
+- [ ] Validar ciclo de vida del canal provisionado con historial real y renovacion segura de procesos; no ejecutado en §124.

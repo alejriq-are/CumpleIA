@@ -424,3 +424,27 @@ la base operacional. Cambios de head requieren revision explicita de la guarda.
 Siguiente: preparar ensayo de rotacion/retiro y recuperacion local preservando
 historial. Fuentes/aceptacion y alcance integral pendientes; ley fija, M3-T1 EN
 PROGRESO y activacion bloqueada. Sin commit/push.
+
+## 2026-10-09 — M3-T1 §124: ensayo aislado de rotacion/retiro y recuperacion
+
+Se agregan tres pruebas PostgreSQL de ciclo de vida al ejecutor fijo, sobre login
+aleatorio temporal de fixture y base aislada. Rotacion: clave antigua rechazada en
+conexiones nuevas (28P01), conexion previa sobrevive, pool se dispone y clave nueva
+permite recuperar el canal; rol local e identidad se limpian tras rollback. NOLOGIN:
+conexion nueva rechazada (28000), conexion previa sigue viva pero _prepare_channel
+rechaza con 503; restaurar LOGIN y renovar pool recupera. Retiro de membresia:
+conexion caliente rechazada por guarda 503, restauracion recupera el canal.
+
+63 pruebas focalizadas aprobadas en 13.03 s; Black/Ruff aprobados. El snapshot de
+pruebas permanece igual antes/despues de cada ensayo (registro inicialmente vacio
+por guarda del runner); no se extrapola a prueba de historial no vacio. Fixtures
+restauran flags/membresia cuando procede, disponen pools y eliminan solo su rol
+aleatorio. No cambian login/secreto/pool operacional ni perfil personal.
+Preflight readonly posterior del canal original: ok, auditoria coherente, selector
+revision 1 y activation_authorized false. No rotacion/retiro real del canal de usuario
+ni actualizacion de su archivo privado en este checkpoint.
+
+Pendiente operacional: ensayo coordinado sobre canal provisionado, renovacion de
+procesos/conexiones y referencia de recuperacion segura con historial real. Ensayo
+tecnico aislado no acredita ese cambio. Fuentes/aceptacion y alcance integral siguen
+pendientes; ley fija, M3-T1 EN PROGRESO y activacion EIPD bloqueada. Sin commit/push.

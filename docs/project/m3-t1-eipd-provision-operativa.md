@@ -300,3 +300,18 @@ Targets fijos: tests/test_eipd_test_runner.py, tests/test_api_eipd_admin.py y
 tests/test_api_eipd_admin_concurrency.py. `pytest` directo no recibe la proteccion
 del wrapper: no usarlo contra la base operacional. Para otra suite/head, revisar
 primero alcance y guardas. Resultado §123: 60 aprobadas.
+
+## §124 — resultados del ensayo aislado
+
+El ejecutor incluye tests/test_eipd_channel_lifecycle.py; resultado total 63 aprobadas.
+ALTER PASSWORD rechaza la credencial antigua solo en nuevas conexiones; NOLOGIN
+impide nuevas conexiones sin terminar las existentes. La guarda de cada solicitud
+rechaza rol NOLOGIN o membresia retirada. Restaurar flags/membresia o sustituir la
+credencial y renovar el pool recupera el canal de pruebas; no habilita activacion.
+
+Para una rotacion real: preparar la credencial y recuperacion fuera del repositorio,
+drenar solicitudes y cerrar conexiones, aplicar el cambio, inyectarlo en nuevos
+procesos, verificar rechazo de clave anterior con conexion nueva y ejecutar preflight
+mas comprobacion personal. No asumir revocacion instantanea de una solicitud ya
+autorizada. Mantener publicaciones/eventos y verificar snapshot antes/despues.
+Ese cambio real no se ejecuto en §124; el canal actual sigue intacto en revision 1.
