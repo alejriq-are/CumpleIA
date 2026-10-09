@@ -139,3 +139,17 @@ aprobados. Sin escrituras operacionales ni cambio de selector EIPD.
 Proximo: diseñar persistencia/API y versiones de asociacion especiales/EIPD para
 incorporar investigacion sin reinterpretar historicos. Ley fija, M3-T1 EN PROGRESO,
 confirmacion de investigacion y activacion EIPD bloqueadas. Sin commit/push.
+
+## 2026-10-09 — M3-T1 §132: persistencia/API de investigacion delimitadas
+
+Plan concreto en docs/project/m3-t1-investigacion-integracion.md: columna JSONB
+nullable sin backfill, input documental/output con binding de servidor, contratos
+sin ciclos de importacion y semantica PATCH omision/null/reaporte. Contexto cambiado
+sin reaporte conserva binding y debe marcar obsolescencia. Historicos no reciben
+hash nuevo automaticamente; protecciones tenant/inmutabilidad y gates preservados.
+
+Orden: schema/modelo/migracion, luego servicios/API, readiness y finalmente nuevas
+versiones especiales/EIPD con aceptacion. Sin cambios de codigo ni migracion aplicada,
+no nueva suite; ultima focalizada 119 §131. Siguiente implementar primer incremento
+persistente de schema/modelo/migracion en base aislada. Ley fija, M3-T1 EN PROGRESO,
+confirmacion de investigacion y activacion EIPD bloqueadas. Sin commit/push.

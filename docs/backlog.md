@@ -362,4 +362,5 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] Implementar schema/evaluador puro §129; sin persistencia ni gates, can_confirm=false.
 - [x] Ampliar aplicabilidad/limites §130: 20 casos nuevos; suite aislada 107 aprobadas.
 - [x] Implementar binding independiente de investigacion y chequeo de obsolescencia §131; 119 pruebas aisladas aprobadas. Historicos intactos, sin conversion automatica.
-- [ ] Diseñar persistencia/API y nuevas asociaciones especiales/EIPD antes de habilitar confirmacion.
+- [x] Delimitar persistencia/API §132 en docs/project/m3-t1-investigacion-integracion.md.
+- [ ] Implementar schema/modelo/migracion nullable sin backfill y validar en base aislada; servicios/API y nuevas asociaciones especiales/EIPD posteriores.

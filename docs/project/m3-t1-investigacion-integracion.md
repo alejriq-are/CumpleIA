@@ -1,0 +1,79 @@
+# M3-T1 — Integracion persistente de investigacion
+
+Fecha: 2026-10-09. §132. Estado: DISENO DE INTEGRACION; NO IMPLEMENTADO.
+Base: 374b83bf381f273d12f8ddbc1f4fb68b549d67c1.
+
+## Almacenamiento y compatibilidad
+
+Agregar legal_assessments.research_assessment JSONB nullable, almacenando
+BoundResearchAssessmentV1 (assessment y context_binding). Migracion append-only
+sobre b17d95c0286f: ADD COLUMN y CHECK null u objeto JSON; sin backfill ni cambios
+a datos historicos. Historicos devuelven null, no reciben asociacion sintetica.
+No crear tabla global ni permisos nuevos; conservar organization_id/RLS de M3.
+Revisar efectivamente los grants por columna al aplicar migracion, no asumirlos.
+
+Entrada create/update: research_assessment ResearchAssessmentV1 nullable, sin
+context_binding del cliente. Salida: BoundResearchAssessmentV1 nullable, asociacion
+generada por servidor. Rechazar hashes/client metadata dentro del expediente por
+extra=forbid. No relajar los schemas historicos especiales/EIPD.
+
+research.py importa contratos de licitud.py; importar research.py directamente
+de vuelta crearia ciclo. Antes de añadir campos, ubicar las nuevas definiciones
+en licitud.py antes de DraftCreate y dejar research.py como exportacion compatible,
+sin mover ni modificar contratos historicos. Probar importacion y OpenAPI.
+
+## Semantica de borrador
+
+| Operacion | Resultado previsto |
+| --- | --- |
+| Create con expediente | Generar binding con RAT construido por servidor, base canonica y LIA del borrador; persistir objeto |
+| Create sin expediente | Persistir SQL NULL |
+| PATCH omitido | Conservar expediente y binding previos exactamente |
+| PATCH null explicito | Retirar expediente, persistir SQL NULL |
+| PATCH objeto | Revalidar y generar binding solo para ese aporte explicito |
+| PATCH RAT/base/LIA sin reaporte | Conservar binding previo; asociacion debe resultar obsoleta |
+| PATCH LIA y expediente juntos | Vincular al contexto final de la misma actualizacion, no a valores anteriores |
+| Confirmado/reemplazado | Mantener protecciones existentes; impedir editar o retirar expediente |
+
+Usar model_fields_set para distinguir omision/null. No renovar binding al consultar
+readiness/GET ni repararlo por comparar hashes. Aplicar el mismo bloqueo de serie y
+control de borrador existentes, rollback atomico y aislamiento tenant.
+
+## Readiness y gates por etapas
+
+Primer incremento de persistencia: guardar/leer/reaportar y mostrar estado documental
+y asociacion, sin habilitar investigacion. Mantener validador_no_implementado en
+special_conditions hasta integrar la ruta en un cambio posterior revisado.
+BoundResearchAssessmentV1 vigente y evaluador completo no bastan para confirmar.
+
+Antes de habilitar: nueva version especial que incluya el material de investigacion
+y nueva version EIPD correspondiente, dispatch explicito y pruebas de compatibilidad
+para historicos sin documento. No editar hashes/versiones anteriores. Que un contrato
+sea viejo no autoriza atribuirle cobertura de un expediente que no contiene.
+
+El primer incremento exige base interes_legitimo_art13d/LIA vigente, RAT no sensible
+y titulares adultos. Rutas no soportadas permanecen en revision. No sustituye
+screening EIPD, deteccion de condiciones especiales ni autoridad humana.
+
+## Validacion prevista
+
+- Migracion/head/modelos coherentes, NULL historico y CHECK JSONB.
+- CRUD PostgreSQL real con app_user, RLS tenant cruzado y alcance RAT.
+- HTTP create/GET/PATCH: omision/null/reaportes, ambos cambios atomicos y hashes
+  de cliente rechazados dentro del contrato cerrado.
+- Contexto/LIA cambiado sin reaporte produce obsolescencia; reaporte explicito
+  repara solo la asociacion nueva, sin reinterpretar bindings historicos.
+- Estado confirmado/reemplazado conserva expediente y no admite mutacion.
+- Readiness/confirmacion mantiene bloqueo de investigacion/EIPD durante esta etapa.
+- Ejecutar pruebas en base aislada. Al cambiar head, migrarla y actualizar guarda
+  del runner tras revisar identidad; no tocar registro operacional para probar.
+
+## Orden de implementacion
+
+1. Modelos/schema/migracion compatibles y comprobacion de NULL/grants.
+2. Servicio/API de borrador con semantica exacta de PATCH y pruebas tenant/HTTP.
+3. Readiness documental, obsolescencia y protecciones de inmutabilidad.
+4. Versiones nuevas especiales/EIPD y gate integrado con aceptacion revisada.
+
+No migracion aplicada en §132. Ley fija, M3-T1 EN PROGRESO; confirmacion de
+investigacion y activacion EIPD bloqueadas. Sin commit/push.
