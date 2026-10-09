@@ -128,3 +128,32 @@ Proximo: dispatch por version y diagnostico de falta de cobertura; luego escritu
 API ordenada research/especiales/screening con pruebas de compatibilidad ampliadas.
 Ley fija, M3-T1 EN PROGRESO; confirmacion investigacion y activacion EIPD bloqueadas.
 Sin commit/push.
+
+## 2026-10-09 — M3-T1 §138: dispatch y cobertura de investigacion
+
+Evaluadores especiales/screening aceptan research por argumento keyword opcional;
+screening recibe tambien legal_basis. Control transversal M3 propaga documentos
+persistidos y base final, sin cambiar funciones de escritura create/PATCH ni sus
+versiones generadas (especiales V10/screening V11 hasta siguiente incremento).
+Version especial 11 y screening 12 comparan contra sus nuevos hashes; las versiones
+anteriores conservan algoritmos historicos. Version desconocida sigue rechazada por
+contratos cerrados, sin promocion ni fallback a sucesores.
+
+Research presente con version anterior emite asociacion_investigacion_no_cubierta
+(requiere_revision especial/pendiente_revision screening) y context_current false.
+Chequeo independiente de las ramas de falta de cobertura previa: otros motivos no
+se ocultan. Revalida estructura BoundResearchAssessmentV1; no repara sus hashes ni
+sustituye su evaluador de completitud/vigencia. Nueva asociacion transversal vigente
+no garantiza vigencia research ni autoridad; gate §135 permanece bloqueado.
+
+Ocho casos nuevos: evaluacion antigua/nueva para ambos documentos, cambio de cuerpo
+con metadatos conservados produce obsolescencia, antiguos sin research compatibles
+y falta de cobertura investigacion coexistiendo con cobertura contractual pendiente.
+Suite focalizada 153 aprobadas en 21.35 s. Suite ampliada aislada final: 327 aprobadas en 389.91 s, incluidos 174 casos HTTP
+existentes. Black/Ruff/diff check aprobados. Sin ejecucion contra base operacional,
+cambios de tablas/datos operacionales ni politicas.
+
+Proximo: generar especiales V11/screening V12 desde API respetando orden final
+RAT/base/LIA, research, especiales, screening y omision/null/reaporte. Mantener los
+bloqueos hasta revisar frontera de resolucion/revision/aceptacion. Ley fija, M3-T1
+EN PROGRESO; confirmacion investigacion y activacion EIPD bloqueadas. Sin commit/push.

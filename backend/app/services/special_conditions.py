@@ -10,6 +10,7 @@ from pydantic import TypeAdapter
 from app.schemas.licitud import (
     BiometricAssessmentV1,
     BiometricRightsExceptionAssessmentV1,
+    BoundResearchAssessmentV1,
     ConsentAssessmentV1,
     ContractAssessmentV1,
     EconomicObligationsAssessmentV1,
@@ -934,6 +935,8 @@ def evaluate_special_conditions_v1(
     biometric=None,
     sensitive_rights_exception=None,
     biometric_rights_exception=None,
+    *,
+    research=None,
 ):
     """Detecta hechos y preparación documental, sin autorizar rutas especiales."""
     parsed = (
@@ -941,6 +944,12 @@ def evaluate_special_conditions_v1(
         if conditions is not None
         else None
     )
+    if research is not None:
+        BoundResearchAssessmentV1.model_validate(
+            research.model_dump()
+            if isinstance(research, BoundResearchAssessmentV1)
+            else research
+        )
     rat = (
         RatContextSnapshotV1.model_validate(snapshot) if snapshot is not None else None
     )
@@ -1007,6 +1016,15 @@ def evaluate_special_conditions_v1(
             mapping[q] for q, active in flags.items() if active and q in mapping
         )
     if parsed is not None:
+        research_uncovered = (
+            research is not None and parsed.context_binding.schema_version < 11
+        )
+        if research_uncovered:
+            issue(
+                "research_assessment",
+                "asociacion_investigacion_no_cubierta",
+                "requiere_revision",
+            )
         if rat is not None:
             if parsed.context_binding.schema_version < 10 and (
                 sensitive_rights_exception is not None
@@ -1215,7 +1233,27 @@ def evaluate_special_conditions_v1(
                         )
                     )
                 )
-                current = parsed.context_binding.hash == expected
+                if parsed.context_binding.schema_version == 11:
+                    expected = build_special_context_binding_hash_v11(
+                        rat,
+                        legal_basis,
+                        consent,
+                        lia,
+                        contract,
+                        legal_obligation,
+                        rights_defense,
+                        economic_obligations,
+                        geolocation,
+                        sensitive_consent,
+                        health,
+                        biometric,
+                        sensitive_rights_exception,
+                        biometric_rights_exception,
+                        research=research,
+                    )
+                current = (
+                    parsed.context_binding.hash == expected and not research_uncovered
+                )
                 if not current:
                     issue(
                         "context_binding.hash",

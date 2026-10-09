@@ -10,6 +10,7 @@ from pydantic import TypeAdapter
 from app.schemas.licitud import (
     BiometricAssessmentV1,
     BiometricRightsExceptionAssessmentV1,
+    BoundResearchAssessmentV1,
     ContractAssessmentV1,
     EconomicObligationsAssessmentV1,
     EipdQuestionIdV1,
@@ -843,6 +844,7 @@ def bind_eipd_screening_v5(
 
 EipdResult = Literal["requiere_eipd", "pendiente_revision", "sin_supuestos_declarados"]
 EipdIssueCode = Literal[
+    "asociacion_investigacion_no_cubierta",
     "screening_ausente",
     "snapshot_ausente",
     "contexto_desactualizado",
@@ -910,6 +912,9 @@ def evaluate_eipd_screening_v1(
     biometric=None,
     sensitive_rights_exception=None,
     biometric_rights_exception=None,
+    *,
+    legal_basis=None,
+    research=None,
 ) -> EipdReadinessV1:
     """Evaluador historico v1: ninguna excepcion habilitada."""
     return _evaluate_eipd_screening(
@@ -928,6 +933,8 @@ def evaluate_eipd_screening_v1(
         biometric,
         sensitive_rights_exception,
         biometric_rights_exception,
+        legal_basis=legal_basis,
+        research=research,
     )
 
 
@@ -948,6 +955,8 @@ def _evaluate_eipd_screening(
     sensitive_rights_exception=None,
     biometric_rights_exception=None,
     *,
+    legal_basis=None,
+    research=None,
     prepared_exceptions: frozenset[str] = frozenset(),
 ) -> EipdReadinessV1:
     """Deriva detección EIPD conservando también los motivos históricos."""
@@ -960,6 +969,12 @@ def _evaluate_eipd_screening(
         if screening is not None
         else None
     )
+    if research is not None:
+        BoundResearchAssessmentV1.model_validate(
+            research.model_dump()
+            if isinstance(research, BoundResearchAssessmentV1)
+            else research
+        )
     rat = (
         RatContextSnapshotV1.model_validate(
             snapshot.model_dump()
@@ -1013,6 +1028,20 @@ def _evaluate_eipd_screening(
     observations: list[EipdObservationV1] = []
     force_review = False
     context_current = False
+    research_uncovered = (
+        research is not None
+        and parsed is not None
+        and parsed.context_binding.schema_version < 12
+    )
+    if research_uncovered:
+        issues.append(
+            EipdIssueV1(
+                "research_assessment",
+                "asociacion_investigacion_no_cubierta",
+                "pendiente_revision",
+            )
+        )
+        force_review = True
 
     if rat is None:
         issues.append(
@@ -1256,7 +1285,27 @@ def _evaluate_eipd_screening(
                     )
                 )
             )
-            context_current = parsed.context_binding.hash == expected_hash
+            if parsed.context_binding.schema_version == 12:
+                expected_hash = build_eipd_context_binding_hash_v12(
+                    rat,
+                    parsed_lia,
+                    special_model,
+                    contract,
+                    legal_obligation,
+                    rights_defense,
+                    economic_obligations,
+                    geolocation,
+                    sensitive_consent,
+                    health,
+                    biometric,
+                    sensitive_rights_exception,
+                    biometric_rights_exception,
+                    legal_basis=legal_basis,
+                    research=research,
+                )
+            context_current = (
+                parsed.context_binding.hash == expected_hash and not research_uncovered
+            )
         if not context_current and not force_review:
             issues.append(
                 EipdIssueV1(

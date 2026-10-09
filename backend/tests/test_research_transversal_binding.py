@@ -128,3 +128,115 @@ def test_closed_successor_contracts(model, version):
     ):
         with pytest.raises(ValidationError):
             model.model_validate({"context_binding": invalid})
+
+
+@pytest.mark.parametrize("kind", ["special", "eipd"])
+@pytest.mark.parametrize("current", [True, False])
+def test_evaluator_dispatch_and_historical_coverage(
+    context, negative_controls, kind, current
+):
+    document, rat, lia = context
+    bound = bind_research_assessment_v1(
+        document, rat, "interes_legitimo_art13d", lia
+    ).model_dump(mode="json")
+    before = deepcopy((context, bound, negative_controls))
+    if kind == "special":
+        binder = (
+            special.bind_special_conditions_v11
+            if current
+            else special.bind_special_conditions_v10
+        )
+        stored = binder(
+            negative_controls["special_conditions"],
+            *arguments(kind, rat, lia),
+            **({"research": bound} if current else {}),
+        ).model_dump(mode="json")
+        result = special.evaluate_special_conditions_v1(
+            stored, rat, "interes_legitimo_art13d", None, lia, research=bound
+        )
+    else:
+        binder = (
+            eipd.bind_eipd_screening_v12 if current else eipd.bind_eipd_screening_v11
+        )
+        stored = binder(
+            negative_controls["eipd_screening"],
+            *arguments(kind, rat, lia),
+            **(
+                {"legal_basis": "interes_legitimo_art13d", "research": bound}
+                if current
+                else {}
+            ),
+        ).model_dump(mode="json")
+        result = eipd.evaluate_eipd_screening_v1(
+            stored, rat, lia, legal_basis="interes_legitimo_art13d", research=bound
+        )
+    codes = {i.code for i in result.issues}
+    assert result.context_current is current
+    assert ("asociacion_investigacion_no_cubierta" in codes) is (not current)
+    assert (context, bound, negative_controls) == before
+    if current:
+        bound["assessment"]["public_interest_analysis"] += " modificado"
+        if kind == "special":
+            changed = special.evaluate_special_conditions_v1(
+                stored, rat, "interes_legitimo_art13d", None, lia, research=bound
+            )
+        else:
+            changed = eipd.evaluate_eipd_screening_v1(
+                stored, rat, lia, legal_basis="interes_legitimo_art13d", research=bound
+            )
+        assert not changed.context_current
+        assert "contexto_desactualizado" in {i.code for i in changed.issues}
+
+
+@pytest.mark.parametrize("kind", ["special", "eipd"])
+def test_old_without_research_preserves_compatibility(context, negative_controls, kind):
+    _, rat, lia = context
+    if kind == "special":
+        stored = special.bind_special_conditions_v10(
+            negative_controls["special_conditions"], *arguments(kind, rat, lia)
+        ).model_dump(mode="json")
+        result = special.evaluate_special_conditions_v1(
+            stored, rat, "interes_legitimo_art13d", None, lia
+        )
+    else:
+        stored = eipd.bind_eipd_screening_v11(
+            negative_controls["eipd_screening"], *arguments(kind, rat, lia)
+        ).model_dump(mode="json")
+        result = eipd.evaluate_eipd_screening_v1(stored, rat, lia)
+    assert result.context_current
+    assert "asociacion_investigacion_no_cubierta" not in {i.code for i in result.issues}
+
+
+@pytest.mark.parametrize("kind", ["special", "eipd"])
+def test_missing_coverage_coexists_with_previous_review(
+    context, negative_controls, kind
+):
+    document, rat, lia = context
+    bound = bind_research_assessment_v1(document, rat, "interes_legitimo_art13d", lia)
+    if kind == "special":
+        stored = special.bind_special_conditions_v1(
+            negative_controls["special_conditions"],
+            rat,
+            "interes_legitimo_art13d",
+            None,
+            lia,
+        ).model_dump(mode="json")
+        result = special.evaluate_special_conditions_v1(
+            stored,
+            rat,
+            "interes_legitimo_art13d",
+            None,
+            lia,
+            contract={},
+            research=bound,
+        )
+    else:
+        stored = eipd.bind_eipd_screening_v1(
+            negative_controls["eipd_screening"], rat, lia
+        ).model_dump(mode="json")
+        result = eipd.evaluate_eipd_screening_v1(
+            stored, rat, lia, contract={}, research=bound
+        )
+    codes = {i.code for i in result.issues}
+    assert "asociacion_investigacion_no_cubierta" in codes
+    assert "asociacion_contractual_no_cubierta" in codes

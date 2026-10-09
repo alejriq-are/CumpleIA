@@ -1591,6 +1591,7 @@ def evaluate_transversal_readiness_v1(assessment, snapshot):
         getattr(assessment, "biometric_assessment", None),
         getattr(assessment, "sensitive_rights_exception_assessment", None),
         getattr(assessment, "biometric_rights_exception_assessment", None),
+        research=getattr(assessment, "research_assessment", None),
     )
     eipd = evaluate_eipd_screening_v1(
         assessment.eipd_screening,
@@ -1608,6 +1609,8 @@ def evaluate_transversal_readiness_v1(assessment, snapshot):
         getattr(assessment, "biometric_assessment", None),
         getattr(assessment, "sensitive_rights_exception_assessment", None),
         getattr(assessment, "biometric_rights_exception_assessment", None),
+        legal_basis=assessment.legal_basis,
+        research=getattr(assessment, "research_assessment", None),
     )
     blockers = []
     if (

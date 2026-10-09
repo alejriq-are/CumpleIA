@@ -389,4 +389,10 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 
 - [x] Contratos cerrados especiales V11/EIPD V12 y hash/bind de expediente completo sin reparar bindings research.
 - [x] 16 casos nuevos y 145 focalizados aprobados; funciones historicas verificadas intactas, Black/Ruff aprobados.
-- [ ] Dispatch evaluador y falta de cobertura historica; escritura API posterior. Gates siguen bloqueados.
+- [x] Dispatch evaluador y falta de cobertura historica §138; escritura API pendiente. Gates siguen bloqueados.
+
+### M3-T1 §138 — Evaluacion versionada de investigacion
+
+- [x] Dispatch especiales V11/screening V12 y falta de cobertura independiente para versiones anteriores con investigacion.
+- [x] 8 casos nuevos; suite ampliada aislada 327 aprobadas, Black/Ruff aprobados.
+- [ ] Generacion API de asociaciones sucesoras y pruebas de orden PATCH. Confirmacion investigacion/EIPD bloqueadas.
