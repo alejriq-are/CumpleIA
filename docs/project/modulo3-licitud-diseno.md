@@ -9067,3 +9067,27 @@ perfil permanecen fuera del cambio. Rotacion REAL pendiente, no acreditada por
 ensayo aislado §124 ni por este plan. Sin nueva suite; ultima focalizada 63 §124.
 Fuentes/aceptacion y alcance integral pendientes; ley fija, M3-T1 EN PROGRESO y
 activacion bloqueada. Sin commit/push.
+
+## 2026-10-09 — M3-T1 §126: rotacion real local ejecutada
+
+Se detuvo el proceso propio de validacion 8001 y se comprobo ausencia de conexiones
+del login dedicado antes de alterar password. Destino development/loopback, login
+esperado, archivo privado 0600 y head b17d95c0286f verificados. Snapshot previo
+validado: 1 publicacion deshabilitada, 1 seleccion, revision 1.
+
+Nueva clave aleatoria en memoria, copia privada de recuperacion 0600 externa al
+repo y reemplazo privado preparado; cambio password de eipd_backend_local y
+sustitucion atomica de admin.env. Conexion NUEVA con credencial anterior rechazada;
+nueva credencial: preflight ok. Snapshot completo posterior exactamente igual al
+previo; no cambios de perfiles, permisos, publicaciones, eventos ni selector.
+
+Proceso propio 8001 reiniciado con nuevo secreto en memoria, DEBUG=false y sin
+access log. GET /admin/eipd/status sin token -> 401. Backend previo 8000 fuera del
+cambio. No secretos ni PII en documentos/logs/repositorio. Copia privada de
+recuperacion conservada hasta confirmar sesion personal; retirada aun pendiente.
+No se afirma validacion personal tras reinicio a partir del diagnostico tecnico.
+
+Proximo: usuario Comprobar acceso y Consultar registro en pantalla con sesion real,
+confirmar revision 1/politica deshabilitada y luego retirar copia privada anterior.
+No suite nueva (ultima 63 §124). Fuentes/aceptacion y alcance integral pendientes;
+ley fija, M3-T1 EN PROGRESO y activacion EIPD bloqueada. Sin commit/push.

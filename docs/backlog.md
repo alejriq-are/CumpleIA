@@ -348,4 +348,5 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 ## M3-T1 §125 — rotacion real preparada
 
 - [x] Verificar canal/destino/head y preparar drenaje, reemplazo privado, recuperacion y comprobacion posterior.
-- [ ] Ejecutar rotacion real local segun docs/project/m3-t1-eipd-plan-rotacion-local.md y confirmar acceso personal; pendiente.
+- [x] Rotacion real local ejecutada §126: credencial anterior rechazada en conexion nueva; nuevo canal ok y snapshot completo intacto.
+- [x] Acceso personal tras reinicio confirmado por captura y copia privada anterior retirada (§126).
