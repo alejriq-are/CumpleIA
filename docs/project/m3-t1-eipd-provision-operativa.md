@@ -272,3 +272,16 @@ local con actor/fecha/hash del servidor, sin seleccion ni activacion. La pantall
 contrasta el resultado mediante GET /audit. Ante referencia ya registrada o error,
 consultar el registro antes de continuar; no repetir POST a ciegas. Registrar el
 resultado personal real; este procedimiento no constituye aceptacion juridica.
+
+## §121 — seleccion personal y pruebas aisladas
+
+En /admin/eipd-validation, pulsar Preparar seleccion, revisar referencia y revision,
+y pulsar Seleccionar politica deshabilitada. Se guardan evento y selector local;
+la politica permanece deshabilitada. Ante 409 o resultado incierto consultar el
+registro, sin repetir POST a ciegas. Registrar la comprobacion posterior real.
+
+Las suites de escritura deben usar cumpleia_eipd_tests_20261009 con DATABASE_URL y
+APP_DATABASE_URL apuntando a esa base solo en el proceso de pruebas, conservando
+respectivamente roles mantenimiento/app_user. No copiar credenciales a documentos
+ni cambiar el entorno del backend operacional. Base vacia creada/migrada en §121;
+las pruebas no deben ejecutarse contra el registro personal de desarrollo.

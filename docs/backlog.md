@@ -325,3 +325,9 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] Propuesta fija autenticada, vista revisable y publicacion explicita con comprobacion posterior; 56 pruebas focalizadas aprobadas.
 - [x] Publicacion con sesion personal confirmada por captura: 1 publicacion deshabilitada, 0 selecciones, revision 0 (2026-10-09).
 - [ ] Preparar seleccion explicita con revision vigente y verificar evento/selector en la auditoria.
+
+## M3-T1 §121 — seleccion deshabilitada
+
+- [x] Preparar seleccion con revision vigente y comprobar evento/hash/selector; checks frontend y 56 pruebas API aisladas aprobadas.
+- [x] Seleccion personal confirmada por capturas y snapshot tecnico readonly coherente: revision 1, 1 publicacion y 1 seleccion deshabilitada (2026-10-09).
+- [ ] Revisar cierre operacional y pendientes de provision/rotacion/retiro y aceptacion integral; activacion bloqueada.

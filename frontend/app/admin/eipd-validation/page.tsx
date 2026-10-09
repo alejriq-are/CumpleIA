@@ -15,13 +15,13 @@ type Draft = {
 };
 
 type Audit = {
-  selector: { revision: number; publication_id: string } | null;
+  selector: { revision: number; publication_id: string; selection_id: string } | null;
   publications: {
     id: string;
     policy: { policy_reference: string; activation: string };
     policy_hash: string;
   }[];
-  selections: { id: string; revision: number }[];
+  selections: { id: string; revision: number; publication_id: string; policy_hash: string }[];
 };
 
 export default function EipdValidationPage() {
@@ -30,6 +30,13 @@ export default function EipdValidationPage() {
   const [audit, setAudit] = useState<Audit | null>(null);
   const [draft, setDraft] = useState<Draft | null>(null);
   const [publicationAttempted, setPublicationAttempted] = useState(false);
+  const [selectionDraft, setSelectionDraft] = useState<{
+    publication_id: string;
+    expected_revision: number;
+    reference: string;
+    hash: string;
+  } | null>(null);
+  const [selectionAttempted, setSelectionAttempted] = useState(false);
   const local = process.env.NODE_ENV === "development";
 
   async function checkAccess() {
@@ -67,6 +74,7 @@ export default function EipdValidationPage() {
   async function readAudit() {
     setBusy(true);
     setAudit(null);
+    setSelectionDraft(null);
     setMessage("");
     try {
       const { data, error } = await createClient().auth.getSession();
@@ -202,12 +210,125 @@ export default function EipdValidationPage() {
     }
   }
 
+  async function prepareSelection() {
+    if (!local || busy || selectionAttempted) return;
+    setBusy(true);
+    setSelectionDraft(null);
+    setMessage("");
+    try {
+      const { data, error } = await createClient().auth.getSession();
+      if (error || !data.session) throw new Error("session");
+      const response = await fetch("http://127.0.0.1:8001/admin/eipd/audit", {
+        headers: { Authorization: `Bearer ${data.session.access_token}` },
+        cache: "no-store",
+      });
+      if (!response.ok) throw new Error("audit");
+      const current: Audit = await response.json();
+      setAudit(current);
+      const publication = current.publications.find(
+        (p) => p.policy.policy_reference === "m3-t1-eipd-deshabilitada-v1"
+      );
+      if (!publication || publication.policy.activation !== "deshabilitada") {
+        setMessage("La publicación deshabilitada no está disponible. Consulta el registro.");
+        return;
+      }
+      if (current.selections.some((event) => event.publication_id === publication.id)) {
+        setMessage(
+          "Esta publicación ya fue seleccionada. Consulta el registro; no se seleccionará otra vez."
+        );
+        return;
+      }
+      setSelectionDraft({
+        publication_id: publication.id,
+        expected_revision: current.selector?.revision ?? 0,
+        reference: publication.policy.policy_reference,
+        hash: publication.policy_hash,
+      });
+      setMessage("Selección preparada. Revisa la política y la revisión antes de confirmar.");
+    } catch {
+      setAudit(null);
+      setMessage("No se pudo preparar la selección. Consulta el registro y comprueba tu acceso.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function selectDisabled() {
+    if (!local || busy || selectionAttempted || !selectionDraft) return;
+    setBusy(true);
+    setMessage("");
+    try {
+      const { data, error } = await createClient().auth.getSession();
+      if (error || !data.session) throw new Error("session");
+      setSelectionAttempted(true);
+      const headers = { Authorization: `Bearer ${data.session.access_token}` };
+      const response = await fetch("http://127.0.0.1:8001/admin/eipd/selections", {
+        method: "POST",
+        headers: { ...headers, "Content-Type": "application/json" },
+        cache: "no-store",
+        body: JSON.stringify({
+          publication_id: selectionDraft.publication_id,
+          expected_revision: selectionDraft.expected_revision,
+          rationale:
+            "Validacion operacional local M3-T1; seleccion deshabilitada, activacion bloqueada",
+          evidence_reference:
+            "docs/project/m3-t1-eipd-expediente-operativo.md#validacion-local-seleccion",
+        }),
+      });
+      setAudit(null);
+      setSelectionDraft(null);
+      if (response.status !== 201) {
+        setMessage(
+          response.status === 409
+            ? "Selección no admitida o revisión desactualizada. Consulta el registro; no se reintentará automáticamente."
+            : "Selección no confirmada. Consulta el registro antes de continuar."
+        );
+        return;
+      }
+      const result: {
+        event: Audit["selections"][number];
+        selector: NonNullable<Audit["selector"]>;
+      } = await response.json();
+      const auditResponse = await fetch("http://127.0.0.1:8001/admin/eipd/audit", {
+        headers,
+        cache: "no-store",
+      });
+      if (!auditResponse.ok) throw new Error("audit");
+      const current: Audit = await auditResponse.json();
+      const event = current.selections.find((e) => e.id === result.event.id);
+      const publication = current.publications.find((p) => p.id === selectionDraft.publication_id);
+      if (
+        !event ||
+        event.publication_id !== selectionDraft.publication_id ||
+        event.policy_hash !== selectionDraft.hash ||
+        event.revision !== selectionDraft.expected_revision + 1 ||
+        current.selector?.selection_id !== event.id ||
+        current.selector.revision !== event.revision ||
+        current.selector.publication_id !== event.publication_id ||
+        publication?.policy.activation !== "deshabilitada"
+      )
+        throw new Error("verification");
+      setAudit(current);
+      setMessage(
+        "Política deshabilitada seleccionada y confirmada en la auditoría. La activación EIPD permanece bloqueada."
+      );
+    } catch {
+      setAudit(null);
+      setSelectionDraft(null);
+      setMessage(
+        "No se pudo confirmar el resultado. Consulta el registro; no repitas la selección a ciegas."
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
     <main className="mx-auto max-w-2xl space-y-4 p-6">
       <h1 className="text-2xl font-semibold">Comprobar acceso administrativo</h1>
       <p>
-        Las comprobaciones utilizan tu sesión actual. Solo el botón de publicación guarda una
-        política deshabilitada.
+        Las consultas utilizan tu sesión actual. Publicar y seleccionar guardan cambios en el
+        registro local; la política permanece deshabilitada.
       </p>
       {local ? (
         <button
@@ -280,6 +401,45 @@ export default function EipdValidationPage() {
                 className="rounded bg-blue-700 px-4 py-2 text-white disabled:opacity-50"
               >
                 Publicar política deshabilitada
+              </button>
+            </div>
+          )}
+        </section>
+      )}
+      {local && (
+        <section
+          className="space-y-3 rounded border p-4"
+          aria-label="Selección local deshabilitada"
+        >
+          <h2 className="text-xl font-semibold">Seleccionar política deshabilitada</h2>
+          <p>
+            Se guardará un evento permanente y se actualizará la política seleccionada del registro
+            local. La política seguirá deshabilitada; las fuentes y la aceptación continuarán
+            pendientes.
+          </p>
+          <button
+            type="button"
+            onClick={prepareSelection}
+            disabled={busy || selectionAttempted}
+            className="rounded bg-blue-700 px-4 py-2 text-white disabled:opacity-50"
+          >
+            Preparar selección
+          </button>
+          {selectionDraft && (
+            <div className="space-y-2">
+              <p>Referencia: {selectionDraft.reference}</p>
+              <p>
+                Revisión actual consultada: {selectionDraft.expected_revision}. Nueva revisión
+                prevista: {selectionDraft.expected_revision + 1}.
+              </p>
+              <p>Estado: deshabilitada. La activación EIPD permanece bloqueada.</p>
+              <button
+                type="button"
+                onClick={selectDisabled}
+                disabled={busy || selectionAttempted}
+                className="rounded bg-blue-700 px-4 py-2 text-white disabled:opacity-50"
+              >
+                Seleccionar política deshabilitada
               </button>
             </div>
           )}

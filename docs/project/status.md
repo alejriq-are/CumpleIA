@@ -1,3 +1,48 @@
+## 2026-10-09 — M3-T1 §121: seleccion personal y registro confirmados
+
+El usuario aporta dos capturas: revision 1, publicaciones 1, selecciones 1,
+referencia m3-t1-eipd-deshabilitada-v1 deshabilitada y seleccionada. La segunda
+muestra rechazo preventivo de reseleccion: publicacion ya seleccionada, sin
+ofrecer otra seleccion. Se registra como evidencia visual del usuario; no como
+inspeccion independiente del JWT o de la solicitud HTTP original.
+
+Comprobacion tecnica readonly posterior mediante canal dedicado: snapshot validado,
+1 publicacion, 1 evento y selector revision 1; identidades publicacion/evento/selector
+y hash coinciden, actor de publicacion/seleccion consistente, fuentes/aceptacion
+pendientes y activacion deshabilitada. Sin nuevas escrituras ni datos personales,
+claves, tokens o capturas incorporados al repositorio.
+
+Queda confirmada la seleccion operacional deshabilitada y su persistencia coherente.
+No constituye aceptacion juridica ni habilitacion. Proximo: revisar el cierre de la
+validacion operacional y pendientes de provision/rotacion/retiro y aceptacion,
+manteniendo la ley fija. M3-T1 EN PROGRESO; activacion EIPD bloqueada.
+Sin commit/push.
+
+## 2026-10-09 — M3-T1 §121: seleccion local deshabilitada preparada
+
+La pantalla prepara la seleccion tras consultar GET /audit, toma publication_id,
+hash y revision vigentes y muestra referencia/revision antes del boton explicito.
+Solo admite la publicacion fija deshabilitada y no ofrece reseleccion de una
+publicacion ya presente en eventos. POST /selections existente mantiene autoridad,
+control optimista de revision y rechazo de politica habilitada. Tras 201 se consulta
+el snapshot y se contrastan evento, hash, revision y selector, conservando estado
+deshabilitado. No hay reintentos automaticos ante 409 o respuesta incierta.
+La seleccion operacional personal sigue pendiente; no se ejecuta por este paso.
+
+Type-check/lint frontend y formato aprobados. La primera suite en base operacional
+produjo 52 aprobadas/4 fallidas porque los casos esperan registro vacio y ya existe
+la publicacion personal. Se creo cumpleia_eipd_tests_20261009 vacia, solo esquema
+migrado a head, funciones auth y permisos app_user equivalentes; sin copiar datos
+personales ni cambiar URLs persistentes. Suite focalizada API/concurrencia en esa
+base: 56 aprobadas en 12.15 s. Usar esa base aislada en siguientes suites; no ejecutar
+pruebas de escritura contra el registro operacional. La base de pruebas queda local.
+
+Comprobacion readonly posterior del snapshot operacional: 1 publicacion deshabilitada,
+0 selecciones y sin selector (revision 0); registro personal preservado. No infiere
+solicitud HTTP personal de esta consulta tecnica. Fuentes complementarias y aceptacion
+integral pendientes; ley fija, M3-T1 EN PROGRESO y activacion bloqueada.
+Sin commit/push.
+
 ## 2026-10-09 — M3-T1 §120: publicacion personal confirmada por captura
 
 El usuario aporta captura posterior a Publicar politica deshabilitada. Muestra
