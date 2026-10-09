@@ -161,3 +161,37 @@ local y canal seguro. ConnectError previo en consulta de autenticacion externa
 no se considera resuelto por el contraste UID. Canal tecnico y autoridad local
 estan provisionados; selector ausente. Fuentes/aceptacion pendientes, activacion
 bloqueada; EN PROGRESO. Sin nueva suite ni commit/push.
+
+## §117 — Proceso local configurado e identidad externa verificada (2026-10-09)
+
+Base limpia 6474873b2cd0eb0a9e941322cbca04bb9e59d365. Archivo privado externo
+presente, modo 0600 validado; carga solo en memoria de nuevo proceso local,
+DEBUG=false, access_log=false, uvicorn en 127.0.0.1:8001. Proceso de validacion
+separado del backend existente 8000; .env habitual sin cambios y secreto no impreso.
+Sesión de herramienta que mantiene proceso: 30969 (referencia efimera, no garantiza
+persistencia tras cierre/reinicio de herramienta). No despliegue remoto ni servicio
+persistente del sistema; verificar salud antes de cada paso.
+
+DNS de proyecto de autenticacion accesible y JWKS publico GET 200. Reintento GET
+administrativo readonly de usuario Supabase -> 200; id/correo coinciden con perfil
+local y dato humano aportado, email confirmado, superadmin local true. ConnectError
+anterior ya no se reproduce en estas consultas. No se exponen PII/claves/respuestas.
+Esto acredita identidad externa por consulta administrativa, no JWT de sesion personal.
+
+Proceso nuevo health 200; POST ambas rutas EIPD sin token -> 401. No se publica ni
+selecciona politica ni modifica perfil. Credencial privada del canal cargada por
+proceso iniciado; pool inicializacion diferida, prueba readonly del canal acreditada
+§113. No inferir solicitud autenticada por salud o rechazo anonimo.
+
+Se intento inspeccion de navegador mediante herramienta CUA; inicializacion falla
+por helper/setup refresh, sin estado de navegador disponible. Habilidad instalada
+leida (computer-use 26.1002.52244); ruta anterior del catalogo ausente, encontrada
+mediante busqueda local. No bypass de automatizacion ni extraccion de tokens.
+Pendiente sesion autentica del usuario por canal local seguro. No pedir contrasena/
+JWT por chat ni generar token sintetico como evidencia operacional.
+
+Proximo: solicitud autenticada con JWT real del staff contra proceso configurado,
+politica deshabilitada y auditoria; requiere acceso a sesion del usuario. Fuentes/
+aceptacion/provision integral siguen pendientes; activacion bloqueada. Sin nueva
+suite, ultima completa 3654 §106 y focalizadas 31 §110. M3-T1 EN PROGRESO.
+Sin commit/push.

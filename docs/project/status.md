@@ -1,3 +1,12 @@
+## 2026-10-09 — M3-T1: backend local configurado y Supabase verificado
+
+§117 proceso separado 127.0.0.1:8001, secreto externo en memoria/logs limitados,
+health 200 y ambas rutas 401 sin token. DNS/JWKS 200 y consulta admin Supabase 200:
+vinculo/correo/confirmacion coinciden con staff local autorizado. No acredita JWT
+personal. CUA navegador no inicia (helper/setup refresh); sesion real pendiente.
+Sin politicas nuevas ni .env habitual cambiado. EN PROGRESO, activacion bloqueada.
+Sin nueva suite ni commit/push.
+
 ## 2026-10-09 — M3-T1: UID contrastado y HTTP anonimo probado
 
 §116 UID aportado coincide con perfil local unico/superadmin=true. Backend local

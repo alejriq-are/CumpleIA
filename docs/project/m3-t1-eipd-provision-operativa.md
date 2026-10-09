@@ -234,3 +234,13 @@ Autorizacion concreta recibida; login limitado creado y credencial privada exter
 permisos/auditoria verificados sin selector. .env habitual no alterado; solo proceso
 de diagnostico carga secreto. Backend HTTP, identidad staff, humo/seleccion y retirada
 pendientes. No trasladar valor del archivo privado a evidencia ni commitearlo.
+
+## 11. Proceso de validacion local (§117)
+
+Proceso efimero separado 127.0.0.1:8001 carga archivo privado mediante dotenv en
+memoria, DEBUG=false/access_log=false; backend previo 8000 no reiniciado ni .env
+modificado. Health 200 y rutas 401 sin token. DNS/JWKS accesibles; identidad staff
+contrastada por lectura administrativa Supabase 200. Prueba JWT de sesion personal
+pendiente: no sustituirla por consulta admin, token sintetico o flags locales.
+Tras reinicio/cierre comprobar proceso/config antes de continuar; referencia de
+sesion efimera en expediente. No pegar secretos/tokens en evidencia ni chat.
