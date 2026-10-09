@@ -438,3 +438,9 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] Screening sobre ContextV2/frontera V2 conserva todos los motivos y bloquea continuacion/confirmacion.
 - [x] Contratos historicos separados; once casos nuevos.
 - [ ] Composicion V3 y posterior API/metadatos de eventos/aceptacion.
+
+### M3-T1 §146 — Composicion V3 de investigacion
+
+- [x] Contratos cerrados y composicion pura con ContextV2, screening V3 y resolucion versionada.
+- [x] Motivos completos, vigencias separadas, revision ajena/obsoleta visible y confirmacion bloqueada.
+- [ ] Lectura API versionada, escritor/metadatos de eventos y aceptacion revisada.

@@ -9514,3 +9514,32 @@ La suite HTTP ampliada no se repitio porque este modulo aun no se conecta a API.
 Proximo: composicion V3 con diagnosticos de investigacion y bloqueo conservador;
 luego integracion API/metadatos de eventos y aceptacion revisada.
 Ley fija; M3-T1 EN PROGRESO. Activacion EIPD bloqueada. Sin commit/push.
+
+## 2026-10-09 — M3-T1 §146: composicion V3 de investigacion
+
+Nuevo eipd_controls_v3.py mantiene contratos separados: entrada cerrada con ContextV2,
+resolucion StoredV1/V2 explicita, evento humano y politica/identidad reales de servidor.
+Composicion pura sin DB ni escritura. STAGES_V3 incorpora research sin modificar
+las etapas ni contratos historicos. Conserva deteccion V3 completa, evaluacion
+ordinaria, motivos de frontera, asociacion/documento research y dispatch de resolucion.
+Preparacion, revision documental y vigencia de politica se muestran por separado.
+Revision de otro tenant/expediente se conserva visible como obsoleta; evento V1 no
+acredita cobertura research. Identidad sin evento humano y versiones desconocidas
+se rechazan. Fecha de evaluacion explicita; resultado determinista sin mutacion.
+
+Politica V1 solo representa rutas sensibles historicas: se evalúan barreras generales
+con sin_resolver y se agrega politica_investigacion_no_implementada sin ampliar V1.
+Incluso una identidad coincidente y evento continuar vigente conservan el bloqueo
+investigacion_confirmacion_bloqueada. can_confirm fijo false; no promocion automatica
+por preparacion documental ni fuentes declaradas. API/eventos/politica operativa y
+registro local permanecen sin cambios. Integracion API y metadatos de eventos siguen
+pendientes; no se declara terminada la etapa ni habilitada la ruta.
+
+Dieciocho casos nuevos cubren contratos, estado conservador, diagnosticos completos,
+resolucion V1/V2, revision positiva/negativa/obsoleta/otro expediente, politica e identidad.
+550 pruebas aprobadas en 30.93 s en base aislada protegida: 366 focalizadas
+y 184 regresiones historicas de composicion/politica. Black/Ruff aprobados.
+Suite HTTP ampliada no repetida: modulo puro aun no conectado a API.
+Proximo: delimitar e integrar lectura API versionada de composicion/resolucion antes
+de ampliar el escritor y los metadatos auditables de eventos. Aceptacion pendiente.
+Ley fija; M3-T1 EN PROGRESO, investigacion y activacion EIPD bloqueadas. Sin commit/push.
