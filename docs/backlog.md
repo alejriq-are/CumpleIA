@@ -298,4 +298,5 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] M3-T1 §107: revalidacion documental de fuentes base/busqueda complementaria y matriz de trazabilidad a commits; sin cambio de gates ni nueva suite.
 - [x] M3-T1 §108: procedimiento de provision deshabilitada preparado, JSON de ejemplo validado; sin provision real ni cambios de gates.
 - [x] M3-T1 §109: preflight readonly limitado y seis pruebas nuevas; 23 focalizadas aprobadas, sin escrituras/provision operativa.
-- [ ] M3-T1: ampliar diagnostico de permisos/evidencia y acreditar provision real; completar instrumentos complementarios y decision de aceptacion real antes de habilitar.
+- [x] M3-T1 §110: permisos efectivos de grupo/login/public/RLS en preflight e informe v1; ocho nuevas, 31 focalizadas aprobadas.
+- [ ] M3-T1: expediente y validacion de provision real sobre destino/staff/responsable acreditados; instrumentos complementarios y decision de aceptacion real antes de habilitar.

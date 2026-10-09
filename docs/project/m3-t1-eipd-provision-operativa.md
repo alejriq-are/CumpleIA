@@ -200,3 +200,21 @@ No verifica exhaustivamente grupo/grants de dominio/red/entorno; las comprobacio
 del resto del procedimiento siguen pendientes. No sustituir smoke JWT/HTTP por
 preflight ni usar su ok como permiso de habilitar. §109 probado con fixtures locales,
 no ejecutado contra un entorno operativo real.
+
+## 8. Alcance ampliado del informe (§110)
+
+Se mantiene el comando y codigos de §109. Ahora verifica atributos/membresias/
+propiedad del grupo, ADMIN OPTION del login, CREATE public, RLS y permisos de tres
+tablas globales, accesos efectivos fuera de alcance sobre relaciones public, incluidos
+PUBLIC/grants por columna. No verifica exhaustivamente funciones/secuencias/otros
+schemas ni contenido de politicas RLS, ni sustituye head/migraciones revisados.
+
+JSON incluye report_version=1 y permissions_verified=true solo tras completar esas
+comprobaciones; permission_scope=public_relations_and_role_flags. Campos
+migration_head_verified/environment_identity_verified/personal_authentication_verified/
+activation_authorized=false distinguen el diagnostico de la validacion operativa.
+Registrar informe/exit junto con referencia del entorno, commit/head comprobados por
+mantenimiento, fecha/responsable y resultados HTTP. No conceder SELECT sobre
+alembic_version al canal solo para completar evidencia: comprobar head por mantenimiento.
+Un ok no acredita el destino correcto ni acepta una politica. Si faltan expediente,
+identidad o resultados reales, conservar PENDIENTE. §110 no ejecuta provision real.

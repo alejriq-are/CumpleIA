@@ -1,3 +1,13 @@
+## 2026-10-09 — M3-T1: permisos efectivos de preflight
+
+§110 grupo/login/RLS/privilegios de tres tablas y acceso fuera de alcance public,
+columnas/PUBLIC incluidos. Informe v1 con limites de identidad/head/JWT/activacion.
+Ocho nuevas con objetos/grants temporales; 31 focalizadas aprobadas en 3.26 s.
+Sin nueva suite completa, ultima 3654 §106; sin ejecucion operativa acreditada.
+Proximo expediente de entorno/destino/identidad/responsable y resultados preflight/
+HTTP acordados. Fuentes/aceptacion pendientes, ley fija, EN PROGRESO, activacion
+bloqueada. Sin commit/push.
+
 ## 2026-10-09 — M3-T1: preflight administrativo readonly
 
 §109 script de diagnostico limitado READ ONLY/rollback, login/rol/perfiles y snapshot

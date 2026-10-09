@@ -8728,3 +8728,34 @@ Proximo: ampliar diagnostico de permisos de grupo/dominio y evidencia de entorno
 sin secretos; ejecutar provision solo sobre destino/identidad acreditados. Fuentes/
 aceptacion real pendientes, activacion bloqueada, ley fija, M3-T1 EN PROGRESO.
 Sin commit/push.
+
+## §110 — Permisos efectivos y limites de evidencia del preflight (2026-10-09)
+
+Base f0f5224118886cb21a5c8024ccfd1728bce66391. Preflight readonly amplía catalogo:
+grupo NOLOGIN/NOINHERIT sin privilegios amplios, membresias superiores ni propiedad
+de relaciones; app_user sin membresia administrativa; login sin ADMIN OPTION;
+login/grupo sin CREATE sobre public. Tres tablas globales con RLS y SELECT/INSERT,
+UPDATE solo selector; sin DELETE/TRUNCATE/REFERENCES/TRIGGER ni UPDATE por columna
+en publicaciones/eventos. Rechaza permisos efectivos de login sobre relaciones
+public y del grupo fuera de las tres admitidas, incluidos grants PUBLIC/por columna.
+No consulta filas del dominio tenant. No repara permisos ni modifica configuracion.
+
+Informe versionado report_version=1, permissions_verified=true con alcance explicito
+public_relations_and_role_flags solo al completar chequeos. environment_identity_verified
+/migration_head_verified/personal_authentication_verified/activation_authorized=false:
+no acredita destino, head operativo, JWT ni decision de activacion. No cubre todo
+privilegio de funciones/secuencias/otros schemas ni equivalencia del cuerpo de RLS;
+requiere revisar migraciones/config/entorno y ejecutar matriz HTTP por separado.
+
+Ocho PostgreSQL nuevas: grants efectivos SELECT tabla/columna al grupo/login/PUBLIC
+sobre tabla temporal vacia, ADMIN OPTION del login temporal y CREATE public del login.
+Rechazos observados y objetos/grants eliminados por cleanup; canal normal vuelve a
+superar chequeos. 31 focalizadas con canal y preflight anteriores: 3.26 s; formato/
+diff correctos. No nueva suite completa; ultima 3654 §106. Sin migracion/grants
+persistentes/credenciales reales ni ejecucion contra entorno operativo acreditado.
+
+Proximo: completar expediente de destino/commit/head/login/staff/responsable y
+registrar resultados del preflight/HTTP en entorno acordado. No ampliar privilegios
+para hacer pasar el informe; corregir provision conforme contrato. Fuentes oficiales
+complementarias/aceptacion real aun pendientes, activacion bloqueada. Ley reformada
+base fija; M3-T1 EN PROGRESO integral. Sin commit/push.
