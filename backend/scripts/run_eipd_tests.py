@@ -14,6 +14,7 @@ TEST_DATABASE = "cumpleia_eipd_tests_20261009"
 EXPECTED_HEAD = "b17d95c0286f"
 TARGETS = (
     "tests/test_eipd_test_runner.py",
+    "tests/test_services_research.py",
     "tests/test_eipd_channel_lifecycle.py",
     "tests/test_api_eipd_admin.py",
     "tests/test_api_eipd_admin_concurrency.py",

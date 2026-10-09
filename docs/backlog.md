@@ -359,4 +359,5 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 ## M3-T1 §128 — investigacion documental
 
 - [x] Delimitar primer incremento de investigacion con datos no sensibles/adultos y LIA, completitud/aplicabilidad y fuente primaria.
-- [ ] Implementar schema/evaluador puro segun docs/project/m3-t1-investigacion-diseno.md; integracion y confirmacion siguen pendientes.
+- [x] Implementar schema/evaluador puro §129; sin persistencia ni gates, can_confirm=false.
+- [ ] Ampliar casos de aplicabilidad/limites y diseñar binding nuevo antes de integrar persistencia/API.

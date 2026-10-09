@@ -73,3 +73,26 @@ resuelven con este contrato inicial; mantener evaluaciones existentes de esas ru
 - Pruebas de escritura solo mediante base aislada; no tocar selector EIPD revision 1.
 
 Pendiente implementacion. M3-T1 EN PROGRESO; activacion EIPD bloqueada.
+
+## 2026-10-09 — M3-T1 §129: contrato/evaluador puro de investigacion
+
+Se agregan app/schemas/research.py (ResearchAssessmentV1 cerrado, borrador opcional,
+revalidacion de instancias) y app/services/research.py. Evaluador puro reutiliza LIA,
+canonizacion de finalidad y RAT; exige base interes_legitimo y cobertura completa
+conservadora, deriva sensibles/menores/vulnerabilidad a revision. Completa finalidad,
+interes publico, exclusividad, medidas/evidencia y conservacion. Difusion si exige
+documentacion de anonimizacion; no la hace no aplicable y material residual requiere
+revision; pendiente deja aplicabilidad sin resolver. No verifica eficacia material.
+
+Resultado completo solo describe preparacion documental; can_confirm siempre false.
+No integra persistencia/API/binding ni levanta validador_no_implementado especial.
+Snapshots y hashes historicos intactos; sin migracion ni escrituras operacionales.
+Pruebas nuevas: ausencia de campos, si/no/pendiente, difusion/material residual,
+alcance, finalidad/base/LIA incompatible, sensibles/menores, schema cerrado,
+revalidacion, determinismo y entradas sin cambios. Runner aislado ampliado para
+incluir pruebas de investigacion; Black/Ruff aprobados. Suite aislada: 87 pruebas
+aprobadas en 13.20 s (24 nuevas de investigacion y 63 previas). No nueva suite completa.
+
+Proximo: ampliar casos de aplicabilidad y limites antes de diseñar binding nuevo e
+integracion persistente. Ley fija, M3-T1 EN PROGRESO y activacion EIPD bloqueada.
+Sin commit/push.
