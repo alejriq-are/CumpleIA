@@ -1,3 +1,13 @@
+## 2026-10-08 — M3-T1: fuentes y trazabilidad de aceptacion
+
+§107 revision documental sobre HEAD 97d4fd29920e98a7b0a94714b04ae43e7cb5d010 limpio.
+BCN/Diario Oficial reabiertos; instrumento complementario Agencia no verificado en
+busqueda acotada (sin afirmar inexistencia). Matriz actualizada con commits §§103–106,
+head local b17d95c0286f y ultima suite 3654 §106; sin nueva suite ni cambio de gates.
+Aceptacion real/fuentes complementarias/provision operativa pendientes. Proximo:
+procedimiento verificable de provision con politica deshabilitada. Ley fija,
+EN PROGRESO integral; activacion bloqueada. Sin commit/push.
+
 ## 2026-10-08 — M3-T1: concurrencia administrativa HTTP
 
 §106 doce pruebas reales de revocacion previa/posterior, commit/rollback/cancelacion,

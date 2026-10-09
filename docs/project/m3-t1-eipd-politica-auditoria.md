@@ -2,7 +2,8 @@
 
 Fecha: 2026-10-07. Checkpoint §89. Estado: contratos §90, persistencia §§91–92, servicios §93 y resolver limitado §94
 implementados; acciones/evidencia y concurrencia §§95–99 conectadas; autoridad
-personal pendiente, contrato §100.
+personal/pool/transporte/concurrencia §§101–106 implementados y probados localmente;
+fuentes complementarias/aceptacion real/provision operativa pendientes (§107).
 Base: §§82–88; Ley 21.719 / Ley 19.628 reformada fija por instruccion del usuario.
 Este contrato describe controles de producto; no introduce requisitos legales ni
 acredita verificacion de fuentes. Acciones admiten solo politica auditada deshabilitada.
@@ -198,3 +199,12 @@ autoridad -> 403, pool sin identidad residual. Dos selecciones revision 0 -> 201
 con un evento/selector; dos publicaciones referencia identica -> 201/409 con una
 fila, incluyendo conflicto real 23505. 97 focalizadas conjuntas aprobadas.
 Fuentes/aceptacion/provision operativa aun pendientes, activacion bloqueada.
+
+### Trazabilidad vigente (§107)
+
+Head de evidencia 97d4fd29920e98a7b0a94714b04ae43e7cb5d010, suite 3654 §106;
+head local DB b17d95c0286f. Matriz vigente en m3-t1-revision-aceptacion.md §107.
+Texto base revalidado (BCN/Diario Oficial), instrumentos complementarios Agencia
+no verificados en busqueda acotada. Sin accepted_by/aceptacion real ni provision
+operativa acreditados. Mantener politica deshabilitada; pruebas y declaraciones
+editables de una politica no constituyen verificacion de fuente ni aceptacion.

@@ -8649,3 +8649,38 @@ Proximo: revisar fuentes oficiales y trazabilidad de aceptacion tecnica para el
 control EIPD, sin habilitar mientras falten requisitos; registrar/probar provision
 operativa por separado. Ley 21.719/19.628 reformada base fija independiente del
 calendario; M3-T1 sigue EN PROGRESO integral. Sin commit/push en este paso.
+
+## §107 — Revalidacion de fuentes y trazabilidad tecnica (2026-10-08)
+
+Base Git limpia/sincronizada: 97d4fd29920e98a7b0a94714b04ae43e7cb5d010 (§106).
+Registro m3-t1-eipd-fuentes.md actualizado: BCN por portal nuevo, art15ter localizado;
+Diario Oficial CVE 2583630 PDF abierto. Busqueda acotada no verifica instrumento
+complementario especifico de Agencia; no acredita inexistencia. Ley reformada
+base fija independiente del calendario; no reinterpretar consulta facultativa como
+aprobacion juridica universal. No version/autoridad/aceptacion inventadas.
+
+| Criterio actual | Evidencia trazable | Estado |
+| --- | --- | --- |
+| Autoridad y escritores personales | 07bc7dd8ad06a16f5e32efc17ac67efa1036e356, §§102–103 | Implementado/probado |
+| Pool separado y JWT/sub local | 01d27b0c44cec33dd2dfa2f160f0e6e3f3dc3257, §104 | Implementado/probado local |
+| Rutas HTTP administrativas | 56dba76a0052eccb766f77ac91ba59c62d1f922d, §105 | Implementado/probado local |
+| Revocacion/carreras/rollback/cancelacion HTTP | 97d4fd29920e98a7b0a94714b04ae43e7cb5d010, §106 | Doce nuevas; 97 focalizadas, 11.73 s |
+| Suite completa del contenido §106 | Checkpoint §106; pruebas antes del commit, contenido luego versionado | 3654 passed, 369.30 s |
+| Head local de migraciones | alembic current consultado §107 | b17d95c0286f (head) |
+| Fuentes legales base | Registro F1/F4 y revalidacion §107 | Texto consultado, sin certificacion exhaustiva de vigencia |
+| Instrumentos complementarios Agencia | Registro §107 | PENDIENTE; sin instrumento/version verificados |
+| Decision de aceptacion real con responsable/evidencia | Sin aceptacion trazable registrada | PENDIENTE; pruebas no equivalen a accepted_by |
+| Provision/validacion operativa real | Solo roles/credenciales sinteticos de tests | PENDIENTE; sin despliegue acreditado |
+| Activacion excepcional real | Guardias productivas conservadas | BLOQUEADA |
+
+La matriz inicial de este documento y checkpoints anteriores son historicos;
+para autoridad/pool/transporte/head actual prevalece esta evidencia. No se declara
+aceptacion integral ni se genera objeto de politica con fuentes verificadas,
+accepted_by, validation_commit o activation habilitada. Este inventario asocia
+pruebas a commits; no reemplaza decision de aceptacion ni validacion operativa.
+
+Solo documentacion en §107: diff --check correcto; no nueva suite ni migracion.
+Ultima suite completa conserva 3654 §106. Proximo paso independiente: procedimiento
+verificable de provision operativa del canal con politica deshabilitada, sin
+credenciales reales ni activacion. Completar fuentes/aceptacion antes de habilitar.
+M3-T1 EN PROGRESO integral. Sin commit/push en este paso.
