@@ -31,6 +31,7 @@ from app.schemas.licitud import (
     BoundResearchAssessmentV1,
     EipdControlCompositionOut,
     EipdControlCompositionV2Out,
+    EipdControlCompositionV3Out,
     EipdResolutionReviewIn,
     LegalAssessmentDraftCreate,
     LegalAssessmentDraftUpdate,
@@ -72,12 +73,14 @@ from app.services.eipd_controls import (
     compose_eipd_controls_v1,
     compose_eipd_controls_v2,
 )
+from app.services.eipd_controls_v3 import compose_eipd_controls_v3
 from app.services.eipd_policy import (
     build_eipd_review_policy_metadata_v1,
     derive_eipd_review_policy_identity_v1,
 )
 from app.services.eipd_policy_store import (
     lock_eipd_policy_selector_v1,
+    read_eipd_policy_audit_snapshot_v1,
     read_selected_eipd_policy_v1,
     resolve_eipd_policy_snapshot_for_transaction_v1,
 )
@@ -89,6 +92,7 @@ from app.services.eipd_resolution import (
     evaluate_eipd_resolution_document_v1,
     evaluate_eipd_resolution_review_prerequisites_v1,
 )
+from app.services.eipd_resolution_binding_v2 import EipdResolutionContextV2
 from app.services.eipd_review_v2 import evaluate_eipd_resolution_review_prerequisites_v2
 from app.services.eipd_screening_v2 import evaluate_eipd_screening_v2
 from app.services.geolocation import evaluate_geolocation_assessment_v1
@@ -1061,6 +1065,18 @@ def build_eipd_resolution_context_from_assessment_v1(assessment, snapshot):
     )
 
 
+def build_eipd_resolution_context_from_assessment_v2(assessment, snapshot):
+    """Lectura del material persistido actual; nunca repara asociaciones."""
+    legacy = build_eipd_resolution_context_from_assessment_v1(assessment, snapshot)
+    return EipdResolutionContextV2.model_validate(
+        {
+            **legacy.model_dump(mode="python"),
+            "context_schema_version": 2,
+            "research_assessment": assessment.research_assessment,
+        }
+    )
+
+
 async def update_legal_assessment_draft_v1(
     db: AsyncSession,
     organization_id: uuid.UUID,
@@ -1896,6 +1912,46 @@ def _compose_assessment_eipd_controls_v2(
     ).model_dump(mode="json")
 
 
+def _compose_assessment_eipd_controls_v3(
+    assessment,
+    organization_id,
+    context,
+    rat_current,
+    latest_review,
+    identity,
+    evaluated_on,
+    policy,
+):
+    result = compose_eipd_controls_v3(
+        {
+            "assessment": _assessment_eipd_composition_input_v1(
+                assessment, organization_id, context, rat_current, latest_review
+            ),
+            "policy": policy,
+            "latest_review_policy": identity,
+        },
+        evaluated_on=evaluated_on,
+    )
+    data = asdict(result)
+    data.update(
+        evaluation_version=3,
+        can_confirm=result.can_confirm,
+        latest_review_policy=identity.model_dump(mode="json") if identity else None,
+    )
+    detection = data["detection_v3"]
+    detection.update(
+        evaluation_version=3,
+        can_continue=result.detection_v3.can_continue,
+        can_confirm=result.detection_v3.can_confirm,
+    )
+    detection["frontier"].update(
+        is_frontier_prepared=result.detection_v3.frontier.is_frontier_prepared,
+        can_confirm=result.detection_v3.frontier.can_confirm,
+    )
+    data["resolution"]["can_confirm"] = result.resolution.can_confirm
+    return EipdControlCompositionV3Out.model_validate(data).model_dump(mode="json")
+
+
 async def confirm_legal_assessment_v1(
     db: AsyncSession,
     organization_id: uuid.UUID,
@@ -2268,6 +2324,7 @@ async def get_legal_assessment_readiness_v1(
     eipd_resolution = None
     eipd_controls = None
     eipd_controls_v2 = None
+    eipd_controls_v3 = None
     evaluated_on = datetime.now(UTC).date()
     try:
         if assessment.legal_basis == "consentimiento_art12":
@@ -2499,6 +2556,38 @@ async def get_legal_assessment_readiness_v1(
                 evaluated_on,
                 await _selected_disabled_eipd_policy_v1(db),
             )
+        if research is not None:
+            try:
+                policy_state = await read_eipd_policy_audit_snapshot_v1(db)
+            except ValueError:
+                raise HTTPException(
+                    status_code=409, detail={"code": "politica_eipd_no_disponible"}
+                ) from None
+            publication = next(
+                (
+                    p
+                    for p in policy_state.publications
+                    if policy_state.selector is not None
+                    and p.id == policy_state.selector.publication_id
+                ),
+                None,
+            )
+            eipd_controls_v3 = _compose_assessment_eipd_controls_v3(
+                assessment,
+                organization_id,
+                (
+                    build_eipd_resolution_context_from_assessment_v2(
+                        assessment, current_snapshot
+                    )
+                    if current_snapshot is not None
+                    else None
+                ),
+                rat_current,
+                review_payload,
+                review_identity,
+                evaluated_on,
+                publication.policy if publication else None,
+            )
         blockers.extend(
             {k: v for k, v in item.items() if k != "status_code"}
             for item in transversal_blockers
@@ -2530,6 +2619,7 @@ async def get_legal_assessment_readiness_v1(
             "eipd_v2": eipd_v2,
             "eipd_controls": eipd_controls,
             "eipd_controls_v2": eipd_controls_v2,
+            "eipd_controls_v3": eipd_controls_v3,
             "special": asdict(special),
             "confirmation_blockers": blockers,
             "pending_controls": [

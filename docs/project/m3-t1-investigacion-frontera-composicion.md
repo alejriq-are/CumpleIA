@@ -169,3 +169,30 @@ Suite HTTP ampliada no repetida: modulo puro aun no conectado a API.
 Proximo: delimitar e integrar lectura API versionada de composicion/resolucion antes
 de ampliar el escritor y los metadatos auditables de eventos. Aceptacion pendiente.
 Ley fija; M3-T1 EN PROGRESO, investigacion y activacion EIPD bloqueadas. Sin commit/push.
+
+## 2026-10-09 — M3-T1 §147: lectura API de composicion V3
+
+Readiness incorpora eipd_controls_v3 opcional cuando hay expediente research o
+regimen investigacion detectado. ContextV2 se construye con RAT actual y documentos
+persistidos sin rebind/reparacion. Se agrega salida cerrada V3, frontera V2 y
+resolucion versionada; banderas can_confirm/can_continue/is_frontier_prepared false
+son explicitas. Contratos V1/V2 y sus acciones no se reinterpretan.
+
+La lectura comparte el ultimo evento/identidad obtenidos por consulta unica de
+historial; consulta el registro real de politica. Selector ausente produce politica
+null y bloqueo politica_no_disponible, sin bootstrap ni fallback sintetico. Registro
+invalido conserva rechazo conservador. Politica V1 no acredita ruta investigacion.
+No cambia confirmacion/revision, escritor de resolucion, eventos ni base operacional.
+La resolucion StoredV2 sigue pendiente de integracion de escritura y metadatos.
+
+Pruebas HTTP nuevas verifican lectura sin INSERT/UPDATE/DELETE, historial consultado
+una vez, sin eventos sinteticos, query parameters sin autoridad, limites entre tenants,
+asociacion vigente/obsoleta, ordinario sin research con V3 null y OpenAPI cerrado.
+Regresion pura adicional corrige propagacion de issues research sin question_id:
+el campo es opcional en el agregador, sin perder los motivos de incompletitud.
+Suite protegida completa mas readiness V2: 570 pruebas aprobadas en 455.49 s.
+Incluye 174 pruebas HTTP de licitud, tres casos HTTP/OpenAPI nuevos y una
+regresion pura de expediente research incompleto. Black/Ruff aprobados.
+Proximo: integracion versionada del escritor de resolucion y metadatos auditables
+sin activar EIPD ni confirmar investigacion; aceptacion revisada pendiente.
+Ley fija; M3-T1 EN PROGRESO. Activacion EIPD bloqueada. Sin commit/push.

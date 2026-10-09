@@ -124,7 +124,11 @@ def _compose_v3(value, *, evaluated_on: date, policy_context):
     def add(stage, items, prefix=""):
         for item in items:
             issue(
-                stage, prefix + item.field, item.code, item.category, item.question_id
+                stage,
+                prefix + item.field,
+                item.code,
+                item.category,
+                getattr(item, "question_id", None),
             )
 
     if data.assessment_status != "borrador":

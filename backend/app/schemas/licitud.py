@@ -1518,6 +1518,73 @@ class EipdControlCompositionV2Out(EipdControlCompositionOut):
     latest_review_policy: EipdReviewPolicyIdentityOut | None
 
 
+class ResearchAssociationReadinessOut(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    result: Literal["vigente", "requiere_revision"]
+    issues: list[str]
+
+
+class EipdFrontierReadinessV2Out(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    result: Literal["incompleto", "requiere_revision"]
+    route: Literal["investigacion_no_sensible_adultos", "sin_resolver"]
+    issues: list[ReadinessIssueOut]
+    research: DocumentaryReadinessOut | None
+    research_association: ResearchAssociationReadinessOut | None
+    special: SpecialReadinessOut | None
+    screening: EipdReadinessOut | None
+    is_frontier_prepared: Literal[False]
+    can_confirm: Literal[False]
+
+
+class EipdReadinessV3Out(EipdReadinessOut):
+    model_config = ConfigDict(extra="forbid")
+    evaluation_version: Literal[3]
+    frontier: EipdFrontierReadinessV2Out
+    can_continue: Literal[False]
+    can_confirm: Literal[False]
+
+
+class EipdCompositionIssueV3Out(ReadinessIssueOut):
+    model_config = ConfigDict(extra="forbid")
+    stage: Literal[
+        "state",
+        "rat",
+        "ordinary",
+        "research",
+        "frontier",
+        "detection",
+        "resolution",
+        "sources",
+        "activation",
+        "review",
+    ]
+
+
+class EipdResolutionDocumentVersionedOut(EipdResolutionDocumentReadinessOut):
+    binding_version: int | None = Field(strict=True, ge=1, le=2)
+    can_confirm: Literal[False]
+
+
+class EipdControlCompositionV3Out(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    evaluation_version: Literal[3]
+    preparation_result: Literal["requiere_revision", "incompleto"]
+    ordinary: EipdOrdinaryControlOut | None
+    detection_v3: EipdReadinessV3Out
+    resolution: EipdResolutionDocumentVersionedOut
+    review_state: EipdResolutionReviewStateOut
+    preparation_issues: list[EipdCompositionIssueV3Out]
+    review_blockers: list[EipdCompositionIssueV3Out]
+    confirmation_blockers: list[EipdCompositionIssueV3Out]
+    policy: EipdPolicyReadinessOut
+    review_policy_status: Literal[
+        "sin_revision", "sin_identidad", "vigente", "obsoleta"
+    ]
+    latest_review_policy: EipdReviewPolicyIdentityOut | None
+    can_confirm: Literal[False]
+
+
 class ConfirmationBlockerOut(BaseModel):
     field: str
     code: str
@@ -1554,6 +1621,7 @@ class LegalAssessmentReadinessOut(BaseModel):
     eipd_v2: EipdReadinessV2Out | None = None
     eipd_controls: EipdControlCompositionOut | None = None
     eipd_controls_v2: EipdControlCompositionV2Out | None = None
+    eipd_controls_v3: EipdControlCompositionV3Out | None = None
     special: SpecialReadinessOut
     confirmation_blockers: list[ConfirmationBlockerOut]
     pending_controls: list[str]

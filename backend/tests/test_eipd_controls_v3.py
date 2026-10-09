@@ -213,3 +213,15 @@ def test_unknown_resolution_binding_rejected(composition):
     composition["assessment"]["resolution"]["context_binding"]["binding_version"] = 99
     with pytest.raises(ValidationError):
         compose(composition)
+
+
+def test_incomplete_research_issues_are_composed(composition):
+    composition["assessment"]["context"]["research_assessment"]["assessment"][
+        "public_interest_analysis"
+    ] = None
+    result = compose(composition)
+    assert not result.can_confirm
+    assert any(
+        i.stage == "research" and i.code == "campo_obligatorio"
+        for i in result.preparation_issues
+    )
