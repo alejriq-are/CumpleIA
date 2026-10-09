@@ -1,9 +1,16 @@
 # M3-T1 — Revisión de aceptación
 
-Fecha de actualizacion: 2026-10-09 (§117). Estado: EN PROGRESO. Revisión documental y de código;
+Fecha de actualizacion: 2026-10-09 (§122). Estado: EN PROGRESO. Revisión documental y de código;
 no modifica reglas ni amplía el alcance. Última suite completa registrada:
 3654 passed (§106), posterior a concurrencia administrativa HTTP.
 Checkpoints inferiores son históricos; el total no acredita cierre integral.
+
+## Estado actual del canal operativo local
+
+Secuencia personal local validada hasta politica deshabilitada seleccionada, revision 1.
+Ver [cierre delimitado §122](m3-t1-eipd-cierre-validacion-local.md). Pendientes de
+rotacion/retiro, fuentes, aceptacion y alcance integral; no confundir esta secuencia
+con cierre de M3-T1 ni con habilitacion excepcional.
 
 ## Fuentes y criterio
 
@@ -19,7 +26,7 @@ certifica todas las combinaciones ni constituye validación jurídica externa.
 | Criterio | Estado observado | Evidencia |
 | --- | --- | --- |
 | Evaluación por finalidad, serie/versiones y alcance M2 | Implementado y probado | schemas/licitud.py; services/licitud.py; tests/test_services_licitud.py; tests/test_api_licitud.py |
-| Tablas, constraints, índices, JSONB y migraciones | Implementado; head local b51d3f6a9c20 | db/models.py; alembic/versions/5997a757f17b_modulo3_licitud_persistencia.py y migraciones posteriores |
+| Tablas, constraints, índices, JSONB y migraciones | Implementado; head local b17d95c0286f verificado §122 | db/models.py; alembic/versions/5997a757f17b_modulo3_licitud_persistencia.py y migraciones posteriores |
 | Tenant/RLS y FK compuestas | Probado en PostgreSQL/app_user | tests/test_rls_isolation_licitud.py y tests/test_api_licitud.py |
 | Canonización, hash y snapshot desde M2 | Implementado y probado | tests/test_services_licitud.py; HTTP con RAT real |
 | Seis bases ordinarias y preparación propia | Implementado y probado | services/{consentimiento,lia,contract,legal_obligation,rights_defense,economic_obligations}.py; pruebas de servicios/API |
@@ -3665,4 +3672,27 @@ Queda confirmada la seleccion operacional deshabilitada y su persistencia cohere
 No constituye aceptacion juridica ni habilitacion. Proximo: revisar el cierre de la
 validacion operacional y pendientes de provision/rotacion/retiro y aceptacion,
 manteniendo la ley fija. M3-T1 EN PROGRESO; activacion EIPD bloqueada.
+Sin commit/push.
+
+## 2026-10-09 — M3-T1 §122: cierre delimitado de validacion local
+
+La secuencia acceso personal -> consulta -> publicacion -> seleccion deshabilitada
+queda documentada por capturas aportadas por el usuario (§118–121), y snapshot
+tecnico posterior readonly coherente. Este cierre solo cubre esa secuencia local;
+no marca DONE del modulo ni aceptacion juridica ni puesta en produccion.
+
+Nuevo preflight readonly real: status ok, salida 0, channel_verified y
+permissions_verified true, audit_coherent true, selector_present true y revision 1;
+activation_authorized false. Las banderas de identidad del entorno/head/autenticacion
+personal del CLI permanecen false por alcance limitado de esa herramienta, sin
+sustituir la evidencia personal previa. Head comprobado separadamente por lectura
+de alembic_version: b17d95c0286f. Sin escrituras ni nueva suite en este checkpoint;
+ultima focalizada: 56 aprobadas en base aislada §121, ultima completa: 3654 §106.
+
+Pendientes separados: (1) asegurar ejecucion de futuras suites solo en base aislada,
+(2) probar rotacion/retiro del canal y recuperacion local preservando auditoria,
+(3) verificar fuentes complementarias y registrar aceptacion real con responsables,
+(4) resolver regimenes especiales/representacion y criterios del alcance integral.
+No se identifica una fuente nueva ni se cambia una regla legal en esta revision.
+Ley 21.719/19.628 reformada fija. M3-T1 EN PROGRESO; activacion EIPD bloqueada.
 Sin commit/push.

@@ -1,7 +1,9 @@
 # M3-T1 — Provision operativa del canal EIPD deshabilitado
 
-Fecha: 2026-10-09. §108. Estado: PROCEDIMIENTO PREPARADO; NO EJECUTADO EN UN
-ENTORNO OPERATIVO. Base revisada c963e75c2caa0936e04fdeac01ebad4f903ae911.
+Fecha: 2026-10-09. Procedimiento base §108; actualizacion §122.
+Estado: SECUENCIA LOCAL DESHABILITADA VALIDADA (§118–121); rotacion/retiro y
+entornos adicionales pendientes. Ver m3-t1-eipd-cierre-validacion-local.md.
+Base de codigo revisada 6a6fd27f878a7612d0ceeb9abdcdf968b9f2bf0e.
 Ley 21.719/19.628 reformada es base fija. No autoriza activacion excepcional,
 verificacion ficticia de fuentes ni aceptacion integral. Evidencia local disponible:
 3654 pruebas §106; trazabilidad y pendientes §107.
@@ -94,8 +96,8 @@ adicionales. Si falla, corregir provision y repetir; no ampliar grants indiscrim
 
 Mantenimiento lee el snapshot auditado completo con
 read_eipd_policy_audit_snapshot_v1 en una transaccion de lectura revisada, o utiliza
-una herramienta operativa equivalente que valide hash/cadena/selector. No existe
-GET administrativo de snapshot en §105: no documentar una ruta inexistente.
+una herramienta operativa equivalente que valide hash/cadena/selector. Desde §119 existe GET /admin/eipd/audit protegido por autoridad personal, que
+valida el snapshot; en §105 esa ruta aun no existia.
 Ausencia de selector validada equivale a expected_revision=0. Si hay selector,
 registrar su revision real; si hay corrupcion o politica habilitada inesperada,
 interrumpir la puesta en servicio y revisar el incidente. No modificar filas para

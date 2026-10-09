@@ -375,3 +375,26 @@ No constituye aceptacion juridica ni habilitacion. Proximo: revisar el cierre de
 validacion operacional y pendientes de provision/rotacion/retiro y aceptacion,
 manteniendo la ley fija. M3-T1 EN PROGRESO; activacion EIPD bloqueada.
 Sin commit/push.
+
+## 2026-10-09 — M3-T1 §122: cierre delimitado de validacion local
+
+La secuencia acceso personal -> consulta -> publicacion -> seleccion deshabilitada
+queda documentada por capturas aportadas por el usuario (§118–121), y snapshot
+tecnico posterior readonly coherente. Este cierre solo cubre esa secuencia local;
+no marca DONE del modulo ni aceptacion juridica ni puesta en produccion.
+
+Nuevo preflight readonly real: status ok, salida 0, channel_verified y
+permissions_verified true, audit_coherent true, selector_present true y revision 1;
+activation_authorized false. Las banderas de identidad del entorno/head/autenticacion
+personal del CLI permanecen false por alcance limitado de esa herramienta, sin
+sustituir la evidencia personal previa. Head comprobado separadamente por lectura
+de alembic_version: b17d95c0286f. Sin escrituras ni nueva suite en este checkpoint;
+ultima focalizada: 56 aprobadas en base aislada §121, ultima completa: 3654 §106.
+
+Pendientes separados: (1) asegurar ejecucion de futuras suites solo en base aislada,
+(2) probar rotacion/retiro del canal y recuperacion local preservando auditoria,
+(3) verificar fuentes complementarias y registrar aceptacion real con responsables,
+(4) resolver regimenes especiales/representacion y criterios del alcance integral.
+No se identifica una fuente nueva ni se cambia una regla legal en esta revision.
+Ley 21.719/19.628 reformada fija. M3-T1 EN PROGRESO; activacion EIPD bloqueada.
+Sin commit/push.

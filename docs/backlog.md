@@ -331,3 +331,10 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] Preparar seleccion con revision vigente y comprobar evento/hash/selector; checks frontend y 56 pruebas API aisladas aprobadas.
 - [x] Seleccion personal confirmada por capturas y snapshot tecnico readonly coherente: revision 1, 1 publicacion y 1 seleccion deshabilitada (2026-10-09).
 - [ ] Revisar cierre operacional y pendientes de provision/rotacion/retiro y aceptacion integral; activacion bloqueada.
+
+## M3-T1 §122 — cierre delimitado de validacion local
+
+- [x] Consolidar secuencia personal deshabilitada, coherencia persistida y preflight posterior ok; head verificado.
+- [x] Separar pendientes operacionales y juridicos en docs/project/m3-t1-eipd-cierre-validacion-local.md.
+- [ ] Preparar ejecutor de pruebas que exija base aislada antes de nuevas suites de escritura.
+- [ ] Validar rotacion/retiro y recuperacion, fuentes/aceptacion y alcance integral; M3-T1 EN PROGRESO.
