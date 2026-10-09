@@ -9386,3 +9386,17 @@ Sin suite operacional ni cambio de migracion/registro/politica. Proximo: revisar
 resolucion/revision EIPD para investigacion, sin ampliar contratos historicos ni
 habilitar confirmacion antes de aceptacion revisada. Ley fija, M3-T1 EN PROGRESO,
 confirmacion investigacion y activacion EIPD bloqueadas. Sin commit/push.
+
+## 2026-10-09 — M3-T1 §140: contexto y revision EIPD de investigacion delimitados
+
+Revision del codigo confirma que ContextV1 no incluye research; vigencia documental
+y evento historico no acreditan investigacion. Plan concreto en
+m3-t1-investigacion-resolucion-eipd.md: contexto/binding/Stored V2 separados, hashes
+con dominio/version nuevo, dispatch historico y seleccion de version sin reparacion
+ni degradacion automatica. Reaportes documentales no crean decisiones humanas.
+
+Se delimita revision de frontera/screening/composicion y metadatos de eventos antes
+de escritor V2; no asumir migracion ni cobertura de politica existente. Proximo:
+contratos y funciones puras V2 con regresiones V1 intactas. Paso documental, sin
+suite nueva; ultima 329 ampliadas y 162 regresiones §139. Ley fija, M3-T1 EN PROGRESO,
+confirmacion investigacion y activacion EIPD bloqueadas. Sin commit/push.

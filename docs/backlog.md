@@ -402,3 +402,9 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] Create/PATCH especiales V11/screening V12 con valores finales y conservacion de asociaciones omitidas.
 - [x] Dos casos HTTP nuevos; 329 ampliadas y 162 regresiones frontera/screening V2 aprobadas.
 - [ ] Revisar cobertura versionada del contexto de resolucion/revision EIPD de investigacion; gates bloqueados.
+
+### M3-T1 §140 — Resolucion/revision EIPD de investigacion
+
+- [x] Revisar cobertura V1 y delimitar contratos V2, compatibilidad historica y frontera de revision/eventos.
+- [ ] Implementar contexto/binding/Stored V2 y funciones puras con pruebas V1 intactas.
+- [ ] Dispatch, frontera/composicion, metadatos de eventos y escritura API posteriores; gates bloqueados.
