@@ -8684,3 +8684,21 @@ Ultima suite completa conserva 3654 §106. Proximo paso independiente: procedimi
 verificable de provision operativa del canal con politica deshabilitada, sin
 credenciales reales ni activacion. Completar fuentes/aceptacion antes de habilitar.
 M3-T1 EN PROGRESO integral. Sin commit/push en este paso.
+
+## §108 — Procedimiento operativo deshabilitado preparado (2026-10-09)
+
+Base c963e75c2caa0936e04fdeac01ebad4f903ae911. Se agrega
+m3-t1-eipd-provision-operativa.md: expediente de entorno/commit/head/login/staff/
+secreto por referencia/selector, provision del login separada del grupo NOLOGIN,
+comprobaciones de rol local y permisos, pruebas HTTP negativas/positivas con politica
+deshabilitada, verificacion de auditoria, revocacion/retirada/rotacion con drenaje.
+Reconoce ausencia de GET snapshot; lectura coherente por herramienta de mantenimiento.
+Sin retry ciego, borrado de auditoria, downgrade ni aceptacion/fuentes inventadas.
+
+Plantillas no ejecutadas; no se provisionan roles/credenciales/perfiles ni se envia
+trafico a un entorno operativo. JSON de publicacion validado contra PublicationRequest;
+diff --check correcto. No cambios de codigo ni nueva suite completa: 3654 §106.
+Provision real, instrumento complementario y decision de aceptacion permanecen
+PENDIENTES. Proximo: preparar preflight verificable de solo lectura del canal,
+sin reemplazar JWT/autoridad ni emitir publicacion/seleccion. Activacion bloqueada;
+ley reformada base fija; M3-T1 EN PROGRESO integral. Sin commit/push.

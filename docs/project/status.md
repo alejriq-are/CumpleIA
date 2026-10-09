@@ -1,3 +1,12 @@
+## 2026-10-09 — M3-T1: procedimiento de provision deshabilitada
+
+§108 runbook operativo preparado con expediente, login/pool/staff separados,
+verificacion local de roles, JWT/HTTP/auditoria, retirada/rotacion y revocacion.
+Solo documentacion; JSON ejemplo validado, sin ejecucion/provision real ni nueva
+suite; ultima 3654 §106. Fuentes/aceptacion/provision real pendientes. Proximo
+preflight verificable de solo lectura del canal. Ley fija, EN PROGRESO integral;
+activacion bloqueada. Sin commit/push.
+
 ## 2026-10-08 — M3-T1: fuentes y trazabilidad de aceptacion
 
 §107 revision documental sobre HEAD 97d4fd29920e98a7b0a94714b04ae43e7cb5d010 limpio.
