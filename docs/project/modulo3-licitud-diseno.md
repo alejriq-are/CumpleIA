@@ -9144,3 +9144,21 @@ aprobadas en 13.20 s (24 nuevas de investigacion y 63 previas). No nueva suite c
 Proximo: ampliar casos de aplicabilidad y limites antes de diseñar binding nuevo e
 integracion persistente. Ley fija, M3-T1 EN PROGRESO y activacion EIPD bloqueada.
 Sin commit/push.
+
+## 2026-10-09 — M3-T1 §130: limites y aplicabilidad de investigacion probados
+
+20 casos nuevos en test_services_research.py: difusion ausente/pendiente mantiene
+anonimizacion sin resolver, evidencia con referencia/tipo vacios no acredita
+preparacion, cada componente de anonimizacion requerido si se publica, RAT parcial
+y selectores semanticamente duplicados requieren revision, adolescentes/vulnerables/
+sensibilidad declarada no evaden limites iniciales, expediente/snapshot ausentes y
+respuestas sin razonamiento impiden completo. No fue necesario cambiar evaluador.
+
+Suite via ejecutor aislado: 107 aprobadas en 13.05 s (44 investigacion, 63 previas).
+Black/Ruff aprobados. Sin escritura operacional, cambios legales ni politicas;
+can_confirm sigue false, sin persistencia/API/binding ni integracion especial.
+
+Proximo: implementar identidad/binding documental nuevo y probar cambios de
+finalidad, RAT, LIA y expediente; conservar schemas y hashes historicos. No inferir
+asociacion vigente a partir de completitud. Ley fija, M3-T1 EN PROGRESO y activacion
+EIPD bloqueada. Sin commit/push.

@@ -360,4 +360,5 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 
 - [x] Delimitar primer incremento de investigacion con datos no sensibles/adultos y LIA, completitud/aplicabilidad y fuente primaria.
 - [x] Implementar schema/evaluador puro §129; sin persistencia ni gates, can_confirm=false.
-- [ ] Ampliar casos de aplicabilidad/limites y diseñar binding nuevo antes de integrar persistencia/API.
+- [x] Ampliar aplicabilidad/limites §130: 20 casos nuevos; suite aislada 107 aprobadas.
+- [ ] Implementar identidad/binding nuevo y compatibilidad historica antes de integrar persistencia/API.
