@@ -244,3 +244,14 @@ contrastada por lectura administrativa Supabase 200. Prueba JWT de sesion person
 pendiente: no sustituirla por consulta admin, token sintetico o flags locales.
 Tras reinicio/cierre comprobar proceso/config antes de continuar; referencia de
 sesion efimera en expediente. No pegar secretos/tokens en evidencia ni chat.
+
+## §118 — comprobacion mediante sesion personal local
+
+Con los procesos locales disponibles, iniciar sesion normalmente en
+http://localhost:3000 y abrir /admin/eipd-validation; pulsar Comprobar acceso.
+La pantalla solo funciona en desarrollo y consulta GET /admin/eipd/status en
+127.0.0.1:8001 con la sesion del navegador. No compartir contrasenas ni tokens por
+chat. El resumen de acceso no sustituye el snapshot completo de auditoria ni
+habilita activacion. Registrar el resultado real antes de avanzar a escrituras
+con politica deshabilitada. Si los procesos terminaron, reiniciarlos con el canal
+privado existente sin copiar secretos al repositorio.

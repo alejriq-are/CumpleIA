@@ -1,3 +1,38 @@
+## 2026-10-09 — M3-T1 §118: comprobacion personal confirmada por el usuario
+
+El usuario aporta captura de /admin/eipd-validation con el resultado:
+«Acceso administrativo confirmado. La activacion EIPD permanece bloqueada».
+Se registra como evidencia visual aportada por el usuario de la comprobacion con
+su sesion real, posterior al cierre y nuevo inicio de sesion. No se capturan ni
+persisten tokens, credenciales o datos personales; no se incorpora la imagen al
+repositorio. No se afirma una inspeccion independiente de la solicitud HTTP.
+
+La comprobacion de acceso queda satisfecha con esta evidencia. No publica ni
+selecciona politicas y no habilita activacion. Proximo paso: preparar la validacion
+operacional de publicacion/seleccion de politica deshabilitada y auditoria con
+sesion personal. Fuentes complementarias y aceptacion integral siguen pendientes.
+M3-T1 EN PROGRESO. Sin commit/push.
+
+## 2026-10-09 — M3-T1 §118: comprobacion local de acceso personal preparada
+
+Se incorpora GET /admin/eipd/status, protegido por el canal administrativo y la
+autoridad personal existentes. Devuelve solo un resumen de acceso y presencia de
+selector; activation_authorized permanece false. No publica, selecciona ni crea
+politicas. La pantalla de desarrollo /admin/eipd-validation utiliza la sesion
+Supabase del navegador sin mostrar ni persistir el token y consulta el backend
+local 127.0.0.1:8001.
+
+Validacion: 40 pruebas focalizadas de API aprobadas; Black/Ruff, type-check y lint
+del frontend aprobados. HTTP real sin sesion: pantalla redirige al login (307),
+GET de estado rechaza sin token (401). Esto no acredita JWT personal real: queda
+pendiente iniciar sesion, abrir la pantalla y pulsar Comprobar acceso. Los procesos
+locales son efimeros; backend anterior 8000 permanece. No cambios de credenciales,
+perfil ni politicas. Ultima suite completa: 3654 pruebas (§106).
+
+La Ley 21.719 / 19.628 reformada permanece como base fija. Fuentes complementarias,
+aceptacion y validacion operacional integral pendientes. M3-T1 EN PROGRESO;
+activacion excepcional bloqueada. Sin commit/push en este paso.
+
 ## 2026-10-09 — M3-T1: backend local configurado y Supabase verificado
 
 §117 proceso separado 127.0.0.1:8001, secreto externo en memoria/logs limitados,
@@ -2904,3 +2939,12 @@ Pruebas realizadas:
 La ubicación del workspace no es controlable por la configuración de corrida; será determinada exclusivamente por el harness trusted.
 
 Siguiente etapa: F1.19B — workspace reproducible y aislamiento del repositorio canónico.
+
+### §118 — correccion del arranque local
+
+El primer arranque del frontend sobreescribia en memoria la clave publica de
+.env.local con un valor de ejemplo del backend y causaba Invalid API key.
+Se detuvo ese proceso y se reinicio Next usando su .env.local existente, sin
+editar credenciales. La clave publica del frontend responde 200 en auth/v1/settings;
+/login responde 200. Sesion personal y comprobacion administrativa aun pendientes.
+No se registran claves ni tokens. Sin commit/push.

@@ -306,3 +306,10 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] M3-T1 §116: UID aportado contrastado con perfil local autorizado; backend/rutas registrados, rechazo anonimo 401 probado.
 - [x] M3-T1 §117: proceso local separado con secreto en memoria, health/401 y Supabase/JWKS 200; vinculo staff externo verificado por consulta admin.
 - [ ] M3-T1: sesion/JWT personal real y humo autenticado, publicacion/seleccion deshabilitada y validacion/retirada operativas; fuentes/aceptacion pendientes.
+
+## M3-T1 §118 — acceso personal local (2026-10-09)
+
+- [x] Endpoint administrativo de lectura y pantalla local de comprobacion; 40 pruebas API y checks frontend aprobados.
+- [x] Comprobar acceso con sesion personal real: resultado confirmado en captura aportada por el usuario (2026-10-09).
+- [ ] Validar publicacion/seleccion de politica deshabilitada y auditoria con sesion personal.
+- [ ] Completar fuentes complementarias, aceptacion y validacion operacional integral; activacion excepcional bloqueada.

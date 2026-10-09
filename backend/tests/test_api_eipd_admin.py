@@ -299,3 +299,26 @@ async def test_wrong_runtime_pool_is_503(
     )
     assert response.status_code == 503
     assert await state(_session_factory) == before
+
+
+async def test_authenticated_status_is_readonly(
+    api, authority, signing_key, _session_factory
+):
+    before = await state(_session_factory)
+    response = await api.get(
+        "/admin/eipd/status", headers=headers(signing_key, authority[1])
+    )
+    assert response.status_code == 200
+    assert response.json() == {
+        "authenticated_admin": True,
+        "selector_present": False,
+        "activation_authorized": False,
+    }
+    assert await state(_session_factory) == before
+
+
+async def test_status_requires_auth_and_global_authority(api, signing_key, auth_a_id):
+    assert (await api.get("/admin/eipd/status")).status_code == 401
+    assert (
+        await api.get("/admin/eipd/status", headers=headers(signing_key, auth_a_id))
+    ).status_code == 403

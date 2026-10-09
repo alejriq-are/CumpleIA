@@ -16,6 +16,7 @@ from app.services.eipd_policy_audit import (
 )
 from app.services.eipd_policy_store import (
     publish_eipd_policy_v1,
+    read_eipd_policy_audit_snapshot_v1,
     select_eipd_policy_v1,
 )
 
@@ -68,3 +69,17 @@ async def select_policy(request: SelectionRequest, db: AdminDb):
         raise HTTPException(
             409, "Seleccion EIPD no admitida o revision obsoleta"
         ) from None
+
+
+@router.get("/status")
+async def administrative_status(db: AdminDb):
+    """Solicitud personal autenticada, lectura sin bootstrap/activacion."""
+    try:
+        state = await read_eipd_policy_audit_snapshot_v1(db)
+    except ValueError:
+        raise HTTPException(409, "Auditoria EIPD no disponible") from None
+    return {
+        "authenticated_admin": True,
+        "selector_present": state.selector is not None,
+        "activation_authorized": False,
+    }
