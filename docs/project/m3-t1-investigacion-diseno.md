@@ -114,3 +114,28 @@ Proximo: implementar identidad/binding documental nuevo y probar cambios de
 finalidad, RAT, LIA y expediente; conservar schemas y hashes historicos. No inferir
 asociacion vigente a partir de completitud. Ley fija, M3-T1 EN PROGRESO y activacion
 EIPD bloqueada. Sin commit/push.
+
+## 2026-10-09 — M3-T1 §131: asociacion nueva de investigacion
+
+ResearchContextBindingV1 y BoundResearchAssessmentV1 son contratos cerrados nuevos,
+independientes de SpecialContextBinding historico. research_binding.py calcula
+SHA-256 con dominio/version explicitos: contexto incluye RAT completo/base/LIA;
+documento incluye expediente completo. JSON ordenado por claves; orden de listas y
+textos conservado deliberadamente (comparacion conservadora, sin prometer equivalencia
+semantica). Bind revalida y devuelve copia; chequeo no actualiza hashes automaticamente.
+
+Cambios RAT/finalidad/base/LIA producen asociacion_contexto_obsoleta; cambios de
+expediente producen asociacion_documento_obsoleta. Ausencia requiere revision;
+contrato historico/version desconocida no se convierte silenciosamente. Asociacion
+vigente no acredita completitud/autoridad; can_confirm sigue false. Sin migracion,
+API, persistencia ni cambios de bindings/hashes historicos.
+
+La primera ejecucion detecto error previo de catalogo: evaluador research usaba
+interes_legitimo abreviado. Corregido a interes_legitimo_art13d, igual que LegalBasis;
+pruebas actualizadas y regresion rechaza el alias. Suite final aislada: 119 aprobadas
+en 10.04 s (11 asociacion, 45 evaluador investigacion y 63 previas). Black/Ruff
+aprobados. Sin escrituras operacionales ni cambio de selector EIPD.
+
+Proximo: diseñar persistencia/API y versiones de asociacion especiales/EIPD para
+incorporar investigacion sin reinterpretar historicos. Ley fija, M3-T1 EN PROGRESO,
+confirmacion de investigacion y activacion EIPD bloqueadas. Sin commit/push.

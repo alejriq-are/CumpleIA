@@ -121,7 +121,7 @@ def evaluate_research_assessment_v1(assessment, snapshot, legal_basis, lia_asses
         or document.anonymization_evidence
     ):
         issue("anonymization", "documento_residual", "requiere_revision")
-    if legal_basis != "interes_legitimo":
+    if legal_basis != "interes_legitimo_art13d":
         issue("legal_basis", "base_no_admitida", "requiere_revision")
     dependency = evaluate_lia_assessment_v1(lia_assessment, snapshot)
     issues.extend(

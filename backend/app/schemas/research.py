@@ -2,7 +2,7 @@
 
 from typing import Literal
 
-from pydantic import ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from app.schemas.licitud import (
     ContractEvidenceV1,
@@ -31,3 +31,18 @@ class ResearchAssessmentV1(LegalAssessmentScopeIn):
     anonymization_analysis: str | None = None
     anonymization_evidence: list[ContractEvidenceV1] = Field(default_factory=list)
     retention_analysis: str | None = None
+
+
+class ResearchContextBindingV1(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid", frozen=True, revalidate_instances="always"
+    )
+    schema_version: Literal[1] = 1
+    context_hash: str = Field(pattern=r"^[0-9a-f]{64}$")
+    document_hash: str = Field(pattern=r"^[0-9a-f]{64}$")
+
+
+class BoundResearchAssessmentV1(BaseModel):
+    model_config = ConfigDict(extra="forbid", revalidate_instances="always")
+    assessment: ResearchAssessmentV1
+    context_binding: ResearchContextBindingV1
