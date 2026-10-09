@@ -276,3 +276,52 @@ selecciones operacionales en este paso. Proximo: preparar la publicacion de una
 politica deshabilitada y verificar su persistencia/auditoria; posteriormente,
 seleccionarla con revision vigente. Ley fija, fuentes complementarias y aceptacion
 integral pendientes. M3-T1 EN PROGRESO; activacion bloqueada. Sin commit/push.
+
+## Validacion local publicacion
+
+La referencia de la propuesta identifica este procedimiento operacional; no acredita
+por si sola una publicacion ejecutada ni aceptacion juridica. Resultado personal
+pendiente hasta la comprobacion real aportada por el usuario.
+
+## 2026-10-09 — M3-T1 §120: publicacion local deshabilitada preparada
+
+GET /admin/eipd/publication-draft protegido por AdminDb devuelve la propuesta fija
+resolve_eipd_gate_policy_v1, sin escrituras ni aceptacion: fuentes pendientes,
+aceptacion pendiente, sin responsables/evidencia de aceptacion inventados y
+activacion deshabilitada. Motivo operacional y referencia documental explicitos.
+
+La pantalla de desarrollo prepara la propuesta tras consultar el snapshot actual,
+evita ofrecer publicacion si su referencia ya existe y muestra que el registro
+local es permanente. Solo Publicar politica deshabilitada solicita POST existente
+con JWT personal. Tras 201 consulta nuevamente la auditoria y contrasta ID/hash y
+estado deshabilitado. No selecciona ni activa; no hay reintentos automaticos.
+Ante resultado incierto requiere consultar el registro, sin repetir a ciegas.
+
+56 pruebas API/concurrencia aprobadas en 13.27 s; casos nuevos cubren propuesta
+readonly, JWT/autoridad, publicacion seguida de auditoria, selector ausente y
+rechazo de duplicados sin cambios. Black/Ruff y type-check/lint frontend aprobados.
+Proceso local 8001 actualizado; GET propuesta sin token devuelve 401. La publicacion
+operacional con sesion personal sigue pendiente: no se ejecuta ni se acredita por
+estas pruebas. No se cambian credenciales, perfiles ni el backend previo 8000.
+
+Proximo: usuario prepara/revisa/publica politica deshabilitada en pantalla y aporta
+resultado; luego verificar auditoria y preparar seleccion con revision vigente.
+Ley 21.719 / 19.628 reformada fija; fuentes complementarias/aceptacion pendientes.
+M3-T1 EN PROGRESO; activacion EIPD bloqueada. Sin commit/push.
+
+## 2026-10-09 — M3-T1 §120: publicacion personal confirmada por captura
+
+El usuario aporta captura posterior a Publicar politica deshabilitada. Muestra
+revision actual 0, publicaciones 1, selecciones 0, ninguna politica seleccionada,
+referencia m3-t1-eipd-deshabilitada-v1 en estado deshabilitada y mensaje de
+publicacion confirmada en el registro; activacion EIPD bloqueada.
+Se registra como evidencia visual aportada por el usuario de la publicacion con
+su sesion personal y comprobacion posterior de la pantalla, sin afirmar una
+inspeccion independiente de la solicitud HTTP o de los campos de auditoria.
+No se incorporan imagenes, PII, claves ni tokens al repositorio.
+
+La publicacion operacional queda confirmada por esta evidencia. No acredita
+seleccion ni aceptacion juridica. Proximo: preparar seleccion explicita de la
+publicacion deshabilitada con revision vigente y comprobar evento/selector en
+la auditoria. Fuentes complementarias y aceptacion integral siguen pendientes;
+ley fija, M3-T1 EN PROGRESO y activacion bloqueada. Sin commit/push.

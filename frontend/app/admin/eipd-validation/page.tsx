@@ -3,6 +3,17 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
+type Draft = {
+  policy: {
+    policy_reference: string;
+    activation: string;
+    sources_status: string;
+    acceptance_status: string;
+  };
+  rationale: string;
+  evidence_reference: string;
+};
+
 type Audit = {
   selector: { revision: number; publication_id: string } | null;
   publications: {
@@ -17,6 +28,8 @@ export default function EipdValidationPage() {
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
   const [audit, setAudit] = useState<Audit | null>(null);
+  const [draft, setDraft] = useState<Draft | null>(null);
+  const [publicationAttempted, setPublicationAttempted] = useState(false);
   const local = process.env.NODE_ENV === "development";
 
   async function checkAccess() {
@@ -78,10 +91,124 @@ export default function EipdValidationPage() {
     }
   }
 
+  async function preparePublication() {
+    if (!local) return;
+    setBusy(true);
+    setDraft(null);
+    setMessage("");
+    try {
+      const { data, error } = await createClient().auth.getSession();
+      if (error || !data.session) {
+        setMessage("Inicia sesión para preparar la publicación.");
+        return;
+      }
+      const headers = { Authorization: `Bearer ${data.session.access_token}` };
+      const auditResponse = await fetch("http://127.0.0.1:8001/admin/eipd/audit", {
+        headers,
+        cache: "no-store",
+      });
+      if (!auditResponse.ok) throw new Error("audit");
+      const current: Audit = await auditResponse.json();
+      setAudit(current);
+      const response = await fetch("http://127.0.0.1:8001/admin/eipd/publication-draft", {
+        headers,
+        cache: "no-store",
+      });
+      if (!response.ok) throw new Error("draft");
+      const proposal: Draft = await response.json();
+      if (
+        proposal.policy.activation !== "deshabilitada" ||
+        proposal.policy.sources_status !== "pendiente" ||
+        proposal.policy.acceptance_status !== "pendiente"
+      )
+        throw new Error("policy");
+      if (
+        current.publications.some(
+          (p) => p.policy.policy_reference === proposal.policy.policy_reference
+        )
+      ) {
+        setMessage(
+          "La política ya está publicada. Consulta el registro; no se publicará otra vez."
+        );
+        return;
+      }
+      setDraft(proposal);
+      setMessage("Propuesta preparada. Revisa los datos antes de publicar.");
+    } catch {
+      setMessage("No se pudo preparar la publicación. Consulta el registro y comprueba tu acceso.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function publishDisabled() {
+    if (
+      !local ||
+      busy ||
+      publicationAttempted ||
+      !draft ||
+      draft.policy.activation !== "deshabilitada"
+    )
+      return;
+    setBusy(true);
+    setMessage("");
+    try {
+      const { data, error } = await createClient().auth.getSession();
+      if (error || !data.session) {
+        setMessage("Inicia sesión para publicar la política.");
+        return;
+      }
+      setPublicationAttempted(true);
+      const headers = { Authorization: `Bearer ${data.session.access_token}` };
+      const response = await fetch("http://127.0.0.1:8001/admin/eipd/publications", {
+        method: "POST",
+        headers: { ...headers, "Content-Type": "application/json" },
+        body: JSON.stringify(draft),
+        cache: "no-store",
+      });
+      setAudit(null);
+      if (response.status !== 201) {
+        setMessage(
+          "Publicación no confirmada. Consulta el registro antes de continuar; no se reintentará automáticamente."
+        );
+        return;
+      }
+      const published: Audit["publications"][number] = await response.json();
+      const auditResponse = await fetch("http://127.0.0.1:8001/admin/eipd/audit", {
+        headers,
+        cache: "no-store",
+      });
+      if (!auditResponse.ok) throw new Error("audit");
+      const current: Audit = await auditResponse.json();
+      setAudit(current);
+      const stored = current.publications.find((p) => p.id === published.id);
+      if (
+        !stored ||
+        stored.policy_hash !== published.policy_hash ||
+        stored.policy.activation !== "deshabilitada"
+      )
+        throw new Error("verification");
+      setDraft(null);
+      setMessage(
+        "Política deshabilitada publicada y confirmada en el registro. Esta acción no selecciona la política. La activación EIPD permanece bloqueada."
+      );
+    } catch {
+      setAudit(null);
+      setMessage(
+        "No se pudo confirmar el resultado. Consulta el registro antes de continuar; no repitas la publicación a ciegas."
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
     <main className="mx-auto max-w-2xl space-y-4 p-6">
       <h1 className="text-2xl font-semibold">Comprobar acceso administrativo</h1>
-      <p>Esta comprobación utiliza tu sesión actual y no modifica políticas.</p>
+      <p>
+        Las comprobaciones utilizan tu sesión actual. Solo el botón de publicación guarda una
+        política deshabilitada.
+      </p>
       {local ? (
         <button
           type="button"
@@ -119,6 +246,43 @@ export default function EipdValidationPage() {
             </p>
           ))}
           <p>La consulta no modifica políticas.</p>
+        </section>
+      )}
+      {local && (
+        <section
+          className="space-y-3 rounded border p-4"
+          aria-label="Publicación local deshabilitada"
+        >
+          <h2 className="text-xl font-semibold">Publicar política deshabilitada</h2>
+          <p>
+            Se guardará una publicación permanente en el registro local, con tu usuario y fecha. Las
+            fuentes y la aceptación seguirán pendientes; esta acción no selecciona ni activa la
+            política.
+          </p>
+          <button
+            type="button"
+            onClick={preparePublication}
+            disabled={busy || publicationAttempted}
+            className="rounded bg-blue-700 px-4 py-2 text-white disabled:opacity-50"
+          >
+            Preparar publicación
+          </button>
+          {draft && (
+            <div className="space-y-2">
+              <p>Referencia: {draft.policy.policy_reference}</p>
+              <p>Estado: deshabilitada. Fuentes: pendientes. Aceptación: pendiente.</p>
+              <p>Motivo: {draft.rationale}</p>
+              <p>Evidencia: {draft.evidence_reference}</p>
+              <button
+                type="button"
+                onClick={publishDisabled}
+                disabled={busy || publicationAttempted}
+                className="rounded bg-blue-700 px-4 py-2 text-white disabled:opacity-50"
+              >
+                Publicar política deshabilitada
+              </button>
+            </div>
+          )}
         </section>
       )}
       <p role="status" aria-live="polite">

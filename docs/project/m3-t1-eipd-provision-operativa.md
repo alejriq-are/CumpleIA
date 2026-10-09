@@ -263,3 +263,12 @@ GET /admin/eipd/audit valida el snapshot completo y permite obtener la revision
 actual antes de una seleccion. La UI muestra revision y resumen; consultar no
 publica ni selecciona. Ante error, no inferir revision cero ni reintentar escrituras
 a ciegas. Registrar el resultado real; la activacion permanece bloqueada.
+
+## §120 — publicacion explicita deshabilitada
+
+En /admin/eipd-validation, pulsar Preparar publicacion, revisar referencia, estado,
+motivo y evidencia. Publicar politica deshabilitada guarda una publicacion permanente
+local con actor/fecha/hash del servidor, sin seleccion ni activacion. La pantalla
+contrasta el resultado mediante GET /audit. Ante referencia ya registrada o error,
+consultar el registro antes de continuar; no repetir POST a ciegas. Registrar el
+resultado personal real; este procedimiento no constituye aceptacion juridica.

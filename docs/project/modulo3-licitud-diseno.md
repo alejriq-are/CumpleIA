@@ -8926,3 +8926,29 @@ y seleccion deshabilitadas con revision vigente y evidencia operacional.
 No hubo publicaciones/selecciones operacionales en este paso. Ley fija, fuentes
 complementarias/aceptacion pendientes; M3-T1 EN PROGRESO y activacion bloqueada.
 Sin commit/push.
+
+## 2026-10-09 — M3-T1 §120: publicacion local deshabilitada preparada
+
+GET /admin/eipd/publication-draft protegido por AdminDb devuelve la propuesta fija
+resolve_eipd_gate_policy_v1, sin escrituras ni aceptacion: fuentes pendientes,
+aceptacion pendiente, sin responsables/evidencia de aceptacion inventados y
+activacion deshabilitada. Motivo operacional y referencia documental explicitos.
+
+La pantalla de desarrollo prepara la propuesta tras consultar el snapshot actual,
+evita ofrecer publicacion si su referencia ya existe y muestra que el registro
+local es permanente. Solo Publicar politica deshabilitada solicita POST existente
+con JWT personal. Tras 201 consulta nuevamente la auditoria y contrasta ID/hash y
+estado deshabilitado. No selecciona ni activa; no hay reintentos automaticos.
+Ante resultado incierto requiere consultar el registro, sin repetir a ciegas.
+
+56 pruebas API/concurrencia aprobadas en 13.27 s; casos nuevos cubren propuesta
+readonly, JWT/autoridad, publicacion seguida de auditoria, selector ausente y
+rechazo de duplicados sin cambios. Black/Ruff y type-check/lint frontend aprobados.
+Proceso local 8001 actualizado; GET propuesta sin token devuelve 401. La publicacion
+operacional con sesion personal sigue pendiente: no se ejecuta ni se acredita por
+estas pruebas. No se cambian credenciales, perfiles ni el backend previo 8000.
+
+Proximo: usuario prepara/revisa/publica politica deshabilitada en pantalla y aporta
+resultado; luego verificar auditoria y preparar seleccion con revision vigente.
+Ley 21.719 / 19.628 reformada fija; fuentes complementarias/aceptacion pendientes.
+M3-T1 EN PROGRESO; activacion EIPD bloqueada. Sin commit/push.

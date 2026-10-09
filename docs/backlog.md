@@ -319,3 +319,9 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] Consulta administrativa autenticada del snapshot validado y pantalla de revision; 54 pruebas focalizadas aprobadas.
 - [x] Consulta con sesion personal confirmada por captura: revision 0, publicaciones 0, selecciones 0 (2026-10-09).
 - [ ] Preparar publicacion deshabilitada y comprobar persistencia/auditoria; luego seleccionar con revision vigente.
+
+## M3-T1 §120 — publicacion local deshabilitada
+
+- [x] Propuesta fija autenticada, vista revisable y publicacion explicita con comprobacion posterior; 56 pruebas focalizadas aprobadas.
+- [x] Publicacion con sesion personal confirmada por captura: 1 publicacion deshabilitada, 0 selecciones, revision 0 (2026-10-09).
+- [ ] Preparar seleccion explicita con revision vigente y verificar evento/selector en la auditoria.

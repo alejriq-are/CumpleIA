@@ -354,3 +354,44 @@ async def test_personal_audit_rejects_tenant(api, signing_key, auth_a_id):
         "/admin/eipd/audit", headers=headers(signing_key, auth_a_id)
     )
     assert response.status_code == 403
+
+
+async def test_disabled_draft_publish_and_audit_without_selection(
+    api, authority, signing_key, _session_factory
+):
+    credential = headers(signing_key, authority[1])
+    before = await state(_session_factory)
+    response = await api.get("/admin/eipd/publication-draft", headers=credential)
+    assert response.status_code == 200
+    draft = response.json()
+    policy = draft["policy"]
+    assert policy["activation"] == "deshabilitada"
+    assert policy["sources_status"] == policy["acceptance_status"] == "pendiente"
+    assert policy["source_records"] == []
+    assert policy["accepted_by"] is None and policy["validation_commit"] is None
+    assert await state(_session_factory) == before
+    response = await api.post(
+        "/admin/eipd/publications", json=draft, headers=credential
+    )
+    assert response.status_code == 201
+    publication = response.json()
+    assert publication["created_by"] == str(authority[0])
+    audit = await api.get("/admin/eipd/audit", headers=credential)
+    assert audit.status_code == 200
+    assert audit.json()["publications"] == [publication]
+    assert audit.json()["selector"] is None
+    assert audit.json()["selections"] == []
+    after = await state(_session_factory)
+    duplicate = await api.post(
+        "/admin/eipd/publications", json=draft, headers=credential
+    )
+    assert duplicate.status_code == 409
+    assert await state(_session_factory) == after
+
+
+async def test_disabled_draft_requires_personal_authority(api, signing_key, auth_a_id):
+    assert (await api.get("/admin/eipd/publication-draft")).status_code == 401
+    response = await api.get(
+        "/admin/eipd/publication-draft", headers=headers(signing_key, auth_a_id)
+    )
+    assert response.status_code == 403
