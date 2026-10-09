@@ -33,7 +33,7 @@ banderas false describen limites del diagnostico y no anulan las evidencias sepa
 | Pendiente | Criterio verificable | Siguiente accion |
 | --- | --- | --- |
 | Ejecucion aislada de pruebas | Suites de escritura no apuntan al registro operacional | Ejecutor focalizado preparado §123; 60 pruebas aprobadas. Pytest directo fuera de esta guarda |
-| Rotacion y retiro del canal | Credencial anterior rechazada tras renovar procesos/conexiones; historial preservado | Ensayo aislado §124 y rotacion real con historial intacto/acceso personal confirmados §126; retiro definitivo pendiente |
+| Rotacion y retiro del canal | Credencial anterior rechazada tras renovar procesos/conexiones; historial preservado | Ensayo aislado §124 y rotacion real con historial intacto/acceso personal confirmados §126; ensayo de retiro reversible real y recuperacion tecnica aprobados §127; acceso personal posterior confirmado por captura; retiro definitivo no ejecutado |
 | Fuentes complementarias | Referencias oficiales/version/aplicabilidad verificadas | Completar expediente de fuentes sin inferir inexistencia por busqueda vacia |
 | Aceptacion | Responsable y evidencia reales, asociados al codigo revisado | Revisar matriz integral antes de cualquier habilitacion |
 | Regimenes especiales y representacion pendientes | Alcance y validador/gates/evidencia definidos y probados | Priorizar segun matriz de aceptacion; no declarar ilicitud por falta de soporte |

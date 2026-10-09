@@ -350,3 +350,8 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] Verificar canal/destino/head y preparar drenaje, reemplazo privado, recuperacion y comprobacion posterior.
 - [x] Rotacion real local ejecutada §126: credencial anterior rechazada en conexion nueva; nuevo canal ok y snapshot completo intacto.
 - [x] Acceso personal tras reinicio confirmado por captura y copia privada anterior retirada (§126).
+
+## M3-T1 §127 — retiro reversible real
+
+- [x] Drenar canal real, comprobar NOLOGIN con conexion nueva, restaurar LOGIN y verificar snapshot completo intacto/revision 1.
+- [x] Acceso personal tras reinicio de recuperacion confirmado por captura §127. Retiro definitivo no ejecutado.

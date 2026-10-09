@@ -374,3 +374,19 @@ Rotacion local y acceso posterior confirmados; recuperacion temporal cerrada.
 Retiro definitivo del canal no ejecutado. Fuentes/aceptacion y alcance integral
 siguen pendientes; ley fija, M3-T1 EN PROGRESO y activacion bloqueada.
 Sin commit/push.
+
+## 2026-10-09 — M3-T1 §127: retiro reversible del canal real y recuperacion
+
+Proceso propio 8001 detenido y ausencia de sesiones dedicadas comprobada tras
+snapshot previo validado. Login local eipd_backend_local cambiado temporalmente
+a NOLOGIN: conexion NUEVA con credencial actual rechazada, SQLSTATE 28000.
+LOGIN restaurado en finally; nueva conexion y preflight ok. Snapshot completo
+posterior exactamente igual al previo, selector revision 1. No cambio de password,
+archivo privado, membresias, perfiles, publicaciones, eventos ni selector.
+
+Proceso 8001 reiniciado con credencial privada actual, DEBUG=false y sin access log;
+GET /status sin token -> 401. Backend 8000 fuera del ensayo. Comprobacion personal
+posterior al reinicio pendiente. No constituye retiro definitivo del canal ni
+revocacion instantanea de transacciones ya autorizadas; se dreno antes del cambio.
+No nueva suite; ultima 63 §124. Ley fija, fuentes/aceptacion y alcance integral
+pendientes; M3-T1 EN PROGRESO y activacion EIPD bloqueada. Sin commit/push.
