@@ -406,5 +406,11 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 ### M3-T1 §140 — Resolucion/revision EIPD de investigacion
 
 - [x] Revisar cobertura V1 y delimitar contratos V2, compatibilidad historica y frontera de revision/eventos.
-- [ ] Implementar contexto/binding/Stored V2 y funciones puras con pruebas V1 intactas.
+- [x] Implementar contexto/binding/Stored V2 y funciones puras con pruebas V1 intactas §141.
 - [ ] Dispatch, frontera/composicion, metadatos de eventos y escritura API posteriores; gates bloqueados.
+
+### M3-T1 §141 — Asociacion pura de resolucion V2
+
+- [x] Contexto cerrado con investigacion explicitamente nullable, binding/Stored V2 separados y hashes nuevos sin reparacion.
+- [x] 323 focalizadas aisladas aprobadas (9 nuevas y regresiones V1); Black/Ruff aprobados.
+- [ ] Dispatch documental/readiness/revision de investigacion; frontera/composicion/escritor posteriores. Gates bloqueados.

@@ -616,6 +616,18 @@ class EipdResolutionAssessmentStoredV1(EipdResolutionAssessmentV1):
     context_binding: EipdResolutionContextBindingV1 | None = None
 
 
+class EipdResolutionContextBindingV2(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    binding_version: Literal[2] = 2
+    context_hash: str = Field(pattern=r"^[0-9a-f]{64}$")
+
+
+class EipdResolutionAssessmentStoredV2(EipdResolutionAssessmentV1):
+    """Asociacion sucesora separada; no es entrada HTTP."""
+
+    context_binding: EipdResolutionContextBindingV2
+
+
 EipdResolutionReviewDecision = Literal["continuar", "requiere_cambios", "no_continuar"]
 
 

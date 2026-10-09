@@ -88,3 +88,28 @@ evento anterior visible pero sin autoridad sintetica. Posteriormente HTTP omisio
 null/reaportes conjuntos, orden final, rollback, inmutabilidad, tenant y concurrencia.
 Usar base aislada y runner protegido. Este paso es documental: ultima validacion
 329 ampliadas y 162 regresiones §139, sin nueva suite ni migracion. Sin commit/push.
+
+## 2026-10-09 — M3-T1 §141: contexto y asociacion puros de resolucion V2
+
+Contratos nuevos EipdResolutionContextBindingV2 y StoredV2 separados de V1; StoredV2
+exige binding V2 no nullable. Nuevo modulo eipd_resolution_binding_v2.py define
+ContextV2 cerrado con context_schema_version 2 y research_assessment obligatorio,
+aunque null. Hash de contexto y documental usan dominios/version explicitos; bind
+revalida entrada documental sin hashes de cliente y compara sin reparar asociaciones.
+V1 y su modulo historico permanecen intactos; ninguna salida/API admite V2 aun.
+
+Nueve casos nuevos: determinismo modelo/dict y no mutacion; cambios de cuerpo/binding
+research, retiro, base, RAT y LIA invalidan contexto; campos extras/version desconocida
+rechazados, research omitido rechazado/null admitido, V2 rechazado por contratos V1
+cerrados, documento ya asociado no aceptado como entrada editable. Fixtures de hashes
+V1 de contexto/documento preservadas; V2 null tiene identidad distinta a V1.
+Runner incorpora nuevas pruebas y regresiones documentales V1. Resultado final
+focalizado aislado 323 aprobadas en 31.40 s (9 nuevas, 159 documentales V1 y 155 previas).
+Black/Ruff/diff check aprobados. No nueva suite HTTP ampliada: API/escritores y
+comparadores existentes no se cambian; ultima ampliada 329 y 162 regresiones §139.
+
+Proximo: dispatch documental/readiness y revision con diagnostico explicito de
+cobertura research; posterior frontera/composicion, metadatos y escritor API V2.
+No migracion/backfill, eventos/revisiones nuevas ni cambios de politica/credenciales.
+Ley fija, M3-T1 EN PROGRESO; confirmacion investigacion y activacion EIPD bloqueadas.
+Sin commit/push.

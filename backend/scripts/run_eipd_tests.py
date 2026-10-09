@@ -16,6 +16,8 @@ TARGETS = (
     "tests/test_eipd_test_runner.py",
     "tests/test_services_research.py",
     "tests/test_research_binding.py",
+    "tests/test_eipd_resolution_binding_v2.py",
+    "tests/test_services_eipd_resolution.py",
     "tests/test_research_transversal_binding.py",
     "tests/test_research_storage.py",
     "tests/test_api_research.py",
