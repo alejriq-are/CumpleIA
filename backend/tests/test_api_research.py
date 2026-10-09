@@ -6,11 +6,14 @@ import pytest
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy import text
 
+from app.db.models import TreatmentDataSource
 from app.main import app
 from app.services.research_binding import evaluate_research_association_v1
 from tests import test_api_licitud as api
+from tests import test_services_research as research_cases
 
 rat_m3 = api.rat_m3
+context = research_cases.context
 pytestmark = pytest.mark.asyncio(loop_scope="session")
 
 
@@ -192,3 +195,107 @@ async def test_openapi_research_contracts():
     assert schemas["ResearchAssessmentV1"]["additionalProperties"] is False
     assert "context_binding" not in schemas["ResearchAssessmentV1"]["properties"]
     assert "context_binding" in schemas["BoundResearchAssessmentV1"]["properties"]
+
+
+async def test_research_readiness_complete_stale_and_readonly(
+    client_a, rat_m3, org_a_id, context, _session_factory
+):
+    treatment, payload = rat_m3
+    document, _, lia = context
+    async with _session_factory() as db:
+        db.add(
+            TreatmentDataSource(
+                organization_id=org_a_id,
+                treatment_id=treatment,
+                source_type="titular",
+                is_public_source=False,
+            )
+        )
+        await db.commit()
+    payload.update(
+        research_assessment=document,
+        legal_basis="interes_legitimo_art13d",
+        lia_assessment=lia,
+    )
+    async with AsyncClient(
+        transport=ASGITransport(app=client_a),
+        base_url="http://test",
+        headers={"X-Organization-Id": str(org_a_id)},
+    ) as client:
+        created = await client.post(
+            f"/licitud/treatments/{treatment}/assessments", json=payload
+        )
+        assert created.status_code == 201, created.text
+        original = created.json()
+        url = f"/licitud/treatments/{treatment}/assessments/{original['id']}"
+        for _ in range(2):
+            response = await client.get(url + "/readiness")
+            assert response.status_code == 200, response.text
+            result = response.json()
+            assert result["research"]["result"] == "completo", result["research"]
+            assert result["research"]["association_result"] == "vigente"
+            assert result["research"]["association_issues"] == []
+            assert result["research"]["can_confirm"] is False
+            assert "investigacion_confirmacion_bloqueada" in {
+                b["code"] for b in result["confirmation_blockers"]
+            }
+        assert (await client.get(url)).json() == original
+        rejected = await client.post(url + "/confirm")
+        assert rejected.status_code == 409, rejected.text
+        assert (await client.get(url)).json() == original
+        lia["conclusion"]["balancing_summary"] += " revisada"
+        changed = await client.patch(url, json={"lia_assessment": lia})
+        assert changed.status_code == 200, changed.text
+        stale = (await client.get(url + "/readiness")).json()["research"]
+        assert stale["result"] == "completo"
+        assert stale["association_result"] == "requiere_revision"
+        assert "asociacion_contexto_obsoleta" in stale["association_issues"]
+        assert (await client.get(url)).json()["research_assessment"] == original[
+            "research_assessment"
+        ]
+        current = await client.patch(url, json={"research_assessment": document})
+        assert current.status_code == 200
+        assert (await client.get(url + "/readiness")).json()["research"][
+            "association_result"
+        ] == "vigente"
+        document.pop("evidence")
+        assert (
+            await client.patch(url, json={"research_assessment": document})
+        ).status_code == 200
+        assert (await client.get(url + "/readiness")).json()["research"][
+            "result"
+        ] == "incompleto"
+        assert (
+            await client.patch(url, json={"research_assessment": None})
+        ).status_code == 200
+        assert (await client.get(url + "/readiness")).json()["research"] is None
+
+
+async def test_declared_research_missing_document(client_a, rat_m3, org_a_id):
+    treatment, payload = rat_m3
+    for declaration in payload["special_conditions"]["declarations"]:
+        if (
+            declaration["question_id"]
+            == "fines_historicos_estadisticos_cientificos_investigacion"
+        ):
+            declaration["answer"] = "si"
+    async with AsyncClient(
+        transport=ASGITransport(app=client_a),
+        base_url="http://test",
+        headers={"X-Organization-Id": str(org_a_id)},
+    ) as client:
+        created = await client.post(
+            f"/licitud/treatments/{treatment}/assessments", json=payload
+        )
+        assert created.status_code == 201, created.text
+        url = f"/licitud/treatments/{treatment}/assessments/{created.json()['id']}"
+        response = await client.get(url + "/readiness")
+        assert response.status_code == 200, response.text
+        ready = response.json()
+        assert ready["research"]["can_confirm"] is False
+        assert "expediente_ausente" in {i["code"] for i in ready["research"]["issues"]}
+        assert ready["research"]["association_issues"] == ["asociacion_ausente"]
+        assert "investigacion_confirmacion_bloqueada" in {
+            i["code"] for i in ready["confirmation_blockers"]
+        }
+        assert (await client.get(url)).json()["research_assessment"] is None

@@ -1335,6 +1335,15 @@ class DocumentaryReadinessOut(BaseModel):
     applicability: list[ReadinessApplicabilityOut]
 
 
+class ResearchDocumentReadinessOut(DocumentaryReadinessOut):
+    """Completitud y asociacion independientes de autoridad para confirmar."""
+
+    model_config = ConfigDict(extra="forbid")
+    association_result: Literal["vigente", "requiere_revision"]
+    association_issues: list[str]
+    can_confirm: Literal[False] = False
+
+
 class EipdResolutionDocumentReadinessOut(DocumentaryReadinessOut):
     """Preparacion documental aislada de revision y frontera de confirmacion."""
 
@@ -1500,6 +1509,7 @@ class LegalAssessmentReadinessOut(BaseModel):
     status: LegalAssessmentStatus
     legal_basis: LegalBasis | None
     rat_context_current: bool | None
+    research: ResearchDocumentReadinessOut | None = None
     consent: DocumentaryReadinessOut | None
     lia: DocumentaryReadinessOut | None
     contract: DocumentaryReadinessOut | None

@@ -1,3 +1,32 @@
+## 2026-10-09 — M3-T1 §135: readiness de investigacion y bloqueo conservador
+
+Readiness agrega research nullable con result/issues/applicability documentales,
+association_result/association_issues independientes y can_confirm fijo false.
+Evalua sobre RAT actual recomponible, base y LIA; compara binding persistido sin
+renovarlo. Si RAT no disponible informa contexto_rat_no_disponible; si investigacion
+es declarada y no hay expediente informa expediente/asociacion ausentes. Historicos
+sin expediente ni regimen detectado conservan research null, sin hash sintetico.
+
+Control transversal compartido por readiness y confirmacion agrega bloqueo 409
+investigacion_confirmacion_bloqueada si hay expediente o regimen detectado, incluso
+si se declararon respuestas negativas o el documento esta completo/vigente.
+No se cambia validador especial ni versiones/hashes especiales/EIPD anteriores.
+Completitud documental no implica autoridad ni activa una ruta excepcional.
+
+Nuevos casos HTTP verifican completo+vigente+bloqueado, confirmacion 409 sin mutar
+expediente, lectura reiterada sin escrituras, LIA cambiada sin reaporte produce
+obsolescencia aun con documento completo, reaporte recupera vigencia, falta evidencia
+produce incompleto y retiro deja null para ruta no declarada. Otro caso verifica
+investigacion declarada sin documento, con bloqueos y sin asociacion sintetica.
+Validacion final ampliada en base aislada: 303 pruebas aprobadas en 248.17 s
+(incluye 174 HTTP existentes de licitud y 129 focalizadas). Black/Ruff aprobados.
+Sin ejecucion de suite contra base operacional ni nueva migracion.
+
+Proximo: delimitar nuevas versiones de asociaciones especiales/EIPD que cubran el
+expediente de investigacion sin reinterpretar material historico. Mantener el gate
+bloqueado hasta integracion completa y aceptacion revisada. Ley fija, M3-T1 EN
+PROGRESO, activacion EIPD bloqueada. Sin migracion/despliegue ni commit/push.
+
 ## 2026-10-09 — M3-T1 §134: expediente de investigacion en API de borrador
 
 Create/PATCH aceptan ResearchAssessmentV1 nullable; salida GET/POST/PATCH expone

@@ -364,10 +364,17 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] Implementar binding independiente de investigacion y chequeo de obsolescencia §131; 119 pruebas aisladas aprobadas. Historicos intactos, sin conversion automatica.
 - [x] Delimitar persistencia/API §132 en docs/project/m3-t1-investigacion-integracion.md.
 - [x] Schema/modelo/migracion nullable sin backfill §133; 121 pruebas aisladas, upgrade/check en ambas bases y auditoria EIPD intacta.
-- [ ] Integrar servicios/API create/GET/PATCH con binding de servidor y pruebas tenant; nuevas asociaciones especiales/EIPD posteriores.
+- [x] Integrar servicios/API create/GET/PATCH con binding de servidor y pruebas de acceso §134; nuevas asociaciones especiales/EIPD pendientes.
 
 ### M3-T1 §134 — API del expediente de investigacion
 
 - [x] Create/GET/PATCH con binding de servidor y omision/null/reaporte; contratos cliente cerrados.
 - [x] 127 pruebas focalizadas aprobadas y 174 HTTP existentes de compatibilidad aprobadas; estados historicos protegidos.
-- [ ] Readiness documental/asociacion de investigacion y versiones especiales/EIPD posteriores. Confirmacion sigue bloqueada; M3-T1 EN PROGRESO.
+- [x] Readiness documental/asociacion de investigacion §135. Confirmacion sigue bloqueada; M3-T1 EN PROGRESO.
+- [ ] Nuevas versiones especiales/EIPD que cubran investigacion y aceptacion revisada antes de habilitar el gate.
+
+### M3-T1 §135 — Readiness de investigacion
+
+- [x] Completitud, aplicabilidad y asociacion vigentes/obsoletas expuestas sin escrituras; bloqueo compartido de confirmacion incluso con expediente completo.
+- [x] 303 pruebas ampliadas aisladas aprobadas; Black/Ruff aprobados.
+- [ ] Nuevas versiones de binding especial/EIPD e integracion posterior; M3-T1 EN PROGRESO y activacion bloqueada.

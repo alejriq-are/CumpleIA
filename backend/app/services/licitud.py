@@ -28,6 +28,7 @@ from app.db.models import (
     Vendor,
 )
 from app.schemas.licitud import (
+    BoundResearchAssessmentV1,
     EipdControlCompositionOut,
     EipdControlCompositionV2Out,
     EipdResolutionReviewIn,
@@ -94,7 +95,11 @@ from app.services.geolocation import evaluate_geolocation_assessment_v1
 from app.services.health import evaluate_health_assessment_v1
 from app.services.legal_obligation import evaluate_legal_obligation_assessment_v1
 from app.services.lia import evaluate_lia_assessment_v1
-from app.services.research_binding import bind_research_assessment_v1
+from app.services.research import evaluate_research_assessment_v1
+from app.services.research_binding import (
+    bind_research_assessment_v1,
+    evaluate_research_association_v1,
+)
 from app.services.rights_defense import evaluate_rights_defense_assessment_v1
 from app.services.sensitive_consent import evaluate_sensitive_consent_assessment_v1
 from app.services.sensitive_rights_exception import (
@@ -1605,6 +1610,18 @@ def evaluate_transversal_readiness_v1(assessment, snapshot):
         getattr(assessment, "biometric_rights_exception_assessment", None),
     )
     blockers = []
+    if (
+        getattr(assessment, "research_assessment", None) is not None
+        or "investigacion_art16quinquies" in special.detected_regimes
+    ):
+        blockers.append(
+            {
+                "field": "research_assessment",
+                "code": "investigacion_confirmacion_bloqueada",
+                "message": "La preparación documental de investigación no habilita su confirmación",
+                "status_code": 409,
+            }
+        )
     if getattr(assessment, "eipd_resolution_assessment", None) is not None:
         blockers.append(
             {
@@ -2226,6 +2243,7 @@ async def get_legal_assessment_readiness_v1(
             "contexto_rat_no_disponible",
             "No se pudo recomponer el contexto actual; revise finalidad y alcance",
         )
+    research = None
     consent = None
     lia = None
     contract = None
@@ -2308,6 +2326,44 @@ async def get_legal_assessment_readiness_v1(
         special, eipd, transversal_blockers = evaluate_transversal_readiness_v1(
             assessment, current_snapshot
         )
+        research_document = getattr(assessment, "research_assessment", None)
+        if (
+            research_document is not None
+            or "investigacion_art16quinquies" in special.detected_regimes
+        ):
+            bound = (
+                BoundResearchAssessmentV1.model_validate(research_document)
+                if research_document is not None
+                else None
+            )
+            research_result = evaluate_research_assessment_v1(
+                bound.assessment if bound else None,
+                current_snapshot,
+                assessment.legal_basis,
+                assessment.lia_assessment,
+            )
+            association = (
+                evaluate_research_association_v1(
+                    bound,
+                    current_snapshot,
+                    assessment.legal_basis,
+                    assessment.lia_assessment,
+                )
+                if current_snapshot is not None
+                else None
+            )
+            research = {
+                **asdict(research_result),
+                "association_result": (
+                    association.result if association else "requiere_revision"
+                ),
+                "association_issues": (
+                    list(association.issues)
+                    if association
+                    else ["contexto_rat_no_disponible"]
+                ),
+                "can_confirm": False,
+            }
         if (
             assessment.geolocation_assessment is not None
             or "geolocalizacion_art16sexies" in special.detected_regimes
@@ -2446,6 +2502,7 @@ async def get_legal_assessment_readiness_v1(
             "status": assessment.status,
             "legal_basis": assessment.legal_basis,
             "rat_context_current": rat_current,
+            "research": research,
             "consent": consent,
             "lia": lia,
             "contract": contract,
