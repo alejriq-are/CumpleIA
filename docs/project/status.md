@@ -1,3 +1,30 @@
+## 2026-10-09 — M3-T1 §133: almacenamiento nullable de investigacion
+
+Migracion append-only c28f1a9d730b sobre b17d95c0286f agrega research_assessment
+JSONB nullable a legal_assessments, CHECK SQL NULL u objeto, sin backfill. ORM
+agrega campo/constraint; ninguno de los expedientes historicos se reinterpreta.
+Contratos nuevos movidos antes de DraftCreate en licitud.py y reexportados por
+schemas/research.py para evitar ciclos de importacion; no se agrega input/output
+API aun, evitando aceptar datos sin servicio de guardado. Hashes historicos intactos.
+
+Primero upgrade/head y alembic check en base aislada aprobados. Dos pruebas nuevas
+verifican columna/nullable/RLS/permisos runtime y borrador HTTP real con SQL NULL,
+rechazo arrays/texto/numero/bool/JSON null y almacenamiento objeto. CHECK SQL no
+valida todo el contrato; servicio/API posterior lo hara. La primera comprobacion
+por nombre de constraint fallo por convencion de nombres; ajustada a tabla/definicion.
+Suite final aislada: 121 aprobadas en 10.03 s. Black/Ruff aprobados; runner exige
+nuevo head c28f1a9d730b, base aislada y registro EIPD vacio como antes.
+
+Luego migracion aplicada al desarrollo local, alembic check aprobado y snapshot
+EIPD completo exactamente igual antes/despues: selector revision 1. Sin cambios de
+password/perfil/politicas; no suite contra base operacional ni despliegue remoto.
+Nuevo head de ambas bases c28f1a9d730b; procedimientos antiguos con head previo son
+historicos, requieren ese sucesor para la version actual del codigo.
+
+Proximo: crear/leer/PATCH de expediente con binding de servidor, omision/null/reaporte
+y aislamiento tenant, manteniendo investigacion bloqueada hasta integrar readiness.
+Ley fija, M3-T1 EN PROGRESO y activacion EIPD bloqueada. Sin commit/push.
+
 ## 2026-10-09 — M3-T1 §132: persistencia/API de investigacion delimitadas
 
 Plan concreto en docs/project/m3-t1-investigacion-integracion.md: columna JSONB

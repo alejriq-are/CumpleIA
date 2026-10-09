@@ -390,3 +390,10 @@ posterior al reinicio pendiente. No constituye retiro definitivo del canal ni
 revocacion instantanea de transacciones ya autorizadas; se dreno antes del cambio.
 No nueva suite; ultima 63 §124. Ley fija, fuentes/aceptacion y alcance integral
 pendientes; M3-T1 EN PROGRESO y activacion EIPD bloqueada. Sin commit/push.
+
+## §133 — head actual para el ejecutor
+
+Head actual c28f1a9d730b, aplicado en desarrollo local y base aislada; alembic check
+aprobado en ambas. Runner exige el nuevo head y agrega test_research_storage.py.
+Historicos b17d95c0286f siguen documentando su checkpoint, no el head actual.
+Suite aislada 121 aprobadas; auditoria operacional intacta/revision 1.

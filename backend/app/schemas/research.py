@@ -1,48 +1,13 @@
-"""Contrato nuevo independiente; no modifica snapshots/hashes historicos M3."""
-
-from typing import Literal
-
-from pydantic import BaseModel, ConfigDict, Field
+"""Exportaciones compatibles del contrato documental de investigacion."""
 
 from app.schemas.licitud import (
-    ContractEvidenceV1,
-    ContractResponseV1,
-    LegalAssessmentScopeIn,
+    BoundResearchAssessmentV1,
+    ResearchAssessmentV1,
+    ResearchContextBindingV1,
 )
 
-
-class ResearchAssessmentV1(LegalAssessmentScopeIn):
-    model_config = ConfigDict(extra="forbid", revalidate_instances="always")
-    schema_version: Literal[1] = 1
-    purpose_type: (
-        Literal["historico", "estadistico", "cientifico", "estudio_investigacion"]
-        | None
-    ) = None
-    purpose_description: str | None = None
-    public_interest_analysis: str | None = None
-    exclusive_use: ContractResponseV1 | None = None
-    exclusivity_controls_analysis: str | None = None
-    quality_measures_analysis: str | None = None
-    security_measures_analysis: str | None = None
-    measures_implemented: ContractResponseV1 | None = None
-    evidence: list[ContractEvidenceV1] = Field(default_factory=list)
-    publication_planned: ContractResponseV1 | None = None
-    anonymization_method: str | None = None
-    anonymization_analysis: str | None = None
-    anonymization_evidence: list[ContractEvidenceV1] = Field(default_factory=list)
-    retention_analysis: str | None = None
-
-
-class ResearchContextBindingV1(BaseModel):
-    model_config = ConfigDict(
-        extra="forbid", frozen=True, revalidate_instances="always"
-    )
-    schema_version: Literal[1] = 1
-    context_hash: str = Field(pattern=r"^[0-9a-f]{64}$")
-    document_hash: str = Field(pattern=r"^[0-9a-f]{64}$")
-
-
-class BoundResearchAssessmentV1(BaseModel):
-    model_config = ConfigDict(extra="forbid", revalidate_instances="always")
-    assessment: ResearchAssessmentV1
-    context_binding: ResearchContextBindingV1
+__all__ = [
+    "BoundResearchAssessmentV1",
+    "ResearchAssessmentV1",
+    "ResearchContextBindingV1",
+]

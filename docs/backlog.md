@@ -363,4 +363,5 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] Ampliar aplicabilidad/limites §130: 20 casos nuevos; suite aislada 107 aprobadas.
 - [x] Implementar binding independiente de investigacion y chequeo de obsolescencia §131; 119 pruebas aisladas aprobadas. Historicos intactos, sin conversion automatica.
 - [x] Delimitar persistencia/API §132 en docs/project/m3-t1-investigacion-integracion.md.
-- [ ] Implementar schema/modelo/migracion nullable sin backfill y validar en base aislada; servicios/API y nuevas asociaciones especiales/EIPD posteriores.
+- [x] Schema/modelo/migracion nullable sin backfill §133; 121 pruebas aisladas, upgrade/check en ambas bases y auditoria EIPD intacta.
+- [ ] Integrar servicios/API create/GET/PATCH con binding de servidor y pruebas tenant; nuevas asociaciones especiales/EIPD posteriores.
