@@ -32,6 +32,7 @@ from app.services.biometric_rights_exception import (
 )
 from app.services.geolocation import evaluate_geolocation_assessment_v1
 from app.services.health import evaluate_health_assessment_v1
+from app.services.research_transversal_binding import build_research_transversal_hash
 from app.services.sensitive_consent import evaluate_sensitive_consent_assessment_v1
 from app.services.sensitive_rights_exception import (
     evaluate_sensitive_rights_exception_v1,
@@ -1836,6 +1837,102 @@ def bind_special_conditions_v10(
                     biometric,
                     sensitive_rights_exception,
                     biometric_rights_exception,
+                ),
+            },
+        }
+    )
+
+
+def build_special_context_binding_hash_v11(
+    snapshot,
+    legal_basis,
+    consent,
+    lia,
+    contract,
+    legal_obligation,
+    rights_defense,
+    economic_obligations,
+    geolocation,
+    sensitive_consent,
+    health,
+    biometric,
+    sensitive_rights_exception=None,
+    biometric_rights_exception=None,
+    *,
+    research=None,
+):
+    previous = build_special_context_binding_hash_v10(
+        snapshot,
+        legal_basis,
+        consent,
+        lia,
+        contract,
+        legal_obligation,
+        rights_defense,
+        economic_obligations,
+        geolocation,
+        sensitive_consent,
+        health,
+        biometric,
+        sensitive_rights_exception,
+        biometric_rights_exception,
+    )
+    return build_research_transversal_hash(
+        "cumpleia.special.research", 11, previous, research
+    )
+
+
+def bind_special_conditions_v11(
+    conditions,
+    snapshot,
+    legal_basis,
+    consent,
+    lia,
+    contract,
+    legal_obligation,
+    rights_defense,
+    economic_obligations,
+    geolocation,
+    sensitive_consent,
+    health,
+    biometric,
+    sensitive_rights_exception=None,
+    biometric_rights_exception=None,
+    *,
+    research=None,
+):
+    parsed = SpecialConditionsDraftIn.model_validate(
+        conditions.model_dump()
+        if isinstance(conditions, SpecialConditionsDraftIn)
+        else conditions
+    )
+    rat = RatContextSnapshotV1.model_validate(
+        snapshot.model_dump()
+        if isinstance(snapshot, RatContextSnapshotV1)
+        else snapshot
+    )
+    validate_special_conditions_scope_v1(parsed, rat)
+    return SpecialConditionsV1.model_validate(
+        {
+            **parsed.model_dump(mode="json"),
+            "context_binding": {
+                "schema_version": 11,
+                "hash": build_special_context_binding_hash_v11(
+                    rat,
+                    legal_basis,
+                    consent,
+                    lia,
+                    contract,
+                    legal_obligation,
+                    rights_defense,
+                    economic_obligations,
+                    geolocation,
+                    sensitive_consent,
+                    health,
+                    biometric,
+                    sensitive_rights_exception,
+                    biometric_rights_exception,
+                    research=research,
                 ),
             },
         }

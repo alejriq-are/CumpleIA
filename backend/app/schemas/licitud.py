@@ -442,6 +442,10 @@ class EipdContextBindingV11(EipdContextBindingV1):
     schema_version: Literal[11] = 11
 
 
+class EipdContextBindingV12(EipdContextBindingV1):
+    schema_version: Literal[12] = 12
+
+
 class EipdScreeningDraftIn(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -470,6 +474,7 @@ class EipdScreeningV1(EipdScreeningDraftIn):
         | EipdContextBindingV9
         | EipdContextBindingV10
         | EipdContextBindingV11
+        | EipdContextBindingV12
     )
 
 
@@ -956,6 +961,10 @@ class SpecialContextBindingV10(SpecialContextBindingV1):
     schema_version: Literal[10] = 10
 
 
+class SpecialContextBindingV11(SpecialContextBindingV1):
+    schema_version: Literal[11] = 11
+
+
 class SpecialConditionsDraftIn(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -987,6 +996,7 @@ class SpecialConditionsV1(SpecialConditionsDraftIn):
         | SpecialContextBindingV8
         | SpecialContextBindingV9
         | SpecialContextBindingV10
+        | SpecialContextBindingV11
     )
 
 

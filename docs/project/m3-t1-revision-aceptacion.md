@@ -4031,3 +4031,30 @@ aceptacion historica a investigacion antes de ampliar esa frontera explicitament
 Proximo: contratos y funciones puras nuevos, luego dispatch/API. Sin implementacion,
 migracion ni suite nueva; ultima validacion 303 §135. Ley fija, M3-T1 EN PROGRESO,
 confirmacion investigacion y activacion EIPD bloqueadas. Sin commit/push.
+
+## 2026-10-09 — M3-T1 §137: contratos y funciones puras de asociacion
+
+SpecialContextBindingV11 y EipdContextBindingV12 agregados como sucesores cerrados;
+versiones anteriores conservadas. Nuevas funciones hash/bind especiales V11 y
+screening V12 envuelven el hash anterior intacto con dominio/version explicitos y
+BoundResearchAssessmentV1 completo o null. Screening agrega legal_basis validada
+explicitamente. Helper research_transversal_binding serializa sin mutacion y no
+repara/recalcula los hashes de investigacion recibidos. Binding obsoleto puede ser
+serializado estructuralmente: su vigencia sigue siendo un control independiente.
+
+16 casos nuevos: determinismo modelo/dict, null vs documento, cambios de cuerpo,
+binding, RAT y LIA, base explicita screening, version research desconocida, contratos
+cerrados sucesores y fixtures de hashes historicos. Comparacion estructural de todas
+las funciones anteriores contra ed0f669 aprobada como verificacion del cambio; fuera
+de pytest para no exigir historial Git en clones superficiales. Fixtures de hashes
+quedan como regresion automatica. Suite final aislada: 145 aprobadas en 13.00 s;
+Black/Ruff/diff check aprobados. No repetida suite HTTP ampliada de 303 §135, pues
+servicios/API siguen generando las versiones anteriores y su dispatch no se modifica.
+
+No dispatch evaluador nuevo ni generacion API de versiones sucesoras aun: funciones
+nuevas son primitives aisladas; no afirmar cobertura operacional de investigacion.
+No migracion/backfill, cambios de datos/politicas/credenciales, despliegue ni gates.
+Proximo: dispatch por version y diagnostico de falta de cobertura; luego escritura
+API ordenada research/especiales/screening con pruebas de compatibilidad ampliadas.
+Ley fija, M3-T1 EN PROGRESO; confirmacion investigacion y activacion EIPD bloqueadas.
+Sin commit/push.

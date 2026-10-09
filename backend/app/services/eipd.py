@@ -5,6 +5,8 @@ import json
 from dataclasses import dataclass
 from typing import Literal, get_args
 
+from pydantic import TypeAdapter
+
 from app.schemas.licitud import (
     BiometricAssessmentV1,
     BiometricRightsExceptionAssessmentV1,
@@ -15,6 +17,7 @@ from app.schemas.licitud import (
     EipdScreeningV1,
     GeolocationAssessmentV1,
     HealthAssessmentV1,
+    LegalBasis,
     LegalObligationAssessmentV1,
     LiaAssessmentV1,
     RatContextSnapshotV1,
@@ -26,6 +29,7 @@ from app.schemas.licitud import (
 from app.services.biometric import evaluate_biometric_assessment_v1
 from app.services.geolocation import evaluate_geolocation_assessment_v1
 from app.services.health import evaluate_health_assessment_v1
+from app.services.research_transversal_binding import build_research_transversal_hash
 from app.services.sensitive_consent import evaluate_sensitive_consent_assessment_v1
 
 
@@ -1748,6 +1752,96 @@ def bind_eipd_screening_v11(
                     biometric,
                     sensitive_rights_exception,
                     biometric_rights_exception,
+                ),
+            },
+        }
+    )
+
+
+def build_eipd_context_binding_hash_v12(
+    snapshot,
+    lia,
+    special_conditions,
+    contract,
+    legal_obligation,
+    rights_defense,
+    economic_obligations,
+    geolocation,
+    sensitive_consent,
+    health,
+    biometric,
+    sensitive_rights_exception=None,
+    biometric_rights_exception=None,
+    *,
+    legal_basis,
+    research=None,
+):
+    basis = TypeAdapter(LegalBasis | None).validate_python(legal_basis)
+    previous = build_eipd_context_binding_hash_v11(
+        snapshot,
+        lia,
+        special_conditions,
+        contract,
+        legal_obligation,
+        rights_defense,
+        economic_obligations,
+        geolocation,
+        sensitive_consent,
+        health,
+        biometric,
+        sensitive_rights_exception,
+        biometric_rights_exception,
+    )
+    return build_research_transversal_hash(
+        "cumpleia.eipd.screening.research", 12, previous, research, legal_basis=basis
+    )
+
+
+def bind_eipd_screening_v12(
+    screening,
+    snapshot,
+    lia,
+    special_conditions,
+    contract,
+    legal_obligation,
+    rights_defense,
+    economic_obligations,
+    geolocation,
+    sensitive_consent,
+    health,
+    biometric,
+    sensitive_rights_exception=None,
+    biometric_rights_exception=None,
+    *,
+    legal_basis,
+    research=None,
+):
+    parsed = EipdScreeningDraftIn.model_validate(
+        screening.model_dump()
+        if isinstance(screening, EipdScreeningDraftIn)
+        else screening
+    )
+    return EipdScreeningV1.model_validate(
+        {
+            **parsed.model_dump(mode="json"),
+            "context_binding": {
+                "schema_version": 12,
+                "hash": build_eipd_context_binding_hash_v12(
+                    snapshot,
+                    lia,
+                    special_conditions,
+                    contract,
+                    legal_obligation,
+                    rights_defense,
+                    economic_obligations,
+                    geolocation,
+                    sensitive_consent,
+                    health,
+                    biometric,
+                    sensitive_rights_exception,
+                    biometric_rights_exception,
+                    legal_basis=legal_basis,
+                    research=research,
                 ),
             },
         }

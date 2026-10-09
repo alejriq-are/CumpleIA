@@ -382,5 +382,11 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 ### M3-T1 §136 — Asociaciones para investigacion
 
 - [x] Delimitar versiones sucesoras especiales V11/EIPD V12, material, compatibilidad y orden PATCH.
-- [ ] Implementar contratos/funciones puras nuevos con pruebas de hashes historicos intactos.
+- [x] Implementar contratos/funciones puras nuevos con pruebas de hashes historicos intactos §137; 145 focalizadas aprobadas.
 - [ ] Dispatch y servicio/API, luego contexto de resolucion/revision y aceptacion. Confirmacion investigacion/EIPD bloqueadas.
+
+### M3-T1 §137 — Asociaciones puras sucesoras
+
+- [x] Contratos cerrados especiales V11/EIPD V12 y hash/bind de expediente completo sin reparar bindings research.
+- [x] 16 casos nuevos y 145 focalizados aprobados; funciones historicas verificadas intactas, Black/Ruff aprobados.
+- [ ] Dispatch evaluador y falta de cobertura historica; escritura API posterior. Gates siguen bloqueados.
