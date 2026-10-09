@@ -322,3 +322,35 @@ async def test_status_requires_auth_and_global_authority(api, signing_key, auth_
     assert (
         await api.get("/admin/eipd/status", headers=headers(signing_key, auth_a_id))
     ).status_code == 403
+
+
+async def test_personal_audit_tracks_publication_and_selection_readonly(
+    api, authority, signing_key, _session_factory
+):
+    credential = headers(signing_key, authority[1])
+    assert (await api.get("/admin/eipd/audit")).status_code == 401
+    before = await state(_session_factory)
+    response = await api.get("/admin/eipd/audit", headers=credential)
+    assert response.status_code == 200
+    assert response.json() == before.model_dump(mode="json")
+    assert await state(_session_factory) == before
+    pub = await api.post(
+        "/admin/eipd/publications", json=publication(), headers=credential
+    )
+    assert pub.status_code == 201
+    selected = await api.post(
+        "/admin/eipd/selections", json=selection(pub.json()["id"]), headers=credential
+    )
+    assert selected.status_code == 201
+    after = await state(_session_factory)
+    response = await api.get("/admin/eipd/audit", headers=credential)
+    assert response.status_code == 200
+    assert response.json() == after.model_dump(mode="json")
+    assert await state(_session_factory) == after
+
+
+async def test_personal_audit_rejects_tenant(api, signing_key, auth_a_id):
+    response = await api.get(
+        "/admin/eipd/audit", headers=headers(signing_key, auth_a_id)
+    )
+    assert response.status_code == 403

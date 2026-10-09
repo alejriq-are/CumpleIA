@@ -239,3 +239,40 @@ selecciona politicas y no habilita activacion. Proximo paso: preparar la validac
 operacional de publicacion/seleccion de politica deshabilitada y auditoria con
 sesion personal. Fuentes complementarias y aceptacion integral siguen pendientes.
 M3-T1 EN PROGRESO. Sin commit/push.
+
+## 2026-10-09 — M3-T1 §119: consulta personal del registro operativo
+
+Se incorpora GET /admin/eipd/audit con AdminDb y el contrato cerrado de snapshot
+validado. La lectura conserva la comprobacion JWT, autoridad global y canal
+restringido; errores de coherencia devuelven 409. No crea ni modifica politicas.
+La pantalla local incorpora Consultar registro y muestra revision vigente,
+numero de publicaciones/selecciones y referencias/estado de las politicas.
+Sin selector la revision mostrada es cero; no se inventa una seleccion inicial.
+
+Pruebas API y concurrencia: 54 aprobadas en 12.91 s. Nuevos casos cubren lectura
+sin escrituras antes/despues de publicar y seleccionar, rechazo sin JWT y rechazo
+tenant. Black/Ruff y type-check/lint frontend aprobados. Backend de validacion
+reiniciado; GET real /audit sin token devuelve 401. No se acredita consulta real
+con sesion personal hasta el resultado aportado por el usuario. La comprobacion
+de acceso personal §118 ya fue confirmada mediante captura.
+
+Proximo: consultar el registro con la sesion personal; luego preparar publicacion
+y seleccion deshabilitadas con revision vigente y evidencia operacional.
+No hubo publicaciones/selecciones operacionales en este paso. Ley fija, fuentes
+complementarias/aceptacion pendientes; M3-T1 EN PROGRESO y activacion bloqueada.
+Sin commit/push.
+
+## 2026-10-09 — M3-T1 §119: consulta del registro confirmada por el usuario
+
+El usuario aporta dos capturas de la pantalla local: entrada y resultado de
+Consultar registro. La segunda muestra revision actual 0, publicaciones 0,
+selecciones 0, ninguna politica seleccionada y activacion EIPD bloqueada.
+Se registra como evidencia visual aportada por el usuario de la consulta con su
+sesion personal; no como inspeccion independiente de la solicitud HTTP.
+No se incorporan imagenes, datos personales, claves ni tokens al repositorio.
+
+La consulta personal del registro queda confirmada. No hubo publicaciones ni
+selecciones operacionales en este paso. Proximo: preparar la publicacion de una
+politica deshabilitada y verificar su persistencia/auditoria; posteriormente,
+seleccionarla con revision vigente. Ley fija, fuentes complementarias y aceptacion
+integral pendientes. M3-T1 EN PROGRESO; activacion bloqueada. Sin commit/push.

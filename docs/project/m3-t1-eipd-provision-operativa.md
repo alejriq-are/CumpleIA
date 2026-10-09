@@ -255,3 +255,11 @@ chat. El resumen de acceso no sustituye el snapshot completo de auditoria ni
 habilita activacion. Registrar el resultado real antes de avanzar a escrituras
 con politica deshabilitada. Si los procesos terminaron, reiniciarlos con el canal
 privado existente sin copiar secretos al repositorio.
+
+## §119 — revision antes de escrituras
+
+En /admin/eipd-validation, pulsar Consultar registro con la sesion personal.
+GET /admin/eipd/audit valida el snapshot completo y permite obtener la revision
+actual antes de una seleccion. La UI muestra revision y resumen; consultar no
+publica ni selecciona. Ante error, no inferir revision cero ni reintentar escrituras
+a ciegas. Registrar el resultado real; la activacion permanece bloqueada.

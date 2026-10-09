@@ -313,3 +313,9 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] Comprobar acceso con sesion personal real: resultado confirmado en captura aportada por el usuario (2026-10-09).
 - [ ] Validar publicacion/seleccion de politica deshabilitada y auditoria con sesion personal.
 - [ ] Completar fuentes complementarias, aceptacion y validacion operacional integral; activacion excepcional bloqueada.
+
+## M3-T1 §119 — registro operacional
+
+- [x] Consulta administrativa autenticada del snapshot validado y pantalla de revision; 54 pruebas focalizadas aprobadas.
+- [x] Consulta con sesion personal confirmada por captura: revision 0, publicaciones 0, selecciones 0 (2026-10-09).
+- [ ] Preparar publicacion deshabilitada y comprobar persistencia/auditoria; luego seleccionar con revision vigente.

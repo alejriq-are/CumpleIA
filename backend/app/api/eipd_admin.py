@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.eipd_admin import get_eipd_admin_db
 from app.services.eipd_policy import EipdGatePolicyV1, Text
 from app.services.eipd_policy_audit import (
+    EipdPolicyAuditSnapshotV1,
     EipdPolicyPublicationV1,
     EipdPolicySelectionPlanV1,
     EipdPolicySelectionRequestV1,
@@ -83,3 +84,12 @@ async def administrative_status(db: AdminDb):
         "selector_present": state.selector is not None,
         "activation_authorized": False,
     }
+
+
+@router.get("/audit", response_model=EipdPolicyAuditSnapshotV1)
+async def administrative_audit(db: AdminDb):
+    """Snapshot validado para revisar revision y evidencia, sin escrituras."""
+    try:
+        return await read_eipd_policy_audit_snapshot_v1(db)
+    except ValueError:
+        raise HTTPException(409, "Auditoria EIPD no disponible") from None
