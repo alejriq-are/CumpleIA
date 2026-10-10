@@ -9843,3 +9843,31 @@ interfaz de usuario no ampliada en este incremento.
 Proximo: contrato de salida versionada de eventos V2 con metadata auditable, conservando
 historia sin identidad inferida. M3-T1 EN PROGRESO; Ley fija, fuentes/aceptacion pendientes,
 positivos/confirmacion/activacion bloqueados. Sin commit/push.
+
+
+## 2026-10-09 — M3-T1 §158: respuesta versionada de eventos
+
+EipdResolutionReviewOutV2 extiende lectura historica con response_schema_version 2,
+identidad de politica nullable y review_context_metadata nullable obligatoria.
+Contrato cerrado valida hashes de metadata contra evento; version de respuesta
+no es version de binding. Serializador lee exclusivamente identidad persistida,
+sin derivarla del expediente ni del selector actuales; historicos null siguen null.
+
+POST .../eipd-resolution/reviews/v2 reutiliza escritor autentico/transaccional y
+respuesta auditada. POST historico conserva response_model/campos originales.
+GET .../eipd-resolution/reviews/{review_id}/v2 valida tratamiento/evaluacion/tenant
+antes de leer evento; admite evaluaciones confirmadas/reemplazadas, sin exigir borrador.
+Lectura requiere view_content, escritura edit_content y ambas suscripcion activa.
+Positivos V2, confirmacion y activacion permanecen bloqueados.
+
+Seis casos nuevos HTTP/OpenAPI: ambas negativas respuesta/lectura identicas, metadata
+historia intacta tras cambio documental, contrato cerrado/hashes, tenant ajeno y evento/
+padre ausentes, GET sin escrituras, salida historica preservada, historia sin identidad
+ni fallback con padre confirmado, viewer lector/no escritor y suscripcion suspendida.
+621 pruebas aisladas aprobadas en 56.05 s; Black/Ruff/diff check aprobados.
+Suite HTTP general licitud no repetida; ultima completa §147: 570 aprobadas.
+Sin migracion ni datos operacionales modificados. Interfaz no ampliada en este paso.
+
+Proximo: preparar consumidor frontend tipado de requisitos y eventos versionados,
+conservando bloqueos y sin habilitar modulo incompleto. Ley fija; M3-T1 EN PROGRESO,
+fuentes/aceptacion pendientes. Sin commit/push.

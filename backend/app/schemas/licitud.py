@@ -686,6 +686,23 @@ class EipdResolutionReviewWithPolicyOut(EipdResolutionReviewOut):
         return self
 
 
+class EipdResolutionReviewOutV2(EipdResolutionReviewWithPolicyOut):
+    """Representacion auditada del evento; version de salida no es la del binding."""
+
+    response_schema_version: Literal[2]
+    review_context_metadata: EipdReviewContextMetadataV1 | None
+
+    @model_validator(mode="after")
+    def validar_hashes_metadatos_evento(self):
+        metadata = self.review_context_metadata
+        if metadata is not None and (
+            metadata.document_hash != self.document_hash
+            or metadata.context_hash != self.context_hash
+        ):
+            raise ValueError("Metadata discordante con hashes del evento")
+        return self
+
+
 class EipdResolutionReviewStateOut(BaseModel):
     """Estado derivado de lectura; no evalua ni autoriza confirmacion."""
 

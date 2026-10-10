@@ -510,3 +510,9 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] Readiness V3 expone prerequisitos y metadata actual por decision; sin autoridad ni eventos ficticios.
 - [x] Kernel compartido con validacion humana preservada; 615 pruebas aisladas aprobadas.
 - [ ] Salida versionada de eventos V2, consumidores y aceptacion; positivos/confirmacion bloqueados.
+
+### M3-T1 §158 — Respuesta auditada versionada
+
+- [x] POST/GET de representacion V2 con identidad persistida; contrato historico intacto y null sin inferir.
+- [x] Lectura por tenant/padre/estado, permisos/suscripcion y 621 pruebas aisladas aprobadas.
+- [ ] Consumidor frontend tipado y aceptacion; positivos/confirmacion/activacion bloqueados.

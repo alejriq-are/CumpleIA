@@ -101,6 +101,7 @@ from app.services.eipd_review_metadata import (
     eipd_review_metadata_is_current_v1,
     read_eipd_review_context_metadata_v1,
 )
+from app.services.eipd_review_response_v2 import serialize_eipd_resolution_review_v2
 from app.services.eipd_review_v2 import evaluate_eipd_resolution_review_prerequisites_v2
 from app.services.eipd_review_v3 import (
     evaluate_eipd_resolution_review_prerequisites_v3,
@@ -2985,3 +2986,20 @@ async def _record_eipd_negative_review_v2_locked(
     db.add(event)
     await db.flush()
     return event
+
+
+async def get_eipd_resolution_review_v2(
+    db, organization_id, treatment_id, assessment_id, review_id
+):
+    """Lectura por padre y tenant autenticados; no compara con contexto actual."""
+    await get_legal_assessment_v1(db, organization_id, treatment_id, assessment_id)
+    event = await db.scalar(
+        select(EipdResolutionReview).where(
+            EipdResolutionReview.id == review_id,
+            EipdResolutionReview.assessment_id == assessment_id,
+            EipdResolutionReview.organization_id == organization_id,
+        )
+    )
+    if event is None:
+        raise _not_found("Revision EIPD no encontrada")
+    return serialize_eipd_resolution_review_v2(event)
