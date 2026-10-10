@@ -84,6 +84,7 @@ const fields: Record<string, string> = {
   notes: "Notas",
   assessment: "Evaluación",
   context_binding: "Vinculación al contexto",
+  context_metadata: "Identidad auditable del material de revisión",
   context_hash: "Identidad del contexto",
   document_hash: "Identidad del documento",
   research_material_hash: "Identidad del material de investigación",

@@ -1,3 +1,22 @@
+## 2026-10-10 — M3-T1 §170: historia preservada tras cambio documental
+
+Ensayo autorizado sobre datos ficticios locales: se cambio el analisis de conservacion
+del material de investigacion mediante servicio de dominio/runtime restringido.
+Comparacion de salida del evento antes/despues confirma igualdad completa, sin nuevas
+revisiones. RAT vigente; readiness indica review_context_metadata_status obsoleta.
+El usuario verifico por captura el mismo evento con decision, fundamento, referencia,
+fecha y politica historicos. Consulta de requisitos muestra identidad auditable no
+disponible para nueva revision: se conserva la vinculacion previa del documento EIPD,
+no se repara silenciosamente al cambiar investigacion. Pantalla actual no expone
+estado de vigencia del evento; ese estado se comprobo en servicio, no por captura.
+
+Capturas adicionales confirman detalle amplio y ruta de Controles de uso exclusivo
+en español. Se corrigio etiqueta faltante context_metadata por Identidad auditable
+del material de revision; contrato y motivo sin cambios. Datos ficticios no se versionan.
+M3-T1 EN PROGRESO; confirmacion/activacion bloqueadas, fuentes/aceptacion y prueba
+API entre cuentas pendientes. Proximo: revincular explicitamente el documento ficticio
+tras su revision, conservando el evento anterior, y verificar diagnostico actualizado.
+
 ## 2026-10-10 — M3-T1 §169: amplitud y jerarquia del detalle
 
 A solicitud del usuario tras captura con columnas estrechas, decisiones se muestran
