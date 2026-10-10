@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import { EipdReviewIssues } from "./EipdReviewIssues";
 import { ApiError } from "@/lib/api/client";
 import type { EipdReviewPreparationOut, EipdResolutionReviewOutV2 } from "@/lib/api/eipd-review";
 
@@ -59,13 +60,7 @@ export function PreparationView({ value }: { value: EipdReviewPreparationOut }) 
                     ? "Identidad auditable no disponible."
                     : "Identidad del material actual disponible."}
                 </p>
-                {diagnostic.issues.length > 0 && (
-                  <ul className="mt-3 list-disc space-y-2 pl-5 text-sm">
-                    {diagnostic.issues.map((issue, index) => (
-                      <li key={`${issue.code}-${index}`}>{issue.code.replaceAll("_", " ")}</li>
-                    ))}
-                  </ul>
-                )}
+                {diagnostic.issues.length > 0 && <EipdReviewIssues issues={diagnostic.issues} />}
               </article>
             );
           })}

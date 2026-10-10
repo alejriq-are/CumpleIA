@@ -172,3 +172,30 @@ Checks automatizados anteriores no repetidos por tratarse de documentacion.
 M3-T1 EN PROGRESO; fuentes/aceptacion pendientes; confirmacion y activacion bloqueadas.
 Proximo: mejorar presentacion de los motivos pendientes de la consulta V3 y mantener
 como pendiente explicito la prueba directa de API EIPD entre cuentas/organizaciones.
+
+## 2026-10-10 — M3-T1 §163: motivos documentales legibles
+
+Consulta interna V3 agrupa motivos por etapa con titulos en español, explica codigos
+frecuentes e identifica campo/pregunta. Deduplicacion solo visual por etapa, campo,
+codigo, categoria y pregunta; conserva cantidad de ocurrencias y total informado.
+Motivos con campos o preguntas distintos permanecen separados. Detalle desplegable
+conserva codigo/campo/categoria/etapa/pregunta exactos para trazabilidad. Codigos
+no reconocidos muestran aviso neutral y detalle, sin inventar requisitos legales.
+
+Sin cambios de API, reglas, autoridad, metadata, permisos, escrituras ni migraciones.
+Nuevas etiquetas no resuelven pendientes ni habilitan confirmacion/activacion.
+Validacion: 5 interacciones Chromium aprobadas (2.6 s), tipos y lint frontend aprobados.
+Caso agregado verifica campos distintos, duplicados con cantidad, preguntas y codigo
+desconocido conservado. Callbacks sinteticos; presentacion en expediente local con
+sesion personal pendiente de inspeccion manual. Backend y cliente sin cambios;
+regresiones anteriores no repetidas. M3-T1 EN PROGRESO; fuentes/aceptacion pendientes.
+Proximo: inspeccion visual de motivos en el expediente de prueba, manteniendo pendiente
+la prueba directa de API EIPD entre cuentas/organizaciones.
+
+Inspeccion manual posterior con sesion autorizada y expediente ficticio: usuario
+confirmo mediante capturas las etapas, campos y tres tarjetas; el desplegable de
+justificacion mostro codigo justificacion_ausente, campo justification, categoria
+incompleto y etapa state. Continuar mantuvo pendientes; las decisiones negativas
+mostraron requisitos documentales cumplidos sin conceder autoridad ni confirmar.
+Pendiente ampliar traducciones de campos que conservan etiquetas inglesas como
+exclusive_use; no se considera completada toda la localizacion.

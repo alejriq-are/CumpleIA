@@ -22,10 +22,11 @@ test.beforeAll(async () => {
     import {createRoot} from "react-dom/client";
     import {EipdReviewConsultation} from ${JSON.stringify(path.resolve("components/admin/EipdReviewConsultation.tsx"))};
     import {ApiError} from ${JSON.stringify(path.resolve("lib/api/client.ts"))};
-    window.demo={calls:[],mode:"ok",release:null};
+    window.demo={calls:[],mode:"ok",release:null,issues:null};
     function preparation(scope){
       const partial={prerequisites_met:true,context_metadata:null,issues:[]};
-      return {assessment_id:scope.assessmentId,status:"borrador",review_prerequisites_v3:{evaluation_version:3,evaluation_scope:"requisitos_documentales",authorizes_action:false,can_confirm:false,requiere_cambios:partial,no_continuar:partial,continuar:{prerequisites_met:false,context_metadata:null,issues:[{code:"investigacion_confirmacion_bloqueada"}]}}};
+      if(window.demo.issues)partial.issues=window.demo.issues;
+      return {assessment_id:scope.assessmentId,status:"borrador",review_prerequisites_v3:{evaluation_version:3,evaluation_scope:"requisitos_documentales",authorizes_action:false,can_confirm:false,requiere_cambios:partial,no_continuar:partial,continuar:{prerequisites_met:false,context_metadata:null,issues:[{stage:"research",field:"research_assessment",code:"investigacion_confirmacion_bloqueada",category:"pendiente_revision",question_id:null}]}}};
     }
     async function loadPreparation(scope){
       window.demo.calls.push({kind:"preparation",scope});
@@ -91,7 +92,9 @@ test("solo consulta y limpia datos al cambiar expediente", async ({ page }) => {
       "Cumplir estos requisitos documentales no concede permiso ni registra una decisión."
     )
   ).toBeVisible();
-  await expect(page.getByText("investigacion confirmacion bloqueada")).toBeVisible();
+  await expect(
+    page.getByText("La confirmación del expediente de investigación permanece bloqueada.")
+  ).toBeVisible();
   expect(await page.getByRole("button").allTextContents()).toEqual([
     "Consultar requisitos",
     "Consultar revisión",
@@ -153,4 +156,44 @@ test("evento historico no infiere metadata y seleccion explicita delimita consul
       id: ids[3],
     },
   ]);
+});
+
+test("motivos distinguen campos y preguntas, agrupan duplicados y conservan códigos desconocidos", async ({
+  page,
+}) => {
+  await scopeForm(page);
+  await page.evaluate(() => {
+    const first = {
+      stage: "resolution",
+      field: "eipd_resolution_assessment.document_reference",
+      code: "campo_obligatorio",
+      category: "incompleto",
+      question_id: null,
+    };
+    (window as unknown as { demo: { issues: unknown[] } }).demo.issues = [
+      first,
+      first,
+      { ...first, field: "eipd_resolution_assessment.document_version" },
+      {
+        ...first,
+        stage: "research",
+        field: "research_assessment",
+        code: "codigo_futuro",
+        question_id: "pregunta_futura",
+      },
+    ];
+  });
+  await page.getByRole("button", { name: "Consultar requisitos" }).click();
+  const card = page
+    .locator("article")
+    .filter({ has: page.getByRole("heading", { name: "Requiere cambios", exact: true }) });
+  await expect(card.getByText("4 motivos informados.")).toBeVisible();
+  await expect(card.locator("li")).toHaveCount(3);
+  await expect(card.getByText("Campo: Documento EIPD › Referencia del documento")).toBeVisible();
+  await expect(card.getByText("Campo: Documento EIPD › Versión del documento")).toBeVisible();
+  await expect(card.getByText("Informado 2 veces por el diagnóstico.")).toBeVisible();
+  await expect(card.getByText("Pregunta: pregunta futura")).toBeVisible();
+  await card.locator("li").last().getByText("Detalle del diagnóstico").click();
+  await expect(card.getByText("codigo_futuro", { exact: true })).toBeVisible();
+  await expect(card.getByText("pendiente de revisión", { exact: false })).toBeVisible();
 });

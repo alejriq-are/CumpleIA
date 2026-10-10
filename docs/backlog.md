@@ -528,3 +528,10 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] Ruta bajo layout administrativo con sesion/contexto explicitos, requisitos y evento historico sin autoridad.
 - [x] 4 interacciones Chromium aisladas + 11 regresiones del cliente, type-check/lint aprobados.
 - [ ] Validacion real de sesion/expediente y aceptacion; modulo/confirmacion/activacion bloqueados.
+
+### M3-T1 §163 — Presentacion de motivos de consulta
+
+- [x] Etapas, campos y preguntas visibles; duplicados exactos con cantidad y detalle original.
+- [x] 5 pruebas de interaccion, tipos y lint frontend aprobados.
+- [x] Inspeccion visual con sesion y expediente ficticio local: etapas, campos y detalle original.
+- [ ] Ampliar traducciones de campos; prueba directa de API entre cuentas pendiente.
