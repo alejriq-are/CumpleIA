@@ -456,3 +456,9 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] Seleccion V1/V2 por contexto final y antecedente persistido, sin downgrade V2.
 - [x] Research declarado sin documento conserva cobertura V2; ordinario mantiene binding V1.
 - [ ] Integrar POST/PATCH y consumidores, metadatos auditables y aceptacion.
+
+### M3-T1 §149 — Escritor API versionado
+
+- [x] POST/PATCH con contexto final, antecedente persistido, omision/null/reaporte y salida V1/V2.
+- [x] Readiness por version sin aplicar composiciones historicas a V2; acciones V2 bloqueadas sin eventos.
+- [ ] Metadatos auditables/prerequisitos versionados de revision y aceptacion.

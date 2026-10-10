@@ -1327,7 +1327,9 @@ class LegalAssessmentOut(BaseModel):
     biometric_assessment: BiometricAssessmentV1 | None
     economic_obligations_assessment: EconomicObligationsAssessmentV1 | None
     rights_defense_assessment: RightsDefenseAssessmentV1 | None
-    eipd_resolution_assessment: EipdResolutionAssessmentStoredV1 | None = None
+    eipd_resolution_assessment: (
+        EipdResolutionAssessmentStoredV1 | EipdResolutionAssessmentStoredV2 | None
+    ) = None
     eipd_screening: EipdScreeningV1 | None
     schema_version: int
     rat_context_schema_version: int

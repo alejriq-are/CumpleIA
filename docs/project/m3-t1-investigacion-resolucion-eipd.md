@@ -235,3 +235,36 @@ completa mas readiness V2: 570 aprobadas en §147.
 Proximo: conectar escritor/lectores mediante dispatch y bloqueo explicito de revision
 V2 hasta incorporar metadatos auditables. No migracion ni cambio operacional.
 Ley fija; M3-T1 EN PROGRESO. Activacion EIPD bloqueada. Sin commit/push.
+
+## 2026-10-09 — M3-T1 §149: escritor V2 conectado a API
+
+POST/PATCH de resolucion usan bind_eipd_resolution_for_context sobre ContextV2
+con material final research/especiales/screening/base/LIA/RAT. PATCH aporta antecedente
+persistido para impedir downgrade V2. Omision conserva JSON anterior; null elimina;
+reaporte explicito asocia nuevamente. Out admite StoredV1 y StoredV2 sin ampliar
+el documento de entrada: binding del cliente sigue rechazado. Ordinario mantiene V1.
+
+Readiness despacha documento y vigencia de revision por version cuando hay research
+presente/declarado o resolucion V2. Conserva forma documental superior y expone
+binding_version en composicion V3. Composiciones V1/V2 quedan null en este ambito;
+no se proyecta una resolucion V2 sobre lectores historicos. V3 sigue disponible al
+retirar research si persiste resolucion V2. Registro real de politica o ausencia
+explicita; sin bootstrap, rebind de lectura ni eventos sinteticos.
+
+Confirmacion y registro de cualquier decision de revision V2 rechazan 409
+resolucion_eipd_v2_revision_pendiente tras relectura/locks existentes. Metadatos
+versionados de eventos aun pendientes; no se escribe historia V2 sin cobertura
+auditable. Acciones historicas V1 conservan comportamiento. No migracion ni cambio
+operacional; ley fija y activacion EIPD bloqueada.
+
+Seis casos HTTP nuevos cubren create/PATCH y contexto final, omision/obsolescencia/
+reaporte/null, retirada sin downgrade, V1 preservada hasta reaporte, aislamiento,
+binding cliente rechazado, declaracion sin documento, lectura sin mutacion, revision
+positiva/negativa bloqueada sin eventos e inmutabilidad de expediente confirmado.
+485 pruebas aisladas aprobadas en 68.19 s: suite focalizada mas regresiones
+HTTP de resolucion, revision, readiness V2 y confirmacion V2/seleccionada.
+Incluye seis casos nuevos. Black/Ruff aprobados. No se repitieron las 174
+pruebas generales HTTP de licitud; ultima suite completa §147: 570 aprobadas.
+Proximo: contrato/metadatos auditables por version para eventos, conservando historia
+V1 y bloqueo hasta integrar prerequisitos y aceptacion. M3-T1 EN PROGRESO.
+Sin commit/push.
