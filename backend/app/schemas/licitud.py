@@ -11,6 +11,8 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl, model_validator
 
+from app.schemas.eipd_review_metadata import EipdReviewContextMetadataV1
+
 LegalBasis = Literal[
     "consentimiento_art12",
     "obligaciones_economicas_art13a",
@@ -1584,6 +1586,10 @@ class EipdControlCompositionV3Out(BaseModel):
         "sin_revision", "sin_identidad", "vigente", "obsoleta"
     ]
     latest_review_policy: EipdReviewPolicyIdentityOut | None
+    latest_review_context_metadata: EipdReviewContextMetadataV1 | None
+    review_context_metadata_status: Literal[
+        "sin_revision", "sin_metadatos", "vigente", "obsoleta"
+    ]
     can_confirm: Literal[False]
 
 

@@ -474,3 +474,9 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] Columna nullable sin backfill, contrato/hashes comprobados y lectura ORM/pura conservadora.
 - [x] Migracion aislada/local verificada, historia intacta y 445 pruebas aprobadas.
 - [ ] Visibilidad API, prerequisitos de eventos V2 y aceptacion; acciones bloqueadas.
+
+### M3-T1 §152 — Metadata visible en readiness V3
+
+- [x] Lectura actual/historica separada por identidad, una consulta y sin fallback ni escrituras.
+- [x] 465 pruebas aprobadas; metadata vigente no levanta bloques de revision/confirmacion.
+- [ ] Prerequisitos puros versionados de revision, registro controlado y aceptacion.

@@ -1,3 +1,29 @@
+## 2026-10-09 — M3-T1 §152: lectura API de metadata de revision
+
+Composicion V3 expone latest_review_context_metadata y estado separado sin_revision,
+sin_metadatos, vigente u obsoleta. La consulta del ultimo evento retorna metadata
+validada junto a evento/identidad de politica; wrapper historico conserva contrato
+de dos valores. Una sola SELECT de historial; no busca identidad de eventos anteriores.
+Metadata solo de salida, no agregada a entradas HTTP de decision humana.
+
+Vigencia compara hashes del evento, documento y ContextV2 actuales, incluido research.
+Historia sin metadata conserva null; evento reciente sin identidad no hereda metadata
+anterior. Revision documental, politica y metadata son estados independientes. Ausencia
+u obsolescencia agrega bloqueo explicito de confirmacion en V3; metadata vigente
+no elimina bloques documentales, de fuentes, politica ni investigacion.
+
+Seis casos HTTP/OpenAPI nuevos: sin evento, historico sin metadata, identidad vigente,
+material cambiado con metadata obsoleta, ultima negativa sin fallback y contrato de
+salida cerrado. Verifican una consulta de historial, ausencia de escrituras, expediente
+y conteo de eventos intactos, frontera de tenant y revision V2 aun rechazada.
+465 pruebas aisladas aprobadas en 39.62 s: focalizadas mas readiness V2/revisiones
+historicas; Black/Ruff aprobados. Suite HTTP general de licitud no repetida; ultima
+completa §147: 570 aprobadas. Sin migracion ni cambio operacional en este paso.
+
+Proximo: prerequisitos puros de revision V2 con metadatos/cobertura explicitos antes
+de conectar registro de decisiones; confirmacion y activacion permanecen bloqueadas.
+Ley fija; M3-T1 EN PROGRESO. Sin commit/push.
+
 ## 2026-10-09 — M3-T1 §151: almacenamiento de metadatos de revision
 
 Migracion aditiva d39e2b0f841c sobre c28f1a9d730b agrega review_context_metadata JSONB

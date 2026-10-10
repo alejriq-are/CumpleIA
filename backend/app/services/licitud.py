@@ -97,6 +97,10 @@ from app.services.eipd_resolution_readiness_v2 import (
     evaluate_eipd_resolution_document_versioned,
 )
 from app.services.eipd_resolution_writer import bind_eipd_resolution_for_context
+from app.services.eipd_review_metadata import (
+    eipd_review_metadata_is_current_v1,
+    read_eipd_review_context_metadata_v1,
+)
 from app.services.eipd_review_v2 import evaluate_eipd_resolution_review_prerequisites_v2
 from app.services.eipd_screening_v2 import evaluate_eipd_screening_v2
 from app.services.geolocation import evaluate_geolocation_assessment_v1
@@ -1793,7 +1797,9 @@ def evaluate_transversal_readiness_v1(assessment, snapshot):
     return special, eipd, blockers
 
 
-async def _latest_eipd_review_snapshot_v1(db, organization_id, assessment_id):
+async def _latest_eipd_review_snapshot_with_metadata_v1(
+    db, organization_id, assessment_id
+):
     """Lee ultimo evento del tenant; operaciones mutadoras llaman bajo lock."""
     latest_review = await db.scalar(
         select(EipdResolutionReview)
@@ -1828,7 +1834,17 @@ async def _latest_eipd_review_snapshot_v1(db, organization_id, assessment_id):
     identity = (
         derive_eipd_review_policy_identity_v1(latest_review) if latest_review else None
     )
-    return review_payload, identity
+    metadata = (
+        read_eipd_review_context_metadata_v1(latest_review) if latest_review else None
+    )
+    return review_payload, identity, metadata
+
+
+async def _latest_eipd_review_snapshot_v1(db, organization_id, assessment_id):
+    payload, identity, _ = await _latest_eipd_review_snapshot_with_metadata_v1(
+        db, organization_id, assessment_id
+    )
+    return payload, identity
 
 
 async def _latest_eipd_review_payload_v1(db, organization_id, assessment_id):
@@ -1934,6 +1950,7 @@ def _compose_assessment_eipd_controls_v3(
     identity,
     evaluated_on,
     policy,
+    context_metadata=None,
 ):
     result = compose_eipd_controls_v3(
         {
@@ -1951,6 +1968,44 @@ def _compose_assessment_eipd_controls_v3(
         can_confirm=result.can_confirm,
         latest_review_policy=identity.model_dump(mode="json") if identity else None,
     )
+    metadata_status = (
+        "sin_revision"
+        if latest_review is None
+        else (
+            "sin_metadatos"
+            if context_metadata is None
+            else (
+                "vigente"
+                if eipd_review_metadata_is_current_v1(
+                    context_metadata,
+                    assessment.eipd_resolution_assessment,
+                    context,
+                    latest_review,
+                )
+                else "obsoleta"
+            )
+        )
+    )
+    data.update(
+        latest_review_context_metadata=(
+            context_metadata.model_dump(mode="json") if context_metadata else None
+        ),
+        review_context_metadata_status=metadata_status,
+    )
+    if metadata_status in ("sin_metadatos", "obsoleta"):
+        data["confirmation_blockers"] = list(data["confirmation_blockers"]) + [
+            {
+                "stage": "review",
+                "field": "latest_review.context_metadata",
+                "code": (
+                    "revision_sin_metadatos_contexto"
+                    if metadata_status == "sin_metadatos"
+                    else "metadatos_revision_obsoletos"
+                ),
+                "category": "requiere_revision",
+                "question_id": None,
+            }
+        ]
     detection = data["detection_v3"]
     detection.update(
         evaluation_version=3,
@@ -2557,8 +2612,10 @@ async def get_legal_assessment_readiness_v1(
             )
             if use_v3:
                 eipd_resolution.pop("binding_version")
-        review_payload, review_identity = await _latest_eipd_review_snapshot_v1(
-            db, organization_id, assessment.id
+        review_payload, review_identity, context_metadata = (
+            await _latest_eipd_review_snapshot_with_metadata_v1(
+                db, organization_id, assessment.id
+            )
         )
         eipd_resolution_review = (
             derive_eipd_resolution_review_state_versioned
@@ -2627,6 +2684,7 @@ async def get_legal_assessment_readiness_v1(
                 review_identity,
                 evaluated_on,
                 publication.policy if publication else None,
+                context_metadata,
             )
         blockers.extend(
             {k: v for k, v in item.items() if k != "status_code"}
