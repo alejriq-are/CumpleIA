@@ -1,3 +1,42 @@
+## 2026-10-09 — M3-T1 §160: pantalla interna solo lectura
+
+Nueva ruta frontend /admin/licitud-validation bajo layout superadmin existente.
+Usa sesion actual por consulta y cliente tipado; exige organizacion/tratamiento/
+evaluacion explicitos por UUID, sin persistir tokens o inferir tenant. Consultas
+separadas de requisitos y evento por identificador. No ofrece registrar decisiones,
+confirmar o activar ni cambia tarjeta/navegacion del modulo publico incompleto.
+
+Componente muestra requisitos por decision como diagnostico sin autoridad y eventos
+como identidad historica; null no se reconstruye. Estados de carga/error accesibles,
+campos/botones bloqueados durante espera, datos anteriores borrados antes de consulta
+y al cambiar alcance; mensajes diferenciados para sesion/suscripcion/permisos/ausencia.
+Eventos exhiben fundamento/referencia/fecha/politica registrada sin acreditar vigencia.
+
+Cuatro pruebas de interaccion Chromium sobre componente real compilado temporalmente,
+callbacks sinteticos sin red/base/sesion personal: consulta/contexto, carga sin duplicados,
+error sin datos anteriores y evento historico sin metadata. 4 aprobadas en 2.2 s;
+11 regresiones del cliente aprobadas en 386 ms. Type-check/lint frontend aprobados.
+Pruebas no verifican autenticacion del layout ni conectividad con backend real;
+validacion manual posterior descrita abajo. Backend sin cambios,
+ultima regresion §158 621 aprobadas no repetida. Sin migracion; datos ficticios locales.
+
+
+Validacion manual posterior con sesion personal y datos ficticios locales: consulta
+V3 muestra las tres decisiones; identificadores inexistentes de evaluacion, tratamiento,
+revision y organizacion devuelven ausencia sin conservar resultados; restaurar alcance
+recupera las tarjetas. Se comprobo la validacion de campo obligatorio en Revision.
+Se preparo un borrador de investigacion estadistica para una finalidad de prueba en
+el tratamiento existente mediante servicios de dominio y rol runtime restringido.
+Se actualizo explicitamente su contexto RAT y se revinculo investigacion: aviso de
+contexto desactualizado desaparecio en servicio y pantalla. Estas escrituras locales
+no son parte del repositorio. No se registro revision ni se confirmo o activo EIPD.
+Pendientes: lectura de un evento existente y aislamiento entre dos organizaciones
+existentes de prueba; organizacion inexistente no acredita ese aislamiento completo.
+
+Proximo: consultar un evento existente y probar aislamiento entre organizaciones;
+ajustar presentacion de motivos si corresponde. Ley fija; M3-T1 EN PROGRESO, fuentes/aceptacion
+pendientes; positivos/confirmacion/activacion bloqueados.
+
 ## 2026-10-09 — M3-T1 §159: consumidor frontend tipado
 
 Nuevo lib/api/eipd-review.ts define contratos de metadata V1, requisitos por decision

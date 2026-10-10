@@ -96,3 +96,26 @@ como runner, sin fixture page/browser ni red real. No requiere servicios locales
 sesion personal ni base de datos; fetch se simula/restaura en cada caso.
 Once casos de contratos, headers, alcance, cache y errores. Estos checks no sustituyen
 una futura prueba real de interfaz ni autorizacion del backend.
+
+### Consulta interna EIPD (§160)
+
+`npm run test:eipd-consultation` compila el componente React real en un directorio
+temporal, eliminado al terminar, y ejecuta cuatro interacciones en Chromium.
+No usa servicios, JWT personal ni base de datos; callbacks sinteticos prueban carga,
+limpieza de contexto, errores y lectura historica. No sustituye prueba de layout
+administrativo/autenticacion ni integracion de la sesion personal contra API real.
+Pantalla: `/admin/licitud-validation`, solo lectura con UUID explicitos del expediente.
+
+### Validacion manual local de consulta interna (§160)
+
+Validacion manual posterior con sesion personal y datos ficticios locales: consulta
+V3 muestra las tres decisiones; identificadores inexistentes de evaluacion, tratamiento,
+revision y organizacion devuelven ausencia sin conservar resultados; restaurar alcance
+recupera las tarjetas. Se comprobo la validacion de campo obligatorio en Revision.
+Se preparo un borrador de investigacion estadistica para una finalidad de prueba en
+el tratamiento existente mediante servicios de dominio y rol runtime restringido.
+Se actualizo explicitamente su contexto RAT y se revinculo investigacion: aviso de
+contexto desactualizado desaparecio en servicio y pantalla. Estas escrituras locales
+no son parte del repositorio. No se registro revision ni se confirmo o activo EIPD.
+Pendientes: lectura de un evento existente y aislamiento entre dos organizaciones
+existentes de prueba; organizacion inexistente no acredita ese aislamiento completo.

@@ -522,3 +522,9 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] Tipos/cliente de requisitos y eventos auditados; negativos sin inyeccion ni autoridad derivada.
 - [x] 11 pruebas de red simulada y type-check/lint frontend aprobados; backend sin cambios.
 - [ ] Pantalla interna solo lectura y aceptacion; modulo/confirmacion/activacion bloqueados.
+
+### M3-T1 §160 — Consulta interna solo lectura
+
+- [x] Ruta bajo layout administrativo con sesion/contexto explicitos, requisitos y evento historico sin autoridad.
+- [x] 4 interacciones Chromium aisladas + 11 regresiones del cliente, type-check/lint aprobados.
+- [ ] Validacion real de sesion/expediente y aceptacion; modulo/confirmacion/activacion bloqueados.

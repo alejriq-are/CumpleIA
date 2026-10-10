@@ -776,3 +776,30 @@ Proximo: integrar consulta solo lectura en pantalla interna de validacion de lic
 con seleccion explicita de organizacion/expediente y estados de carga/error claros.
 Ley fija; M3-T1 EN PROGRESO, fuentes/aceptacion pendientes; confirmacion/activacion
 bloqueadas. Sin commit/push.
+
+
+## 2026-10-09 — M3-T1 §160: pantalla interna solo lectura
+
+Nueva ruta frontend /admin/licitud-validation bajo layout superadmin existente.
+Usa sesion actual por consulta y cliente tipado; exige organizacion/tratamiento/
+evaluacion explicitos por UUID, sin persistir tokens o inferir tenant. Consultas
+separadas de requisitos y evento por identificador. No ofrece registrar decisiones,
+confirmar o activar ni cambia tarjeta/navegacion del modulo publico incompleto.
+
+Componente muestra requisitos por decision como diagnostico sin autoridad y eventos
+como identidad historica; null no se reconstruye. Estados de carga/error accesibles,
+campos/botones bloqueados durante espera, datos anteriores borrados antes de consulta
+y al cambiar alcance; mensajes diferenciados para sesion/suscripcion/permisos/ausencia.
+Eventos exhiben fundamento/referencia/fecha/politica registrada sin acreditar vigencia.
+
+Cuatro pruebas de interaccion Chromium sobre componente real compilado temporalmente,
+callbacks sinteticos sin red/base/sesion personal: consulta/contexto, carga sin duplicados,
+error sin datos anteriores y evento historico sin metadata. 4 aprobadas en 2.2 s;
+11 regresiones del cliente aprobadas en 386 ms. Type-check/lint frontend aprobados.
+Pruebas no verifican autenticacion del layout ni conectividad con backend real;
+validacion de sesion personal y expediente real sigue pendiente. Backend sin cambios,
+ultima regresion §158 621 aprobadas no repetida. Sin migracion/datos operacionales.
+
+Proximo: validar flujo real de consulta con sesion y expediente autorizado y ajustar
+presentacion de motivos si corresponde. Ley fija; M3-T1 EN PROGRESO, fuentes/aceptacion
+pendientes; positivos/confirmacion/activacion bloqueados. Sin commit/push.

@@ -11,7 +11,8 @@
     "format": "prettier --write .",
     "test:e2e": "playwright test",
     "test:e2e:install": "playwright install chromium",
-    "test:eipd-client": "playwright test e2e/eipd-api-client.spec.ts"
+    "test:eipd-client": "playwright test e2e/eipd-api-client.spec.ts",
+    "test:eipd-consultation": "playwright test e2e/eipd-consultation.spec.ts"
   },
   "dependencies": {
     "next": "15.0.0",
