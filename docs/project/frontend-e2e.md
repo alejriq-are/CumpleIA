@@ -219,3 +219,18 @@ finalidad de investigacion y Controles de uso exclusivo visibles en español;
 detalle conserva codigo, campo, categoria y etapa originales. Permanecen etiquetas
 sin traducir en rutas de interes legitimo: conclusion, balancing_summary, decision.
 Pendiente completar esas etiquetas y otras rutas; no se afirma localizacion total.
+
+## 2026-10-10 — M3-T1 §165: etiquetas de interes legitimo
+
+Catalogo visual ampliado para las secciones y campos de LIA v1: finalidad/interes,
+necesidad, naturaleza/alcance, expectativas, impacto, salvaguardas, transparencia/
+oposicion y conclusion. Rutas observadas conclusion/balancing_summary/decision
+muestran Conclusion/Resumen de ponderacion/Decision en español. Respuestas y
+comentarios tambien etiquetados. Detalle conserva identificadores originales.
+Sin cambios de contratos, reglas, permisos, API ni datos. Campos desconocidos
+mantienen fallback; no se declara localizacion completa de todos los regimenes.
+Tipos y lint frontend aprobados. Sin pruebas nuevas que repliquen traducciones;
+interacciones §163 sin cambios y no repetidas. Inspeccion visual pendiente.
+M3-T1 EN PROGRESO; fuentes/aceptacion pendientes, confirmacion/activacion bloqueadas.
+Proximo: revisar rutas LIA en expediente ficticio. Prueba directa API entre cuentas
+permanece pendiente; rechazos de pagina/RAT no sustituyen ese control EIPD.

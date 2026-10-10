@@ -542,3 +542,9 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] Tipos y lint frontend aprobados.
 - [x] Inspeccion manual: uso exclusivo y controles en español; detalle original preservado.
 - [ ] Traducir rutas restantes (conclusion/balancing_summary/decision); API entre cuentas pendiente.
+
+### M3-T1 §165 — Etiquetas de interes legitimo
+
+- [x] Traducir secciones/campos LIA v1 y conservar identificadores del detalle.
+- [x] Tipos y lint frontend aprobados.
+- [ ] Inspeccion visual de rutas LIA en expediente ficticio; API entre cuentas pendiente.
