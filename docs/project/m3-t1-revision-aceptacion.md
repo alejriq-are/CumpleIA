@@ -4681,3 +4681,30 @@ Validacion: resultados de pantalla comunicados por el usuario; checks automatiza
 M3-T1 EN PROGRESO; fuentes/aceptacion pendientes; continuar/confirmar/activar bloqueados.
 Proximo: prueba reciproca con la segunda cuenta en su expediente autorizado, sin
 ampliar permisos, y mejorar presentacion de motivos si corresponde.
+
+## 2026-10-10 — M3-T1 §162: segunda sesion y acceso administrativo
+
+Validacion manual con una segunda cuenta personal autenticada, propietaria de una
+organizacion de prueba distinta y sin permiso global superadmin. Las membresias y
+la separacion de organizaciones se comprobaron mediante consulta local solo lectura.
+Abrir el tratamiento de la primera organizacion desde la segunda sesion mostro
+Actividad de tratamiento no encontrada, sin cargar datos. Su inventario propio
+mostro ausencia de actividades y no incluyo las de la primera organizacion.
+La pagina /admin/licitud-validation redirigio a /dashboard por falta de superadmin.
+No se ampliaron roles ni membresias para realizar la prueba.
+
+Tras cerrar la segunda sesion y recuperar la cuenta original autorizada, se consulto
+la revision ficticia existente: requiere_cambios, fundamento, referencia, fecha UTC,
+politica deshabilitada y metadata de contexto V2 conservaron los valores registrados.
+Resultados observados y comunicados por el usuario mediante capturas de pantalla.
+
+Alcance: tratamiento RAT ajeno, listado propio, restriccion de pagina administrativa
+y recuperacion de acceso autorizado. No constituye consulta reciproca de la API EIPD
+con token de la segunda cuenta ni cobertura exhaustiva de aislamiento/RLS.
+La cuenta automatizada de pruebas no se utilizo: no se verifico acceso utilizable.
+Sin codigo ni migraciones; datos ficticios y organizacion nueva solo en base local.
+Sin correos, identificadores personales, credenciales ni tokens en el repositorio.
+Checks automatizados anteriores no repetidos por tratarse de documentacion.
+M3-T1 EN PROGRESO; fuentes/aceptacion pendientes; confirmacion y activacion bloqueadas.
+Proximo: mejorar presentacion de los motivos pendientes de la consulta V3 y mantener
+como pendiente explicito la prueba directa de API EIPD entre cuentas/organizaciones.
