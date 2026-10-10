@@ -1,3 +1,22 @@
+## 2026-10-10 — M3-T1 §172: segunda revision negativa independiente
+
+Ensayo sobre expediente ficticio PRUEBA-2: servicio de dominio/runtime restringido
+registro no_continuar con fundamento y referencia de prueba distintos. Comprobacion
+transaccional: conteo aumento exactamente en uno; salida completa del evento anterior
+permanece identica. Metadata de ultima revision vigente en readiness; representa
+identidad documental, no aprobacion ni permiso. No confirmacion ni activacion.
+
+Capturas del usuario: consulta del evento nuevo muestra No continuar, referencia
+PRUEBA-REVISION-PRUEBA2-20261010 y fundamento sobre PRUEBA-2. Al consultar el evento
+anterior reaparecen Requiere cambios, referencia original, fundamento y fecha intactos.
+Ambos eventos se consultan por separado; no hay sobrescritura historica.
+Datos ficticios solo en base local; sin codigo, migraciones o nuevos tests automatizados.
+Validacion de servicio y sesion personal; checks previos no repetidos.
+M3-T1 EN PROGRESO; fuentes/aceptacion pendientes; confirmacion/activacion bloqueadas.
+API EIPD entre cuentas sigue pendiente. Proximo: hacer visible el estado de vigencia
+documental de la ultima revision en consulta de requisitos, separado de historia y
+preparacion para nuevas decisiones, sin inferir autoridad ni actualizar eventos.
+
 ## 2026-10-10 — M3-T1 §171: revinculacion documental explicita de prueba
 
 Tras el cambio ficticio de conservacion de §170, se reviso/reaporto el documento EIPD
