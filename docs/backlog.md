@@ -462,3 +462,9 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] POST/PATCH con contexto final, antecedente persistido, omision/null/reaporte y salida V1/V2.
 - [x] Readiness por version sin aplicar composiciones historicas a V2; acciones V2 bloqueadas sin eventos.
 - [ ] Metadatos auditables/prerequisitos versionados de revision y aceptacion.
+
+### M3-T1 §150 — Metadatos auditables puros
+
+- [x] Contrato cerrado/versiones estrictas y generador/comparador de identidad de material V1/V2.
+- [x] Ausencia historica conservada; cobertura research explicita sin autoridad ni proyeccion.
+- [ ] Persistencia append-only/lectura de metadata, prerequisitos V2 y aceptacion.

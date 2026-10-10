@@ -268,3 +268,33 @@ pruebas generales HTTP de licitud; ultima suite completa §147: 570 aprobadas.
 Proximo: contrato/metadatos auditables por version para eventos, conservando historia
 V1 y bloqueo hasta integrar prerequisitos y aceptacion. M3-T1 EN PROGRESO.
 Sin commit/push.
+
+## 2026-10-09 — M3-T1 §150: contrato puro de metadatos de revision
+
+Nuevo schemas/eipd_review_metadata.py define EipdReviewContextMetadataV1 cerrado:
+metadata_schema_version 1, versiones enteras estrictas de binding/contexto 1/2,
+cobertura no_cubierta/contexto_v2 coherente, hashes de documento/contexto y hash
+opcional del material research completo (incluido su binding). V2 cubre research
+null explicitamente; null en hash de research no declara documento presente.
+
+Nuevo services/eipd_review_metadata.py genera identidad desde material de servidor
+validado y asociado vigente. No proyecta ContextV2 sobre binding V1 ni genera identidad
+vigente para contexto obsoleto/ausente/resolucion no asociada. Usa hashes historicos
+V1 o sucesores V2 y dominio separado del hash research. Comparador verifica identidad
+contra hashes de evento y material actual; metadatos ausentes permanecen ausentes.
+Vigencia no acredita autoridad, tenant, completitud, politica ni decision positiva:
+esas validaciones corresponden a los prerequisitos/locks/actor autentico del caller.
+
+Doce casos prueban V1/V2 sin mutacion/determinismo, correspondencia con evento,
+historia sin metadata, hashes distintos, proyeccion rechazada, contexto obsoleto o
+material ausente, V2 con research null y contratos/versiones estrictos incoherentes.
+393 pruebas focalizadas aisladas aprobadas en 18.58 s, con doce casos nuevos;
+Black/Ruff aprobados. No se repitio suite HTTP ampliada: helpers puros sin conexion
+API. Ultimas regresiones API ampliadas §149: 485 aprobadas.
+
+Sin conexion API/eventos ni migracion en este paso. Proxima persistencia: nueva columna
+JSONB nullable sin backfill/default sintetico, preservando RLS/tenant/append-only y
+FK historicas. Validar contrato/pares/hash del evento al insertar; salida de lectura
+versionada debe mantener null historico y no reinterpretar evidencias V1. Prerequisitos
+V2 y aceptacion siguen pendientes; todas las revisiones V2 siguen rechazadas.
+Ley fija, M3-T1 EN PROGRESO; activacion EIPD bloqueada. Sin commit/push.
