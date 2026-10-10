@@ -1,3 +1,25 @@
+## 2026-10-09 — M3-T1 §156: negativas simultaneas y cancelacion
+
+Cuatro casos nuevos de PostgreSQL real amplian concurrencia V2. Dos negativas sobre
+la misma serie esperan bloqueo observable y conservan eventos independientes con
+igual identidad vigente: commit de primera conserva ambas; rollback conserva solo
+segunda. Lectura del ultimo evento retorna segunda negativa y su metadata exacta.
+
+Cancelacion de tarea durante espera de serie o politica usa cierre de sesion/transaccion
+real. No persiste evento parcial. En espera de serie se prueba que administrador puede
+adquirir bloqueo global exclusivo antes de liberar serie: shared lock de tarea cancelada
+ya fue liberado. Reintento en sesion nueva usa documento/politica actuales y publica
+exactamente un evento con metadata V2. No se cambian escritor, permisos ni contratos.
+
+14 pruebas de concurrencia V2 aprobadas en 4.89 s; regresion ampliada: 607 pruebas
+aisladas aprobadas en 51.50 s, incluidos registro HTTP historico y locks compartidos.
+Black/Ruff y diff check aprobados. Suite HTTP general licitud no repetida;
+ultima completa §147: 570 aprobadas. Sin migracion ni datos operacionales modificados.
+
+Proximo: lectura de prerequisitos V3 de revision en readiness para explicar preparacion
+por decision sin atribuir permiso ni habilitar positivos. M3-T1 EN PROGRESO; Ley fija,
+fuentes/aceptacion pendientes, confirmacion/activacion bloqueadas. Sin commit/push.
+
 ## 2026-10-09 — M3-T1 §155: concurrencia de negativas V2
 
 Diez casos PostgreSQL reales con sesiones app_user independientes prueban espera

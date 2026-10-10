@@ -34,14 +34,14 @@ async def state(client_a, resolution_rat, org_a_id):
     return resolution_rat[0], UUID(original["id"]), original
 
 
-async def review(db, state, org, actor):
+async def review(db, state, org, actor, decision="requiere_cambios"):
     return await licitud.record_eipd_resolution_review_v1(
         db,
         org,
         state[0],
         state[1],
         actor,
-        EipdResolutionReviewIn.model_validate(http.request()),
+        EipdResolutionReviewIn.model_validate(http.request(decision)),
     )
 
 
@@ -237,3 +237,142 @@ async def test_policy_change_waits_negative_transaction_until_commit_or_rollback
             assert latest["id"] == events[0].id
             assert identity.policy_hash != successor.policy_hash
             await db.rollback()
+
+
+@pytest.mark.parametrize("commit_first", [True, False])
+async def test_two_negatives_serialize_without_partial_or_lost_events(
+    state,
+    _app_session_factory,
+    _session_factory,
+    org_a_id,
+    profile_a_id,
+    auth_a_id,
+    commit_first,
+):
+    async with _app_session_factory() as first, _app_session_factory() as second:
+        await rls._set_auth_user(first, auth_a_id)
+        await rls._set_auth_user(second, auth_a_id)
+        first_event = await review(first, state, org_a_id, profile_a_id)
+        first_id = first_event.id
+        metadata = dict(first_event.review_context_metadata)
+        pid = await second.scalar(text("SELECT pg_backend_pid()"))
+        task = asyncio.create_task(
+            review(second, state, org_a_id, profile_a_id, "no_continuar")
+        )
+        try:
+            await locks.blocked(first, pid)
+            assert not task.done()
+            assert not await http.rows(_session_factory, str(state[1]))
+            if commit_first:
+                await first.commit()
+            else:
+                await first.rollback()
+            second_event = await asyncio.wait_for(task, 5)
+            second_id = second_event.id
+            assert second_id != first_id
+            assert second_event.review_context_metadata == metadata
+            await second.commit()
+        finally:
+            await locks.stop(task)
+            await first.rollback()
+            await second.rollback()
+    events = await http.rows(_session_factory, str(state[1]))
+    assert {e.id for e in events} == (
+        {first_id, second_id} if commit_first else {second_id}
+    )
+    assert {e.decision for e in events} == (
+        {"requiere_cambios", "no_continuar"} if commit_first else {"no_continuar"}
+    )
+    async with _app_session_factory() as reader:
+        await rls._set_auth_user(reader, auth_a_id)
+        latest, _, current_metadata = (
+            await licitud._latest_eipd_review_snapshot_with_metadata_v1(
+                reader, org_a_id, state[1]
+            )
+        )
+        assert latest["id"] == second_id and latest["decision"] == "no_continuar"
+        assert current_metadata.model_dump(mode="json") == metadata
+        await reader.rollback()
+
+
+@pytest.mark.parametrize("wait_on", ["series", "policy"])
+async def test_cancel_waiter_releases_transaction_locks_and_retry_succeeds(
+    state,
+    successor,
+    _app_session_factory,
+    _session_factory,
+    org_a_id,
+    profile_a_id,
+    auth_a_id,
+    wait_on,
+):
+    pid_ready = asyncio.get_running_loop().create_future()
+
+    async def waiting_review():
+        # Session context must clean up cancellation (BaseException), including
+        # global shared locks acquired before the series wait.
+        async with _app_session_factory() as db:
+            await rls._set_auth_user(db, auth_a_id)
+            pid_ready.set_result(await db.scalar(text("SELECT pg_backend_pid()")))
+            await review(db, state, org_a_id, profile_a_id)
+            await db.commit()
+
+    holder_factory = _app_session_factory if wait_on == "series" else _session_factory
+    async with holder_factory() as holder:
+        if wait_on == "series":
+            await rls._set_auth_user(holder, auth_a_id)
+            updated = await licitud.update_legal_assessment_draft_v1(
+                holder,
+                org_a_id,
+                state[0],
+                state[1],
+                profile_a_id,
+                LegalAssessmentDraftUpdate.model_validate(
+                    {
+                        "eipd_resolution_assessment": {
+                            "document_reference": "TEST: EIPD156 nuevo"
+                        },
+                    }
+                ),
+            )
+            expected_context_hash = updated.eipd_resolution_assessment[
+                "context_binding"
+            ]["context_hash"]
+        else:
+            await holder.execute(text("SET LOCAL ROLE eipd_policy_admin"))
+            await store.choose(holder, profile_a_id, successor, 1)
+            expected_context_hash = state[2]["eipd_resolution_assessment"][
+                "context_binding"
+            ]["context_hash"]
+        task = asyncio.create_task(waiting_review())
+        try:
+            pid = await asyncio.wait_for(pid_ready, 5)
+            await locks.blocked(holder, pid)
+            assert not task.done()
+            task.cancel()
+            with pytest.raises(asyncio.CancelledError):
+                await asyncio.wait_for(task, 5)
+            assert not await http.rows(_session_factory, str(state[1]))
+            if wait_on == "series":
+                # Admin can acquire global exclusive lock while series remains
+                # held: cancelled waiter no longer owns its shared policy lock.
+                async with _session_factory() as admin:
+                    await admin.execute(text("SET LOCAL ROLE eipd_policy_admin"))
+                    plan = await asyncio.wait_for(
+                        store.choose(admin, profile_a_id, successor, 1), 5
+                    )
+                    assert plan.selector.revision == 2
+                    await admin.commit()
+            await holder.commit()
+        finally:
+            await locks.stop(task)
+            await holder.rollback()
+    async with _app_session_factory() as retry:
+        await rls._set_auth_user(retry, auth_a_id)
+        event = await asyncio.wait_for(review(retry, state, org_a_id, profile_a_id), 5)
+        assert event.context_hash == expected_context_hash
+        assert event.policy_hash == successor.policy_hash
+        assert event.review_context_metadata["context_hash"] == expected_context_hash
+        await retry.commit()
+    events = await http.rows(_session_factory, str(state[1]))
+    assert len(events) == 1 and events[0].id == event.id

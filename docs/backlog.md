@@ -498,3 +498,9 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] Relectura tras PATCH/selector, commit/rollback e historia intacta con bloqueos PostgreSQL observados.
 - [x] 603 pruebas aisladas aprobadas; escritor existente conserva garantias sin cambio productivo.
 - [ ] Negativas simultaneas/cancelacion, consumidores y aceptacion; positivos/confirmacion bloqueados.
+
+### M3-T1 §156 — Simultaneidad y cancelacion V2
+
+- [x] Negativas independientes serializadas, commit/rollback y ultimo evento con identidad exacta.
+- [x] Cancelacion libera locks sin evento parcial; reintento vigente. 607 pruebas aisladas aprobadas.
+- [ ] Lectura de prerequisitos por decision en readiness y aceptacion; positivos/confirmacion bloqueados.
