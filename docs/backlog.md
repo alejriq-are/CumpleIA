@@ -555,3 +555,16 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] 5 interacciones Chromium, tipos y lint aprobados.
 - [x] Captura manual confirma detalle de justificacion en español (§167).
 - [ ] API entre cuentas y cobertura de otras rutas pendientes.
+
+### M3-T1 §168 — Navegacion por temas
+
+- [x] Desplegables con cantidad de motivos distintos y total de ocurrencias conservado.
+- [x] 6 interacciones Chromium, tipos y lint aprobados.
+- [ ] Inspeccion manual con expediente ficticio; API entre cuentas pendiente.
+
+### M3-T1 §169 — Amplitud y detalle
+
+- [x] Decisiones a ancho completo, motivos separados y detalle con etiquetas destacadas.
+- [x] Tipos/lint y 6 interacciones aprobados.
+- [x] Captura de escritorio confirma ancho y detalle de justificacion/investigacion.
+- [ ] Vista movil y otros temas; API entre cuentas pendiente.

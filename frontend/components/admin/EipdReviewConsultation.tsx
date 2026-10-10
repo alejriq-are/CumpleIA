@@ -44,12 +44,12 @@ export function PreparationView({ value }: { value: EipdReviewPreparationOut }) 
       {result === null ? (
         <p>Este expediente no tiene diagnóstico de revisión V3 disponible.</p>
       ) : (
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="space-y-4">
           {(Object.keys(labels) as (keyof typeof labels)[]).map((decision) => {
             const diagnostic = result[decision];
             return (
-              <article key={decision} className="rounded-lg border bg-white p-4">
-                <h3 className="font-semibold">{labels[decision]}</h3>
+              <article key={decision} className="rounded-lg border bg-white p-5">
+                <h3 className="text-lg font-semibold">{labels[decision]}</h3>
                 <p className="mt-2">
                   {diagnostic.prerequisites_met
                     ? "Requisitos documentales cumplidos."

@@ -92,6 +92,7 @@ test("solo consulta y limpia datos al cambiar expediente", async ({ page }) => {
       "Cumplir estos requisitos documentales no concede permiso ni registra una decisión."
     )
   ).toBeVisible();
+  await page.getByText("Investigación — 1 motivo distinto", { exact: true }).click();
   await expect(
     page
       .locator("li > p")
@@ -191,6 +192,11 @@ test("motivos distinguen campos y preguntas, agrupan duplicados y presentan moti
     .filter({ has: page.getByRole("heading", { name: "Requiere cambios", exact: true }) });
   await expect(card.getByText("4 motivos informados.")).toBeVisible();
   await expect(card.locator("li")).toHaveCount(3);
+  await expect(
+    card.getByText("Campo: Documento EIPD › Referencia del documento")
+  ).not.toBeVisible();
+  await card.getByText("Documento EIPD — 2 motivos distintos", { exact: true }).click();
+  await card.getByText("Investigación — 1 motivo distinto", { exact: true }).click();
   await expect(card.getByText("Campo: Documento EIPD › Referencia del documento")).toBeVisible();
   await expect(card.getByText("Campo: Documento EIPD › Versión del documento")).toBeVisible();
   await expect(card.getByText("Informado 2 veces por el diagnóstico.")).toBeVisible();
@@ -198,8 +204,30 @@ test("motivos distinguen campos y preguntas, agrupan duplicados y presentan moti
   await card.locator("li").last().getByText("Detalle del diagnóstico").click();
   await expect(card.getByText("codigo_futuro", { exact: true })).toHaveCount(0);
   await expect(card.locator("li").last().getByText("Incompleto", { exact: true })).toBeVisible();
-  await expect(card.getByText("Investigación", { exact: true })).toHaveCount(2);
+  await expect(card.getByText("Investigación", { exact: true })).toHaveCount(1);
   await expect(
     card.getByText("Hay un motivo pendiente de revisión. Consulta su detalle.", { exact: true })
   ).toBeVisible();
+});
+
+test("temas se despliegan con teclado sin perder motivos al cerrar", async ({ page }) => {
+  await scopeForm(page);
+  await page.getByRole("button", { name: "Consultar requisitos" }).click();
+  const summary = page.getByText("Investigación — 1 motivo distinto", { exact: true });
+  const message = page
+    .locator("li > p")
+    .getByText("La confirmación del expediente de investigación permanece bloqueada.");
+  await expect(message).not.toBeVisible();
+  await summary.focus();
+  await page.keyboard.press("Enter");
+  await expect(message).toBeVisible();
+  await page.keyboard.press("Enter");
+  await expect(message).not.toBeVisible();
+  await page.keyboard.press("Enter");
+  await expect(message).toBeVisible();
+  expect(
+    await page.evaluate(
+      () => (window as unknown as { demo: { calls: unknown[] } }).demo.calls.length
+    )
+  ).toBe(1);
 });

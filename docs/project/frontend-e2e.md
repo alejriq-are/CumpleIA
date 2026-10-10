@@ -269,3 +269,43 @@ pendientes y confirmacion/activacion bloqueadas. Prueba directa API entre cuenta
 permanece pendiente; pruebas de pagina y RAT no la sustituyen.
 Proximo: revisar presentacion del volumen de motivos y pendientes funcionales del
 expediente, manteniendo explicita la prueba de API entre cuentas aun no ejecutada.
+
+## 2026-10-10 — M3-T1 §168: navegacion por temas de motivos
+
+Etapas de motivos se muestran en desplegables nativos details/summary, cerrados
+inicialmente, con cantidad de motivos distintos por tema. Total de ocurrencias
+informadas permanece visible; deduplicacion exacta y cantidades no se modifican.
+Textos e identificacion de campos/detalles en español conservados. Todos los motivos
+siguen disponibles al abrir el tema, sin paginacion, truncamiento o nuevas consultas.
+
+Seis interacciones Chromium aprobadas en 2.5 s, incluyendo abrir/cerrar/reabrir por
+teclado sin otra peticion y grupos con duplicados/campos distintos. Tipos/lint
+aprobados. Callbacks sinteticos; inspeccion manual de temas en expediente pendiente.
+Sin reglas, contratos, permisos, escrituras, backend ni migraciones. M3-T1 EN PROGRESO;
+confirmacion/activacion bloqueadas y fuentes/aceptacion pendientes. Prueba directa
+API EIPD entre cuentas pendiente. Proximo: revisar desplegables en expediente ficticio.
+
+## 2026-10-10 — M3-T1 §169: amplitud y jerarquia del detalle
+
+A solicitud del usuario tras captura con columnas estrechas, decisiones se muestran
+apiladas a ancho completo, eliminando el estiramiento de tarjetas sin motivos.
+Temas con fondo diferenciado; motivos individuales en bloques con espacio y borde.
+Detalle muestra etiquetas destacadas y valores en dos columnas desde sm; en ancho
+pequeño se apilan. min-width y ruptura de palabras permiten rutas largas. Mantiene
+desplegables por tema de §168, conteos, contenido, español y navegacion por teclado.
+
+Validacion: tipos/lint aprobados y 6 interacciones Chromium aprobadas en 2.8 s.
+Interacciones usan callbacks sinteticos, no validan pixeles ni CSS real de la pagina;
+inspeccion visual final del nuevo diseño en sesion personal pendiente. Captura previa
+confirma que los desplegables de §168 abren tema/detalle, pero motivo de esta mejora
+fue el ancho insuficiente. Sin contratos, backend, reglas, autoridad ni escrituras.
+M3-T1 EN PROGRESO; confirmacion/activacion bloqueadas y fuentes/aceptacion pendientes.
+Prueba directa API EIPD entre cuentas pendiente. Proximo: inspeccionar ancho y detalle
+del expediente ficticio en pantalla antes de cerrar validacion visual.
+
+Inspeccion manual posterior: captura del usuario confirma ancho ampliado, bloques
+separados y alineacion etiqueta/valor en detalles abiertos de justificacion e
+investigacion; motivos, categoria y etapa visibles en español. Captura muestra
+conteos por tema (Estado: 1, Investigacion: 65 motivos distintos) y total de 256
+ocurrencias. Valida estos bloques en escritorio; vista movil y otros temas no
+inspeccionados exhaustivamente. Confirmacion de investigacion sigue bloqueada.

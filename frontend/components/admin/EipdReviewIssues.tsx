@@ -221,12 +221,21 @@ export function EipdReviewIssues({ issues }: { issues: EipdReviewIssueV3[] }) {
   return (
     <div className="mt-3 space-y-3 text-sm">
       <p>{issues.length} motivos informados.</p>
+      <p className="text-gray-600">
+        Despliega un tema para revisar sus motivos. Las repeticiones idénticas se agrupan.
+      </p>
       {Array.from(groups, ([stage, items]) => (
-        <section key={stage} className="space-y-2">
-          <h4 className="font-semibold">{stages[stage]}</h4>
-          <ul className="list-disc space-y-3 pl-5">
+        <details key={stage} className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+          <summary className="cursor-pointer font-semibold text-gray-900">
+            {stages[stage]} — {items.size}{" "}
+            {items.size === 1 ? "motivo distinto" : "motivos distintos"}
+          </summary>
+          <ul className="mt-4 list-none space-y-3">
             {Array.from(items, ([key, { issue, count }]) => (
-              <li key={key}>
+              <li
+                key={key}
+                className="min-w-0 space-y-2 rounded-lg border border-gray-200 bg-white p-4"
+              >
                 <p>
                   {messages[issue.code] ??
                     "Hay un motivo pendiente de revisión. Consulta su detalle."}
@@ -240,21 +249,27 @@ export function EipdReviewIssues({ issues }: { issues: EipdReviewIssueV3[] }) {
                 {count > 1 && (
                   <p className="text-gray-600">Informado {count} veces por el diagnóstico.</p>
                 )}
-                <details className="mt-1 break-words text-gray-600">
-                  <summary className="cursor-pointer">Detalle del diagnóstico</summary>
-                  <dl>
-                    <dt>Motivo</dt>
-                    <dd>{messages[issue.code] ?? "Motivo pendiente de revisión."}</dd>
-                    <dt>Campo</dt>
-                    <dd>{fieldLabel(issue.field)}</dd>
-                    <dt>Categoría</dt>
-                    <dd>{categories[issue.category]}</dd>
-                    <dt>Etapa</dt>
-                    <dd>{stages[issue.stage]}</dd>
+                <details className="mt-2 break-words rounded-md bg-gray-50 p-3 text-gray-700">
+                  <summary className="cursor-pointer font-medium text-blue-800">
+                    Detalle del diagnóstico
+                  </summary>
+                  <dl className="mt-3 grid grid-cols-1 gap-x-6 gap-y-3 sm:grid-cols-[9rem_minmax(0,1fr)]">
+                    <dt className="font-semibold text-gray-900">Motivo</dt>
+                    <dd className="min-w-0 break-words">
+                      {messages[issue.code] ?? "Motivo pendiente de revisión."}
+                    </dd>
+                    <dt className="font-semibold text-gray-900">Campo</dt>
+                    <dd className="min-w-0 break-words">{fieldLabel(issue.field)}</dd>
+                    <dt className="font-semibold text-gray-900">Categoría</dt>
+                    <dd className="min-w-0 break-words">{categories[issue.category]}</dd>
+                    <dt className="font-semibold text-gray-900">Etapa</dt>
+                    <dd className="min-w-0 break-words">{stages[issue.stage]}</dd>
                     {issue.question_id !== null && (
                       <>
-                        <dt>Pregunta</dt>
-                        <dd>{fields[issue.question_id] ?? "Pregunta pendiente de identificar"}</dd>
+                        <dt className="font-semibold text-gray-900">Pregunta</dt>
+                        <dd className="min-w-0 break-words">
+                          {fields[issue.question_id] ?? "Pregunta pendiente de identificar"}
+                        </dd>
                       </>
                     )}
                   </dl>
@@ -262,7 +277,7 @@ export function EipdReviewIssues({ issues }: { issues: EipdReviewIssueV3[] }) {
               </li>
             ))}
           </ul>
-        </section>
+        </details>
       ))}
     </div>
   );
