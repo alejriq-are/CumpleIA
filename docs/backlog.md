@@ -535,3 +535,10 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] 5 pruebas de interaccion, tipos y lint frontend aprobados.
 - [x] Inspeccion visual con sesion y expediente ficticio local: etapas, campos y detalle original.
 - [ ] Ampliar traducciones de campos; prueba directa de API entre cuentas pendiente.
+
+### M3-T1 §164 — Etiquetas documentales
+
+- [x] Ampliar traducciones de campos manteniendo identidad original en detalle.
+- [x] Tipos y lint frontend aprobados.
+- [x] Inspeccion manual: uso exclusivo y controles en español; detalle original preservado.
+- [ ] Traducir rutas restantes (conclusion/balancing_summary/decision); API entre cuentas pendiente.

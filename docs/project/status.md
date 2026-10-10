@@ -1,3 +1,23 @@
+## 2026-10-10 — M3-T1 §164: etiquetas de campos en español
+
+Ampliado el catalogo visual para campos de investigacion, documento EIPD, contexto,
+base ordinaria y regimenes especiales. Uso exclusivo, controles, calidad, medidas,
+publicacion, anonimizacion, conservacion y analisis documentales muestran etiquetas
+en español. Identificadores originales conservados en detalle; campos desconocidos
+mantienen fallback existente. No se declara localizacion completa de todo contrato.
+Sin cambios de reglas, API, agrupacion, conteo, autoridad ni datos persistidos.
+Tipos y lint frontend aprobados; no nuevas pruebas que reproduzcan traducciones.
+Pruebas de interaccion §163 sin cambios y no repetidas. Inspeccion manual de nuevas
+etiquetas pendiente. M3-T1 EN PROGRESO; fuentes/aceptacion, confirmacion/activacion
+siguen pendientes/bloqueadas. Prueba directa de API EIPD entre cuentas pendiente.
+Proximo: verificar etiquetas de investigacion en expediente ficticio local.
+
+Inspeccion manual posterior mediante captura del usuario: Uso exclusivo para la
+finalidad de investigacion y Controles de uso exclusivo visibles en español;
+detalle conserva codigo, campo, categoria y etapa originales. Permanecen etiquetas
+sin traducir en rutas de interes legitimo: conclusion, balancing_summary, decision.
+Pendiente completar esas etiquetas y otras rutas; no se afirma localizacion total.
+
 ## 2026-10-10 — M3-T1 §163: motivos documentales legibles
 
 Consulta interna V3 agrupa motivos por etapa con titulos en español, explica codigos
