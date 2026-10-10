@@ -130,3 +130,20 @@ def test_request_cannot_supply_metadata_or_unknown_decision(composition):
         evaluate_eipd_resolution_review_prerequisites_v3(
             composition, {}, evaluated_on=datetime(2026, 10, 9)
         )
+
+
+@pytest.mark.parametrize("decision", ["continuar", "requiere_cambios", "no_continuar"])
+def test_decision_only_diagnostic_matches_validated_human_request(
+    composition, decision
+):
+    from app.services.eipd_review_v3 import (
+        evaluate_eipd_review_decision_prerequisites_v3,
+    )
+
+    assert evaluate_eipd_review_decision_prerequisites_v3(
+        composition, decision, evaluated_on=cases.TODAY
+    ) == evaluate(composition, decision)
+    with pytest.raises(ValidationError):
+        evaluate_eipd_review_decision_prerequisites_v3(
+            composition, "aprobar", evaluated_on=cases.TODAY
+        )

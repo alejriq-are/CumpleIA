@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from datetime import date
 from typing import Literal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, TypeAdapter
 
 from app.schemas.eipd_review_metadata import EipdReviewContextMetadataV1
 from app.schemas.licitud import EipdResolutionReviewIn
@@ -50,12 +50,26 @@ def evaluate_eipd_resolution_review_prerequisites_v3(
     """
     if type(evaluated_on) is not date:
         raise ValueError("evaluated_on exige date explicita")
-    raw = value.model_dump(mode="python") if isinstance(value, BaseModel) else value
-    data = EipdControlCompositionInputV3.model_validate(raw)
     raw_review = (
         review.model_dump(mode="python") if isinstance(review, BaseModel) else review
     )
     request = EipdResolutionReviewIn.model_validate(raw_review)
+    return evaluate_eipd_review_decision_prerequisites_v3(
+        value, request.decision, evaluated_on=evaluated_on
+    )
+
+
+def evaluate_eipd_review_decision_prerequisites_v3(
+    value, decision, *, evaluated_on: date
+):
+    """Diagnostico sin solicitud humana ficticia; no autoriza ni registra eventos."""
+    if type(evaluated_on) is not date:
+        raise ValueError("evaluated_on exige date explicita")
+    decision = TypeAdapter(
+        Literal["continuar", "requiere_cambios", "no_continuar"]
+    ).validate_python(decision)
+    raw = value.model_dump(mode="python") if isinstance(value, BaseModel) else value
+    data = EipdControlCompositionInputV3.model_validate(raw)
     assessment = data.assessment
     issues = []
 
@@ -105,7 +119,7 @@ def evaluate_eipd_resolution_review_prerequisites_v3(
     if metadata is None:
         block("review", "context_metadata", "metadatos_revision_no_disponibles")
     composition = None
-    if request.decision == "continuar":
+    if decision == "continuar":
         composition = compose_eipd_controls_v3(data, evaluated_on=evaluated_on)
         issues.extend(composition.review_blockers)
     ordered = tuple(
@@ -119,6 +133,4 @@ def evaluate_eipd_resolution_review_prerequisites_v3(
             ),
         )
     )
-    return EipdResolutionReviewPrerequisitesV3(
-        request.decision, ordered, metadata, composition
-    )
+    return EipdResolutionReviewPrerequisitesV3(decision, ordered, metadata, composition)

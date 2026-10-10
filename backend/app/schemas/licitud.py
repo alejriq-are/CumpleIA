@@ -1570,6 +1570,26 @@ class EipdResolutionDocumentVersionedOut(EipdResolutionDocumentReadinessOut):
     can_confirm: Literal[False]
 
 
+class EipdReviewDecisionPrerequisitesV3Out(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    prerequisites_met: bool
+    context_metadata: EipdReviewContextMetadataV1 | None
+    issues: list[EipdCompositionIssueV3Out]
+
+
+class EipdReviewPrerequisitesByDecisionV3Out(BaseModel):
+    """Diagnostico puro: no valida permisos, locks ni disponibilidad de la accion."""
+
+    model_config = ConfigDict(extra="forbid")
+    evaluation_version: Literal[3]
+    evaluation_scope: Literal["requisitos_documentales"]
+    authorizes_action: Literal[False]
+    can_confirm: Literal[False]
+    continuar: EipdReviewDecisionPrerequisitesV3Out
+    requiere_cambios: EipdReviewDecisionPrerequisitesV3Out
+    no_continuar: EipdReviewDecisionPrerequisitesV3Out
+
+
 class EipdControlCompositionV3Out(BaseModel):
     model_config = ConfigDict(extra="forbid")
     evaluation_version: Literal[3]
@@ -1587,6 +1607,7 @@ class EipdControlCompositionV3Out(BaseModel):
     ]
     latest_review_policy: EipdReviewPolicyIdentityOut | None
     latest_review_context_metadata: EipdReviewContextMetadataV1 | None
+    review_prerequisites_v3: EipdReviewPrerequisitesByDecisionV3Out
     review_context_metadata_status: Literal[
         "sin_revision", "sin_metadatos", "vigente", "obsoleta"
     ]

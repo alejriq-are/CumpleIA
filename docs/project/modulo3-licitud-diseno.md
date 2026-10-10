@@ -9814,3 +9814,32 @@ ultima completa §147: 570 aprobadas. Sin migracion ni datos operacionales modif
 Proximo: lectura de prerequisitos V3 de revision en readiness para explicar preparacion
 por decision sin atribuir permiso ni habilitar positivos. M3-T1 EN PROGRESO; Ley fija,
 fuentes/aceptacion pendientes, confirmacion/activacion bloqueadas. Sin commit/push.
+
+
+## 2026-10-09 — M3-T1 §157: prerequisitos por decision en readiness
+
+Salida cerrada V3 agrega review_prerequisites_v3 con claves continuar/requiere_cambios/
+no_continuar, evaluation_version 3 y evaluation_scope requisitos_documentales.
+Cada decision muestra prerequisites_met, identidad de material actual y motivos.
+authorizes_action/can_confirm constantes false: diagnostico no valida permisos,
+locks ni disponibilidad de accion. Metadata prospectiva se distingue de metadata
+del ultimo evento historico; no crea ni simula una revision humana.
+
+Evaluador puro extrae kernel de decision validada sin rationale/referencia ficticios;
+escritor mantiene validacion humana EipdResolutionReviewIn y delega al mismo kernel.
+Negativas pueden cumplir requisitos documentales aun sin politica seleccionada;
+registro real conserva rechazo de politica ausente y controles transaccionales.
+Continuar mantiene motivos comunes sin exigir evento anterior. Contratos V1/V2 intactos.
+
+Cinco casos HTTP/OpenAPI nuevos: material vigente/obsoleto/ausente/historico, salida
+cerrada y exclusiva de lectura; una SELECT de historial, sin escrituras ni eventos,
+expediente intacto, tenant ajeno rechazado y parametros de autoridad ignorados.
+Tres casos puros comprueban equivalencia diagnostico/solicitud humana por decision.
+615 pruebas aisladas aprobadas en 53.47 s, Black/Ruff/diff check aprobados.
+Suite HTTP general licitud no repetida; ultima completa §147: 570 aprobadas.
+Sin migracion ni datos operacionales modificados. Capacidad expuesta por API,
+interfaz de usuario no ampliada en este incremento.
+
+Proximo: contrato de salida versionada de eventos V2 con metadata auditable, conservando
+historia sin identidad inferida. M3-T1 EN PROGRESO; Ley fija, fuentes/aceptacion pendientes,
+positivos/confirmacion/activacion bloqueados. Sin commit/push.

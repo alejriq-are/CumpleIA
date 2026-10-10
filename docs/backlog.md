@@ -504,3 +504,9 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] Negativas independientes serializadas, commit/rollback y ultimo evento con identidad exacta.
 - [x] Cancelacion libera locks sin evento parcial; reintento vigente. 607 pruebas aisladas aprobadas.
 - [ ] Lectura de prerequisitos por decision en readiness y aceptacion; positivos/confirmacion bloqueados.
+
+### M3-T1 §157 — Diagnostico documental por decision
+
+- [x] Readiness V3 expone prerequisitos y metadata actual por decision; sin autoridad ni eventos ficticios.
+- [x] Kernel compartido con validacion humana preservada; 615 pruebas aisladas aprobadas.
+- [ ] Salida versionada de eventos V2, consumidores y aceptacion; positivos/confirmacion bloqueados.

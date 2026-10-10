@@ -102,7 +102,10 @@ from app.services.eipd_review_metadata import (
     read_eipd_review_context_metadata_v1,
 )
 from app.services.eipd_review_v2 import evaluate_eipd_resolution_review_prerequisites_v2
-from app.services.eipd_review_v3 import evaluate_eipd_resolution_review_prerequisites_v3
+from app.services.eipd_review_v3 import (
+    evaluate_eipd_resolution_review_prerequisites_v3,
+    evaluate_eipd_review_decision_prerequisites_v3,
+)
 from app.services.eipd_screening_v2 import evaluate_eipd_screening_v2
 from app.services.geolocation import evaluate_geolocation_assessment_v1
 from app.services.health import evaluate_health_assessment_v1
@@ -1953,22 +1956,40 @@ def _compose_assessment_eipd_controls_v3(
     policy,
     context_metadata=None,
 ):
-    result = compose_eipd_controls_v3(
-        {
-            "assessment": _assessment_eipd_composition_input_v1(
-                assessment, organization_id, context, rat_current, latest_review
-            ),
-            "policy": policy,
-            "latest_review_policy": identity,
-        },
-        evaluated_on=evaluated_on,
-    )
+    composition_input = {
+        "assessment": _assessment_eipd_composition_input_v1(
+            assessment, organization_id, context, rat_current, latest_review
+        ),
+        "policy": policy,
+        "latest_review_policy": identity,
+    }
+    result = compose_eipd_controls_v3(composition_input, evaluated_on=evaluated_on)
     data = asdict(result)
     data.update(
         evaluation_version=3,
         can_confirm=result.can_confirm,
         latest_review_policy=identity.model_dump(mode="json") if identity else None,
     )
+    prerequisites = dict(
+        evaluation_version=3,
+        evaluation_scope="requisitos_documentales",
+        authorizes_action=False,
+        can_confirm=False,
+    )
+    for decision in ("continuar", "requiere_cambios", "no_continuar"):
+        diagnostic = evaluate_eipd_review_decision_prerequisites_v3(
+            composition_input, decision, evaluated_on=evaluated_on
+        )
+        prerequisites[decision] = {
+            "prerequisites_met": diagnostic.prerequisites_met,
+            "context_metadata": (
+                diagnostic.context_metadata.model_dump(mode="json")
+                if diagnostic.context_metadata
+                else None
+            ),
+            "issues": [asdict(i) for i in diagnostic.issues],
+        }
+    data["review_prerequisites_v3"] = prerequisites
     metadata_status = (
         "sin_revision"
         if latest_review is None
