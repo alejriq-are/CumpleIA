@@ -4655,3 +4655,29 @@ ultima regresion §158 621 aprobadas no repetida. Sin migracion/datos operaciona
 Proximo: validar flujo real de consulta con sesion y expediente autorizado y ajustar
 presentacion de motivos si corresponde. Ley fija; M3-T1 EN PROGRESO, fuentes/aceptacion
 pendientes; positivos/confirmacion/activacion bloqueados. Sin commit/push.
+
+## 2026-10-10 — M3-T1 §161: validacion manual de revision guardada
+
+Con sesion personal en la pantalla interna y datos ficticios locales, se preparo
+un documento EIPD incompleto vinculado al contexto V2 de investigacion y se registro
+una decision sintetica requiere_cambios mediante servicios de dominio y rol runtime.
+La consulta mostro decision, fundamento de prueba, referencia, fecha UTC, politica
+deshabilitada registrada y metadata de contexto V2/cobertura de investigacion.
+Un identificador de revision inexistente produjo ausencia; restaurar el correcto
+recupero el mismo evento. Cambiar organizacion limpia Revision y resultados:
+se reingreso expresamente el identificador antes de comprobar el rechazo.
+
+Se verifico en la base que las dos organizaciones de prueba existen y pertenecen
+a cuentas distintas. Con la sesion original, consultar el evento de la primera bajo
+la segunda devolvio ausencia sin mostrarlo; restaurar la organizacion propietaria
+recupero el evento y sus mismos datos historicos. Este resultado acredita ese caso
+manual, no una prueba reciproca con la segunda cuenta ni cobertura exhaustiva de RLS.
+No se otorgaron membresias ni permisos adicionales para la prueba.
+
+Escrituras ficticias solo en base local; ningun registro, correo, UUID personal,
+credencial o token se incorpora al repositorio. Sin cambio de codigo ni migracion.
+Validacion: resultados de pantalla comunicados por el usuario; checks automatizados
+§160 (4 interacciones, 11 cliente, tipos/lint) y §158 (621 backend) no repetidos.
+M3-T1 EN PROGRESO; fuentes/aceptacion pendientes; continuar/confirmar/activar bloqueados.
+Proximo: prueba reciproca con la segunda cuenta en su expediente autorizado, sin
+ampliar permisos, y mejorar presentacion de motivos si corresponde.
