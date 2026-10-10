@@ -4467,3 +4467,31 @@ ultima completa §147: 570 aprobadas. Sin migracion ni cambios de datos operacio
 Proximo: integrar prerequisitos/metadata de servidor en registro controlado de
 negativas V2, con locks, aislamiento y persistencia atomica; positivos, confirmacion
 y activacion siguen bloqueados. Ley fija; M3-T1 EN PROGRESO. Sin commit/push.
+
+
+## 2026-10-09 — M3-T1 §154: registro HTTP de negativas V2
+
+Accion autenticada de revision permite requiere_cambios/no_continuar para resolucion
+binding V2. Tras locks globales de politica/selector y serie, relee borrador/versiones,
+reconstruye RAT/ContextV2 actuales y aplica prerequisitos V3. No repara asociaciones.
+Evento persiste hashes, review_context_metadata generada por servidor, actor autenticado
+e identidad de politica seleccionada deshabilitada en la misma transaccion.
+Decision continuar V2 conserva 409 resolucion_eipd_v2_revision_pendiente; confirmacion
+y activacion permanecen bloqueadas. Escritor V1 y contratos HTTP historicos intactos.
+
+Ocho casos nuevos aislados: ambas negativas con research presente/null explicito,
+dos eventos append-only independientes, metadata/hashes/cobertura/actor/politica,
+readiness vigente con negativa bloqueante, tenant ajeno y metadata inyectada rechazados;
+material research obsoleto, RAT desactualizado y estado confirmado sin evento;
+fallo despues de flush revierte evento y metadata. Expediente permanece inalterado.
+Fixture ordinaria incompleta rechaza confirmacion por 400 antes del guard EIPD;
+regresiones documentales conservan comprobacion 409 para expedientes aplicables.
+
+578 pruebas aisladas aprobadas en 41.89 s, incluyendo prerequisitos y registro HTTP
+historicos V2; Black/Ruff aprobados. Suite HTTP general licitud no repetida;
+ultima completa §147: 570 aprobadas. Sin migracion ni inserciones operacionales.
+
+Proximo: comprobar concurrencia/relectura de negativas V2 frente a cambios del
+expediente y de politica antes de ampliar consumidores. Positivos/confirmacion
+siguen bloqueados; fuentes/aceptacion pendientes. Ley fija; M3-T1 EN PROGRESO.
+Sin commit/push.

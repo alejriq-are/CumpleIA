@@ -1,4 +1,4 @@
-"""Escritura documental V2 sin revision ni confirmacion habilitadas."""
+"""Escritura documental V2; positivos y confirmacion siguen bloqueados."""
 
 from copy import deepcopy
 from uuid import UUID
@@ -88,7 +88,7 @@ async def test_final_context_omission_reaporte_withdrawal_and_readonly(
         assert data["eipd_controls_v3"]["resolution"]["context_current"]
         assert not data["eipd_controls_v3"]["can_confirm"]
         assert (await client.get(url)).json() == current
-        for decision in ("continuar", "requiere_cambios", "no_continuar"):
+        for decision in ("continuar",):
             rejected = await client.post(
                 url + "/eipd-resolution/reviews",
                 json={

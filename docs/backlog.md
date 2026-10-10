@@ -486,3 +486,9 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] Identidad V2/cobertura explicita generada desde servidor; negativas parciales y positivos con controles comunes.
 - [x] 560 pruebas aisladas aprobadas; sin eventos ni activacion y contratos historicos intactos.
 - [ ] Registro controlado de negativas V2 con metadata, locks/aislamiento y aceptacion; positivos bloqueados.
+
+### M3-T1 §154 — Negativas HTTP V2 con metadata
+
+- [x] Registro autenticado bajo locks/relectura con hashes y metadata de servidor atomicos.
+- [x] 578 pruebas aisladas aprobadas: negativas, tenant, obsolescencia, rollback y regresiones historicas.
+- [ ] Concurrencia especifica V2/cambio de politica, consumidores y aceptacion; positivos bloqueados.

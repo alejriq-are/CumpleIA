@@ -102,6 +102,7 @@ from app.services.eipd_review_metadata import (
     read_eipd_review_context_metadata_v1,
 )
 from app.services.eipd_review_v2 import evaluate_eipd_resolution_review_prerequisites_v2
+from app.services.eipd_review_v3 import evaluate_eipd_resolution_review_prerequisites_v3
 from app.services.eipd_screening_v2 import evaluate_eipd_screening_v2
 from app.services.geolocation import evaluate_geolocation_assessment_v1
 from app.services.health import evaluate_health_assessment_v1
@@ -2777,8 +2778,13 @@ async def record_eipd_resolution_review_v1(
     if draft.schema_version != 1 or draft.rat_context_schema_version != 1:
         raise _conflict("Version de evaluacion o contexto RAT no admitida")
     if _resolution_uses_context_v2(draft):
-        raise HTTPException(
-            status_code=409, detail={"code": "resolucion_eipd_v2_revision_pendiente"}
+        if payload.decision == "continuar":
+            raise HTTPException(
+                status_code=409,
+                detail={"code": "resolucion_eipd_v2_revision_pendiente"},
+            )
+        return await _record_eipd_negative_review_v2_locked(
+            db, organization_id, treatment_id, profile_id, draft, series, payload
         )
     try:
         scope = _scope_from_snapshot_v1(draft.rat_context_snapshot)
@@ -2887,6 +2893,71 @@ async def record_eipd_resolution_review_v1(
         context_hash=draft.eipd_resolution_assessment["context_binding"][
             "context_hash"
         ],
+        created_by=profile_id,
+        **build_eipd_review_policy_metadata_v1(policy),
+    )
+    db.add(event)
+    await db.flush()
+    return event
+
+
+async def _record_eipd_negative_review_v2_locked(
+    db, organization_id, treatment_id, profile_id, draft, series, payload
+):
+    """Caller mantiene locks globales/serie y transaccion autenticada hasta commit."""
+    try:
+        scope = _scope_from_snapshot_v1(draft.rat_context_snapshot)
+        bundle = await build_rat_context_bundle_from_m2_v1(
+            db,
+            organization_id,
+            treatment_id,
+            purpose_key=series.purpose_key,
+            scope=scope,
+        )
+        context = build_eipd_resolution_context_from_assessment_v2(
+            draft, bundle.snapshot
+        )
+        policy = await _selected_disabled_eipd_policy_v1(db)
+        latest_review, identity = await _latest_eipd_review_snapshot_v1(
+            db, organization_id, draft.id
+        )
+        result = evaluate_eipd_resolution_review_prerequisites_v3(
+            {
+                "assessment": _assessment_eipd_composition_input_v1(
+                    draft,
+                    organization_id,
+                    context,
+                    build_rat_context_hash_v1(bundle.canonical)
+                    == draft.rat_context_hash,
+                    latest_review,
+                ),
+                "policy": policy,
+                "latest_review_policy": identity,
+            },
+            payload,
+            evaluated_on=datetime.now(UTC).date(),
+        )
+    except ValidationError:
+        raise _bad_request("Contrato documental de revision EIPD invalido") from None
+    if not result.prerequisites_met:
+        raise HTTPException(
+            status_code=409,
+            detail={
+                "code": "revision_eipd_no_preparada",
+                "evaluation_version": 3,
+                "issues_v3": [asdict(i) for i in result.issues],
+            },
+        )
+    metadata = result.context_metadata
+    event = EipdResolutionReview(
+        organization_id=organization_id,
+        assessment_id=draft.id,
+        decision=result.decision,
+        rationale=payload.rationale,
+        review_reference=payload.review_reference,
+        document_hash=metadata.document_hash,
+        context_hash=metadata.context_hash,
+        review_context_metadata=metadata.model_dump(mode="json"),
         created_by=profile_id,
         **build_eipd_review_policy_metadata_v1(policy),
     )
