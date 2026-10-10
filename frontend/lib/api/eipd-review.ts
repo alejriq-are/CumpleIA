@@ -55,10 +55,13 @@ export type EipdReviewPrerequisitesByDecisionV3 = {
   requiere_cambios: EipdReviewDecisionPrerequisitesV3;
   no_continuar: EipdReviewDecisionPrerequisitesV3;
 };
+export type EipdLatestReviewContextStatus =
+  "sin_revision" | "sin_metadatos" | "vigente" | "obsoleta";
 export type EipdReviewPreparationOut = {
   assessment_id: string;
   status: "borrador" | "confirmado" | "reemplazado";
   review_prerequisites_v3: EipdReviewPrerequisitesByDecisionV3 | null;
+  latest_review_context_status: EipdLatestReviewContextStatus | null;
 };
 export type EipdResolutionReviewOutV2 = {
   response_schema_version: 2;
@@ -173,6 +176,7 @@ export const eipdReviewApi = {
         evaluation_version: 3;
         can_confirm: false;
         review_prerequisites_v3: EipdReviewPrerequisitesByDecisionV3;
+        review_context_metadata_status: EipdLatestReviewContextStatus;
       } | null;
     }>(path + "/readiness", {
       token: scope.token,
@@ -188,7 +192,12 @@ export const eipdReviewApi = {
     const controls = value.eipd_controls_v3;
     if (controls !== null) {
       requireContract(
-        controls && controls.evaluation_version === 3 && controls.can_confirm === false
+        controls &&
+          controls.evaluation_version === 3 &&
+          controls.can_confirm === false &&
+          ["sin_revision", "sin_metadatos", "vigente", "obsoleta"].includes(
+            controls.review_context_metadata_status
+          )
       );
       const result = controls.review_prerequisites_v3;
       requireContract(
@@ -239,6 +248,8 @@ export const eipdReviewApi = {
       assessment_id: value.assessment_id,
       status: value.status,
       review_prerequisites_v3: controls === null ? null : controls.review_prerequisites_v3,
+      latest_review_context_status:
+        controls === null ? null : controls.review_context_metadata_status,
     };
   },
   async event(scope: EipdReviewScope, reviewId: string): Promise<EipdResolutionReviewOutV2> {

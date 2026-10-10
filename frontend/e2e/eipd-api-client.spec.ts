@@ -45,6 +45,7 @@ function readiness() {
     eipd_controls_v3: {
       evaluation_version: 3,
       can_confirm: false,
+      review_context_metadata_status: "vigente",
       review_prerequisites_v3: {
         evaluation_version: 3,
         evaluation_scope: "requisitos_documentales",
@@ -235,5 +236,26 @@ test("errores de texto historicos conservan mensaje", async () => {
       await expect(eipdReviewApi.preparation(scope)).rejects.toThrow("Acceso denegado");
     },
     403
+  );
+});
+
+test("estado de ultima revision conserva las cuatro variantes, ausencia V3 y rechaza estados desconocidos", async () => {
+  for (const state of ["sin_revision", "sin_metadatos", "vigente", "obsoleta"] as const) {
+    const body = readiness();
+    body.eipd_controls_v3.review_context_metadata_status = state;
+    await withFetch(body, async () => {
+      expect((await eipdReviewApi.preparation(scope)).latest_review_context_status).toBe(state);
+    });
+  }
+  const invalid = readiness();
+  invalid.eipd_controls_v3.review_context_metadata_status = "aprobada";
+  await withFetch(invalid, async () => {
+    await expect(eipdReviewApi.preparation(scope)).rejects.toThrow("incompatible");
+  });
+  await withFetch(
+    { assessment_id: scope.assessmentId, status: "borrador", eipd_controls_v3: null },
+    async () => {
+      expect((await eipdReviewApi.preparation(scope)).latest_review_context_status).toBeNull();
+    }
   );
 });

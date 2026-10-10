@@ -4773,3 +4773,23 @@ M3-T1 EN PROGRESO; fuentes/aceptacion pendientes; confirmacion/activacion bloque
 API EIPD entre cuentas sigue pendiente. Proximo: hacer visible el estado de vigencia
 documental de la ultima revision en consulta de requisitos, separado de historia y
 preparacion para nuevas decisiones, sin inferir autoridad ni actualizar eventos.
+
+## 2026-10-10 — M3-T1 §173: estado documental de ultima revision visible
+
+Cliente de preparacion proyecta review_context_metadata_status existente del servidor
+como latest_review_context_status: sin_revision/sin_metadatos/vigente/obsoleta, null
+fuera de V3. Valida enum cerrado; no infiere estado ni calcula identidad en frontend.
+Pantalla de requisitos muestra Vínculo de la última revisión con el material actual,
+separado de requisitos por decision. Explica que identidad vigente no aprueba ni
+autoriza continuar/confirmar/activar; estado siempre de ultima revision, no del evento
+historico seleccionado. Consulta historica limpia este bloque y conserva su aviso.
+
+Validacion: 12 pruebas cliente aprobadas (543 ms), 7 interacciones Chromium (3.2 s),
+tipos/lint aprobados. Casos nuevos cubren cuatro estados, null fuera de V3, enum
+invalido rechazado y alternancia requisitos/historia sin mezclar estado. Fetch/callbacks
+sinteticos. Captura del usuario confirma vinculo vigente, aviso sin autoridad y Continuar
+con requisitos pendientes (252 motivos); el campo de evento anterior permanece visible,
+sin atribuirle el estado de ultima revision. Alternancia historica manual aun pendiente.
+Backend, contratos persistidos,
+permisos y datos sin cambios. M3-T1 EN PROGRESO; fuentes/aceptacion y API entre cuentas
+pendientes; confirmacion/activacion bloqueadas. Proximo: comprobar separacion al consultar el evento historico anterior.

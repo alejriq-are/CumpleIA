@@ -22,11 +22,11 @@ test.beforeAll(async () => {
     import {createRoot} from "react-dom/client";
     import {EipdReviewConsultation} from ${JSON.stringify(path.resolve("components/admin/EipdReviewConsultation.tsx"))};
     import {ApiError} from ${JSON.stringify(path.resolve("lib/api/client.ts"))};
-    window.demo={calls:[],mode:"ok",release:null,issues:null};
+    window.demo={calls:[],mode:"ok",release:null,issues:null,latestStatus:"sin_revision"};
     function preparation(scope){
       const partial={prerequisites_met:true,context_metadata:null,issues:[]};
       if(window.demo.issues)partial.issues=window.demo.issues;
-      return {assessment_id:scope.assessmentId,status:"borrador",review_prerequisites_v3:{evaluation_version:3,evaluation_scope:"requisitos_documentales",authorizes_action:false,can_confirm:false,requiere_cambios:partial,no_continuar:partial,continuar:{prerequisites_met:false,context_metadata:null,issues:[{stage:"research",field:"research_assessment",code:"investigacion_confirmacion_bloqueada",category:"pendiente_revision",question_id:null}]}}};
+      return {assessment_id:scope.assessmentId,status:"borrador",latest_review_context_status:window.demo.latestStatus,review_prerequisites_v3:{evaluation_version:3,evaluation_scope:"requisitos_documentales",authorizes_action:false,can_confirm:false,requiere_cambios:partial,no_continuar:partial,continuar:{prerequisites_met:false,context_metadata:null,issues:[{stage:"research",field:"research_assessment",code:"investigacion_confirmacion_bloqueada",category:"pendiente_revision",question_id:null}]}}};
     }
     async function loadPreparation(scope){
       window.demo.calls.push({kind:"preparation",scope});
@@ -230,4 +230,36 @@ test("temas se despliegan con teclado sin perder motivos al cerrar", async ({ pa
       () => (window as unknown as { demo: { calls: unknown[] } }).demo.calls.length
     )
   ).toBe(1);
+});
+
+test("estado de ultima revision distingue historia y requisitos sin atribuir autoridad", async ({
+  page,
+}) => {
+  await scopeForm(page);
+  const messages = {
+    sin_revision: "No hay una revisión guardada para este expediente.",
+    sin_metadatos:
+      "La última revisión no tiene identidad documental registrada; no se puede comparar con el material actual.",
+    vigente: "El vínculo documental de la última revisión corresponde al material actual.",
+    obsoleta:
+      "El vínculo documental de la última revisión está desactualizado respecto del material actual.",
+  };
+  for (const [state, message] of Object.entries(messages)) {
+    await page.evaluate((state) => {
+      (window as unknown as { demo: { latestStatus: string } }).demo.latestStatus = state;
+    }, state);
+    await page.getByRole("button", { name: "Consultar requisitos" }).click();
+    await expect(page.getByText(message, { exact: true })).toBeVisible();
+  }
+  await expect(
+    page.getByText(
+      "Este estado no aprueba el expediente ni autoriza continuar, confirmar o activar. Se refiere a la última revisión, aunque consultes otro evento histórico."
+    )
+  ).toBeVisible();
+  await page.getByLabel("Revisión (identificador)", { exact: true }).fill(ids[3]);
+  await page.getByRole("button", { name: "Consultar revisión" }).click();
+  await expect(
+    page.getByRole("heading", { name: "Vínculo de la última revisión con el material actual" })
+  ).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Revisión guardada" })).toBeVisible();
 });

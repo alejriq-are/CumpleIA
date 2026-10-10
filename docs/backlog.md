@@ -568,3 +568,10 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] Tipos/lint y 6 interacciones aprobados.
 - [x] Captura de escritorio confirma ancho y detalle de justificacion/investigacion.
 - [ ] Vista movil y otros temas; API entre cuentas pendiente.
+
+### M3-T1 §173 — Estado documental de ultima revision
+
+- [x] Proyeccion validada del estado existente y aviso sin autoridad separado de requisitos/historia.
+- [x] 12 cliente, 7 interacciones, tipos y lint aprobados.
+- [x] Captura del expediente ficticio: vinculo vigente, aviso sin autoridad y Continuar pendiente.
+- [ ] Alternancia historica manual y prueba directa API entre cuentas pendientes.
