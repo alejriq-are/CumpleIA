@@ -1,3 +1,28 @@
+## 2026-10-09 — M3-T1 §153: prerequisitos puros de revision V3
+
+Nuevo eipd_review_v3 evalua decisiones sobre resolucion con binding V2 y ContextV2.
+Negativas requiere_cambios/no_continuar exigen borrador, versiones admitidas,
+RAT vigente y asociacion actual; no exigen completitud documental ni un evento
+anterior. Metadata se genera desde material de servidor con cobertura contexto_v2,
+research presente o null explicito; nunca se acepta en la solicitud humana.
+Ausencia, binding historico y obsolescencia producen motivos separados y no identidad.
+
+Continuar agrega review_blockers de composicion V3 sin exigir revision anterior.
+Conserva barreras de investigacion, fuentes, politica y activacion. prerequisites_met
+solo describe requisitos puros; can_confirm siempre false y no reemplaza permisos,
+validacion de tenant/actor, politica real ni relectura bajo lock. No conecta acciones
+HTTP ni inserta eventos; guardia V2 existente permanece bloqueada.
+
+Doce casos nuevos: negativas parciales sin mutacion, positivo bloqueado sin circularidad,
+seis cambios de estado/identidad, research null cubierto y entradas humanas cerradas.
+560 pruebas aisladas aprobadas en 34.80 s, incluyendo prerequisitos V2 y revisiones
+HTTP historicas; Black/Ruff aprobados. Suite HTTP general licitud no repetida;
+ultima completa §147: 570 aprobadas. Sin migracion ni cambios de datos operacionales.
+
+Proximo: integrar prerequisitos/metadata de servidor en registro controlado de
+negativas V2, con locks, aislamiento y persistencia atomica; positivos, confirmacion
+y activacion siguen bloqueados. Ley fija; M3-T1 EN PROGRESO. Sin commit/push.
+
 ## 2026-10-09 — M3-T1 §152: lectura API de metadata de revision
 
 Composicion V3 expone latest_review_context_metadata y estado separado sin_revision,

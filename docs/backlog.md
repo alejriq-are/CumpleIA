@@ -480,3 +480,9 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] Lectura actual/historica separada por identidad, una consulta y sin fallback ni escrituras.
 - [x] 465 pruebas aprobadas; metadata vigente no levanta bloques de revision/confirmacion.
 - [ ] Prerequisitos puros versionados de revision, registro controlado y aceptacion.
+
+### M3-T1 §153 — Prerequisitos puros V3
+
+- [x] Identidad V2/cobertura explicita generada desde servidor; negativas parciales y positivos con controles comunes.
+- [x] 560 pruebas aisladas aprobadas; sin eventos ni activacion y contratos historicos intactos.
+- [ ] Registro controlado de negativas V2 con metadata, locks/aislamiento y aceptacion; positivos bloqueados.
