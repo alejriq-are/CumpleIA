@@ -534,3 +534,32 @@ FK historicas. Validar contrato/pares/hash del evento al insertar; salida de lec
 versionada debe mantener null historico y no reinterpretar evidencias V1. Prerequisitos
 V2 y aceptacion siguen pendientes; todas las revisiones V2 siguen rechazadas.
 Ley fija, M3-T1 EN PROGRESO; activacion EIPD bloqueada. Sin commit/push.
+
+## 2026-10-09 — M3-T1 §151: almacenamiento de metadatos de revision
+
+Migracion aditiva d39e2b0f841c sobre c28f1a9d730b agrega review_context_metadata JSONB
+nullable a eipd_resolution_reviews, sin default/backfill. CHECK cerrado exige campos,
+versiones/cobertura coherentes y hashes identicos a los del evento; research hash es
+null o hash valido solo en V2. JSON null/arrays, contratos parciales/extras y versiones
+o hashes discordantes se rechazan. ORM mapea SQL NULL mediante none_as_null=True.
+
+Lector puro read_eipd_review_context_metadata_v1 revalida metadata y correspondencia
+con hashes del evento; historicos null retornan None sin inferir identidad. No cambia
+salidas ni escritor de eventos HTTP: visibilidad API y prerequisitos siguen pendientes.
+Mantiene RLS, FK de tenant y permisos runtime INSERT/SELECT; UPDATE/DELETE rechazados.
+Ninguna revision V2 ni confirmacion/activacion habilitada.
+
+Diecisiete casos PostgreSQL nuevos cubren nullabilidad/grants/RLS, roundtrip y
+historia intacta, rechazo de modificaciones/borrado, once contratos invalidos y
+cuatro intentos de saltar aislamiento (tenant/actor/padre/sin autenticacion).
+445 pruebas aisladas aprobadas en 25.03 s, incluyendo regresiones de politica de
+revision; Black/Ruff aprobados. Ejecutor protegido fija nuevo head d39e2b0f841c.
+Suite HTTP general de licitud no repetida; ultima completa §147: 570 aprobadas.
+
+Migracion validada/aplicada en base aislada y luego en base local cumpleia; destinos
+local/development comprobados. Comparacion de registros antes/despues confirma
+politica/publicaciones/selecciones/selector/eventos existentes identicos, sin metadata
+sintetica. No se ejecuta downgrade ni se modifica migracion historica.
+Proximo: exponer lectura API versionada de metadata y evaluar prerequisitos V2,
+antes de permitir eventos. Ley fija; M3-T1 EN PROGRESO. Activacion bloqueada.
+Sin commit/push.

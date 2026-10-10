@@ -85,3 +85,17 @@ def eipd_review_metadata_is_current_v1(metadata, document, context, review):
     except ValueError:
         return False
     return parsed == current
+
+
+def read_eipd_review_context_metadata_v1(event):
+    """Lee identidad persistida; null historico no se deriva ni rellena."""
+    value = event.review_context_metadata
+    if value is None:
+        return None
+    metadata = EipdReviewContextMetadataV1.model_validate(value)
+    if (metadata.document_hash, metadata.context_hash) != (
+        event.document_hash,
+        event.context_hash,
+    ):
+        raise ValueError("Metadatos discordantes con el evento persistido")
+    return metadata

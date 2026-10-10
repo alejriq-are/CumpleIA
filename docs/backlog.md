@@ -468,3 +468,9 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] Contrato cerrado/versiones estrictas y generador/comparador de identidad de material V1/V2.
 - [x] Ausencia historica conservada; cobertura research explicita sin autoridad ni proyeccion.
 - [ ] Persistencia append-only/lectura de metadata, prerequisitos V2 y aceptacion.
+
+### M3-T1 §151 — Almacenamiento de metadata
+
+- [x] Columna nullable sin backfill, contrato/hashes comprobados y lectura ORM/pura conservadora.
+- [x] Migracion aislada/local verificada, historia intacta y 445 pruebas aprobadas.
+- [ ] Visibilidad API, prerequisitos de eventos V2 y aceptacion; acciones bloqueadas.

@@ -1685,6 +1685,10 @@ class EipdResolutionReview(Base):
 
     __tablename__ = "eipd_resolution_reviews"
     __table_args__ = (
+        CheckConstraint(
+            "review_context_metadata IS NULL OR (\njsonb_typeof(review_context_metadata) = 'object'\nAND review_context_metadata ?& ARRAY['metadata_schema_version','resolution_binding_version','context_schema_version','research_coverage','document_hash','context_hash','research_material_hash']\nAND review_context_metadata - ARRAY['metadata_schema_version','resolution_binding_version','context_schema_version','research_coverage','document_hash','context_hash','research_material_hash'] = '{}'::jsonb\nAND jsonb_typeof(review_context_metadata->'metadata_schema_version') = 'number'\nAND review_context_metadata->>'metadata_schema_version' = '1'\nAND jsonb_typeof(review_context_metadata->'resolution_binding_version') = 'number'\nAND review_context_metadata->>'resolution_binding_version' IN ('1','2')\nAND jsonb_typeof(review_context_metadata->'context_schema_version') = 'number'\nAND review_context_metadata->>'context_schema_version' = review_context_metadata->>'resolution_binding_version'\nAND jsonb_typeof(review_context_metadata->'research_coverage') = 'string'\nAND review_context_metadata->>'research_coverage' = CASE WHEN review_context_metadata->>'context_schema_version' = '2' THEN 'contexto_v2' ELSE 'no_cubierta' END\nAND jsonb_typeof(review_context_metadata->'document_hash') = 'string'\nAND review_context_metadata->>'document_hash' = document_hash\nAND jsonb_typeof(review_context_metadata->'context_hash') = 'string'\nAND review_context_metadata->>'context_hash' = context_hash\nAND (review_context_metadata->'research_material_hash' = 'null'::jsonb OR\n    (review_context_metadata->>'context_schema_version' = '2'\n     AND jsonb_typeof(review_context_metadata->'research_material_hash') = 'string'\n     AND review_context_metadata->>'research_material_hash' ~ '^[0-9a-f]{64}$'))\n) IS TRUE",
+            name="ck_eipd_reviews_context_metadata",
+        ),
         UniqueConstraint(
             "id",
             "assessment_id",
@@ -1747,6 +1751,9 @@ class EipdResolutionReview(Base):
     review_reference: Mapped[str] = mapped_column(Text, nullable=False)
     document_hash: Mapped[str] = mapped_column(Text, nullable=False)
     context_hash: Mapped[str] = mapped_column(Text, nullable=False)
+    review_context_metadata: Mapped[dict | None] = mapped_column(
+        JSONB(none_as_null=True), nullable=True
+    )
     policy_version: Mapped[int | None] = mapped_column(sa.Integer, nullable=True)
     policy_reference: Mapped[str | None] = mapped_column(Text, nullable=True)
     policy_hash: Mapped[str | None] = mapped_column(Text, nullable=True)
