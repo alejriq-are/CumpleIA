@@ -548,3 +548,9 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] Traducir secciones/campos LIA v1 y conservar identificadores del detalle.
 - [x] Tipos y lint frontend aprobados.
 - [ ] Inspeccion visual de rutas LIA en expediente ficticio; API entre cuentas pendiente.
+
+### M3-T1 §166 — Diagnostico visible en español
+
+- [x] Traducir detalle, etapas, categorias y campos; fallback desconocido en español.
+- [x] 5 interacciones Chromium, tipos y lint aprobados.
+- [ ] Inspeccion manual final; API entre cuentas pendiente.

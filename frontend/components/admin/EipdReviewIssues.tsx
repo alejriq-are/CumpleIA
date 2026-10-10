@@ -169,13 +169,40 @@ const fields: Record<string, string> = {
   responsible_area: "Área responsable",
   answer: "Respuesta",
   comment: "Comentario",
+  acceptance_status: "Estado de aceptación",
+  analysis: "Análisis",
+  answers: "Respuestas",
+  applicability_analysis: "Análisis de aplicabilidad",
+  checked_on: "Fecha de verificación",
+  conditions: "Condiciones",
+  declarations: "Declaraciones",
+  eipd_gate: "Habilitación EIPD",
+  policy: "Política",
+  routes: "Rutas de evaluación",
+  sources: "Fuentes",
+  datos_protegidos_excepcion_consentimiento: "Datos protegidos por una excepción al consentimiento",
+  evaluacion_sistematica_automatizada_efectos_significativos:
+    "Evaluación sistemática automatizada con efectos significativos",
+  monitoreo_sistematico_zona_publica: "Monitoreo sistemático de zonas públicas",
+  probable_alto_riesgo_contextual: "Probable alto riesgo según el contexto",
+  tratamiento_masivo_o_gran_escala: "Tratamiento masivo o a gran escala",
   latest_review: "Última revisión",
   latest_review_context_metadata: "Identidad del material de la última revisión",
+};
+const categories: Record<EipdReviewIssueV3["category"], string> = {
+  incompleto: "Incompleto",
+  requiere_revision: "Requiere revisión",
+  pendiente_revision: "Revisión pendiente",
+  supuesto_declarado: "Supuesto declarado",
 };
 function fieldLabel(field: string) {
   return field
     .split(".")
-    .map((part) => fields[part] ?? part.replaceAll("_", " "))
+    .map(
+      (part) =>
+        fields[part] ??
+        (/^\d+$/.test(part) ? `Elemento ${Number(part) + 1}` : "Campo pendiente de identificar")
+    )
     .join(" › ");
 }
 export function EipdReviewIssues({ issues }: { issues: EipdReviewIssueV3[] }) {
@@ -206,7 +233,9 @@ export function EipdReviewIssues({ issues }: { issues: EipdReviewIssueV3[] }) {
                 </p>
                 <p className="break-words text-gray-600">Campo: {fieldLabel(issue.field)}</p>
                 {issue.question_id !== null && (
-                  <p className="break-words">Pregunta: {issue.question_id.replaceAll("_", " ")}</p>
+                  <p className="break-words">
+                    Pregunta: {fields[issue.question_id] ?? "Pregunta pendiente de identificar"}
+                  </p>
                 )}
                 {count > 1 && (
                   <p className="text-gray-600">Informado {count} veces por el diagnóstico.</p>
@@ -214,18 +243,18 @@ export function EipdReviewIssues({ issues }: { issues: EipdReviewIssueV3[] }) {
                 <details className="mt-1 break-words text-gray-600">
                   <summary className="cursor-pointer">Detalle del diagnóstico</summary>
                   <dl>
-                    <dt>Código</dt>
-                    <dd>{issue.code}</dd>
+                    <dt>Motivo</dt>
+                    <dd>{messages[issue.code] ?? "Motivo pendiente de revisión."}</dd>
                     <dt>Campo</dt>
-                    <dd>{issue.field}</dd>
+                    <dd>{fieldLabel(issue.field)}</dd>
                     <dt>Categoría</dt>
-                    <dd>{issue.category}</dd>
+                    <dd>{categories[issue.category]}</dd>
                     <dt>Etapa</dt>
-                    <dd>{issue.stage}</dd>
+                    <dd>{stages[issue.stage]}</dd>
                     {issue.question_id !== null && (
                       <>
                         <dt>Pregunta</dt>
-                        <dd>{issue.question_id}</dd>
+                        <dd>{fields[issue.question_id] ?? "Pregunta pendiente de identificar"}</dd>
                       </>
                     )}
                   </dl>

@@ -234,3 +234,21 @@ interacciones §163 sin cambios y no repetidas. Inspeccion visual pendiente.
 M3-T1 EN PROGRESO; fuentes/aceptacion pendientes, confirmacion/activacion bloqueadas.
 Proximo: revisar rutas LIA en expediente ficticio. Prueba directa API entre cuentas
 permanece pendiente; rechazos de pagina/RAT no sustituyen ese control EIPD.
+
+## 2026-10-10 — M3-T1 §166: diagnostico visible en español
+
+Por solicitud explicita del usuario, el detalle presenta campo, categoria, etapa,
+pregunta y motivo en español. Reemplaza identificadores crudos visibles por etiquetas;
+Codigo pasa a Motivo. Datos originales del contrato y agrupacion siguen intactos
+internamente; la pantalla ya no ofrece el detalle de identificadores tecnicos crudos.
+Campos/preguntas desconocidos muestran etiquetas neutrales en español; no se infiere
+traduccion ni requisitos legales. Indices numericos se muestran como elementos.
+Se revisaron segmentos de los motivos del expediente ficticio mediante consulta
+solo lectura y se agregaron etiquetas faltantes de fuentes, habilitacion, politicas,
+condiciones y preguntas de deteccion. No se modifican datos ni contratos backend.
+
+Tipos/lint frontend aprobados, 5 interacciones Chromium aprobadas en 2.3 s tras
+actualizar expectativas de detalle; callbacks sinteticos. Inspeccion manual final
+pendiente. La interfaz no habilita nuevas decisiones, confirmacion o activacion.
+M3-T1 EN PROGRESO; fuentes/aceptacion y API entre cuentas siguen pendientes.
+Proximo: comprobar detalle de diagnostico en español con expediente ficticio local.

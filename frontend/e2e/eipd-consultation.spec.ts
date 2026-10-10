@@ -93,7 +93,9 @@ test("solo consulta y limpia datos al cambiar expediente", async ({ page }) => {
     )
   ).toBeVisible();
   await expect(
-    page.getByText("La confirmación del expediente de investigación permanece bloqueada.")
+    page
+      .locator("li > p")
+      .getByText("La confirmación del expediente de investigación permanece bloqueada.")
   ).toBeVisible();
   expect(await page.getByRole("button").allTextContents()).toEqual([
     "Consultar requisitos",
@@ -158,7 +160,7 @@ test("evento historico no infiere metadata y seleccion explicita delimita consul
   ]);
 });
 
-test("motivos distinguen campos y preguntas, agrupan duplicados y conservan códigos desconocidos", async ({
+test("motivos distinguen campos y preguntas, agrupan duplicados y presentan motivos desconocidos en español", async ({
   page,
 }) => {
   await scopeForm(page);
@@ -192,8 +194,12 @@ test("motivos distinguen campos y preguntas, agrupan duplicados y conservan cód
   await expect(card.getByText("Campo: Documento EIPD › Referencia del documento")).toBeVisible();
   await expect(card.getByText("Campo: Documento EIPD › Versión del documento")).toBeVisible();
   await expect(card.getByText("Informado 2 veces por el diagnóstico.")).toBeVisible();
-  await expect(card.getByText("Pregunta: pregunta futura")).toBeVisible();
+  await expect(card.getByText("Pregunta: Pregunta pendiente de identificar")).toBeVisible();
   await card.locator("li").last().getByText("Detalle del diagnóstico").click();
-  await expect(card.getByText("codigo_futuro", { exact: true })).toBeVisible();
-  await expect(card.getByText("pendiente de revisión", { exact: false })).toBeVisible();
+  await expect(card.getByText("codigo_futuro", { exact: true })).toHaveCount(0);
+  await expect(card.locator("li").last().getByText("Incompleto", { exact: true })).toBeVisible();
+  await expect(card.getByText("Investigación", { exact: true })).toHaveCount(2);
+  await expect(
+    card.getByText("Hay un motivo pendiente de revisión. Consulta su detalle.", { exact: true })
+  ).toBeVisible();
 });
