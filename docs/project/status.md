@@ -1,3 +1,22 @@
+## 2026-10-10 — M3-T1 §171: revinculacion documental explicita de prueba
+
+Tras el cambio ficticio de conservacion de §170, se reviso/reaporto el documento EIPD
+como PRUEBA-2 mediante servicio de dominio y rol runtime restringido. El servidor
+vinculo el documento al contexto V2 actual; no se edito metadata manualmente.
+Comparacion del evento historico antes/despues confirma igualdad completa. Su
+asociacion al contexto anterior permanece obsoleta en readiness; no se transforma
+una revision antigua en aprobacion del material nuevo. No se registro nuevo evento.
+
+Servicio comprobo requisitos_met true y metadata disponible para ambas decisiones
+negativas, y false para continuar. Captura del usuario confirma identidad del material
+actual disponible, requisitos documentales cumplidos para requiere_cambios/no_continuar,
+y continuar pendiente con 252 ocurrencias. No acredita expediente completo ni permiso.
+Cambios ficticios solo en base local; sin codigo, migraciones ni nuevas pruebas
+automatizadas. Validacion de servicio y pantalla; checks previos no repetidos.
+M3-T1 EN PROGRESO; confirmacion/activacion bloqueadas y fuentes/aceptacion pendientes.
+API EIPD entre cuentas sigue pendiente. Proximo: comprobar registro de otra revision
+negativa sobre el material nuevo, conservando la anterior y su orden historico.
+
 ## 2026-10-10 — M3-T1 §170: historia preservada tras cambio documental
 
 Ensayo autorizado sobre datos ficticios locales: se cambio el analisis de conservacion
