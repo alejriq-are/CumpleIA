@@ -382,7 +382,10 @@ tipos/lint aprobados. Casos nuevos cubren cuatro estados, null fuera de V3, enum
 invalido rechazado y alternancia requisitos/historia sin mezclar estado. Fetch/callbacks
 sinteticos. Captura del usuario confirma vinculo vigente, aviso sin autoridad y Continuar
 con requisitos pendientes (252 motivos); el campo de evento anterior permanece visible,
-sin atribuirle el estado de ultima revision. Alternancia historica manual aun pendiente.
+sin atribuirle el estado de ultima revision. Segunda captura confirma consulta del evento
+anterior: Requiere cambios, referencia PRUEBA-REVISION-LECTURA-20261010, fundamento
+y fecha originales; conserva aviso historico y no muestra bloque de vinculo actual.
 Backend, contratos persistidos,
 permisos y datos sin cambios. M3-T1 EN PROGRESO; fuentes/aceptacion y API entre cuentas
-pendientes; confirmacion/activacion bloqueadas. Proximo: comprobar separacion al consultar el evento historico anterior.
+pendientes; confirmacion/activacion bloqueadas. Alternancia manual requisitos/historia comprobada en escritorio; otros estados solo
+cubiertos por pruebas sinteticas. Prueba directa API entre cuentas sigue pendiente.

@@ -574,4 +574,5 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] Proyeccion validada del estado existente y aviso sin autoridad separado de requisitos/historia.
 - [x] 12 cliente, 7 interacciones, tipos y lint aprobados.
 - [x] Captura del expediente ficticio: vinculo vigente, aviso sin autoridad y Continuar pendiente.
-- [ ] Alternancia historica manual y prueba directa API entre cuentas pendientes.
+- [x] Captura historica: evento anterior intacto, aviso historico y bloque actual ausente.
+- [ ] Prueba directa API entre cuentas y otros estados reales pendientes.
