@@ -492,3 +492,9 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] Registro autenticado bajo locks/relectura con hashes y metadata de servidor atomicos.
 - [x] 578 pruebas aisladas aprobadas: negativas, tenant, obsolescencia, rollback y regresiones historicas.
 - [ ] Concurrencia especifica V2/cambio de politica, consumidores y aceptacion; positivos bloqueados.
+
+### M3-T1 §155 — Concurrencia negativa V2
+
+- [x] Relectura tras PATCH/selector, commit/rollback e historia intacta con bloqueos PostgreSQL observados.
+- [x] 603 pruebas aisladas aprobadas; escritor existente conserva garantias sin cambio productivo.
+- [ ] Negativas simultaneas/cancelacion, consumidores y aceptacion; positivos/confirmacion bloqueados.

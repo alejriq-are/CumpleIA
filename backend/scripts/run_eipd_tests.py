@@ -26,6 +26,7 @@ TARGETS = (
     "tests/test_eipd_review_metadata_storage.py",
     "tests/test_api_eipd_review_metadata_readiness.py",
     "tests/test_api_eipd_negative_review_v2.py",
+    "tests/test_eipd_negative_review_v2_concurrency.py",
     "tests/test_api_eipd_resolution_writer_v2.py",
     "tests/test_api_eipd_controls_v3_readiness.py",
     "tests/test_services_eipd_resolution.py",

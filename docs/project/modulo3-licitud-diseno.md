@@ -9767,3 +9767,27 @@ Proximo: comprobar concurrencia/relectura de negativas V2 frente a cambios del
 expediente y de politica antes de ampliar consumidores. Positivos/confirmacion
 siguen bloqueados; fuentes/aceptacion pendientes. Ley fija; M3-T1 EN PROGRESO.
 Sin commit/push.
+
+
+## 2026-10-09 — M3-T1 §155: concurrencia de negativas V2
+
+Diez casos PostgreSQL reales con sesiones app_user independientes prueban espera
+observable mediante pg_blocking_pids, sin temporizadores como evidencia de bloqueo.
+PATCH de research sin reaporte, reaporte con documento nuevo y retirada se prueban
+con commit/rollback: revision espera serie, relee material y genera identidad actual,
+o rechaza obsolescencia/ausencia sin evento. Rollback conserva material anterior.
+
+Cambio de selector previo bloquea revision hasta terminar y usa identidad real nueva
+si commit o anterior si rollback. Cambio administrativo posterior espera hasta commit/
+rollback de revision: evento solo visible tras commit; rollback no publica nada.
+Historia conserva hashes/metadatos y politica original aunque selector cambie.
+No se habilitan positivos ni confirmacion/activacion; no fue necesario cambiar escritor.
+Limpieza de fixtures solo sobre datos sinteticos de la base aislada.
+
+603 pruebas aisladas aprobadas en 46.31 s, incluidos locks compartidos y regresiones
+HTTP/prerequisitos historicos. Black/Ruff y diff check aprobados. Suite HTTP general
+licitud no repetida; ultima completa §147: 570 aprobadas. Sin migracion, cambio de
+permisos ni datos operacionales. M3-T1 EN PROGRESO, Ley fija, fuentes/aceptacion pendientes.
+
+Proximo: verificar negativas simultaneas sobre la misma serie y cancelacion durante
+espera antes de ampliar consumidores. Sin commit/push.
