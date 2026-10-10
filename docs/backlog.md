@@ -516,3 +516,9 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] POST/GET de representacion V2 con identidad persistida; contrato historico intacto y null sin inferir.
 - [x] Lectura por tenant/padre/estado, permisos/suscripcion y 621 pruebas aisladas aprobadas.
 - [ ] Consumidor frontend tipado y aceptacion; positivos/confirmacion/activacion bloqueados.
+
+### M3-T1 §159 — Cliente frontend de revisiones
+
+- [x] Tipos/cliente de requisitos y eventos auditados; negativos sin inyeccion ni autoridad derivada.
+- [x] 11 pruebas de red simulada y type-check/lint frontend aprobados; backend sin cambios.
+- [ ] Pantalla interna solo lectura y aceptacion; modulo/confirmacion/activacion bloqueados.

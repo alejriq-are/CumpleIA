@@ -1,3 +1,31 @@
+## 2026-10-09 — M3-T1 §159: consumidor frontend tipado
+
+Nuevo lib/api/eipd-review.ts define contratos de metadata V1, requisitos por decision
+V3 y evento/identidad de politica V2. Cliente usa apiFetch compartido con token y
+X-Organization-Id, valida alcance UUID y consultas sin cache. preparation retorna
+proyeccion de requisitos (null fuera de V3); event lee identidad persistida; recordNegative
+solo admite requiere_cambios/no_continuar, fundamento y referencia, sin campos auditados.
+No ofrece continuar/confirmar/activar ni habilita navegacion del modulo.
+
+Comprueba versiones, flags false, motivos estructurados, cobertura/hashes, identidad
+de tenant/expediente/evento y politica nullable coherente. Historia null permanece null.
+Rechaza datos incompatibles e inyeccion antes de envio; no reintenta mutaciones.
+ApiError conserva detail estructurado y mensaje de errores textuales existente;
+apiFetch exportado agrega cache opcional sin cambiar cache de consumidores previos.
+
+Once pruebas frontend sin navegador/servicios/red real, fetch simulado: headers/paths,
+cache, proyeccion sin autoridad, identidad historica, motivos malformados, POST minimo,
+positivos/inyeccion/identificadores invalidos sin peticion, errores 401/402/403/409 y
+compatibilidad de mensaje textual. npm run test:eipd-client: 11 aprobadas en 464 ms.
+Type-check y lint completos frontend aprobados; Prettier archivos nuevos y diff check.
+Backend sin cambios: ultima regresion §158 621 aprobadas; no repetida en este paso.
+Sin migracion, datos operacionales ni prueba de sesion personal en navegador.
+
+Proximo: integrar consulta solo lectura en pantalla interna de validacion de licitud,
+con seleccion explicita de organizacion/expediente y estados de carga/error claros.
+Ley fija; M3-T1 EN PROGRESO, fuentes/aceptacion pendientes; confirmacion/activacion
+bloqueadas. Sin commit/push.
+
 ## 2026-10-09 — M3-T1 §158: respuesta versionada de eventos
 
 EipdResolutionReviewOutV2 extiende lectura historica con response_schema_version 2,

@@ -10,7 +10,8 @@
     "type-check": "tsc --noEmit",
     "format": "prettier --write .",
     "test:e2e": "playwright test",
-    "test:e2e:install": "playwright install chromium"
+    "test:e2e:install": "playwright install chromium",
+    "test:eipd-client": "playwright test e2e/eipd-api-client.spec.ts"
   },
   "dependencies": {
     "next": "15.0.0",

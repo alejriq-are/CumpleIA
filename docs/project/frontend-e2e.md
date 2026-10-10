@@ -88,3 +88,11 @@ E2E requiere este entorno completo y no se agrega al CI genérico sin su fixture
 
 Referencias: [configuración de Playwright](https://playwright.dev/docs/test-configuration)
 y [sesiones autenticadas](https://playwright.dev/docs/auth).
+
+### Cliente de revision EIPD (§159)
+
+`npm run test:eipd-client` ejecuta `e2e/eipd-api-client.spec.ts` con Playwright
+como runner, sin fixture page/browser ni red real. No requiere servicios locales,
+sesion personal ni base de datos; fetch se simula/restaura en cada caso.
+Once casos de contratos, headers, alcance, cache y errores. Estos checks no sustituyen
+una futura prueba real de interfaz ni autorizacion del backend.
