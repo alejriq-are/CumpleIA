@@ -553,4 +553,5 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 
 - [x] Traducir detalle, etapas, categorias y campos; fallback desconocido en español.
 - [x] 5 interacciones Chromium, tipos y lint aprobados.
-- [ ] Inspeccion manual final; API entre cuentas pendiente.
+- [x] Captura manual confirma detalle de justificacion en español (§167).
+- [ ] API entre cuentas y cobertura de otras rutas pendientes.

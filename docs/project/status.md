@@ -1,3 +1,20 @@
+## 2026-10-10 — M3-T1 §167: comprobacion visual del detalle en español
+
+Captura del usuario con sesion autorizada y expediente ficticio confirma que el
+motivo de justificacion muestra Motivo, Campo Justificacion, Categoria Incompleto
+y Etapa Estado de la evaluacion en español. No aparecen identificadores ingleses
+en ese detalle. Tarjetas negativas mantienen requisitos documentales cumplidos;
+Continuar muestra pendientes y la confirmacion de investigacion permanece bloqueada.
+La captura valida ese detalle y las etiquetas visibles, no todos los motivos de
+otros expedientes ni una localizacion exhaustiva de todas las rutas.
+
+Solo documentacion; sin codigo, migraciones ni datos nuevos. Tipos/lint y cinco
+interacciones aprobados en §166 no repetidos. M3-T1 EN PROGRESO; fuentes/aceptacion
+pendientes y confirmacion/activacion bloqueadas. Prueba directa API entre cuentas
+permanece pendiente; pruebas de pagina y RAT no la sustituyen.
+Proximo: revisar presentacion del volumen de motivos y pendientes funcionales del
+expediente, manteniendo explicita la prueba de API entre cuentas aun no ejecutada.
+
 ## 2026-10-10 — M3-T1 §166: diagnostico visible en español
 
 Por solicitud explicita del usuario, el detalle presenta campo, categoria, etapa,
