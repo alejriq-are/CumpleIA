@@ -665,3 +665,8 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] Cabecera movil apilada y textos Inventario/proceso/evaluacion aclarados; tipos/lint aprobados.
 - [x] Captura posterior a 390 confirma cabecera apilada y textos actualizados legibles.
 - [ ] Acciones de enlaces, medicion nueva de overflow y API entre cuentas pendientes.
+
+### M3-T1 §191 — Redireccion segunda cuenta
+
+- [x] Reporte y captura /dashboard: segunda cuenta no accede a consulta interna.
+- [ ] Rechazo directo de API EIPD con segunda cuenta pendiente.

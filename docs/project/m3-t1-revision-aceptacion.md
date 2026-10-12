@@ -5018,3 +5018,15 @@ apilados; Panel de adecuacion, Inventario de tratamientos (RAT), proceso y evalu
 legibles sin recortes aparentes en area visible. Sin medicion nueva de overflow ni
 prueba de acciones de enlaces. M3-T1 EN PROGRESO; fuentes/aceptacion y API entre
 cuentas pendientes; confirmacion/activacion bloqueadas.
+
+## 2026-10-12 — M3-T1 §191: segunda cuenta redirigida desde consulta interna
+
+Usuario informa redireccion al panel al abrir consulta interna con segunda cuenta
+personal. Captura Edge Responsive 390 x 749 muestra /dashboard, identidad de segunda
+cuenta y panel general; consulta interna y expediente no visibles. Comprobacion
+manual de barrera de navegacion administrativa, complementando §190.
+No acredita rechazo de endpoints EIPD con token de segunda cuenta ni aislamiento
+integral RLS/API. Sin cambios de permisos, sesiones, codigo o datos.
+
+Registro documental; tests no repetidos. M3-T1 EN PROGRESO; fuentes/aceptacion y
+prueba directa API entre cuentas pendientes; confirmacion/activacion bloqueadas.
