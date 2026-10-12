@@ -1,3 +1,18 @@
+## 2026-10-12 — M3-T1 §193: lectura historica EIPD con segunda sesion
+
+Usuario reutiliza peticion GET RAT capturada con segunda cuenta personal mediante
+Edge Network Console, cambia solo URL a endpoint de lectura historica EIPD v2 del
+expediente original y envia. Captura muestra URL calculada correcta, GET, estado
+404 Not Found y cuerpo detail Evaluacion juridica no encontrada; sin datos del evento.
+Identidad de segunda cuenta visible en pagina. Headers/auth conservados por instruccion,
+no expuestos ni inspeccionados en captura. No contrasenas ni tokens copiados al registro.
+
+Prueba manual directa de ese endpoint de lectura desde segunda sesion, complementa
+rechazo RAT y redireccion UI. No acredita todos los endpoints, escritura, reciprocidad,
+contenido exacto de headers ni cobertura integral RLS. No se modifican permisos ni
+expediente. Tests no repetidos: registro de evidencia manual. M3-T1 EN PROGRESO;
+fuentes/aceptacion y cobertura restante pendientes; confirmacion/activacion bloqueadas.
+
 ## 2026-10-12 — M3-T1 §192: segunda cuenta consulta tratamiento ajeno
 
 Captura Edge Responsive 390 x 749 muestra segunda cuenta personal y URL del

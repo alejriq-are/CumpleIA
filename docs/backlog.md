@@ -675,3 +675,8 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 
 - [x] Captura segunda cuenta: tratamiento ajeno no encontrado, campos visibles vacios y GET RAT 404.
 - [ ] Acceso directo API EIPD y cobertura integral RLS pendientes.
+
+### M3-T1 §193 — GET historico EIPD segunda sesion
+
+- [x] Network Console: GET historico v2 correcto retorna 404 y Evaluacion juridica no encontrada.
+- [ ] Otros endpoints, escritura, reciprocidad y cobertura integral RLS pendientes.
