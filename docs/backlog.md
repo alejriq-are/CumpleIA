@@ -614,3 +614,8 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 
 - [x] Captura /login tras cierre y reporte de redireccion al reabrir consulta sin sesion.
 - [ ] Prueba directa API entre cuentas y revocacion no acreditadas por navegacion.
+
+### M3-T1 §181 — Reingreso movil
+
+- [x] Captura tras reingreso: panel y cuenta visibles, tres campos de expediente vacios.
+- [x] Segunda captura del final: Revision vacia y resultados anteriores ausentes.

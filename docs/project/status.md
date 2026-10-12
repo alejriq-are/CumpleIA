@@ -1,3 +1,16 @@
+## 2026-10-12 — M3-T1 §181: reingreso en vista movil emulada
+
+Tras instruccion de reingresar con cuenta personal, captura Edge Responsive
+390 x 749 muestra consulta interna y cabecera con cuenta autenticada. Campos
+Organizacion, Tratamiento y Evaluacion visibles vacios. Cabecera adaptable conservada.
+Segunda captura del final muestra Revision tambien vacia y espacio posterior sin
+resultados de requisitos ni evento historico. Reingreso con formulario limpio
+comprobado visualmente en ambas capturas. No se registran credenciales.
+
+Sin cambios de codigo, datos o permisos; registro documental, tests no repetidos.
+M3-T1 EN PROGRESO; fuentes/aceptacion y API entre cuentas pendientes;
+confirmacion/activacion bloqueadas.
+
 ## 2026-10-12 — M3-T1 §180: cierre de sesion y acceso protegido en movil
 
 Secuencia manual del usuario en Edge Responsive 390 x 749: tras cerrar sesion,
