@@ -1,3 +1,16 @@
+## 2026-10-12 — M3-T1 §189: recuperacion tras consulta en organizacion distinta
+
+Tras instruccion de restaurar organizacion original y reingresar Revision, captura
+Edge Responsive 390 x 749 muestra evento original Requiere cambios, referencia
+PRUEBA-REVISION-LECTURA-20261010, fundamento/fecha originales y aviso historico.
+Mensaje no encontrado ausente en pagina; 404 anterior sigue visible en consola.
+Campo Organizacion fuera de captura: imagen acredita resultado recuperado, no valor
+actual del campo ni headers. No nueva medicion de overflow ni prueba de segunda cuenta.
+
+Sin cambios de codigo, datos o permisos; registro documental, tests no repetidos.
+M3-T1 EN PROGRESO; fuentes/aceptacion y API entre cuentas pendientes;
+confirmacion/activacion bloqueadas.
+
 ## 2026-10-12 — M3-T1 §188: consulta historica con organizacion distinta
 
 Captura Edge Responsive 390 x 749 con organizacion de prueba distinta y mismos

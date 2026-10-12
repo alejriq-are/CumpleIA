@@ -654,3 +654,8 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 
 - [x] Captura a 390: mensaje no encontrado, sin datos historicos; GET 404 visible.
 - [ ] Sesion de segunda cuenta y cobertura directa de API/RLS pendientes.
+
+### M3-T1 §189 — Recuperacion tras rechazo por organizacion
+
+- [x] Captura a 390: evento original recuperado y mensaje no encontrado ausente.
+- [ ] Prueba directa API entre cuentas pendiente.
