@@ -593,3 +593,9 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 
 - [x] Comparacion scrollWidth > clientWidth retorna false con Investigacion/detalle abiertos.
 - [ ] Otros estados/anchuras, overflow interno y dispositivo fisico pendientes.
+
+### M3-T1 §177 — Cabecera movil
+
+- [x] Titulo, cuenta y cierre apilados bajo sm; correo largo ajustable.
+- [x] Captura posterior a 390 pixeles confirma cabecera apilada y titulo legible.
+- [ ] Accion de botones y otros anchos pendientes.

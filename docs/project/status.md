@@ -1,3 +1,15 @@
+## 2026-10-12 — M3-T1 §177: cabecera administrativa adaptable
+
+Capturas del formulario a 390 pixeles muestran campos y botones dentro del ancho;
+no verifican accion de botones. Cabecera anterior comprime titulo en tres lineas.
+Se apilan titulo, correo y cierre de sesion bajo breakpoint sm; a mayor ancho se
+conserva fila. Correo largo puede partirse sin ensanchar contenido. Autorizacion,
+sesion y componente de cierre sin cambios. Tipos y lint aprobados; ajuste de clases
+visual sin nuevas pruebas automatizadas. Captura posterior Edge Responsive 390 x 749
+confirma titulo en una linea, correo debajo y cierre separado, sin recortes visibles
+en cabecera. Accion de cierre y otros anchos no comprobados por esta captura.
+M3-T1 EN PROGRESO; confirmacion/activacion bloqueadas.
+
 ## 2026-10-12 — M3-T1 §176: medicion de desbordamiento a 390 pixeles
 
 Captura del usuario en Edge Responsive 390 x 749, Investigacion y detalle abiertos:
