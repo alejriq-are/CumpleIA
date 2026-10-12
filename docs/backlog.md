@@ -619,3 +619,8 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 
 - [x] Captura tras reingreso: panel y cuenta visibles, tres campos de expediente vacios.
 - [x] Segunda captura del final: Revision vacia y resultados anteriores ausentes.
+
+### M3-T1 §182 — Campo Organizacion requerido
+
+- [x] Captura a 390: aviso nativo en Organizacion vacia y sin resultados visibles.
+- [ ] Otros campos y validacion directa backend no acreditados por esta captura.

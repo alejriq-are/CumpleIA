@@ -496,3 +496,15 @@ comprobado visualmente en ambas capturas. No se registran credenciales.
 Sin cambios de codigo, datos o permisos; registro documental, tests no repetidos.
 M3-T1 EN PROGRESO; fuentes/aceptacion y API entre cuentas pendientes;
 confirmacion/activacion bloqueadas.
+
+## 2026-10-12 — M3-T1 §182: organizacion obligatoria en vista movil
+
+Captura del usuario Edge Responsive 390 x 749 tras pulsar Consultar requisitos con
+campos vacios: foco en Organizacion y aviso nativo Rellene este campo. No resultados
+visibles debajo de formularios. Comprobacion visual de restriccion HTML requerida;
+no captura de red ni prueba directa de validacion backend. Otros campos obligatorios
+no comprobados por esta imagen.
+
+Sin cambios de codigo, datos o permisos; registro documental, tests no repetidos.
+M3-T1 EN PROGRESO; fuentes/aceptacion y API entre cuentas pendientes;
+confirmacion/activacion bloqueadas.
