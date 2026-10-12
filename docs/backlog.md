@@ -629,3 +629,8 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 
 - [x] Capturas a 390: aviso nativo en Tratamiento y Evaluacion vacios, sin resultados visibles.
 - [ ] Validacion directa backend no acreditada por estas capturas.
+
+### M3-T1 §184 — Revision requerida
+
+- [x] Captura a 390: Revision vacia exige completar campo con expediente identificado.
+- [ ] Validacion directa backend no acreditada por esta captura.

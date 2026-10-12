@@ -1,3 +1,15 @@
+## 2026-10-12 — M3-T1 §184: revision obligatoria en vista movil
+
+Captura Edge Responsive 390 x 749 con tres identificadores de expediente completos
+y Revision vacia, tras instruccion de pulsar Consultar revision: foco en Revision y
+aviso nativo Rellene este campo. No resultado historico visible. Completa secuencia
+visual de campos requeridos §182-§184. Evidencia HTML nativa; no captura de red ni
+prueba directa backend. No implica confirmacion, activacion o decision nueva.
+
+Sin cambios de codigo, datos o permisos; registro documental, tests no repetidos.
+M3-T1 EN PROGRESO; fuentes/aceptacion y API entre cuentas pendientes;
+confirmacion/activacion bloqueadas.
+
 ## 2026-10-12 — M3-T1 §183: tratamiento y evaluacion obligatorios en movil
 
 Dos capturas Edge Responsive 390 x 749: con Organizacion completa y Tratamiento
