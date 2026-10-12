@@ -1,3 +1,17 @@
+## 2026-10-12 — M3-T1 §180: cierre de sesion y acceso protegido en movil
+
+Secuencia manual del usuario en Edge Responsive 390 x 749: tras cerrar sesion,
+captura muestra /login y formulario de ingreso. Luego usuario informa que introducir
+la URL de consulta interna y pulsar Enter redirige al login. Captura adicional muestra
+formulario de ingreso y URL administrativa aun escrita en barra, por lo que la
+redireccion final se acredita por su reporte, no por esa barra de direcciones.
+Panel interno y expediente no visibles en las capturas de ingreso.
+
+Comprobacion de navegacion frontend sin sesion; no acredita revocacion de tokens,
+prueba directa de API ni aislamiento entre cuentas. Sin cambios de codigo, permisos
+o datos; registro documental, tests no repetidos. M3-T1 EN PROGRESO;
+fuentes/aceptacion y API entre cuentas pendientes; confirmacion/activacion bloqueadas.
+
 ## 2026-10-12 — M3-T1 §179: consulta historica en vista movil emulada
 
 Captura del usuario Edge Responsive 390 x 749 tras consultar evento anterior:

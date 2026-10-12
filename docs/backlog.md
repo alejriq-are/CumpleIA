@@ -609,3 +609,8 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 
 - [x] Captura a 390: evento original legible, aviso historico y bloque actual ausente.
 - [ ] Cierre de sesion movil y API entre cuentas pendientes.
+
+### M3-T1 §180 — Cierre de sesion movil
+
+- [x] Captura /login tras cierre y reporte de redireccion al reabrir consulta sin sesion.
+- [ ] Prueba directa API entre cuentas y revocacion no acreditadas por navegacion.
