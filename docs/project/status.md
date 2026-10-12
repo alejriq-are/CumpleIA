@@ -1,3 +1,15 @@
+## 2026-10-12 — M3-T1 §176: medicion de desbordamiento a 390 pixeles
+
+Captura del usuario en Edge Responsive 390 x 749, Investigacion y detalle abiertos:
+expresion document.documentElement.scrollWidth > document.documentElement.clientWidth
+retorna false. El elemento raiz no presenta ancho de contenido superior al visible
+en ese estado. Complementa comprobacion visual de §175; no acredita otros estados,
+anchuras, overflow interno de cada elemento o dispositivo fisico.
+
+Sin cambios de codigo, datos ni permisos. Registro documental; tests no repetidos.
+M3-T1 EN PROGRESO; fuentes/aceptacion y API entre cuentas pendientes;
+confirmacion/activacion bloqueadas.
+
 ## 2026-10-12 — M3-T1 §175: vista emulada de 390 pixeles
 
 Captura del usuario en Edge DevTools, Responsive 390 x 749: Investigacion abierta

@@ -588,3 +588,8 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] Captura Edge Responsive 390 x 749: detalle de Investigacion legible y textos ajustados.
 - [ ] Medicion de overflow, formularios, otros temas y dispositivo fisico pendientes.
 - [ ] Mensajes de consola no inspeccionados; API entre cuentas pendiente.
+
+### M3-T1 §176 — Medicion a 390 pixeles
+
+- [x] Comparacion scrollWidth > clientWidth retorna false con Investigacion/detalle abiertos.
+- [ ] Otros estados/anchuras, overflow interno y dispositivo fisico pendientes.
