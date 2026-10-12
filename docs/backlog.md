@@ -576,3 +576,9 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] Captura del expediente ficticio: vinculo vigente, aviso sin autoridad y Continuar pendiente.
 - [x] Captura historica: evento anterior intacto, aviso historico y bloque actual ausente.
 - [ ] Prueba directa API entre cuentas y otros estados reales pendientes.
+
+### M3-T1 §174 — Vista a ancho reducido
+
+- [x] Capturas de vista general e Investigacion: ajuste de texto y detalle apilado legible.
+- [ ] Dispositivo movil, otras anchuras/temas y medicion de overflow pendientes.
+- [ ] Prueba directa API entre cuentas pendiente.

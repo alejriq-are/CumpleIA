@@ -1,3 +1,17 @@
+## 2026-10-12 — M3-T1 §174: comprobacion visual a ancho reducido
+
+Dos capturas del usuario sobre el expediente ficticio: vista general y tema
+Investigacion con primer detalle abierto. En el ancho mostrado, tarjetas y textos
+visibles permanecen dentro del contenido; etiquetas y valores del detalle se apilan
+en una columna. Motivo, Campo, Categoria y Etapa legibles; texto largo del campo de
+uso exclusivo ajusta lineas. Sin recortes aparentes en el area capturada.
+
+Evidencia visual parcial de escritorio a ancho reducido, no ensayo en dispositivo
+movil ni medicion automatizada de overflow. Otros temas, anchuras y estados reales
+siguen pendientes. Sin cambios de codigo, datos, permisos o decisiones; no se repiten
+pruebas automatizadas porque solo se registra evidencia. M3-T1 EN PROGRESO;
+fuentes/aceptacion y API entre cuentas pendientes; confirmacion/activacion bloqueadas.
+
 ## 2026-10-10 — M3-T1 §173: estado documental de ultima revision visible
 
 Cliente de preparacion proyecta review_context_metadata_status existente del servidor

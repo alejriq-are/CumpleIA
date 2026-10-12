@@ -389,3 +389,17 @@ Backend, contratos persistidos,
 permisos y datos sin cambios. M3-T1 EN PROGRESO; fuentes/aceptacion y API entre cuentas
 pendientes; confirmacion/activacion bloqueadas. Alternancia manual requisitos/historia comprobada en escritorio; otros estados solo
 cubiertos por pruebas sinteticas. Prueba directa API entre cuentas sigue pendiente.
+
+## 2026-10-12 — M3-T1 §174: comprobacion visual a ancho reducido
+
+Dos capturas del usuario sobre el expediente ficticio: vista general y tema
+Investigacion con primer detalle abierto. En el ancho mostrado, tarjetas y textos
+visibles permanecen dentro del contenido; etiquetas y valores del detalle se apilan
+en una columna. Motivo, Campo, Categoria y Etapa legibles; texto largo del campo de
+uso exclusivo ajusta lineas. Sin recortes aparentes en el area capturada.
+
+Evidencia visual parcial de escritorio a ancho reducido, no ensayo en dispositivo
+movil ni medicion automatizada de overflow. Otros temas, anchuras y estados reales
+siguen pendientes. Sin cambios de codigo, datos, permisos o decisiones; no se repiten
+pruebas automatizadas porque solo se registra evidencia. M3-T1 EN PROGRESO;
+fuentes/aceptacion y API entre cuentas pendientes; confirmacion/activacion bloqueadas.
