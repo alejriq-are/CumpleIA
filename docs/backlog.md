@@ -582,3 +582,9 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] Capturas de vista general e Investigacion: ajuste de texto y detalle apilado legible.
 - [ ] Dispositivo movil, otras anchuras/temas y medicion de overflow pendientes.
 - [ ] Prueba directa API entre cuentas pendiente.
+
+### M3-T1 §175 — Emulacion de 390 pixeles
+
+- [x] Captura Edge Responsive 390 x 749: detalle de Investigacion legible y textos ajustados.
+- [ ] Medicion de overflow, formularios, otros temas y dispositivo fisico pendientes.
+- [ ] Mensajes de consola no inspeccionados; API entre cuentas pendiente.

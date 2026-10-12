@@ -403,3 +403,18 @@ movil ni medicion automatizada de overflow. Otros temas, anchuras y estados real
 siguen pendientes. Sin cambios de codigo, datos, permisos o decisiones; no se repiten
 pruebas automatizadas porque solo se registra evidencia. M3-T1 EN PROGRESO;
 fuentes/aceptacion y API entre cuentas pendientes; confirmacion/activacion bloqueadas.
+
+## 2026-10-12 — M3-T1 §175: vista emulada de 390 pixeles
+
+Captura del usuario en Edge DevTools, Responsive 390 x 749: Investigacion abierta
+con detalle de confirmacion bloqueada. Motivo, Campo, Categoria y Etapa se apilan;
+textos visibles ajustan lineas dentro de las tarjetas, sin recortes aparentes.
+Tambien visible el motivo de evidencia ausente y su control de detalle cerrado.
+
+Validacion visual del area capturada en emulacion, no dispositivo fisico ni medicion
+de scrollWidth/clientWidth. No acredita ausencia de overflow en toda la pagina ni
+cobertura de formularios, otros temas o anchuras. Contadores de DevTools visibles
+sin mensajes de consola: no permiten determinar causa o impacto de errores.
+Sin cambios de codigo, datos o permisos; no se repiten tests por registro documental.
+M3-T1 EN PROGRESO; fuentes/aceptacion, API entre cuentas y cobertura restante
+pendientes; confirmacion/activacion bloqueadas.
