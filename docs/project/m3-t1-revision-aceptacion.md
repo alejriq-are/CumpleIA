@@ -4862,3 +4862,17 @@ de overflow. No implica aprobacion, confirmacion o activacion.
 Sin cambios de codigo, datos o permisos. Registro documental; tests no repetidos.
 Consulta historica y cierre de sesion en vista movil aun no comprobados.
 M3-T1 EN PROGRESO; fuentes/aceptacion y API entre cuentas pendientes.
+
+## 2026-10-12 — M3-T1 §179: consulta historica en vista movil emulada
+
+Captura del usuario Edge Responsive 390 x 749 tras consultar evento anterior:
+Requiere cambios, fundamento original, referencia PRUEBA-REVISION-LECTURA-20261010,
+fecha original, politica registrada y metadata contexto version 2 visibles.
+Aviso historico conservado; bloque de vinculo documental actual ausente entre
+formulario y resultado. Textos ajustados dentro de tarjeta, sin recortes aparentes.
+Complementa §178: alternancia requisitos/historia comprobada manualmente a 390.
+
+Sin cambios de codigo, datos o permisos; registro documental, tests no repetidos.
+No medicion nueva de overflow ni dispositivo fisico. Cierre de sesion movil pendiente.
+M3-T1 EN PROGRESO; fuentes/aceptacion y API entre cuentas pendientes;
+confirmacion/activacion bloqueadas.

@@ -604,3 +604,8 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 
 - [x] Resultado manual a 390 pixeles: borrador, vinculo vigente y Continuar pendiente.
 - [ ] Consulta historica y cierre de sesion en vista movil pendientes.
+
+### M3-T1 §179 — Historia movil
+
+- [x] Captura a 390: evento original legible, aviso historico y bloque actual ausente.
+- [ ] Cierre de sesion movil y API entre cuentas pendientes.
