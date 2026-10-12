@@ -644,3 +644,8 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 
 - [x] Captura a 390: formato corregido recupera evento original sin aviso de formato.
 - [ ] Prueba directa API entre cuentas pendiente.
+
+### M3-T1 §187 — Limpieza al cambiar Organizacion
+
+- [x] Captura a 390: Revision y resultado historico limpiados al cambiar organizacion.
+- [ ] Rechazo API y aislamiento entre cuentas no acreditados por esta captura.

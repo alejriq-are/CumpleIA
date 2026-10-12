@@ -1,3 +1,15 @@
+## 2026-10-12 — M3-T1 §187: limpieza de consulta al cambiar organizacion
+
+Captura del usuario Edge Responsive 390 x 749 despues de cambiar solo Organizacion
+por organizacion de prueba distinta: Tratamiento y Evaluacion conservados, Revision
+vacia y resultado historico anterior ausente. Comprobacion visual de limpieza de
+estado frontend al cambiar alcance. Sin nueva consulta demostrada en esta captura;
+no acredita acceso autorizado, rechazo API o aislamiento backend entre cuentas.
+
+Sin cambios de codigo, datos o permisos; registro documental, tests no repetidos.
+M3-T1 EN PROGRESO; fuentes/aceptacion y API entre cuentas pendientes;
+confirmacion/activacion bloqueadas.
+
 ## 2026-10-12 — M3-T1 §186: recuperacion tras formato invalido
 
 Tras reemplazar Revision prueba por identificador valido y consultar, captura del
