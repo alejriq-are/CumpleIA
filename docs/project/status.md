@@ -1,3 +1,16 @@
+## 2026-10-12 — M3-T1 §192: segunda cuenta consulta tratamiento ajeno
+
+Captura Edge Responsive 390 x 749 muestra segunda cuenta personal y URL del
+tratamiento original con organizacion original. Mensaje Actividad de tratamiento
+no encontrada; nombre y descripcion visibles vacios. Consola muestra GET RAT al
+tratamiento con 404. No contenido del tratamiento original visible. Comprobacion
+manual de rechazo de lectura RAT desde segunda sesion, sin inspeccion de headers,
+respuesta completa o evidencia de cobertura integral RLS. API EIPD aun pendiente.
+
+Sin cambios de codigo, permisos o datos; no completar ni guardar formulario vacio.
+Registro documental; tests no repetidos. M3-T1 EN PROGRESO; fuentes/aceptacion
+pendientes; confirmacion/activacion bloqueadas.
+
 ## 2026-10-12 — M3-T1 §191: segunda cuenta redirigida desde consulta interna
 
 Usuario informa redireccion al panel al abrir consulta interna con segunda cuenta

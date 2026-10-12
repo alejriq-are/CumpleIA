@@ -670,3 +670,8 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 
 - [x] Reporte y captura /dashboard: segunda cuenta no accede a consulta interna.
 - [ ] Rechazo directo de API EIPD con segunda cuenta pendiente.
+
+### M3-T1 §192 — Lectura RAT segunda cuenta
+
+- [x] Captura segunda cuenta: tratamiento ajeno no encontrado, campos visibles vacios y GET RAT 404.
+- [ ] Acceso directo API EIPD y cobertura integral RLS pendientes.
