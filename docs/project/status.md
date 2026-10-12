@@ -1,3 +1,15 @@
+## 2026-10-12 — M3-T1 §183: tratamiento y evaluacion obligatorios en movil
+
+Dos capturas Edge Responsive 390 x 749: con Organizacion completa y Tratamiento
+vacio, foco y aviso nativo Rellene este campo en Tratamiento. Con Organizacion y
+Tratamiento completos y Evaluacion vacia, mismo aviso en Evaluacion. No resultados
+visibles bajo formularios. Complementa §182 para los tres campos de expediente.
+Evidencia de validacion HTML nativa, sin captura de red ni prueba directa backend.
+
+Sin cambios de codigo, datos o permisos; registro documental, tests no repetidos.
+M3-T1 EN PROGRESO; fuentes/aceptacion y API entre cuentas pendientes;
+confirmacion/activacion bloqueadas.
+
 ## 2026-10-12 — M3-T1 §182: organizacion obligatoria en vista movil
 
 Captura del usuario Edge Responsive 390 x 749 tras pulsar Consultar requisitos con

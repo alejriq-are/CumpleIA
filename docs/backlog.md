@@ -624,3 +624,8 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 
 - [x] Captura a 390: aviso nativo en Organizacion vacia y sin resultados visibles.
 - [ ] Otros campos y validacion directa backend no acreditados por esta captura.
+
+### M3-T1 §183 — Campos de expediente requeridos
+
+- [x] Capturas a 390: aviso nativo en Tratamiento y Evaluacion vacios, sin resultados visibles.
+- [ ] Validacion directa backend no acreditada por estas capturas.
