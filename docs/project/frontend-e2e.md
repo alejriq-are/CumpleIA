@@ -595,3 +595,19 @@ actual del campo ni headers. No nueva medicion de overflow ni prueba de segunda 
 Sin cambios de codigo, datos o permisos; registro documental, tests no repetidos.
 M3-T1 EN PROGRESO; fuentes/aceptacion y API entre cuentas pendientes;
 confirmacion/activacion bloqueadas.
+
+## 2026-10-12 — M3-T1 §190: cabecera y textos del panel general
+
+Captura de segunda cuenta muestra /dashboard, cabecera comprimida a 390 pixeles.
+Se apilan marca, enlace Mi organizacion, correo y cierre bajo sm; correo ajustable,
+fila con wrap en ancho mayor. Inventario (RAT) pasa a Inventario de tratamientos (RAT).
+Scoring se reemplaza por evaluacion; sprint por proceso. Saludo admite correo largo.
+Sin cambios de autorizacion, sesiones, rutas ni habilitacion de modulos.
+
+Tipos y lint aprobados; ajuste visual/textual sin nuevas pruebas automatizadas.
+Captura demuestra cuenta y panel general, no secuencia de redireccion por si sola.
+Captura posterior Edge Responsive 390 x 749 confirma marca, enlace, correo y cierre
+apilados; Panel de adecuacion, Inventario de tratamientos (RAT), proceso y evaluacion
+legibles sin recortes aparentes en area visible. Sin medicion nueva de overflow ni
+prueba de acciones de enlaces. M3-T1 EN PROGRESO; fuentes/aceptacion y API entre
+cuentas pendientes; confirmacion/activacion bloqueadas.

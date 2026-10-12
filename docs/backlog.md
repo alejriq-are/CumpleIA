@@ -659,3 +659,9 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 
 - [x] Captura a 390: evento original recuperado y mensaje no encontrado ausente.
 - [ ] Prueba directa API entre cuentas pendiente.
+
+### M3-T1 §190 — Panel general adaptable
+
+- [x] Cabecera movil apilada y textos Inventario/proceso/evaluacion aclarados; tipos/lint aprobados.
+- [x] Captura posterior a 390 confirma cabecera apilada y textos actualizados legibles.
+- [ ] Acciones de enlaces, medicion nueva de overflow y API entre cuentas pendientes.

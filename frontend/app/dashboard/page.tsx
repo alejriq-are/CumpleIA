@@ -4,11 +4,11 @@ import { createClient } from "@/lib/supabase/server";
 const MODULOS = [
   {
     titulo: "Autodiagnóstico",
-    descripcion: "Cuestionario CCS, scoring de brechas e informe de estado de cumplimiento.",
+    descripcion: "Cuestionario CCS, evaluación de brechas e informe de estado de cumplimiento.",
     href: "/dashboard/autodiagnostico",
   },
   {
-    titulo: "Inventario (RAT)",
+    titulo: "Inventario de tratamientos (RAT)",
     descripcion:
       "Registro de Actividades de Tratamiento y gestión del inventario de datos personales.",
     href: "/dashboard/rat",
@@ -41,8 +41,8 @@ export default async function DashboardPage() {
       {/* Encabezado */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900">Panel de adecuación</h1>
-        <p className="mt-1 text-gray-500">
-          Bienvenido/a, <span className="font-medium">{user?.email}</span>. Tu sprint de adecuación
+        <p className="mt-1 break-words text-gray-500">
+          Bienvenido/a, <span className="break-all font-medium">{user?.email}</span>. Tu proceso de adecuación
           a la Ley 21.719 comienza aquí.
         </p>
       </div>
