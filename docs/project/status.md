@@ -1,3 +1,16 @@
+## 2026-10-12 — M3-T1 §185: formato de revision invalido en movil
+
+Captura Edge Responsive 390 x 749 con Revision prueba y expediente identificado:
+aviso nativo Busque la coincidencia con el formato solicitado, foco en Revision y
+sin revision guardada visible. Evidencia de restriccion de formato HTML, no captura
+de red. Error 404 permanece en consola desde consulta anterior; no acredita nueva
+peticion con formato invalido. Captura previa con identificador de Evaluacion usado
+como Revision mostro no encontrado: formato valido no equivale a evento existente.
+
+Sin cambios de codigo, datos o permisos; registro documental, tests no repetidos.
+M3-T1 EN PROGRESO; fuentes/aceptacion y API entre cuentas pendientes;
+confirmacion/activacion bloqueadas.
+
 ## 2026-10-12 — M3-T1 §184: revision obligatoria en vista movil
 
 Captura Edge Responsive 390 x 749 con tres identificadores de expediente completos
