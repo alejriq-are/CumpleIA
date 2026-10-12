@@ -649,3 +649,8 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 
 - [x] Captura a 390: Revision y resultado historico limpiados al cambiar organizacion.
 - [ ] Rechazo API y aislamiento entre cuentas no acreditados por esta captura.
+
+### M3-T1 §188 — Consulta con organizacion distinta
+
+- [x] Captura a 390: mensaje no encontrado, sin datos historicos; GET 404 visible.
+- [ ] Sesion de segunda cuenta y cobertura directa de API/RLS pendientes.

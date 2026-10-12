@@ -1,3 +1,16 @@
+## 2026-10-12 — M3-T1 §188: consulta historica con organizacion distinta
+
+Captura Edge Responsive 390 x 749 con organizacion de prueba distinta y mismos
+identificadores del expediente/evento original: mensaje No se encontro el expediente
+o la revision en esta organizacion. No datos historicos visibles. Consola muestra
+GET local con 404, URL truncada; sin inspeccion de headers o respuesta completa.
+Comprobacion manual de rechazo en sesion actual al cambiar alcance, no login con
+segunda cuenta ni cobertura integral de aislamiento RLS/API entre cuentas.
+
+Sin cambios de codigo, datos o permisos; registro documental, tests no repetidos.
+M3-T1 EN PROGRESO; fuentes/aceptacion y API entre cuentas pendientes;
+confirmacion/activacion bloqueadas.
+
 ## 2026-10-12 — M3-T1 §187: limpieza de consulta al cambiar organizacion
 
 Captura del usuario Edge Responsive 390 x 749 despues de cambiar solo Organizacion
