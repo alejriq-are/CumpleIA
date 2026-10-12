@@ -1,3 +1,16 @@
+## 2026-10-12 — M3-T1 §178: consulta de requisitos en vista movil emulada
+
+Tras instruccion de completar identificadores y pulsar Consultar requisitos, captura
+del usuario Edge Responsive 390 x 749 muestra borrador, vinculo documental vigente,
+aviso sin autoridad y Continuar con requisitos pendientes (252 motivos). Resultado
+visible ajustado al ancho. Comprobacion manual del flujo de consulta con sesion
+personal y expediente ficticio; captura no incluye trazas de red ni medicion nueva
+de overflow. No implica aprobacion, confirmacion o activacion.
+
+Sin cambios de codigo, datos o permisos. Registro documental; tests no repetidos.
+Consulta historica y cierre de sesion en vista movil aun no comprobados.
+M3-T1 EN PROGRESO; fuentes/aceptacion y API entre cuentas pendientes.
+
 ## 2026-10-12 — M3-T1 §177: cabecera administrativa adaptable
 
 Capturas del formulario a 390 pixeles muestran campos y botones dentro del ancho;

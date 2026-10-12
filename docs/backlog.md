@@ -599,3 +599,8 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] Titulo, cuenta y cierre apilados bajo sm; correo largo ajustable.
 - [x] Captura posterior a 390 pixeles confirma cabecera apilada y titulo legible.
 - [ ] Accion de botones y otros anchos pendientes.
+
+### M3-T1 §178 — Consulta movil
+
+- [x] Resultado manual a 390 pixeles: borrador, vinculo vigente y Continuar pendiente.
+- [ ] Consulta historica y cierre de sesion en vista movil pendientes.
