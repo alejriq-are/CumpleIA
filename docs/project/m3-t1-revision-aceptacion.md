@@ -4952,3 +4952,15 @@ como Revision mostro no encontrado: formato valido no equivale a evento existent
 Sin cambios de codigo, datos o permisos; registro documental, tests no repetidos.
 M3-T1 EN PROGRESO; fuentes/aceptacion y API entre cuentas pendientes;
 confirmacion/activacion bloqueadas.
+
+## 2026-10-12 — M3-T1 §186: recuperacion tras formato invalido
+
+Tras reemplazar Revision prueba por identificador valido y consultar, captura del
+usuario Edge Responsive 390 x 749 muestra Requiere cambios y referencia
+PRUEBA-REVISION-LECTURA-20261010, fundamento/fecha originales, politica y metadata
+historica. Aviso de formato ausente; aviso de identidad historica conservado.
+Recuperacion manual de consulta tras §185 comprobada visualmente, sin trazas de red.
+
+Sin cambios de codigo, datos o permisos; registro documental, tests no repetidos.
+M3-T1 EN PROGRESO; fuentes/aceptacion y API entre cuentas pendientes;
+confirmacion/activacion bloqueadas.

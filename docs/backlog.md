@@ -639,3 +639,8 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 
 - [x] Captura a 390: prueba rechazada por formato nativo, sin revision visible.
 - [ ] Peticiones de red y validacion directa backend no acreditadas por esta captura.
+
+### M3-T1 §186 — Recuperacion de consulta
+
+- [x] Captura a 390: formato corregido recupera evento original sin aviso de formato.
+- [ ] Prueba directa API entre cuentas pendiente.
