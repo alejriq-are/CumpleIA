@@ -5149,3 +5149,13 @@ facultades administrativas y conflictos de seleccion/publicacion. Fixtures sinte
 no ensayo de usuarios concurrentes reales ni suite completa. Registro documental;
 codigo y permisos sin cambios. M3-T1 EN PROGRESO; fuentes/aceptacion pendientes;
 confirmacion/activacion bloqueadas.
+
+## 2026-10-13 — M3-T1 §201: inventario inicial de fuentes EIPD
+
+[Inventario y brechas](m3-t1-fuentes-eipd.md): fuente BCN/PDF articulo 15 ter localizada,
+version y fechas identificadas; contraste con campos documentales y politica interna.
+Lista/orientaciones especificas de Agencia no identificadas en busqueda limitada;
+no se afirma inexistencia ni se marca fuentes verificadas. Aceptacion juridica y por
+ruta pendientes. Baseline reformado fijo; politica/expediente sin cambios.
+Solo documentacion, sin nuevos tests. M3-T1 EN PROGRESO;
+confirmacion/activacion bloqueadas.

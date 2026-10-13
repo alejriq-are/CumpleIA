@@ -716,3 +716,8 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 
 - [x] Evidencia reciente y limites consolidados en docs/project/m3-t1-balance-validacion.md.
 - [ ] Inventario de fuentes oficiales/brechas de habilitacion excepcional; sin activar politica.
+
+### M3-T1 §201 — Inventario fuentes EIPD
+
+- [x] Fuente BCN/PDF art. 15 ter localizada; matriz contrato/brechas documentada.
+- [ ] Instrumentos Agencia, revision por rutas y aceptacion pendientes; sin habilitacion.
