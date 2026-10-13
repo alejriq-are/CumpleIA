@@ -40,3 +40,26 @@ Preparar revision de aplicabilidad de rutas sensible_derechos y
 sensible_biometrica_derechos contra articulos especificos y evidencia de Agencia.
 Politica y expediente sin cambios: sources/acceptance pendientes; activation
 deshabilitada; confirmacion/activacion bloqueadas. No tests por cambio documental.
+
+## Revision inicial por ruta — 2026-10-13 (§202)
+
+Referencia: PDF oficial enlazado arriba, paginas 14-16. Lectura documental inicial,
+no aceptacion juridica del expediente ni de politica.
+
+| Ruta del producto | Articulos relacionados | Brecha de aceptacion |
+| --- | --- | --- |
+| sensible_derechos | Art. 16 letra d: necesidad para formulacion, ejercicio o defensa de un derecho ante tribunal u organo administrativo | Justificar necesidad, foro y alcance concreto; no equiparar etiqueta de ruta con prueba |
+| sensible_biometrica_derechos | Art. 16 ter remite para excepciones sin consentimiento al inciso segundo de 16 bis; letra d de 16 bis contempla derechos ante tribunal/organo administrativo | Revisar cadena normativa especifica; no derivar excepcion biometrica solo de 16 d |
+| Ambas: evaluacion de impacto | Art. 15 ter incluye datos sensibles/especialmente protegidos bajo excepciones al consentimiento | Conectar documento y alcance; instrumentos Agencia/aceptacion pendientes |
+
+Distincion de producto verificada en eipd_frontier.py: requiere responsable, limita
+regimenes a sensibles/biometricos y exige ruta excepcion_legal y condicion sensible
+defensa_derechos_art16d. Excluye otros regimenes y determinados expedientes aportados.
+Estas fronteras tecnicas no se presentan como prohibiciones legales universales.
+Politica admite solo dos rutas internas; no habilita automaticamente ninguna.
+
+El fixture actual de investigacion contiene categorias/contextos adicionales y no
+constituye evidencia suficiente para aceptar estas rutas. No reducir sus datos ni
+cambiar su finalidad para forzar admision. Proximo: lista de evidencias revisables
+por ruta y criterio, con responsable de aceptacion pendiente. Sin codigo, migraciones,
+mutaciones de expediente o habilitacion; no nuevos tests por revision documental.

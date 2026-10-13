@@ -1,3 +1,12 @@
+## 2026-10-13 — M3-T1 §202: contraste normativo por ruta excepcional
+
+Ampliado [inventario EIPD](m3-t1-fuentes-eipd.md): sensible_derechos relacionado con
+16 d; biometrica con cadena 16 ter / 16 bis inciso segundo d; impacto con 15 ter.
+Separadas condiciones legales y fronteras tecnicas de eipd_frontier.py. Lectura
+inicial, no aceptacion juridica ni fuente declarada verificada. Fixture de investigacion
+no se fuerza a frontera excepcional. Solo documentacion; politica/expediente sin cambios.
+M3-T1 EN PROGRESO; fuentes/aceptacion pendientes; confirmacion/activacion bloqueadas.
+
 ## 2026-10-13 — M3-T1 §201: inventario inicial de fuentes EIPD
 
 [Inventario y brechas](m3-t1-fuentes-eipd.md): fuente BCN/PDF articulo 15 ter localizada,

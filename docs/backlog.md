@@ -721,3 +721,8 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 
 - [x] Fuente BCN/PDF art. 15 ter localizada; matriz contrato/brechas documentada.
 - [ ] Instrumentos Agencia, revision por rutas y aceptacion pendientes; sin habilitacion.
+
+### M3-T1 §202 — Contraste de rutas
+
+- [x] Cadena normativa sensible/biometrica contrastada con frontera tecnica.
+- [ ] Evidencias por ruta, instrumentos Agencia y aceptacion juridica pendientes.
