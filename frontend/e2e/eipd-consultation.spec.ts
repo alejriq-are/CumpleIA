@@ -26,7 +26,7 @@ test.beforeAll(async () => {
     function preparation(scope){
       const partial={prerequisites_met:true,context_metadata:null,issues:[]};
       if(window.demo.issues)partial.issues=window.demo.issues;
-      return {assessment_id:scope.assessmentId,status:"borrador",policy_status:{sources_status:"pendiente",acceptance_status:"pendiente",activation:"deshabilitada"},latest_review_context_status:window.demo.latestStatus,review_prerequisites_v3:{evaluation_version:3,evaluation_scope:"requisitos_documentales",authorizes_action:false,can_confirm:false,requiere_cambios:partial,no_continuar:partial,continuar:{prerequisites_met:false,context_metadata:null,issues:[{stage:"research",field:"research_assessment",code:"investigacion_confirmacion_bloqueada",category:"pendiente_revision",question_id:null}]}}};
+      return {assessment_id:scope.assessmentId,status:"borrador",policy_status:window.demo.policyStatus ?? {sources_status:"pendiente",acceptance_status:"pendiente",activation:"deshabilitada"},latest_review_context_status:window.demo.latestStatus,review_prerequisites_v3:{evaluation_version:3,evaluation_scope:"requisitos_documentales",authorizes_action:false,can_confirm:false,requiere_cambios:partial,no_continuar:partial,continuar:{prerequisites_met:false,context_metadata:null,issues:[{stage:"research",field:"research_assessment",code:"investigacion_confirmacion_bloqueada",category:"pendiente_revision",question_id:null}]}}};
     }
     async function loadPreparation(scope){
       window.demo.calls.push({kind:"preparation",scope});
@@ -276,4 +276,26 @@ test("politica pendiente visible sin autoridad y separada de evento historico", 
   await page.getByRole("button", {name:"Consultar revisión",exact:true}).click();
   await expect(page.getByRole("heading", {name:"Revisión guardada"})).toBeVisible();
   await expect(page.getByRole("heading", {name:"Estado de la política EIPD"})).toHaveCount(0);
+});
+
+
+test("estados ficticios de politica no autorizan expediente ni muestran controles de confirmacion", async ({ page }) => {
+  await scopeForm(page);
+  for (const item of [
+    {sources_status:"verificadas",acceptance_status:"pendiente",activation:"deshabilitada",acceptance:"Pendiente",activationLabel:"Deshabilitada"},
+    {sources_status:"verificadas",acceptance_status:"aceptada",activation:"deshabilitada",acceptance:"Aceptada según el registro",activationLabel:"Deshabilitada"},
+    {sources_status:"verificadas",acceptance_status:"aceptada",activation:"habilitada",acceptance:"Aceptada según el registro",activationLabel:"Habilitada según el registro"},
+  ]) {
+    await page.evaluate((status) => {
+      (window as unknown as {demo:{policyStatus:unknown}}).demo.policyStatus = status;
+    }, {sources_status:item.sources_status,acceptance_status:item.acceptance_status,activation:item.activation});
+    await page.getByRole("button", {name:"Consultar requisitos",exact:true}).click();
+    const panel = page.locator('section[aria-labelledby="policy-status-heading"]');
+    await expect(panel.getByText("Verificadas según el registro", {exact:true})).toBeVisible();
+    await expect(panel.getByText(item.acceptance, {exact:true})).toBeVisible();
+    await expect(panel.getByText(item.activationLabel, {exact:true})).toBeVisible();
+    await expect(panel.getByText("No aprueba el expediente ni autoriza por sí solo", {exact:false})).toBeVisible();
+    await expect(page.getByRole("button", {name:/confirmar|activar|aprobar/i})).toHaveCount(0);
+    await expect(page.getByText("Requisitos documentales pendientes.", {exact:true})).toBeVisible();
+  }
 });

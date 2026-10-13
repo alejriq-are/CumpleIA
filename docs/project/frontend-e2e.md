@@ -780,3 +780,14 @@ Completa alternancia manual del bloque nuevo §§214-215. No estados habilitados
 ni nueva medicion de overflow. Solo registro documental; tests previos no repetidos;
 codigo/datos/permisos sin cambios. M3-T1 EN PROGRESO;
 revisiones ficticias hasta MVP; confirmacion/activacion bloqueadas.
+
+## 2026-10-13 — M3-T1 §217: estados ficticios de politica en interfaz
+
+Nueva interaccion con tres combinaciones sinteticas: fuentes verificadas/aceptacion
+pendiente/deshabilitada; verificadas/aceptada/deshabilitada; verificadas/aceptada/
+habilitada. Labels segun registro, aviso sin autoridad, requisitos pendientes y
+sin botones de confirmar/activar/aprobar en todos los casos. Mock del componente;
+no politica publicada ni cambio de registro operativo. 9 interacciones Chromium
+aprobadas (3.7 s), tipos/lint correctos. Cliente/backend sin cambios; tests/docs solo.
+No captura CSS real ni aceptacion juridica. M3-T1 EN PROGRESO;
+revisiones ficticias hasta MVP; confirmacion/activacion operativas bloqueadas.

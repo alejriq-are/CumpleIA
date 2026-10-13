@@ -800,3 +800,8 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 
 - [x] Captura a 390: evento historico, dos bloques actuales ausentes y /v2 fetch 200.
 - [ ] Otros estados reales no cubiertos por esta captura.
+
+### M3-T1 §217 — Estados simulados UI
+
+- [x] Tres combinaciones de politica simuladas sin autoridad; 9 interacciones/tipos/lint aprobados.
+- [ ] Sin politica operativa habilitada ni validacion real inferida de mocks.
