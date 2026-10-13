@@ -691,3 +691,8 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 
 - [x] Captura: readiness fetch 200, borrador/vinculo vigente y requisitos pendientes recuperados.
 - [ ] Reciprocidad completa y otros endpoints pendientes.
+
+### M3-T1 §196 — GET historico original 200
+
+- [x] General/Response: GET v2 200, decision original y respuesta esquema 2.
+- [ ] Escritura, reciprocidad y cobertura integral entre tenants pendientes.

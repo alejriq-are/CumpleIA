@@ -680,3 +680,17 @@ ni acceso a todos los endpoints. No aprobacion, confirmacion o activacion.
 
 Sin cambios de codigo, datos o permisos; registro documental, tests no repetidos.
 M3-T1 EN PROGRESO; fuentes/aceptacion y cobertura restante pendientes.
+
+## 2026-10-13 — M3-T1 §196: lectura historica recuperada en sesion original
+
+Dos capturas Edge Responsive 390 x 749 tras consulta con sesion original del ensayo:
+General muestra URL historica v2 exacta, GET y 200 OK; Response muestra decision
+requiere_cambios y response_schema_version 2, metadata historica. UI conserva
+fundamento y referencia PRUEBA-REVISION-LECTURA-20261010 originales. Headers de
+solicitud contraidos; no credenciales registradas. Identidad fuera de area capturada,
+cuenta por secuencia del ensayo. Contrasta con GET historico 404 de segunda sesion
+§193 y complementa contraste readiness §194-§195. No cobertura integral entre tenants.
+
+Sin cambios de codigo, datos o permisos; registro documental, tests no repetidos.
+M3-T1 EN PROGRESO; fuentes/aceptacion y cobertura restante pendientes;
+confirmacion/activacion bloqueadas.
