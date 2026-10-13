@@ -795,3 +795,8 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 
 - [x] Captura a 480: fuentes/aceptacion pendientes, deshabilitada, aviso y readiness 200.
 - [ ] Alternancia historica manual del bloque nuevo y otros estados reales pendientes.
+
+### M3-T1 §216 — Politica/historia separadas
+
+- [x] Captura a 390: evento historico, dos bloques actuales ausentes y /v2 fetch 200.
+- [ ] Otros estados reales no cubiertos por esta captura.

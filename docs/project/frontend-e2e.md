@@ -767,3 +767,16 @@ Comprobacion manual con expediente ficticio; no pruebas de otros estados reales 
 alternancia historica del bloque nuevo en esta captura. Sin cambios de codigo/datos;
 tests previos no repetidos. M3-T1 EN PROGRESO; revisiones ficticias hasta MVP;
 confirmacion/activacion bloqueadas.
+
+## 2026-10-13 — M3-T1 §216: estado actual separado de historia
+
+Captura usuario Edge Responsive 390 x 749 tras Consultar revision: evento historico
+Requiere cambios, referencia/fundamento/fecha originales y aviso historico visibles.
+Entre formulario y evento no aparecen Estado de politica ni Vinculo ultima revision.
+Network /v2 tipo fetch 200 visible. Politica registrada del evento conserva su
+referencia; no se interpreta como estado actual. Textos ajustados en area capturada.
+
+Completa alternancia manual del bloque nuevo §§214-215. No estados habilitados reales
+ni nueva medicion de overflow. Solo registro documental; tests previos no repetidos;
+codigo/datos/permisos sin cambios. M3-T1 EN PROGRESO;
+revisiones ficticias hasta MVP; confirmacion/activacion bloqueadas.
