@@ -30,7 +30,7 @@ test.beforeAll(async () => {
     }
     async function loadPreparation(scope){
       window.demo.calls.push({kind:"preparation",scope});
-      if(window.demo.mode==="error")throw new ApiError(403,"TEST");
+      if(window.demo.mode==="error")throw new ApiError(window.demo.errorStatus ?? 403,"TEST");
       if(window.demo.mode==="wait")return new Promise(resolve=>{window.demo.release=()=>resolve(preparation(scope));});
       return preparation(scope);
     }
@@ -138,6 +138,7 @@ test("errores claros sin mostrar resultados de consultas anteriores", async ({ p
     "No tienes permiso para consultar este expediente."
   );
   await expect(page.getByRole("heading", { name: "Requisitos de revisión" })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "Volver a iniciar sesión" })).toHaveCount(0);
 });
 
 test("evento historico no infiere metadata y seleccion explicita delimita consulta", async ({
@@ -299,4 +300,25 @@ test("estados ficticios de politica no autorizan expediente ni muestran controle
     await expect(page.getByRole("button", {name:/confirmar|activar|aprobar/i})).toHaveCount(0);
     await expect(page.getByText("Requisitos documentales pendientes.", {exact:true})).toBeVisible();
   }
+});
+
+
+test("sesion vencida ofrece inicio de sesion y limpia el enlace al cambiar expediente", async ({ page }) => {
+  await scopeForm(page);
+  await page.getByRole("button", { name: "Consultar requisitos" }).click();
+  await page.evaluate(() => {
+    Object.assign((window as unknown as { demo: object }).demo, { mode: "error", errorStatus: 401 });
+  });
+  await page.getByRole("button", { name: "Consultar requisitos" }).click();
+  await expect(page.getByRole("alert")).toContainText("La sesión no es válida. Vuelve a iniciar sesión.");
+  await expect(page.getByRole("link", { name: "Volver a iniciar sesión" })).toHaveAttribute("href", "/login");
+  await expect(page.getByRole("heading", { name: "Requisitos de revisión" })).toHaveCount(0);
+  await page.getByLabel("Evaluación (identificador)", { exact: true }).fill(ids[3]);
+  await expect(page.getByRole("link", { name: "Volver a iniciar sesión" })).toHaveCount(0);
+  await page.evaluate(() => {
+    Object.assign((window as unknown as { demo: object }).demo, { mode: "ok" });
+  });
+  await page.getByRole("button", { name: "Consultar requisitos" }).click();
+  await expect(page.getByRole("heading", { name: "Requisitos de revisión" })).toBeVisible();
+  await expect(page.getByRole("alert")).toHaveCount(0);
 });

@@ -5334,3 +5334,16 @@ no un detector automatico de datos reales ni una nueva barrera de servidor.
 Sin cambios de politica, permisos, datos o endpoints. Comprobacion de visibilidad
 incluida en la interaccion existente de consulta; 9 interacciones Chromium aprobadas
 (3.9 s), tipos y lint correctos. No comprobacion de CSS real ni sesion integrada.
+
+## 2026-10-13 — M3-T1 §219: recuperacion visible de sesion
+
+Consulta interna muestra enlace Volver a iniciar sesion a /login ante ApiError 401.
+Se limpian resultados anteriores y el enlace al cambiar identificadores o iniciar
+otra consulta. Otros errores no ofrecen este enlace. No redireccion automatica,
+renovacion de token ni persistencia de identificadores/credenciales. Permisos y
+politica operativos sin cambios; pruebas ficticias hasta MVP.
+
+10 interacciones Chromium aprobadas (4.1 s), tipos/lint correctos. Nueva prueba
+simula 401 tras resultado, comprueba enlace y retirada/recuperacion; prueba 403
+existente confirma ausencia del enlace. Mock del componente, no login integrado.
+Confirmacion y activacion siguen bloqueadas; M3-T1 EN PROGRESO.

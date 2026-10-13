@@ -807,3 +807,5 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [ ] Sin politica operativa habilitada ni validacion real inferida de mocks.
 
 - [x] M3-T1 §218: aviso visible de uso exclusivo de datos ficticios hasta MVP en consulta interna; conserva bloqueos operativos. No detecta datos reales automaticamente.
+
+- [x] M3-T1 §219: enlace de inicio de sesion ante 401 en consulta EIPD; limpieza y recuperacion comprobadas con fixtures ficticios.

@@ -166,6 +166,7 @@ export function EipdReviewConsultation({ loadPreparation, loadEvent }: Props) {
   const [reviewId, setReviewId] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [sessionExpired, setSessionExpired] = useState(false);
   const [preparation, setPreparation] = useState<EipdReviewPreparationOut | null>(null);
   const [event, setEvent] = useState<EipdResolutionReviewOutV2 | null>(null);
   function changeScope(field: keyof Scope, value: string) {
@@ -174,12 +175,14 @@ export function EipdReviewConsultation({ loadPreparation, loadEvent }: Props) {
     setEvent(null);
     setReviewId("");
     setError("");
+    setSessionExpired(false);
   }
   async function consult(e: FormEvent, kind: "preparation" | "event") {
     e.preventDefault();
     if (busy) return;
     setBusy(true);
     setError("");
+    setSessionExpired(false);
     setPreparation(null);
     setEvent(null);
     try {
@@ -187,6 +190,7 @@ export function EipdReviewConsultation({ loadPreparation, loadEvent }: Props) {
       else setEvent(await loadEvent(scope, reviewId));
     } catch (failure) {
       setError(consultationError(failure));
+      setSessionExpired(failure instanceof ApiError && failure.status === 401);
     } finally {
       setBusy(false);
     }
@@ -255,6 +259,7 @@ export function EipdReviewConsultation({ loadPreparation, loadEvent }: Props) {
                 setReviewId(e.target.value);
                 setEvent(null);
                 setError("");
+                setSessionExpired(false);
               }}
               className="mt-1 block w-full rounded border p-2 font-normal"
               autoComplete="off"
@@ -272,6 +277,11 @@ export function EipdReviewConsultation({ loadPreparation, loadEvent }: Props) {
       {error && (
         <p role="alert" className="rounded border border-red-200 bg-red-50 p-4 text-red-800">
           {error}
+          {sessionExpired && (
+            <a href="/login" className="mt-2 block font-medium underline">
+              Volver a iniciar sesión
+            </a>
+          )}
         </p>
       )}
       {preparation && <PreparationView value={preparation} />}
