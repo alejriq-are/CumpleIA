@@ -686,3 +686,8 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] Capturas readiness: GET 404 y Evaluacion juridica no encontrada, sin requisitos.
 - [x] Intento previo 401 Token expirado distinguido del ensayo de acceso.
 - [ ] Escritura, reciprocidad y cobertura integral RLS pendientes.
+
+### M3-T1 §195 — Acceso original recuperado
+
+- [x] Captura: readiness fetch 200, borrador/vinculo vigente y requisitos pendientes recuperados.
+- [ ] Reciprocidad completa y otros endpoints pendientes.

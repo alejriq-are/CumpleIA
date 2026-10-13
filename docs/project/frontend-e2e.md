@@ -667,3 +667,16 @@ cobertura integral RLS. Complementa lectura historica §193 y rechazo RAT §192.
 Sin cambios de codigo, datos o permisos; tests no repetidos por evidencia manual.
 M3-T1 EN PROGRESO; fuentes/aceptacion y cobertura restante pendientes;
 confirmacion/activacion bloqueadas.
+
+## 2026-10-13 — M3-T1 §195: requisitos recuperados en sesion original
+
+Tras instruccion de cerrar segunda cuenta y reingresar con cuenta original, captura
+Edge Responsive 390 x 749 muestra borrador, vinculo documental vigente, aviso sin
+autoridad y Continuar pendiente con 252 motivos. Network muestra readiness tipo
+fetch 200 (distinto de preflight tambien 200). Identidad y campos fuera del area
+capturada: secuencia de cuenta por contexto del ensayo, sin inspeccion de headers.
+Contrasta con rechazo 404 de segunda sesion §194; no demuestra reciprocidad completa
+ni acceso a todos los endpoints. No aprobacion, confirmacion o activacion.
+
+Sin cambios de codigo, datos o permisos; registro documental, tests no repetidos.
+M3-T1 EN PROGRESO; fuentes/aceptacion y cobertura restante pendientes.
