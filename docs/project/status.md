@@ -1,3 +1,12 @@
+## 2026-10-13 — M3-T1 §205: trazabilidad estatica de campos de excepciones
+
+[Lista de evidencias](m3-t1-evidencias-rutas-eipd.md) ampliada con campos y pruebas
+especificas localizadas. Revision de codigo de tests, no ejecucion nueva ni cobertura
+integral medida. Caso multisistema localizado omite solo canal de derechos del segundo
+sistema: pendiente verificar/ampliar omision individual de otros campos posteriores.
+Documento/fuentes/politica requieren trazabilidad propia. Solo documentacion;
+M3-T1 EN PROGRESO; aceptacion pendiente; confirmacion/activacion bloqueadas.
+
 ## 2026-10-13 — M3-T1 §204: ensayo sintetico de frontera y requisitos
 
 60 pruebas existentes aprobadas en 9.23 s: prepared frontier HTTP, frontier v2 y

@@ -737,3 +737,9 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] 60 pruebas existentes de frontier HTTP/v2/requisitos aprobadas en base aislada.
 - [x] Lista de evidencia enlaza grupos ensayados y distingue aceptacion pendiente.
 - [ ] Trazabilidad por campo y aceptacion documental pendientes.
+
+### M3-T1 §205 — Trazabilidad de campos
+
+- [x] Campos de excepciones vinculados a pruebas especificas localizadas (revision estatica).
+- [ ] Verificar/ampliar omisiones individuales en segundo sistema biometrico.
+- [ ] Trazabilidad de documento/fuentes/politica y aceptacion pendientes.

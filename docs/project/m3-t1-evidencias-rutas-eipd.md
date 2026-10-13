@@ -60,3 +60,36 @@ No cobertura individual de cada campo de la lista por esta corrida. Todas las fi
 de aceptacion documental anteriores siguen pendientes. Proximo: detectar campos
 sin trazabilidad de prueba especifica y preparar matriz de cobertura, sin repetir
 estos casos salvo cambio o fallo.
+
+## Trazabilidad de campos de excepciones — §205
+
+Revision estatica 2026-10-13 de tests existentes; no ejecucion nueva ni cobertura
+medida por herramienta. Referencias en backend/tests/. No confundir prueba localizada
+con prueba aprobada en esta etapa o aceptacion documental.
+
+| Campos/grupo | Prueba localizada | Tipo de asercion revisado |
+| --- | --- | --- |
+| context_reference, purpose_description, right_description, right_basis_reference, holder_connection_analysis, forum_description, proceeding_reference, processing_operations, necessity_analysis, data_minimization_analysis, safeguards_analysis | Ambos test_services_*rights_exception.py: CONTEXT_TEXTS / test_required_texts | Cada texto mutado a None, vacio y espacios |
+| sensitive_data_description, exception_application_analysis | test_services_sensitive_rights_exception.py: OWN_TEXTS / test_required_texts | Texto obligatorio e incompleto |
+| biometric_data_description, unique_identification_analysis, exception_application_analysis, sensitive_context_connection_analysis, systems_coverage_analysis | test_services_biometric_rights_exception.py: OWN_TEXTS / test_required_texts | Texto obligatorio e incompleto |
+| route, forum_type, proceeding_stage, right_holder, exception_basis | test_required_enums / test_missing_enums; supported routes/forums/stages/holder | Enumeraciones y combinaciones: revisar ramas completas antes de certificar |
+| preparatory_actions, post_proceeding_necessity_analysis | test_applicable_stage_text_required, test_stage_residuality; test_stage_conditional_and_residuality | Exigencia segun etapa, residualidad |
+| related_to_right, necessary_for_route, within_forum_scope, principles_addressed, exception_conditions_met | RESPONSES / test_required_responses de ambos servicios | Respuestas requeridas y categorias diagnosticas |
+| unique_identification_confirmed, all_systems_documented | RESPONSES biometrico / test_required_responses | Respuestas requeridas |
+| scope: categorias/titulares | test_scope_empty_invalid_or_duplicate, test_scope_partial_coverage_and_discordance; variantes biometricas | Alcance invalido/duplicado/incompleto y enlace sensible |
+| evidence: documento/contexto/condicion/sistema | test_required_evidence de ambos servicios | Lista, tipo y referencia faltantes |
+| system_reference/name/description, specific_purpose, purpose_alignment_analysis, use_period_description, retention_alignment_analysis, rights_exercise_description/contact_channel, information_reference | SYSTEM_TEXTS biometrico / test_required_texts | Campos del primer sistema mutados individualmente |
+| system_identification_disclosed, purpose_disclosed, use_period_disclosed, rights_exercise_disclosed | RESPONSES biometrico / test_required_responses | Respuestas informativas del primer sistema |
+| Sistemas multiples | test_unique_systems_and_information_of_every_system | Duplicado canonico y rights_contact_channel faltante en segundo sistema |
+
+### Brecha delimitada para el proximo ensayo
+
+La prueba localizada de multiples sistemas altera solo el canal de derechos del
+segundo sistema. La matriz no acredita todavia omision individual de cada otro
+texto/respuesta/evidencia en sistemas posteriores. Revisar el conjunto de tests
+antes de agregar casos para evitar duplicacion; si falta cobertura, ampliar ensayo
+parametrizado del segundo sistema con aserciones de campo e indice precisos.
+
+Documento EIPD completo, fuentes y politica tienen suites propias: su trazabilidad
+por campo no queda cerrada por esta matriz de excepciones. Todos los resultados de
+aceptacion documental siguen pendientes; no codigo/datos/politica modificados.
