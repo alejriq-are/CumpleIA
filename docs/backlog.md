@@ -769,3 +769,8 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 
 - [x] Matriz de campos y nueve casos nuevos; modulo politica 121 aprobadas en base aislada.
 - [ ] Verificacion externa y aceptacion real pendientes.
+
+### M3-T1 §211 — Regresion conjunta
+
+- [x] 545 pruebas en una corrida focalizada aislada tras ampliaciones; 8.39 s.
+- [ ] Expediente de revision de aceptacion y fuentes externas pendientes.

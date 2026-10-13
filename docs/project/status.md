@@ -1,3 +1,17 @@
+## 2026-10-13 — M3-T1 §211: regresion conjunta tras ampliacion de cobertura
+
+545 pruebas aprobadas en 8.39 s, una misma corrida de servicios biometrico, documento
+EIPD y politica ampliados, mas API controls v3 readiness, response v2 y negativas v2.
+Base aislada/head/registro vacio/runtime restringido verificados antes de pytest.
+No suite completa del repositorio ni nuevas pruebas de fuentes externas.
+
+Comprobacion conjunta de cambios §§206-210 con controles/lecturas/escritura negativa.
+Codigo operativo, politica y expedientes sin cambios. No nuevos tests en esta etapa;
+solo registro de regresion. Proximo avance: preparar expediente de revision de
+aceptacion con referencias, campos pendientes y responsable por designar; no seguir
+ampliando combinaciones sin brecha concreta. M3-T1 EN PROGRESO;
+fuentes/aceptacion pendientes; confirmacion/activacion bloqueadas.
+
 ## 2026-10-13 — M3-T1 §210: registros individuales de fuentes de politica
 
 Matriz SourceRecordV1 documentada; nueve casos nuevos de campos omitidos en segundo

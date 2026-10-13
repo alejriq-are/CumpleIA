@@ -28,3 +28,10 @@ Revisar el contrato y las fuentes requeridas para la habilitacion excepcional EI
 identificando referencias oficiales existentes y brechas de evidencia. Resultado
 esperado: matriz de fuentes/criterios revisable; sin activar politica ni expediente.
 No repetir capturas ni tests aprobados salvo nuevo cambio, fallo o concern definido.
+
+## Regresion conjunta posterior (§211)
+
+2026-10-13: 545 aprobadas en 8.39 s en base aislada, incluyendo los tres modulos
+ampliados y API de controls v3/readiness, respuesta historica v2 y negativas v2.
+Corrida conjunta focalizada, no suite integral. Aceptacion de fuentes/politica sigue
+pendiente; confirmacion/activacion operativas bloqueadas.
