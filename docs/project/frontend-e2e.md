@@ -651,3 +651,19 @@ rechazo RAT y redireccion UI. No acredita todos los endpoints, escritura, recipr
 contenido exacto de headers ni cobertura integral RLS. No se modifican permisos ni
 expediente. Tests no repetidos: registro de evidencia manual. M3-T1 EN PROGRESO;
 fuentes/aceptacion y cobertura restante pendientes; confirmacion/activacion bloqueadas.
+
+## 2026-10-13 — M3-T1 §194: requisitos EIPD rechazados con segunda sesion
+
+Capturas del usuario con segunda cuenta visible muestran URL readiness correcta,
+metodo GET, estado 404 Not Found y respuesta detail Evaluacion juridica no encontrada.
+No requisitos del expediente original expuestos. Usuario reutiliza peticion RAT
+reciente mediante Edit and Resend y cambia solo URL; cabeceras contraidas, sin copiar
+credenciales al registro. Comprobacion manual directa del endpoint de requisitos.
+
+Intento previo con copia antigua devolvio 401 Token expirado: acredita rechazo de
+credencial vencida, no aislamiento entre organizaciones. Repeticion posterior retorna
+404 descrito arriba. No inspeccion de headers, prueba de escritura, reciprocidad ni
+cobertura integral RLS. Complementa lectura historica §193 y rechazo RAT §192.
+Sin cambios de codigo, datos o permisos; tests no repetidos por evidencia manual.
+M3-T1 EN PROGRESO; fuentes/aceptacion y cobertura restante pendientes;
+confirmacion/activacion bloqueadas.

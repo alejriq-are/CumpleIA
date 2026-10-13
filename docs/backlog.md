@@ -680,3 +680,9 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 
 - [x] Network Console: GET historico v2 correcto retorna 404 y Evaluacion juridica no encontrada.
 - [ ] Otros endpoints, escritura, reciprocidad y cobertura integral RLS pendientes.
+
+### M3-T1 §194 — GET requisitos segunda sesion
+
+- [x] Capturas readiness: GET 404 y Evaluacion juridica no encontrada, sin requisitos.
+- [x] Intento previo 401 Token expirado distinguido del ensayo de acceso.
+- [ ] Escritura, reciprocidad y cobertura integral RLS pendientes.
