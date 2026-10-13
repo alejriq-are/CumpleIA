@@ -743,3 +743,9 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] Campos de excepciones vinculados a pruebas especificas localizadas (revision estatica).
 - [ ] Verificar/ampliar omisiones individuales en segundo sistema biometrico.
 - [ ] Trazabilidad de documento/fuentes/politica y aceptacion pendientes.
+
+### M3-T1 §206 — Omisiones segundo sistema
+
+- [x] 15 casos nuevos; modulo biometrico 229 aprobadas en base aislada, Black/Ruff correctos.
+- [ ] Respuestas no/pendiente, fundamento y evidencia parcial posteriores no cubiertos por nuevos casos.
+- [ ] Aceptacion documental pendiente.

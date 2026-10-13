@@ -93,3 +93,17 @@ parametrizado del segundo sistema con aserciones de campo e indice precisos.
 Documento EIPD completo, fuentes y politica tienen suites propias: su trazabilidad
 por campo no queda cerrada por esta matriz de excepciones. Todos los resultados de
 aceptacion documental siguen pendientes; no codigo/datos/politica modificados.
+
+## Segundo sistema: omisiones individuales — §206
+
+Añadido test_second_system_omission_does_not_borrow_complete_first_system en
+test_services_biometric_rights_exception.py: segundo sistema con referencia distinta,
+primero completo. Quince casos: diez textos en espacios, cuatro respuestas ausentes y
+lista de evidencia vacia. Cada caso exige incompleto, can_confirm falso y diagnostico
+exacto systems.1; no motivos systems.0 ni mutacion de documento/primer sistema.
+
+Modulo completo: 229 aprobadas en 0.59 s en base aislada verificada. Black y Ruff
+aprobados. No cambio de evaluador, schema, politica o expediente operativo.
+Queda cubierta esta brecha delimitada de omisiones; respuestas negativas/pendientes,
+fundamentos y evidencia parcial en sistemas posteriores no se afirman cubiertos por
+los quince casos. Aceptacion documental de todas las filas sigue pendiente.

@@ -764,3 +764,35 @@ def test_shared_biometric_exception_gate_reasons(
             for s in special_result.issues
         )
     assert vars(state) == before
+
+
+@pytest.mark.parametrize(
+    "field,value,code,suffix",
+    [(field, " ", "campo_obligatorio", "") for field in SYSTEM_TEXTS]
+    + [
+        (field.removeprefix("systems.0."), None, "respuesta_ausente", "")
+        for field in RESPONSES
+        if field.startswith("systems.0.")
+    ]
+    + [("evidence", [], "evidencia_ausente", "")],
+)
+def test_second_system_omission_does_not_borrow_complete_first_system(
+    biometric_exception_context, field, value, code, suffix
+):
+    document = biometric_exception_context[0]
+    first = deepcopy(document["systems"][0])
+    second = deepcopy(first)
+    second["system_reference"] = "SECOND-SYSTEM"
+    document["systems"].append(second)
+    assert evaluate(*biometric_exception_context).can_confirm
+
+    second[field] = value
+    before_evaluation = deepcopy(document)
+    result = evaluate(*biometric_exception_context)
+    path = f"systems.1.{field}{suffix}"
+    assert result.result == "incompleto"
+    assert not result.can_confirm
+    assert (path, code, "incompleto") in issue_set(result)
+    assert not any(issue.field.startswith("systems.0.") for issue in result.issues)
+    assert document["systems"][0] == first
+    assert document == before_evaluation

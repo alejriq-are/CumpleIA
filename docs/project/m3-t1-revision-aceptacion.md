@@ -5197,3 +5197,12 @@ integral medida. Caso multisistema localizado omite solo canal de derechos del s
 sistema: pendiente verificar/ampliar omision individual de otros campos posteriores.
 Documento/fuentes/politica requieren trazabilidad propia. Solo documentacion;
 M3-T1 EN PROGRESO; aceptacion pendiente; confirmacion/activacion bloqueadas.
+
+## 2026-10-13 — M3-T1 §206: omisiones en segundo sistema biometrico
+
+15 casos nuevos parametrizados: textos, respuestas y evidencia del segundo sistema
+no aprovechan completitud del primero. Aserciones de indice/campo/categoria,
+can_confirm falso e inmutabilidad. Modulo completo 229 aprobadas (0.59 s), base
+aislada verificada antes de pytest; Black/Ruff aprobados. [Trazabilidad](m3-t1-evidencias-rutas-eipd.md)
+actualizada con limites. Solo tests/documentacion; evaluador/politica/expediente sin
+cambios. M3-T1 EN PROGRESO; aceptacion pendiente; confirmacion/activacion bloqueadas.
