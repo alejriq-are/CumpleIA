@@ -1,3 +1,18 @@
+## 2026-10-13 — M3-T1 §220: compilacion de produccion y regresion frontend
+
+Comprobado commit d300a6c: 13 pruebas cliente (427 ms) y 10 interacciones Chromium
+(3.9 s), todas aprobadas. next build completo: compilacion, tipos/lint, paginas y
+trazas correctos; incluye /admin/licitud-validation y /login. Copia temporal de
+fuentes sin .env ni artefactos previos, dependencias instaladas enlazadas y valores
+publicos ficticios; copia retirada al finalizar. No alteracion de .next del servidor
+de desarrollo, politica, datos o permisos; no despliegue ni prueba de login real.
+
+Build informa aviso de Supabase sobre Node 20 y recomendacion de Node 22 o superior;
+pendiente validar actualizacion del runtime, sin cambiar dependencias en esta etapa.
+Avisos de cache webpack sin fallo de compilacion. La compilacion no acredita MVP
+completo ni aceptacion juridica. Pruebas ficticias hasta MVP; M3-T1 EN PROGRESO y
+confirmacion/activacion bloqueadas.
+
 ## 2026-10-13 — M3-T1 §219: recuperacion visible de sesion
 
 Consulta interna muestra enlace Volver a iniciar sesion a /login ante ApiError 401.
