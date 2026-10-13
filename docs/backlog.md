@@ -811,4 +811,4 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] M3-T1 §219: enlace de inicio de sesion ante 401 en consulta EIPD; limpieza y recuperacion comprobadas con fixtures ficticios.
 
 - [x] M3-T1 §220: compilacion de produccion frontend en copia temporal con configuracion ficticia; 23 pruebas cliente/interaccion aprobadas.
-- [ ] Validar runtime Node 22 o superior para frontend: build §220 informa deprecacion de Node 20 por Supabase; comprobar compatibilidad antes de cambiar runtime.
+- [x] Validar runtime Node 22 para frontend (§221): 23 pruebas, tipos/lint y build aprobados; frontend/.nvmrc compartido con CI. Servidor activo sin reinicio.

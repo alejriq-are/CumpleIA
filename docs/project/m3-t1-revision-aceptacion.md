@@ -5362,3 +5362,17 @@ pendiente validar actualizacion del runtime, sin cambiar dependencias en esta et
 Avisos de cache webpack sin fallo de compilacion. La compilacion no acredita MVP
 completo ni aceptacion juridica. Pruebas ficticias hasta MVP; M3-T1 EN PROGRESO y
 confirmacion/activacion bloqueadas.
+
+## 2026-10-13 — M3-T1 §221: runtime frontend Node 22
+
+Node 22 instalado en paralelo y validado (22.23.3, npm 10.9.9). Frontend .nvmrc fija
+major 22; CI setup-node usa ese archivo como unica referencia. No cambios de
+paquetes/lockfiles, servidor activo ni backend. Para nuevos procesos locales usar
+nvm install/use desde frontend; no se modifica el alias global de Node.
+
+13 pruebas cliente (371 ms), 10 interacciones Chromium (3.9 s), tipos/lint y build
+completo correctos con Node 22. Compilacion en copia temporal sin .env, con valores
+ficticios y dependencias instaladas enlazadas. Aviso Supabase Node 20 ausente;
+avisos webpack de cache permanecen sin fallo. No corrida remota de CI ni prueba
+instalacion limpia de dependencias; no login integrado o despliegue. M3-T1 EN
+PROGRESO, pruebas ficticias hasta MVP; confirmacion/activacion bloqueadas.
