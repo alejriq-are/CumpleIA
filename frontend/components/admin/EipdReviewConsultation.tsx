@@ -198,7 +198,7 @@ export function EipdReviewConsultation({ loadPreparation, loadEvent }: Props) {
         Selecciona el expediente mediante sus identificadores. Esta pantalla solo consulta datos.
       </p>
       <p className="rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm">
-        M3-T1 en progreso. La confirmación y la activación EIPD permanecen bloqueadas.
+        Pruebas de desarrollo: utiliza únicamente datos ficticios hasta disponer de la versión MVP. M3-T1 en progreso. La confirmación y la activación EIPD permanecen bloqueadas.
       </p>
       <form
         onSubmit={(e) => consult(e, "preparation")}

@@ -5324,3 +5324,13 @@ no politica publicada ni cambio de registro operativo. 9 interacciones Chromium
 aprobadas (3.7 s), tipos/lint correctos. Cliente/backend sin cambios; tests/docs solo.
 No captura CSS real ni aceptacion juridica. M3-T1 EN PROGRESO;
 revisiones ficticias hasta MVP; confirmacion/activacion operativas bloqueadas.
+
+## 2026-10-13 — M3-T1 §218: aviso visible de pruebas ficticias
+
+La consulta interna recuerda utilizar unicamente datos ficticios hasta disponer de
+la version MVP, conforme al acuerdo de desarrollo del usuario. Mantiene el aviso
+M3-T1 en progreso y confirmacion/activacion bloqueadas. Es una instruccion visible,
+no un detector automatico de datos reales ni una nueva barrera de servidor.
+Sin cambios de politica, permisos, datos o endpoints. Comprobacion de visibilidad
+incluida en la interaccion existente de consulta; 9 interacciones Chromium aprobadas
+(3.9 s), tipos y lint correctos. No comprobacion de CSS real ni sesion integrada.

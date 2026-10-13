@@ -84,6 +84,7 @@ async function scopeForm(page: import("@playwright/test").Page) {
 }
 
 test("solo consulta y limpia datos al cambiar expediente", async ({ page }) => {
+  await expect(page.getByText("Pruebas de desarrollo: utiliza únicamente datos ficticios hasta disponer de la versión MVP.", { exact: false })).toBeVisible();
   await scopeForm(page);
   await page.getByRole("button", { name: "Consultar requisitos" }).click();
   await expect(page.getByRole("heading", { name: "Requisitos de revisión" })).toBeVisible();

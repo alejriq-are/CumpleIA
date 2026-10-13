@@ -805,3 +805,5 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 
 - [x] Tres combinaciones de politica simuladas sin autoridad; 9 interacciones/tipos/lint aprobados.
 - [ ] Sin politica operativa habilitada ni validacion real inferida de mocks.
+
+- [x] M3-T1 §218: aviso visible de uso exclusivo de datos ficticios hasta MVP en consulta interna; conserva bloqueos operativos. No detecta datos reales automaticamente.
