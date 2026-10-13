@@ -1,3 +1,13 @@
+## 2026-10-13 — M3-T1 §213: simulacion ficticia de revision de desarrollo
+
+Incorporada aclaracion del usuario: revisiones/pruebas ficticias hasta MVP; empresa
+real posterior, sin revisor real requerido ahora. Expediente pasa a simulacion, campos
+de aceptacion autentica diferidos. Cuatro casos nuevos para dos decisiones negativas
+con politica pendiente/deshabilitada e identidad vigente: barreras preservadas e
+inputs inmutables. Modulo politica 125 aprobadas (0.74 s), base aislada verificada;
+Black/Ruff correctos. Solo tests/docs; politica/expediente operativos sin cambios.
+M3-T1 EN PROGRESO; confirmacion/activacion bloqueadas.
+
 ## 2026-10-13 — M3-T1 §212: expediente de revision de aceptacion
 
 Preparado [expediente revisable](m3-t1-expediente-revision.md) con commit tecnico

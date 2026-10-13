@@ -482,3 +482,34 @@ def test_second_policy_source_requires_its_own_verification_record(policy, field
     )
     assert policy["source_records"][0] == first
     assert policy == before
+
+
+@pytest.mark.parametrize("decision", ["requiere_cambios", "no_continuar"])
+def test_fictitious_development_review_preserves_pending_disabled_policy(
+    policy, prepared_controls, decision
+):
+    policy.update(
+        policy_reference="PRUEBA: revision ficticia de desarrollo",
+        sources_status="pendiente",
+        source_records=[],
+        acceptance_status="pendiente",
+        acceptance_reference=None,
+        validation_commit=None,
+        acceptance_evidence_reference=None,
+        accepted_by=None,
+        activation="deshabilitada",
+    )
+    identity = add_review(prepared_controls, policy, decision)
+    before_policy = deepcopy(policy)
+    before_assessment = deepcopy(prepared_controls)
+    result = compose(prepared_controls, policy, identity)
+    assert result.review_policy_status == "vigente"
+    assert result.policy.sources_status == "pendiente"
+    assert result.policy.acceptance_status == "pendiente"
+    assert result.policy.activation == "deshabilitada"
+    assert {"fuentes_oficiales_no_verificadas", "gate_eipd_no_habilitado"} <= codes(
+        result.confirmation_blockers
+    )
+    assert "decision_no_continuar" in codes(result.confirmation_blockers)
+    assert policy == before_policy
+    assert prepared_controls == before_assessment

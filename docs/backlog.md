@@ -779,3 +779,9 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 
 - [x] Paquete de revision preparado con evidencia/limites y registro de decision pendiente.
 - [ ] Designacion de revisor, verificacion externa y aceptacion autentica pendientes.
+
+### M3-T1 §213 — Revision ficticia de desarrollo
+
+- [x] Alcance ficticio hasta MVP incorporado; aceptacion real diferida.
+- [x] Cuatro casos nuevos; modulo politica 125 aprobadas en base aislada; formato/lint correctos.
+- [ ] Validacion con empresa/revisor reales posterior a MVP.

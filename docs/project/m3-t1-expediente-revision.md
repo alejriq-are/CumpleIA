@@ -1,6 +1,6 @@
 # M3-T1 — Expediente para revision de aceptacion
 
-Preparado: 2026-10-13. Estado: BORRADOR PARA REVISION. No constituye aceptacion,
+Preparado: 2026-10-13. Estado: BORRADOR PARA SIMULACION DE DESARROLLO. No constituye aceptacion,
 autorizacion legal, publicacion de politica ni habilitacion de gates.
 
 ## Identidad tecnica de la revision
@@ -61,3 +61,22 @@ Politica deshabilitada, fuentes/aceptacion pendientes; confirmacion y activacion
 bloqueadas. M3-T1 EN PROGRESO. No cambios de datos, permisos o reglas operativas.
 Proximo paso humano: designar revisor y resolver las filas pendientes; mientras tanto,
 este paquete permite revision sin habilitar el sistema.
+
+## Acuerdo de desarrollo — §213
+
+Usuario confirma que hasta version MVP todas las pruebas/revisiones usan datos
+ficticios; ensayo con empresa real posterior. No se solicita revisor real en esta
+etapa. Campos de responsable/decision autentica anteriores quedan diferidos para
+validacion real; no bloquean simulaciones de desarrollo ni se completan como hechos.
+
+Simulacion automatizada: referencia PRUEBA: revision ficticia de desarrollo,
+fuentes pendientes, registros vacios, aceptacion pendiente sin responsable/evidencia,
+activation deshabilitada. Decisiones ficticias requiere_cambios y no_continuar,
+con identidad tecnica de politica vigente. Resultado esperado y observado: fuentes
+y habilitacion pendientes siguen bloqueando confirmacion, junto a decision negativa;
+identidad vigente no sustituye aceptacion. Datos solo en fixtures aislados.
+
+Cuatro casos nuevos (dos decisiones en variantes del fixture), modulo politica
+125 aprobadas en 0.74 s; Black/Ruff correctos. Codigo operativo y expediente local
+sin cambios. Pruebas manuales del usuario se pediran solo cuando aporten evidencia
+adicional del flujo visible. No se requieren capturas para estos casos automatizados.
