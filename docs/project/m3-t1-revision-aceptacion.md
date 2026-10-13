@@ -5230,3 +5230,12 @@ activation habilitada/deshabilitada. Contrato rechaza etiqueta aceptada incomple
 sin mutar input. Modulo de politica 112 aprobadas (0.68 s), base aislada verificada;
 Black/Ruff correctos. Solo tests/documentacion; politica/expediente operativos sin
 cambios. M3-T1 EN PROGRESO; aceptacion pendiente; confirmacion/activacion bloqueadas.
+
+## 2026-10-13 — M3-T1 §210: registros individuales de fuentes de politica
+
+Matriz SourceRecordV1 documentada; nueve casos nuevos de campos omitidos en segundo
+registro. Primera fuente completa no compensa, errores de indice/campo precisos e
+input inmutable. Modulo politica 121 aprobadas (0.69 s), base aislada verificada;
+Black/Ruff correctos. No verificacion externa por pasar schema. Solo tests/docs;
+politica/expediente sin cambios. M3-T1 EN PROGRESO;
+aceptacion pendiente; confirmacion/activacion bloqueadas.

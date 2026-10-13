@@ -142,3 +142,22 @@ si activation es deshabilitada; rechazo no muta input. Modulo 112 aprobadas en
 Fixtures sinteticos no acreditan fuente real ni aceptacion humana. Estado operativo
 permanece pendiente/deshabilitado. No cobertura integral de todos los campos por
 esta ampliacion; matriz de SourceRecordV1 detallada sigue pendiente.
+
+## Registro de fuentes de politica — §210
+
+Matriz SourceRecordV1 basada en backend/app/services/eipd_policy.py:
+
+| Campo | Evidencia candidata | Validacion tecnica localizada |
+| --- | --- | --- |
+| emitter / instrument_reference | Emisor e identificacion del instrumento | Texto no vacio; instrumento unico en politica |
+| primary_url | URL primaria oficial | URL HTTP(S); no verifica contenido remoto |
+| publication_version / publication_date | Version y fecha de publicacion | Texto/fecha; fecha futura genera motivo en evaluador |
+| applicability_analysis / applicable_routes | Analisis y rutas cubiertas | Texto y rutas cerradas no vacias ni duplicadas; cobertura agregada |
+| verification_reference / verified_by | Referencia de verificacion y responsable | Texto y UUID; no demuestra verificacion externa ni facultad real por si solo |
+
+Nueve casos nuevos omiten individualmente cada campo en segundo registro con primera
+fuente completa. Rechazo exacto source_records.1.campo, tipo missing, sin mutacion.
+Modulo politica 121 aprobadas en 0.69 s, base aislada verificada; Black/Ruff correctos.
+Pruebas existentes invalid policy/hash/future cubren otros controles citados, no se
+afirma combinatoria completa. Fuente oficial localizada no convertida en registro
+verificado: referencias/responsables reales y aceptacion siguen pendientes.

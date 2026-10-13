@@ -764,3 +764,8 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 
 - [x] Ocho casos nuevos; modulo de politica 112 aprobadas en base aislada; formato/lint correctos.
 - [ ] Matriz detallada SourceRecordV1 y aceptacion real pendientes.
+
+### M3-T1 §210 — SourceRecordV1
+
+- [x] Matriz de campos y nueve casos nuevos; modulo politica 121 aprobadas en base aislada.
+- [ ] Verificacion externa y aceptacion real pendientes.

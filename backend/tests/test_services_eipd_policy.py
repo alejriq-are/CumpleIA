@@ -450,3 +450,35 @@ def test_accepted_policy_requires_each_acceptance_record_even_when_disabled(
     ):
         EipdGatePolicyV1.model_validate(policy)
     assert policy == before
+
+
+@pytest.mark.parametrize(
+    "field",
+    [
+        "emitter",
+        "instrument_reference",
+        "primary_url",
+        "publication_version",
+        "publication_date",
+        "applicability_analysis",
+        "applicable_routes",
+        "verification_reference",
+        "verified_by",
+    ],
+)
+def test_second_policy_source_requires_its_own_verification_record(policy, field):
+    first = deepcopy(policy["source_records"][0])
+    second = deepcopy(first)
+    second["instrument_reference"] = "TEST: segundo instrumento"
+    policy["source_records"].append(second)
+    assert EipdGatePolicyV1.model_validate(policy).sources_status == "verificadas"
+    del second[field]
+    before = deepcopy(policy)
+    with pytest.raises(ValidationError) as error:
+        EipdGatePolicyV1.model_validate(policy)
+    assert any(
+        item["loc"] == ("source_records", 1, field) and item["type"] == "missing"
+        for item in error.value.errors()
+    )
+    assert policy["source_records"][0] == first
+    assert policy == before

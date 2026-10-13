@@ -1,3 +1,12 @@
+## 2026-10-13 — M3-T1 §210: registros individuales de fuentes de politica
+
+Matriz SourceRecordV1 documentada; nueve casos nuevos de campos omitidos en segundo
+registro. Primera fuente completa no compensa, errores de indice/campo precisos e
+input inmutable. Modulo politica 121 aprobadas (0.69 s), base aislada verificada;
+Black/Ruff correctos. No verificacion externa por pasar schema. Solo tests/docs;
+politica/expediente sin cambios. M3-T1 EN PROGRESO;
+aceptacion pendiente; confirmacion/activacion bloqueadas.
+
 ## 2026-10-13 — M3-T1 §209: evidencia obligatoria de aceptacion de politica
 
 Ocho casos nuevos: cuatro registros de aceptacion omitidos individualmente con
