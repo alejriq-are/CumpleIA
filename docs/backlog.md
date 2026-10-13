@@ -696,3 +696,8 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 
 - [x] General/Response: GET v2 200, decision original y respuesta esquema 2.
 - [ ] Escritura, reciprocidad y cobertura integral entre tenants pendientes.
+
+### M3-T1 §197 — Regresion escritura aislada
+
+- [x] 14 pruebas existentes de API negativa/writer v2 aprobadas en base aislada verificada.
+- [ ] Suite completa y escritura manual entre cuentas no cubiertas por esta corrida.

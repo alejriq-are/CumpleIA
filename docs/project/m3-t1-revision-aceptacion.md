@@ -5101,3 +5101,18 @@ cuenta por secuencia del ensayo. Contrasta con GET historico 404 de segunda sesi
 Sin cambios de codigo, datos o permisos; registro documental, tests no repetidos.
 M3-T1 EN PROGRESO; fuentes/aceptacion y cobertura restante pendientes;
 confirmacion/activacion bloqueadas.
+
+## 2026-10-13 — M3-T1 §197: regresion focalizada de escritura EIPD
+
+Ejecutadas suites existentes test_api_eipd_negative_review_v2 y
+test_api_eipd_resolution_writer_v2: 14 aprobadas en 6.91 s. Antes de pytest se aplican
+build_environment y verify_destination del ejecutor: base aislada fija, head previsto,
+registro global vacio y runtime app_user sin bypass/superuser verificados. No pytest
+sobre base operativa. Fixtures sinteticas y autenticacion de tests; no sesiones reales.
+
+Cobertura focal: persistencia negativa/metadata y barreras, material rechazado sin
+evento, rollback tras fallo, vinculo final/omision/reaporte, rechazo de vinculacion
+inyectada por cliente y bloqueo de patch de confirmado. No suite completa ni nueva
+prueba manual de escritura entre cuentas. Expediente operativo sin cambios.
+Registro documental; codigo y permisos sin cambios. M3-T1 EN PROGRESO;
+fuentes/aceptacion pendientes; confirmacion/activacion bloqueadas.
