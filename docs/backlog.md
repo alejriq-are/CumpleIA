@@ -731,3 +731,9 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 
 - [x] Lista revisable basada en contrato real, con resultados pendientes y limites.
 - [ ] Ensayo de fixture dedicado admitido y aceptacion documental pendientes.
+
+### M3-T1 §204 — Ensayo sintetico de frontera
+
+- [x] 60 pruebas existentes de frontier HTTP/v2/requisitos aprobadas en base aislada.
+- [x] Lista de evidencia enlaza grupos ensayados y distingue aceptacion pendiente.
+- [ ] Trazabilidad por campo y aceptacion documental pendientes.

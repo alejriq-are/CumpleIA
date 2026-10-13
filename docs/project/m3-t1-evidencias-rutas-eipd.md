@@ -39,3 +39,24 @@ expediente de investigacion existente. Recorrer lista contra diagnósticos reale
 registrar campos/ramas no cubiertos. No rellenar fixture operativo con hechos ficticios
 presentados como evidencia real. Aceptacion de fuentes y politica siguen pendientes;
 ninguna fila se marca aceptada por pasar tests. Sin modificaciones de codigo/datos.
+
+## Ensayo sintetico de frontera y requisitos — §204
+
+2026-10-13: 60 pruebas existentes aprobadas en 9.23 s, base aislada verificada.
+
+| Grupo de lista | Ensayo tecnico observado | Limite de evidencia |
+| --- | --- | --- |
+| Ruta sensible y biometrica | Prepared frontier HTTP parametrizado con biometric False/True y revision negativa previa/ausente | No verifica documentos reales ni aceptacion por responsable |
+| Dependencias/vinculos | Cambios con commit/rollback durante bloqueo, revision/confirmacion releen dependencias | No ensayo humano simultaneo |
+| Documento parcial o sin identidad vigente | Requisitos distinguen negativas y rechazan material ausente/no vinculado/obsoleto | Completitud documental no acredita fuente o frontera |
+| Fuentes y politica | Documento preparado conserva barreras globales | No habilita politica operativa |
+| Riesgo residual y estado | Riesgo alto e inmutabilidad mantienen rechazos segun caso | No evaluacion externa de riesgo |
+| Investigacion | Contexto completo conserva bloqueo; discordancia/obsolescencia visibles | No ampliar frontera para fixture operativo de investigacion |
+
+Suites: test_api_eipd_prepared_frontier.py, test_eipd_frontier_v2.py y
+test_eipd_resolution_review_prerequisites.py. Fixtures reutilizados de pruebas,
+separados del expediente operativo; sin nuevos schemas o datos operativos.
+No cobertura individual de cada campo de la lista por esta corrida. Todas las filas
+de aceptacion documental anteriores siguen pendientes. Proximo: detectar campos
+sin trazabilidad de prueba especifica y preparar matriz de cobertura, sin repetir
+estos casos salvo cambio o fallo.

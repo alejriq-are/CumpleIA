@@ -5178,3 +5178,13 @@ ni aceptacion. No inventar revisores o documentos. Proximo ensayo en fixture ded
 admitido de base aislada; expediente de investigacion operativo sin cambios.
 Solo documentacion, tests no repetidos. M3-T1 EN PROGRESO;
 fuentes/aceptacion pendientes; confirmacion/activacion bloqueadas.
+
+## 2026-10-13 — M3-T1 §204: ensayo sintetico de frontera y requisitos
+
+60 pruebas existentes aprobadas en 9.23 s: prepared frontier HTTP, frontier v2 y
+requisitos de revision. Base aislada/head/registro vacio/runtime verificados antes de
+pytest. Ensayo sensible/biometrico, material parcial/obsoleto y barreras globales;
+fixture investigacion completo conserva bloqueo. [Lista de evidencia](m3-t1-evidencias-rutas-eipd.md)
+ampliada con trazabilidad por grupo y limites. No acredita cada campo ni aceptacion
+juridica. Expediente/politica operativos sin cambios. M3-T1 EN PROGRESO;
+fuentes/aceptacion pendientes; confirmacion/activacion bloqueadas.
