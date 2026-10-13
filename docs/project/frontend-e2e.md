@@ -754,3 +754,16 @@ incoherencia y null; bloque visible y retirada al consultar historia. Fixtures
 mockeados, no sesion real/CSS completa. Inspeccion manual pendiente. Backend,
 politica/datos/permisos sin cambios. M3-T1 EN PROGRESO;
 confirmacion/activacion bloqueadas; revisiones ficticias hasta MVP.
+
+## 2026-10-13 — M3-T1 §215: comprobacion visual de estado de politica
+
+Captura usuario Edge Responsive 480 x 749: Estado de la politica EIPD muestra fuentes
+pendientes de verificacion, aceptacion pendiente y habilitacion deshabilitada, con
+aviso sin autoridad. Vinculo ultima revision vigente separado; Continuar mantiene
+requisitos pendientes (252 motivos). Network readiness 200 visible; no headers
+inspeccionados. Textos ajustados en area capturada, sin medicion nueva de overflow.
+
+Comprobacion manual con expediente ficticio; no pruebas de otros estados reales ni
+alternancia historica del bloque nuevo en esta captura. Sin cambios de codigo/datos;
+tests previos no repetidos. M3-T1 EN PROGRESO; revisiones ficticias hasta MVP;
+confirmacion/activacion bloqueadas.

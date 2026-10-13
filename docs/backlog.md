@@ -790,3 +790,8 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 
 - [x] Proyeccion validada y vista sin autoridad; 13 cliente/8 interacciones/tipos/lint aprobados.
 - [ ] Inspeccion manual con expediente ficticio pendiente.
+
+### M3-T1 §215 — Politica visible validada
+
+- [x] Captura a 480: fuentes/aceptacion pendientes, deshabilitada, aviso y readiness 200.
+- [ ] Alternancia historica manual del bloque nuevo y otros estados reales pendientes.
