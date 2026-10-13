@@ -812,3 +812,6 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 
 - [x] M3-T1 §220: compilacion de produccion frontend en copia temporal con configuracion ficticia; 23 pruebas cliente/interaccion aprobadas.
 - [x] Validar runtime Node 22 para frontend (§221): 23 pruebas, tipos/lint y build aprobados; frontend/.nvmrc compartido con CI. Servidor activo sin reinicio.
+
+- [x] M3-T1 §222: instalacion limpia Node 22 desde lockfile comprobada; CI usa npm ci y cache del lockfile. CI remoto aun no ejecutado para esta rama.
+- [ ] Prioritario: actualizar Next.js 15.0.0 a release corregida y validar compatibilidad; instalacion §222 detecta aviso de seguridad confirmado en https://nextjs.org/blog/CVE-2025-66478.

@@ -1,3 +1,20 @@
+## 2026-10-13 — M3-T1 §222: instalacion limpia y reproducible
+
+Node 22.23.3: npm ci instala 387 paquetes desde lockfile en copia temporal sin .env
+ni node_modules enlazados. Tipos/lint, 13 pruebas cliente (457 ms), 10 interacciones
+Chromium (3.8 s) y build completo aprobados con configuracion ficticia. Copia
+retirada al finalizar; servidor/datos/permisos/politica sin cambios. CI cambia npm
+install por npm ci y cache usa package-lock.json. Paquetes/lockfile sin cambios.
+
+GitHub no registra runs ni PR abierto para esta rama: workflow solo push main/master
+y pull_request a esas ramas. No se declara CI remoto aprobado. No login integrado
+ni despliegue. M3-T1 EN PROGRESO; pruebas ficticias hasta MVP; activacion bloqueada.
+
+Instalacion informa deprecaciones existentes de tooling y aviso de seguridad de
+Next.js 15.0.0. Aviso oficial contrastado: https://nextjs.org/blog/CVE-2025-66478
+Actualizacion a release corregida y validacion de compatibilidad quedan pendientes
+prioritarios; compilacion exitosa no elimina ese aviso ni acredita seguridad global.
+
 ## 2026-10-13 — M3-T1 §221: runtime frontend Node 22
 
 Node 22 instalado en paralelo y validado (22.23.3, npm 10.9.9). Frontend .nvmrc fija
