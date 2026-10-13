@@ -1,3 +1,12 @@
+## 2026-10-13 — M3-T1 §212: expediente de revision de aceptacion
+
+Preparado [expediente revisable](m3-t1-expediente-revision.md) con commit tecnico
+verificado, referencias de balance/fuentes/trazabilidad y registro pendiente de
+responsable/decision/evidencia. No UUID o aceptaciones inventadas. Define condiciones
+previas a propuesta de habilitacion; no modifica politica/expediente/permisos.
+Solo documentacion; tests no repetidos. M3-T1 EN PROGRESO;
+fuentes/aceptacion pendientes; confirmacion/activacion bloqueadas.
+
 ## 2026-10-13 — M3-T1 §211: regresion conjunta tras ampliacion de cobertura
 
 545 pruebas aprobadas en 8.39 s, una misma corrida de servicios biometrico, documento

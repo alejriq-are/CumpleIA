@@ -774,3 +774,8 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 
 - [x] 545 pruebas en una corrida focalizada aislada tras ampliaciones; 8.39 s.
 - [ ] Expediente de revision de aceptacion y fuentes externas pendientes.
+
+### M3-T1 §212 — Expediente revisable
+
+- [x] Paquete de revision preparado con evidencia/limites y registro de decision pendiente.
+- [ ] Designacion de revisor, verificacion externa y aceptacion autentica pendientes.
