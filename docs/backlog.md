@@ -785,3 +785,8 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] Alcance ficticio hasta MVP incorporado; aceptacion real diferida.
 - [x] Cuatro casos nuevos; modulo politica 125 aprobadas en base aislada; formato/lint correctos.
 - [ ] Validacion con empresa/revisor reales posterior a MVP.
+
+### M3-T1 §214 — Estado de politica en consulta
+
+- [x] Proyeccion validada y vista sin autoridad; 13 cliente/8 interacciones/tipos/lint aprobados.
+- [ ] Inspeccion manual con expediente ficticio pendiente.

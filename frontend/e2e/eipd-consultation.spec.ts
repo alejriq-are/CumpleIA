@@ -26,7 +26,7 @@ test.beforeAll(async () => {
     function preparation(scope){
       const partial={prerequisites_met:true,context_metadata:null,issues:[]};
       if(window.demo.issues)partial.issues=window.demo.issues;
-      return {assessment_id:scope.assessmentId,status:"borrador",latest_review_context_status:window.demo.latestStatus,review_prerequisites_v3:{evaluation_version:3,evaluation_scope:"requisitos_documentales",authorizes_action:false,can_confirm:false,requiere_cambios:partial,no_continuar:partial,continuar:{prerequisites_met:false,context_metadata:null,issues:[{stage:"research",field:"research_assessment",code:"investigacion_confirmacion_bloqueada",category:"pendiente_revision",question_id:null}]}}};
+      return {assessment_id:scope.assessmentId,status:"borrador",policy_status:{sources_status:"pendiente",acceptance_status:"pendiente",activation:"deshabilitada"},latest_review_context_status:window.demo.latestStatus,review_prerequisites_v3:{evaluation_version:3,evaluation_scope:"requisitos_documentales",authorizes_action:false,can_confirm:false,requiere_cambios:partial,no_continuar:partial,continuar:{prerequisites_met:false,context_metadata:null,issues:[{stage:"research",field:"research_assessment",code:"investigacion_confirmacion_bloqueada",category:"pendiente_revision",question_id:null}]}}};
     }
     async function loadPreparation(scope){
       window.demo.calls.push({kind:"preparation",scope});
@@ -262,4 +262,18 @@ test("estado de ultima revision distingue historia y requisitos sin atribuir aut
     page.getByRole("heading", { name: "Vínculo de la última revisión con el material actual" })
   ).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "Revisión guardada" })).toBeVisible();
+});
+
+
+test("politica pendiente visible sin autoridad y separada de evento historico", async ({ page }) => {
+  await scopeForm(page);
+  await page.getByRole("button", {name:"Consultar requisitos",exact:true}).click();
+  await expect(page.getByRole("heading", {name:"Estado de la política EIPD"})).toBeVisible();
+  await expect(page.getByText("Pendientes de verificación", {exact:true})).toBeVisible();
+  await expect(page.getByText("Deshabilitada", {exact:true})).toBeVisible();
+  await expect(page.getByText("Este estado corresponde a la política actual.", {exact:false})).toBeVisible();
+  await page.getByLabel("Revisión (identificador)", {exact:true}).fill(ids[3]);
+  await page.getByRole("button", {name:"Consultar revisión",exact:true}).click();
+  await expect(page.getByRole("heading", {name:"Revisión guardada"})).toBeVisible();
+  await expect(page.getByRole("heading", {name:"Estado de la política EIPD"})).toHaveCount(0);
 });

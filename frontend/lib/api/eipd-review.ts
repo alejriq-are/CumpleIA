@@ -57,11 +57,17 @@ export type EipdReviewPrerequisitesByDecisionV3 = {
 };
 export type EipdLatestReviewContextStatus =
   "sin_revision" | "sin_metadatos" | "vigente" | "obsoleta";
+export type EipdPolicyStatus = {
+  sources_status: "pendiente" | "verificadas";
+  acceptance_status: "pendiente" | "aceptada";
+  activation: "deshabilitada" | "habilitada";
+};
 export type EipdReviewPreparationOut = {
   assessment_id: string;
   status: "borrador" | "confirmado" | "reemplazado";
   review_prerequisites_v3: EipdReviewPrerequisitesByDecisionV3 | null;
   latest_review_context_status: EipdLatestReviewContextStatus | null;
+  policy_status: EipdPolicyStatus | null;
 };
 export type EipdResolutionReviewOutV2 = {
   response_schema_version: 2;
@@ -177,6 +183,7 @@ export const eipdReviewApi = {
         can_confirm: false;
         review_prerequisites_v3: EipdReviewPrerequisitesByDecisionV3;
         review_context_metadata_status: EipdLatestReviewContextStatus;
+        policy: EipdPolicyStatus;
       } | null;
     }>(path + "/readiness", {
       token: scope.token,
@@ -198,6 +205,15 @@ export const eipdReviewApi = {
           ["sin_revision", "sin_metadatos", "vigente", "obsoleta"].includes(
             controls.review_context_metadata_status
           )
+      );
+      const policy = controls.policy;
+      requireContract(
+        policy &&
+          ["pendiente", "verificadas"].includes(policy.sources_status) &&
+          ["pendiente", "aceptada"].includes(policy.acceptance_status) &&
+          ["deshabilitada", "habilitada"].includes(policy.activation) &&
+          (policy.activation !== "habilitada" ||
+            (policy.sources_status === "verificadas" && policy.acceptance_status === "aceptada"))
       );
       const result = controls.review_prerequisites_v3;
       requireContract(
@@ -248,6 +264,11 @@ export const eipdReviewApi = {
       assessment_id: value.assessment_id,
       status: value.status,
       review_prerequisites_v3: controls === null ? null : controls.review_prerequisites_v3,
+      policy_status: controls === null ? null : {
+        sources_status: controls.policy.sources_status,
+        acceptance_status: controls.policy.acceptance_status,
+        activation: controls.policy.activation,
+      },
       latest_review_context_status:
         controls === null ? null : controls.review_context_metadata_status,
     };

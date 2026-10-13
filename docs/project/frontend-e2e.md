@@ -739,3 +739,18 @@ facultades administrativas y conflictos de seleccion/publicacion. Fixtures sinte
 no ensayo de usuarios concurrentes reales ni suite completa. Registro documental;
 codigo y permisos sin cambios. M3-T1 EN PROGRESO; fuentes/aceptacion pendientes;
 confirmacion/activacion bloqueadas.
+
+## 2026-10-13 — M3-T1 §214: estado actual de politica visible en consulta
+
+Cliente readiness V3 proyecta sources_status/acceptance_status/activation existentes
+como policy_status, null fuera de V3. Enum cerrado y coherencia de habilitada con
+fuentes verificadas/aceptacion aceptada; no inferencia ni escritura. Vista Estado de
+la politica EIPD con etiquetas españolas y aviso sin autoridad; separada de historia.
+Consulta de evento limpia bloque. Estado registrado no verifica externamente fuentes.
+
+13 pruebas cliente (510 ms), 8 interacciones Chromium (3.4 s), tipos/lint aprobados.
+Casos nuevos: estados pendientes/habilitados sinteticos, valores desconocidos,
+incoherencia y null; bloque visible y retirada al consultar historia. Fixtures
+mockeados, no sesion real/CSS completa. Inspeccion manual pendiente. Backend,
+politica/datos/permisos sin cambios. M3-T1 EN PROGRESO;
+confirmacion/activacion bloqueadas; revisiones ficticias hasta MVP.
