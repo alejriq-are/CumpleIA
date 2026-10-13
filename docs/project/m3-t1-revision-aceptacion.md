@@ -1,5 +1,8 @@
 # M3-T1 — Revisión de aceptación
 
+Estado consolidado al 2026-10-13: [balance vigente](m3-t1-balance-validacion.md).
+El encabezado y checkpoints anteriores conservan su fecha historica. M3-T1 EN PROGRESO.
+
 Fecha de actualizacion: 2026-10-09 (§122). Estado: EN PROGRESO. Revisión documental y de código;
 no modifica reglas ni amplía el alcance. Última suite completa registrada:
 3654 passed (§106), posterior a concurrencia administrativa HTTP.

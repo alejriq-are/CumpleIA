@@ -1,3 +1,13 @@
+## 2026-10-13 — M3-T1 §200: balance de evidencia y siguientes criterios
+
+Consolidado [balance de validacion](m3-t1-balance-validacion.md) con evidencias de
+vista movil, sesiones, lecturas, historia y corridas aisladas §§197-199. No suma
+conteos como cobertura integral. Explicita pendientes de fuentes/aceptacion, politica
+operativa deshabilitada, escritura/reciprocidad y alcance de regimenes.
+Proximo: inventario de referencias oficiales y brechas para habilitacion excepcional,
+sin activar politica ni expediente. Solo documentacion; tests no repetidos.
+M3-T1 EN PROGRESO; confirmacion/activacion bloqueadas.
+
 ## 2026-10-13 — M3-T1 §199: regresion focalizada de concurrencia
 
 Suites existentes test_eipd_negative_review_v2_concurrency y

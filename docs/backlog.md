@@ -711,3 +711,8 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 
 - [x] 26 pruebas existentes de concurrencia negativa/administrativa aprobadas en base aislada.
 - [ ] Ensayo de usuarios reales concurrentes y suite completa no cubiertos por esta corrida.
+
+### M3-T1 §200 — Balance de validacion
+
+- [x] Evidencia reciente y limites consolidados en docs/project/m3-t1-balance-validacion.md.
+- [ ] Inventario de fuentes oficiales/brechas de habilitacion excepcional; sin activar politica.
