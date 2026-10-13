@@ -116,3 +116,17 @@ con categoria esperada, can_confirm falso, sin motivos del primero ni mutacion.
 Modulo completo 243 aprobadas; base aislada verificada. Black/Ruff aprobados.
 Brecha delimitada de §206 ampliada; no cobertura universal de combinaciones o indices.
 Aceptacion documental sigue pendiente; evaluador y expediente operativo sin cambios.
+
+## Fuentes documentales: trazabilidad y segundo elemento — §208
+
+Revision estatica de test_services_eipd_resolution.py: test_sources_conditions cubre
+estado/bloque/lista/referencia/analisis/version/aplicabilidad y contradiccion;
+test_required_dates cubre checked_on ausente/futuro; test_evidence_required_and_all_items_checked
+incluye evidencia del bloque official. No validacion externa de instrumentos.
+
+Añadidos cinco casos en test_second_official_source_cannot_borrow_complete_first_source:
+segunda fuente con referencia o analisis vacios, version ausente, aplicabilidad
+ausente/pendiente. Exige diagnostico official_sources.sources.1, incompleto y documento
+no preparado; primer elemento sin motivos e input inmutable. Modulo completo 164
+aprobadas (0.39 s), base aislada verificada; Black/Ruff correctos. No declara fuentes
+verificadas ni aceptacion de politica. Variantes adicionales y matriz politica pendientes.

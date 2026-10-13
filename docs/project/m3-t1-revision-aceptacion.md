@@ -5214,3 +5214,11 @@ evidencia parcial. Diagnostico y categoria precisos, bloqueo e inmutabilidad.
 Modulo completo 243 aprobadas en base aislada verificada; Black/Ruff correctos.
 Solo tests/documentacion; evaluador/politica/expediente sin cambios.
 M3-T1 EN PROGRESO; aceptacion pendiente; confirmacion/activacion bloqueadas.
+
+## 2026-10-13 — M3-T1 §208: segunda fuente documental EIPD
+
+Revisada trazabilidad del bloque de fuentes y añadidos cinco casos para segunda fuente
+incompleta. Diagnostico indice/campo correcto, documento no preparado e inmutabilidad.
+Modulo EIPD completo 164 aprobadas en 0.39 s, base aislada verificada; Black/Ruff
+correctos. Solo tests/documentacion; fuentes reales/politica/expediente sin cambios.
+M3-T1 EN PROGRESO; aceptacion pendiente; confirmacion/activacion bloqueadas.

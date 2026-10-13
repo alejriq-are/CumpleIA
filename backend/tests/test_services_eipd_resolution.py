@@ -720,3 +720,37 @@ def test_each_evidence_item_checked_not_only_first(complete_resolution):
         i.field == "evidence.1.reference" and i.code == "evidencia_incompleta"
         for i in result.issues
     )
+
+
+@pytest.mark.parametrize(
+    "field,value,code",
+    [
+        ("source_reference", " ", "campo_obligatorio"),
+        ("review_analysis", " ", "campo_obligatorio"),
+        ("publication_version", None, "version_publicacion_ausente"),
+        ("applicability", None, "aplicabilidad_sin_resolver"),
+        ("applicability", "pendiente", "aplicabilidad_sin_resolver"),
+    ],
+)
+def test_second_official_source_cannot_borrow_complete_first_source(
+    complete_resolution, field, value, code
+):
+    doc, ctx = complete_resolution
+    first = deepcopy(doc["official_sources"]["sources"][0])
+    second = deepcopy(first)
+    second["source_reference"] = "SECOND-SOURCE"
+    doc["official_sources"]["sources"].append(second)
+    assert evaluate(doc, ctx).is_document_prepared
+    second[field] = value
+    before = deepcopy(doc)
+    result = evaluate(doc, ctx)
+    assert result.result == "incompleto"
+    assert not result.is_document_prepared
+    assert any(
+        issue.field == f"official_sources.sources.1.{field}" and issue.code == code
+        for issue in result.issues
+    )
+    assert not any(
+        issue.field.startswith("official_sources.sources.0.") for issue in result.issues
+    )
+    assert doc == before

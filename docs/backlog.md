@@ -754,3 +754,8 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 
 - [x] 14 casos nuevos; modulo 243 aprobadas en base aislada; formato/lint correctos.
 - [ ] Combinaciones adicionales y aceptacion documental pendientes.
+
+### M3-T1 §208 — Segunda fuente documental
+
+- [x] Cinco casos nuevos; modulo 164 aprobadas en base aislada; formato/lint correctos.
+- [ ] Variantes adicionales y trazabilidad de politica/aceptacion pendientes.

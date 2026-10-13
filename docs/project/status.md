@@ -1,3 +1,11 @@
+## 2026-10-13 — M3-T1 §208: segunda fuente documental EIPD
+
+Revisada trazabilidad del bloque de fuentes y añadidos cinco casos para segunda fuente
+incompleta. Diagnostico indice/campo correcto, documento no preparado e inmutabilidad.
+Modulo EIPD completo 164 aprobadas en 0.39 s, base aislada verificada; Black/Ruff
+correctos. Solo tests/documentacion; fuentes reales/politica/expediente sin cambios.
+M3-T1 EN PROGRESO; aceptacion pendiente; confirmacion/activacion bloqueadas.
+
 ## 2026-10-13 — M3-T1 §207: respuestas y evidencia parcial multisistema
 
 14 casos nuevos sobre segundo sistema: negativas/pendientes, fundamento vacio y
