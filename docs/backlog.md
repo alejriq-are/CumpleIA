@@ -706,3 +706,8 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 
 - [x] 45 pruebas existentes de permisos/reviews/readiness/confirmacion aprobadas en base aislada.
 - [ ] Suite completa y escritura/reciprocidad manual entre cuentas pendientes.
+
+### M3-T1 §199 — Concurrencia aislada
+
+- [x] 26 pruebas existentes de concurrencia negativa/administrativa aprobadas en base aislada.
+- [ ] Ensayo de usuarios reales concurrentes y suite completa no cubiertos por esta corrida.

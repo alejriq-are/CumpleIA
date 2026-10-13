@@ -725,3 +725,17 @@ operativa, confirmacion o activacion del expediente real de prueba. No suite com
 ni nueva prueba manual de escritura/reciprocidad entre cuentas. Codigo y permisos
 sin cambios; registro documental. M3-T1 EN PROGRESO; fuentes/aceptacion pendientes;
 confirmacion/activacion bloqueadas.
+
+## 2026-10-13 — M3-T1 §199: regresion focalizada de concurrencia
+
+Suites existentes test_eipd_negative_review_v2_concurrency y
+test_api_eipd_admin_concurrency: 26 aprobadas en 8.18 s. build_environment y
+verify_destination comprueban base aislada/head/registro vacio y runtime restringido
+antes de pytest; no cambios de politica o expedientes operativos.
+
+Casos de espera y recarga de material/politica, commit/rollback, revisiones negativas
+simultaneas sin eventos parciales/perdidos, cancelacion y reintento; revocacion de
+facultades administrativas y conflictos de seleccion/publicacion. Fixtures sinteticas,
+no ensayo de usuarios concurrentes reales ni suite completa. Registro documental;
+codigo y permisos sin cambios. M3-T1 EN PROGRESO; fuentes/aceptacion pendientes;
+confirmacion/activacion bloqueadas.
