@@ -759,3 +759,8 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 
 - [x] Cinco casos nuevos; modulo 164 aprobadas en base aislada; formato/lint correctos.
 - [ ] Variantes adicionales y trazabilidad de politica/aceptacion pendientes.
+
+### M3-T1 §209 — Registros de aceptacion
+
+- [x] Ocho casos nuevos; modulo de politica 112 aprobadas en base aislada; formato/lint correctos.
+- [ ] Matriz detallada SourceRecordV1 y aceptacion real pendientes.

@@ -426,3 +426,27 @@ def test_policy_issue_order_deterministic(policy):
     assert (
         evaluate_eipd_policy_v1(policy, route=ROUTES[0], evaluated_on=TODAY) == before
     )
+
+
+@pytest.mark.parametrize(
+    "field",
+    [
+        "acceptance_reference",
+        "validation_commit",
+        "acceptance_evidence_reference",
+        "accepted_by",
+    ],
+)
+@pytest.mark.parametrize("activation", ["deshabilitada", "habilitada"])
+def test_accepted_policy_requires_each_acceptance_record_even_when_disabled(
+    policy, field, activation
+):
+    policy["activation"] = activation
+    assert EipdGatePolicyV1.model_validate(policy).acceptance_status == "aceptada"
+    policy[field] = None
+    before = deepcopy(policy)
+    with pytest.raises(
+        ValidationError, match="Aceptacion exige evidencia y responsable"
+    ):
+        EipdGatePolicyV1.model_validate(policy)
+    assert policy == before

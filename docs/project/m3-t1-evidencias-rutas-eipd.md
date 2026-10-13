@@ -130,3 +130,15 @@ ausente/pendiente. Exige diagnostico official_sources.sources.1, incompleto y do
 no preparado; primer elemento sin motivos e input inmutable. Modulo completo 164
 aprobadas (0.39 s), base aislada verificada; Black/Ruff correctos. No declara fuentes
 verificadas ni aceptacion de politica. Variantes adicionales y matriz politica pendientes.
+
+## Aceptacion de politica: registros obligatorios — §209
+
+test_services_eipd_policy.py contiene barreras de fuentes/cobertura/activacion, hash
+y campos invalidos. Ampliado con ocho casos: omision de acceptance_reference,
+validation_commit, acceptance_evidence_reference o accepted_by, para politica
+habilitada y deshabilitada. Una etiqueta aceptada exige todos los registros incluso
+si activation es deshabilitada; rechazo no muta input. Modulo 112 aprobadas en
+0.68 s, base aislada verificada; Black/Ruff correctos. Contrato sin cambios.
+Fixtures sinteticos no acreditan fuente real ni aceptacion humana. Estado operativo
+permanece pendiente/deshabilitado. No cobertura integral de todos los campos por
+esta ampliacion; matriz de SourceRecordV1 detallada sigue pendiente.

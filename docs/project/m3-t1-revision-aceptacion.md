@@ -5222,3 +5222,11 @@ incompleta. Diagnostico indice/campo correcto, documento no preparado e inmutabi
 Modulo EIPD completo 164 aprobadas en 0.39 s, base aislada verificada; Black/Ruff
 correctos. Solo tests/documentacion; fuentes reales/politica/expediente sin cambios.
 M3-T1 EN PROGRESO; aceptacion pendiente; confirmacion/activacion bloqueadas.
+
+## 2026-10-13 — M3-T1 §209: evidencia obligatoria de aceptacion de politica
+
+Ocho casos nuevos: cuatro registros de aceptacion omitidos individualmente con
+activation habilitada/deshabilitada. Contrato rechaza etiqueta aceptada incompleta
+sin mutar input. Modulo de politica 112 aprobadas (0.68 s), base aislada verificada;
+Black/Ruff correctos. Solo tests/documentacion; politica/expediente operativos sin
+cambios. M3-T1 EN PROGRESO; aceptacion pendiente; confirmacion/activacion bloqueadas.
