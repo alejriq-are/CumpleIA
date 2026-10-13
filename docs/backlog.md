@@ -726,3 +726,8 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 
 - [x] Cadena normativa sensible/biometrica contrastada con frontera tecnica.
 - [ ] Evidencias por ruta, instrumentos Agencia y aceptacion juridica pendientes.
+
+### M3-T1 §203 — Evidencia por ruta
+
+- [x] Lista revisable basada en contrato real, con resultados pendientes y limites.
+- [ ] Ensayo de fixture dedicado admitido y aceptacion documental pendientes.

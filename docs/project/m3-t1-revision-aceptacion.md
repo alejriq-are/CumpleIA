@@ -5168,3 +5168,13 @@ Separadas condiciones legales y fronteras tecnicas de eipd_frontier.py. Lectura
 inicial, no aceptacion juridica ni fuente declarada verificada. Fixture de investigacion
 no se fuerza a frontera excepcional. Solo documentacion; politica/expediente sin cambios.
 M3-T1 EN PROGRESO; fuentes/aceptacion pendientes; confirmacion/activacion bloqueadas.
+
+## 2026-10-13 — M3-T1 §203: lista revisable de evidencias por ruta
+
+Creada [lista de evidencias](m3-t1-evidencias-rutas-eipd.md), basada en schemas reales:
+contexto/derecho/foro/necesidad/resguardos, sensible, biometrica/sistemas, documento
+EIPD y politica. Todas las filas pendientes; evidencia candidata no acredita hechos
+ni aceptacion. No inventar revisores o documentos. Proximo ensayo en fixture dedicado
+admitido de base aislada; expediente de investigacion operativo sin cambios.
+Solo documentacion, tests no repetidos. M3-T1 EN PROGRESO;
+fuentes/aceptacion pendientes; confirmacion/activacion bloqueadas.
