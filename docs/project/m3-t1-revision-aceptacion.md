@@ -5393,3 +5393,22 @@ Instalacion informa deprecaciones existentes de tooling y aviso de seguridad de
 Next.js 15.0.0. Aviso oficial contrastado: https://nextjs.org/blog/CVE-2025-66478
 Actualizacion a release corregida y validacion de compatibilidad quedan pendientes
 prioritarios; compilacion exitosa no elimina ese aviso ni acredita seguridad global.
+
+## 2026-10-13 — M3-T1 §223: actualizacion Next.js corregida
+
+Next y eslint-config-next fijados de 15.0.0 a 15.5.27; package-lock actualizado y
+coherencia de versiones raiz/resueltas comprobada. React 18 conservado. Release
+publicada consultada en npm; aviso oficial mayo 2026 requiere >=15.5.18 en Next 15:
+https://vercel.com/changelog/next-js-may-2026-security-release
+No basta antiguo parche 15.0.x para los avisos posteriores.
+
+Instalacion y validacion en copia temporal sin .env ni node_modules previos, con
+Node 22.23.3 y configuracion ficticia: 13 pruebas cliente (436 ms), 10 interacciones
+Chromium (3.8 s), tipos/lint y build completo aprobados. Manifiestos copiados tras
+exito; copia eliminada. Servidor activo/node_modules originales NO actualizados:
+requiere npm ci y reinicio local antes de afirmar aplicacion efectiva de la correccion.
+No despliegue, login integrado o CI remoto. No afirmacion de ausencia global de CVE.
+
+Avisos existentes de tooling/cache y deprecacion next lint permanecen; migracion
+ESLint CLI diferida. Politica/datos/permisos sin cambios. M3-T1 EN PROGRESO;
+pruebas ficticias hasta MVP; confirmacion/activacion bloqueadas.
