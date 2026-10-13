@@ -5116,3 +5116,19 @@ inyectada por cliente y bloqueo de patch de confirmado. No suite completa ni nue
 prueba manual de escritura entre cuentas. Expediente operativo sin cambios.
 Registro documental; codigo y permisos sin cambios. M3-T1 EN PROGRESO;
 fuentes/aceptacion pendientes; confirmacion/activacion bloqueadas.
+
+## 2026-10-13 — M3-T1 §198: regresion focalizada de permisos y confirmacion
+
+Ejecutadas suites existentes test_api_eipd_resolution_reviews,
+test_api_eipd_review_response_v2, test_api_eipd_review_prerequisites_v3 y
+test_api_eipd_confirmation_v2: 45 aprobadas en 18.24 s. build_environment y
+verify_destination verifican base aislada fija/head/registro vacio y runtime
+app_user restringido antes de pytest. Expedientes operativos sin cambios.
+
+Casos incluyen rechazo de organizacion ajena, permiso de escritura, lectura y
+respuesta historica v2, diagnosticos por decision y barreras/identidad de confirmacion.
+Fixtures sinteticas de politicas y autenticacion: resultados no habilitan politica
+operativa, confirmacion o activacion del expediente real de prueba. No suite completa
+ni nueva prueba manual de escritura/reciprocidad entre cuentas. Codigo y permisos
+sin cambios; registro documental. M3-T1 EN PROGRESO; fuentes/aceptacion pendientes;
+confirmacion/activacion bloqueadas.

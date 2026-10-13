@@ -701,3 +701,8 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 
 - [x] 14 pruebas existentes de API negativa/writer v2 aprobadas en base aislada verificada.
 - [ ] Suite completa y escritura manual entre cuentas no cubiertas por esta corrida.
+
+### M3-T1 §198 — Permisos y confirmacion aislados
+
+- [x] 45 pruebas existentes de permisos/reviews/readiness/confirmacion aprobadas en base aislada.
+- [ ] Suite completa y escritura/reciprocidad manual entre cuentas pendientes.
