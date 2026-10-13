@@ -749,3 +749,8 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] 15 casos nuevos; modulo biometrico 229 aprobadas en base aislada, Black/Ruff correctos.
 - [ ] Respuestas no/pendiente, fundamento y evidencia parcial posteriores no cubiertos por nuevos casos.
 - [ ] Aceptacion documental pendiente.
+
+### M3-T1 §207 — Respuestas/evidencia segundo sistema
+
+- [x] 14 casos nuevos; modulo 243 aprobadas en base aislada; formato/lint correctos.
+- [ ] Combinaciones adicionales y aceptacion documental pendientes.

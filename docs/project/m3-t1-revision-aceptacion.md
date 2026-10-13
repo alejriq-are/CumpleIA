@@ -5206,3 +5206,11 @@ can_confirm falso e inmutabilidad. Modulo completo 229 aprobadas (0.59 s), base
 aislada verificada antes de pytest; Black/Ruff aprobados. [Trazabilidad](m3-t1-evidencias-rutas-eipd.md)
 actualizada con limites. Solo tests/documentacion; evaluador/politica/expediente sin
 cambios. M3-T1 EN PROGRESO; aceptacion pendiente; confirmacion/activacion bloqueadas.
+
+## 2026-10-13 — M3-T1 §207: respuestas y evidencia parcial multisistema
+
+14 casos nuevos sobre segundo sistema: negativas/pendientes, fundamento vacio y
+evidencia parcial. Diagnostico y categoria precisos, bloqueo e inmutabilidad.
+Modulo completo 243 aprobadas en base aislada verificada; Black/Ruff correctos.
+Solo tests/documentacion; evaluador/politica/expediente sin cambios.
+M3-T1 EN PROGRESO; aceptacion pendiente; confirmacion/activacion bloqueadas.

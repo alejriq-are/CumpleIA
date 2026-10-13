@@ -107,3 +107,12 @@ aprobados. No cambio de evaluador, schema, politica o expediente operativo.
 Queda cubierta esta brecha delimitada de omisiones; respuestas negativas/pendientes,
 fundamentos y evidencia parcial en sistemas posteriores no se afirman cubiertos por
 los quince casos. Aceptacion documental de todas las filas sigue pendiente.
+
+## Respuestas y evidencia parcial del segundo sistema — §207
+
+14 casos nuevos: cuatro respuestas informativas por no/pendiente/si sin fundamento
+(12), tipo o referencia de evidencia en espacios (2). Diagnostico exacto systems.1
+con categoria esperada, can_confirm falso, sin motivos del primero ni mutacion.
+Modulo completo 243 aprobadas; base aislada verificada. Black/Ruff aprobados.
+Brecha delimitada de §206 ampliada; no cobertura universal de combinaciones o indices.
+Aceptacion documental sigue pendiente; evaluador y expediente operativo sin cambios.

@@ -796,3 +796,76 @@ def test_second_system_omission_does_not_borrow_complete_first_system(
     assert not any(issue.field.startswith("systems.0.") for issue in result.issues)
     assert document["systems"][0] == first
     assert document == before_evaluation
+
+
+@pytest.mark.parametrize(
+    "field",
+    [
+        field.removeprefix("systems.0.")
+        for field in RESPONSES
+        if field.startswith("systems.0.")
+    ],
+)
+@pytest.mark.parametrize(
+    "value,suffix,code,category",
+    [
+        (
+            {"answer": "no", "rationale": "No acreditado"},
+            ".answer",
+            "respuesta_revision",
+            "requiere_revision",
+        ),
+        (
+            {"answer": "pendiente", "rationale": "En revision"},
+            ".answer",
+            "respuesta_pendiente",
+            "incompleto",
+        ),
+        (
+            {"answer": "si", "rationale": " "},
+            ".rationale",
+            "fundamento_ausente",
+            "incompleto",
+        ),
+    ],
+)
+def test_second_system_response_cannot_be_overridden_by_first(
+    biometric_exception_context, field, value, suffix, code, category
+):
+    document = biometric_exception_context[0]
+    first = deepcopy(document["systems"][0])
+    second = deepcopy(first)
+    second["system_reference"] = "SECOND-SYSTEM"
+    document["systems"].append(second)
+    assert evaluate(*biometric_exception_context).can_confirm
+    second[field] = value
+    before = deepcopy(document)
+    result = evaluate(*biometric_exception_context)
+    assert result.result == category
+    assert not result.can_confirm
+    assert (f"systems.1.{field}{suffix}", code, category) in issue_set(result)
+    assert not any(issue.field.startswith("systems.0.") for issue in result.issues)
+    assert document == before
+
+
+@pytest.mark.parametrize("field", ["evidence_type", "reference"])
+def test_second_system_partial_evidence_cannot_borrow_first(
+    biometric_exception_context, field
+):
+    document = biometric_exception_context[0]
+    second = deepcopy(document["systems"][0])
+    second["system_reference"] = "SECOND-SYSTEM"
+    document["systems"].append(second)
+    assert evaluate(*biometric_exception_context).can_confirm
+    second["evidence"][0][field] = " "
+    before = deepcopy(document)
+    result = evaluate(*biometric_exception_context)
+    assert result.result == "incompleto"
+    assert not result.can_confirm
+    assert (
+        f"systems.1.evidence.0.{field}",
+        "evidencia_incompleta",
+        "incompleto",
+    ) in issue_set(result)
+    assert not any(issue.field.startswith("systems.0.") for issue in result.issues)
+    assert document == before
