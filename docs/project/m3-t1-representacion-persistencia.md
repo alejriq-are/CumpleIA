@@ -1,10 +1,21 @@
 # M3-T1 — Integracion persistente de representacion sensible
 
-Estado: plan tecnico de implementacion, 2026-10-14 (§240).
-Storage/migracion aplicados (§242), CRUD conectado (§243) y diagnostico
-readiness/interfaz integrado (§244); cobertura EIPD de representacion pendiente
-y confirmacion bloqueada.
-Contratos/binding/evaluador puros existentes: §§237–239.
+Estado verificado: 2026-10-14 (§264), M3-T1 EN PROGRESO.
+Persistencia/CRUD/diagnostico de representacion integrados; contexto EIPD V3,
+composicion V4 y consulta historica V3 integrados (§§260–263). Migracion local
+f52d6c9b3e10 aplicada. Confirmacion, activacion y registro de revisiones de
+expedientes con representacion o binding3 siguen bloqueados por servidor.
+
+Pendiente antes de ampliar escritura: definir prerrequisitos propios del registro
+negativo sucesor, derivar metadata2 desde contexto actual bajo los locks vigentes,
+comprobar aislamiento/atomicidad/concurrencia y mantener bloqueadas las decisiones
+positivas. La lectura historica V3 no completa ese alcance ni acredita vigencia.
+No hay POST V3 publicado. Las rutas existentes no pueden usar la retirada del
+material para eludir el gate de binding3.
+
+Las secciones de diseño siguientes describen la secuencia original; las entradas
+§§241–264 documentan la implementacion y validacion posterior. No interpretar sus
+futuros o pendientes historicos como inventario actual.
 
 ## Almacenamiento y compatibilidad
 
@@ -504,3 +515,21 @@ sin alterar permisos append-only de ejecucion. Ruff/Black correctos. Solo datos
 ficticios en base aislada; sin eventos operativos nuevos, merge ni despliegue.
 M3-T1 EN PROGRESO; activacion EIPD bloqueada. Proximo: revisar prerrequisitos y
 alcance pendiente del registro negativo V3 antes de ampliar escritura.
+
+## 2026-10-14 — M3-T1 §264: auditoria de barreras antes de escritura sucesora
+
+Matriz HTTP ampliada a seis combinaciones: ruta historica sin sufijo y V2,
+por continuar/requiere_cambios/no_continuar, con material ficticio representado.
+Cada caso comprueba rechazo409 con motivo explicito, expediente identico antes y
+despues y cero eventos persistidos. Prerrequisitos V4 mantienen las tres decisiones
+bloqueadas. No POST V3 ni habilitacion nueva. Plan tecnico actualizado para separar
+capacidad actual de pasos historicos y pendiente de registro negativo sucesor.
+
+901 pruebas del catalogo EIPD ampliado aprobadas en 270.21 s, base fija aislada
+verificada. Ruff global y Black (257 archivos) correctos. CI de 418ddbc completo:
+frontend y backend success (run38644483434). No se afirma CI del commit nuevo aun.
+Primer intento de matriz uso sufijo /v1 inexistente; corregido a ruta real. Tras
+interrupcion se retiro una publicacion temporal identificada por actor/referencias
+exactas de fixture, solo en base aislada con nombre/head verificados; runner
+revalido registro vacio antes de repetir. Ningun dato operativo modificado.
+M3-T1 EN PROGRESO; pruebas ficticias hasta MVP; activacion EIPD bloqueada.

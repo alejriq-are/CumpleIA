@@ -319,7 +319,13 @@ async def test_readiness_reports_stale_context_and_removal(saved):
         assert response.json()["representation_context_coverage"] == "no_aplica"
 
 
-async def test_representation_marks_all_v4_review_decisions_pending(saved):
+@pytest.mark.parametrize("review_version", ["", "/v2"])
+@pytest.mark.parametrize(
+    "decision_name", ["continuar", "requiere_cambios", "no_continuar"]
+)
+async def test_representation_marks_all_v4_review_decisions_pending(
+    saved, _session_factory, review_version, decision_name
+):
     tid, out, app, org = saved
     url = f"/licitud/treatments/{tid}/assessments/{out['id']}"
     async with AsyncClient(
@@ -342,16 +348,28 @@ async def test_representation_marks_all_v4_review_decisions_pending(saved):
                 issue["code"] == "politica_representacion_no_implementada"
                 for issue in decision["issues"]
             )
-        assert (
-            await client.post(
-                url + "/eipd-resolution/reviews/v2",
-                json={
-                    "decision": "requiere_cambios",
-                    "rationale": "PRUEBA",
-                    "review_reference": "PRUEBA",
-                },
-            )
-        ).status_code == 409
+        before = (await client.get(url)).json()
+        response = await client.post(
+            url + f"/eipd-resolution/reviews{review_version}",
+            json={
+                "decision": decision_name,
+                "rationale": "PRUEBA: decision ficticia sin autorizacion",
+                "review_reference": "PRUEBA-BARRERA-V4",
+            },
+        )
+        assert response.status_code == 409, response.text
+        assert response.json()["detail"]["code"] == (
+            "resolucion_eipd_representacion_asociacion_pendiente"
+        )
+        assert (await client.get(url)).json() == before
+    async with _session_factory() as db:
+        count = await db.scalar(
+            text(
+                "SELECT count(*) FROM eipd_resolution_reviews WHERE assessment_id=:id"
+            ),
+            {"id": UUID(out["id"])},
+        )
+        assert count == 0
 
 
 @pytest.mark.parametrize("given_by", ["representante_legal", "mandatario"])

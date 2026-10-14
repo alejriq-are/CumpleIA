@@ -1,3 +1,21 @@
+## 2026-10-14 — M3-T1 §264: auditoria de barreras antes de escritura sucesora
+
+Matriz HTTP ampliada a seis combinaciones: ruta historica sin sufijo y V2,
+por continuar/requiere_cambios/no_continuar, con material ficticio representado.
+Cada caso comprueba rechazo409 con motivo explicito, expediente identico antes y
+despues y cero eventos persistidos. Prerrequisitos V4 mantienen las tres decisiones
+bloqueadas. No POST V3 ni habilitacion nueva. Plan tecnico actualizado para separar
+capacidad actual de pasos historicos y pendiente de registro negativo sucesor.
+
+901 pruebas del catalogo EIPD ampliado aprobadas en 270.21 s, base fija aislada
+verificada. Ruff global y Black (257 archivos) correctos. CI de 418ddbc completo:
+frontend y backend success (run38644483434). No se afirma CI del commit nuevo aun.
+Primer intento de matriz uso sufijo /v1 inexistente; corregido a ruta real. Tras
+interrupcion se retiro una publicacion temporal identificada por actor/referencias
+exactas de fixture, solo en base aislada con nombre/head verificados; runner
+revalido registro vacio antes de repetir. Ningun dato operativo modificado.
+M3-T1 EN PROGRESO; pruebas ficticias hasta MVP; activacion EIPD bloqueada.
+
 ## 2026-10-14 — M3-T1 §263: consulta historica sucesora integrada
 
 Cliente y vista consultan GET reviews/{id}/v3 y conservan metadata1/2/null sin
