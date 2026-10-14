@@ -1,3 +1,20 @@
+## 2026-10-14 — M3-T1 §263: consulta historica sucesora integrada
+
+Cliente y vista consultan GET reviews/{id}/v3 y conservan metadata1/2/null sin
+reconstruir historia ni inferir vigencia actual. Metadata2 valida versiones,
+coberturas, campos cerrados y hashes del evento; muestra identidad documental
+registrada de investigacion/representacion sin habilitar decisiones. Escritura
+negativa existente V2 sin cambios. Lector de ultima revision admite metadata2;
+proyeccion antigua no la convierte a metadata1. Readiness V4 conserva bloqueos.
+
+46 pruebas frontend aprobadas; tipos/lint correctos. 13 pruebas backend de lectura
+V3/V2/readiness aprobadas, incluyendo evento sintetico metadata2 y lectura repetida.
+Fixture elimina exclusivamente su evento en finally antes de limpiar el padre;
+sin alterar permisos append-only de ejecucion. Ruff/Black correctos. Solo datos
+ficticios en base aislada; sin eventos operativos nuevos, merge ni despliegue.
+M3-T1 EN PROGRESO; activacion EIPD bloqueada. Proximo: revisar prerrequisitos y
+alcance pendiente del registro negativo V3 antes de ampliar escritura.
+
 ## 2026-10-14 — M3-T1 §262: lectura HTTP de revisiones V3
 
 GET reviews/{review_id}/v3 serializa metadata1/2/null guardada con salida version3,

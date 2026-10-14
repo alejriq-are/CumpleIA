@@ -103,8 +103,8 @@ from app.services.eipd_resolution_readiness_v2 import (
 from app.services.eipd_resolution_writer import bind_eipd_resolution_for_context
 from app.services.eipd_review_metadata import (
     eipd_review_metadata_is_current_v1,
-    read_eipd_review_context_metadata_v1,
 )
+from app.services.eipd_review_metadata_v2 import read_eipd_review_context_metadata_v2
 from app.services.eipd_review_response_v2 import serialize_eipd_resolution_review_v2
 from app.services.eipd_review_response_v3 import serialize_eipd_resolution_review_v3
 from app.services.eipd_review_v2 import evaluate_eipd_resolution_review_prerequisites_v2
@@ -1909,7 +1909,7 @@ async def _latest_eipd_review_snapshot_with_metadata_v1(
         derive_eipd_review_policy_identity_v1(latest_review) if latest_review else None
     )
     metadata = (
-        read_eipd_review_context_metadata_v1(latest_review) if latest_review else None
+        read_eipd_review_context_metadata_v2(latest_review) if latest_review else None
     )
     return review_payload, identity, metadata
 
@@ -2060,27 +2060,36 @@ def _compose_assessment_eipd_controls_v3(
             "issues": [asdict(i) for i in diagnostic.issues],
         }
     data["review_prerequisites_v3"] = prerequisites
+    successor_metadata = (
+        context_metadata is not None and context_metadata.metadata_schema_version == 2
+    )
     metadata_status = (
-        "sin_revision"
-        if latest_review is None
+        "obsoleta"
+        if successor_metadata
         else (
-            "sin_metadatos"
-            if context_metadata is None
+            "sin_revision"
+            if latest_review is None
             else (
-                "vigente"
-                if eipd_review_metadata_is_current_v1(
-                    context_metadata,
-                    assessment.eipd_resolution_assessment,
-                    context,
-                    latest_review,
+                "sin_metadatos"
+                if context_metadata is None
+                else (
+                    "vigente"
+                    if eipd_review_metadata_is_current_v1(
+                        context_metadata,
+                        assessment.eipd_resolution_assessment,
+                        context,
+                        latest_review,
+                    )
+                    else "obsoleta"
                 )
-                else "obsoleta"
             )
         )
     )
     data.update(
         latest_review_context_metadata=(
-            context_metadata.model_dump(mode="json") if context_metadata else None
+            context_metadata.model_dump(mode="json")
+            if context_metadata and not successor_metadata
+            else None
         ),
         review_context_metadata_status=metadata_status,
     )

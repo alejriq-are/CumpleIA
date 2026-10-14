@@ -3,12 +3,12 @@
 import { useState, type FormEvent } from "react";
 import { EipdReviewIssues } from "./EipdReviewIssues";
 import { ApiError } from "@/lib/api/client";
-import type { EipdReviewPreparationOut, EipdResolutionReviewOutV2 } from "@/lib/api/eipd-review";
+import type { EipdReviewPreparationOut, EipdResolutionReviewReadOut } from "@/lib/api/eipd-review";
 
 type Scope = { organizationId: string; treatmentId: string; assessmentId: string };
 type Props = {
   loadPreparation: (scope: Scope) => Promise<EipdReviewPreparationOut>;
-  loadEvent: (scope: Scope, reviewId: string) => Promise<EipdResolutionReviewOutV2>;
+  loadEvent: (scope: Scope, reviewId: string) => Promise<EipdResolutionReviewReadOut>;
 };
 const labels = {
   continuar: "Continuar",
@@ -187,7 +187,7 @@ export function PreparationView({ value }: { value: EipdReviewPreparationOut }) 
   );
 }
 
-export function EventView({ value }: { value: EipdResolutionReviewOutV2 }) {
+export function EventView({ value }: { value: EipdResolutionReviewReadOut }) {
   return (
     <section aria-labelledby="event-heading" className="space-y-3 rounded-lg border bg-white p-5">
       <h2 id="event-heading" className="text-xl font-semibold">
@@ -219,7 +219,9 @@ export function EventView({ value }: { value: EipdResolutionReviewOutV2 }) {
           <dd>
             {value.review_context_metadata === null
               ? "Sin metadatos registrados; no se reconstruyen."
-              : `Contexto versión ${value.review_context_metadata.context_schema_version}. Cobertura: ${value.review_context_metadata.research_coverage === "contexto_v2" ? "contexto de investigación" : "sin cobertura de investigación"}.`}
+              : value.review_context_metadata.metadata_schema_version === 2
+                ? `Contexto versión 3. Cobertura: contexto de investigación y representación. Material de representación: ${value.review_context_metadata.representation_material_hash === null ? "sin material registrado" : "identidad registrada"}.`
+                : `Contexto versión ${value.review_context_metadata.context_schema_version}. Cobertura: ${value.review_context_metadata.research_coverage === "contexto_v2" ? "contexto de investigación" : "sin cobertura de investigación"}.`}
           </dd>
         </div>
       </dl>
@@ -242,7 +244,7 @@ export function EipdReviewConsultation({ loadPreparation, loadEvent }: Props) {
   const [error, setError] = useState("");
   const [sessionExpired, setSessionExpired] = useState(false);
   const [preparation, setPreparation] = useState<EipdReviewPreparationOut | null>(null);
-  const [event, setEvent] = useState<EipdResolutionReviewOutV2 | null>(null);
+  const [event, setEvent] = useState<EipdResolutionReviewReadOut | null>(null);
   function changeScope(field: keyof Scope, value: string) {
     setScope({ ...scope, [field]: value });
     setPreparation(null);
