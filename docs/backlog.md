@@ -168,7 +168,7 @@ El anexo de respuestas crudas y, en general, cualquier bitácora de auditoría f
 Matriz de implementación, evidencia y brechas en
 [Revisión de aceptación M3-T1](project/m3-t1-revision-aceptacion.md).
 Diseño y alcance en [Bases de licitud](project/modulo3-licitud-diseno.md).
-Última suite completa registrada: 2234 passed (§58); no acredita cierre integral.
+Suite completa backend de CI: 3977 passed en commit 7f94bbf (§232); no acredita cierre integral ni los commits posteriores.
 
 - [x] Núcleo persistente, alcance por finalidad, snapshot/hash, RLS y lifecycle.
 - [x] Seis bases ordinarias; geolocalización y consentimiento expreso sensible
@@ -838,3 +838,13 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] M3-T1 §234: revision focal control global politica; docstring API actualizado y limite bloqueo servicio/SQL precisado. Sin nueva barrera SQL.
 
 - [x] §235: CI agrupa por workflow/ref y prioriza ultimo commit en PR; cancelacion efectiva pendiente de observar tras publicar configuracion.
+
+
+## Siguiente bloque funcional M3-T1 — §236
+
+Representacion sensible: [diseño preliminar de desarrollo](project/m3-t1-representacion-desarrollo.md).
+No habilitada; pruebas ficticias hasta MVP. Checklist historico no acredita facultad.
+
+- [x] Delimitar campos candidatos y matriz documental conservadora (§236).
+- [ ] Revisar/fijar contrato V1 y pruebas puras de forma; no persistencia o confirmacion.
+- [ ] Diseñar binding sucesor, persistencia y diagnostico manteniendo historicos/bloqueos.

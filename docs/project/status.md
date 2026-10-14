@@ -1,3 +1,18 @@
+## 2026-10-14 — M3-T1 §236: siguiente bloque funcional de representacion
+
+Contrastado backlog integral con codigo: given_by distingue titular/representante/
+mandatario; acreditacion sensible completa sigue pendiente. Preparado diseño
+preliminar separado con campos candidatos, matriz, limites y secuencia schema ->
+binding -> persistencia -> readiness. Requisitos del producto, no criterio juridico
+ni ruta habilitada. Primera etapa solo forma/documentacion, can_confirm=false.
+
+Backlog corrige contador historico global a CI 3977 en commit 7f94bbf, sin extender
+aprobacion a commits posteriores. CI 865c6f9 en curso al consultar; no resultado
+remoto de concurrencia afirmado. Solo diseño/docs, no tests nuevos ni cambios de
+codigo/datos/politica. Proximo concreto: revisar/fijar schema V1 y pruebas puras
+ficticias. M3-T1 EN PROGRESO; pruebas ficticias hasta MVP, empresa real posterior;
+confirmacion/activacion bloqueadas.
+
 ## 2026-10-14 — M3-T1 §235: priorizar CI del ultimo commit de PR
 
 Workflow CI agrupa ejecuciones por workflow/ref; cancel-in-progress solo en evento
