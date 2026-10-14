@@ -31,6 +31,7 @@ TARGETS = (
     "tests/test_eipd_frontier_v2.py",
     "tests/test_eipd_screening_v3.py",
     "tests/test_eipd_controls_v3.py",
+    "tests/test_eipd_controls_v4.py",
     "tests/test_eipd_resolution_writer.py",
     "tests/test_eipd_resolution_writer_v3.py",
     "tests/test_eipd_review_metadata.py",

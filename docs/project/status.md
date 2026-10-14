@@ -1,3 +1,21 @@
+## 2026-10-14 — M3-T1 §258: composicion transversal V4
+
+Composicion pura V4 recibe IDs de servidor/contexto3 y combina representacion,
+resolucion, controles ordinarios, deteccion/frontera, revision y politica. Reutiliza
+nucleos historicos mediante parametros internos con defaults anteriores; contexto
+normativo proyectado explicitamente para deteccion, identidad documental V3 no se
+proyecta. Ruta investigacion solo cuando existe/declarada; no agrega barrera de
+investigacion a ruta ordinaria. Barrera politica_representacion_no_implementada en
+preparacion/revision/confirmacion y flags false aun con revision/politica vigentes.
+No rutas normativas nuevas o habilitacion implicita por metadatos.
+
+Diez casos nuevos. 166 pruebas composicion V4, nucleos previos y readiness HTTP
+V1/V2/V3 aprobadas en 11.51 s, base fija aislada verificada; Ruff/Black correctos.
+Runner incorpora suite. Validacion anterior interrumpida por limite temporal del
+reviewer, ahora resuelta por canal normal. Sin API/builder operativo nuevo todavia;
+siguiente conjunto: salida/prerrequisitos V4 y conexion CRUD/readiness coherentes.
+M3-T1 EN PROGRESO; datos ficticios hasta MVP; activacion EIPD bloqueada.
+
 ## 2026-10-14 — M3-T1 §257: composicion documental representacion/EIPD
 
 Nuevo adaptador puro recibe IDs org/tratamiento/evaluacion de servidor y ContextV3
