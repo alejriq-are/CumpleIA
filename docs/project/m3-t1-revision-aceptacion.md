@@ -5629,3 +5629,9 @@ conectada via entradas personales y gestion transaccional de dependencia; distin
 primitivas internas y barrera de activation del servicio. Solo comentario/docs,
 funcionalidad sin cambios. Ruff/Black del archivo correctos; sin repeticion de tests.
 M3-T1 EN PROGRESO; pruebas ficticias hasta MVP; confirmacion/activacion bloqueadas.
+
+## Delimitacion §274
+
+Infancia/adolescencia inicia contrato interno y plan de integracion en
+[m3-t1-infancia-adolescencia.md](m3-t1-infancia-adolescencia.md).
+Sin almacenamiento/API/evaluador positivo; conserva fallback y bloqueos.

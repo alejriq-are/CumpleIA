@@ -15,6 +15,7 @@ EXPECTED_HEAD = "f52d6c9b3e10"
 TARGETS = (
     "tests/test_eipd_test_runner.py",
     "tests/test_sensitive_representation_schema.py",
+    "tests/test_child_adolescent_schema.py",
     "tests/test_sensitive_representation_api_contracts.py",
     "tests/test_sensitive_representation_binding.py",
     "tests/test_sensitive_representation.py",

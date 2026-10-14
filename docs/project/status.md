@@ -1,3 +1,18 @@
+## 2026-10-14 — M3-T1 §274: contrato documental inicial de infancia
+
+Ruta residual delimitada con diseño local y texto oficial BCN articulo16quater,
+Ley21.719/reformaLey19.628. Contrato interno cerrado ChildAdolescentAssessmentV1:
+scope RAT, grupos declarados, cruce sensible menor16 separado, analisis de interes
+superior/autonomia, propuesta autorizacion y sujeto del consentimiento, evidencia.
+Parcial no implica preparado; no deduce edad/representacion desde nombres. No fechas
+de nacimiento, hashes/actor/flags de permiso editables. No campo API ni persistencia.
+Fallback especial y gates EIPD intactos. Plan de evaluador/binding/CRUD/integracion
+versionada y matriz en m3-t1-infancia-adolescencia.md. No reglas positivas nuevas.
+
+49 pruebas de contratos aprobadas en0.23s,10 nuevas; Ruff/Black correctos. Runner
+focal ampliado. Solo datos ficticios. Siguiente evaluador documental conservador,
+sin autorizar confirmacion por completar campos. M3-T1 EN PROGRESO.
+
 ## 2026-10-14 — M3-T1 §273: CI integral aprobado e inventario residual
 
 CI38652738904 sobre dbe1080 termino success en tres trabajos: backend4277 passed,
