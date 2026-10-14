@@ -1066,3 +1066,38 @@ conexion de pagina tipada a cliente real, sin escritura en sesion personal ni da
 operativos. CI331fc83 success. No botones positivos, confirmacion o activacion.
 M3-T1 EN PROGRESO; siguiente validar recorrido integrado aislado/auditar alcance.
 Sin merge ni despliegue; EIPD bloqueada.
+
+## 2026-10-14 — M3-T1 §271: recorrido integrado Chromium/cliente/API/DB aislada
+
+Nuevo ejecutor fijo python -m scripts.run_eipd_browser_test usa build_environment
++ verify_destination de suite EIPD, exige Node/npm local y lanza solo test integrado.
+Pytest crea expediente ficticio y servidor HTTP127.0.0.1 de puerto aleatorio con
+sesion sintetica de fixtures; Chromium390x749 renderiza componente y usa cliente/API
+reales para consultar, registrar negativa y leer evento. Verificacion DB exige un
+solo evento metadata2, actor servidor esperado y statusborrador. Cleanup de fixture
+elimina solo eventos del assessment de prueba, cierra servidor/proceso y shell temporal.
+Shell/servidor comparten origen: primer intento con shell interceptado localhost
+fue bloqueado por proteccion loopback; corregido sin desactivar seguridad del browser
+ni modificar CORS operativo. Ningun dato o sesion personal utilizado.
+
+Recorrido integrado opt-in aprobado en3.09s mediante ejecutor final. 66 pruebas
+frontend habituales aprobadas en6.4s; integrado se omite explicitamente sin servidor
+inyectado. Tipos/lint/Prettier y Ruff/Black global262 archivos correctos. Prueba real
+de componentes/cliente/transporte/API/PostgreSQL, con autenticacion sintetica; no
+prueba de login Supabase ni navegador personal. No funcion nueva del producto.
+M3-T1 EN PROGRESO; auditoria integral y validacion de sesion pendientes. Confirmacion
+y activacion EIPD bloqueadas; sin merge/despliegue.
+
+### Ejecutar recorrido integrado aislado
+
+Con Node/npm disponibles en PATH y desde backend:
+
+```text
+../.venv/bin/python -m scripts.run_eipd_browser_test
+```
+
+El ejecutor fija destino de pruebas, verifica head/roles/registro vacio y no admite
+argumentos. No iniciar el spec integrado directamente contra servicios operativos.
+No exige claves nuevas ni exportar tokens personales. Sin CUMPLEIA_UI_API el spec
+Playwright se omite; el runner la deriva de su servidor temporal. Sin
+CUMPLEIA_UI_INTEGRATION=1 el test pytest integrado se omite en suites ordinarias.

@@ -1,3 +1,24 @@
+## 2026-10-14 — M3-T1 §271: recorrido integrado Chromium/cliente/API/DB aislada
+
+Nuevo ejecutor fijo python -m scripts.run_eipd_browser_test usa build_environment
++ verify_destination de suite EIPD, exige Node/npm local y lanza solo test integrado.
+Pytest crea expediente ficticio y servidor HTTP127.0.0.1 de puerto aleatorio con
+sesion sintetica de fixtures; Chromium390x749 renderiza componente y usa cliente/API
+reales para consultar, registrar negativa y leer evento. Verificacion DB exige un
+solo evento metadata2, actor servidor esperado y statusborrador. Cleanup de fixture
+elimina solo eventos del assessment de prueba, cierra servidor/proceso y shell temporal.
+Shell/servidor comparten origen: primer intento con shell interceptado localhost
+fue bloqueado por proteccion loopback; corregido sin desactivar seguridad del browser
+ni modificar CORS operativo. Ningun dato o sesion personal utilizado.
+
+Recorrido integrado opt-in aprobado en3.09s mediante ejecutor final. 66 pruebas
+frontend habituales aprobadas en6.4s; integrado se omite explicitamente sin servidor
+inyectado. Tipos/lint/Prettier y Ruff/Black global262 archivos correctos. Prueba real
+de componentes/cliente/transporte/API/PostgreSQL, con autenticacion sintetica; no
+prueba de login Supabase ni navegador personal. No funcion nueva del producto.
+M3-T1 EN PROGRESO; auditoria integral y validacion de sesion pendientes. Confirmacion
+y activacion EIPD bloqueadas; sin merge/despliegue.
+
 ## 2026-10-14 — M3-T1 §270: formulario negativo V3 de desarrollo
 
 Panel interno conecta recordNegativeV3 mediante sesion actual. Tras consultar
