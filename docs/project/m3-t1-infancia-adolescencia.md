@@ -60,3 +60,22 @@ obsolescencia, historial inmutable, confirmacion bloqueada y commit/rollback rea
 
 Esta delimitacion inicia una ruta residual del alcance integral; no difiere las
 otras rutas ni acredita cumplimiento juridico externo.
+
+## 2026-10-14 — M3-T1 §275: evaluador puro de infancia/adolescencia
+
+evaluate_child_adolescent_v1 valida contrato/snapshot sin mutarlos, compara grupos y
+categorias del scope, detecta codigos ajenos, material residual y resumen RAT
+contradictorio. Exige analisis/referencias/evidencia para completitud documental.
+Cruce sensible menor16 separado: adolescencia+sensibilidad no lo deduce; pendiente,
+subgrupo incoherente o afirmacion sin contexto producen motivos. Rutas legales
+expresas y grupos mixtos conservan revision; titular en infancia/cruce menor16 pide
+revision. No acredita edad/facultades ni interpreta prosa como prueba. Resultado
+completo solo documental; authorizes_action/can_confirm siemprefalse.
+
+104 pruebas focalizadas infancia/contratos/investigacion/representacion aprobadas
+en0.31s;19 nuevas del evaluador. Casos incluyen whitespace, determinismo/inmutabilidad,
+RAT ausente/resumen incoherente, ausencia/noaplicable, scope, declaracion residual,
+grupo mixto, ruta legal, otorgante y cruce no inferido. Ruff/Black correctos. Sin
+API/almacenamiento/binding nuevo, sin cambiar fallback ni gates actuales. Solo
+fixtures ficticios. Siguiente asociacion versionada propia antes de persistencia.
+M3-T1 EN PROGRESO; confirmacion/activacion EIPD bloqueadas.
