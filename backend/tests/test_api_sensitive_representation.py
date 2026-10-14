@@ -1,17 +1,23 @@
 """CRUD ficticio bajo permisos/RLS, con gates conservadores."""
 
+import asyncio
 from copy import deepcopy
 from uuid import UUID, uuid4
 
 import pytest
+from fastapi import HTTPException
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy import text, update
 
 from app.db.models import TreatmentDataCategory, TreatmentPurpose
+from app.schemas.licitud import LegalAssessmentRepresentationDraftUpdateV1
+from app.services import licitud
 from app.services.sensitive_representation_binding import (
     evaluate_sensitive_representation_association_v1,
 )
 from tests import test_api_licitud as api
+from tests import test_eipd_policy_shared_lock as locks
+from tests import test_rls_isolation_licitud as rls
 
 rat_m3 = api.rat_m3
 complete_payload = api.complete_payload
@@ -544,3 +550,100 @@ async def test_complete_document_does_not_authorize_actions(
             == "resolucion_eipd_representacion_asociacion_pendiente"
         )
         assert (await client.get(url)).json() == original
+
+
+@pytest.mark.parametrize("holder_action", ["representation", "confirmation"])
+@pytest.mark.parametrize("commit_holder", [True, False])
+async def test_representation_and_confirmation_serialize(
+    saved,
+    rat_m3,
+    complete_payload,
+    _app_session_factory,
+    _session_factory,
+    profile_a_id,
+    auth_a_id,
+    holder_action,
+    commit_holder,
+):
+    tid, out, app, org = saved
+    aid = UUID(out["id"])
+    async with AsyncClient(
+        transport=ASGITransport(app=app),
+        base_url="http://test",
+        headers={"X-Organization-Id": str(org)},
+    ) as client:
+        prepared = await client.patch(
+            f"/licitud/treatments/{tid}/assessments/{aid}",
+            json={
+                "sensitive_representation_assessment": None,
+                "consent_assessment": complete_payload,
+                "special_conditions": rat_m3[1]["special_conditions"],
+                "eipd_screening": rat_m3[1]["eipd_screening"],
+            },
+        )
+        assert prepared.status_code == 200, prepared.text
+
+    async def act(db, action):
+        if action == "confirmation":
+            return await licitud.confirm_legal_assessment_v1(
+                db, org, tid, aid, profile_a_id
+            )
+        return await licitud.update_legal_assessment_draft_v1(
+            db,
+            org,
+            tid,
+            aid,
+            profile_a_id,
+            LegalAssessmentRepresentationDraftUpdateV1(
+                sensitive_representation_assessment=DOCUMENT
+            ),
+        )
+
+    waiting_action = (
+        "confirmation" if holder_action == "representation" else "representation"
+    )
+    async with _app_session_factory() as holder, _app_session_factory() as waiter:
+        await rls._set_auth_user(holder, auth_a_id)
+        await rls._set_auth_user(waiter, auth_a_id)
+        await act(holder, holder_action)
+        pid = await waiter.scalar(text("SELECT pg_backend_pid()"))
+        task = asyncio.create_task(act(waiter, waiting_action))
+        try:
+            await locks.blocked(holder, pid)
+            assert not task.done()
+            if commit_holder:
+                await holder.commit()
+                with pytest.raises(HTTPException) as exc:
+                    await asyncio.wait_for(task, 5)
+                assert exc.value.status_code == 409
+                if waiting_action == "confirmation":
+                    assert (
+                        exc.value.detail["code"]
+                        == "representacion_confirmacion_bloqueada"
+                    )
+                await waiter.rollback()
+                final_action = holder_action
+            else:
+                await holder.rollback()
+                await asyncio.wait_for(task, 5)
+                await waiter.commit()
+                final_action = waiting_action
+        finally:
+            await locks.stop(task)
+            await holder.rollback()
+            await waiter.rollback()
+    async with _session_factory() as db:
+        row = (
+            await db.execute(
+                text(
+                    "SELECT status::text, sensitive_representation_assessment IS NOT NULL AS has_material "
+                    "FROM legal_assessments WHERE id=:id"
+                ),
+                {"id": aid},
+            )
+        ).one()
+        assert tuple(row) == (
+            ("borrador", True)
+            if final_action == "representation"
+            else ("confirmado", False)
+        )

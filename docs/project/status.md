@@ -1,3 +1,18 @@
+## 2026-10-14 — M3-T1 §248: concurrencia representacion/confirmacion
+
+Cuatro casos con PostgreSQL real y app_user prueban ambos ordenes: aporte de
+representacion primero o confirmacion ordinaria primero, con commit/rollback del
+holder. Espera comprobada por pg_blocking_pids, no por retraso supuesto. Tras commit
+el waiter relee y rechaza 409; tras rollback prosigue la otra operacion. Estado
+final exclusivo: borrador con material o confirmado sin material. No se permite
+confirmado con representacion. Confirmacion ordinaria ficticia no activa EIPD.
+
+28 pruebas API/representacion aprobadas en 8.65 s en base fija aislada verificada;
+Ruff/Black correctos. Primera corrida detecto fixture transversal obsoleto al
+cambiar consentimiento; reaporte de controles ficticios corrigio preparacion sin
+relajar gates. Sin cambios de servicio, migraciones, politica ni datos operativos.
+M3-T1 EN PROGRESO; pruebas ficticias hasta MVP; confirmacion EIPD bloqueada.
+
 ## 2026-10-14 — M3-T1 §247: documento completo y alcances en API
 
 Tres casos HTTP ficticios comprueban documento completo compatible, alcance RAT
