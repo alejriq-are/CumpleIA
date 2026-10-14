@@ -1101,3 +1101,22 @@ argumentos. No iniciar el spec integrado directamente contra servicios operativo
 No exige claves nuevas ni exportar tokens personales. Sin CUMPLEIA_UI_API el spec
 Playwright se omite; el runner la deriva de su servidor temporal. Sin
 CUMPLEIA_UI_INTEGRATION=1 el test pytest integrado se omite en suites ordinarias.
+
+## 2026-10-14 — M3-T1 §272: auditoria vigente y CI integrado aislado
+
+Matriz de aceptacion actualizada contra codigo: representacion ya tiene persistencia,
+CRUD/diagnostico/gates y registro negativo V3; no equivale a facultades reales ni
+confirmacion. Se mantienen pendientes alcance integral, rutas especiales con
+validador_no_implementado, fuentes/aceptacion y validacion de sesion personal.
+No se reclasifican silenciosamente como diferidas ni se declara DONE.
+
+Nuevo trabajo CI separado eipd-integration instala Python/Node/Chromium, inicia
+PostgreSQL exclusivo cumpleia_eipd_tests_20261009, aplica migraciones y ejecuta
+runner fijo integrado. Environmentdevelopment solo para esa DB ficticia/efimera;
+roles separados y secretos dummy. No comparte servicio con pruebas generales ni
+usa tokens personales. YAML parseado y comprobados nombreDB/env/runner; diffcheck
+correcto. Recorrido local real ya validado§271; primera ejecucion remota del nuevo
+job pendiente tras push. CIec5679b frontend success/backend en ejecucion al consultar;
+no se afirma suite integral actual aprobada. Sin cambio de logica del producto.
+Siguiente inventario de rutas especiales residuales contra catalogo/diseno y
+resolucion de fallos CI si aparecen. M3-T1 EN PROGRESO; EIPD bloqueada.

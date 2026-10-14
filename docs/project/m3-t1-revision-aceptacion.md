@@ -1,12 +1,14 @@
 # M3-T1 — Revisión de aceptación
 
-Estado consolidado al 2026-10-13: [balance vigente](m3-t1-balance-validacion.md).
-El encabezado y checkpoints anteriores conservan su fecha historica. M3-T1 EN PROGRESO.
+Estado consolidado al 2026-10-14 (§272): M3-T1 EN PROGRESO.
+Ver [estado de trabajo](status.md) y [representacion persistente](m3-t1-representacion-persistencia.md).
+El alcance integral no se reemplaza por los limites de entregas anteriores.
 
-Fecha de actualizacion: 2026-10-09 (§122). Estado: EN PROGRESO. Revisión documental y de código;
-no modifica reglas ni amplía el alcance. Última suite completa registrada:
-3654 passed (§106), posterior a concurrencia administrativa HTTP.
-Checkpoints inferiores son históricos; el total no acredita cierre integral.
+Evidencia reciente: catalogo EIPD ampliado942 aprobado (§268),66 pruebas frontend
+(§271) y recorrido Chromium/cliente/API/PostgreSQL aislado aprobado (§271).
+Estos conteos no equivalen a suite integral actual ni validacion juridica externa.
+No sesion Supabase personal verificada en el recorrido integrado; usa actor sintetico.
+Checkpoints inferiores conservan fecha y contexto historicos.
 
 ## Estado actual del canal operativo local
 
@@ -29,7 +31,7 @@ certifica todas las combinaciones ni constituye validación jurídica externa.
 | Criterio | Estado observado | Evidencia |
 | --- | --- | --- |
 | Evaluación por finalidad, serie/versiones y alcance M2 | Implementado y probado | schemas/licitud.py; services/licitud.py; tests/test_services_licitud.py; tests/test_api_licitud.py |
-| Tablas, constraints, índices, JSONB y migraciones | Implementado; head local b17d95c0286f verificado §122 | db/models.py; alembic/versions/5997a757f17b_modulo3_licitud_persistencia.py y migraciones posteriores |
+| Tablas, constraints, índices, JSONB y migraciones | Implementado; head local f52d6c9b3e10 verificado §§260/271 | db/models.py; alembic/versions/5997a757f17b_modulo3_licitud_persistencia.py y migraciones posteriores |
 | Tenant/RLS y FK compuestas | Probado en PostgreSQL/app_user | tests/test_rls_isolation_licitud.py y tests/test_api_licitud.py |
 | Canonización, hash y snapshot desde M2 | Implementado y probado | tests/test_services_licitud.py; HTTP con RAT real |
 | Seis bases ordinarias y preparación propia | Implementado y probado | services/{consentimiento,lia,contract,legal_obligation,rights_defense,economic_obligations}.py; pruebas de servicios/API |
@@ -41,13 +43,29 @@ certifica todas las combinaciones ni constituye validación jurídica externa.
 | Excepciones sensible/biometrica de derechos | Preparacion/readiness integradas; confirmacion bloqueada por EIPD | services/{sensitive_rights_exception,biometric_rights_exception,special_conditions,licitud}.py; seis HTTP por cada excepcion (§56/§58) |
 | Resolucion EIPD e historial | Persistencia/asociaciones/API, evaluador documental, readiness/vigencia, accion humana y composicion orientativa implementados; continuar/gates pendientes | eipd_resolution.py; db/models.py; migracion b51d3f6a9c20; 36 pruebas PostgreSQL/RLS (§63) y 25 HTTP documentales (§64); 18 pruebas de readiness/vigencia (§66) |
 | Regímenes especiales restantes | Pendiente funcional; bloqueo explícito | services/special_conditions.py mantiene validador_no_implementado para rutas no soportadas |
-| Representación en ruta sensible | Pendiente funcional delimitado | sensitive_consent.py: representacion_no_preparada; no implica prohibición jurídica de representación |
+| Representación en ruta sensible | Persistencia, CRUD, diagnostico y revisiones negativas V3 integrados; confirmacion/activacion bloqueadas | sensitive_representation*.py; eipd_controls_v4.py; test_api_sensitive_representation.py; test_api_eipd_negative_review_v3.py; test_eipd_browser_integration.py |
 | Coexistencia sensible/geolocalización | Probada a nivel transversal y HTTP conjunto | test_sensitive_and_geolocation_transversal; test_api_sensitive_geolocation_joint_confirmation (4 casos) |
 | Concurrencia/rollback de ruta sensible | Seis bases con RAT simulado; coexistencia sensible/geolocalización con RAT real y base consentimiento | test_confirm_postgres_reemplazo_y_rollback_real; test_concurrencia_real_revalida_tras_bloqueo; test_confirmation_concurrent_real_rat_joint |
 
 Las rutas pendientes incluyen excepciones sensibles del catálogo, excepciones y
 contextos restringidos de salud, biometría, infancia/adolescencia e investigación. La vulnerabilidad
 sigue produciendo revisión. No se declara ilícita una ruta por faltar su validador.
+
+## Auditoria vigente §272
+
+| Area | Evidencia actual | Brecha conservada |
+| --- | --- | --- |
+| Representacion sensible | Binding propio, SQL/RLS/CRUD, diagnostico, gates y concurrencia | No acreditar facultades/autenticidad/revocacion ni habilitar confirmacion |
+| Revision negativa sucesora | POST V3, lectura V3, cliente estricto, formulario y recorrido real aislado | Login/sesion personal y revision final del alcance integral |
+| EIPD positiva | Bloqueos en servidor y sin botones de confirmacion/activacion | Politica, fuentes y aceptacion no habilitadas; no inferir autorizacion de metadata |
+| Regimenes especiales | special_conditions mantiene fallback validador_no_implementado y condiciones residuales | Inventariar rutas no soportadas contra catalogo y diseno antes de elegir siguiente implementacion |
+| Cobertura de pruebas | Suite focal942,frontend66 e integrada aislada | No declarar suite integral actual aprobada sin resultado CI del HEAD |
+| Automatizacion integrada | Trabajo CI separado con PostgreSQL exclusivo y runner fijo | Resultado remoto del nuevo trabajo aun pendiente de su primera ejecucion |
+
+La persistencia/documentacion de representacion no sustituye el gate conservador
+representacion_no_preparada de sensitive_consent. Debe evaluarse con el conjunto
+de controles antes de cualquier ampliacion positiva. No se difieren silenciosamente
+regimenes especiales pendientes ni se marca DONE por disponer del formulario.
 
 ## Brechas y siguiente orden propuesto
 
