@@ -820,3 +820,5 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] M3-T1 §225: usuario comprueba visualmente requisitos y revision ficticia en Edge 390 x 749 tras actualizacion local Next; sin comprobacion nueva de status HTTP o login.
 
 - [x] M3-T1 §226: ESLint CLI sustituye next lint y revisa tambien e2e/config/middleware; falso positivo callback fixture corregido sin desactivar reglas.
+
+- [x] M3-T1 §227: aviso superior de pruebas ficticias hasta MVP y bloqueos visibles completo en captura Edge 390 x 749 del usuario.

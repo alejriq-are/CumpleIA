@@ -1,3 +1,16 @@
+## 2026-10-13 — M3-T1 §227: aviso ficticio comprobado en movil
+
+Captura usuario Edge Responsive 390 x 749 en consulta interna local: aviso superior
+completo y legible indica uso exclusivo de datos ficticios hasta version MVP,
+M3-T1 en progreso y confirmacion/activacion EIPD bloqueadas. Titulo y explicacion
+solo consulta visibles. Completa evidencia visual pendiente del aviso §218, fuera
+de encuadre en §225. No se copian email ni identificadores de la captura.
+
+Sin medicion instrumental de overflow, comprobacion HTTP nueva o prueba de 401.
+Errores visibles de extensiones y mensajes Fast Refresh no acreditan fallo API.
+Solo documentacion; codigo/datos/permisos/politica sin cambios, tests no repetidos.
+M3-T1 EN PROGRESO; pruebas ficticias hasta MVP; bloqueos operativos preservados.
+
 ## 2026-10-13 — M3-T1 §226: ESLint directo en frontend
 
 npm run lint usa ESLint CLI en archivos js/jsx/ts/tsx de todo frontend; excluye
