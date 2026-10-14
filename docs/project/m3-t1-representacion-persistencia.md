@@ -469,3 +469,21 @@ V4 con grupos/traducciones/decisiones bloqueadas/limpieza al leer historia. Sele
 ambiguo y traducciones duplicadas detectados por checks se corrigieron antes de
 validacion final. No prueba de sesion personal real ni cambio de fixture operativo.
 M3-T1 EN PROGRESO; datos ficticios hasta MVP; activacion EIPD bloqueada.
+
+## 2026-10-14 — M3-T1 §262: lectura HTTP de revisiones V3
+
+GET reviews/{review_id}/v3 serializa metadata1/2/null guardada con salida version3,
+sin reconstruir binding, consultar vigencia actual o atribuir autoridad. Consulta
+comparte filtro autenticado de org/tratamiento/evaluacion/evento y permiso view_content;
+suscripcion activa conservada. GET V2 mantiene contrato para historia V1/null y
+rechaza metadata2 con 409 revision_eipd_metadata_v2_requiere_salida_v3, sin convertirla
+a identidad V1 ni provocar error interno. No endpoint nuevo de escritura.
+
+Tres casos parametrizados nuevos con eventos ficticios aislados metadata1/2/null;
+lectura repetida, cero INSERT/UPDATE/DELETE, org no autorizada403, padre inexistente404,
+evento ajeno bajo padre propio404 y compatibilidad V2. 28 pruebas lectura V3/V2 y
+metadata aprobadas en 4.10 s; Ruff/Black correctos. Fixture app_user dependiente
+registrada tras primer intento sin esa fixture; sin cambiar permisos. Runner incluye
+suite. No datos/eventos operativos creados, politica o accion habilitada.
+Proximo: cliente/vista historica compatible y lectura de ultima metadata sucesora
+antes de integrar cualquier registro negativo V3. M3-T1 EN PROGRESO; EIPD bloqueada.
