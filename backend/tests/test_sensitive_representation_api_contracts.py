@@ -112,3 +112,24 @@ def test_legacy_models_remain_without_new_field():
         LegalAssessmentOut,
     ]:
         assert "sensitive_representation_assessment" not in model.model_fields
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        {"can_confirm": True},
+        {"authorizes_action": True},
+        {"evaluation_version": 2},
+        {
+            "result": "completo",
+            "issues": [{"field": "PRUEBA", "code": "PRUEBA", "category": "incompleto"}],
+        },
+    ],
+)
+def test_readiness_cannot_claim_authority_or_inconsistent_completeness(change):
+    from app.schemas.licitud import SensitiveRepresentationReadinessOutV1
+
+    with pytest.raises(ValidationError):
+        SensitiveRepresentationReadinessOutV1.model_validate(
+            {"result": "completo", "issues": [], **change}
+        )

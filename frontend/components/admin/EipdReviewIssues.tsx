@@ -11,8 +11,32 @@ const stages: Record<EipdReviewIssueV3["stage"], string> = {
   sources: "Fuentes oficiales",
   activation: "Habilitación EIPD",
   review: "Revisión",
+  representation: "Representación sensible",
 };
 const messages: Record<string, string> = {
+  representacion_material_pendiente: "Falta aportar este dato documental de la representación.",
+  representacion_documento_ausente: "Falta el documento de representación.",
+  representacion_clase_pendiente: "Falta identificar la clase de representación.",
+  representacion_clase_incompatible:
+    "La clase de representación no coincide con quien otorga el consentimiento.",
+  representacion_otorgante_pendiente: "Falta identificar quién otorga el consentimiento.",
+  representacion_documento_incompatible:
+    "El documento de representación no corresponde al otorgante registrado.",
+  representacion_ruta_no_admitida: "Esta ruta de representación requiere revisión.",
+  representacion_alcance_pendiente: "Falta indicar el alcance de la representación.",
+  representacion_alcance_rat_incompatible:
+    "El alcance de representación no coincide con el inventario seleccionado.",
+  representacion_alcance_sensible_pendiente:
+    "Falta indicar el alcance del consentimiento sensible.",
+  representacion_alcance_sensible_incompatible:
+    "El alcance de representación y consentimiento sensible no coinciden.",
+  representacion_evidencia_pendiente: "Falta una referencia de evidencia documental.",
+  representacion_fecha_futura: "La fecha documentada es posterior al día de evaluación.",
+  representacion_intervalo_finalizado: "El intervalo de vigencia declarado ya finalizó.",
+  representacion_regimen_concurrente_pendiente: "Hay un régimen concurrente pendiente de revisión.",
+  representacion_contexto_actual_no_disponible:
+    "No se pudo reconstruir el contexto actual de representación.",
+  asociacion_documento_obsoleta: "El documento cambió y requiere un reaporte explícito.",
   campo_obligatorio: "Falta completar este campo.",
   pregunta_omitida: "Falta responder esta pregunta.",
   expediente_ausente: "Falta el documento de evaluación.",
@@ -32,6 +56,21 @@ const messages: Record<string, string> = {
     "La política para investigación sigue pendiente de implementación.",
 };
 const fields: Record<string, string> = {
+  representation_assessment: "Documento de representación",
+  representation_kind: "Clase de representación",
+  representative_reference: "Referencia del representante",
+  represented_subjects_reference: "Referencia de titulares representados",
+  authority_document_reference: "Referencia del documento de facultades",
+  authority_document_version: "Versión del documento de facultades",
+  authority_basis_description: "Fundamento declarado de representación",
+  express_authority_analysis: "Análisis declarado de facultades",
+  scope_match_analysis: "Correspondencia del alcance",
+  validity_analysis: "Análisis de vigencia",
+  limitations: "Limitaciones declaradas",
+  revocation_information: "Información declarada de revocación",
+  issued_on: "Fecha del documento",
+  valid_from: "Inicio del intervalo declarado",
+  valid_until: "Fin del intervalo declarado",
   justification: "Justificación",
   legal_basis: "Base de licitud",
   scope: "Alcance",

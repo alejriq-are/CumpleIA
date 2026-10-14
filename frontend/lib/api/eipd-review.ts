@@ -35,7 +35,8 @@ export type EipdReviewIssueV3 = {
     | "resolution"
     | "sources"
     | "activation"
-    | "review";
+    | "review"
+    | "representation";
   field: string;
   code: string;
   category: "incompleto" | "requiere_revision" | "pendiente_revision" | "supuesto_declarado";
@@ -62,12 +63,22 @@ export type EipdPolicyStatus = {
   acceptance_status: "pendiente" | "aceptada";
   activation: "deshabilitada" | "habilitada";
 };
+export type SensitiveRepresentationReadiness = {
+  evaluation_version: 1;
+  evaluation_scope: "requisitos_documentales";
+  authorizes_action: false;
+  can_confirm: false;
+  result: "no_aplicable" | "incompleto" | "requiere_revision" | "completo";
+  issues: EipdReviewIssueV3[];
+};
 export type EipdReviewPreparationOut = {
   assessment_id: string;
   status: "borrador" | "confirmado" | "reemplazado";
   review_prerequisites_v3: EipdReviewPrerequisitesByDecisionV3 | null;
   latest_review_context_status: EipdLatestReviewContextStatus | null;
   policy_status: EipdPolicyStatus | null;
+  sensitive_representation: SensitiveRepresentationReadiness | null;
+  representation_context_coverage: "no_aplica" | "pendiente";
 };
 export type EipdResolutionReviewOutV2 = {
   response_schema_version: 2;
@@ -178,6 +189,16 @@ export const eipdReviewApi = {
     const value = await apiFetch<{
       assessment_id: string;
       status: EipdReviewPreparationOut["status"];
+      sensitive_representation?:
+        | (Omit<SensitiveRepresentationReadiness, "issues"> & {
+            issues: Array<{
+              field: string;
+              code: string;
+              category: "incompleto" | "requiere_revision";
+            }>;
+          })
+        | null;
+      representation_context_coverage?: "no_aplica" | "pendiente";
       eipd_controls_v3: {
         evaluation_version: 3;
         can_confirm: false;
@@ -196,6 +217,54 @@ export const eipdReviewApi = {
         value.assessment_id.toLowerCase() === scope.assessmentId.toLowerCase() &&
         ["borrador", "confirmado", "reemplazado"].includes(value.status)
     );
+    const rawRepresentation = value.sensitive_representation ?? null;
+    const coverage = value.representation_context_coverage ?? "no_aplica";
+    requireContract(["no_aplica", "pendiente"].includes(coverage));
+    requireContract((coverage === "pendiente") === (rawRepresentation !== null));
+    let representation: SensitiveRepresentationReadiness | null = null;
+    if (rawRepresentation !== null) {
+      requireContract(
+        rawRepresentation.evaluation_version === 1 &&
+          rawRepresentation.evaluation_scope === "requisitos_documentales" &&
+          rawRepresentation.authorizes_action === false &&
+          rawRepresentation.can_confirm === false &&
+          ["no_aplicable", "incompleto", "requiere_revision", "completo"].includes(
+            rawRepresentation.result
+          ) &&
+          Array.isArray(rawRepresentation.issues)
+      );
+      for (const issue of rawRepresentation.issues) {
+        requireContract(
+          issue &&
+            typeof issue.field === "string" &&
+            typeof issue.code === "string" &&
+            ["incompleto", "requiere_revision"].includes(issue.category)
+        );
+      }
+      const expected = rawRepresentation.issues.some(
+        (issue) => issue.category === "requiere_revision"
+      )
+        ? "requiere_revision"
+        : rawRepresentation.issues.length > 0
+          ? "incompleto"
+          : "completo";
+      requireContract(
+        rawRepresentation.result === expected ||
+          (rawRepresentation.result === "no_aplicable" && rawRepresentation.issues.length === 0)
+      );
+      representation = {
+        evaluation_version: 1,
+        evaluation_scope: "requisitos_documentales",
+        authorizes_action: false,
+        can_confirm: false,
+        result: rawRepresentation.result,
+        issues: rawRepresentation.issues.map((issue) => ({
+          ...issue,
+          stage: "representation",
+          question_id: null,
+        })),
+      };
+    }
     const controls = value.eipd_controls_v3;
     if (controls !== null) {
       requireContract(
@@ -263,7 +332,10 @@ export const eipdReviewApi = {
     return {
       assessment_id: value.assessment_id,
       status: value.status,
-      review_prerequisites_v3: controls === null ? null : controls.review_prerequisites_v3,
+      review_prerequisites_v3:
+        controls === null || coverage === "pendiente" ? null : controls.review_prerequisites_v3,
+      sensitive_representation: representation,
+      representation_context_coverage: coverage,
       policy_status:
         controls === null
           ? null
@@ -273,7 +345,9 @@ export const eipdReviewApi = {
               activation: controls.policy.activation,
             },
       latest_review_context_status:
-        controls === null ? null : controls.review_context_metadata_status,
+        controls === null || coverage === "pendiente"
+          ? null
+          : controls.review_context_metadata_status,
     };
   },
   async event(scope: EipdReviewScope, reviewId: string): Promise<EipdResolutionReviewOutV2> {

@@ -1,8 +1,9 @@
 # M3-T1 — Integracion persistente de representacion sensible
 
 Estado: plan tecnico de implementacion, 2026-10-14 (§240).
-Storage/migracion aplicados (§242) y CRUD conectado (§243); readiness de
-representacion pendiente con bloqueo controlado; confirmacion bloqueada.
+Storage/migracion aplicados (§242), CRUD conectado (§243) y diagnostico
+readiness/interfaz integrado (§244); cobertura EIPD de representacion pendiente
+y confirmacion bloqueada.
 Contratos/binding/evaluador puros existentes: §§237–239.
 
 ## Almacenamiento y compatibilidad
@@ -166,3 +167,30 @@ Runner incorpora CRUD. Ruff/Black correctos; sin migracion adicional.
 Proximo: diagnostico versionado readiness de representacion y cobertura EIPD
 conservadora, manteniendo can_confirm=false. M3-T1 EN PROGRESO, pruebas ficticias
 hasta MVP; confirmacion/activacion bloqueadas.
+
+
+## 2026-10-14 — M3-T1 §244: diagnostico de representacion en readiness/interfaz
+
+Contrato de salida versionado con result/motivos, flags false y cobertura pendiente
+cuando hay diagnostico. Backend evalua contra RAT actual; motivos de obsolescencia,
+material/alcance/fechas y contexto no disponible. Exige representacion ausente para
+consentimiento representado sensible; documento completo solo comprueba datos.
+Gate de confirmacion conservado. Readiness vuelve a 200 con bloque propio en vez
+de 409 temporal. Sin documento/representacion sensible, salida null/no_aplica.
+
+Con diagnostico pendiente, proyeccion V3 marca las tres decisiones no preparadas,
+metadata de accion null y motivo de asociacion pendiente. No toca eventos, hashes
+historicos ni habilita nuevas revisiones. Estado de metadata interno anterior
+sigue referido al contexto de su version; campo cobertura explicito lo delimita.
+Cliente valida diagnostico/coherencia/flags y suprime vigencia global/prerrequisitos
+que no cubren representacion. Pantalla muestra bloque, motivos españoles y aviso
+sin facultad/autenticidad; consulta historica retira el bloque actual. Sin botones
+nuevos de escritura o confirmacion. Compatible con respuesta legacy sin bloque.
+
+132 pruebas backend focalizadas aprobadas (5.45 s), entorno aislado verificado;
+20 cliente y 11 interacciones Chromium frontend aprobadas (31, 4.5 s), tipos/lint
+correctos. Incluye actualizacion test OpenAPI al contrato sucesor sin retirar V3,
+rechazo de flags/resultados incoherentes, contexto obsoleto/retiro, tres decisiones
+pendientes y UI/historia. Ruff/Black/Prettier correctos. No suite integral nueva,
+prueba visual con sesion real del bloque nuevo ni cambio de fixture operativo.
+M3-T1 EN PROGRESO; pruebas ficticias hasta MVP; confirmacion/activacion bloqueadas.

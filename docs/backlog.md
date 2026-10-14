@@ -855,3 +855,4 @@ No habilitada; pruebas ficticias hasta MVP. Checklist historico no acredita facu
 - [x] §241: centralizacion sin ciclo y contratos futuros Create/Update/Out, 107 pruebas relacionadas; endpoints activos sin nuevo campo. Persistencia pendiente.
 - [x] §242: migracion/storage nullable de representacion, barrera SQL no confirmado y RLS probados; 116 relacionadas aprobadas, API del campo pendiente.
 - [x] §243: CRUD de representacion conectado y gates conservadores; 127 pruebas del bloque aprobadas, readiness especifico pendiente (409 controlado).
+- [x] §244: diagnostico representacion en readiness/interfaz, cobertura pendiente explicita y vigencia global suprimida; 132 backend y 31 frontend aprobadas. Sin habilitacion.

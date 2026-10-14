@@ -189,10 +189,15 @@ async def test_confirmation_readiness_and_review_fail_closed(saved):
             assert result.status_code == 409, result.text
             assert result.json()["detail"]["code"] == code
         result = await client.get(url + "/readiness")
-        assert result.status_code == 409
-        assert (
-            result.json()["detail"]["code"]
-            == "representacion_readiness_integracion_pendiente"
+        assert result.status_code == 200, result.text
+        body = result.json()
+        assert body["representation_context_coverage"] == "pendiente"
+        assert body["sensitive_representation"]["result"] == "incompleto"
+        assert not body["sensitive_representation"]["can_confirm"]
+        assert not body["sensitive_representation"]["authorizes_action"]
+        assert any(
+            item["code"] == "representacion_confirmacion_bloqueada"
+            for item in body["confirmation_blockers"]
         )
         assert (await client.get(url)).json()["status"] == "borrador"
 
@@ -268,3 +273,74 @@ async def test_unknown_root_fields_do_not_apply_partial_change(saved):
         )
         assert response.status_code == 422
         assert (await client.get(url)).json() == before
+
+
+async def test_readiness_reports_stale_context_and_removal(saved):
+    tid, out, app, org = saved
+    url = f"/licitud/treatments/{tid}/assessments/{out['id']}"
+    async with AsyncClient(
+        transport=ASGITransport(app=app),
+        base_url="http://test",
+        headers={"X-Organization-Id": str(org)},
+    ) as client:
+        assert (
+            await client.patch(
+                url,
+                json={
+                    "consent_assessment": {
+                        "given_by": "mandatario",
+                        "notes": "PRUEBA: cambio",
+                    }
+                },
+            )
+        ).status_code == 200
+        response = await client.get(url + "/readiness")
+        assert response.status_code == 200, response.text
+        diagnosis = response.json()["sensitive_representation"]
+        assert diagnosis["result"] == "requiere_revision"
+        assert any(
+            issue["code"] == "asociacion_contexto_obsoleta"
+            for issue in diagnosis["issues"]
+        )
+        assert (
+            await client.patch(url, json={"sensitive_representation_assessment": None})
+        ).status_code == 200
+        response = await client.get(url + "/readiness")
+        assert response.status_code == 200
+        # Fixture RAT ordinario no sensible: no inferir representacion sensible por given_by solo.
+        assert response.json()["sensitive_representation"] is None
+        assert response.json()["representation_context_coverage"] == "no_aplica"
+
+
+async def test_representation_marks_all_v3_review_decisions_pending(saved):
+    tid, out, app, org = saved
+    url = f"/licitud/treatments/{tid}/assessments/{out['id']}"
+    async with AsyncClient(
+        transport=ASGITransport(app=app),
+        base_url="http://test",
+        headers={"X-Organization-Id": str(org)},
+    ) as client:
+        result = await client.patch(url, json={"research_assessment": {}})
+        assert result.status_code == 200, result.text
+        result = await client.get(url + "/readiness")
+        assert result.status_code == 200, result.text
+        controls = result.json()["eipd_controls_v3"]
+        assert controls is not None
+        for name in ("continuar", "requiere_cambios", "no_continuar"):
+            decision = controls["review_prerequisites_v3"][name]
+            assert decision["prerequisites_met"] is False
+            assert decision["context_metadata"] is None
+            assert any(
+                issue["code"] == "resolucion_eipd_representacion_asociacion_pendiente"
+                for issue in decision["issues"]
+            )
+        assert (
+            await client.post(
+                url + "/eipd-resolution/reviews/v2",
+                json={
+                    "decision": "requiere_cambios",
+                    "rationale": "PRUEBA",
+                    "review_reference": "PRUEBA",
+                },
+            )
+        ).status_code == 409

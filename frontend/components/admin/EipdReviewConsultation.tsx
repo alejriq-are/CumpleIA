@@ -31,7 +31,8 @@ export function consultationError(error: unknown): string {
 }
 
 export function PreparationView({ value }: { value: EipdReviewPreparationOut }) {
-  const result = value.review_prerequisites_v3;
+  const result =
+    value.representation_context_coverage === "pendiente" ? null : value.review_prerequisites_v3;
   return (
     <section aria-labelledby="preparation-heading" className="space-y-4">
       <h2 id="preparation-heading" className="text-xl font-semibold">
@@ -72,35 +73,74 @@ export function PreparationView({ value }: { value: EipdReviewPreparationOut }) 
           </p>
         </section>
       )}
-      {value.latest_review_context_status !== null && (
+      {value.sensitive_representation && (
         <section
-          aria-labelledby="latest-review-heading"
-          className="rounded-lg border border-blue-200 bg-blue-50 p-4"
+          aria-labelledby="representation-heading"
+          className="space-y-3 rounded-lg border bg-white p-4"
         >
-          <h3 id="latest-review-heading" className="font-semibold">
-            Vínculo de la última revisión con el material actual
+          <h3 id="representation-heading" className="font-semibold">
+            Representación del consentimiento sensible
           </h3>
-          <p className="mt-2">
+          <p>
             {
               {
-                sin_revision: "No hay una revisión guardada para este expediente.",
-                sin_metadatos:
-                  "La última revisión no tiene identidad documental registrada; no se puede comparar con el material actual.",
-                vigente:
-                  "El vínculo documental de la última revisión corresponde al material actual.",
-                obsoleta:
-                  "El vínculo documental de la última revisión está desactualizado respecto del material actual.",
-              }[value.latest_review_context_status]
+                no_aplicable: "No aplica este diagnóstico.",
+                incompleto: "Documentación incompleta.",
+                requiere_revision: "La documentación requiere revisión.",
+                completo: "Campos documentales completos.",
+              }[value.sensitive_representation.result]
             }
           </p>
-          <p className="mt-2 text-sm text-gray-600">
-            Este estado no aprueba el expediente ni autoriza continuar, confirmar o activar. Se
-            refiere a la última revisión, aunque consultes otro evento histórico.
+          <p className="text-sm text-gray-600">
+            Este diagnóstico no verifica facultades ni autenticidad y no autoriza confirmar el
+            expediente.
           </p>
+          {value.sensitive_representation.issues.length > 0 && (
+            <EipdReviewIssues issues={value.sensitive_representation.issues} />
+          )}
         </section>
       )}
+      {value.representation_context_coverage === "pendiente" && (
+        <p role="status" className="rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm">
+          Las revisiones EIPD anteriores no cubren este material de representación. La integración
+          de esa cobertura está pendiente; no se presenta vigencia global ni se permite registrar
+          una nueva revisión EIPD o confirmar.
+        </p>
+      )}
+      {value.latest_review_context_status !== null &&
+        value.representation_context_coverage !== "pendiente" && (
+          <section
+            aria-labelledby="latest-review-heading"
+            className="rounded-lg border border-blue-200 bg-blue-50 p-4"
+          >
+            <h3 id="latest-review-heading" className="font-semibold">
+              Vínculo de la última revisión con el material actual
+            </h3>
+            <p className="mt-2">
+              {
+                {
+                  sin_revision: "No hay una revisión guardada para este expediente.",
+                  sin_metadatos:
+                    "La última revisión no tiene identidad documental registrada; no se puede comparar con el material actual.",
+                  vigente:
+                    "El vínculo documental de la última revisión corresponde al material actual.",
+                  obsoleta:
+                    "El vínculo documental de la última revisión está desactualizado respecto del material actual.",
+                }[value.latest_review_context_status]
+              }
+            </p>
+            <p className="mt-2 text-sm text-gray-600">
+              Este estado no aprueba el expediente ni autoriza continuar, confirmar o activar. Se
+              refiere a la última revisión, aunque consultes otro evento histórico.
+            </p>
+          </section>
+        )}
       {result === null ? (
-        <p>Este expediente no tiene diagnóstico de revisión V3 disponible.</p>
+        <p>
+          {value.representation_context_coverage === "pendiente"
+            ? "Requisitos de revisión EIPD pendientes de integrar con la representación."
+            : "Este expediente no tiene diagnóstico de revisión V3 disponible."}
+        </p>
       ) : (
         <div className="space-y-4">
           {(Object.keys(labels) as (keyof typeof labels)[]).map((decision) => {

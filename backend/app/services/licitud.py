@@ -35,7 +35,6 @@ from app.schemas.licitud import (
     EipdResolutionReviewIn,
     LegalAssessmentDraftCreate,
     LegalAssessmentDraftUpdate,
-    LegalAssessmentReadinessOut,
     LegalAssessmentScopeIn,
     RatCanonicalAutomatedDecisionsV1,
     RatCanonicalContextV1,
@@ -56,6 +55,9 @@ from app.schemas.licitud import (
     RatSnapshotSpecialRegimesV1,
     RatSnapshotSystemV1,
     RatSnapshotThirdPartyV1,
+)
+from app.schemas.licitud import (
+    LegalAssessmentRepresentationReadinessOutV1 as LegalAssessmentReadinessOut,
 )
 from app.services import rat as rat_service
 from app.services.biometric import evaluate_biometric_assessment_v1
@@ -119,6 +121,7 @@ from app.services.research_binding import (
 )
 from app.services.rights_defense import evaluate_rights_defense_assessment_v1
 from app.services.sensitive_consent import evaluate_sensitive_consent_assessment_v1
+from app.services.sensitive_representation import evaluate_sensitive_representation_v1
 from app.services.sensitive_representation_binding import (
     bind_sensitive_representation_v1,
 )
@@ -2368,12 +2371,6 @@ async def get_legal_assessment_readiness_v1(
     assessment = await get_legal_assessment_v1(
         db, organization_id, treatment_id, assessment_id
     )
-    # La metadata EIPD anterior no cubre representacion: no presentar vigencia global.
-    if getattr(assessment, "sensitive_representation_assessment", None) is not None:
-        raise HTTPException(
-            status_code=409,
-            detail={"code": "representacion_readiness_integracion_pendiente"},
-        )
     blockers: list[dict] = []
 
     def block(field, code, message):
@@ -2455,6 +2452,52 @@ async def get_legal_assessment_readiness_v1(
             "rat_context_snapshot",
             "contexto_rat_no_disponible",
             "No se pudo recomponer el contexto actual; revise finalidad y alcance",
+        )
+    representation = None
+    representation_material = getattr(
+        assessment, "sensitive_representation_assessment", None
+    )
+    given_by = (assessment.consent_assessment or {}).get("given_by")
+    rat = current_snapshot
+    representation_needed = representation_material is not None or (
+        given_by in ("representante_legal", "mandatario")
+        and rat is not None
+        and (
+            rat.special_regimes.has_sensitive_data
+            or any(item.is_sensitive for item in rat.data_categories)
+        )
+    )
+    if representation_needed:
+        if current_snapshot is None:
+            representation = {
+                "result": "requiere_revision",
+                "issues": [
+                    {
+                        "field": "rat_context_snapshot",
+                        "code": "representacion_contexto_actual_no_disponible",
+                        "category": "requiere_revision",
+                    }
+                ],
+            }
+        else:
+            context = _sensitive_representation_context_v1(assessment)
+            context["rat_context_snapshot"] = current_snapshot
+            try:
+                diagnostic = evaluate_sensitive_representation_v1(
+                    representation_material,
+                    context,
+                    evaluated_on=datetime.now(UTC).date(),
+                )
+            except ValidationError:
+                raise _bad_request("Contrato de representacion invalido") from None
+            representation = {
+                "result": diagnostic.result,
+                "issues": [asdict(item) for item in diagnostic.issues],
+            }
+        block(
+            "sensitive_representation_assessment",
+            "representacion_confirmacion_bloqueada",
+            "La representacion documental permanece bloqueada para confirmacion",
         )
     research = None
     consent = None
@@ -2761,11 +2804,30 @@ async def get_legal_assessment_readiness_v1(
         )
     except ValidationError:
         raise _bad_request("Contrato documental de la evaluación inválido") from None
+    if representation is not None and eipd_controls_v3 is not None:
+        # Solo proyeccion actual: no alterar eventos o identidades persistidos.
+        decisions = eipd_controls_v3["review_prerequisites_v3"]
+        for name in ("continuar", "requiere_cambios", "no_continuar"):
+            decisions[name]["prerequisites_met"] = False
+            decisions[name]["context_metadata"] = None
+            decisions[name]["issues"].append(
+                {
+                    "stage": "review",
+                    "field": "sensitive_representation_assessment",
+                    "code": "resolucion_eipd_representacion_asociacion_pendiente",
+                    "category": "pendiente_revision",
+                    "question_id": None,
+                }
+            )
     return LegalAssessmentReadinessOut.model_validate(
         {
             "assessment_id": assessment.id,
             "status": assessment.status,
             "legal_basis": assessment.legal_basis,
+            "sensitive_representation": representation,
+            "representation_context_coverage": (
+                "pendiente" if representation is not None else "no_aplica"
+            ),
             "rat_context_current": rat_current,
             "research": research,
             "consent": consent,

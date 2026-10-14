@@ -967,3 +967,29 @@ CI=true: Prettier global correcto, ESLint y tipos aprobados, 23 pruebas ficticia
 EIPD aprobadas (4.2 s). No GitHub remoto ni ejecucion RAT autenticado, build no
 repetido para formato. Politica/datos/permisos sin cambios. M3-T1 EN PROGRESO;
 pruebas ficticias hasta MVP; confirmacion/activacion bloqueadas.
+
+## 2026-10-14 — M3-T1 §244: diagnostico de representacion en readiness/interfaz
+
+Contrato de salida versionado con result/motivos, flags false y cobertura pendiente
+cuando hay diagnostico. Backend evalua contra RAT actual; motivos de obsolescencia,
+material/alcance/fechas y contexto no disponible. Exige representacion ausente para
+consentimiento representado sensible; documento completo solo comprueba datos.
+Gate de confirmacion conservado. Readiness vuelve a 200 con bloque propio en vez
+de 409 temporal. Sin documento/representacion sensible, salida null/no_aplica.
+
+Con diagnostico pendiente, proyeccion V3 marca las tres decisiones no preparadas,
+metadata de accion null y motivo de asociacion pendiente. No toca eventos, hashes
+historicos ni habilita nuevas revisiones. Estado de metadata interno anterior
+sigue referido al contexto de su version; campo cobertura explicito lo delimita.
+Cliente valida diagnostico/coherencia/flags y suprime vigencia global/prerrequisitos
+que no cubren representacion. Pantalla muestra bloque, motivos españoles y aviso
+sin facultad/autenticidad; consulta historica retira el bloque actual. Sin botones
+nuevos de escritura o confirmacion. Compatible con respuesta legacy sin bloque.
+
+132 pruebas backend focalizadas aprobadas (5.45 s), entorno aislado verificado;
+20 cliente y 11 interacciones Chromium frontend aprobadas (31, 4.5 s), tipos/lint
+correctos. Incluye actualizacion test OpenAPI al contrato sucesor sin retirar V3,
+rechazo de flags/resultados incoherentes, contexto obsoleto/retiro, tres decisiones
+pendientes y UI/historia. Ruff/Black/Prettier correctos. No suite integral nueva,
+prueba visual con sesion real del bloque nuevo ni cambio de fixture operativo.
+M3-T1 EN PROGRESO; pruebas ficticias hasta MVP; confirmacion/activacion bloqueadas.

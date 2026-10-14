@@ -153,4 +153,10 @@ async def test_openapi_closed_v3():
         ]
         == 3
     )
-    assert "eipd_controls_v3" in schemas["LegalAssessmentReadinessOut"]["properties"]
+    readiness = schemas["LegalAssessmentRepresentationReadinessOutV1"]["properties"]
+    assert "eipd_controls_v3" in readiness
+    assert "sensitive_representation" in readiness
+    assert "representation_context_coverage" in readiness
+    diagnostic = schemas["SensitiveRepresentationReadinessOutV1"]["properties"]
+    assert diagnostic["can_confirm"]["const"] is False
+    assert diagnostic["authorizes_action"]["const"] is False
