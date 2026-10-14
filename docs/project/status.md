@@ -1,3 +1,13 @@
+## 2026-10-14 — M3-T1 §245: representacion ausente y RAT actual en API
+
+Cuatro casos HTTP ficticios adicionales: representante legal/mandatario, con RAT
+sensible antes de crear o cambiado despues. Readiness detecta documento ausente,
+conserva flags false y cobertura pendiente; el cambio posterior informa tambien
+contexto RAT desactualizado. Consulta no modifica snapshot/envelope persistidos y
+confirmacion no resulta exitosa. 17 pruebas API de representacion aprobadas en
+5.29 s con base fija aislada verificada; Ruff/Black correctos. Sin cambio de reglas,
+fixture operativo ni politica. M3-T1 EN PROGRESO; pruebas ficticias hasta MVP.
+
 ## 2026-10-14 — M3-T1 §244: diagnostico de representacion en readiness/interfaz
 
 Contrato de salida versionado con result/motivos, flags false y cobertura pendiente

@@ -5,8 +5,9 @@ from uuid import UUID, uuid4
 
 import pytest
 from httpx import ASGITransport, AsyncClient
-from sqlalchemy import text
+from sqlalchemy import text, update
 
+from app.db.models import TreatmentDataCategory
 from app.services.sensitive_representation_binding import (
     evaluate_sensitive_representation_association_v1,
 )
@@ -344,3 +345,61 @@ async def test_representation_marks_all_v3_review_decisions_pending(saved):
                 },
             )
         ).status_code == 409
+
+
+@pytest.mark.parametrize("given_by", ["representante_legal", "mandatario"])
+@pytest.mark.parametrize("sensitive_before_create", [True, False])
+async def test_missing_document_uses_current_sensitive_rat(
+    client_a, rat_m3, org_a_id, _session_factory, given_by, sensitive_before_create
+):
+    tid, payload = rat_m3
+
+    async def mark_sensitive():
+        async with _session_factory() as db:
+            await db.execute(
+                update(TreatmentDataCategory)
+                .where(TreatmentDataCategory.treatment_id == tid)
+                .values(is_sensitive=True)
+            )
+            await db.commit()
+
+    if sensitive_before_create:
+        await mark_sensitive()
+    async with AsyncClient(
+        transport=ASGITransport(app=client_a),
+        base_url="http://test",
+        headers={"X-Organization-Id": str(org_a_id)},
+    ) as client:
+        created = await client.post(
+            f"/licitud/treatments/{tid}/assessments",
+            json={**payload, "consent_assessment": {"given_by": given_by}},
+        )
+        assert created.status_code == 201, created.text
+        url = f"/licitud/treatments/{tid}/assessments/{created.json()['id']}"
+        before = (await client.get(url)).json()
+        if not sensitive_before_create:
+            await mark_sensitive()
+        response = await client.get(url + "/readiness")
+        assert response.status_code == 200, response.text
+        body = response.json()
+        assert body["representation_context_coverage"] == "pendiente"
+        diagnostic = body["sensitive_representation"]
+        assert diagnostic["result"] == "incompleto"
+        assert diagnostic["can_confirm"] is False
+        assert diagnostic["authorizes_action"] is False
+        assert any(
+            issue["code"] == "representacion_documento_ausente"
+            for issue in diagnostic["issues"]
+        )
+        assert any(
+            issue["code"] == "representacion_confirmacion_bloqueada"
+            for issue in body["confirmation_blockers"]
+        )
+        if not sensitive_before_create:
+            assert any(
+                issue["code"] == "contexto_rat_desactualizado"
+                for issue in body["confirmation_blockers"]
+            )
+        # Consultar no reconstruye ni escribe el expediente persistido.
+        assert (await client.get(url)).json() == before
+        assert (await client.post(url + "/confirm")).status_code != 200
