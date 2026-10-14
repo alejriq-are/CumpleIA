@@ -1,3 +1,18 @@
+## 2026-10-14 — M3-T1 §235: priorizar CI del ultimo commit de PR
+
+Workflow CI agrupa ejecuciones por workflow/ref; cancel-in-progress solo en evento
+pull_request. Nuevo commit del mismo PR cancela runs anteriores del mismo grupo;
+main/master no cancelan run activo mediante esta condicion. Jobs, tests, permisos
+y triggers conservados. YAML parseado y expresiones comprobadas; sintaxis basada
+en documentacion oficial GitHub Actions de control de concurrencia.
+
+Observacion previa: runs de dd30556 y 1d53ceb simultaneos; 35cb46f y 7f94bbf ya
+aprobados. Configuracion nueva todavia no publicada ni observada en GitHub; no
+cancelacion manual. Runs antiguos sin grupo no se presumen cancelados al primer
+push. No repetir tests de producto para configuracion de scheduler. No merge,
+despliegue o cambios de politica/datos; PR #30 draft y M3-T1 EN PROGRESO.
+Pruebas ficticias hasta MVP; confirmacion/activacion bloqueadas.
+
 ## 2026-10-14 — M3-T1 §234: revision de politica global y limite SQL
 
 Inspeccion servicios eipd_policy_store y migraciones global audit/personal authority:

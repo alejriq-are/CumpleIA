@@ -6,6 +6,11 @@ on:
   pull_request:
     branches: [master, main]
 
+# Priorizar el ultimo commit del mismo PR; no cancelar runs activos de main/master.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   # ── Backend Python ──────────────────────────────────────────────────────────
   backend:
