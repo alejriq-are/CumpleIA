@@ -86,3 +86,23 @@ y validacion restantes del MVP. Fuentes/aceptacion operativas pendientes, politi
 deshabilitada; empresa/revision autentica diferidas hasta MVP por acuerdo usuario.
 Pruebas ficticias hasta MVP, M3-T1 EN PROGRESO y confirmacion/activacion bloqueadas.
 Solo registro documental; codigo/politica/datos locales sin cambios.
+
+## 2026-10-14 — M3-T1 §233: revision focal de rutas sensibles
+
+Inspeccion manual de api/licitud.py, api/eipd_admin.py, db/eipd_admin.py y caminos
+de revision/historia/politica seleccionada en services/licitud.py; contexto
+services/eipd_confirmation.py. Lecturas view_content y escrituras edit_content,
+suscripcion requerida y header tenant UUID. Historia valida padre y filtra evento
+por assessment/organization; escritura revalida serie/borrador con filtros tenant
+bajo locks y rechaza continuar con contexto V2. Politica habilitada no admitida en
+canal operativo revisado. Dependencia admin verifica JWT, canal limitado y actor
+personal antes de operar, con commit/rollback transaccional.
+
+No hallazgo accionable nuevo en estos caminos. Revision focal, NO revision completa
+de 198 archivos del PR ni aprobacion independiente/humana/seguridad global. No
+nuevos tests para lectura de codigo; evidencia automatizada §232 referida al commit
+7f94bbf. CI del ultimo commit documental 35cb46f en curso al iniciar esta revision;
+no se presume aprobado por el resultado anterior.
+
+PR #30 draft; sin merge/despliegue/cambio de permisos o politica. M3-T1 EN PROGRESO;
+pruebas ficticias hasta MVP; confirmacion/activacion operativas bloqueadas.

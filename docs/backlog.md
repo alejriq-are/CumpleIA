@@ -832,3 +832,5 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] M3-T1 §231: Ruff/Black global backend aprobados; migracion historica preservada con excepcion I001 exacta; correcciones restantes solo formato/imports.
 
 - [x] M3-T1 §232: PR #30 draft y CI remoto aprobado para 7f94bbf: 3977 pruebas backend y controles frontend con 23 pruebas ficticias. Sin merge/aceptacion juridica; revision tecnica pendiente.
+
+- [x] M3-T1 §233: revision focal de permisos/tenant/canal admin y bloqueos de revisiones; sin hallazgo nuevo en alcance inspeccionado. Revision integral del PR pendiente.
