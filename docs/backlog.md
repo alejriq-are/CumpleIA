@@ -846,5 +846,5 @@ Representacion sensible: [diseño preliminar de desarrollo](project/m3-t1-repres
 No habilitada; pruebas ficticias hasta MVP. Checklist historico no acredita facultad.
 
 - [x] Delimitar campos candidatos y matriz documental conservadora (§236).
-- [ ] Revisar/fijar contrato V1 y pruebas puras de forma; no persistencia o confirmacion.
+- [x] §237: contrato V1 separado y 39 pruebas ficticias de forma aprobadas; no persistencia, readiness o confirmacion.
 - [ ] Diseñar binding sucesor, persistencia y diagnostico manteniendo historicos/bloqueos.

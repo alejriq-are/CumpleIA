@@ -1,6 +1,7 @@
 # M3-T1 — Representacion sensible: siguiente bloque de desarrollo
 
-Estado: DISEÑO PRELIMINAR, sin contrato implementado ni ruta habilitada.
+Estado: contrato documental V1 implementado (§237); binding/evaluador/persistencia
+pendientes, sin ruta habilitada.
 Fecha: 2026-10-14. Pruebas exclusivamente ficticias hasta MVP.
 
 ## Problema y objetivo
@@ -79,3 +80,21 @@ como decision autorizante ni copiar datos del perfil a la persona representada.
 La siguiente tarea concreta es el paso 1–2; no activar flujo positivo por completar
 un schema. La primera etapa tiene can_confirm=false. Revisiones de desarrollo
 ficticias; aceptacion real/empresa posterior al MVP segun acuerdo del usuario.
+
+
+## 2026-10-14 — M3-T1 §237: contrato documental de representacion sensible
+
+Nuevo SensitiveRepresentationAssessmentV1 separado en schemas/sensitive_representation,
+sin importar/conectar en API o modelo persistente. Contrato version 1 cerrado,
+clases representante_legal/mandatario, referencias/analisis, alcance SpecialScopeV1,
+fechas documentadas y evidencia ContractEvidenceV1. Borrador incompleto admite None;
+texto aportado vacio, extras, clases/version desconocidas y intervalo invertido
+rechazados. Sin caducidad inferida, binding/actor/hashes editables ni flags de permiso.
+
+39 pruebas ficticias aprobadas en 0.22 s: parcialidad, inyeccion, alcance ambiguo,
+intervalos, roundtrip y listas independientes. Ejecutadas con entorno de base fija
+verificado por helper seguro por fixtures globales; no datos operativos. Ruff/Black
+correctos. No evaluador de facultad/readiness, persistencia o API nueva. Schema forma
+valida no autoriza ni acredita aplicabilidad. Proximo: binding sucesor separado y
+matriz de integracion antes de persistencia. M3-T1 EN PROGRESO; pruebas ficticias
+hasta MVP; confirmacion/activacion bloqueadas.
