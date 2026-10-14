@@ -1,3 +1,16 @@
+## 2026-10-13 — M3-T1 §224: actualizacion aplicada al frontend local
+
+Identificados y detenidos solo procesos Next/npm del frontend en puerto 3000,
+version anterior 15.0.0. npm ci desde lockfile instala 386 paquetes; version instalada
+Next 15.5.27 comprobada. Reiniciado npm run dev con Node 22.23.3: Next 15.5.27 listo
+en 1056 ms en localhost:3000. No cambios de .env, credenciales ni backend.
+
+Comprobacion HTTP sin sesion: /login 200; /admin/licitud-validation 307 Location
+/login; backend /health 200. No se atribuye prueba de acceso autenticado ni CSS
+visual; regresion/build aislados aprobados en §223, sin repetir. Dependencias
+locales ya actualizadas; no despliegue externo ni cambios de politica/datos.
+M3-T1 EN PROGRESO; pruebas ficticias hasta MVP; confirmacion/activacion bloqueadas.
+
 ## 2026-10-13 — M3-T1 §223: actualizacion Next.js corregida
 
 Next y eslint-config-next fijados de 15.0.0 a 15.5.27; package-lock actualizado y

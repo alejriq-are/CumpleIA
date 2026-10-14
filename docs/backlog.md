@@ -815,4 +815,4 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 
 - [x] M3-T1 §222: instalacion limpia Node 22 desde lockfile comprobada; CI usa npm ci y cache del lockfile. CI remoto aun no ejecutado para esta rama.
 - [x] §223: Next/eslint-config-next 15.5.27 fijados y validados en copia aislada; 23 pruebas y build aprobados.
-- [ ] Aplicar instalacion/reinicio local del frontend para usar Next 15.5.27: servidor abierto sigue con dependencias anteriores (§223).
+- [x] §224: instalacion/reinicio local aplicados: Next 15.5.27 con Node 22; login 200, admin sin sesion redirige /login, backend health 200.
