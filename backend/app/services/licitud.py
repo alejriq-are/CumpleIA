@@ -32,6 +32,7 @@ from app.schemas.licitud import (
     EipdControlCompositionOut,
     EipdControlCompositionV2Out,
     EipdControlCompositionV3Out,
+    EipdRepresentedReviewRejectionV4Out,
     EipdResolutionReviewIn,
     LegalAssessmentDraftCreate,
     LegalAssessmentDraftUpdate,
@@ -2991,10 +2992,12 @@ async def record_eipd_resolution_review_v1(
         )
         raise HTTPException(
             status_code=409,
-            detail={
-                "code": "resolucion_eipd_representacion_asociacion_pendiente",
-                **diagnostic,
-            },
+            detail=EipdRepresentedReviewRejectionV4Out.model_validate(
+                {
+                    "code": "resolucion_eipd_representacion_asociacion_pendiente",
+                    **diagnostic,
+                }
+            ).model_dump(mode="json"),
         )
     if draft.schema_version != 1 or draft.rat_context_schema_version != 1:
         raise _conflict("Version de evaluacion o contexto RAT no admitida")
@@ -3167,7 +3170,15 @@ async def _represented_review_diagnostic_locked(
             "prerequisites_met": False,
             "authorizes_action": False,
             "can_confirm": False,
-            "documentary_issues_v4": [],
+            "documentary_issues_v4": [
+                {
+                    "stage": "review",
+                    "field": "context",
+                    "code": "metadatos_revision_no_disponibles",
+                    "category": "requiere_revision",
+                    "question_id": None,
+                }
+            ],
             "issues_v4": [
                 {
                     "stage": "review",

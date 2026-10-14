@@ -812,3 +812,41 @@ async def test_create_with_representation_and_resolution_binds_final_context(
         )
         assert ready.status_code == 200, ready.text
         assert ready.json()["eipd_controls_v4"]["resolution"]["context_current"] is True
+
+
+async def test_review_diagnostic_invalid_context_is_closed_and_atomic(
+    saved, monkeypatch
+):
+    tid, out, app, org = saved
+    url = f"/licitud/treatments/{tid}/assessments/{out['id']}"
+
+    def invalid_context(*args, **kwargs):
+        raise ValueError("PRUEBA: contexto ficticio invalido")
+
+    monkeypatch.setattr(
+        licitud, "build_eipd_resolution_context_from_assessment_v3", invalid_context
+    )
+    async with AsyncClient(
+        transport=ASGITransport(app=app),
+        base_url="http://test",
+        headers={"X-Organization-Id": str(org)},
+    ) as client:
+        before = (await client.get(url)).json()
+        response = await client.post(
+            url + "/eipd-resolution/reviews/v2",
+            json={
+                "decision": "no_continuar",
+                "rationale": "PRUEBA",
+                "review_reference": "PRUEBA-CONTEXTO-INVALIDO",
+            },
+        )
+        assert response.status_code == 409, response.text
+        detail = response.json()["detail"]
+        assert detail["documentary_prerequisites_met"] is False
+        assert detail["documentary_issues_v4"]
+        assert detail["issues_v4"]
+        assert detail["prerequisites_met"] is False
+        assert detail["authorizes_action"] is False
+        assert detail["can_confirm"] is False
+        assert "context_metadata" not in detail
+        assert (await client.get(url)).json() == before

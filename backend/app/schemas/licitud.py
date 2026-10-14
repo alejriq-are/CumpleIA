@@ -1916,3 +1916,23 @@ class LegalAssessmentRepresentationReadinessOutV2(
     """Campo sucesor separado; diagnosticos historicos conservan sus versiones."""
 
     eipd_controls_v4: EipdControlCompositionV4Out | None = None
+
+
+class EipdRepresentedReviewRejectionV4Out(BaseModel):
+    """Diagnostico de rechazo; nunca contiene identidad o permiso de accion."""
+
+    model_config = ConfigDict(extra="forbid")
+    code: Literal["resolucion_eipd_representacion_asociacion_pendiente"]
+    evaluation_version: Literal[4]
+    documentary_prerequisites_met: bool = Field(strict=True)
+    prerequisites_met: Literal[False]
+    authorizes_action: Literal[False]
+    can_confirm: Literal[False]
+    documentary_issues_v4: list[EipdCompositionIssueV3Out]
+    issues_v4: list[EipdCompositionIssueV3Out] = Field(min_length=1)
+
+    @model_validator(mode="after")
+    def documentary_consistency(self):
+        if self.documentary_prerequisites_met != (not self.documentary_issues_v4):
+            raise ValueError("Resultado documental incoherente con sus motivos")
+        return self

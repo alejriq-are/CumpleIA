@@ -1,3 +1,19 @@
+## 2026-10-14 — M3-T1 §267: contrato estricto del rechazo representado
+
+EipdRepresentedReviewRejectionV4Out cierra campos, fija version/codigo y flagsfalse,
+exige motivos operativos y coherencia entre resultado documental y sus motivos.
+Servicio valida la respuesta409 con este contrato; no puede incluir metadata,
+hashes o actor como contexto de accion. Fallback de contexto invalido informa
+motivos documentales y operativos coherentes, sin escritura ni error interno.
+
+69 pruebas focalizadas aprobadas en16.87s (12 nuevas): contrato cerrado, inyeccion
+de autoridad/identidad, booleano estricto, version equivocada, motivos vacios,
+contradiccion y fallo de contexto HTTP con expediente identico. Compatibilidad de
+negativas V2 y barreras representadas conservada. Ruff/Black correctos. Solo datos
+ficticios aislados; no POST V3 ni permiso nuevo. CI37e477b success; CI4e64d19 aun
+backend en ejecucion al consultar (frontend success), sin afirmar resultado final.
+M3-T1 EN PROGRESO; activacion bloqueada, sin merge/despliegue.
+
 ## 2026-10-14 — M3-T1 §266: diagnostico de rechazo transaccional V4
 
 Las rutas de revision existentes conservan409 y codigo compatible cuando hay
