@@ -893,3 +893,21 @@ Comprobacion HTTP sin sesion: /login 200; /admin/licitud-validation 307 Location
 visual; regresion/build aislados aprobados en §223, sin repetir. Dependencias
 locales ya actualizadas; no despliegue externo ni cambios de politica/datos.
 M3-T1 EN PROGRESO; pruebas ficticias hasta MVP; confirmacion/activacion bloqueadas.
+
+## 2026-10-13 — M3-T1 §225: comprobacion visual tras actualizar Next
+
+Dos capturas del usuario en Edge Responsive 390 x 749, consulta interna local tras
+reinicio §224. Primera: Requisitos de revision, expediente borrador y politica con
+fuentes pendientes, aceptacion pendiente, habilitacion deshabilitada. Segunda:
+Revision guardada muestra Requiere cambios, fundamento expresamente ficticio,
+referencia/fecha originales, politica registrada deshabilitada y metadatos contexto
+version 2/cobertura investigacion. Aviso historico visible: no acredita vigencia
+actual. Bloques de requisitos/politica actual no aparecen entre formulario y evento.
+
+Texto legible en area capturada; sin medicion instrumental de overflow. Consola
+muestra errores de extensiones, no un fallo API visible. No status HTTP de fetch
+expuesto en estas capturas; no se declara prueba Network 200 ni ausencia de errores
+ocultos. Aviso superior de datos ficticios fuera de encuadre, no verificado aqui.
+No nueva escritura ni prueba de login/recuperacion 401. Solo registro documental;
+tests previos no repetidos. M3-T1 EN PROGRESO; pruebas ficticias hasta MVP;
+confirmacion/activacion siguen bloqueadas.
