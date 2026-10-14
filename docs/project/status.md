@@ -1,3 +1,17 @@
+## 2026-10-14 — M3-T1 §254: seleccion de binding V3 desde servidor
+
+Writer compartido valida contexto V3 cerrado antes de cualquier proyeccion y elige
+binding3 cuando hay material de representacion. Reaporte tras retiro conserva V3
+previo; contexto V2 no puede degradar esa cobertura. Sin representacion ni V3 previo,
+seleccion V1/V2 historica conservada. Previous es documento validado de servidor,
+no version propuesta por cliente. Omision/null siguen responsabilidad del caller.
+
+Ocho casos nuevos; 29 pruebas writer/binding y HTTP V2 historico aprobadas en 3.51 s,
+base fija aislada verificada. Runner incorpora suite. Ruff/Black correctos. Builder
+operativo sigue proporcionando V2: falta dispatch/readiness compatible V3, metadata
+proyectada y contratos API antes de conectar su uso. Sin nuevos eventos, cambio de
+politica o datos operativos. M3-T1 EN PROGRESO; EIPD bloqueada; datos ficticios.
+
 ## 2026-10-14 — M3-T1 §253: almacenamiento compatible de metadata V2
 
 Migracion append-only f52d6c9b3e10 tras e41c5b8a2d90 amplía constraint existente:

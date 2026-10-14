@@ -2,6 +2,7 @@
 
 from pydantic import BaseModel
 
+from app.schemas.licitud import EipdResolutionAssessmentStoredV3
 from app.services.eipd_resolution import (
     EipdResolutionContextV1,
     bind_eipd_resolution_v1,
@@ -9,6 +10,10 @@ from app.services.eipd_resolution import (
 from app.services.eipd_resolution_binding_v2 import (
     EipdResolutionContextV2,
     bind_eipd_resolution_v2,
+)
+from app.services.eipd_resolution_binding_v3 import (
+    EipdResolutionContextV3,
+    bind_eipd_resolution_v3,
 )
 from app.services.eipd_resolution_readiness_v2 import _materials
 
@@ -23,10 +28,46 @@ def bind_eipd_resolution_for_context(document, context, *, previous=None):
     raw = (
         context.model_dump(mode="python") if isinstance(context, BaseModel) else context
     )
-    ctx = EipdResolutionContextV2.model_validate(raw)
+    represented_context = (
+        EipdResolutionContextV3.model_validate(raw)
+        if isinstance(raw, dict) and "sensitive_representation_assessment" in raw
+        else None
+    )
+    legacy_raw = (
+        {
+            **{
+                key: value
+                for key, value in raw.items()
+                if key in EipdResolutionContextV2.model_fields
+            },
+            "context_schema_version": 2,
+        }
+        if represented_context is not None
+        else raw
+    )
+    ctx = EipdResolutionContextV2.model_validate(legacy_raw)
     previous_version = 1
     if previous is not None:
-        _, _, _, previous_version = _materials(previous, ctx)
+        stored = (
+            previous.model_dump(mode="python")
+            if isinstance(previous, BaseModel)
+            else previous
+        )
+        binding = stored.get("context_binding") if isinstance(stored, dict) else None
+        if isinstance(binding, dict) and binding.get("binding_version") == 3:
+            EipdResolutionAssessmentStoredV3.model_validate(stored)
+            if represented_context is None:
+                raise ValueError(
+                    "Resolucion V3 exige contexto V3 explicito, incluso tras retirar material"
+                )
+            previous_version = 3
+        else:
+            _, _, _, previous_version = _materials(previous, ctx)
+    if represented_context is not None and (
+        represented_context.sensitive_representation_assessment is not None
+        or previous_version == 3
+    ):
+        return bind_eipd_resolution_v3(document, represented_context)
     special = ctx.special_conditions
     declared = special is not None and (
         any(c.regime_id == "investigacion_art16quinquies" for c in special.conditions)
