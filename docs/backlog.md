@@ -849,4 +849,5 @@ No habilitada; pruebas ficticias hasta MVP. Checklist historico no acredita facu
 - [x] §237: contrato V1 separado y 39 pruebas ficticias de forma aprobadas; no persistencia, readiness o confirmacion.
 - [ ] Diseñar binding sucesor, persistencia y diagnostico manteniendo historicos/bloqueos.
 - [x] §238: binding independiente de representacion, 19 pruebas nuevas y 69 focalizadas aprobadas; can_confirm=false, sin integracion API.
-- [ ] Representacion: evaluador documental conservador y persistencia/binding en API, sin habilitacion positiva.
+- [x] §239: evaluador documental conservador, 30 pruebas nuevas y 88 relacionadas aprobadas; completo no autoriza ni verifica facultades.
+- [ ] Representacion: integracion persistente/binding sucesor en API conservando bloqueos, historicos y limites de diagnostico.

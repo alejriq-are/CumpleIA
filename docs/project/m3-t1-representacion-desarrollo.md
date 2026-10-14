@@ -1,7 +1,7 @@
 # M3-T1 — Representacion sensible: siguiente bloque de desarrollo
 
-Estado: contrato y asociacion V1 implementados (§§237–238); evaluador documental
-y persistencia pendientes, sin ruta habilitada.
+Estado: contrato, asociacion y evaluador documental implementados (§§237–239);
+persistencia/integracion pendientes, sin ruta habilitada.
 Fecha: 2026-10-14. Pruebas exclusivamente ficticias hasta MVP.
 
 ## Problema y objetivo
@@ -117,4 +117,25 @@ acredita facultades, aplicabilidad o autenticidad del material proporcionado.
 69 aprobadas en 0.28 s con entorno aislado verificado. Ruff/Black correctos. Sin
 persistencia, endpoints, migracion o cambio de politica. Siguiente: definir el
 evaluador documental conservador y su matriz antes de integrar persistencia/gates.
+M3-T1 EN PROGRESO; pruebas ficticias hasta MVP; confirmacion/activacion bloqueadas.
+
+## 2026-10-14 — M3-T1 §239: evaluador documental de representacion
+
+Evaluador puro separado: no_aplicable/incompleto/requiere_revision/completo y motivos
+por campo/categoria. Exige referencias/analisis, clase concordante con given_by,
+alcance completo RAT y concordancia sensible, evidencia referenciada y asociacion
+vigente. Fechas documentadas futuras o intervalo finalizado exigen revision; fecha
+final igual al dia no se marca vencida, sin plazo/caducidad inventados. evaluated_on
+explicito, sin reloj interno. Flags de infancia/adolescencia/vulnerabilidad agregados
+o por sujeto mantienen revision pendiente. can_confirm siempre false.
+
+No interpretar texto libre (facultades/limitaciones/revocacion) como hecho juridico:
+completo solo presencia/coherencia documental; no verifica autenticidad, contenido,
+consentimiento efectivo o facultad valida. Regimenes salud/biometria/investigacion y
+EIPD conservan evaluadores propios, no se sustituyen por este diagnostico. Sin API,
+persistencia, politica o migracion nueva; no habilitacion de representantes.
+
+30 pruebas nuevas y 88 relacionadas aprobadas en 0.29 s con entorno aislado verificado;
+Ruff/Black correctos. Siguiente: plan de integracion persistente con binding sucesor,
+alcance de evaluador y restricciones de diagnostico explicitamente conservados.
 M3-T1 EN PROGRESO; pruebas ficticias hasta MVP; confirmacion/activacion bloqueadas.
