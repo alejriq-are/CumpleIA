@@ -205,3 +205,17 @@ contexto RAT desactualizado. Consulta no modifica snapshot/envelope persistidos 
 confirmacion no resulta exitosa. 17 pruebas API de representacion aprobadas en
 5.29 s con base fija aislada verificada; Ruff/Black correctos. Sin cambio de reglas,
 fixture operativo ni politica. M3-T1 EN PROGRESO; pruebas ficticias hasta MVP.
+
+## 2026-10-14 — M3-T1 §246: contexto RAT ausente no descarta representacion
+
+Corregido readiness: con consentimiento de representante legal/mandatario y RAT
+actual no disponible, el bloque indica requiere_revision/cobertura pendiente aunque
+no exista documento. No inferir no_aplica de un contexto que no puede recomponerse.
+Cuatro regresiones HTTP ficticias con/sin material y ambos otorgantes; dos casos
+sin documento reprodujeron el fallo antes del cambio. Consulta conserva expediente
+persistido, flags false y confirmacion bloqueada.
+
+198 pruebas de API representacion, licitud previa y controles V3 aprobadas en
+205.51 s con base fija aislada verificada. Ruff/Black y diff-check correctos.
+Sin migracion, cambio de politica o datos operativos. M3-T1 EN PROGRESO; pruebas
+ficticias hasta MVP; cobertura EIPD de representacion sigue pendiente.

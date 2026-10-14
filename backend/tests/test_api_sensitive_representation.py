@@ -7,7 +7,7 @@ import pytest
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy import text, update
 
-from app.db.models import TreatmentDataCategory
+from app.db.models import TreatmentDataCategory, TreatmentPurpose
 from app.services.sensitive_representation_binding import (
     evaluate_sensitive_representation_association_v1,
 )
@@ -402,4 +402,48 @@ async def test_missing_document_uses_current_sensitive_rat(
             )
         # Consultar no reconstruye ni escribe el expediente persistido.
         assert (await client.get(url)).json() == before
+        assert (await client.post(url + "/confirm")).status_code != 200
+
+
+@pytest.mark.parametrize("given_by", ["representante_legal", "mandatario"])
+@pytest.mark.parametrize("with_document", [True, False])
+async def test_missing_current_rat_does_not_report_representation_not_applicable(
+    client_a, rat_m3, org_a_id, _session_factory, given_by, with_document
+):
+    tid, payload = rat_m3
+    async with AsyncClient(
+        transport=ASGITransport(app=client_a),
+        base_url="http://test",
+        headers={"X-Organization-Id": str(org_a_id)},
+    ) as client:
+        material = (
+            {"sensitive_representation_assessment": DOCUMENT} if with_document else {}
+        )
+        created = await client.post(
+            f"/licitud/treatments/{tid}/assessments",
+            json={**payload, **material, "consent_assessment": {"given_by": given_by}},
+        )
+        assert created.status_code == 201, created.text
+        url = f"/licitud/treatments/{tid}/assessments/{created.json()['id']}"
+        original = (await client.get(url)).json()
+        async with _session_factory() as db:
+            await db.execute(
+                update(TreatmentPurpose)
+                .where(TreatmentPurpose.treatment_id == tid)
+                .values(purpose="PRUEBA: finalidad cambiada")
+            )
+            await db.commit()
+        response = await client.get(url + "/readiness")
+        assert response.status_code == 200, response.text
+        body = response.json()
+        assert body["rat_context_current"] is None
+        assert body["representation_context_coverage"] == "pendiente"
+        diagnostic = body["sensitive_representation"]
+        assert diagnostic["result"] == "requiere_revision"
+        assert diagnostic["can_confirm"] is False
+        assert diagnostic["authorizes_action"] is False
+        assert {issue["code"] for issue in diagnostic["issues"]} == {
+            "representacion_contexto_actual_no_disponible"
+        }
+        assert (await client.get(url)).json() == original
         assert (await client.post(url + "/confirm")).status_code != 200

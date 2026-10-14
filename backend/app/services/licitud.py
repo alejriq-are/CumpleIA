@@ -2461,9 +2461,10 @@ async def get_legal_assessment_readiness_v1(
     rat = current_snapshot
     representation_needed = representation_material is not None or (
         given_by in ("representante_legal", "mandatario")
-        and rat is not None
         and (
-            rat.special_regimes.has_sensitive_data
+            # Sin contexto actual no se puede descartar representacion sensible.
+            rat is None
+            or rat.special_regimes.has_sensitive_data
             or any(item.is_sensitive for item in rat.data_categories)
         )
     )
