@@ -834,3 +834,5 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] M3-T1 §232: PR #30 draft y CI remoto aprobado para 7f94bbf: 3977 pruebas backend y controles frontend con 23 pruebas ficticias. Sin merge/aceptacion juridica; revision tecnica pendiente.
 
 - [x] M3-T1 §233: revision focal de permisos/tenant/canal admin y bloqueos de revisiones; sin hallazgo nuevo en alcance inspeccionado. Revision integral del PR pendiente.
+
+- [x] M3-T1 §234: revision focal control global politica; docstring API actualizado y limite bloqueo servicio/SQL precisado. Sin nueva barrera SQL.

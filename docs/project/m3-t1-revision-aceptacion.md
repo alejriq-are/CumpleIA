@@ -5570,3 +5570,22 @@ no se presume aprobado por el resultado anterior.
 
 PR #30 draft; sin merge/despliegue/cambio de permisos o politica. M3-T1 EN PROGRESO;
 pruebas ficticias hasta MVP; confirmacion/activacion operativas bloqueadas.
+
+## 2026-10-14 — M3-T1 §234: revision de politica global y limite SQL
+
+Inspeccion servicios eipd_policy_store y migraciones global audit/personal authority:
+entradas personales derivan actor bloqueado, primitivas exigen rol administrativo,
+publicacion/seleccion rechazan activation distinta de deshabilitada; seleccion
+con advisory exclusivo y selector FOR UPDATE, lectura transaccional con locks
+compartidos y READ COMMITTED. SQL limita privilegios, integridad y autoridad.
+
+Precision: payload_identity SQL no exige activation deshabilitada. No afirmar
+bloqueo SQL equivalente al servicio ni proteccion ante escritura SQL de canal
+privilegiado fuera de API. Este limite de confianza no habilita endpoint; no se
+introduce migracion o cambio operativo. Revision focal, no cierre de seguridad.
+
+Corregido docstring obsoleto Sin API administrativa en eipd_policy_store: API
+conectada via entradas personales y gestion transaccional de dependencia; distingue
+primitivas internas y barrera de activation del servicio. Solo comentario/docs,
+funcionalidad sin cambios. Ruff/Black del archivo correctos; sin repeticion de tests.
+M3-T1 EN PROGRESO; pruebas ficticias hasta MVP; confirmacion/activacion bloqueadas.
