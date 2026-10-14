@@ -1,3 +1,19 @@
+## 2026-10-14 — M3-T1 §259: salida y requisitos V4 bloqueados
+
+Contrato cerrado EipdControlCompositionV4Out conserva controles ordinarios,
+representacion, deteccion version2/3 segun ruta, resolucion binding1/2/3, revision y
+politica. Proyeccion explicita de propiedades/flags; context_metadata identifica
+material actual, no evento humano ni permiso. Requisitos de tres decisiones V4
+exigen prerequisites_met=false/context_metadata=null y flags false aun cuando haya
+identidad actual. Root ReadinessOutV2 prepara campo separado opcional; root V1 intacto.
+
+Nueve casos nuevos; 56 pruebas salida/composicion/contratos aprobadas en 0.54 s,
+base fija aislada verificada. Roundtrip JSON, rutas ordinaria/investigacion/contexto
+no disponible, flags positivos y uso de metadata documental como contexto de accion
+rechazados. Ruff/Black correctos; runner incorpora suite. Sin cambio de endpoints,
+eventos o politica. Proximo: conectar builder/writer/CRUD/readiness y validar HTTP
+antes de aplicar migracion a base operativa local. M3-T1 EN PROGRESO; EIPD bloqueada.
+
 ## 2026-10-14 — M3-T1 §258: composicion transversal V4
 
 Composicion pura V4 recibe IDs de servidor/contexto3 y combina representacion,

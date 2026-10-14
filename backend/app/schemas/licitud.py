@@ -1865,3 +1865,54 @@ class EipdResolutionDocumentVersionedOutV2(EipdResolutionDocumentVersionedOut):
 
     binding_version: int | None = Field(strict=True, ge=1, le=3)
     can_confirm: Literal[False]
+
+
+class EipdReviewDecisionPrerequisitesV4Out(BaseModel):
+    """Ruta aun bloqueada: identidad disponible no es permiso de registrar revision."""
+
+    model_config = ConfigDict(extra="forbid")
+    prerequisites_met: Literal[False]
+    context_metadata: None
+    issues: list[EipdCompositionIssueV3Out]
+
+
+class EipdReviewPrerequisitesByDecisionV4Out(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    evaluation_version: Literal[4]
+    evaluation_scope: Literal["requisitos_documentales"]
+    authorizes_action: Literal[False]
+    can_confirm: Literal[False]
+    continuar: EipdReviewDecisionPrerequisitesV4Out
+    requiere_cambios: EipdReviewDecisionPrerequisitesV4Out
+    no_continuar: EipdReviewDecisionPrerequisitesV4Out
+
+
+class EipdControlCompositionV4Out(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    evaluation_version: Literal[4]
+    evaluation_scope: Literal["requisitos_documentales"]
+    authorizes_action: Literal[False]
+    can_confirm: Literal[False]
+    preparation_result: Literal["requiere_revision"]
+    ordinary: EipdOrdinaryControlOut | None
+    representation: SensitiveRepresentationReadinessOutV1 | None
+    detection: EipdReadinessV2Out | EipdReadinessV3Out
+    resolution: EipdResolutionDocumentVersionedOutV2
+    review_state: EipdResolutionReviewStateOut
+    preparation_issues: list[EipdCompositionIssueV3Out]
+    review_blockers: list[EipdCompositionIssueV3Out]
+    confirmation_blockers: list[EipdCompositionIssueV3Out]
+    policy: EipdPolicyReadinessOut
+    review_policy_status: Literal[
+        "sin_revision", "sin_identidad", "vigente", "obsoleta"
+    ]
+    context_metadata: EipdReviewContextMetadataV2 | None
+    review_prerequisites_v4: EipdReviewPrerequisitesByDecisionV4Out
+
+
+class LegalAssessmentRepresentationReadinessOutV2(
+    LegalAssessmentRepresentationReadinessOutV1
+):
+    """Campo sucesor separado; diagnosticos historicos conservan sus versiones."""
+
+    eipd_controls_v4: EipdControlCompositionV4Out | None = None
