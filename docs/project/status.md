@@ -1,3 +1,21 @@
+## 2026-10-14 — M3-T1 §276: identidad propia de infancia/adolescencia
+
+BoundChildAdolescentAssessmentV1 y contexto interno cerrado con UUID servidor de
+org/tratamiento/evaluacion, RAT/base/consentimientos, documento de declaraciones
+especiales y representacion asociada. Campos nullable requeridos explicitamente.
+Dominios SHA256 propios de documento/contexto; helper valida y canoniza sin mutar.
+Especiales usa proyeccion documental explicita sin binding para evitar ciclo; un
+envelope accidental se rechaza, no se ignora silenciosamente. No se alteran hashes
+historicos ni contexto EIPD V3. Asociacion ausente/documento cambiado/contexto
+cambiado requieren revision; vigente no acredita facultades ni permite confirmar.
+
+75 pruebas focalizadas aprobadas en0.31s;17 nuevas de identidad. Cubren parent/tenant,
+RAT/base/consentimientos/especiales/representacion, cambio de documento, roundtrip,
+reaporte explicito, contratos/version/hash/extra/nullables y contexto invalido sin
+documento. Ruff/Black correctos. Sin API/migracion/persistencia nuevas, sin datos
+operativos ni cambios a gates. Siguiente componer asociacion con diagnostico antes
+de contratos CRUD/almacenamiento. M3-T1 EN PROGRESO; EIPD bloqueada.
+
 ## 2026-10-14 — M3-T1 §275: evaluador puro de infancia/adolescencia
 
 evaluate_child_adolescent_v1 valida contrato/snapshot sin mutarlos, compara grupos y

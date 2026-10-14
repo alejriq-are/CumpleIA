@@ -2,7 +2,7 @@
 
 from typing import Literal
 
-from pydantic import Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from app.schemas.licitud import SpecialEvidenceV1, SpecialScopeV1
 
@@ -33,3 +33,18 @@ class ChildAdolescentAssessmentV1(SpecialScopeV1):
         if len(self.declared_groups) != len(set(self.declared_groups)):
             raise ValueError("declared_groups no admite duplicados")
         return self
+
+
+class ChildAdolescentBindingV1(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    binding_version: Literal[1] = 1
+    context_hash: str = Field(pattern=r"^[0-9a-f]{64}$")
+    document_hash: str = Field(pattern=r"^[0-9a-f]{64}$")
+
+
+class BoundChildAdolescentAssessmentV1(BaseModel):
+    """Envoltorio servidor independiente; no forma parte de entradas HTTP."""
+
+    model_config = ConfigDict(extra="forbid")
+    assessment: ChildAdolescentAssessmentV1
+    context_binding: ChildAdolescentBindingV1
