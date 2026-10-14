@@ -822,3 +822,5 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] M3-T1 §226: ESLint CLI sustituye next lint y revisa tambien e2e/config/middleware; falso positivo callback fixture corregido sin desactivar reglas.
 
 - [x] M3-T1 §227: aviso superior de pruebas ficticias hasta MVP y bloqueos visibles completo en captura Edge 390 x 749 del usuario.
+
+- [x] M3-T1 §228: CI frontend incorpora 23 pruebas ficticias EIPD, comando verificado localmente con CI=true; ejecucion remota pendiente de PR.

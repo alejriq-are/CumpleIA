@@ -941,3 +941,16 @@ Sin medicion instrumental de overflow, comprobacion HTTP nueva o prueba de 401.
 Errores visibles de extensiones y mensajes Fast Refresh no acreditan fallo API.
 Solo documentacion; codigo/datos/permisos/politica sin cambios, tests no repetidos.
 M3-T1 EN PROGRESO; pruebas ficticias hasta MVP; bloqueos operativos preservados.
+
+## 2026-10-13 — M3-T1 §228: pruebas ficticias EIPD en CI
+
+Job frontend CI instala Chromium con dependencias y ejecuta explicitamente solo
+las suites eipd-api-client y eipd-consultation. Sin rat.spec.ts, servicios reales,
+secrets o fixture autenticado. Nombre job corregido Node.js 22; reglas de disparo
+main/master/PR sin cambios. Verificacion local del comando exacto con CI=true,
+Node 22.23.3 y Next 15.5.27: 23 aprobadas en 3.9 s. YAML parseado y paso verificado.
+
+No corrida remota de GitHub ni nueva instalacion Chromium en runner limpio;
+instalacion Linux a cargo de Playwright en CI. No nueva capacidad operativa.
+Politica/datos/servidor sin cambios; M3-T1 EN PROGRESO y pruebas ficticias hasta MVP;
+confirmacion/activacion siguen bloqueadas.

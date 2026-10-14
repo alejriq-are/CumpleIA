@@ -103,7 +103,7 @@ jobs:
 
   # ── Frontend Node.js ────────────────────────────────────────────────────────
   frontend:
-    name: Frontend (Node.js 20)
+    name: Frontend (Node.js 22)
     runs-on: ubuntu-latest
 
     defaults:
@@ -133,6 +133,13 @@ jobs:
       # entorno (a diferencia de `next build`, cuya fase de workers es frágil).
       - name: Comprobación de tipos — tsc
         run: npm run type-check
+
+      # Suites ficticias: no ejecutan rat.spec.ts ni necesitan servicios/secretos.
+      - name: Instalar Chromium para pruebas EIPD
+        run: npx playwright install --with-deps chromium
+
+      - name: Pruebas EIPD — cliente y consulta con datos ficticios
+        run: npx playwright test e2e/eipd-api-client.spec.ts e2e/eipd-consultation.spec.ts
 
       - name: Formato — Prettier
         run: npx prettier --check .
