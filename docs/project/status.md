@@ -1,3 +1,25 @@
+## 2026-10-14 — M3-T1 §232: CI remoto aprobado en PR borrador
+
+PR #30 creado en borrador sobre main y adjunto al chat:
+https://github.com/alejriq-are/CumpleIA/pull/30
+CI success para commit 7f94bbf1924792a7a11b1a4b6d314d1bdcc35f5d:
+https://github.com/alejriq-are/CumpleIA/actions/runs/38593979233
+Backend: pytest tests/ completo, 3977 passed en 624.62 s; job 11m21s. Lint, Black,
+preparacion DB, migraciones y seed cuestionario correctos en runner GitHub aislado.
+Frontend Node 22: instalacion lockfile, ESLint, tipos, instalacion Chromium,
+23 pruebas ficticias EIPD y Prettier aprobados; job 59 s.
+
+Resultado ligado a ese commit, no garantia de futuros commits. PR sigue draft,
+sin reviewDecision registrado; mergeStateStatus CLEAN no equivale a revision o
+permiso para merge. No fusion ni despliegue. Suite completa backend aprobada en
+CI no prueba login real/frontend RAT autenticado ni valida externamente fuentes.
+
+Pendientes de esta entrega: revision tecnica del alcance/migraciones; desarrollo
+y validacion restantes del MVP. Fuentes/aceptacion operativas pendientes, politica
+deshabilitada; empresa/revision autentica diferidas hasta MVP por acuerdo usuario.
+Pruebas ficticias hasta MVP, M3-T1 EN PROGRESO y confirmacion/activacion bloqueadas.
+Solo registro documental; codigo/politica/datos locales sin cambios.
+
 ## 2026-10-14 — M3-T1 §231: controles globales backend aprobados
 
 Preflight CI detecto imports seed_e2e y migracion historica, mas formato de seed,
