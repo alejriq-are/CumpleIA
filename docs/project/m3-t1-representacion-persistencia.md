@@ -333,3 +333,21 @@ base fija aislada verificada. Runner incorpora suite. Ruff/Black correctos. Buil
 operativo sigue proporcionando V2: falta dispatch/readiness compatible V3, metadata
 proyectada y contratos API antes de conectar su uso. Sin nuevos eventos, cambio de
 politica o datos operativos. M3-T1 EN PROGRESO; EIPD bloqueada; datos ficticios.
+
+## 2026-10-14 — M3-T1 §255: dispatch/readiness documental V3
+
+Adaptador versionado admite binding/context3, selecciona hash/documento/modelo
+correspondiente y conserva proyeccion V1/V2 para reglas historicas. Contexto V3
+cerrado se valida antes de proyectar. Material representacion con binding1/2 añade
+asociacion_representacion_no_cubierta, invalida contexto y revision previa; V3
+reconoce identidad pero conserva motivo representacion_evaluacion_integracion_pendiente
+hasta conectar evaluacion conjunta. Nunca can_confirm=true. Contexto V2 no acepta
+binding3; cambios/retiro invalidan asociacion sin reparar documentos.
+
+Seis casos nuevos; 47 pruebas adaptador/historicas/metadata/writer/HTTP V3 anteriores
+aprobaron en 6.47 s, con base fija aislada verificada. Caso historico reforzado despues:
+revision realmente vigente con hashes de su version pasa obsoleta al añadir material;
+seis casos nuevos revalidados en 0.20 s. Ruff/Black correctos; runner incorpora suite.
+No builder operativo/contexto API cambiado aun, nuevos eventos o politica. Proximo:
+composicion y contratos de salida antes de activar writer V3 en endpoints.
+M3-T1 EN PROGRESO; datos ficticios hasta MVP; EIPD bloqueada.
