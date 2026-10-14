@@ -1,3 +1,18 @@
+## 2026-10-14 — M3-T1 §240: plan persistente coherente de representacion
+
+Revisados puntos concretos ORM, contratos, CRUD/locks y patron migracion research.
+Plan nuevo define columna nullable sin backfill, envelope de servidor, semantica
+PATCH omitido/null/reaporte, contexto tras relectura y pruebas tenant/historicas.
+Evita ciclo de imports y campo API aceptado sin persistencia. Propone barrera SQL
+no confirmado para nueva columna y gates conservadores, aun con material completo.
+
+Limite EIPD explicitado: metadatos antiguos no cubren nuevo documento; requiere
+contexto sucesor antes de nueva revision, sin reinterpretar hashes historicos.
+Readiness debe informar cobertura pendiente, no vigencia global indebida. Plan
+solamente; sin migracion/CRUD/API implementados o tests nuevos. Proximo: integrar
+contratos/modelo/migracion/CRUD como conjunto probado en base aislada. M3-T1 EN
+PROGRESO; pruebas ficticias hasta MVP; confirmacion/activacion bloqueadas.
+
 ## 2026-10-14 — M3-T1 §239: evaluador documental de representacion
 
 Evaluador puro separado: no_aplicable/incompleto/requiere_revision/completo y motivos
