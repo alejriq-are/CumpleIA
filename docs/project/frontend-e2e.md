@@ -1045,3 +1045,24 @@ Type-check, lint y Prettier correctos. Tests sinteticos del cliente, no escritur
 en sesion operativa. Siguiente interfaz de registro negativo con alcance explicito,
 limpieza al cambiar expediente y tratamiento de resultado incierto sin duplicados.
 M3-T1 EN PROGRESO; EIPD bloqueada, sin merge/despliegue.
+
+## 2026-10-14 — M3-T1 §270: formulario negativo V3 de desarrollo
+
+Panel interno conecta recordNegativeV3 mediante sesion actual. Tras consultar
+borrador V4 con politica deshabilitada ofrece formulario separado solo para
+requiere_cambios/no_continuar, fundamento/referencia y casilla de datos ficticios.
+Servidor conserva autorizacion e identidad; diagnostico no se presenta como permiso.
+Mensajes de preparacion distinguen formulario negativo de acciones positivas.
+Ref sincrona impide solicitudes simultaneas; inputs bloqueados durante escritura.
+Exito muestra evento guardado, limpia solicitud y bloquea otro envio en ese alcance.
+Resultado desconocido bloquea repeticion incluso tras nueva consulta; requiere
+verificar historial antes de repetir. Rechazo409 retira formulario hasta reconsulta.
+Cambio de expediente limpia solicitud/resultado/estado, sin arrastrar datos ajenos.
+
+66 pruebas cliente/Chromium aprobadas en6.6s, cinco nuevas de formulario: exito,
+espera/envio unico, resultado incierto,403/limpieza y409/reconsulta en390x749.
+Tipos/lint/Prettier correctos. Pruebas de pantalla usan adaptadores sinteticos;
+conexion de pagina tipada a cliente real, sin escritura en sesion personal ni datos
+operativos. CI331fc83 success. No botones positivos, confirmacion o activacion.
+M3-T1 EN PROGRESO; siguiente validar recorrido integrado aislado/auditar alcance.
+Sin merge ni despliegue; EIPD bloqueada.

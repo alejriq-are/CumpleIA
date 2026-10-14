@@ -1,6 +1,6 @@
 # M3-T1 — Integracion persistente de representacion sensible
 
-Estado verificado: 2026-10-14 (§268), M3-T1 EN PROGRESO.
+Estado verificado: 2026-10-14 (§270), M3-T1 EN PROGRESO.
 Persistencia/CRUD/diagnostico de representacion, contexto EIPD V3, composicion V4
 y consulta historica V3 integrados. Migracion local f52d6c9b3e10 aplicada.
 POST reviews/v3 registra exclusivamente requiere_cambios/no_continuar asociados
@@ -14,10 +14,10 @@ compartidos global/selector y exclusivo de serie, relectura de borrador y RAT,
 metadata2 reconstruida desde material actual. Exige requisitos documentales;
 no exige completar el contenido que precisamente motiva la revision negativa.
 No convierte una revision negativa en permiso ni cambia estado del expediente.
-Frontend permanece de consulta; no ofrece aun registro negativo V3.
+Frontend ofrece formulario negativo V3 separado para pruebas ficticias, tras consulta de borrador V4.
 
-Pendiente: integrar cliente/interfaz negativa con autorizacion explicita y pruebas
-de sesion; revisar alcance integral restante. Ni lectura ni registro negativo
+Pendiente: validar recorrido integrado aislado y pruebas de sesion; revisar alcance
+integral restante. Ni lectura ni registro negativo
 acreditan vigencia posterior, facultades o aceptacion juridica de material real.
 
 Las secciones de diseño siguientes describen la secuencia original; las entradas
@@ -631,3 +631,24 @@ Type-check, lint y Prettier correctos. Tests sinteticos del cliente, no escritur
 en sesion operativa. Siguiente interfaz de registro negativo con alcance explicito,
 limpieza al cambiar expediente y tratamiento de resultado incierto sin duplicados.
 M3-T1 EN PROGRESO; EIPD bloqueada, sin merge/despliegue.
+
+## 2026-10-14 — M3-T1 §270: formulario negativo V3 de desarrollo
+
+Panel interno conecta recordNegativeV3 mediante sesion actual. Tras consultar
+borrador V4 con politica deshabilitada ofrece formulario separado solo para
+requiere_cambios/no_continuar, fundamento/referencia y casilla de datos ficticios.
+Servidor conserva autorizacion e identidad; diagnostico no se presenta como permiso.
+Mensajes de preparacion distinguen formulario negativo de acciones positivas.
+Ref sincrona impide solicitudes simultaneas; inputs bloqueados durante escritura.
+Exito muestra evento guardado, limpia solicitud y bloquea otro envio en ese alcance.
+Resultado desconocido bloquea repeticion incluso tras nueva consulta; requiere
+verificar historial antes de repetir. Rechazo409 retira formulario hasta reconsulta.
+Cambio de expediente limpia solicitud/resultado/estado, sin arrastrar datos ajenos.
+
+66 pruebas cliente/Chromium aprobadas en6.6s, cinco nuevas de formulario: exito,
+espera/envio unico, resultado incierto,403/limpieza y409/reconsulta en390x749.
+Tipos/lint/Prettier correctos. Pruebas de pantalla usan adaptadores sinteticos;
+conexion de pagina tipada a cliente real, sin escritura en sesion personal ni datos
+operativos. CI331fc83 success. No botones positivos, confirmacion o activacion.
+M3-T1 EN PROGRESO; siguiente validar recorrido integrado aislado/auditar alcance.
+Sin merge ni despliegue; EIPD bloqueada.
