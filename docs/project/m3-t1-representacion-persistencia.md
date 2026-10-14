@@ -351,3 +351,19 @@ seis casos nuevos revalidados en 0.20 s. Ruff/Black correctos; runner incorpora 
 No builder operativo/contexto API cambiado aun, nuevos eventos o politica. Proximo:
 composicion y contratos de salida antes de activar writer V3 en endpoints.
 M3-T1 EN PROGRESO; datos ficticios hasta MVP; EIPD bloqueada.
+
+## 2026-10-14 — M3-T1 §256: salidas preparadas de binding V3
+
+LegalAssessmentRepresentationOutV2 admite resoluciones StoredV1/V2/V3 sin convertir
+identidad; contrato activo OutV1 conservado. EipdResolutionDocumentVersionedOutV2
+admite binding1/2/3/null estricto y can_confirm literal false; contrato anterior
+no acepta binding3. Entradas Create/PATCH siguen documentos sin context_binding,
+no envelopes ni version elegida por cliente. Catorce casos nuevos prueban union
+exacta del campo, rechazo de binding de entrada y versiones/flags invalidos.
+
+47 pruebas contratos nuevos/representacion e investigacion HTTP aprobadas en
+4.30 s, base fija aislada verificada; Ruff/Black correctos. Runner incorpora suite.
+No import API nuevo todavia: composicion actual V3 solo admite contexto2 y metadata1.
+Proximo conjunto coherente: composicion sucesora con contexto3/diagnostico propio,
+metadatos/prerrequisitos conservadores y salida; despues builder/writer/API/localDB.
+M3-T1 EN PROGRESO; ficticios hasta MVP; EIPD bloqueada.

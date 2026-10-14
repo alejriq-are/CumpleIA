@@ -1847,3 +1847,21 @@ class EipdResolutionReviewOutV3(EipdResolutionReviewWithPolicyOut):
         ):
             raise ValueError("Metadata discordante con hashes del evento")
         return self
+
+
+class LegalAssessmentRepresentationOutV2(LegalAssessmentRepresentationOutV1):
+    """Salida sucesora preparada; entrada documental conserva su contrato."""
+
+    eipd_resolution_assessment: (
+        EipdResolutionAssessmentStoredV1
+        | EipdResolutionAssessmentStoredV2
+        | EipdResolutionAssessmentStoredV3
+        | None
+    ) = None
+
+
+class EipdResolutionDocumentVersionedOutV2(EipdResolutionDocumentVersionedOut):
+    """Identidad V3 permitida sin atribuir autoridad de confirmacion."""
+
+    binding_version: int | None = Field(strict=True, ge=1, le=3)
+    can_confirm: Literal[False]
