@@ -1,3 +1,18 @@
+## 2026-10-14 — M3-T1 §251: metadata V2 para contexto EIPD V3
+
+Nuevo contrato interno cerrado exige versiones metadata2/binding3/context3,
+cobertura research/representacion contexto_v3 y hashes de material nullable
+explicitos. Builder puro solo acepta resolucion V3 asociada al contexto vigente;
+rechaza contexto obsoleto, no convierte historia ni atribuye facultades. Metadatos
+V1 y lectores/eventos actuales intactos. Integracion writer/lectores/UI aun pendiente;
+representacion operativa sigue con cobertura pendiente y gates bloqueados.
+
+12 pruebas nuevas; 47 de metadata/bindings nuevos e historicos aprobadas en 0.36 s;
+cuatro guardas de runner aprobadas en 0.02 s. Runner aislado incluye suites nuevas.
+Ruff/Black correctos. Sin migracion, nuevas rutas o datos operativos. M3-T1 EN
+PROGRESO; pruebas ficticias hasta MVP. Autorizacion permanente de usuario para
+implementar/validar/commit/push en rama actual; sin merge/despliegue/activar EIPD.
+
 ## 2026-10-14 — M3-T1 §250: binding EIPD V3 de representacion
 
 Contexto V3 extiende V2 con envelope representacion requerido incluso si null;
