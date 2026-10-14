@@ -19,6 +19,7 @@ TARGETS = (
     "tests/test_sensitive_representation_binding.py",
     "tests/test_sensitive_representation.py",
     "tests/test_sensitive_representation_storage.py",
+    "tests/test_api_sensitive_representation.py",
     "tests/test_services_research.py",
     "tests/test_research_binding.py",
     "tests/test_eipd_resolution_binding_v2.py",

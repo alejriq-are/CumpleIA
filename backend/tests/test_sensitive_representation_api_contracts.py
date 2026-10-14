@@ -1,4 +1,4 @@
-"""Contratos futuros sin conectar API: no persistencia o autorizacion."""
+"""Contratos versionados de documento/binding; nunca autorizan acciones."""
 
 import pytest
 from pydantic import ValidationError
@@ -105,7 +105,7 @@ def test_facade_exports_same_classes_and_output_uses_server_shape():
     assert {"$ref": "#/$defs/BoundSensitiveRepresentationV1"} in prop["anyOf"]
 
 
-def test_active_api_models_remain_without_new_field():
+def test_legacy_models_remain_without_new_field():
     for model in [
         LegalAssessmentDraftCreate,
         LegalAssessmentDraftUpdate,

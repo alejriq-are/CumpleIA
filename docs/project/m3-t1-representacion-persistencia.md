@@ -1,8 +1,8 @@
 # M3-T1 — Integracion persistente de representacion sensible
 
 Estado: plan tecnico de implementacion, 2026-10-14 (§240).
-Storage/migracion implementados y aplicados local/aislado (§242); campo API no
-expuesto y confirmacion bloqueada.
+Storage/migracion aplicados (§242) y CRUD conectado (§243); readiness de
+representacion pendiente con bloqueo controlado; confirmacion bloqueada.
 Contratos/binding/evaluador puros existentes: §§237–239.
 
 ## Almacenamiento y compatibilidad
@@ -138,3 +138,31 @@ operativos aportados ni politica habilitada. Downgrade definido, no ensayado.
 Proximo: CRUD del documento/binding con nuevos contratos y gates, cobertura EIPD
 pendiente conservada. M3-T1 EN PROGRESO; pruebas ficticias hasta MVP;
 confirmacion/activacion bloqueadas.
+
+
+## 2026-10-14 — M3-T1 §243: CRUD persistente de representacion y gates
+
+API licitud usa subcontratos versionados Create/Update/Out con documento editable
+y envelope solo salida. Crear asigna UUID servidor antes de bind; editar detecta
+model_fields_set, extrae el campo antes de setattr y bind tras relectura/bundle/cambios.
+Omitido conserva envelope viejo, cambio de consentimiento lo deja obsoleto, reaporte
+renueva identidad, null retira solo de borrador. Lectura respeta tenant/tratamiento;
+confirmados no admiten edicion, material previo no se reconstruye.
+
+Guardas tras lock/relectura: confirmacion con representacion 409, nueva revision
+EIPD con representacion 409 de asociacion pendiente. Readiness con material presente
+409 representacion_readiness_integracion_pendiente: no presentar metadata antigua
+como cobertura del nuevo documento. Esta entrega CRUD no integra aun diagnostico
+readiness; limites explicitos y politica sin cambios. Sin frontend de aporte nuevo.
+
+11 pruebas HTTP nuevas; bloque completo representacion/storage/runner 127 aprobadas
+en 3.79 s, entorno aislado verificado. Casos: guardar/leer SQL, UUID derivado,
+omision/obsolescencia/reaporte/null, inyeccion y cambios parciales no aplicados,
+tenant ajeno/padre incorrecto, gates y confirmado historico intacto. Regresion
+API licitud previa: 174 casos aprobaron en primera corrida; tres casos nuevos
+fallaron por fixtures (selector/consentimiento ausentes y app compartida), corregidos
+sin relajar guardas. No se afirma suite completa del producto en esta etapa.
+Runner incorpora CRUD. Ruff/Black correctos; sin migracion adicional.
+Proximo: diagnostico versionado readiness de representacion y cobertura EIPD
+conservadora, manteniendo can_confirm=false. M3-T1 EN PROGRESO, pruebas ficticias
+hasta MVP; confirmacion/activacion bloqueadas.

@@ -1680,7 +1680,7 @@ class LegalAssessmentReadinessOut(BaseModel):
     pending_controls: list[str]
 
 
-# Representacion: contratos separados, todavia no usados por rutas CRUD.
+# Representacion: contratos versionados; no habilitan confirmacion.
 
 
 class SensitiveRepresentationAssessmentV1(BaseModel):
@@ -1748,7 +1748,7 @@ class BoundSensitiveRepresentationV1(BaseModel):
 
 
 class LegalAssessmentRepresentationDraftCreateV1(LegalAssessmentDraftCreate):
-    """Contrato futuro de persistencia; no conectado a endpoints activos."""
+    """Entrada persistente de representacion, sin binding editable."""
 
     model_config = ConfigDict(extra="forbid")
     sensitive_representation_assessment: SensitiveRepresentationAssessmentV1 | None = (
@@ -1757,7 +1757,7 @@ class LegalAssessmentRepresentationDraftCreateV1(LegalAssessmentDraftCreate):
 
 
 class LegalAssessmentRepresentationDraftUpdateV1(LegalAssessmentDraftUpdate):
-    """PATCH futuro: omision y null se distinguen con model_fields_set."""
+    """PATCH: omision y null se distinguen con model_fields_set."""
 
     model_config = ConfigDict(extra="forbid")
     sensitive_representation_assessment: SensitiveRepresentationAssessmentV1 | None = (
@@ -1766,6 +1766,6 @@ class LegalAssessmentRepresentationDraftUpdateV1(LegalAssessmentDraftUpdate):
 
 
 class LegalAssessmentRepresentationOutV1(LegalAssessmentOut):
-    """Salida futura; el binding solo aparece en forma de servidor."""
+    """Salida persistente; el binding solo aparece en forma de servidor."""
 
     sensitive_representation_assessment: BoundSensitiveRepresentationV1 | None = None
