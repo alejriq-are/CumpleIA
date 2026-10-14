@@ -911,3 +911,20 @@ ocultos. Aviso superior de datos ficticios fuera de encuadre, no verificado aqui
 No nueva escritura ni prueba de login/recuperacion 401. Solo registro documental;
 tests previos no repetidos. M3-T1 EN PROGRESO; pruebas ficticias hasta MVP;
 confirmacion/activacion siguen bloqueadas.
+
+## 2026-10-13 — M3-T1 §226: ESLint directo en frontend
+
+npm run lint usa ESLint CLI en archivos js/jsx/ts/tsx de todo frontend; excluye
+.next/test-results/playwright-report, node_modules ignorado por ESLint. Conserva
+next/core-web-vitals y reglas Hooks; incluye e2e/config/middleware ademas del codigo
+habitual. Sin paquetes nuevos ni cambio de reglas. CI consume el mismo script.
+
+Callback Playwright use renombrado provideFixture para evitar falso positivo Hooks;
+misma llamada/ciclo/limpieza del fixture RAT. ESLint sin errores/avisos y tipos
+aprobados. Playwright --list descubre 25 pruebas en 3 archivos: solo descubrimiento,
+no ejecucion de RAT ni nuevas pruebas de login. Regresion §223 no repetida para
+renombre local y comando lint. El aviso de next lint desaparece en npm run lint;
+el chequeo interno del build sigue administrado por Next.
+
+Servidor/politica/datos sin cambios. M3-T1 EN PROGRESO; pruebas ficticias hasta MVP;
+confirmacion/activacion bloqueadas.

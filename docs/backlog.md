@@ -818,3 +818,5 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] §224: instalacion/reinicio local aplicados: Next 15.5.27 con Node 22; login 200, admin sin sesion redirige /login, backend health 200.
 
 - [x] M3-T1 §225: usuario comprueba visualmente requisitos y revision ficticia en Edge 390 x 749 tras actualizacion local Next; sin comprobacion nueva de status HTTP o login.
+
+- [x] M3-T1 §226: ESLint CLI sustituye next lint y revisa tambien e2e/config/middleware; falso positivo callback fixture corregido sin desactivar reglas.
