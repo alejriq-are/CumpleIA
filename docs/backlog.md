@@ -858,4 +858,8 @@ No habilitada; pruebas ficticias hasta MVP. Checklist historico no acredita facu
 - [x] §244: diagnostico representacion en readiness/interfaz, cobertura pendiente explicita y vigencia global suprimida; 132 backend y 31 frontend aprobadas. Sin habilitacion.
 
 - [x] M3-T1 §260: CRUD de resolucion V3 y diagnostico V4 conectados en API; 892 pruebas aisladas y 37 frontend aprobadas; metadata2 no autoriza acciones. Migracion local aplicada sin cambios de contenido.
-- [ ] M3-T1: vista completa de motivos V4 y lectura/revision versionada de metadata2; EIPD permanece bloqueada y pruebas ficticias hasta MVP.
+- [x] M3-T1 §§261–263: motivos V4 completos y lectura historica V3 de metadata1/2/null, sin inferir autoridad.
+- [x] M3-T1 §§268–270: API/cliente/formulario de revisiones negativas V3 con identidad servidor, permisos, concurrencia y proteccion contra duplicados; confirmacion/activacion bloqueadas.
+- [x] M3-T1 §§271–273: recorrido real Chromium/cliente/API/PostgreSQL ficticio y trabajo CI integrado aprobado en dbe1080; autenticacion sintetica, no login personal.
+- [ ] M3-T1: delimitar siguiente ruta especial pendiente contra inventario §273 de [aceptacion](project/m3-t1-revision-aceptacion.md), diseno y fuentes; no retirar fallback sin evaluador y pruebas.
+- [ ] M3-T1: validacion de sesion personal y revision tecnica integral antes de cierre; fuentes/aceptacion juridica pendientes. Pruebas ficticias hasta MVP.

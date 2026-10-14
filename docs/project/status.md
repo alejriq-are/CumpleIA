@@ -1,3 +1,24 @@
+## 2026-10-14 — M3-T1 §273: CI integral aprobado e inventario residual
+
+CI38652738904 sobre dbe1080 termino success en tres trabajos: backend4277 passed,
+1 skipped en387.51s,frontend y EIPD integrada ficticia success. La omision de suite
+backend corresponde al recorrido opt-in, ejecutado en su trabajo dedicado; no
+atribuir al nuevo commit documental una corrida aun no finalizada.
+
+Inventario de seis SpecialRegimeIdV1 contra dispatch especial y evaluadores de
+salud/sensible/composicion EIPD: consentimiento/excepciones de derechos tienen
+ramas diferenciadas; infancia e investigacion mantienen fallback general, salud
+restringe contextos distintos de otro, representacion no confirma. Deteccion o
+composicion separada no se declara preparacion global. Tabla detallada en matriz
+de aceptacion y backlog actualizado: vista V4/lectura/negativas ya implementadas;
+rutas residuales, sesion personal y revision integral siguen pendientes. No se
+definen reglas legales nuevas ni se retira bloqueo para cerrar por conteo.
+
+Validacion de este bloque documental: contraste de codigo/catalogo/CI y diffcheck;
+sin logica nueva ni datos operativos modificados. Siguiente delimitar proxima ruta
+residual con diseno/fuentes y criterios antes de implementarla. M3-T1 EN PROGRESO;
+confirmacion/activacion EIPD bloqueadas; sin merge/despliegue.
+
 ## 2026-10-14 — M3-T1 §272: auditoria vigente y CI integrado aislado
 
 Matriz de aceptacion actualizada contra codigo: representacion ya tiene persistencia,

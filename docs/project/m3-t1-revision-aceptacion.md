@@ -1,12 +1,13 @@
 # M3-T1 — Revisión de aceptación
 
-Estado consolidado al 2026-10-14 (§272): M3-T1 EN PROGRESO.
+Estado consolidado al 2026-10-14 (§273): M3-T1 EN PROGRESO.
 Ver [estado de trabajo](status.md) y [representacion persistente](m3-t1-representacion-persistencia.md).
 El alcance integral no se reemplaza por los limites de entregas anteriores.
 
 Evidencia reciente: catalogo EIPD ampliado942 aprobado (§268),66 pruebas frontend
 (§271) y recorrido Chromium/cliente/API/PostgreSQL aislado aprobado (§271).
-Estos conteos no equivalen a suite integral actual ni validacion juridica externa.
+CI38652738904 de dbe1080:4277 backend aprobadas/1omitida, frontend e integrada
+aprobados. Esta evidencia tecnica no equivale a validacion juridica externa.
 No sesion Supabase personal verificada en el recorrido integrado; usa actor sintetico.
 Checkpoints inferiores conservan fecha y contexto historicos.
 
@@ -59,13 +60,34 @@ sigue produciendo revisión. No se declara ilícita una ruta por faltar su valid
 | Revision negativa sucesora | POST V3, lectura V3, cliente estricto, formulario y recorrido real aislado | Login/sesion personal y revision final del alcance integral |
 | EIPD positiva | Bloqueos en servidor y sin botones de confirmacion/activacion | Politica, fuentes y aceptacion no habilitadas; no inferir autorizacion de metadata |
 | Regimenes especiales | special_conditions mantiene fallback validador_no_implementado y condiciones residuales | Inventariar rutas no soportadas contra catalogo y diseno antes de elegir siguiente implementacion |
-| Cobertura de pruebas | Suite focal942,frontend66 e integrada aislada | No declarar suite integral actual aprobada sin resultado CI del HEAD |
-| Automatizacion integrada | Trabajo CI separado con PostgreSQL exclusivo y runner fijo | Resultado remoto del nuevo trabajo aun pendiente de su primera ejecucion |
+| Cobertura de pruebas | Suite focal942,frontend66 e integrada aislada | CI integral de dbe1080 aprobado; siguiente commit requiere su propia comprobacion |
+| Automatizacion integrada | Trabajo CI separado con PostgreSQL exclusivo y runner fijo | Trabajo remoto integrado aprobado en CI38652738904 |
 
 La persistencia/documentacion de representacion no sustituye el gate conservador
 representacion_no_preparada de sensitive_consent. Debe evaluarse con el conjunto
 de controles antes de cualquier ampliacion positiva. No se difieren silenciosamente
 regimenes especiales pendientes ni se marca DONE por disponer del formulario.
+
+## Inventario de rutas especiales §273
+
+Inventario de codigo, no interpretacion juridica ni declaracion de licitud.
+Catalogo SpecialRegimeIdV1 y dispatch de evaluate_special_conditions_v1 contrastados
+con health.py, sensitive_consent.py y eipd_controls_v4.py.
+
+| Regimen del catalogo | Rama documental conectada en evaluador especial | Limite que sigue bloqueado |
+| --- | --- | --- |
+| sensibles_art16 | Consentimiento sensible; excepcion mediante evaluador de derechos | Representacion conserva representacion_no_preparada para confirmar; no extrapolar evaluador de derechos a todas las excepciones del catalogo |
+| salud_perfil_biologico_art16bis | Consentimiento y expediente de salud | Otros authorization_route pasan al fallback; contextos distintos de otro mantienen contexto_restringido_no_preparado |
+| biometricos_art16ter | Consentimiento; excepcion mediante evaluador de derechos biometrico | No extrapolar expediente de derechos a otras excepciones o bases |
+| infancia_adolescencia_art16quater | Deteccion/consistencia de edad y alcance | Sin rama de preparacion especial en dispatch; conserva validador_no_implementado |
+| investigacion_art16quinquies | Deteccion especial y composicion de investigacion/EIPD por ruta separada | Dispatch especial general conserva fallback; diagnostico separado no habilita confirmacion |
+| geolocalizacion_art16sexies | Evaluador de geolocalizacion | Requiere material/coherencia/alcance actuales; rama conectada no implica que todo expediente este preparado |
+
+Todas las condiciones residuales detectadas fuera de su regimen conservan revision
+y validador_no_implementado. No eliminar ese fallback para obtener un resultado
+positivo. Proxima delimitacion tecnica: contrastar infancia y contextos restringidos
+con diseno/fuentes antes de introducir validadores. La tabla no define requisitos
+legales nuevos ni cambia el alcance integral aceptado.
 
 ## Brechas y siguiente orden propuesto
 
