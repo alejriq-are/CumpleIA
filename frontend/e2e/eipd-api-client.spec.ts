@@ -401,6 +401,9 @@ function representationV4Readiness() {
       authorizes_action: false,
       can_confirm: false,
       policy: readiness().eipd_controls_v3.policy,
+      preparation_issues: [issue],
+      review_blockers: [issue],
+      confirmation_blockers: [issue],
       review_prerequisites_v4: {
         evaluation_version: 4,
         evaluation_scope: "requisitos_documentales",
@@ -420,6 +423,8 @@ test("V4 conserva politica sin convertir requisitos o identidad en version histo
     expect(result.policy_status?.activation).toBe("deshabilitada");
     expect(result.review_prerequisites_v3).toBeNull();
     expect(result.latest_review_context_status).toBeNull();
+    expect(result.review_prerequisites_v4?.can_confirm).toBe(false);
+    expect(result.current_control_issues_v4?.length).toBe(3);
   });
 });
 
@@ -444,3 +449,11 @@ for (const change of [
     });
   });
 }
+
+test("V4 rechaza motivos actuales malformados antes de mostrarlos", async () => {
+  const raw = JSON.parse(JSON.stringify(representationV4Readiness()));
+  raw.eipd_controls_v4.confirmation_blockers[0].category = "aprobado";
+  await withFetch(raw, async () => {
+    await expect(eipdReviewApi.preparation(scope)).rejects.toThrow();
+  });
+});

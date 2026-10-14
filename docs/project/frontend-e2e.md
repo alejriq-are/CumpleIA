@@ -993,3 +993,21 @@ rechazo de flags/resultados incoherentes, contexto obsoleto/retiro, tres decisio
 pendientes y UI/historia. Ruff/Black/Prettier correctos. No suite integral nueva,
 prueba visual con sesion real del bloque nuevo ni cambio de fixture operativo.
 M3-T1 EN PROGRESO; pruebas ficticias hasta MVP; confirmacion/activacion bloqueadas.
+
+## 2026-10-14 — M3-T1 §261: motivos V4 visibles y requisitos separados
+
+Cliente valida motivos actuales de preparacion/revision/confirmacion y conserva
+prerrequisitos V4 con version propia; no los convierte a V3. Vista muestra conjunto
+completo de motivos agrupados y las tres decisiones bloqueadas, con etiquetas de
+representacion/politica en español. Aviso actual distingue diagnostico integrado
+de vigencia de eventos guardados; identidad documental no se presenta como contexto
+de accion. Vistas V3 anteriores conservadas. Consulta historica limpia motivos V4,
+sin añadir botones de escritura, confirmacion o activacion.
+
+39 pruebas cliente/Chromium aprobadas en 4.6 s; tipos/lint correctos. Caso V4
+revalidado explicitamente a 390x749: 1 aprobado en 1.5 s. Prettier correcto en cinco
+archivos modificados. Nuevos casos: motivos malformados rechazados y recorrido UI
+V4 con grupos/traducciones/decisiones bloqueadas/limpieza al leer historia. Selector
+ambiguo y traducciones duplicadas detectados por checks se corrigieron antes de
+validacion final. No prueba de sesion personal real ni cambio de fixture operativo.
+M3-T1 EN PROGRESO; datos ficticios hasta MVP; activacion EIPD bloqueada.

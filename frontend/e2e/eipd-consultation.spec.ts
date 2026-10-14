@@ -26,7 +26,7 @@ test.beforeAll(async () => {
     function preparation(scope){
       const partial={prerequisites_met:true,context_metadata:null,issues:[]};
       if(window.demo.issues)partial.issues=window.demo.issues;
-      return {assessment_id:scope.assessmentId,status:"borrador",sensitive_representation:window.demo.representation??null,representation_context_coverage:window.demo.representation?"pendiente":"no_aplica",policy_status:window.demo.policyStatus ?? {sources_status:"pendiente",acceptance_status:"pendiente",activation:"deshabilitada"},latest_review_context_status:window.demo.latestStatus,review_prerequisites_v3:{evaluation_version:3,evaluation_scope:"requisitos_documentales",authorizes_action:false,can_confirm:false,requiere_cambios:partial,no_continuar:partial,continuar:{prerequisites_met:false,context_metadata:null,issues:[{stage:"research",field:"research_assessment",code:"investigacion_confirmacion_bloqueada",category:"pendiente_revision",question_id:null}]}}};
+      return {review_prerequisites_v4:window.demo.v4??null,current_control_issues_v4:window.demo.v4issues??null,assessment_id:scope.assessmentId,status:"borrador",sensitive_representation:window.demo.representation??null,representation_context_coverage:window.demo.representation?"pendiente":"no_aplica",policy_status:window.demo.policyStatus ?? {sources_status:"pendiente",acceptance_status:"pendiente",activation:"deshabilitada"},latest_review_context_status:window.demo.latestStatus,review_prerequisites_v3:{evaluation_version:3,evaluation_scope:"requisitos_documentales",authorizes_action:false,can_confirm:false,requiere_cambios:partial,no_continuar:partial,continuar:{prerequisites_met:false,context_metadata:null,issues:[{stage:"research",field:"research_assessment",code:"investigacion_confirmacion_bloqueada",category:"pendiente_revision",question_id:null}]}}};
     }
     async function loadPreparation(scope){
       window.demo.calls.push({kind:"preparation",scope});
@@ -426,4 +426,69 @@ test("representacion muestra faltantes y cobertura pendiente sin vigencia global
       exact: false,
     })
   ).toHaveCount(0);
+});
+
+test("V4 muestra motivos completos y decisiones bloqueadas sin mezclar historia", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 749 });
+  await scopeForm(page);
+  await page.evaluate(() => {
+    const issue = {
+      stage: "activation",
+      field: "policy.routes",
+      code: "politica_representacion_no_implementada",
+      category: "requiere_revision",
+      question_id: null,
+    };
+    const decision = { prerequisites_met: false, context_metadata: null, issues: [issue] };
+    Object.assign((window as unknown as { demo: object }).demo, {
+      latestStatus: "vigente",
+      v4issues: [issue, issue, issue],
+      representation: {
+        evaluation_version: 1,
+        evaluation_scope: "requisitos_documentales",
+        authorizes_action: false,
+        can_confirm: false,
+        result: "incompleto",
+        issues: [],
+      },
+      v4: {
+        evaluation_version: 4,
+        evaluation_scope: "requisitos_documentales",
+        authorizes_action: false,
+        can_confirm: false,
+        continuar: decision,
+        requiere_cambios: decision,
+        no_continuar: decision,
+      },
+    });
+  });
+  await page.getByRole("button", { name: "Consultar requisitos" }).click();
+  await expect(page.getByRole("heading", { name: "Motivos del expediente actual" })).toBeVisible();
+  await expect(
+    page.getByText("El diagnóstico actual incluye la representación.", { exact: false })
+  ).toBeVisible();
+  await expect(page.getByText("Registro de revisión no habilitado.", { exact: true })).toHaveCount(
+    3
+  );
+  await expect(page.getByRole("heading", { name: "Continuar", exact: true })).toBeVisible();
+  const region = page.getByRole("region", { name: "Motivos del expediente actual" });
+  await region.getByText("Habilitación EIPD — 1 motivo distinto", { exact: true }).click();
+  await expect(
+    region
+      .getByText(
+        "La política para representación sigue pendiente; no se permite confirmar o registrar una revisión.",
+        { exact: false }
+      )
+      .first()
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Vínculo de la última revisión con el material actual" })
+  ).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /confirmar|activar|registrar/i })).toHaveCount(0);
+  await page.getByLabel("Revisión (identificador)", { exact: true }).fill(ids[3]);
+  await page.getByRole("button", { name: "Consultar revisión" }).click();
+  await expect(page.getByRole("heading", { name: "Revisión guardada" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Motivos del expediente actual" })).toHaveCount(0);
 });

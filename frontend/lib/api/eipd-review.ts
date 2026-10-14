@@ -56,6 +56,19 @@ export type EipdReviewPrerequisitesByDecisionV3 = {
   requiere_cambios: EipdReviewDecisionPrerequisitesV3;
   no_continuar: EipdReviewDecisionPrerequisitesV3;
 };
+export type EipdReviewDecisionPrerequisitesV4 = Omit<
+  EipdReviewDecisionPrerequisitesV3,
+  "prerequisites_met" | "context_metadata"
+> & { prerequisites_met: false; context_metadata: null };
+export type EipdReviewPrerequisitesByDecisionV4 = Omit<
+  EipdReviewPrerequisitesByDecisionV3,
+  "evaluation_version" | "continuar" | "requiere_cambios" | "no_continuar"
+> & {
+  evaluation_version: 4;
+  continuar: EipdReviewDecisionPrerequisitesV4;
+  requiere_cambios: EipdReviewDecisionPrerequisitesV4;
+  no_continuar: EipdReviewDecisionPrerequisitesV4;
+};
 export type EipdLatestReviewContextStatus =
   "sin_revision" | "sin_metadatos" | "vigente" | "obsoleta";
 export type EipdPolicyStatus = {
@@ -75,6 +88,8 @@ export type EipdReviewPreparationOut = {
   assessment_id: string;
   status: "borrador" | "confirmado" | "reemplazado";
   review_prerequisites_v3: EipdReviewPrerequisitesByDecisionV3 | null;
+  review_prerequisites_v4?: EipdReviewPrerequisitesByDecisionV4 | null;
+  current_control_issues_v4?: EipdReviewIssueV3[] | null;
   latest_review_context_status: EipdLatestReviewContextStatus | null;
   policy_status: EipdPolicyStatus | null;
   sensitive_representation: SensitiveRepresentationReadiness | null;
@@ -205,27 +220,10 @@ export const eipdReviewApi = {
         authorizes_action: false;
         can_confirm: false;
         policy: EipdPolicyStatus;
-        review_prerequisites_v4: {
-          evaluation_version: 4;
-          evaluation_scope: "requisitos_documentales";
-          authorizes_action: false;
-          can_confirm: false;
-          continuar: {
-            prerequisites_met: false;
-            context_metadata: null;
-            issues: EipdReviewIssueV3[];
-          };
-          requiere_cambios: {
-            prerequisites_met: false;
-            context_metadata: null;
-            issues: EipdReviewIssueV3[];
-          };
-          no_continuar: {
-            prerequisites_met: false;
-            context_metadata: null;
-            issues: EipdReviewIssueV3[];
-          };
-        };
+        preparation_issues: EipdReviewIssueV3[];
+        review_blockers: EipdReviewIssueV3[];
+        confirmation_blockers: EipdReviewIssueV3[];
+        review_prerequisites_v4: EipdReviewPrerequisitesByDecisionV4;
       } | null;
       eipd_controls_v3: {
         evaluation_version: 3;
@@ -320,31 +318,43 @@ export const eipdReviewApi = {
             Array.isArray(decision.issues) &&
             decision.issues.length > 0
         );
-        for (const issue of decision.issues) {
-          requireContract(
-            issue &&
-              [
-                "state",
-                "rat",
-                "ordinary",
-                "research",
-                "frontier",
-                "detection",
-                "resolution",
-                "sources",
-                "activation",
-                "review",
-              ].includes(issue.stage) &&
-              typeof issue.field === "string" &&
-              typeof issue.code === "string" &&
-              [
-                "incompleto",
-                "requiere_revision",
-                "pendiente_revision",
-                "supuesto_declarado",
-              ].includes(issue.category) &&
-              (issue.question_id === null || typeof issue.question_id === "string")
-          );
+        const collections =
+          name === "continuar"
+            ? [
+                decision.issues,
+                successor.preparation_issues,
+                successor.review_blockers,
+                successor.confirmation_blockers,
+              ]
+            : [decision.issues];
+        for (const issues of collections) {
+          requireContract(Array.isArray(issues));
+          for (const issue of issues) {
+            requireContract(
+              issue &&
+                [
+                  "state",
+                  "rat",
+                  "ordinary",
+                  "research",
+                  "frontier",
+                  "detection",
+                  "resolution",
+                  "sources",
+                  "activation",
+                  "review",
+                ].includes(issue.stage) &&
+                typeof issue.field === "string" &&
+                typeof issue.code === "string" &&
+                [
+                  "incompleto",
+                  "requiere_revision",
+                  "pendiente_revision",
+                  "supuesto_declarado",
+                ].includes(issue.category) &&
+                (issue.question_id === null || typeof issue.question_id === "string")
+            );
+          }
         }
       }
       const policy = successor.policy;
@@ -421,6 +431,15 @@ export const eipdReviewApi = {
     return {
       assessment_id: value.assessment_id,
       status: value.status,
+      review_prerequisites_v4: successor?.review_prerequisites_v4 ?? null,
+      current_control_issues_v4:
+        successor === null
+          ? null
+          : [
+              ...successor.preparation_issues,
+              ...successor.review_blockers,
+              ...successor.confirmation_blockers,
+            ],
       review_prerequisites_v3:
         controls === null || coverage === "pendiente" ? null : controls.review_prerequisites_v3,
       sensitive_representation: representation,
