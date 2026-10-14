@@ -447,3 +447,100 @@ async def test_missing_current_rat_does_not_report_representation_not_applicable
         }
         assert (await client.get(url)).json() == original
         assert (await client.post(url + "/confirm")).status_code != 200
+
+
+@pytest.mark.parametrize(
+    "scope_case", ["compatible", "rat_incompatible", "sensitive_incompatible"]
+)
+async def test_complete_document_does_not_authorize_actions(
+    client_a, rat_m3, org_a_id, _session_factory, scope_case
+):
+    tid, payload = rat_m3
+    async with _session_factory() as db:
+        await db.execute(
+            update(TreatmentDataCategory)
+            .where(TreatmentDataCategory.treatment_id == tid)
+            .values(is_sensitive=True)
+        )
+        await db.commit()
+    scope = {"data_category_codes": ["id"], "data_subject_codes": ["clientes"]}
+    document = {
+        field: "PRUEBA: declaracion ficticia sin verificar facultades"
+        for field in (
+            "representative_reference",
+            "represented_subjects_reference",
+            "authority_document_reference",
+            "authority_document_version",
+            "authority_basis_description",
+            "express_authority_analysis",
+            "scope_match_analysis",
+            "validity_analysis",
+            "limitations",
+            "revocation_information",
+        )
+    }
+    document.update(
+        representation_kind="mandatario",
+        scope=deepcopy(scope),
+        evidence=[{"evidence_type": "PRUEBA", "reference": "PRUEBA: evidencia"}],
+    )
+    sensitive_scope = deepcopy(scope)
+    if scope_case == "rat_incompatible":
+        document["scope"]["data_category_codes"] = ["otra_categoria_ficticia"]
+    elif scope_case == "sensitive_incompatible":
+        sensitive_scope["data_subject_codes"] = ["otros_titulares_ficticios"]
+    async with AsyncClient(
+        transport=ASGITransport(app=client_a),
+        base_url="http://test",
+        headers={"X-Organization-Id": str(org_a_id)},
+    ) as client:
+        created = await client.post(
+            f"/licitud/treatments/{tid}/assessments",
+            json={
+                **payload,
+                "consent_assessment": {"given_by": "mandatario"},
+                "sensitive_consent_assessment": {"scope": sensitive_scope},
+                "sensitive_representation_assessment": document,
+            },
+        )
+        assert created.status_code == 201, created.text
+        url = f"/licitud/treatments/{tid}/assessments/{created.json()['id']}"
+        original = (await client.get(url)).json()
+        readiness = await client.get(url + "/readiness")
+        assert readiness.status_code == 200, readiness.text
+        body = readiness.json()
+        diagnosis = body["sensitive_representation"]
+        assert body["representation_context_coverage"] == "pendiente"
+        assert diagnosis["can_confirm"] is False
+        assert diagnosis["authorizes_action"] is False
+        if scope_case == "compatible":
+            assert diagnosis["result"] == "completo"
+            assert diagnosis["issues"] == []
+        else:
+            assert diagnosis["result"] == "requiere_revision"
+            code = (
+                "representacion_alcance_rat_incompatible"
+                if scope_case == "rat_incompatible"
+                else "representacion_alcance_sensible_incompatible"
+            )
+            assert any(issue["code"] == code for issue in diagnosis["issues"])
+        confirmed = await client.post(url + "/confirm")
+        assert confirmed.status_code == 409, confirmed.text
+        assert (
+            confirmed.json()["detail"]["code"]
+            == "representacion_confirmacion_bloqueada"
+        )
+        reviewed = await client.post(
+            url + "/eipd-resolution/reviews/v2",
+            json={
+                "decision": "requiere_cambios",
+                "rationale": "PRUEBA",
+                "review_reference": "PRUEBA",
+            },
+        )
+        assert reviewed.status_code == 409, reviewed.text
+        assert (
+            reviewed.json()["detail"]["code"]
+            == "resolucion_eipd_representacion_asociacion_pendiente"
+        )
+        assert (await client.get(url)).json() == original

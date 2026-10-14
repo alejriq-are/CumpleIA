@@ -219,3 +219,14 @@ persistido, flags false y confirmacion bloqueada.
 205.51 s con base fija aislada verificada. Ruff/Black y diff-check correctos.
 Sin migracion, cambio de politica o datos operativos. M3-T1 EN PROGRESO; pruebas
 ficticias hasta MVP; cobertura EIPD de representacion sigue pendiente.
+
+## 2026-10-14 — M3-T1 §247: documento completo y alcances en API
+
+Tres casos HTTP ficticios comprueban documento completo compatible, alcance RAT
+incompatible y alcance de consentimiento sensible incompatible. Completo conserva
+can_confirm/authorizes_action false y cobertura pendiente; los alcances incompatibles
+informan requiere_revision y motivo especifico. En los tres casos confirmacion y
+nueva revision EIPD devuelven 409 con codigo explicito, sin modificar expediente.
+24 pruebas API de representacion aprobadas en 7.47 s, base fija aislada verificada;
+Ruff/Black correctos. No reglas nuevas, migracion, cambios operativos ni habilitacion.
+M3-T1 EN PROGRESO; pruebas ficticias hasta MVP.
