@@ -62,8 +62,8 @@ def evaluate_eipd_review_documentary_decision_v4(
 ):
     """Negativas identifican material actual sin exigir completitud del contenido.
 
-    Este resultado interno no es contexto de accion ni permiso. HTTP sigue bloqueado;
-    un futuro escritor debera autorizar, releer bajo locks y evaluar su politica propia.
+    Este resultado interno no es contexto de accion ni permiso. El escritor debe
+    autorizar, releer bajo locks y aplicar la politica propia del registro negativo.
     """
     if type(evaluated_on) is not date:
         raise ValueError("evaluated_on exige date explicita")

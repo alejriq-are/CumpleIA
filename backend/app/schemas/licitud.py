@@ -1936,3 +1936,9 @@ class EipdRepresentedReviewRejectionV4Out(BaseModel):
         if self.documentary_prerequisites_met != (not self.documentary_issues_v4):
             raise ValueError("Resultado documental incoherente con sus motivos")
         return self
+
+
+class EipdNegativeResolutionReviewInV3(EipdResolutionReviewIn):
+    """Registro negativo sucesor; ninguna decision positiva admitida."""
+
+    decision: Literal["requiere_cambios", "no_continuar"]

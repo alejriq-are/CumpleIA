@@ -1,3 +1,25 @@
+## 2026-10-14 — M3-T1 §268: registro negativo V3 asociado sin activacion
+
+POST eipd-resolution/reviews/v3 admite solo requiere_cambios/no_continuar mediante
+entrada cerrada; fundamento/referencia no vacios. Reutiliza permisos edit_content,
+suscripcion activa, aislamiento tenant y locks global/selector/serie. Relee borrador,
+RAT/material/politica y exige identidad documental vigente binding3/metadata2.
+Guarda hashes/actor/politica derivados de servidor con politica deshabilitada.
+Registro negativo no confirma expediente ni habilita continuar o activar EIPD.
+Rutas anteriores conservan rechazo representado. GET V3 devuelve evento identico;
+readiness sigue bloqueando acciones positivas. Frontend no ofrece registro aun.
+
+942 pruebas del catalogo EIPD aislado aprobadas en276.61s; 15 nuevas HTTP/concurrencia.
+Cubren dos negativas, rechazo positivo/inyeccion/tenant/padre/material obsoleto,
+viewer/suscripcion, y seis commit/rollback de cambio/reaporte/retiro con espera
+PostgreSQL real, relectura y rollback sin eventos. Pruebas usan datos ficticios y
+limpieza administrativa de eventos del propio assessment en finally. Ningun evento
+operativo creado ni migracion/politica activada. Ruff global/Black260 archivos
+correctos. Dos primeras assertions buscaron can_confirm en root incorrecto y se
+corrigieron al campo V4; lint detecto fixture faltante antes de suite amplia.
+M3-T1 EN PROGRESO; siguiente cliente/interfaz negativa y auditoria integral pendiente.
+Sin merge ni despliegue; activacion EIPD bloqueada.
+
 ## 2026-10-14 — M3-T1 §267: contrato estricto del rechazo representado
 
 EipdRepresentedReviewRejectionV4Out cierra campos, fija version/codigo y flagsfalse,

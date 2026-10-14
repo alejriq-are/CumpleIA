@@ -10,6 +10,7 @@ from app.core.deps import require_active_subscription, require_permission
 from app.db.models import Profile
 from app.db.session import get_db
 from app.schemas.licitud import (
+    EipdNegativeResolutionReviewInV3,
     EipdResolutionReviewIn,
     EipdResolutionReviewOut,
     EipdResolutionReviewOutV2,
@@ -154,6 +155,25 @@ async def registrar_revision_eipd_salida_v2(
         db, x_organization_id, treatment_id, assessment_id, profile.id, payload
     )
     return service.serialize_eipd_resolution_review_v2(event)
+
+
+@router.post(
+    "/treatments/{treatment_id}/assessments/{assessment_id}/eipd-resolution/reviews/v3",
+    response_model=EipdResolutionReviewOutV3,
+    status_code=status.HTTP_201_CREATED,
+)
+async def registrar_revision_negativa_eipd_v3(
+    treatment_id: uuid.UUID,
+    assessment_id: uuid.UUID,
+    payload: EipdNegativeResolutionReviewInV3,
+    x_organization_id: Annotated[uuid.UUID, Header()],
+    profile: Profile = Depends(require_permission(Permission.edit_content)),
+    db: AsyncSession = Depends(get_db),
+):
+    event = await service.record_eipd_negative_review_v3(
+        db, x_organization_id, treatment_id, assessment_id, profile.id, payload
+    )
+    return service.serialize_eipd_resolution_review_v3(event)
 
 
 @router.get(

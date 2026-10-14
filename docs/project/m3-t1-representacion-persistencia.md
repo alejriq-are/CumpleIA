@@ -1,17 +1,24 @@
 # M3-T1 — Integracion persistente de representacion sensible
 
-Estado verificado: 2026-10-14 (§264), M3-T1 EN PROGRESO.
-Persistencia/CRUD/diagnostico de representacion integrados; contexto EIPD V3,
-composicion V4 y consulta historica V3 integrados (§§260–263). Migracion local
-f52d6c9b3e10 aplicada. Confirmacion, activacion y registro de revisiones de
-expedientes con representacion o binding3 siguen bloqueados por servidor.
+Estado verificado: 2026-10-14 (§268), M3-T1 EN PROGRESO.
+Persistencia/CRUD/diagnostico de representacion, contexto EIPD V3, composicion V4
+y consulta historica V3 integrados. Migracion local f52d6c9b3e10 aplicada.
+POST reviews/v3 registra exclusivamente requiere_cambios/no_continuar asociados
+a identidad documental actual V3, con metadata2 y politica deshabilitada.
+Confirmacion, continuar y activacion EIPD siguen bloqueados por servidor.
+Las rutas de escritura anteriores conservan rechazo de representacion/binding3.
 
-Pendiente antes de ampliar escritura: definir prerrequisitos propios del registro
-negativo sucesor, derivar metadata2 desde contexto actual bajo los locks vigentes,
-comprobar aislamiento/atomicidad/concurrencia y mantener bloqueadas las decisiones
-positivas. La lectura historica V3 no completa ese alcance ni acredita vigencia.
-No hay POST V3 publicado. Las rutas existentes no pueden usar la retirada del
-material para eludir el gate de binding3.
+Contrato del registro negativo V3: edit_content y suscripcion activa; tenant/actor
+derivados por servidor; entrada cerrada de decision/fundamento/referencia. Locks
+compartidos global/selector y exclusivo de serie, relectura de borrador y RAT,
+metadata2 reconstruida desde material actual. Exige requisitos documentales;
+no exige completar el contenido que precisamente motiva la revision negativa.
+No convierte una revision negativa en permiso ni cambia estado del expediente.
+Frontend permanece de consulta; no ofrece aun registro negativo V3.
+
+Pendiente: integrar cliente/interfaz negativa con autorizacion explicita y pruebas
+de sesion; revisar alcance integral restante. Ni lectura ni registro negativo
+acreditan vigencia posterior, facultades o aceptacion juridica de material real.
 
 Las secciones de diseño siguientes describen la secuencia original; las entradas
 §§241–264 documentan la implementacion y validacion posterior. No interpretar sus
@@ -585,3 +592,25 @@ negativas V2 y barreras representadas conservada. Ruff/Black correctos. Solo dat
 ficticios aislados; no POST V3 ni permiso nuevo. CI37e477b success; CI4e64d19 aun
 backend en ejecucion al consultar (frontend success), sin afirmar resultado final.
 M3-T1 EN PROGRESO; activacion bloqueada, sin merge/despliegue.
+
+## 2026-10-14 — M3-T1 §268: registro negativo V3 asociado sin activacion
+
+POST eipd-resolution/reviews/v3 admite solo requiere_cambios/no_continuar mediante
+entrada cerrada; fundamento/referencia no vacios. Reutiliza permisos edit_content,
+suscripcion activa, aislamiento tenant y locks global/selector/serie. Relee borrador,
+RAT/material/politica y exige identidad documental vigente binding3/metadata2.
+Guarda hashes/actor/politica derivados de servidor con politica deshabilitada.
+Registro negativo no confirma expediente ni habilita continuar o activar EIPD.
+Rutas anteriores conservan rechazo representado. GET V3 devuelve evento identico;
+readiness sigue bloqueando acciones positivas. Frontend no ofrece registro aun.
+
+942 pruebas del catalogo EIPD aislado aprobadas en276.61s; 15 nuevas HTTP/concurrencia.
+Cubren dos negativas, rechazo positivo/inyeccion/tenant/padre/material obsoleto,
+viewer/suscripcion, y seis commit/rollback de cambio/reaporte/retiro con espera
+PostgreSQL real, relectura y rollback sin eventos. Pruebas usan datos ficticios y
+limpieza administrativa de eventos del propio assessment en finally. Ningun evento
+operativo creado ni migracion/politica activada. Ruff global/Black260 archivos
+correctos. Dos primeras assertions buscaron can_confirm en root incorrecto y se
+corrigieron al campo V4; lint detecto fixture faltante antes de suite amplia.
+M3-T1 EN PROGRESO; siguiente cliente/interfaz negativa y auditoria integral pendiente.
+Sin merge ni despliegue; activacion EIPD bloqueada.
