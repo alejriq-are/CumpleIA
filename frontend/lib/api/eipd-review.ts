@@ -264,11 +264,14 @@ export const eipdReviewApi = {
       assessment_id: value.assessment_id,
       status: value.status,
       review_prerequisites_v3: controls === null ? null : controls.review_prerequisites_v3,
-      policy_status: controls === null ? null : {
-        sources_status: controls.policy.sources_status,
-        acceptance_status: controls.policy.acceptance_status,
-        activation: controls.policy.activation,
-      },
+      policy_status:
+        controls === null
+          ? null
+          : {
+              sources_status: controls.policy.sources_status,
+              acceptance_status: controls.policy.acceptance_status,
+              activation: controls.policy.activation,
+            },
       latest_review_context_status:
         controls === null ? null : controls.review_context_metadata_status,
     };

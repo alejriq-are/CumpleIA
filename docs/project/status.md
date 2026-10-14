@@ -1,3 +1,16 @@
+## 2026-10-13 — M3-T1 §229: control de formato frontend aprobado
+
+Preflight de formato exigido por CI detecto seis archivos de codigo y un artefacto
+generado. Aplicado Prettier solo a esos seis archivos: layouts admin/dashboard,
+consulta EIPD, cliente y dos suites EIPD. .prettierignore excluye test-results y
+playwright-report. Sin cambio de comportamiento, reglas de negocio o dependencias.
+
+Controles completos del job frontend ejecutados localmente con Node 22.23.3 y
+CI=true: Prettier global correcto, ESLint y tipos aprobados, 23 pruebas ficticias
+EIPD aprobadas (4.2 s). No GitHub remoto ni ejecucion RAT autenticado, build no
+repetido para formato. Politica/datos/permisos sin cambios. M3-T1 EN PROGRESO;
+pruebas ficticias hasta MVP; confirmacion/activacion bloqueadas.
+
 ## 2026-10-13 — M3-T1 §228: pruebas ficticias EIPD en CI
 
 Job frontend CI instala Chromium con dependencias y ejecuta explicitamente solo

@@ -43,17 +43,32 @@ export function PreparationView({ value }: { value: EipdReviewPreparationOut }) 
       </p>
       {value.policy_status !== null && (
         <section aria-labelledby="policy-status-heading" className="rounded-lg border bg-white p-4">
-          <h3 id="policy-status-heading" className="font-semibold">Estado de la política EIPD</h3>
+          <h3 id="policy-status-heading" className="font-semibold">
+            Estado de la política EIPD
+          </h3>
           <dl className="mt-3 grid grid-cols-1 gap-2 text-sm sm:grid-cols-[9rem_1fr]">
             <dt className="font-semibold">Fuentes oficiales</dt>
-            <dd>{value.policy_status.sources_status === "pendiente" ? "Pendientes de verificación" : "Verificadas según el registro"}</dd>
+            <dd>
+              {value.policy_status.sources_status === "pendiente"
+                ? "Pendientes de verificación"
+                : "Verificadas según el registro"}
+            </dd>
             <dt className="font-semibold">Aceptación</dt>
-            <dd>{value.policy_status.acceptance_status === "pendiente" ? "Pendiente" : "Aceptada según el registro"}</dd>
+            <dd>
+              {value.policy_status.acceptance_status === "pendiente"
+                ? "Pendiente"
+                : "Aceptada según el registro"}
+            </dd>
             <dt className="font-semibold">Habilitación</dt>
-            <dd>{value.policy_status.activation === "deshabilitada" ? "Deshabilitada" : "Habilitada según el registro"}</dd>
+            <dd>
+              {value.policy_status.activation === "deshabilitada"
+                ? "Deshabilitada"
+                : "Habilitada según el registro"}
+            </dd>
           </dl>
           <p className="mt-3 text-sm text-gray-600">
-            Este estado corresponde a la política actual. No aprueba el expediente ni autoriza por sí solo continuar, confirmar o activar.
+            Este estado corresponde a la política actual. No aprueba el expediente ni autoriza por
+            sí solo continuar, confirmar o activar.
           </p>
         </section>
       )}
@@ -202,7 +217,8 @@ export function EipdReviewConsultation({ loadPreparation, loadEvent }: Props) {
         Selecciona el expediente mediante sus identificadores. Esta pantalla solo consulta datos.
       </p>
       <p className="rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm">
-        Pruebas de desarrollo: utiliza únicamente datos ficticios hasta disponer de la versión MVP. M3-T1 en progreso. La confirmación y la activación EIPD permanecen bloqueadas.
+        Pruebas de desarrollo: utiliza únicamente datos ficticios hasta disponer de la versión MVP.
+        M3-T1 en progreso. La confirmación y la activación EIPD permanecen bloqueadas.
       </p>
       <form
         onSubmit={(e) => consult(e, "preparation")}

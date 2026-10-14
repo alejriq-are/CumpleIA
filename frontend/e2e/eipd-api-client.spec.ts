@@ -46,7 +46,11 @@ function readiness() {
       evaluation_version: 3,
       can_confirm: false,
       review_context_metadata_status: "vigente",
-      policy: {sources_status:"pendiente",acceptance_status:"pendiente",activation:"deshabilitada"},
+      policy: {
+        sources_status: "pendiente",
+        acceptance_status: "pendiente",
+        activation: "deshabilitada",
+      },
       review_prerequisites_v3: {
         evaluation_version: 3,
         evaluation_scope: "requisitos_documentales",
@@ -261,15 +265,18 @@ test("estado de ultima revision conserva las cuatro variantes, ausencia V3 y rec
   );
 });
 
-
 test("politica proyecta estados sin autoridad y rechaza enum o habilitacion incoherentes", async () => {
   const body = readiness();
   await withFetch(body, async () => {
-    expect((await eipdReviewApi.preparation(scope)).policy_status).toEqual(body.eipd_controls_v3.policy);
+    expect((await eipdReviewApi.preparation(scope)).policy_status).toEqual(
+      body.eipd_controls_v3.policy
+    );
   });
   for (const patch of [
-    {sources_status:"aprobadas"}, {acceptance_status:"automatica"},
-    {activation:"activada"}, {activation:"habilitada"},
+    { sources_status: "aprobadas" },
+    { acceptance_status: "automatica" },
+    { activation: "activada" },
+    { activation: "habilitada" },
   ]) {
     const invalid = readiness();
     Object.assign(invalid.eipd_controls_v3.policy, patch);
@@ -278,11 +285,20 @@ test("politica proyecta estados sin autoridad y rechaza enum o habilitacion inco
     });
   }
   const enabled = readiness();
-  enabled.eipd_controls_v3.policy = {sources_status:"verificadas",acceptance_status:"aceptada",activation:"habilitada"};
+  enabled.eipd_controls_v3.policy = {
+    sources_status: "verificadas",
+    acceptance_status: "aceptada",
+    activation: "habilitada",
+  };
   await withFetch(enabled, async () => {
-    expect((await eipdReviewApi.preparation(scope)).policy_status).toEqual(enabled.eipd_controls_v3.policy);
+    expect((await eipdReviewApi.preparation(scope)).policy_status).toEqual(
+      enabled.eipd_controls_v3.policy
+    );
   });
-  await withFetch({assessment_id:scope.assessmentId,status:"borrador",eipd_controls_v3:null}, async () => {
-    expect((await eipdReviewApi.preparation(scope)).policy_status).toBeNull();
-  });
+  await withFetch(
+    { assessment_id: scope.assessmentId, status: "borrador", eipd_controls_v3: null },
+    async () => {
+      expect((await eipdReviewApi.preparation(scope)).policy_status).toBeNull();
+    }
+  );
 });
