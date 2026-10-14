@@ -496,3 +496,118 @@ for (const change of ["coverage", "hash", "authority", "extra_metadata", "old_re
     });
   });
 }
+
+for (const decision of ["requiere_cambios", "no_continuar"] as const) {
+  test(`registro V3 envia solo solicitud humana y exige identidad sucesora ${decision}`, async () => {
+    const request = {
+      decision,
+      rationale: "PRUEBA: material ficticio",
+      review_reference: "PRUEBA-V3",
+    };
+    const raw = { ...eventBody(3), ...request, review_context_metadata: successorMetadata };
+    await withFetch(
+      raw,
+      async (calls) => {
+        const result = await eipdReviewApi.recordNegativeV3(scope, request);
+        expect(result.review_context_metadata?.metadata_schema_version).toBe(2);
+        expect(calls).toHaveLength(1);
+        expect(calls[0].url).toContain("/eipd-resolution/reviews/v3");
+        expect(calls[0].options.method).toBe("POST");
+        expect(calls[0].options.cache).toBe("no-store");
+        expect(JSON.parse(String(calls[0].options.body))).toEqual(request);
+      },
+      201
+    );
+  });
+}
+
+for (const change of [
+  "legacy_metadata",
+  "no_metadata",
+  "no_policy",
+  "decision",
+  "rationale",
+  "reference",
+  "foreign_tenant",
+  "authority",
+] as const) {
+  test(`registro V3 rechaza respuesta incompatible ${change}`, async () => {
+    const request = {
+      decision: "requiere_cambios" as const,
+      rationale: "TEST: revisar expediente",
+      review_reference: "TEST: REV159",
+    };
+    const raw = JSON.parse(
+      JSON.stringify({ ...eventBody(3), review_context_metadata: successorMetadata })
+    );
+    if (change === "legacy_metadata") raw.review_context_metadata = metadata;
+    if (change === "no_metadata") raw.review_context_metadata = null;
+    if (change === "no_policy") raw.policy_version = raw.policy_hash = raw.policy_reference = null;
+    if (change === "decision") raw.decision = "no_continuar";
+    if (change === "rationale") raw.rationale = "OTRO";
+    if (change === "reference") raw.review_reference = "OTRA";
+    if (change === "foreign_tenant") raw.organization_id = rid;
+    if (change === "authority") raw.authorizes_action = true;
+    await withFetch(
+      raw,
+      async (calls) => {
+        await expect(eipdReviewApi.recordNegativeV3(scope, request)).rejects.toThrow(
+          "incompatible"
+        );
+        expect(calls).toHaveLength(1); // No retry after a potentially committed response.
+      },
+      201
+    );
+  });
+}
+
+test("registro V3 no envia positivos, identidad inyectada ni entradas vacias", async () => {
+  await withFetch(eventBody(3), async (calls) => {
+    for (const body of [
+      null,
+      {},
+      { decision: "continuar", rationale: "PRUEBA", review_reference: "PRUEBA" },
+      { decision: "no_continuar", rationale: " ", review_reference: "PRUEBA" },
+      {
+        decision: "no_continuar",
+        rationale: "PRUEBA",
+        review_reference: "PRUEBA",
+        created_by: rid,
+      },
+    ]) {
+      await expect(
+        eipdReviewApi.recordNegativeV3(scope, body as EipdNegativeReviewIn)
+      ).rejects.toThrow();
+    }
+    expect(calls).toHaveLength(0);
+  });
+});
+
+for (const status of [401, 402, 403, 409]) {
+  test(`registro V3 conserva rechazo ${status} sin reintentar`, async () => {
+    const detail = {
+      code: "revision_v3_identidad_no_preparada",
+      evaluation_version: 4,
+      documentary_issues_v4: [{ code: "asociacion_obsoleta" }],
+    };
+    await withFetch(
+      { detail },
+      async (calls) => {
+        try {
+          await eipdReviewApi.recordNegativeV3(scope, {
+            decision: "no_continuar",
+            rationale: "PRUEBA",
+            review_reference: "PRUEBA",
+          });
+          throw new Error("Se esperaba rechazo");
+        } catch (error) {
+          expect(error).toBeInstanceOf(ApiError);
+          expect((error as ApiError).status).toBe(status);
+          expect((error as ApiError).detail).toEqual(detail);
+        }
+        expect(calls).toHaveLength(1);
+      },
+      status
+    );
+  });
+}

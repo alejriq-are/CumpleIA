@@ -1,3 +1,20 @@
+## 2026-10-14 — M3-T1 §269: cliente explicito de registro negativo V3
+
+recordNegativeV3 envia solo decision/fundamento/referencia a POST reviews/v3 con
+sesion/tenant y sin cache. Validador compartido rechaza positivos, campos de servidor,
+entradas vacias/null. Escritura exige respuesta3/metadata2/politica registrada,
+identidad tenant/evaluacion y concordancia exacta de solicitud humana. No convierte
+respuesta historica legacy/null en exito de escritura sucesora ni reintenta una
+respuesta incompatible que podria corresponder a evento ya guardado. Metodo V2
+conservado. Sin botones nuevos ni cambio de permisos/confirmacion/activacion.
+
+61 pruebas cliente/Chromium aprobadas en5.1s, incluidas15 nuevas: dos negativas,
+ocho respuestas incompatibles, entradas invalidas y401/402/403/409 sin reintento.
+Type-check, lint y Prettier correctos. Tests sinteticos del cliente, no escritura
+en sesion operativa. Siguiente interfaz de registro negativo con alcance explicito,
+limpieza al cambiar expediente y tratamiento de resultado incierto sin duplicados.
+M3-T1 EN PROGRESO; EIPD bloqueada, sin merge/despliegue.
+
 ## 2026-10-14 — M3-T1 §268: registro negativo V3 asociado sin activacion
 
 POST eipd-resolution/reviews/v3 admite solo requiere_cambios/no_continuar mediante
