@@ -826,3 +826,5 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] M3-T1 §228: CI frontend incorpora 23 pruebas ficticias EIPD, comando verificado localmente con CI=true; ejecucion remota pendiente de PR.
 
 - [x] M3-T1 §229: formato frontend global, lint, tipos y 23 pruebas EIPD aprobados localmente; artefactos Playwright excluidos de Prettier.
+
+- [x] M3-T1 §230: 642 pruebas de las 26 suites del runner EIPD aprobadas en base aislada; verificacion posterior correcta. No suite integral del producto.

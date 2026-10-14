@@ -1,3 +1,18 @@
+## 2026-10-13 — M3-T1 §230: regresion EIPD backend consolidada
+
+Runner seguro scripts.run_eipd_tests ejecutado en commit 321a64c: 642 pruebas
+aprobadas en 234.27 s, 26 suites focalizadas del catalogo TARGETS. Base fija aislada,
+head y app_user sin bypass/superuser verificados antes; misma verificacion posterior
+correcta, registro de politica de pruebas vacio. No creacion/borrado de DB ni uso
+de expediente operativo. Credenciales no copiadas a documentacion.
+
+Cubre investigacion/bindings, frontera/screening/controles, metadatos/requisitos,
+escritura negativa, almacenamiento/lectura, APIs y concurrencia del catalogo.
+No suite completa del backend: otros modulos y servicios fuera de TARGETS no se
+presentan como probados; no nueva validacion externa de fuentes o aceptacion.
+Solo registro documental, codigo/politica/datos operativos sin cambios. M3-T1 EN
+PROGRESO; pruebas ficticias hasta MVP; confirmacion/activacion bloqueadas.
+
 ## 2026-10-13 — M3-T1 §229: control de formato frontend aprobado
 
 Preflight de formato exigido por CI detecto seis archivos de codigo y un artefacto
