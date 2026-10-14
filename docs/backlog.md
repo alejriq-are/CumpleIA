@@ -853,3 +853,4 @@ No habilitada; pruebas ficticias hasta MVP. Checklist historico no acredita facu
 - [ ] Representacion: integracion persistente/binding sucesor en API conservando bloqueos, historicos y limites de diagnostico.
 - [x] §240: [plan persistente de representacion](project/m3-t1-representacion-persistencia.md), semantica PATCH/historicos/tenant y limite de cobertura EIPD; implementacion pendiente.
 - [x] §241: centralizacion sin ciclo y contratos futuros Create/Update/Out, 107 pruebas relacionadas; endpoints activos sin nuevo campo. Persistencia pendiente.
+- [x] §242: migracion/storage nullable de representacion, barrera SQL no confirmado y RLS probados; 116 relacionadas aprobadas, API del campo pendiente.

@@ -1,3 +1,28 @@
+## 2026-10-14 — M3-T1 §242: storage interno de representacion
+
+Migracion nueva e41c5b8a2d90 tras d39e2b0f841c: columna JSONB nullable sin backfill,
+constraint de objeto y prohibicion de status confirmado cuando material no sea NULL.
+Modelo ORM alineado con SQL NULL real. RLS/privilegios previos conservados; SQL solo
+exige objeto y barrera de status, no valida el contrato completo del envelope.
+API del nuevo campo todavia no conectada.
+
+Upgrade aplicado primero en base fija aislada tras verificar head anterior/roles;
+runner EXPECTED_HEAD actualizado solo despues del exito e incorpora cinco suites
+de representacion. 116 pruebas relacionadas aprobadas en 1.00 s: almacenamiento,
+roundtrip/null, rechazo de JSON no objeto, barrera real SQL de confirmacion,
+lectura/escritura propia y rechazo de tenant ajeno, contratos/binding/evaluador y
+guardas runner. Dos aserciones iniciales de nombre fijo corregidas para constraints
+generadas por convencion SQLAlchemy; comparacion del constraint_name real.
+Alembic check aislado sin drift; Ruff/Black correctos.
+
+Upgrade local de desarrollo aplicado despues de pruebas, con host/base/head
+verificados: conteos de expedientes y registros de politica conservados, columna
+nueva NULL en todos los expedientes previos. Backend health 200. No datos/documentos
+operativos aportados ni politica habilitada. Downgrade definido, no ensayado.
+Proximo: CRUD del documento/binding con nuevos contratos y gates, cobertura EIPD
+pendiente conservada. M3-T1 EN PROGRESO; pruebas ficticias hasta MVP;
+confirmacion/activacion bloqueadas.
+
 ## 2026-10-14 — M3-T1 §241: contratos futuros sin ciclo de imports
 
 Tipos de representacion centralizados en schemas/licitud con facade compatible en
