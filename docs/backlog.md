@@ -856,3 +856,6 @@ No habilitada; pruebas ficticias hasta MVP. Checklist historico no acredita facu
 - [x] §242: migracion/storage nullable de representacion, barrera SQL no confirmado y RLS probados; 116 relacionadas aprobadas, API del campo pendiente.
 - [x] §243: CRUD de representacion conectado y gates conservadores; 127 pruebas del bloque aprobadas, readiness especifico pendiente (409 controlado).
 - [x] §244: diagnostico representacion en readiness/interfaz, cobertura pendiente explicita y vigencia global suprimida; 132 backend y 31 frontend aprobadas. Sin habilitacion.
+
+- [x] M3-T1 §260: CRUD de resolucion V3 y diagnostico V4 conectados en API; 892 pruebas aisladas y 37 frontend aprobadas; metadata2 no autoriza acciones. Migracion local aplicada sin cambios de contenido.
+- [ ] M3-T1: vista completa de motivos V4 y lectura/revision versionada de metadata2; EIPD permanece bloqueada y pruebas ficticias hasta MVP.

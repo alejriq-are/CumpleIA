@@ -21,10 +21,10 @@ from app.schemas.licitud import (
     LegalAssessmentRepresentationDraftUpdateV1 as LegalAssessmentDraftUpdate,
 )
 from app.schemas.licitud import (
-    LegalAssessmentRepresentationOutV1 as LegalAssessmentOut,
+    LegalAssessmentRepresentationOutV2 as LegalAssessmentOut,
 )
 from app.schemas.licitud import (
-    LegalAssessmentRepresentationReadinessOutV1 as LegalAssessmentReadinessOut,
+    LegalAssessmentRepresentationReadinessOutV2 as LegalAssessmentReadinessOut,
 )
 from app.services import licitud as service
 from app.services.authorization import Permission

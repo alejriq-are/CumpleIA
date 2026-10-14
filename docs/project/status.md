@@ -1,3 +1,34 @@
+## 2026-10-14 — M3-T1 §260: API V3/V4 conectada
+
+POST/PATCH de resolucion eligen ContextV3 servidor cuando hay representacion o
+binding3 previo, despues de recomponer RAT/consentimientos/aportes. API usa salida
+OutV2 capaz de leer binding3. Readiness conecta campo separado eipd_controls_v4,
+compone identidades/motivos/politica y conserva caminos V1/V2/V3 anteriores donde
+corresponden. Tres decisiones V4 bloqueadas; confirmacion/revision HTTP releen y
+rechazan tambien binding3 tras retirar material, sin degradar cobertura ni crear
+eventos. Campos/contratos de entrada no ampliados a envelopes editables.
+
+Dos recorridos HTTP nuevos: crear todo junto, o aportar/modificar/reaportar/retirar;
+verifican lectura estable, obsolescencia, metadata2, V3 conservado y cero eventos
+tras acciones 409. 49 HTTP focalizadas aprobadas en 18.29 s. Suite runner aislado:
+892 aprobadas en 259.36 s; no equivale a suite completa de producto. Ruff global y
+Black (255 archivos) correctos. OpenAPI test resuelve root publicado; assertions V3
+historicas conservadas, caso representacion ahora comprueba decisiones V4.
+
+Cliente conserva politica V4 sin presentarla como requisitos V3 o vigencia historica;
+valida flags/decision bloqueada/contexto accion null y rechaza mezcla V3/V4. Seis
+casos nuevos; 37 frontend aprobados en 4.1 s, tipos/lint y formato correctos. Todavia
+no presenta lista completa de motivos V4 ni identidad actual como vista nueva.
+
+Migracion f52d6c9b3e10 aplicada a cumpleia local solo despues de suite aislada y
+comprobacion explicita host/base/head/roles. Conteos y huellas de contenido iguales
+en legal_assessments, reviews, publicaciones/selecciones/selector de politica.
+Sin backfill ni material de usuario nuevo. Script inicial aviso de cierre de pool
+por ciclos async separados; migracion/comparacion correctas, lectura final en un
+solo ciclo confirmo head/constraint/rol sin aviso. Backend health 200. EIPD sigue
+bloqueada, sin merge/despliegue; ficticios hasta MVP. Proximo: vista completa V4 y
+lectura/revision versionada compatible con metadata2 antes de cualquier nueva accion.
+
 ## 2026-10-14 — M3-T1 §259: salida y requisitos V4 bloqueados
 
 Contrato cerrado EipdControlCompositionV4Out conserva controles ordinarios,

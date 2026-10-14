@@ -319,7 +319,7 @@ async def test_readiness_reports_stale_context_and_removal(saved):
         assert response.json()["representation_context_coverage"] == "no_aplica"
 
 
-async def test_representation_marks_all_v3_review_decisions_pending(saved):
+async def test_representation_marks_all_v4_review_decisions_pending(saved):
     tid, out, app, org = saved
     url = f"/licitud/treatments/{tid}/assessments/{out['id']}"
     async with AsyncClient(
@@ -331,14 +331,15 @@ async def test_representation_marks_all_v3_review_decisions_pending(saved):
         assert result.status_code == 200, result.text
         result = await client.get(url + "/readiness")
         assert result.status_code == 200, result.text
-        controls = result.json()["eipd_controls_v3"]
+        assert result.json()["eipd_controls_v3"] is None
+        controls = result.json()["eipd_controls_v4"]
         assert controls is not None
         for name in ("continuar", "requiere_cambios", "no_continuar"):
-            decision = controls["review_prerequisites_v3"][name]
+            decision = controls["review_prerequisites_v4"][name]
             assert decision["prerequisites_met"] is False
             assert decision["context_metadata"] is None
             assert any(
-                issue["code"] == "resolucion_eipd_representacion_asociacion_pendiente"
+                issue["code"] == "politica_representacion_no_implementada"
                 for issue in decision["issues"]
             )
         assert (
@@ -647,3 +648,131 @@ async def test_representation_and_confirmation_serialize(
             if final_action == "representation"
             else ("confirmado", False)
         )
+
+
+async def test_resolution_v3_roundtrip_reaporte_withdrawal_and_actions(
+    saved, _session_factory
+):
+    tid, out, app, org = saved
+    url = f"/licitud/treatments/{tid}/assessments/{out['id']}"
+    async with AsyncClient(
+        transport=ASGITransport(app=app),
+        base_url="http://test",
+        headers={"X-Organization-Id": str(org)},
+    ) as client:
+        response = await client.patch(url, json={"eipd_resolution_assessment": {}})
+        assert response.status_code == 200, response.text
+        original = response.json()
+        resolution = original["eipd_resolution_assessment"]
+        assert resolution["context_binding"]["binding_version"] == 3
+        assert (await client.get(url)).json() == original
+        ready = await client.get(url + "/readiness")
+        assert ready.status_code == 200, ready.text
+        control = ready.json()["eipd_controls_v4"]
+        assert control["resolution"]["binding_version"] == 3
+        assert control["resolution"]["context_current"] is True
+        assert control["context_metadata"]["metadata_schema_version"] == 2
+        assert not control["can_confirm"] and not control["authorizes_action"]
+        assert (await client.get(url)).json() == original
+        changed = await client.patch(
+            url,
+            json={
+                "sensitive_representation_assessment": {
+                    **DOCUMENT,
+                    "notes": "PRUEBA: nuevo documento",
+                }
+            },
+        )
+        assert changed.status_code == 200
+        assert changed.json()["eipd_resolution_assessment"] == resolution
+        stale = (await client.get(url + "/readiness")).json()["eipd_controls_v4"]
+        assert stale["resolution"]["context_current"] is False
+        assert stale["context_metadata"] is None
+        fresh = await client.patch(url, json={"eipd_resolution_assessment": {}})
+        assert fresh.status_code == 200, fresh.text
+        new_resolution = fresh.json()["eipd_resolution_assessment"]
+        assert (
+            new_resolution["context_binding"]["context_hash"]
+            != resolution["context_binding"]["context_hash"]
+        )
+        assert new_resolution["context_binding"]["binding_version"] == 3
+        removed = await client.patch(
+            url, json={"sensitive_representation_assessment": None}
+        )
+        assert removed.status_code == 200
+        assert removed.json()["eipd_resolution_assessment"] == new_resolution
+        reissued = await client.patch(url, json={"eipd_resolution_assessment": {}})
+        assert reissued.status_code == 200, reissued.text
+        assert (
+            reissued.json()["eipd_resolution_assessment"]["context_binding"][
+                "binding_version"
+            ]
+            == 3
+        )
+        before_actions = (await client.get(url)).json()
+        confirmed = await client.post(url + "/confirm")
+        assert confirmed.status_code == 409, confirmed.text
+        assert (
+            confirmed.json()["detail"]["code"]
+            == "representacion_confirmacion_bloqueada"
+        )
+        review = await client.post(
+            url + "/eipd-resolution/reviews/v2",
+            json={
+                "decision": "requiere_cambios",
+                "rationale": "PRUEBA",
+                "review_reference": "PRUEBA",
+            },
+        )
+        assert review.status_code == 409, review.text
+        assert (
+            review.json()["detail"]["code"]
+            == "resolucion_eipd_representacion_asociacion_pendiente"
+        )
+        final_ready = await client.get(url + "/readiness")
+        assert final_ready.status_code == 200, final_ready.text
+        assert any(
+            i["code"] == "representacion_confirmacion_bloqueada"
+            for i in final_ready.json()["confirmation_blockers"]
+        )
+        assert (await client.get(url)).json() == before_actions
+    async with _session_factory() as db:
+        assert (
+            await db.scalar(
+                text(
+                    "SELECT count(*) FROM eipd_resolution_reviews WHERE assessment_id=:id"
+                ),
+                {"id": UUID(out["id"])},
+            )
+            == 0
+        )
+
+
+async def test_create_with_representation_and_resolution_binds_final_context(
+    client_a, rat_m3, org_a_id
+):
+    tid, payload = rat_m3
+    async with AsyncClient(
+        transport=ASGITransport(app=client_a),
+        base_url="http://test",
+        headers={"X-Organization-Id": str(org_a_id)},
+    ) as client:
+        response = await client.post(
+            f"/licitud/treatments/{tid}/assessments",
+            json={
+                **payload,
+                "sensitive_representation_assessment": DOCUMENT,
+                "eipd_resolution_assessment": {},
+            },
+        )
+        assert response.status_code == 201, response.text
+        body = response.json()
+        assert (
+            body["eipd_resolution_assessment"]["context_binding"]["binding_version"]
+            == 3
+        )
+        ready = await client.get(
+            f"/licitud/treatments/{tid}/assessments/{body['id']}/readiness"
+        )
+        assert ready.status_code == 200, ready.text
+        assert ready.json()["eipd_controls_v4"]["resolution"]["context_current"] is True
