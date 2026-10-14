@@ -302,3 +302,20 @@ API investigacion aprobadas en 4.54 s con base fija aislada verificada. Ruff/Bla
 correctos. Sin migracion, alteracion de historia, politica ni datos operativos.
 Objetivo autonomo activo por solicitud explicita del usuario, con commit/push de
 bloques validados; sin merge/despliegue ni activar EIPD. M3-T1 EN PROGRESO.
+
+## 2026-10-14 — M3-T1 §253: almacenamiento compatible de metadata V2
+
+Migracion append-only f52d6c9b3e10 tras e41c5b8a2d90 amplía constraint existente:
+conserva contrato metadata1 completo y admite metadata2 cerrado con binding/context3,
+cobertura research/representacion contexto_v3, hashes de evento concordantes y
+hashes de material explicitos nullable. ORM alineado. Sin backfill ni cambios de
+filas, privilegios/RLS o canales operativos. Downgrade rechaza si hay eventos V2;
+no los borra/convierte para restaurar contrato viejo. Downgrade no ensayado.
+
+Upgrade aplicado solo en base fija aislada despues de verificar head/destino previo;
+runner EXPECTED_HEAD actualizado tras exito e incluye suite almacenamiento sucesora.
+17 casos nuevos: roundtrip, append-only, identidad null historica, forma/version/
+cobertura/hash incompatibles, campo faltante, tenant/actor/padre/no_auth. 38 pruebas
+nuevas/historicas/guardas aprobadas en 4.32 s; alembic check sin drift, Ruff/Black
+correctos. Base operativa local sigue en e41 hasta integrar lectores/writer coherentes.
+M3-T1 EN PROGRESO; ficticios hasta MVP; activacion EIPD bloqueada.
