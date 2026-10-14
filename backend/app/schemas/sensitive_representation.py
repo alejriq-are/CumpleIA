@@ -55,3 +55,18 @@ class SensitiveRepresentationAssessmentV1(BaseModel):
         if self.valid_from and self.valid_until and self.valid_until < self.valid_from:
             raise ValueError("Intervalo documental contradictorio")
         return self
+
+
+class SensitiveRepresentationBindingV1(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    binding_version: Literal[1] = 1
+    context_hash: str = Field(pattern=r"^[0-9a-f]{64}$")
+    document_hash: str = Field(pattern=r"^[0-9a-f]{64}$")
+
+
+class BoundSensitiveRepresentationV1(BaseModel):
+    """Envoltorio interno: nunca entrada editable del expediente."""
+
+    model_config = ConfigDict(extra="forbid")
+    assessment: SensitiveRepresentationAssessmentV1
+    context_binding: SensitiveRepresentationBindingV1

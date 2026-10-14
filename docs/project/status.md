@@ -1,3 +1,23 @@
+## 2026-10-14 — M3-T1 §238: asociacion independiente de representacion
+
+Nuevo contexto/binding V1 separado: UUID organizacion/tratamiento/evaluacion,
+RAT canonico, base ordinaria, consentimiento ordinario y sensible. Documento/hash
+con dominio propio sensitive_representation, version 1; no reemplazo ni despacho
+a bindings historicos. Envelope interno cerrado, hashes hex/version; no entrada
+editable de API. Helpers canonicos existentes reused sin modificarlos.
+
+Evaluador puro de asociacion: vigente/requiere_revision, motivos de ausencia,
+contexto obsoleto y documento obsoleto; ambos cambios se informan juntos. Contexto
+invalido no se oculta por documento ausente. Reaporte explicito produce nuevo
+binding sin mutar anterior; can_confirm siempre false. Identidad vigente no
+acredita facultades, aplicabilidad o autenticidad del material proporcionado.
+
+19 pruebas nuevas de binding; conjunto con 39 de schema y 11 de research_binding:
+69 aprobadas en 0.28 s con entorno aislado verificado. Ruff/Black correctos. Sin
+persistencia, endpoints, migracion o cambio de politica. Siguiente: definir el
+evaluador documental conservador y su matriz antes de integrar persistencia/gates.
+M3-T1 EN PROGRESO; pruebas ficticias hasta MVP; confirmacion/activacion bloqueadas.
+
 ## 2026-10-14 — M3-T1 §237: contrato documental de representacion sensible
 
 Nuevo SensitiveRepresentationAssessmentV1 separado en schemas/sensitive_representation,
