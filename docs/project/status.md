@@ -1,3 +1,17 @@
+## 2026-10-14 — M3-T1 §250: binding EIPD V3 de representacion
+
+Contexto V3 extiende V2 con envelope representacion requerido incluso si null;
+contrato interno cerrado, binding/documento StoredV3 separados, dominios de hash
+nuevos. Cambios de cuerpo, hashes de asociacion, retiro, investigacion, RAT o
+consentimiento invalidan identidad sin repararla. V1/V2 no aceptan documentos V3;
+null explicito no comparte hash V2. Funciones puras, sin dispatch/API/metadata/eventos
+nuevos ni cambio de gates; cobertura operativa de representacion sigue pendiente.
+
+10 casos nuevos y regresiones de bindings/evaluador historicos: 206 aprobadas en
+0.61 s con entorno aislado verificado; Ruff/Black correctos. Sin migracion o datos
+operativos. Proximo: contrato sucesor de metadata y composicion compatible antes
+de conectar writer/API. M3-T1 EN PROGRESO; datos ficticios hasta MVP; EIPD bloqueada.
+
 ## 2026-10-14 — M3-T1 §249: regresion OpenAPI detectada por CI
 
 CI de d5a1986 (run 38611120420) fallo en test_openapi_research_contracts por

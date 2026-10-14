@@ -1813,3 +1813,15 @@ class LegalAssessmentRepresentationReadinessOutV1(LegalAssessmentReadinessOut):
         if self.representation_context_coverage != expected:
             raise ValueError("Cobertura de representacion incoherente")
         return self
+
+
+class EipdResolutionContextBindingV3(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    binding_version: Literal[3] = 3
+    context_hash: str = Field(pattern=r"^[0-9a-f]{64}$")
+
+
+class EipdResolutionAssessmentStoredV3(EipdResolutionAssessmentV1):
+    """Binding de representacion; interno, sin dispatch HTTP ni habilitacion."""
+
+    context_binding: EipdResolutionContextBindingV3
