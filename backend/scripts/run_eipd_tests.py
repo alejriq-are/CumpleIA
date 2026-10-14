@@ -25,6 +25,7 @@ TARGETS = (
     "tests/test_eipd_resolution_binding_v2.py",
     "tests/test_eipd_resolution_binding_v3.py",
     "tests/test_eipd_resolution_readiness_v3.py",
+    "tests/test_eipd_representation.py",
     "tests/test_eipd_v3_output_contracts.py",
     "tests/test_eipd_review_metadata_v2.py",
     "tests/test_eipd_frontier_v2.py",

@@ -367,3 +367,22 @@ No import API nuevo todavia: composicion actual V3 solo admite contexto2 y metad
 Proximo conjunto coherente: composicion sucesora con contexto3/diagnostico propio,
 metadatos/prerrequisitos conservadores y salida; despues builder/writer/API/localDB.
 M3-T1 EN PROGRESO; ficticios hasta MVP; EIPD bloqueada.
+
+## 2026-10-14 — M3-T1 §257: composicion documental representacion/EIPD
+
+Nuevo adaptador puro recibe IDs org/tratamiento/evaluacion de servidor y ContextV3
+cerrado. Evalua asociacion propia de representacion separada de binding EIPD; integra
+motivos reales y sustituye solo el placeholder de evaluacion pendiente. Conserva
+motivo de falta de cobertura V1/V2. Metadata V2 solo para binding3/contexto actual;
+identidad puede describir documento incompleto, nunca acredita facultad/preparacion.
+Cambio de ID puede dejar binding EIPD vigente pero representacion obsoleta: no
+confundir ambas relaciones. Resultado siempre authorizes_action/can_confirm false.
+
+Once casos nuevos, incluidos completo documental sin autoridad, retiro, cambio
+corporal, IDs y version antigua. 66 pruebas composicion/evaluadores/metadata aprobadas
+en 0.40 s en base fija aislada verificada; Ruff/Black correctos. Una asercion inicial
+se alineo con codigo existente asociacion_documento_obsoleta, sin cambiar reglas.
+Runner incorpora suite. No accion/API/builder operativo conectado aun; composicion
+transversal, politica y prerrequisitos mantienen barreras propias. Proximo: integrar
+adaptador en readiness/salida de servidor como conjunto con writer y lectura V3.
+M3-T1 EN PROGRESO; datos ficticios hasta MVP; activacion EIPD bloqueada.
