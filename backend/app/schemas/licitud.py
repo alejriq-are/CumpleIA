@@ -18,7 +18,10 @@ from pydantic import (
     model_validator,
 )
 
-from app.schemas.eipd_review_metadata import EipdReviewContextMetadataV1
+from app.schemas.eipd_review_metadata import (
+    EipdReviewContextMetadataV1,
+    EipdReviewContextMetadataV2,
+)
 
 LegalBasis = Literal[
     "consentimiento_art12",
@@ -1825,3 +1828,22 @@ class EipdResolutionAssessmentStoredV3(EipdResolutionAssessmentV1):
     """Binding de representacion; interno, sin dispatch HTTP ni habilitacion."""
 
     context_binding: EipdResolutionContextBindingV3
+
+
+class EipdResolutionReviewOutV3(EipdResolutionReviewWithPolicyOut):
+    """Contrato sucesor interno de lectura; no convierte identidad historica."""
+
+    response_schema_version: Literal[3]
+    review_context_metadata: (
+        EipdReviewContextMetadataV1 | EipdReviewContextMetadataV2 | None
+    )
+
+    @model_validator(mode="after")
+    def validar_hashes_metadatos_evento(self):
+        metadata = self.review_context_metadata
+        if metadata is not None and (
+            metadata.document_hash != self.document_hash
+            or metadata.context_hash != self.context_hash
+        ):
+            raise ValueError("Metadata discordante con hashes del evento")
+        return self

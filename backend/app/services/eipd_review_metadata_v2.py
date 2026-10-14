@@ -1,6 +1,9 @@
 """Metadata pura del contexto V3; no convierte historia ni autoriza acciones."""
 
-from app.schemas.eipd_review_metadata import EipdReviewContextMetadataV2
+from app.schemas.eipd_review_metadata import (
+    EipdReviewContextMetadataV1,
+    EipdReviewContextMetadataV2,
+)
 from app.schemas.licitud import EipdResolutionAssessmentStoredV3
 from app.services.eipd_resolution import _hash, _validated_json
 from app.services.eipd_resolution_binding_v3 import (
@@ -45,3 +48,21 @@ def build_eipd_review_context_metadata_v2(document, context):
             "representation", ctx.sensitive_representation_assessment
         ),
     )
+
+
+def read_eipd_review_context_metadata_v2(event):
+    """Lectura compatible de identidad guardada; nunca reconstruye historia."""
+    value = event.review_context_metadata
+    if value is None:
+        return None
+    version = value.get("metadata_schema_version")
+    if type(version) is not int or version not in (1, 2):
+        raise ValueError("Version de metadata no admitida")
+    model = EipdReviewContextMetadataV1 if version == 1 else EipdReviewContextMetadataV2
+    metadata = model.model_validate(value)
+    if (metadata.document_hash, metadata.context_hash) != (
+        event.document_hash,
+        event.context_hash,
+    ):
+        raise ValueError("Metadatos discordantes con el evento persistido")
+    return metadata

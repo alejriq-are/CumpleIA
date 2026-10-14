@@ -1,3 +1,18 @@
+## 2026-10-14 — M3-T1 §252: lectura compatible de metadata sucesora
+
+Lector interno V2 conserva null historico y distingue estrictamente metadata1/2;
+rechaza versiones desconocidas/bool/texto y hashes discordantes con evento. Contrato
+OutV3 preparado admite identidad V1/V2 sin convertirla, mantiene campos originales
+y valida hashes. Ningun endpoint cambia aun; schema SQL actual solo admite metadata1.
+Proximo bloque necesario: migracion append-only/constraint para metadata2, pruebas
+RLS/append-only y actualizacion de entorno aislado antes de conectar escritura.
+
+Siete casos nuevos; 64 pruebas lector nuevo/historico, contratos representacion y
+API investigacion aprobadas en 4.54 s con base fija aislada verificada. Ruff/Black
+correctos. Sin migracion, alteracion de historia, politica ni datos operativos.
+Objetivo autonomo activo por solicitud explicita del usuario, con commit/push de
+bloques validados; sin merge/despliegue ni activar EIPD. M3-T1 EN PROGRESO.
+
 ## 2026-10-14 — M3-T1 §251: metadata V2 para contexto EIPD V3
 
 Nuevo contrato interno cerrado exige versiones metadata2/binding3/context3,
