@@ -112,6 +112,9 @@ from app.services.eipd_review_v3 import (
     evaluate_eipd_resolution_review_prerequisites_v3,
     evaluate_eipd_review_decision_prerequisites_v3,
 )
+from app.services.eipd_review_v4 import (
+    evaluate_eipd_resolution_review_documentary_prerequisites_v4,
+)
 from app.services.eipd_screening_v2 import evaluate_eipd_screening_v2
 from app.services.geolocation import evaluate_geolocation_assessment_v1
 from app.services.health import evaluate_health_assessment_v1
@@ -2983,9 +2986,15 @@ async def record_eipd_resolution_review_v1(
     if getattr(
         draft, "sensitive_representation_assessment", None
     ) is not None or _resolution_uses_context_v3(draft):
+        diagnostic = await _represented_review_diagnostic_locked(
+            db, organization_id, treatment_id, draft, series, payload
+        )
         raise HTTPException(
             status_code=409,
-            detail={"code": "resolucion_eipd_representacion_asociacion_pendiente"},
+            detail={
+                "code": "resolucion_eipd_representacion_asociacion_pendiente",
+                **diagnostic,
+            },
         )
     if draft.schema_version != 1 or draft.rat_context_schema_version != 1:
         raise _conflict("Version de evaluacion o contexto RAT no admitida")
@@ -3111,6 +3120,73 @@ async def record_eipd_resolution_review_v1(
     db.add(event)
     await db.flush()
     return event
+
+
+async def _represented_review_diagnostic_locked(
+    db, organization_id, treatment_id, draft, series, payload
+):
+    """Solo diagnostica bajo locks del caller; no prepara ni agrega un evento."""
+    try:
+        scope = _scope_from_snapshot_v1(draft.rat_context_snapshot)
+        bundle = await build_rat_context_bundle_from_m2_v1(
+            db,
+            organization_id,
+            treatment_id,
+            purpose_key=series.purpose_key,
+            scope=scope,
+        )
+        context = build_eipd_resolution_context_from_assessment_v3(
+            draft, bundle.snapshot
+        )
+        latest_review, identity = await _latest_eipd_review_snapshot_v1(
+            db, organization_id, draft.id
+        )
+        result = evaluate_eipd_resolution_review_documentary_prerequisites_v4(
+            {
+                "assessment": {
+                    **_assessment_eipd_composition_input_v1(
+                        draft,
+                        organization_id,
+                        context,
+                        build_rat_context_hash_v1(bundle.canonical)
+                        == draft.rat_context_hash,
+                        latest_review,
+                    ),
+                    "treatment_id": treatment_id,
+                },
+                "policy": await _selected_disabled_eipd_policy_v1(db),
+                "latest_review_policy": identity,
+            },
+            payload,
+            evaluated_on=datetime.now(UTC).date(),
+        )
+    except (ValidationError, ValueError):
+        return {
+            "evaluation_version": 4,
+            "documentary_prerequisites_met": False,
+            "prerequisites_met": False,
+            "authorizes_action": False,
+            "can_confirm": False,
+            "documentary_issues_v4": [],
+            "issues_v4": [
+                {
+                    "stage": "review",
+                    "field": "context",
+                    "code": "metadatos_revision_no_disponibles",
+                    "category": "requiere_revision",
+                    "question_id": None,
+                }
+            ],
+        }
+    return {
+        "evaluation_version": result.evaluation_version,
+        "documentary_prerequisites_met": result.documentary_prerequisites_met,
+        "prerequisites_met": False,
+        "authorizes_action": False,
+        "can_confirm": False,
+        "documentary_issues_v4": [asdict(i) for i in result.documentary_issues],
+        "issues_v4": [asdict(i) for i in result.composition.review_blockers],
+    }
 
 
 async def _record_eipd_negative_review_v2_locked(

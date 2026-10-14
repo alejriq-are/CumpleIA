@@ -361,6 +361,13 @@ async def test_representation_marks_all_v4_review_decisions_pending(
         assert response.json()["detail"]["code"] == (
             "resolucion_eipd_representacion_asociacion_pendiente"
         )
+        detail = response.json()["detail"]
+        assert detail["evaluation_version"] == 4
+        assert detail["prerequisites_met"] is False
+        assert detail["authorizes_action"] is False
+        assert detail["can_confirm"] is False
+        assert detail["documentary_prerequisites_met"] is False
+        assert detail["issues_v4"]
         assert (await client.get(url)).json() == before
     async with _session_factory() as db:
         count = await db.scalar(
@@ -746,6 +753,17 @@ async def test_resolution_v3_roundtrip_reaporte_withdrawal_and_actions(
         assert (
             review.json()["detail"]["code"]
             == "resolucion_eipd_representacion_asociacion_pendiente"
+        )
+        diagnostic = review.json()["detail"]
+        assert diagnostic["evaluation_version"] == 4
+        assert diagnostic["documentary_prerequisites_met"] is True
+        assert diagnostic["prerequisites_met"] is False
+        assert diagnostic["authorizes_action"] is False
+        assert diagnostic["can_confirm"] is False
+        assert diagnostic["documentary_issues_v4"] == []
+        assert any(
+            i["code"] == "politica_representacion_no_implementada"
+            for i in diagnostic["issues_v4"]
         )
         final_ready = await client.get(url + "/readiness")
         assert final_ready.status_code == 200, final_ready.text

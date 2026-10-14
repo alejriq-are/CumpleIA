@@ -551,3 +551,21 @@ asociacion del material representado: corregido antes de validar. Runner ampliad
 Ruff/Black correctos. Solo fixtures ficticios; sin datos operativos modificados.
 Proximo: definir adaptador transaccional y contrato de accion negativo sucesor antes
 de publicar POST V3; mantener barrera positiva y de activacion. M3-T1 EN PROGRESO.
+
+## 2026-10-14 — M3-T1 §266: diagnostico de rechazo transaccional V4
+
+Las rutas de revision existentes conservan409 y codigo compatible cuando hay
+representacion/binding3. Tras locks globales/selector/serie y relectura de borrador,
+reconstruyen bundle/contexto actual y ejecutan evaluador documental V4. Respuesta
+separa documentary_prerequisites_met/documentary_issues_v4 de issues_v4 operativos;
+prerequisites_met/authorizes_action/can_confirm false. No expone metadata como
+contexto de accion, no agrega evento ni publica POST V3. Contrato documental
+invalido rechaza conservadoramente con motivo, nunca promociona a permiso.
+
+57 pruebas API representacion/evaluador/negativas V2 aprobadas en16.37s. Matriz
+seis rutas/decisiones comprueba diagnostico bloqueado y cero eventos; caso binding3
+tras retirar documento confirma identidad documental actual pero accionfalse y
+barrera politica presente. Compatibilidad V2 previa conservada. Ruff/Black correctos.
+Solo datos ficticios aislados. Pendiente escritor negativo sucesor y sus contratos,
+autorizacion y concurrencia antes de habilitarlo; esta entrega solo diagnostica.
+M3-T1 EN PROGRESO; activacion EIPD bloqueada, sin merge/despliegue.
