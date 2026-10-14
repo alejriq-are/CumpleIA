@@ -852,3 +852,4 @@ No habilitada; pruebas ficticias hasta MVP. Checklist historico no acredita facu
 - [x] §239: evaluador documental conservador, 30 pruebas nuevas y 88 relacionadas aprobadas; completo no autoriza ni verifica facultades.
 - [ ] Representacion: integracion persistente/binding sucesor en API conservando bloqueos, historicos y limites de diagnostico.
 - [x] §240: [plan persistente de representacion](project/m3-t1-representacion-persistencia.md), semantica PATCH/historicos/tenant y limite de cobertura EIPD; implementacion pendiente.
+- [x] §241: centralizacion sin ciclo y contratos futuros Create/Update/Out, 107 pruebas relacionadas; endpoints activos sin nuevo campo. Persistencia pendiente.

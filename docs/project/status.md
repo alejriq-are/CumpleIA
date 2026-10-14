@@ -1,3 +1,19 @@
+## 2026-10-14 — M3-T1 §241: contratos futuros sin ciclo de imports
+
+Tipos de representacion centralizados en schemas/licitud con facade compatible en
+sensitive_representation. Preparados subcontratos Create/Update/Out separados para
+futura persistencia: entrada documento sin binding, salida envelope servidor, root
+cerrado. API activa sigue usando clases anteriores, sin nuevo campo aceptado.
+Model_fields_set distingue omitido/null/aporte; validator scope null conservado.
+
+Comparacion antes/despues: JSON schemas de tres modelos API activos y tres modelos
+de representacion identicos; hash de documento ficticio identico. No reescritura
+de datos/hashes historicos. 19 pruebas nuevas de contratos futuros, mas 88 anteriores:
+107 aprobadas en 0.32 s con entorno aislado verificado; Ruff/Black correctos.
+No migracion, ORM/CRUD o conexion API nueva. Proximo: implementar conjunto coherente
+de persistencia y gates antes de cambiar tipos usados por endpoints.
+M3-T1 EN PROGRESO; pruebas ficticias hasta MVP; confirmacion/activacion bloqueadas.
+
 ## 2026-10-14 — M3-T1 §240: plan persistente coherente de representacion
 
 Revisados puntos concretos ORM, contratos, CRUD/locks y patron migracion research.
