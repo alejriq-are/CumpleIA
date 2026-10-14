@@ -50,3 +50,17 @@ No suite completa del backend: otros modulos y servicios fuera de TARGETS no se
 presentan como probados; no nueva validacion externa de fuentes o aceptacion.
 Solo registro documental, codigo/politica/datos operativos sin cambios. M3-T1 EN
 PROGRESO; pruebas ficticias hasta MVP; confirmacion/activacion bloqueadas.
+
+## 2026-10-14 — M3-T1 §231: controles globales backend aprobados
+
+Preflight CI detecto imports seed_e2e y migracion historica, mas formato de seed,
+servicio RAT y test activacion. Ruff ordena imports seed; Black normaliza los tres
+archivos. Comparacion AST confirma codigo identico en servicio/test y cuerpo seed
+identico excluyendo imports ordenados. Seed no ejecutado, ningun dato creado.
+
+Migracion aplicada 5997a757f17b intacta por regla append-only AGENTS.md. Excepcion
+Ruff por archivo exacto limitada a I001 (orden imports); sin exclusion de otras
+reglas o migraciones. Ruff global aprobado; Black global 230 archivos correctos.
+No cambio funcional, tests de regresion §230 no repetidos para formato. No suite
+integral del producto ni CI remoto. Politica/datos/permisos sin cambios; M3-T1 EN
+PROGRESO, pruebas ficticias hasta MVP; confirmacion/activacion bloqueadas.

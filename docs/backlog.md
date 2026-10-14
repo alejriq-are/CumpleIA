@@ -828,3 +828,5 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] M3-T1 §229: formato frontend global, lint, tipos y 23 pruebas EIPD aprobados localmente; artefactos Playwright excluidos de Prettier.
 
 - [x] M3-T1 §230: 642 pruebas de las 26 suites del runner EIPD aprobadas en base aislada; verificacion posterior correcta. No suite integral del producto.
+
+- [x] M3-T1 §231: Ruff/Black global backend aprobados; migracion historica preservada con excepcion I001 exacta; correcciones restantes solo formato/imports.
