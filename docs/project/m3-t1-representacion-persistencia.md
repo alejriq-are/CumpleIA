@@ -245,3 +245,16 @@ Ruff/Black correctos. Primera corrida detecto fixture transversal obsoleto al
 cambiar consentimiento; reaporte de controles ficticios corrigio preparacion sin
 relajar gates. Sin cambios de servicio, migraciones, politica ni datos operativos.
 M3-T1 EN PROGRESO; pruebas ficticias hasta MVP; confirmacion EIPD bloqueada.
+
+## 2026-10-14 — M3-T1 §249: regresion OpenAPI detectada por CI
+
+CI de d5a1986 (run 38611120420) fallo en test_openapi_research_contracts por
+KeyError LegalAssessmentDraftCreate: el endpoint ya publica el contrato sucesor de
+representacion. Prueba corregida para resolver el ref real de requestBody POST/PATCH,
+sin depender del nombre interno de clase. Conserva checks de ResearchAssessmentV1,
+extras rechazados y binding solo de salida; no cambia contrato ni servicio.
+
+33 pruebas API investigacion/contratos representacion aprobadas en 4.05 s en base
+fija aislada verificada; Ruff/Black correctos. Validacion integral remota del nuevo
+commit pendiente, no se declara CI completa aprobada. M3-T1 EN PROGRESO; datos
+ficticios hasta MVP; confirmacion/activacion EIPD bloqueadas.

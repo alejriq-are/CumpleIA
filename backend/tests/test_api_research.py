@@ -189,7 +189,15 @@ async def test_research_immutable_and_tenant(
 
 async def test_openapi_research_contracts():
     schemas = app.openapi()["components"]["schemas"]
-    for name in ("LegalAssessmentDraftCreate", "LegalAssessmentDraftUpdate"):
+    # Verificar contratos realmente publicados, sin fijar nombres de clases internas.
+    for path, method in (
+        ("/licitud/treatments/{treatment_id}/assessments", "post"),
+        ("/licitud/treatments/{treatment_id}/assessments/{assessment_id}", "patch"),
+    ):
+        request_schema = app.openapi()["paths"][path][method]["requestBody"]["content"][
+            "application/json"
+        ]["schema"]
+        name = request_schema["$ref"].rsplit("/", 1)[-1]
         alternatives = schemas[name]["properties"]["research_assessment"]["anyOf"]
         assert {"$ref": "#/components/schemas/ResearchAssessmentV1"} in alternatives
     assert schemas["ResearchAssessmentV1"]["additionalProperties"] is False
