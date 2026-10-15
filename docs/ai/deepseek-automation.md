@@ -49,3 +49,21 @@ Fuentes consultadas 2026-10-15:
 
 Fallback: traslado manual por chat si el usuario decide no usar saldo API.
 Esta modalidad es independiente de LLM_PROVIDER y de las claves del producto.
+
+## Piloto autorizado con credito existente
+
+Usuario autorizo una prueba pagada DS-001 el 2026-10-15. Captura de Harness:
+USD4.70 recargados y CNY5.39 de bono; no sumar monedas ni asumir que la credencial
+API dedicada comparte ese saldo hasta consultarlo. La clave dedicada no estaba
+configurada en Windows/WSL; no se extrajeron tokens de la sesion de Harness.
+
+Antes/despues se consulta /user/balance; se guardan saldos por moneda, usage del
+modelo y estimacion USD segun tarifas Flash consultadas el 15/10. El delta de
+saldo no acredita por si solo costo exacto si hubo llamadas concurrentes,
+redondeo o liquidacion pendiente. Evitar usar Harness durante la medicion.
+Un parche invalido tambien puede consumir; expense.json se guarda antes de
+validar el contenido. Una sola generacion, sin repeticion automatica.
+Fuente saldo: https://api-docs.deepseek.com/api/get-user-balance/
+
+Bloqueo pendiente: configurar privadamente CUMPLEIA_DEEPSEEK_HANDOFF_KEY. No
+pegar la clave en chats/capturas; mantenerla separada de las claves del producto.

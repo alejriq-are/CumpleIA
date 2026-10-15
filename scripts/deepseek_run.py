@@ -43,6 +43,64 @@ def request_api(body, key):
         ) from None
 
 
+def request_balance(key):
+    request = urllib.request.Request(
+        "https://api.deepseek.com/user/balance",
+        headers={"Authorization": "Bearer " + key},
+        method="GET",
+    )
+    try:
+        with urllib.request.build_opener(NoRedirect).open(
+            request, timeout=20
+        ) as response:
+            raw = response.read(1000001)
+            if len(raw) > 1000000:
+                raise ValueError("Saldo: respuesta demasiado grande")
+            return json.loads(raw)
+    except (urllib.error.URLError, TimeoutError):
+        raise ValueError("No se pudo comprobar el saldo") from None
+
+
+def balance_delta(before, after):
+    from decimal import Decimal
+
+    values = {
+        row["currency"]: Decimal(row["total_balance"])
+        for row in before["balance_infos"]
+    }
+    return {
+        row["currency"]: str(values[row["currency"]] - Decimal(row["total_balance"]))
+        for row in after["balance_infos"]
+        if row["currency"] in values
+    }
+
+
+def estimated_cost(usage):
+    from decimal import Decimal
+
+    if not isinstance(usage, dict):
+        return None
+    prompt = usage.get("prompt_tokens")
+    completion = usage.get("completion_tokens")
+    hit = usage.get("prompt_cache_hit_tokens", 0)
+    if (
+        any(type(value) is not int or value < 0 for value in (prompt, completion, hit))
+        or hit > prompt
+    ):
+        return None
+    peak = (
+        Decimal(hit) * Decimal("0.006")
+        + Decimal(prompt - hit) * Decimal("0.3")
+        + Decimal(completion) * Decimal("1.2")
+    ) / Decimal(1000000)
+    return dict(
+        off_peak_usd=str(peak / 2),
+        peak_usd=str(peak),
+        reference_date="2026-10-15",
+        kind="estimacion_por_tarifas_no_factura",
+    )
+
+
 def prepare(root, task_id):
     if not re.fullmatch(r"[A-Z0-9-]{1,40}", task_id):
         raise ValueError("ID invalido")
@@ -51,7 +109,14 @@ def prepare(root, task_id):
     return bundle
 
 
-def run_task(root, bundle, output, send=False, transport=request_api):
+def run_task(
+    root,
+    bundle,
+    output,
+    send=False,
+    transport=request_api,
+    balance_transport=request_balance,
+):
     output = Path(output).resolve()
     if output.is_relative_to(root):
         raise ValueError("Guardar resultados fuera del checkout")
@@ -95,10 +160,28 @@ def run_task(root, bundle, output, send=False, transport=request_api):
     # Reserva antes de la llamada: ante fallo incierto, conservarla y revisar.
     with (output / "request-started.json").open("x") as file:
         json.dump(summary, file)
+    before = balance_transport(key)
+    (output / "balance-before.json").write_text(json.dumps(before, indent=2))
+    if before.get("is_available") is not True:
+        raise ValueError("Saldo no disponible; no se envia tarea")
     response = transport(body, key)
     (output / "response.json").write_text(
         json.dumps(response, ensure_ascii=False, indent=2)
     )
+    # Registrar uso y saldo aunque el modelo devuelva un parche invalido.
+    expense = dict(
+        usage=response.get("usage"),
+        balance_delta=None,
+        estimated_cost=estimated_cost(response.get("usage")),
+        attribution="delta observado, separado por moneda; requiere ausencia de otras llamadas",
+    )
+    try:
+        after = balance_transport(key)
+        (output / "balance-after.json").write_text(json.dumps(after, indent=2))
+        expense["balance_delta"] = balance_delta(before, after)
+    except (ValueError, KeyError, TypeError):
+        expense["balance_after_unavailable"] = True
+    (output / "expense.json").write_text(json.dumps(expense, indent=2))
     choice = response["choices"][0]
     if choice.get("finish_reason") != "stop":
         raise ValueError("Respuesta truncada/incompleta; sin reintento")
@@ -115,6 +198,7 @@ def run_task(root, bundle, output, send=False, transport=request_api):
         mode="parche_pendiente_revision",
         usage=response.get("usage"),
         scope_check=checked,
+        expense=expense,
     )
     (output / "result.json").write_text(
         json.dumps(summary, ensure_ascii=False, indent=2)

@@ -47,6 +47,12 @@ class LauncherTests(unittest.TestCase):
     def tearDown(self):
         self.tmp.cleanup()
 
+    def balance(self, key):
+        return dict(
+            is_available=True,
+            balance_infos=[dict(currency="USD", total_balance="4.70")],
+        )
+
     def transport(self, body, key):
         self.assertEqual(key, "PRUEBA-CLAVE-FICTICIA")
         self.assertEqual(body["max_tokens"], 4096)
@@ -82,7 +88,7 @@ class LauncherTests(unittest.TestCase):
             m.os.environ, {"CUMPLEIA_DEEPSEEK_HANDOFF_KEY": "PRUEBA-CLAVE-FICTICIA"}
         ):
             result = m.run_task(
-                self.root, self.bundle, self.output, True, self.transport
+                self.root, self.bundle, self.output, True, self.transport, self.balance
             )
         self.assertEqual(result["requests_sent"], 1)
         self.assertEqual((self.root / "a.txt").read_text(), "PRUEBA\n")
@@ -95,7 +101,9 @@ class LauncherTests(unittest.TestCase):
         with patch.dict(
             m.os.environ, {"CUMPLEIA_DEEPSEEK_HANDOFF_KEY": "PRUEBA-CLAVE-FICTICIA"}
         ):
-            m.run_task(self.root, self.bundle, self.output, True, self.transport)
+            m.run_task(
+                self.root, self.bundle, self.output, True, self.transport, self.balance
+            )
             with self.assertRaises(FileExistsError):
                 m.run_task(
                     self.root,
@@ -111,7 +119,14 @@ class LauncherTests(unittest.TestCase):
             m.os.environ, {"CUMPLEIA_DEEPSEEK_HANDOFF_KEY": "PRUEBA-CLAVE-FICTICIA"}
         ):
             with self.assertRaises(ValueError):
-                m.run_task(self.root, self.bundle, self.output, True, self.transport)
+                m.run_task(
+                    self.root,
+                    self.bundle,
+                    self.output,
+                    True,
+                    self.transport,
+                    self.balance,
+                )
 
     def test_stale_never_sends(self):
         self.bundle["state"]["head"] = "0" * 40
@@ -123,6 +138,49 @@ class LauncherTests(unittest.TestCase):
                 True,
                 lambda *a: self.fail("No enviar"),
             )
+
+    def test_currency_delta_not_combined(self):
+        before = dict(
+            balance_infos=[
+                dict(currency="USD", total_balance="4.70"),
+                dict(currency="CNY", total_balance="5.39"),
+            ]
+        )
+        after = dict(
+            balance_infos=[
+                dict(currency="USD", total_balance="4.69"),
+                dict(currency="CNY", total_balance="5.38"),
+            ]
+        )
+        self.assertEqual(m.balance_delta(before, after), dict(USD="0.01", CNY="0.01"))
+
+    def test_insufficient_balance_never_sends(self):
+        with patch.dict(
+            m.os.environ, {"CUMPLEIA_DEEPSEEK_HANDOFF_KEY": "PRUEBA-CLAVE-FICTICIA"}
+        ):
+            with self.assertRaises(ValueError):
+                m.run_task(
+                    self.root,
+                    self.bundle,
+                    self.output,
+                    True,
+                    lambda *a: self.fail("No llamar API"),
+                    lambda key: dict(is_available=False),
+                )
+
+    def test_usage_estimate_separate_from_invoice(self):
+        costs = m.estimated_cost(
+            dict(
+                prompt_tokens=1000000,
+                completion_tokens=1000000,
+                prompt_cache_hit_tokens=0,
+            )
+        )
+        from decimal import Decimal
+
+        self.assertEqual(Decimal(costs["peak_usd"]), Decimal("1.5"))
+        self.assertEqual(Decimal(costs["off_peak_usd"]), Decimal("0.75"))
+        self.assertIsNone(m.estimated_cost(dict(prompt_tokens=-1, completion_tokens=1)))
 
     def test_output_cannot_dirty_repo(self):
         with self.assertRaises(ValueError):
