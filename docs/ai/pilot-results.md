@@ -36,3 +36,11 @@ solo checks afectados. Ajustar contexto/presupuesto/criterios segun ese resultad
 
 Resultado externo, metricas de consumo, reintentos y ajustes posteriores:
 pendientes de la respuesta real. Hasta entonces el ADR permanece en piloto.
+
+## Extension para API local
+
+16 pruebas del protocolo/lanzador aprobadas localmente: transporte falso con
+clave ficticia, preparacion sin leer clave ni enviar, sin segunda llamada al
+reusar salida, rechazo de pruebas inventadas y base obsoleta, codigo intacto y
+sin clave en logs. Fecha 2026-10-15; ejecutor Codex; metodo unittest en scripts/tests.
+No hubo llamada API pagada. Faltan presupuesto/clave privados y respuesta real.

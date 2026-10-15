@@ -28,7 +28,12 @@ Desde raiz y checkout limpio:
     python3 scripts/handoff.py state --remote
     python3 scripts/handoff.py packet --task docs/ai/tasks/DS-001.json --remote > /tmp/CumpleIA-DS-001.json
 
-Copiar el JSON completo a Deepseek y pedir diff unificado + reporte, sin aplicar.
+Modalidad recomendada por preferencia del usuario: lanzador local + API,
+`python3 scripts/deepseek_run.py DS-001`. Hoy prepara sin gasto; `--send` requiere
+decision de presupuesto y clave dedicada configurada privadamente. Ver
+docs/ai/deepseek-automation.md. No hubo llamada pagada ni prueba real de Deepseek.
+
+Fallback manual: copiar el JSON completo a Deepseek y pedir diff unificado + reporte, sin aplicar.
 Al volver, guardar el diff fuera del checkout y comprobarlo usando el HEAD del
 paquete (nunca sustituirlo por el HEAD actual para eludir una base obsoleta):
 

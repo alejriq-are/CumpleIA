@@ -3,6 +3,7 @@ on:
   push:
     paths:
       - 'scripts/handoff.py'
+      - 'scripts/deepseek_run.py'
       - 'scripts/tests/**'
       - 'docs/ai/**'
       - 'docs/HANDOFF.md'
@@ -10,6 +11,7 @@ on:
   pull_request:
     paths:
       - 'scripts/handoff.py'
+      - 'scripts/deepseek_run.py'
       - 'scripts/tests/**'
       - 'docs/ai/**'
       - 'docs/HANDOFF.md'
