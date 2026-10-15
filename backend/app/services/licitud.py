@@ -73,6 +73,7 @@ from app.services.economic_obligations import (
     evaluate_economic_obligations_assessment_v1,
 )
 from app.services.eipd import bind_eipd_screening_v12, evaluate_eipd_screening_v1
+from app.services.eipd_child import build_eipd_child_composition_v5
 from app.services.eipd_confirmation import record_eipd_confirmation_evidence_v1
 from app.services.eipd_controls import (
     compose_eipd_controls_v1,
@@ -2846,7 +2847,9 @@ async def get_legal_assessment_readiness_v1(
             c.get("authorization_route") == "excepcion_legal"
             for c in (assessment.special_conditions or {}).get("conditions", [])
         )
-        if not (use_v3 or use_v4) and (
+        if not (
+            _child_adolescent_needed(assessment, current_snapshot) or use_v3 or use_v4
+        ) and (
             eipd_resolution is not None
             or review_payload is not None
             or proposed_exception
@@ -2873,7 +2876,7 @@ async def get_legal_assessment_readiness_v1(
                 evaluated_on,
                 await _selected_disabled_eipd_policy_v1(db),
             )
-        if use_v4:
+        if use_v4 and not _child_adolescent_needed(assessment, current_snapshot):
             composition_input = {
                 "assessment": {
                     **_assessment_eipd_composition_input_v1(
@@ -2897,7 +2900,11 @@ async def get_legal_assessment_readiness_v1(
                     "representacion_confirmacion_bloqueada",
                     "La resolucion V3 mantiene bloqueada la confirmacion",
                 )
-        if use_v3 and not use_v4:
+        if (
+            use_v3
+            and not use_v4
+            and not _child_adolescent_needed(assessment, current_snapshot)
+        ):
             try:
                 policy_state = await read_eipd_policy_audit_snapshot_v1(db)
             except ValueError:
@@ -2951,6 +2958,7 @@ async def get_legal_assessment_readiness_v1(
                     "question_id": None,
                 }
             )
+    eipd_controls_v5 = None
     child = None
     child_material = getattr(assessment, "child_adolescent_assessment", None)
     child_rat = current_snapshot or RatContextSnapshotV1.model_validate(
@@ -2983,6 +2991,21 @@ async def get_legal_assessment_readiness_v1(
             "infancia_confirmacion_bloqueada",
             "El expediente de infancia mantiene bloqueada la confirmacion",
         )
+        child_context = None
+        if current_snapshot is not None:
+            child_context = {
+                **build_eipd_resolution_context_from_assessment_v3(
+                    assessment, current_snapshot
+                ).model_dump(mode="python"),
+                "context_schema_version": 4,
+                "organization_id": organization_id,
+                "treatment_id": treatment_id,
+                "assessment_id": assessment.id,
+                "child_adolescent_assessment": child_material,
+            }
+        eipd_controls_v5 = build_eipd_child_composition_v5(
+            context=child_context, child=child, blockers=blockers
+        )
         eipd_controls = eipd_controls_v2 = eipd_controls_v3 = eipd_controls_v4 = None
         eipd_resolution = None
         if eipd_resolution_review.latest_review is not None:
@@ -2993,6 +3016,7 @@ async def get_legal_assessment_readiness_v1(
         {
             "assessment_id": assessment.id,
             "status": assessment.status,
+            "eipd_controls_v5": eipd_controls_v5,
             "child_adolescent": child,
             "child_adolescent_context_coverage": (
                 "pendiente" if child is not None else "no_aplica"

@@ -94,6 +94,15 @@ async def test_real_client_form_records_isolated_negative_event(
             assert events[0][2] == profile_a_id
             assert (
                 await db.scalar(
+                    text(
+                        "SELECT child_adolescent_assessment->'assessment'->>'notes' FROM legal_assessments WHERE id=:id"
+                    ),
+                    {"id": prepared[1]["id"]},
+                )
+                == "PRUEBA: editor Chromium con API real aislada"
+            )
+            assert (
+                await db.scalar(
                     text("SELECT status::text FROM legal_assessments WHERE id=:id"),
                     {"id": prepared[1]["id"]},
                 )

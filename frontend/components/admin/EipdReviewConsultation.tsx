@@ -413,6 +413,14 @@ export function EipdReviewConsultation({ loadPreparation, loadEvent, recordNegat
           </button>
         </fieldset>
       </form>
+      {Object.values(scope).every((value) => new RegExp(`^${uuidPattern}$`).test(value)) && (
+        <a
+          className="block text-blue-700 underline"
+          href={`/dashboard/licitud/${scope.treatmentId}/${scope.assessmentId}?organizationId=${encodeURIComponent(scope.organizationId)}`}
+        >
+          Editar documento de infancia y adolescencia
+        </a>
+      )}
       <form
         onSubmit={(e) => consult(e, "event")}
         className="space-y-3 rounded-lg border bg-white p-5"

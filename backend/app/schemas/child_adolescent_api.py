@@ -9,6 +9,7 @@ from app.schemas.child_adolescent import (
     ChildAdolescentAssessmentV1,
     ChildAdolescentReadinessOutV1,
 )
+from app.schemas.eipd_child import EipdChildCompositionV5Out
 from app.schemas.licitud import (
     LegalAssessmentRepresentationDraftCreateV1,
     LegalAssessmentRepresentationDraftUpdateV1,
@@ -33,6 +34,7 @@ class LegalAssessmentChildOutV1(LegalAssessmentRepresentationOutV2):
 
 
 class LegalAssessmentChildReadinessOutV1(LegalAssessmentRepresentationReadinessOutV2):
+    eipd_controls_v5: EipdChildCompositionV5Out | None = None
     child_adolescent: ChildAdolescentReadinessOutV1 | None = None
     child_adolescent_context_coverage: Literal["no_aplica", "pendiente"] = "no_aplica"
 
@@ -41,6 +43,17 @@ class LegalAssessmentChildReadinessOutV1(LegalAssessmentRepresentationReadinessO
         expected = "pendiente" if self.child_adolescent is not None else "no_aplica"
         if self.child_adolescent_context_coverage != expected:
             raise ValueError("Cobertura infancia debe ser explicita")
+        if (self.eipd_controls_v5 is not None) != (expected == "pendiente"):
+            raise ValueError(
+                "Composicion V5 requerida solo con cobertura infancia pendiente"
+            )
+        if (
+            self.eipd_controls_v5 is not None
+            and self.eipd_controls_v5.child_adolescent != self.child_adolescent
+        ):
+            raise ValueError(
+                "Diagnostico V5 debe corresponder al documento de infancia"
+            )
         if expected == "pendiente" and any(
             getattr(self, field) is not None
             for field in (

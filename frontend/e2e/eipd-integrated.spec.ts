@@ -29,9 +29,13 @@ test("formulario y cliente reales registran una negativa en API aislada", async 
       import React from "react";
       import {createRoot} from "react-dom/client";
       import {EipdReviewConsultation} from ${JSON.stringify(path.resolve("components/admin/EipdReviewConsultation.tsx"))};
+      import {ChildAdolescentEditor} from ${JSON.stringify(path.resolve("components/licitud/ChildAdolescentEditor.tsx"))};
+      import {childApi} from ${JSON.stringify(path.resolve("lib/api/child-adolescent.ts"))};
       import {eipdReviewApi} from ${JSON.stringify(path.resolve("lib/api/eipd-review.ts"))};
       const scope=s=>({...s,token:"PRUEBA: sesion sintetica del servidor aislado"});
-      createRoot(document.getElementById("root")).render(React.createElement(EipdReviewConsultation,{
+      const root=createRoot(document.getElementById("root"));
+      window.openChildEditor=(s)=>{const context=scope(s);root.render(React.createElement(ChildAdolescentEditor,{load:()=>childApi.load(context),save:doc=>childApi.save(context,doc),readiness:()=>childApi.readiness(context)}));};
+      root.render(React.createElement(EipdReviewConsultation,{
         loadPreparation:s=>eipdReviewApi.preparation(scope(s)),
         loadEvent:(s,id)=>eipdReviewApi.event(scope(s),id),
         recordNegative:(s,r)=>eipdReviewApi.recordNegativeV3(scope(s),r)
@@ -90,6 +94,24 @@ test("formulario y cliente reales registran una negativa en API aislada", async 
     await expect(page.getByRole("button", { name: "Guardar revisión negativa" })).toHaveCount(0);
     await page.getByRole("button", { name: "Consultar revisión", exact: true }).click();
     await expect(page.getByText("PRUEBA-CHROMIUM-API-V3", { exact: true })).toBeVisible();
+    await expect(page.getByRole("button", { name: /confirmar|activar|^Continuar$/i })).toHaveCount(
+      0
+    );
+    await page.evaluate((s) => (window as any).openChildEditor(s), {
+      organizationId: process.env.CUMPLEIA_UI_ORG!,
+      treatmentId: process.env.CUMPLEIA_UI_TREATMENT!,
+      assessmentId: process.env.CUMPLEIA_UI_ASSESSMENT!,
+    });
+    await page
+      .getByLabel("Notas", { exact: true })
+      .fill("PRUEBA: editor Chromium con API real aislada");
+    await page.getByLabel("Niños y niñas", { exact: true }).check();
+    await page.getByRole("button", { name: "Guardar documento", exact: true }).click();
+    await expect(page.getByRole("status")).toHaveText("Documento guardado.");
+    await expect(
+      page.getByText("La consulta incluye infancia en el contexto actual.")
+    ).toBeVisible();
+    await expect(page.getByText("Confirmación y activación bloqueadas.")).toBeVisible();
     await expect(page.getByRole("button", { name: /confirmar|activar|^Continuar$/i })).toHaveCount(
       0
     );

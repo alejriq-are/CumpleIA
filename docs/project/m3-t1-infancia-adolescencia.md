@@ -1,24 +1,29 @@
 # M3-T1 — Infancia y adolescencia: primer contrato documental
 
-Estado operativo: persistencia y CRUD de infancia/adolescencia implementados;
-validacion local completada; CI se comprueba tras publicar el bloque. M3-T1 sigue EN PROGRESO.
+Estado operativo: persistencia, editor de borrador y composicion documental V5
+implementados. M3-T1 sigue EN PROGRESO; solo datos ficticios hasta MVP.
 
-- Columna JSONB nullable y migracion `a73d8e0c4b21` sobre `f52d6c9b3e10`;
-  sin backfill ni cambios de RLS. Downgrade rechaza documentos existentes.
-- POST/PATCH/GET aceptan documento crudo y devuelven envelope con identidad del
-  servidor. Omision conserva, null retira en borrador y reaporte asocia el contexto
-  final, incluyendo declaraciones especiales y representacion relacionada.
-- Readiness separa completitud de identidad. Contexto RAT actual no disponible
-  nunca presenta una asociacion antigua como vigente. Retirar material no elimina
-  la necesidad documental si el RAT incluye infancia/adolescencia.
-- Confirmacion y nuevas revisiones EIPD con cobertura infancia permanecen
-  bloqueadas. Eventos historicos no se reescriben; su lectura sigue disponible.
-  Las composiciones V1-V4 no se presentan como cobertura de este nuevo documento.
-- Solo pruebas ficticias hasta MVP; activacion EIPD bloqueada.
+- Columna JSONB nullable y migracion `a73d8e0c4b21` aplicada en desarrollo y base
+  aislada. Sin backfill ni cambios RLS; expedientes/historia existentes intactos.
+- Editor: `/dashboard/licitud/[treatmentId]/[assessmentId]?organizationId=...`,
+  enlazado desde la consulta interna. Documento crudo de entrada, identidad de
+  salida; omision conserva, null retira y reaporte asocia contexto final.
+- Composicion V5 de solo lectura: contexto V4 con UUID servidor, contexto V3 y
+  documento infancia; dominio hash propio. Contexto actual ausente produce hash
+  null y revision pendiente, sin reutilizar copia antigua. Incluye bloqueos
+  generales/documentales e infancia; las tres decisiones tienen requisitos false.
+- El contexto V4 es de consulta, no un nuevo binding persistido de resolucion.
+  Resoluciones anteriores mantienen `resolution_child_coverage=no_cubierta`;
+  no se alteran hashes V1-V3, metadata ni eventos historicos. Las composiciones
+  antiguas no se muestran como cobertura nueva. Activacion/confirmacion bloqueadas.
+- Guardado y diagnostico se informan por separado. Error/resultado incierto conserva
+  cambios y elimina diagnostico viejo; doble envio impedido. Viewer/confirmado
+  solo lectura; API sigue imponiendo permisos y aislamiento del servidor.
 
-Pendiente fuera de este bloque: composicion transversal versionada que cubra
-infancia, presentacion/edicion del documento en interfaz y validacion/aceptacion
-explicitas antes de cualquier capacidad positiva. No modificar hashes historicos.
+Pendiente posterior: contrato y persistencia sucesores de resolucion/revision con
+identidad infancia, integracion de politica con fuentes y aceptacion explicitamente
+verificadas antes de cualquier capacidad positiva. No levantar gates por campos
+completos, por hashes vigentes ni por usar datos ficticios.
 
 ## Fuente y limite interpretativo
 

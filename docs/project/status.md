@@ -1,16 +1,26 @@
-## Estado operativo M3-T1 — bloque persistencia infancia/adolescencia
+## Estado operativo M3-T1 — editor y composicion documental infancia
 
-Rama: `feature/m3-t1-licitud-persistencia`. Bloque backend implementado y validado localmente.
-POST/PATCH/GET persisten documento con identidad servidor; omision/null/reaporte
-separados. Migracion `a73d8e0c4b21` verificada sobre la base aislada, sin modificar
-la base operativa. Confirmacion y activacion EIPD bloqueadas; datos ficticios.
-Detalles y siguientes capacidades: [plan infancia/adolescencia](m3-t1-infancia-adolescencia.md).
-Validacion: 46 casos storage/CRUD/contratos, atomicidad e historia; regresion
-backend con 4354 aprobadas y fallos por catalogo ausente de M1, corregido en base
-aislada y 60 casos afectados/reaporte aprobados. Cliente EIPD 48 aprobadas,
-TypeScript/lint y Ruff/Black correctos; Chromium/API/DB aislada 1 aprobada.
-Publicacion del bloque: pendiente de commit/push y CI.
-Este resumen es el estado actual; las entradas siguientes son antecedentes.
+Rama: `feature/m3-t1-licitud-persistencia`. Ultima base publicada: `dfa200a`,
+CI aprobada (4397 backend, 66 frontend, 1 integrada). Bloque sucesor implementado.
+
+- Editor de borradores accesible desde la consulta interna; permite grupos,
+  alcance, analisis, ruta/otorgante declarado, referencias y retirada explicita.
+  Viewer/confirmado solo lectura; staff verificado puede consultar sin membresia.
+- Composicion documental EIPD V5 con contexto de consulta V4 e identidad propia
+  que cubre infancia y materiales relacionados. No reescribe resoluciones V1-V3
+  ni eventos; su cobertura de infancia sigue explicitamente `no_cubierta`.
+  Todas las decisiones, confirmacion y activacion permanecen bloqueadas.
+- Migracion `a73d8e0c4b21` aplicada y verificada en desarrollo local: checksum de
+  evaluaciones y revisiones anteriores intacto. Pruebas nuevas solo en base aislada.
+- Validacion: regresion backend 299 casos y composicion final 14 casos aprobados;
+  frontend 76 casos (incluye 10 editor/cliente), tipos y lint correctos; recorrido
+  real Chromium/API/PostgreSQL aprobado. Validacion final y publicacion se verifican contra Git/CI.
+
+Siguiente fuera del bloque: contrato persistido sucesor de resolucion/revision
+que incluya infancia, fuentes/aceptacion de politica y demas rutas M3-T1. La
+composicion V5 es diagnostica; no constituye autorizacion ni levanta activacion.
+Detalles: [plan infancia/adolescencia](m3-t1-infancia-adolescencia.md).
+Las entradas siguientes son antecedentes, no el estado operativo vigente.
 
 ## 2026-10-14 — M3-T1 §279: contratos futuros y matriz transaccional infancia
 
