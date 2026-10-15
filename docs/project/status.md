@@ -1,3 +1,22 @@
+## 2026-10-14 — M3-T1 §278: coherencia documental relacionada de infancia
+
+Nuevo evaluador puro contrasta documento con consentimiento declarado y proyeccion
+especial: ausencia/otorgante pendiente, discrepancia de otorgante, tres declaraciones
+edad/cruce y su fundamento, scope comparable, condicion infancia y ruta consentimiento.
+Padre/madre o cuidado personal no se equiparan automaticamente a los tres valores
+del contrato consentimiento actual; relacion no comparable pide revision. Material
+sensible exige presencia del consentimiento sensible relacionado, sin afirmar que
+esa presencia satisfaga sus reglas propias. Declaracion especial no crea un cruce
+sensible menor16 sin flags/scope correspondientes. Sin inferir edad ni facultades.
+
+Composicion agrega estos motivos aunque documento completo y asociacionvigente;
+identidad no encubre incoherencia. 71 pruebas infancia aprobadas en0.31s;11 nuevas.
+Fixtures del compositor ahora aportan relaciones coherentes explicitas para aislar
+los casos previos. Ruff global y Black271 archivos correctos. Sin API/CRUD/migracion
+ni datos operativos nuevos; conserva fallback y gates. Siguiente contratos de
+persistencia y matriz transaccional antes de integrar almacenamiento como conjunto.
+M3-T1 EN PROGRESO; confirmacion/activacion EIPD bloqueadas.
+
 ## 2026-10-14 — M3-T1 §277: diagnostico de infancia con identidad
 
 build_child_adolescent_readiness_v1 compone evaluador documental y asociacion sin
