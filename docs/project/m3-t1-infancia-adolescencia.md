@@ -25,6 +25,27 @@ identidad infancia, integracion de politica con fuentes y aceptacion explicitame
 verificadas antes de cualquier capacidad positiva. No levantar gates por campos
 completos, por hashes vigentes ni por usar datos ficticios.
 
+## Bloque operativo: resoluciones y revisiones sucesoras V4
+
+Persistencia separada en `eipd_child_resolutions` y `eipd_child_reviews`, API
+versionada y politica negativa V1 de desarrollo/pruebas. Contexto V4 incluye
+infancia y UUID de servidor; eventos guardan identidad completa y politica
+seleccionada bajo orden global/selector/serie. Lecturas recomprueban hashes
+contra el snapshot guardado, sin reconstruirlo desde el expediente actual.
+
+Se admiten documentos incompletos para registrar faltantes, nunca una decision
+positiva. Retirada/cambio del material o RAT obsoleto bloquean nuevas revisiones;
+el reaporte exige otra resolucion. Politica sin fuentes ni aceptacion verificadas:
+no concede autoridad juridica. Declaracion ficticia requerida; no prueba el
+origen de los datos. Activacion EIPD bloqueada. Migracion nueva validada en base
+aislada y desarrollo local, sin cambiar historia existente.
+
+Pendientes: interfaz de escritura/consulta del sucesor y validacion/aceptacion
+juridica de politica antes de considerar cualquier habilitacion futura.
+
+Los apartados siguientes describen decisiones y matrices historicas; no son el
+estado operativo actual (ver tambien `status.md`).
+
 ## Fuente y limite interpretativo
 
 Revisado el [texto oficial BCN, Ley21.719, articulo16quater](https://www.bcn.cl/leychile/navegar?i=1209272),

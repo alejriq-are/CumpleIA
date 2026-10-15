@@ -92,6 +92,22 @@ async def test_real_client_form_records_isolated_negative_event(
             assert len(events) == 1
             assert events[0][0:2] == ("requiere_cambios", "2")
             assert events[0][2] == profile_a_id
+            child_events = (
+                await db.execute(
+                    text(
+                        "SELECT decision,review_context_metadata->>'metadata_schema_version',review_context_metadata->>'child_coverage',created_by FROM eipd_child_reviews WHERE assessment_id=:id"
+                    ),
+                    {"id": prepared[1]["id"]},
+                )
+            ).all()
+            assert len(child_events) == 1
+            assert tuple(child_events[0]) == (
+                "requiere_cambios",
+                "3",
+                "contexto_v4",
+                profile_a_id,
+            )
+
             assert (
                 await db.scalar(
                     text(

@@ -112,6 +112,26 @@ test("formulario y cliente reales registran una negativa en API aislada", async 
       page.getByText("La consulta incluye infancia en el contexto actual.")
     ).toBeVisible();
     await expect(page.getByText("Confirmación y activación bloqueadas.")).toBeVisible();
+    // API sucesora desde Chromium; no se presenta como un formulario nuevo.
+    const successor = await page.evaluate(async (scope) => {
+      const base = `/licitud/treatments/${scope.treatment}/assessments/${scope.assessment}/eipd-child/v4`;
+      const headers = {"Content-Type":"application/json", "X-Organization-Id":scope.organization};
+      const created = await fetch(base + "/resolutions", {method:"POST",headers,body:JSON.stringify({data_kind:"ficticios",document:{notes:"PRUEBA: sucesor Chromium aislado"}})});
+      const resolution = await created.json();
+      const path = base + `/resolutions/${resolution.id}/reviews`;
+      const request = {data_kind:"ficticios",decision:"requiere_cambios",rationale:"PRUEBA: faltan evidencias ficticias",review_reference:"PRUEBA-CHROMIUM-INFANCIA-V4"};
+      const saved = await fetch(path,{method:"POST",headers,body:JSON.stringify(request)});
+      const event = await saved.json();
+      const loaded = await fetch(path + `/${event.id}`,{headers});
+      const rejected = await fetch(path,{method:"POST",headers,body:JSON.stringify({...request,decision:"continuar"})});
+      return {created:created.status,saved:saved.status,loaded:loaded.status,rejected:rejected.status,event,history:await loaded.json()};
+    }, {organization:process.env.CUMPLEIA_UI_ORG!,treatment:process.env.CUMPLEIA_UI_TREATMENT!,assessment:process.env.CUMPLEIA_UI_ASSESSMENT!});
+    expect([successor.created,successor.saved,successor.loaded,successor.rejected]).toEqual([201,201,200,422]);
+    expect(successor.history).toEqual(successor.event);
+    expect(successor.event.review_context_metadata.child_coverage).toBe("contexto_v4");
+    expect(successor.event.can_confirm).toBe(false);
+    expect(successor.event.authorizes_action).toBe(false);
+
     await expect(page.getByRole("button", { name: /confirmar|activar|^Continuar$/i })).toHaveCount(
       0
     );

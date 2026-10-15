@@ -1,24 +1,31 @@
-## Estado operativo M3-T1 — editor y composicion documental infancia
+## Estado operativo M3-T1 — sucesores EIPD con infancia
 
-Rama: `feature/m3-t1-licitud-persistencia`. Ultima base publicada: `dfa200a`,
-CI aprobada (4397 backend, 66 frontend, 1 integrada). Bloque sucesor implementado.
+Rama: `feature/m3-t1-licitud-persistencia`. Base publicada anterior: `f6d54bc`.
 
-- Editor de borradores accesible desde la consulta interna; permite grupos,
-  alcance, analisis, ruta/otorgante declarado, referencias y retirada explicita.
-  Viewer/confirmado solo lectura; staff verificado puede consultar sin membresia.
-- Composicion documental EIPD V5 con contexto de consulta V4 e identidad propia
-  que cubre infancia y materiales relacionados. No reescribe resoluciones V1-V3
-  ni eventos; su cobertura de infancia sigue explicitamente `no_cubierta`.
-  Todas las decisiones, confirmacion y activacion permanecen bloqueadas.
-- Migracion `a73d8e0c4b21` aplicada y verificada en desarrollo local: checksum de
-  evaluaciones y revisiones anteriores intacto. Pruebas nuevas solo en base aislada.
-- Validacion: regresion backend 299 casos y composicion final 14 casos aprobados;
-  frontend 76 casos (incluye 10 editor/cliente), tipos y lint correctos; recorrido
-  real Chromium/API/PostgreSQL aprobado. Validacion final y publicacion se verifican contra Git/CI.
+- API `/licitud/treatments/{treatment_id}/assessments/{assessment_id}/eipd-child/v4`:
+  crear/listar/leer resoluciones y revisiones negativas; consultar politica.
+  Resoluciones numeradas bajo lock de serie, con documento y contexto V4 completos.
+  Tablas separadas, sin reserializar resoluciones ni eventos V1-V3.
+- Revisiones `requiere_cambios` / `no_continuar` asociadas a la resolucion exacta,
+  hashes del contexto/infancia y politica seleccionada. Material cambiado, retirado,
+  RAT obsoleto o asociacion infancia no vigente impiden escribir una revision.
+  Leer un evento historico no acredita vigencia ni habilita acciones.
+- Politica infancia V1 tecnica y negativa: fuentes/aceptacion pendientes,
+  activacion deshabilitada y seleccion global explicita sin fallback. Escrituras
+  solo en desarrollo/pruebas, con declaracion obligatoria `data_kind=ficticios`;
+  esta declaracion no verifica por si misma que el contenido sea ficticio.
+- Migracion `b84e9f1a5c32` aplicada a base aislada y desarrollo local; cinco
+  historiales previos conservan checksum. RLS desde origen, actor/rol/suscripcion,
+  FK de material exacto, UPDATE/DELETE/TRUNCATE denegados a app_user y trigger de
+  inmutabilidad. Downgrade rechaza historial no vacio.
+- Validacion local: 105 pruebas enfocadas, lint/formato backend y recorrido
+  Chromium/API/PostgreSQL real con sucesor V4 y rechazo de decision positiva.
+  Estado de publicacion y CI completa se verifica contra Git/Actions.
 
-Siguiente fuera del bloque: contrato persistido sucesor de resolucion/revision
-que incluya infancia, fuentes/aceptacion de politica y demas rutas M3-T1. La
-composicion V5 es diagnostica; no constituye autorizacion ni levanta activacion.
+Pendientes fuera del bloque: formulario para crear/consultar estos sucesores en
+la interfaz, politica juridica con fuentes oficiales verificadas y aceptacion
+trazable, demas rutas M3-T1. La composicion V5 y consulta actuales no promueven el
+historial anterior a cobertura infancia. Confirmacion/activacion EIPD bloqueadas.
 Detalles: [plan infancia/adolescencia](m3-t1-infancia-adolescencia.md).
 Las entradas siguientes son antecedentes, no el estado operativo vigente.
 
