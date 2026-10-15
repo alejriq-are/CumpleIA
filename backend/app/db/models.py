@@ -19,6 +19,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 
 from app.db.base import Base
+from app.db.child_eipd import EipdChildResolution, EipdChildReview  # noqa: F401
 
 # ── Enums ────────────────────────────────────────────────────────────────────
 
@@ -1438,6 +1439,9 @@ class LegalAssessment(Base):
         ),
         UniqueConstraint(
             "id", "organization_id", name="uq_legal_assessments_id_tenant"
+        ),
+        UniqueConstraint(
+            "id", "treatment_id", "organization_id", name="uq_assessment_child_parent"
         ),
         CheckConstraint(
             "eipd_resolution_assessment IS NULL OR jsonb_typeof(eipd_resolution_assessment) = 'object'",
