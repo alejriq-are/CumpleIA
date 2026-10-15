@@ -1,3 +1,18 @@
+## 2026-10-14 — M3-T1 §279: contratos futuros y matriz transaccional infancia
+
+Create/Update/Out futuros separados de rutas activas; documento crudo nullable de
+entrada y envelope solo salida. Omision/null/reaporte diferenciados; campos de
+servidor/hash/permiso y envelopes rechazados. Test verifica OpenAPI publicado sin
+campo nuevo. No cambios ORM/API ni entrada aceptada sin guardar. Matriz concreta
+creacion/PATCH/relectura/concurrencia/tenant/migracion/historia en plan infancia;
+columna futura nullableJSONB y gate conservador antes de conectar CRUD.
+
+88 pruebas infancia aprobadas en0.56s;17 nuevas de contratos. Roundtrip PATCH usa
+exclude_unset para preservar intencion: primer intento serializaba scope omitido
+como null y rechazo correctamente. Ruff/Black correctos. Runner ampliado. Siguiente
+implementar almacenamiento/migracion y CRUD/gates como conjunto en base aislada.
+M3-T1 EN PROGRESO; datos ficticios y confirmacion/activacion EIPD bloqueadas.
+
 ## 2026-10-14 — M3-T1 §278: coherencia documental relacionada de infancia
 
 Nuevo evaluador puro contrasta documento con consentimiento declarado y proyeccion
