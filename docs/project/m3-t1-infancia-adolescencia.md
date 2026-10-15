@@ -1,6 +1,6 @@
 # M3-T1 — Infancia y adolescencia: primer contrato documental
 
-Estado: contrato, evaluador documental e identidad propios §§274–276, 2026-10-14. M3-T1 EN PROGRESO.
+Estado: contrato, evaluador documental e identidad propios §§274–277, 2026-10-14. M3-T1 EN PROGRESO.
 No campo API, persistencia, evaluador positivo ni cambio del fallback especial.
 Solo pruebas ficticias hasta MVP; confirmacion/activacion EIPD bloqueadas.
 
@@ -97,3 +97,21 @@ reaporte explicito, contratos/version/hash/extra/nullables y contexto invalido s
 documento. Ruff/Black correctos. Sin API/migracion/persistencia nuevas, sin datos
 operativos ni cambios a gates. Siguiente componer asociacion con diagnostico antes
 de contratos CRUD/almacenamiento. M3-T1 EN PROGRESO; EIPD bloqueada.
+
+## 2026-10-14 — M3-T1 §277: diagnostico de infancia con identidad
+
+build_child_adolescent_readiness_v1 compone evaluador documental y asociacion sin
+rebind ni mutacion. Expone resultado documental separado de association_status;
+contenido completo con hash/contexto obsoleto requiere revision, identidad vigente
+no completa contenido faltante, ausencia y noaplicabilidad quedan diferenciadas.
+Salida interna cerrada/versionada exige coherencia de motivos/resultado, asociacion
+vigente para completo y flags authorizes_action/can_confirm false. No interpreta
+identidad como facultades ni habilita operaciones positivas.
+
+60 pruebas focalizadas de infancia aprobadas en0.30s;14 nuevas: separacion identidad/
+completitud, documento/contexto/padre cambiados, ausencia/noaplicable, roundtrip,
+inmutabilidad, contexto invalido y salidas incoherentes/autoridad inyectada. Ruff/
+Black correctos. Sin API/migracion/CRUD ni datos operativos nuevos. Pendiente contraste
+semantico con declaraciones especiales/consentimientos relacionados antes de conectar
+persistencia; la identidad cubre esos materiales pero no prueba su coherencia legal.
+M3-T1 EN PROGRESO; confirmacion/activacion EIPD bloqueadas.

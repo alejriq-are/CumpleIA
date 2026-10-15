@@ -18,6 +18,7 @@ TARGETS = (
     "tests/test_child_adolescent_schema.py",
     "tests/test_child_adolescent.py",
     "tests/test_child_adolescent_binding.py",
+    "tests/test_child_adolescent_readiness.py",
     "tests/test_sensitive_representation_api_contracts.py",
     "tests/test_sensitive_representation_binding.py",
     "tests/test_sensitive_representation.py",

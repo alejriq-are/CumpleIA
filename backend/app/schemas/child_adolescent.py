@@ -48,3 +48,55 @@ class BoundChildAdolescentAssessmentV1(BaseModel):
     model_config = ConfigDict(extra="forbid")
     assessment: ChildAdolescentAssessmentV1
     context_binding: ChildAdolescentBindingV1
+
+
+class ChildAdolescentIssueOutV1(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    field: str
+    code: str
+    category: Literal["incompleto", "requiere_revision"]
+
+
+class ChildAdolescentReadinessOutV1(BaseModel):
+    """Salida interna de diagnostico, sin permisos positivos."""
+
+    model_config = ConfigDict(extra="forbid")
+    evaluation_version: Literal[1]
+    result: Literal["no_aplicable", "incompleto", "requiere_revision", "completo"]
+    documentary_result: Literal[
+        "no_aplicable", "incompleto", "requiere_revision", "completo"
+    ]
+    association_status: Literal["no_aplicable", "vigente", "requiere_revision"]
+    issues: list[ChildAdolescentIssueOutV1]
+    can_confirm: Literal[False]
+    authorizes_action: Literal[False]
+
+    @model_validator(mode="after")
+    def coherent_result(self):
+        if self.documentary_result == "no_aplicable" and (
+            self.association_status != "no_aplicable" or self.issues
+        ):
+            raise ValueError("No aplicabilidad incoherente con asociacion o motivos")
+        if (
+            self.documentary_result in ("incompleto", "requiere_revision")
+            and not self.issues
+        ):
+            raise ValueError("Diagnostico documental pendiente exige motivos")
+        expected = (
+            "requiere_revision"
+            if any(i.category == "requiere_revision" for i in self.issues)
+            else (
+                "incompleto"
+                if self.issues
+                else (
+                    "no_aplicable"
+                    if self.documentary_result == "no_aplicable"
+                    else "completo"
+                )
+            )
+        )
+        if self.result != expected:
+            raise ValueError("Resultado de diagnostico incoherente")
+        if self.result == "completo" and self.association_status != "vigente":
+            raise ValueError("Documento completo exige asociacion vigente")
+        return self
