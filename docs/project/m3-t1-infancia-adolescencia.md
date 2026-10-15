@@ -43,6 +43,16 @@ aislada y desarrollo local, sin cambiar historia existente.
 Pendientes: interfaz de escritura/consulta del sucesor y validacion/aceptacion
 juridica de politica antes de considerar cualquier habilitacion futura.
 
+Salida a MVP: la restriccion SQL `data_kind=ficticios` es intencional. Introducir
+datos reales requiere una nueva migracion revisada, contratos separados o
+versionados, politica juridica aceptada y evidencia de aislamiento/permisos.
+Conservar la clasificacion ficticia de todos los eventos anteriores; nunca
+convertir ni backfillear su procedencia. Aprobar ingreso de datos reales y activar
+EIPD son decisiones independientes; ninguna se autoriza por completar una UI.
+
+H1 cerrado con FK RESTRICT (c95f0a2b6d43), sin reescribir b84. H2 cerrado con
+opt-in de escrituras ficticias false por defecto y prohibicion fuera de dev/test.
+
 Los apartados siguientes describen decisiones y matrices historicas; no son el
 estado operativo actual (ver tambien `status.md`).
 

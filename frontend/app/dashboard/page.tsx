@@ -47,10 +47,10 @@ export default async function DashboardPage() {
         </p>
       </div>
 
-      {/* Alerta fase 0 */}
+      {/* Estado de desarrollo */}
       <div className="mb-8 rounded-xl border border-blue-200 bg-blue-50 px-5 py-4 text-sm text-blue-800">
-        <strong>Fase 0 en curso</strong> — Los módulos se habilitarán progresivamente. Estamos
-        construyendo los cimientos del sistema.
+        <strong>MVP en desarrollo</strong> — Los módulos se habilitarán progresivamente. Las pruebas
+        se realizan con datos ficticios.
       </div>
 
       {/* Tarjetas de módulos */}

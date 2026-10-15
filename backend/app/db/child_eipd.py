@@ -86,7 +86,7 @@ class EipdChildResolution(ChildIdentity, Base):
                 "legal_assessments.treatment_id",
                 "legal_assessments.organization_id",
             ],
-            ondelete="CASCADE",
+            ondelete="RESTRICT",
         ),
         sa.UniqueConstraint(
             "assessment_id", "version", name="uq_child_resolution_version"
@@ -136,7 +136,7 @@ class EipdChildReview(ChildIdentity, Base):
                 "eipd_child_resolutions.context_hash",
                 "eipd_child_resolutions.child_material_hash",
             ],
-            ondelete="CASCADE",
+            ondelete="RESTRICT",
         ),
         sa.CheckConstraint(
             "decision IN ('requiere_cambios','no_continuar')", name="negative_decision"

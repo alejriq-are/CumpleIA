@@ -48,6 +48,7 @@ jobs:
       APP_DB_PASSWORD: app_dev_password
       SUPABASE_URL: https://thsivchuzxqofrloriiy.supabase.co
       ENVIRONMENT: test
+      EIPD_CHILD_TEST_WRITES_ENABLED: "true"
       DEBUG: "false"
       # Dummies: el runner debe parecerse a un entorno real con secretos
       # presentes. Así el test que exige secretos en producción demuestra que
@@ -176,6 +177,7 @@ jobs:
       APP_DATABASE_URL: postgresql+asyncpg://app_user:app_dev_password@localhost:5432/cumpleia_eipd_tests_20261009
       APP_DB_PASSWORD: app_dev_password
       ENVIRONMENT: development
+      EIPD_CHILD_TEST_WRITES_ENABLED: "true"
       DEBUG: "false"
       SUPABASE_URL: https://test-project.supabase.co
       SUPABASE_SERVICE_ROLE_KEY: dummy-service-role-key-for-ci

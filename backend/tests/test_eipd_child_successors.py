@@ -485,6 +485,15 @@ async def test_downgrade_guard_and_empty_roundtrip(prepared, _session_factory):
     spec = importlib.util.spec_from_file_location("child_successor_migration", path)
     migration = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(migration)
+    restrict_path = (
+        Path(__file__).parents[1]
+        / "alembic/versions/c95f0a2b6d43_restrict_child_eipd_history.py"
+    )
+    restrict_spec = importlib.util.spec_from_file_location(
+        "child_history_restrict_roundtrip", restrict_path
+    )
+    restrict = importlib.util.module_from_spec(restrict_spec)
+    restrict_spec.loader.exec_module(restrict)
     async with _session_factory() as db:
         connection = await db.connection()
 
@@ -494,9 +503,10 @@ async def test_downgrade_guard_and_empty_roundtrip(prepared, _session_factory):
                     sync, opts={"target_metadata": Base.metadata}
                 )
             ):
+                restrict.downgrade()
                 migration.downgrade()
 
-        with pytest.raises(RuntimeError, match="existen resoluciones"):
+        with pytest.raises(RuntimeError, match="historial infancia"):
             await connection.run_sync(downgrade)
         # Eliminacion exclusivamente de fixtures ficticias dentro de transaccion revertida.
         await db.execute(text("DELETE FROM eipd_child_reviews"))
@@ -510,6 +520,7 @@ async def test_downgrade_guard_and_empty_roundtrip(prepared, _session_factory):
                 )
             ):
                 migration.upgrade()
+                restrict.upgrade()
 
         await connection.run_sync(upgrade)
         assert await db.scalar(
@@ -610,3 +621,104 @@ async def test_direct_insert_rls_rejects_cross_tenant_or_actor(
                     .values(role="owner")
                 )
                 await db.commit()
+
+
+async def test_parent_delete_cannot_erase_child_history(
+    prepared, _app_session_factory, auth_a_id
+):
+    state, resolution = prepared
+    async with client(state) as http:
+        response = await http.post(
+            url(state) + f"/resolutions/{resolution['id']}/reviews", json=review()
+        )
+        assert response.status_code == 201, response.text
+    async with _app_session_factory() as db:
+        await rls._set_auth_user(db, auth_a_id)
+        with pytest.raises(DBAPIError):
+            async with db.begin_nested():
+                await db.execute(
+                    text("DELETE FROM legal_assessments WHERE id=:id"),
+                    dict(id=UUID(state[1]["id"])),
+                )
+        assert (
+            await db.scalar(
+                text("SELECT count(*) FROM eipd_child_resolutions WHERE id=:id"),
+                dict(id=UUID(resolution["id"])),
+            )
+            == 1
+        )
+        assert (
+            await db.scalar(
+                text("SELECT count(*) FROM eipd_child_reviews WHERE resolution_id=:id"),
+                dict(id=UUID(resolution["id"])),
+            )
+            == 1
+        )
+        await db.rollback()
+
+
+async def test_restrict_fks_and_parent_links(prepared, _session_factory):
+    state, resolution = prepared
+    async with client(state) as http:
+        response = await http.post(
+            url(state) + f"/resolutions/{resolution['id']}/reviews", json=review()
+        )
+        assert response.status_code == 201, response.text
+    async with _session_factory() as db:
+        actions = (
+            (
+                await db.execute(
+                    text(
+                        "SELECT confdeltype FROM pg_constraint WHERE conname IN ('fk_eipd_child_resolutions_assessment_id_legal_assessments','fk_eipd_child_reviews_resolution_id_eipd_child_resolutions')"
+                    )
+                )
+            )
+            .scalars()
+            .all()
+        )
+        assert len(actions) == 2 and all(x == b"r" or x == "r" for x in actions)
+        for table, key in (
+            ("legal_assessments", state[1]["id"]),
+            ("eipd_child_resolutions", resolution["id"]),
+        ):
+            with pytest.raises(IntegrityError):
+                async with db.begin_nested():
+                    await db.execute(
+                        text(f"DELETE FROM {table} WHERE id=:id"), dict(id=UUID(key))
+                    )
+        assert (
+            await db.scalar(
+                text("SELECT count(*) FROM eipd_child_reviews WHERE resolution_id=:id"),
+                dict(id=UUID(resolution["id"])),
+            )
+            == 1
+        )
+
+
+async def test_missing_environment_and_opt_in_fail_closed(prepared, monkeypatch):
+    from app.core.config import Settings
+    from app.services import eipd_child_persistence as service
+
+    monkeypatch.delenv("ENVIRONMENT", raising=False)
+    monkeypatch.delenv("EIPD_CHILD_TEST_WRITES_ENABLED", raising=False)
+    settings = Settings(_env_file=None, supabase_url="https://test-project.supabase.co")
+    assert (
+        settings.environment == "development"
+        and not settings.eipd_child_test_writes_enabled
+    )
+    monkeypatch.setattr(service, "get_settings", lambda: settings)
+    state, resolution = prepared
+    async with client(state) as http:
+        for path, payload in (
+            (url(state) + "/resolutions", dict(data_kind="ficticios", document={})),
+            (url(state) + f"/resolutions/{resolution['id']}/reviews", review()),
+        ):
+            response = await http.post(path, json=payload)
+            assert (
+                response.status_code == 409
+                and response.json()["detail"]["code"]
+                == "infancia_escritura_ficticia_no_habilitada"
+            )
+        assert (
+            await http.get(url(state) + f"/resolutions/{resolution['id']}")
+        ).status_code == 200

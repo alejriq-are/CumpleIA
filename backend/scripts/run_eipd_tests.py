@@ -11,7 +11,7 @@ from sqlalchemy.engine import make_url
 from sqlalchemy.ext.asyncio import create_async_engine
 
 TEST_DATABASE = "cumpleia_eipd_tests_20261009"
-EXPECTED_HEAD = "b84e9f1a5c32"
+EXPECTED_HEAD = "c95f0a2b6d43"
 TARGETS = (
     "tests/test_eipd_child_successors.py",
     "tests/test_eipd_test_runner.py",
@@ -105,6 +105,8 @@ def build_environment(settings, inherited):
         hide_password=False
     )
     env["SUPABASE_URL"] = "https://test-project.supabase.co"
+    # Habilitacion solo del proceso de pruebas contra el destino aislado fijo.
+    env["EIPD_CHILD_TEST_WRITES_ENABLED"] = "true"
     return env
 
 

@@ -1,6 +1,7 @@
 ## Estado operativo M3-T1 — sucesores EIPD con infancia
 
-Rama: `feature/m3-t1-licitud-persistencia`. Base publicada anterior: `f6d54bc`.
+Rama: `feature/m3-t1-licitud-persistencia`. Base funcional publicada: `1b158cb`; formato: `507aa74`.
+CI de `507aa74` aprobada: 4451 backend, 1 omitida, 76 frontend y 1 integrada.
 
 - API `/licitud/treatments/{treatment_id}/assessments/{assessment_id}/eipd-child/v4`:
   crear/listar/leer resoluciones y revisiones negativas; consultar politica.
@@ -22,10 +23,25 @@ Rama: `feature/m3-t1-licitud-persistencia`. Base publicada anterior: `f6d54bc`.
   Chromium/API/PostgreSQL real con sucesor V4 y rechazo de decision positiva.
   Estado de publicacion y CI completa se verifica contra Git/Actions.
 
+Revision H1-H4 (15/10): migracion append-only `c95f0a2b6d43` cambia ambas FK
+sucesoras a RESTRICT; elimina la perdida indirecta por cascada. Prueba SQL como
+app_user antes fallaba y ahora pasa; tambien se bloquea borrar una resolucion
+con revisiones y downgrade inseguro con historial. Aplicada en base aislada y
+local de desarrollo, siete historiales con checksum intacto. 78 pruebas enfocadas
+y recorrido Chromium/API/DB aprobados; CI final se verifica contra Git/Actions.
+
+Escrituras de infancia requieren ademas `EIPD_CHILD_TEST_WRITES_ENABLED=true`
+y entorno development/test; valor por defecto y ejemplo false. El ejecutor
+habilita solo su proceso de pruebas en la base aislada fija. No editar `.env`
+operativo ni inferir habilitacion por no definir ENVIRONMENT. Esta autorizacion
+tecnica no habilita EIPD ni acepta datos reales. Panel: MVP en desarrollo.
+
 Pendientes fuera del bloque: formulario para crear/consultar estos sucesores en
 la interfaz, politica juridica con fuentes oficiales verificadas y aceptacion
 trazable, demas rutas M3-T1. La composicion V5 y consulta actuales no promueven el
-historial anterior a cobertura infancia. Confirmacion/activacion EIPD bloqueadas.
+historial anterior a cobertura infancia. Confirmacion/activacion EIPD bloqueadas. Migracion para datos reales requiere
+criterios MVP, contratos/politica revisados y pruebas previas; no se elimina
+`data_kind=ficticios` ni sus CHECK durante desarrollo.
 Detalles: [plan infancia/adolescencia](m3-t1-infancia-adolescencia.md).
 Las entradas siguientes son antecedentes, no el estado operativo vigente.
 
