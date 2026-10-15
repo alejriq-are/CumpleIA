@@ -44,8 +44,11 @@ async def selected_policy(db):
 async def locked_context(db, org, tid, aid):
     from app.services import licitud
 
-    if get_settings().environment not in ("development", "test"):
+    settings = get_settings()
+    if settings.environment not in ("development", "test"):
         conflict("infancia_escritura_solo_desarrollo")
+    if not settings.eipd_child_test_writes_enabled:
+        conflict("infancia_escritura_ficticia_no_habilitada")
     draft = await licitud.get_legal_assessment_draft_v1(db, org, tid, aid)
     try:
         await licitud.resolve_eipd_policy_snapshot_for_transaction_v1(db)
