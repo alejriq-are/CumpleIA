@@ -9,24 +9,24 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.deps import require_active_subscription, require_permission
 from app.db.models import Profile
 from app.db.session import get_db
+from app.schemas.child_adolescent_api import (
+    LegalAssessmentChildDraftCreateV1 as LegalAssessmentDraftCreate,
+)
+from app.schemas.child_adolescent_api import (
+    LegalAssessmentChildDraftUpdateV1 as LegalAssessmentDraftUpdate,
+)
+from app.schemas.child_adolescent_api import (
+    LegalAssessmentChildOutV1 as LegalAssessmentOut,
+)
+from app.schemas.child_adolescent_api import (
+    LegalAssessmentChildReadinessOutV1 as LegalAssessmentReadinessOut,
+)
 from app.schemas.licitud import (
     EipdNegativeResolutionReviewInV3,
     EipdResolutionReviewIn,
     EipdResolutionReviewOut,
     EipdResolutionReviewOutV2,
     EipdResolutionReviewOutV3,
-)
-from app.schemas.licitud import (
-    LegalAssessmentRepresentationDraftCreateV1 as LegalAssessmentDraftCreate,
-)
-from app.schemas.licitud import (
-    LegalAssessmentRepresentationDraftUpdateV1 as LegalAssessmentDraftUpdate,
-)
-from app.schemas.licitud import (
-    LegalAssessmentRepresentationOutV2 as LegalAssessmentOut,
-)
-from app.schemas.licitud import (
-    LegalAssessmentRepresentationReadinessOutV2 as LegalAssessmentReadinessOut,
 )
 from app.services import licitud as service
 from app.services.authorization import Permission

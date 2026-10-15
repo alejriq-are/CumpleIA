@@ -1499,6 +1499,14 @@ class LegalAssessment(Base):
             "sensitive_representation_assessment IS NULL OR status <> 'confirmado'",
             name="ck_legal_assessments_sensitive_representation_no_confirmation",
         ),
+        CheckConstraint(
+            "child_adolescent_assessment IS NULL OR jsonb_typeof(child_adolescent_assessment) = 'object'",
+            name="ck_legal_assessments_child_adolescent_object",
+        ),
+        CheckConstraint(
+            "child_adolescent_assessment IS NULL OR status <> 'confirmado'",
+            name="ck_legal_assessments_child_adolescent_no_confirmation",
+        ),
         CheckConstraint("version >= 1", name="ck_legal_assessments_version"),
         CheckConstraint(
             "schema_version >= 1",
@@ -1613,6 +1621,9 @@ class LegalAssessment(Base):
         JSONB(none_as_null=True), nullable=True
     )
     research_assessment: Mapped[dict | None] = mapped_column(
+        JSONB(none_as_null=True), nullable=True
+    )
+    child_adolescent_assessment: Mapped[dict | None] = mapped_column(
         JSONB(none_as_null=True), nullable=True
     )
     sensitive_representation_assessment: Mapped[dict | None] = mapped_column(

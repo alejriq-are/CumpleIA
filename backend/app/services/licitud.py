@@ -27,6 +27,9 @@ from app.db.models import (
     TreatmentVendor,
     Vendor,
 )
+from app.schemas.child_adolescent_api import (
+    LegalAssessmentChildReadinessOutV1 as LegalAssessmentReadinessOut,
+)
 from app.schemas.licitud import (
     BoundResearchAssessmentV1,
     EipdControlCompositionOut,
@@ -57,14 +60,13 @@ from app.schemas.licitud import (
     RatSnapshotSystemV1,
     RatSnapshotThirdPartyV1,
 )
-from app.schemas.licitud import (
-    LegalAssessmentRepresentationReadinessOutV2 as LegalAssessmentReadinessOut,
-)
 from app.services import rat as rat_service
 from app.services.biometric import evaluate_biometric_assessment_v1
 from app.services.biometric_rights_exception import (
     evaluate_biometric_rights_exception_v1,
 )
+from app.services.child_adolescent_binding import bind_child_adolescent_v1
+from app.services.child_adolescent_readiness import build_child_adolescent_readiness_v1
 from app.services.consentimiento import evaluate_consent_assessment_v1
 from app.services.contract import evaluate_contract_assessment_v1
 from app.services.economic_obligations import (
@@ -1155,6 +1157,39 @@ def _sensitive_representation_context_v1(assessment):
     }
 
 
+def _child_adolescent_needed(assessment, snapshot=None):
+    if getattr(assessment, "child_adolescent_assessment", None) is not None:
+        return True
+    rat = snapshot if snapshot is not None else assessment.rat_context_snapshot
+    if isinstance(rat, RatContextSnapshotV1):
+        rat = rat.model_dump(mode="python")
+    flags = rat.get("special_regimes", {})
+    return bool(
+        flags.get("includes_children")
+        or flags.get("includes_adolescents")
+        or any(
+            x.get("includes_children") or x.get("includes_adolescents")
+            for x in rat.get("data_subjects", [])
+        )
+    )
+
+
+def _child_adolescent_context_v1(assessment, snapshot=None):
+    special = assessment.special_conditions
+    return {
+        **_sensitive_representation_context_v1(assessment),
+        "rat_context_snapshot": (
+            snapshot if snapshot is not None else assessment.rat_context_snapshot
+        ),
+        "special_conditions_document": (
+            {k: v for k, v in special.items() if k != "context_binding"}
+            if special is not None
+            else None
+        ),
+        "sensitive_representation_assessment": assessment.sensitive_representation_assessment,
+    }
+
+
 async def update_legal_assessment_draft_v1(
     db: AsyncSession,
     organization_id: uuid.UUID,
@@ -1173,6 +1208,8 @@ async def update_legal_assessment_draft_v1(
     )
 
     changes = payload.model_dump(mode="json", exclude_unset=True)
+    child_was_provided = "child_adolescent_assessment" in payload.model_fields_set
+    child_input = changes.pop("child_adolescent_assessment", None)
     representation_was_provided = (
         "sensitive_representation_assessment" in payload.model_fields_set
     )
@@ -1284,6 +1321,14 @@ async def update_legal_assessment_draft_v1(
             raise _bad_request(
                 "Contrato o alcance de condiciones especiales inválido"
             ) from None
+    if child_was_provided:
+        assessment.child_adolescent_assessment = (
+            bind_child_adolescent_v1(
+                child_input, _child_adolescent_context_v1(assessment)
+            ).model_dump(mode="json")
+            if child_input is not None
+            else None
+        )
     if screening_was_provided:
         assessment.eipd_screening = (
             bind_eipd_screening_v12(
@@ -1497,6 +1542,11 @@ async def create_legal_assessment_draft_v1(
             raise _bad_request(
                 "Contrato o alcance de condiciones especiales inválido"
             ) from None
+    child_input = getattr(payload, "child_adolescent_assessment", None)
+    if child_input is not None:
+        assessment.child_adolescent_assessment = bind_child_adolescent_v1(
+            child_input, _child_adolescent_context_v1(assessment)
+        ).model_dump(mode="json")
     if payload.eipd_screening is not None:
         assessment.eipd_screening = bind_eipd_screening_v12(
             payload.eipd_screening,
@@ -2173,6 +2223,10 @@ async def confirm_legal_assessment_v1(
         raise _not_found("Evaluación jurídica no encontrada")
     if draft.status != "borrador":
         raise _conflict("La evaluación jurídica ya no está en estado borrador")
+    if _child_adolescent_needed(draft):
+        raise HTTPException(
+            status_code=409, detail={"code": "infancia_confirmacion_bloqueada"}
+        )
     if getattr(
         draft, "sensitive_representation_assessment", None
     ) is not None or _resolution_uses_context_v3(draft):
@@ -2897,10 +2951,52 @@ async def get_legal_assessment_readiness_v1(
                     "question_id": None,
                 }
             )
+    child = None
+    child_material = getattr(assessment, "child_adolescent_assessment", None)
+    child_rat = current_snapshot or RatContextSnapshotV1.model_validate(
+        assessment.rat_context_snapshot
+    )
+    child_needed = _child_adolescent_needed(assessment, child_rat)
+    if child_needed:
+        if current_snapshot is None:
+            child = {
+                "evaluation_version": 1,
+                "result": "requiere_revision",
+                "documentary_result": "requiere_revision",
+                "association_status": "requiere_revision",
+                "issues": [
+                    {
+                        "field": "rat_context_snapshot",
+                        "code": "infancia_contexto_actual_no_disponible",
+                        "category": "requiere_revision",
+                    }
+                ],
+                "can_confirm": False,
+                "authorizes_action": False,
+            }
+        else:
+            child = build_child_adolescent_readiness_v1(
+                child_material, _child_adolescent_context_v1(assessment, child_rat)
+            ).model_dump(mode="json")
+        block(
+            "child_adolescent_assessment",
+            "infancia_confirmacion_bloqueada",
+            "El expediente de infancia mantiene bloqueada la confirmacion",
+        )
+        eipd_controls = eipd_controls_v2 = eipd_controls_v3 = eipd_controls_v4 = None
+        eipd_resolution = None
+        if eipd_resolution_review.latest_review is not None:
+            eipd_resolution_review = eipd_resolution_review.model_copy(
+                update={"review_status": "obsoleta"}
+            )
     return LegalAssessmentReadinessOut.model_validate(
         {
             "assessment_id": assessment.id,
             "status": assessment.status,
+            "child_adolescent": child,
+            "child_adolescent_context_coverage": (
+                "pendiente" if child is not None else "no_aplica"
+            ),
             "legal_basis": assessment.legal_basis,
             "sensitive_representation": representation,
             "representation_context_coverage": (
@@ -2986,6 +3082,11 @@ async def record_eipd_resolution_review_v1(
         raise _not_found("Evaluacion juridica no encontrada")
     if draft.status != "borrador":
         raise _conflict("La evaluacion juridica ya no esta en estado borrador")
+    if _child_adolescent_needed(draft):
+        raise HTTPException(
+            status_code=409,
+            detail={"code": "resolucion_eipd_infancia_asociacion_pendiente"},
+        )
     if _negative_v3:
         return await _record_eipd_negative_review_v3_locked(
             db, organization_id, treatment_id, profile_id, draft, series, payload

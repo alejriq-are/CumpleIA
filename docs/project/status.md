@@ -1,3 +1,17 @@
+## Estado operativo M3-T1 — bloque persistencia infancia/adolescencia
+
+Rama: `feature/m3-t1-licitud-persistencia`. Bloque backend implementado y validado localmente.
+POST/PATCH/GET persisten documento con identidad servidor; omision/null/reaporte
+separados. Migracion `a73d8e0c4b21` verificada sobre la base aislada, sin modificar
+la base operativa. Confirmacion y activacion EIPD bloqueadas; datos ficticios.
+Detalles y siguientes capacidades: [plan infancia/adolescencia](m3-t1-infancia-adolescencia.md).
+Validacion: 46 casos storage/CRUD/contratos, atomicidad e historia; regresion
+backend con 4354 aprobadas y fallos por catalogo ausente de M1, corregido en base
+aislada y 60 casos afectados/reaporte aprobados. Cliente EIPD 48 aprobadas,
+TypeScript/lint y Ruff/Black correctos; Chromium/API/DB aislada 1 aprobada.
+Publicacion del bloque: pendiente de commit/push y CI.
+Este resumen es el estado actual; las entradas siguientes son antecedentes.
+
 ## 2026-10-14 — M3-T1 §279: contratos futuros y matriz transaccional infancia
 
 Create/Update/Out futuros separados de rutas activas; documento crudo nullable de

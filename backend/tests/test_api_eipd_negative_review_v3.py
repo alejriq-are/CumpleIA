@@ -271,3 +271,60 @@ async def test_negative_v3_requires_edit_permission_and_active_subscription(
                     {"previous": previous, "org": prepared[3]},
                 )
             await db.commit()
+
+
+async def test_child_document_does_not_rewrite_or_promote_historical_review(
+    prepared, explicit_review_policy, _session_factory
+):
+    async with client(prepared) as http:
+        response = await http.post(
+            url(prepared) + "/eipd-resolution/reviews/v3", json=payload()
+        )
+        assert response.status_code == 201, response.text
+        event = response.json()
+        read_url = url(prepared) + f"/eipd-resolution/reviews/{event['id']}/v3"
+        historical = await http.get(read_url)
+        assert historical.status_code == 200, historical.text
+        changed = await http.patch(
+            url(prepared),
+            json={
+                "child_adolescent_assessment": {
+                    "declared_groups": ["ninos_ninas"],
+                    "notes": "PRUEBA: infancia ficticia",
+                }
+            },
+        )
+        assert changed.status_code == 200, changed.text
+        readiness = await http.get(url(prepared) + "/readiness")
+        assert readiness.status_code == 200, readiness.text
+        body = readiness.json()
+        assert body["child_adolescent_context_coverage"] == "pendiente"
+        assert body["eipd_resolution_review"]["review_status"] == "obsoleta"
+        assert all(
+            body[field] is None
+            for field in (
+                "eipd_controls",
+                "eipd_controls_v2",
+                "eipd_controls_v3",
+                "eipd_controls_v4",
+            )
+        )
+        assert (await http.get(read_url)).json() == historical.json()
+        rejected = await http.post(
+            url(prepared) + "/eipd-resolution/reviews/v3", json=payload()
+        )
+        assert rejected.status_code == 409
+        assert (
+            rejected.json()["detail"]["code"]
+            == "resolucion_eipd_infancia_asociacion_pendiente"
+        )
+    async with _session_factory() as db:
+        assert (
+            await db.scalar(
+                text(
+                    "SELECT count(*) FROM eipd_resolution_reviews WHERE assessment_id=:id"
+                ),
+                {"id": UUID(prepared[1]["id"])},
+            )
+            == 1
+        )
