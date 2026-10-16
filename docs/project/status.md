@@ -78,6 +78,15 @@ G2-G5 pendientes, G6/G7 bloqueados. Sin migracion/cambio de politica u opt-in.
 78 backend dirigidas, ocho nuevas UI y una integrada real aprobadas.
 [Contrato y recorrido](m3-t1-mvp-alcance-propuesto.md). Verificar CI por HEAD.
 
+Preparacion ficticia de piloto (16/10): usuario confirma que no hay empresa piloto.
+Formulario/API valida referencias de revision y operacion con facultad/hashes
+vigentes; faltantes visibles, simulacion sin registrar decisiones ni cerrar gates.
+87 API/DB dirigidas, cuatro barreras de restaurador, 11 UI y una integrada real
+aprobadas. Restauracion aislada de 39 tablas con RLS/privilegios intactos; origen
+intacto, copia retirada, historiales vacios. No valida produccion ni reemplaza
+revision humana. Sin migraciones/opt-in. CI previa 01d1576 aprobada.
+[Contrato y pendientes reales](m3-t1-piloto-preparacion.md). CI por HEAD exacto.
+
 Pendientes fuera del bloque: revision juridica real, otras politicas/documentos, alcance y evidencia MVP,
 demas rutas M3-T1. La composicion V5 y consulta actuales no promueven el
 historial anterior a cobertura infancia. Confirmacion/activacion EIPD bloqueadas. Migracion para datos reales requiere

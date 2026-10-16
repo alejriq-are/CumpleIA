@@ -31,6 +31,7 @@ test("formulario y cliente reales registran una negativa en API aislada", async 
       import {EipdReviewConsultation} from ${JSON.stringify(path.resolve("components/admin/EipdReviewConsultation.tsx"))};
       import {ChildAdolescentEditor} from ${JSON.stringify(path.resolve("components/licitud/ChildAdolescentEditor.tsx"))};
       import {MvpDossierPanel} from ${JSON.stringify(path.resolve("components/licitud/MvpDossierPanel.tsx"))};
+      import {preparePilot} from ${JSON.stringify(path.resolve("lib/api/pilot-preparation.ts"))};
       import {loadMvpDossier} from ${JSON.stringify(path.resolve("lib/api/mvp-dossier.ts"))};
       import {OrganizationAcceptancePanel} from ${JSON.stringify(path.resolve("components/licitud/OrganizationAcceptancePanel.tsx"))};
       import {organizationAcceptanceApi as acceptanceApi} from ${JSON.stringify(path.resolve("lib/api/organization-acceptance.ts"))};
@@ -47,7 +48,7 @@ test("formulario y cliente reales registran una negativa en API aislada", async 
         load:async()=>{const [a,p,r]=await Promise.all([childApi.load(context),childEipdApi.policy(context),childEipdApi.list(context)]);return {status:a.status,policy:p,resolutions:r};},
         create:d=>childEipdApi.create(context,d),reviews:r=>childEipdApi.reviews(context,r),review:(r,d,f,ref)=>childEipdApi.review(context,r,d,f,ref),readOnly:false
       }));};
-      window.openDossier=(s)=>{const context=scope(s);root.render(React.createElement(MvpDossierPanel,{load:()=>loadMvpDossier(context)}));};
+      window.openDossier=(s)=>{const context=scope(s);root.render(React.createElement(MvpDossierPanel,{load:()=>loadMvpDossier(context),prepare:(packet,form)=>preparePilot(context,packet,form)}));};
       window.openAcceptance=(s,r)=>{const context=scope(s);root.render(React.createElement(OrganizationAcceptancePanel,{load:()=>acceptanceApi.load(context,r),designate:(actor,p)=>acceptanceApi.designate(context,actor,p),record:(actor,p)=>acceptanceApi.record(context,r,actor,p),readOnly:false}));};
       root.render(React.createElement(EipdReviewConsultation,{
         loadPreparation:s=>eipdReviewApi.preparation(scope(s)),
@@ -315,6 +316,26 @@ test("formulario y cliente reales registran una negativa en API aislada", async 
     await expect(
       page.getByRole("button", { name: "Descargar expediente JSON", exact: true })
     ).toBeEnabled();
+    await page
+      .getByRole("checkbox", { name: "Declaro referencias ficticias para el piloto" })
+      .check();
+    await page.getByLabel("Decisión de revisión ficticia", { exact: true }).selectOption("acepta");
+    for (const label of [
+      "Referencia de revisión jurídica ficticia",
+      "Referencia de entorno",
+      "Referencia de control de accesos",
+      "Referencia de restauración",
+      "Referencia de retención",
+      "Referencia de soporte",
+      "Referencia de incidentes",
+    ]) {
+      await page.getByLabel(label, { exact: true }).fill("PRUEBA: referencia declarada integrada");
+    }
+    await page.getByRole("button", { name: "Validar preparación ficticia", exact: true }).click();
+    await expect(page.getByRole("status")).toContainText(
+      "Referencias de prueba completas; evidencia no verificada."
+    );
+    await expect(page.getByRole("status")).toContainText("Simulación no registrada");
     const download = page.waitForEvent("download");
     await page.getByRole("button", { name: "Descargar expediente JSON", exact: true }).click();
     const artifact = await download;

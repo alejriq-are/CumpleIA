@@ -18,17 +18,19 @@ identifica el HEAD exacto de la tarea. Una CI anterior no prueba un commit nuevo
 
 ## Bloque funcional vigente — producto
 
-16/10: expediente documental MVP confirmado e implementado: consulta y descarga
-JSON de RAT asociado, evaluacion de licitud/LIA y EIPD disponible; versiones,
-hashes, eventos ficticios solo sobre EIPD exacta, fuentes oficiales consultadas y
-gates MVP. G1 alcance definido; restantes pendientes/bloqueados. No acta real,
-verificacion de facultades reales ni liberacion. RAT es snapshot asociado, no
-inventario completo/atestacion de actualidad. Consulta solo development/test.
-78 backend dirigidas, ocho nuevas UI/cliente y una integrada real aprobadas;
-tipos/lint/formato correctos. No migracion ni cambio de opt-in/politica global.
-Aceptacion organizacion previa permanece ligada solo al sucesor infancia.
-[Contrato operativo y pendientes](project/m3-t1-mvp-alcance-propuesto.md).
-EIPD bloqueada; datos ficticios; sin merge/despliegue. Consultar CI del HEAD exacto.
+16/10: no existe organizacion piloto; usuario confirma preparacion con datos
+ficticios. Formulario de revision/facultad y controles operativos simula referencias
+contra hashes del expediente MVP y facultad propia vigente. Enumera faltantes;
+no registra actas/eventos reales ni cierra gates por referencias completas.
+87 API/DB dirigidas, cuatro barreras de restaurador, 11 UI/cliente y una integrada
+real aprobadas; tipos/lint/formato. CI del previo 01d1576 aprobada.
+Al reanudar, integracion Docker/WSL no disponible para repetir DB local; evidencia
+del recorrido/restauracion ya ejecutados conservada. Rehabilitar antes de repetir.
+Restauracion local aislada validada: 39 tablas, RLS/privilegios de cuatro historiales,
+origen intacto y copia propia retirada. Historiales vacios; no certifica produccion.
+[Contrato y evidencia](project/m3-t1-piloto-preparacion.md).
+Sin migraciones ni cambio de opt-in/politica. G2/G5 y empresa/evidencia real pendientes;
+datos reales y EIPD bloqueados, sin merge/despliegue. Verificar CI del HEAD exacto.
 
 ## Proxima transferencia
 

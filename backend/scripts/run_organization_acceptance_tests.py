@@ -22,6 +22,8 @@ def main():
             "-q",
             "tests/test_organization_acceptance.py",
             "tests/test_mvp_dossier.py",
+            "tests/test_pilot_preparation.py",
+            "tests/test_pilot_restore_guardrails.py",
             "tests/test_child_adolescent_storage.py",
             "tests/test_eipd_child_successors.py",
             "tests/test_eipd_test_runner.py",

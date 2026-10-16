@@ -1,4 +1,5 @@
 "use client";
+import { PilotPreparationPanel, type PilotPrepare } from "./PilotPreparationPanel";
 import { useState, useRef, useEffect } from "react";
 import type { Dossier } from "@/lib/api/mvp-dossier";
 const labels = {
@@ -6,7 +7,13 @@ const labels = {
   licitud_lia: "Evaluación de licitud / LIA",
   eipd: "Documento EIPD",
 };
-export function MvpDossierPanel({ load }: { load: () => Promise<Dossier> }) {
+export function MvpDossierPanel({
+  load,
+  prepare,
+}: {
+  load: () => Promise<Dossier>;
+  prepare?: PilotPrepare;
+}) {
   const [packet, setPacket] = useState<Dossier | null>(null),
     [busy, setBusy] = useState(false),
     [error, setError] = useState("");
@@ -113,6 +120,9 @@ export function MvpDossierPanel({ load }: { load: () => Promise<Dossier> }) {
               </li>
             ))}
           </ul>
+          {prepare && (
+            <PilotPreparationPanel key={packet.packet_hash} packet={packet} prepare={prepare} />
+          )}
           <h3>Criterios de salida a MVP</h3>
           <ul>
             {packet.release_gates.map((g) => (

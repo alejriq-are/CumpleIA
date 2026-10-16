@@ -1,4 +1,6 @@
 "use client";
+import { preparePilot, type PilotForm } from "@/lib/api/pilot-preparation";
+import type { Dossier } from "@/lib/api/mvp-dossier";
 import { MvpDossierPanel } from "./MvpDossierPanel";
 import { loadMvpDossier } from "@/lib/api/mvp-dossier";
 import { useCallback } from "react";
@@ -31,6 +33,10 @@ export function ChildAdolescentPage({
     if (error || !data.session) throw new ApiError(401, "Sesión no disponible");
     return { organizationId, treatmentId, assessmentId, token: data.session.access_token };
   }, [organizationId, treatmentId, assessmentId]);
+  const pilot = useCallback(
+    async (packet: Dossier, form: PilotForm) => preparePilot(await scope(), packet, form),
+    [scope]
+  );
   const dossier = useCallback(async () => loadMvpDossier(await scope()), [scope]);
   const load = useCallback(async () => childApi.load(await scope()), [scope]);
   const save = useCallback(
@@ -77,7 +83,7 @@ export function ChildAdolescentPage({
   );
   return (
     <div key={`${organizationId}:${treatmentId}:${assessmentId}`} className="space-y-6">
-      <MvpDossierPanel load={dossier} />
+      <MvpDossierPanel load={dossier} prepare={pilot} />
       <ChildAdolescentEditor
         key={`${organizationId}:${treatmentId}:${assessmentId}`}
         load={load}
