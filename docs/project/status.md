@@ -53,11 +53,14 @@ formato; recorrido Chromium/API/PostgreSQL aislado aprobado, incluido contraste
 de campos, tipos y enums del editor con Pydantic real. Sin migraciones ni cambios
 de habilitacion operativa. CI del nuevo commit se consulta tras publicar.
 
-Revision juridica/MVP: [expediente preparado](m3-t1-politica-juridica-mvp.md),
+Revision juridica/MVP: [modelo corregido V2](m3-t1-politica-juridica-mvp-v2.md),
 consulta oficial 16/10, copia DO/checksum y registro estructurado pendientes de
 revision humana. No se declaran fuentes globalmente verificadas ni politica
 aceptada. Gates G1-G7 propuestos, datos reales y activacion separados.
-Falta responsable/acta y suficiencia de fuentes para cerrar este bloque.
+Responsabilidad resuelta por el usuario: organizacion responsable mediante persona
+facultada. No hay bloqueo por exigir revisor externo/acta real para desarrollo.
+Pendiente implementar aceptacion tenant con datos ficticios, separada del control
+global; acta real y suficiencia de fuentes corresponden a la salida a MVP.
 Runtime y politica infancia V1 intactos.
 
 Pendientes fuera del bloque: revision/aceptacion juridica, alcance y evidencia MVP,

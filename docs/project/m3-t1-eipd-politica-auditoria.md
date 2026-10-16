@@ -9,7 +9,7 @@ Este contrato describe controles de producto; no introduce requisitos legales ni
 acredita verificacion de fuentes. Acciones admiten solo politica auditada deshabilitada.
 
 Expediente operativo de revision preparado al 16/10:
-[politica juridica y gates MVP](m3-t1-politica-juridica-mvp.md).
+[modelo de responsabilidad y gates MVP V2](m3-t1-politica-juridica-mvp-v2.md).
 Consulta documental no sustituye accepted_by/acta ni provision operativa.
 La politica de infancia V1 sigue pendiente y deshabilitada; no se reescribe.
 

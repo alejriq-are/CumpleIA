@@ -27,9 +27,11 @@ verificacion/aceptacion juridica de politica y criterios de salida a MVP.
 Validacion: 30 pruebas UI/cliente, tipos/lint/formato y recorrido real aislado;
 la integrada compara campos/estructura con el esquema Pydantic vigente.
 Expediente de revision y gates MVP preparado, no aceptado:
-[politica juridica/MVP](project/m3-t1-politica-juridica-mvp.md). Fuentes base
+[politica juridica/MVP V2](project/m3-t1-politica-juridica-mvp-v2.md). Fuentes base
 consultadas; instrumentos complementarios no verificados en busqueda acotada.
-Responsable y acta humana pendientes; no fabricar accepted_by ni promover V1.
+Responsabilidad definida: organizacion responsable mediante persona facultada.
+Desarrollar flujo tenant con actores ficticios; no exigir acta real/UUID operativo
+para avanzar. No reutilizar accepted_by global ni promover V1.
 Contrato y checksum verificados sin DB; runtime/politica/opt-in sin cambios.
 Estado y limites: docs/project/status.md (solo entrada operativa) y
 m3-t1-infancia-adolescencia.md. Verificar HEAD/CI actual antes de transferir.

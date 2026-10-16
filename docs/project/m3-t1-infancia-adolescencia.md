@@ -53,8 +53,9 @@ verificacion oficial ni aceptacion de politica. Resultado incierto: no repetir;
 consultar historial antes de recargar.
 
 Pendientes: validacion/aceptacion juridica de politica y criterios de salida MVP.
-[Expediente revisable](m3-t1-politica-juridica-mvp.md) preparado con fuentes y gates,
-no aceptado; requiere responsable y acta humana. Activacion EIPD bloqueada.
+[Modelo vigente V2](m3-t1-politica-juridica-mvp-v2.md) preparado con fuentes y gates,
+no aceptado; organizacion responsable/actor facultado definidos como roles.
+Desarrollar el flujo con actores ficticios; acta real requerida antes del piloto. Activacion EIPD bloqueada.
 
 Salida a MVP: la restriccion SQL `data_kind=ficticios` es intencional. Introducir
 datos reales requiere una nueva migracion revisada, contratos separados o
