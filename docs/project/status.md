@@ -36,9 +36,21 @@ habilita solo su proceso de pruebas en la base aislada fija. No editar `.env`
 operativo ni inferir habilitacion por no definir ENVIRONMENT. Esta autorizacion
 tecnica no habilita EIPD ni acepta datos reales. Panel: MVP en desarrollo.
 
-Pendientes fuera del bloque: formulario para crear/consultar estos sucesores en
-la interfaz, politica juridica con fuentes oficiales verificadas y aceptacion
-trazable, demas rutas M3-T1. La composicion V5 y consulta actuales no promueven el
+Interfaz sucesora (16/10): el editor de infancia incorpora creacion de resoluciones
+**parciales** (referencia, version y notas), consulta de versiones y sus revisiones,
+y registro de `requiere_cambios` / `no_continuar` sobre la resolucion seleccionada.
+Solo declaracion ficticia; viewer/expediente no borrador sin escrituras. Cliente
+rechaza identidad/cobertura/politica incompatibles, conserva formularios en rechazos
+y bloquea repeticion tras resultado incierto. La API revalida material y permisos.
+Validacion de este bloque: 91 regresiones de cliente/UI y 19 pruebas nuevas del flujo, tipos y lint
+sin advertencias; recorrido Chromium/API/PostgreSQL aislado aprobado. Sin cambios
+de migracion ni habilitacion del entorno operativo. CI del nuevo commit se verifica
+al publicar; la CI historica citada arriba no lo acredita.
+
+Pendientes fuera del bloque: formulario completo de analisis/riesgos/medidas y
+fuentes del documento EIPD sucesor (la UI actual identifica un documento parcial),
+politica juridica con fuentes oficiales verificadas y aceptacion trazable,
+demas rutas M3-T1. La composicion V5 y consulta actuales no promueven el
 historial anterior a cobertura infancia. Confirmacion/activacion EIPD bloqueadas. Migracion para datos reales requiere
 criterios MVP, contratos/politica revisados y pruebas previas; no se elimina
 `data_kind=ficticios` ni sus CHECK durante desarrollo.

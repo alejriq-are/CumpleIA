@@ -20,9 +20,9 @@ implementados. M3-T1 sigue EN PROGRESO; solo datos ficticios hasta MVP.
   cambios y elimina diagnostico viejo; doble envio impedido. Viewer/confirmado
   solo lectura; API sigue imponiendo permisos y aislamiento del servidor.
 
-Pendiente posterior: contrato y persistencia sucesores de resolucion/revision con
-identidad infancia, integracion de politica con fuentes y aceptacion explicitamente
-verificadas antes de cualquier capacidad positiva. No levantar gates por campos
+Sucesores con identidad infancia: persistencia implementada y formulario parcial
+descrito abajo. Pendiente integracion de politica con fuentes y aceptacion
+explicitamente verificadas antes de cualquier capacidad positiva. No levantar gates por campos
 completos, por hashes vigentes ni por usar datos ficticios.
 
 ## Bloque operativo: resoluciones y revisiones sucesoras V4
@@ -40,8 +40,17 @@ no concede autoridad juridica. Declaracion ficticia requerida; no prueba el
 origen de los datos. Activacion EIPD bloqueada. Migracion nueva validada en base
 aislada y desarrollo local, sin cambiar historia existente.
 
-Pendientes: interfaz de escritura/consulta del sucesor y validacion/aceptacion
-juridica de politica antes de considerar cualquier habilitacion futura.
+Interfaz del sucesor (16/10): en el editor se pueden registrar referencias/version
+/notas de una resolucion parcial, listar versiones, consultar sus eventos y registrar
+solo revisiones negativas. Las resoluciones/eventos se conservan inmutables; una
+consulta historica no acredita vigencia. Usa el ultimo documento de infancia
+guardado; los cambios sin guardar no se incorporan. La habilitacion tecnica de
+escrituras ficticias continua siendo opt-in del servidor, no un control de la UI.
+Resultado de escritura incierto: no repetir; consultar historial antes de recargar.
+
+Pendientes: edicion completa del documento sucesor (analisis, riesgos, medidas,
+fuentes y evidencias), validacion/aceptacion juridica de politica antes de considerar
+cualquier habilitacion futura. No presentar la resolucion parcial como EIPD completa.
 
 Salida a MVP: la restriccion SQL `data_kind=ficticios` es intencional. Introducir
 datos reales requiere una nueva migracion revisada, contratos separados o

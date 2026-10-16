@@ -16,6 +16,16 @@ integrada aprobados. Esta observacion es un snapshot, no el HEAD perpetuo.
 Antes de transferir, generar scripts/handoff.py state --remote: ese resultado
 identifica el HEAD exacto de la tarea. Una CI anterior no prueba un commit nuevo.
 
+## Bloque funcional vigente — producto
+
+16/10: formulario parcial de sucesores de infancia integrado en el editor:
+referencia/version/notas, consulta de resoluciones y sus eventos, revisiones
+negativas con datos ficticios. EIPD sigue bloqueada; no cambiar el opt-in del
+entorno operativo. Siguiente bloque candidato: completar edicion del documento
+EIPD sucesor (analisis/riesgos/medidas/fuentes), con la misma politica negativa.
+Estado y limites: docs/project/status.md (solo entrada operativa) y
+m3-t1-infancia-adolescencia.md. Verificar HEAD/CI actual antes de transferir.
+
 ## Proxima transferencia
 
 Estado: DS-001 a DS-005 terminados. DS-005 agrega reordenacion de evidencia;

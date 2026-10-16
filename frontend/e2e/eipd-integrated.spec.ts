@@ -30,11 +30,17 @@ test("formulario y cliente reales registran una negativa en API aislada", async 
       import {createRoot} from "react-dom/client";
       import {EipdReviewConsultation} from ${JSON.stringify(path.resolve("components/admin/EipdReviewConsultation.tsx"))};
       import {ChildAdolescentEditor} from ${JSON.stringify(path.resolve("components/licitud/ChildAdolescentEditor.tsx"))};
+      import {ChildEipdHistory} from ${JSON.stringify(path.resolve("components/licitud/ChildEipdHistory.tsx"))};
+      import {childEipdApi} from ${JSON.stringify(path.resolve("lib/api/child-eipd.ts"))};
       import {childApi} from ${JSON.stringify(path.resolve("lib/api/child-adolescent.ts"))};
       import {eipdReviewApi} from ${JSON.stringify(path.resolve("lib/api/eipd-review.ts"))};
       const scope=s=>({...s,token:"PRUEBA: sesion sintetica del servidor aislado"});
       const root=createRoot(document.getElementById("root"));
       window.openChildEditor=(s)=>{const context=scope(s);root.render(React.createElement(ChildAdolescentEditor,{load:()=>childApi.load(context),save:doc=>childApi.save(context,doc),readiness:()=>childApi.readiness(context)}));};
+      window.openChildHistory=(s)=>{const context=scope(s);root.render(React.createElement(ChildEipdHistory,{
+        load:async()=>{const [a,p,r]=await Promise.all([childApi.load(context),childEipdApi.policy(context),childEipdApi.list(context)]);return {status:a.status,policy:p,resolutions:r};},
+        create:d=>childEipdApi.create(context,d),reviews:r=>childEipdApi.reviews(context,r),review:(r,d,f,ref)=>childEipdApi.review(context,r,d,f,ref),readOnly:false
+      }));};
       root.render(React.createElement(EipdReviewConsultation,{
         loadPreparation:s=>eipdReviewApi.preparation(scope(s)),
         loadEvent:(s,id)=>eipdReviewApi.event(scope(s),id),
@@ -112,7 +118,34 @@ test("formulario y cliente reales registran una negativa en API aislada", async 
       page.getByText("La consulta incluye infancia en el contexto actual.")
     ).toBeVisible();
     await expect(page.getByText("Confirmación y activación bloqueadas.")).toBeVisible();
-    // API sucesora desde Chromium; no se presenta como un formulario nuevo.
+    await page.evaluate((s) => (window as any).openChildHistory(s), {
+      organizationId: process.env.CUMPLEIA_UI_ORG!,
+      treatmentId: process.env.CUMPLEIA_UI_TREATMENT!,
+      assessmentId: process.env.CUMPLEIA_UI_ASSESSMENT!,
+    });
+    await page
+      .getByRole("checkbox", { name: "Declaro que este registro usa datos ficticios" })
+      .check();
+    await page
+      .getByLabel("Referencia de la resolución *", { exact: true })
+      .fill("PRUEBA-RES-CHROMIUM-INFANCIA");
+    await page
+      .getByLabel("Notas de la resolución", { exact: true })
+      .fill("PRUEBA: sucesor Chromium aislado");
+    await page.getByRole("button", { name: "Registrar resolución ficticia", exact: true }).click();
+    await expect(page.getByRole("status")).toContainText("Resolución documental 1 registrada");
+    await page
+      .getByLabel("Fundamento de la revisión *", { exact: true })
+      .fill("PRUEBA: faltan evidencias ficticias");
+    await page
+      .getByLabel("Referencia de la revisión *", { exact: true })
+      .fill("PRUEBA-CHROMIUM-INFANCIA-V4");
+    await page.getByRole("button", { name: "Registrar revisión ficticia", exact: true }).click();
+    await expect(page.getByRole("status")).toContainText("Revisión negativa registrada");
+    await page.getByRole("button", { name: "Actualizar historial de infancia" }).click();
+    await page.getByRole("button", { name: "Consultar resolución 1", exact: true }).click();
+    await expect(page.getByText("PRUEBA-CHROMIUM-INFANCIA-V4", { exact: true })).toBeVisible();
+    // El servidor tambien debe rechazar la decision positiva fuera del formulario.
     const successor = await page.evaluate(
       async (scope) => {
         const base = `/licitud/treatments/${scope.treatment}/assessments/${scope.assessment}/eipd-child/v4`;
@@ -120,38 +153,21 @@ test("formulario y cliente reales registran una negativa en API aislada", async 
           "Content-Type": "application/json",
           "X-Organization-Id": scope.organization,
         };
-        const created = await fetch(base + "/resolutions", {
+        const resolutions = await (await fetch(base + "/resolutions", { headers })).json();
+        const r = resolutions[0];
+        const path = base + `/resolutions/${r.id}/reviews`;
+        const events = await (await fetch(path, { headers })).json();
+        const rejected = await fetch(path, {
           method: "POST",
           headers,
           body: JSON.stringify({
             data_kind: "ficticios",
-            document: { notes: "PRUEBA: sucesor Chromium aislado" },
+            decision: "continuar",
+            rationale: "PRUEBA",
+            review_reference: "PRUEBA-POSITIVA-RECHAZADA",
           }),
         });
-        const resolution = await created.json();
-        const path = base + `/resolutions/${resolution.id}/reviews`;
-        const request = {
-          data_kind: "ficticios",
-          decision: "requiere_cambios",
-          rationale: "PRUEBA: faltan evidencias ficticias",
-          review_reference: "PRUEBA-CHROMIUM-INFANCIA-V4",
-        };
-        const saved = await fetch(path, { method: "POST", headers, body: JSON.stringify(request) });
-        const event = await saved.json();
-        const loaded = await fetch(path + `/${event.id}`, { headers });
-        const rejected = await fetch(path, {
-          method: "POST",
-          headers,
-          body: JSON.stringify({ ...request, decision: "continuar" }),
-        });
-        return {
-          created: created.status,
-          saved: saved.status,
-          loaded: loaded.status,
-          rejected: rejected.status,
-          event,
-          history: await loaded.json(),
-        };
+        return { resolution: r, event: events[0], rejected: rejected.status };
       },
       {
         organization: process.env.CUMPLEIA_UI_ORG!,
@@ -159,11 +175,10 @@ test("formulario y cliente reales registran una negativa en API aislada", async 
         assessment: process.env.CUMPLEIA_UI_ASSESSMENT!,
       }
     );
-    expect([successor.created, successor.saved, successor.loaded, successor.rejected]).toEqual([
-      201, 201, 200, 422,
-    ]);
-    expect(successor.history).toEqual(successor.event);
+    expect(successor.rejected).toBe(422);
+    expect(successor.resolution.document.document_reference).toBe("PRUEBA-RES-CHROMIUM-INFANCIA");
     expect(successor.event.review_context_metadata.child_coverage).toBe("contexto_v4");
+    expect(successor.event.document_hash).toBe(successor.resolution.document_hash);
     expect(successor.event.can_confirm).toBe(false);
     expect(successor.event.authorizes_action).toBe(false);
 

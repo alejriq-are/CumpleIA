@@ -145,7 +145,7 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Pruebas EIPD — cliente y consulta con datos ficticios
-        run: npx playwright test e2e/eipd-api-client.spec.ts e2e/eipd-consultation.spec.ts e2e/child-adolescent-editor.spec.ts e2e/child-adolescent-order.acceptance.spec.ts e2e/child-adolescent-field-regressions.spec.ts
+        run: npx playwright test e2e/eipd-api-client.spec.ts e2e/eipd-consultation.spec.ts e2e/child-adolescent-editor.spec.ts e2e/child-adolescent-order.acceptance.spec.ts e2e/child-adolescent-field-regressions.spec.ts e2e/child-eipd-history.spec.ts
 
       - name: Formato — Prettier
         run: npx prettier --check .

@@ -1,5 +1,12 @@
 "use client";
 import { useCallback } from "react";
+import { ChildEipdHistory } from "./ChildEipdHistory";
+import {
+  childEipdApi,
+  type ChildResolution,
+  type ResolutionDraft,
+  type NegativeDecision,
+} from "@/lib/api/child-eipd";
 import { ChildAdolescentEditor } from "./ChildAdolescentEditor";
 import { childApi, type ChildDocument } from "@/lib/api/child-adolescent";
 import { createClient } from "@/lib/supabase/client";
@@ -26,13 +33,48 @@ export function ChildAdolescentPage({
     [scope]
   );
   const readiness = useCallback(async () => childApi.readiness(await scope()), [scope]);
+  const history = useCallback(async () => {
+    const current = await scope();
+    const [assessment, policy, resolutions] = await Promise.all([
+      childApi.load(current),
+      childEipdApi.policy(current),
+      childEipdApi.list(current),
+    ]);
+    return { status: assessment.status, policy, resolutions };
+  }, [scope]);
+  const createResolution = useCallback(
+    async (draft: ResolutionDraft) => childEipdApi.create(await scope(), draft),
+    [scope]
+  );
+  const loadReviews = useCallback(
+    async (resolution: ChildResolution) => childEipdApi.reviews(await scope(), resolution),
+    [scope]
+  );
+  const createReview = useCallback(
+    async (
+      resolution: ChildResolution,
+      decision: NegativeDecision,
+      rationale: string,
+      reference: string
+    ) => childEipdApi.review(await scope(), resolution, decision, rationale, reference),
+    [scope]
+  );
   return (
-    <ChildAdolescentEditor
-      key={`${organizationId}:${treatmentId}:${assessmentId}`}
-      load={load}
-      save={save}
-      readiness={readiness}
-      readOnly={readOnly}
-    />
+    <div key={`${organizationId}:${treatmentId}:${assessmentId}`} className="space-y-6">
+      <ChildAdolescentEditor
+        key={`${organizationId}:${treatmentId}:${assessmentId}`}
+        load={load}
+        save={save}
+        readiness={readiness}
+        readOnly={readOnly}
+      />
+      <ChildEipdHistory
+        load={history}
+        create={createResolution}
+        reviews={loadReviews}
+        review={createReview}
+        readOnly={readOnly}
+      />
+    </div>
   );
 }
