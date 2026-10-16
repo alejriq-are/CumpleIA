@@ -153,3 +153,45 @@ Autonomia verificada: preparacion/entrega del bloque; pruebas y aceptacion ejecu
 por Codex. No se verifico bucle autonomo de correccion a partir de tests ni acceso
 Deepseek a terminal. Siguiente decision: consolidar ejecutor reutilizable solo si
 se decide continuar; este piloto no autoriza gasto recurrente ni lotes nuevos.
+
+## DS-004 — correccion desde fallo real controlado, 2026-10-15
+
+Base 3a24ec974f1fa28b1792befd500ab2623b73380c. Presupuesto referencia USD0.20,
+maximo tres llamadas. Bloque nuevo: notas vacias persistidas null; añadir/quitar
+una evidencia temporal preservando la original; recuperar un 403 y guardar las
+mismas notas sin status falso, alerta residual ni activacion EIPD. Tres tests
+nuevos; componente, harness y tests anteriores intactos.
+
+Deepseek entrego codigo en llamada 1. Reporto checks como objeto, no lista;
+ejecutor inicial se detuvo antes de pruebas con AttributeError. Codex reviso la
+respuesta existente, normalizo solo interpretacion de metadatos y reviso el codigo
+antes de ejecutarlo. No hubo segunda generacion para ese problema ni reparacion
+manual del codigo. Esta friccion del prototipo tambien cuenta como coordinacion.
+
+Copia aislada del frontend desde Git, sin .env; dependencias existentes reutilizadas.
+API key no se hereda a subprocess de pruebas; comandos fijos del ejecutor, ningun
+comando arbitrario del modelo. Fallo controlado introducido por Codex en una
+expectativa de referencia del test nuevo B, no en el codigo original de Deepseek.
+Red real: 1 fallo/15 aprobadas; Expected PRUEBA: FALLO_CONTROLADO_DS004,
+Received PRUEBA: evidencia. Deepseek recibio log y corrigio el literal en llamada 2.
+El ejecutor acepto solo ese literal JSON, conservando toBe y el resto del codigo;
+comparo contra la entrega inicialmente revisada para impedir debilitamiento.
+Luego ejecuto automaticamente 16 UI, type-check, ESLint y Prettier: aprobados.
+Sin intervencion Codex/usuario entre fallo, decision de reparacion y checks finales.
+
+Total dos llamadas: entrada 10471, salida 1444, total 11915 tokens, cache 0.
+Estimacion USD0.00243705–0.0048741, no factura; delta inmediato USD0.00/CNY0.00
+por llamada, cargo exacto no confirmado. Bucle red/feedback/fix/checks 17.01 segundos.
+Resumen persistido docs/ai/results/DS-004.json; originales y ejecutores
+experimentales /tmp/cumpleia-deepseek/DS-004/. Codigo final aplicado exactamente
+al checkout base; no repetir suite backend por un cambio de tests UI.
+
+Autonomia validada: implementar bloque y reparar una expectativa a partir del
+fallo real del ejecutor. No prueba que Deepseek resuelva errores arbitrarios de
+producto, RLS, migraciones o politica: esa reparacion esta limitada a un literal
+sembrado deliberadamente. Codex conserva revision inicial/final y publicacion;
+no hay shell libre para el modelo ni agente general listo para lotes recurrentes.
+Siguiente alcance razonable: correcciones UI/test acotadas con criterios fijos y
+preservacion de assertions, ampliar permisos solo por bloque. Ahorro neto de
+ChatGPT sigue sin medicion comparable; preparacion/revision del prototipo tiene
+costo y no debe omitirse. EIPD bloqueada, datos ficticios, sin merge/despliegue.

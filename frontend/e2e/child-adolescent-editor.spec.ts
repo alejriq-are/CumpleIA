@@ -174,6 +174,67 @@ test("marca Adolescentes, desmarca Ninos y ninas y conserva evidencia ficticia",
     },
   ]);
 });
+test("normaliza notas vacias y guarda con un solo PATCH en null", async ({ page }) => {
+  await mount(page);
+  await page.getByLabel("Notas", { exact: true }).fill("");
+  await page.getByRole("button", { name: "Guardar documento", exact: true }).click();
+  await expect(page.getByRole("status")).toHaveText("Documento guardado.");
+  const calls = await page.evaluate(() =>
+    (window as any).demo.calls.filter((c: any) => c.options.method === "PATCH")
+  );
+  expect(calls).toHaveLength(1);
+  const body = JSON.parse(calls[0].options.body);
+  expect(body.child_adolescent_assessment.notes).toBeNull();
+});
+test("anade evidencia 2 y la quita antes de guardar conservando la evidencia 1", async ({
+  page,
+}) => {
+  await mount(page);
+  await page.getByRole("button", { name: "Añadir evidencia" }).click();
+  await page.getByLabel("Tipo de evidencia 2", { exact: true }).fill("PRUEBA: temporal");
+  await page
+    .getByLabel("Referencia de evidencia 2", { exact: true })
+    .fill("PRUEBA: referencia temporal");
+  await page.getByRole("button", { name: "Quitar evidencia 2" }).click();
+  await page.getByRole("button", { name: "Guardar documento", exact: true }).click();
+  await expect(page.getByRole("status")).toHaveText("Documento guardado.");
+  const calls = await page.evaluate(() =>
+    (window as any).demo.calls.filter((c: any) => c.options.method === "PATCH")
+  );
+  expect(calls).toHaveLength(1);
+  const body = JSON.parse(calls[0].options.body);
+  const evidence = body.child_adolescent_assessment.evidence;
+  expect(evidence).toHaveLength(1);
+  expect(evidence[0].reference).toBe("PRUEBA: evidencia");
+  expect(evidence[0].obtained_on).toBe("2026-10-01");
+});
+test("recupera guardado 403 y reintenta con exito conservando cambios", async ({ page }) => {
+  await mount(page);
+  await page.getByLabel("Notas", { exact: true }).fill("PRUEBA: reintento");
+  await page.evaluate(() => {
+    (window as any).demo.mode = "denied";
+  });
+  await page.getByRole("button", { name: "Guardar documento", exact: true }).click();
+  const alert = page.getByRole("alert");
+  await expect(alert).toContainText("No se confirmó el guardado");
+  await expect(alert).not.toContainText("403");
+  await expect(page.getByLabel("Notas", { exact: true })).toHaveValue("PRUEBA: reintento");
+  await expect(page.getByRole("status")).toHaveCount(0);
+  await page.evaluate(() => {
+    (window as any).demo.mode = "ok";
+  });
+  await page.getByRole("button", { name: "Guardar documento", exact: true }).click();
+  await expect(page.getByRole("status")).toHaveText("Documento guardado.");
+  await expect(page.getByRole("alert")).toHaveCount(0);
+  const calls = await page.evaluate(() =>
+    (window as any).demo.calls.filter((c: any) => c.options.method === "PATCH")
+  );
+  expect(calls).toHaveLength(2);
+  const bodies = calls.map((c: any) => JSON.parse(c.options.body));
+  const notes = bodies.map((b: any) => b.child_adolescent_assessment.notes);
+  expect(notes).toEqual(["PRUEBA: reintento", "PRUEBA: reintento"]);
+  await expect(page.getByText("Confirmación y activación bloqueadas.")).toBeVisible();
+});
 test("retiro envia null y no habilita acciones", async ({ page }) => {
   await mount(page);
   await page.getByRole("button", { name: "Retirar documento del borrador" }).click();
