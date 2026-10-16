@@ -70,6 +70,12 @@ version/hash exactos, revocacion e historial inmutable con RLS. 65 backend enfoc
 y desarrollo local; nueve tablas previas con conteo/checksum intacto, nuevas vacias
 en desarrollo. Opt-in operativo sigue false; EIPD bloqueada.
 
+Seguimiento CI 5b3f29d: backend 4471 aprobadas, una omitida y un fallo en roundtrip
+por dependencia nueva; corregido orden de reversión/restauración en prueba.
+72 pruebas enfocadas aprobadas; no cambio en migración aplicada ni protecciones.
+Siguiente alcance propuesto y fuentes oficiales consultadas:
+[mvp documental](m3-t1-mvp-alcance-propuesto.md); pendiente decidir documentos.
+
 Pendientes fuera del bloque: revision juridica real, otras politicas/documentos, alcance y evidencia MVP,
 demas rutas M3-T1. La composicion V5 y consulta actuales no promueven el
 historial anterior a cobertura infancia. Confirmacion/activacion EIPD bloqueadas. Migracion para datos reales requiere
