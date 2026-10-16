@@ -1,4 +1,5 @@
 "use client";
+import { EipdDocumentFields, EipdDocumentView } from "./EipdDocumentFields";
 import { useEffect, useRef, useState } from "react";
 import { ApiError } from "@/lib/api/client";
 import type {
@@ -23,6 +24,9 @@ type Props = {
 };
 const empty = { reference: "", version: "", notes: "" };
 function problem(error: unknown) {
+  if (error instanceof ApiError && error.status === 400) return error.message;
+  if (error instanceof ApiError && error.status === 422)
+    return "Revisa los campos del documento: el servidor rechazó su formato. Conservamos el formulario.";
   if (error instanceof ApiError && error.status === 409) {
     const code = (error.detail as { code?: string } | undefined)?.code;
     if (
@@ -43,6 +47,7 @@ export function ChildEipdHistory({ load, create, reviews, review, readOnly }: Pr
   const [selected, setSelected] = useState<ChildResolution | null>(null);
   const [events, setEvents] = useState<ChildReview[]>([]);
   const [draft, setDraft] = useState(empty);
+  const [document, setDocument] = useState<Record<string, unknown>>({});
   const [decision, setDecision] = useState<NegativeDecision>("requiere_cambios");
   const [rationale, setRationale] = useState(""),
     [reference, setReference] = useState("");
@@ -140,6 +145,7 @@ export function ChildEipdHistory({ load, create, reviews, review, readOnly }: Pr
     try {
       if (kind === "resolution") {
         const saved = await create({
+          ...document,
           schema_version: 1,
           document_reference: draft.reference.trim(),
           document_version: draft.version.trim() || null,
@@ -153,6 +159,7 @@ export function ChildEipdHistory({ load, create, reviews, review, readOnly }: Pr
           setSelected(saved);
           setEvents([]);
           setDraft(empty);
+          setDocument({});
           setMessage(
             `Resolución documental ${saved.version} registrada. EIPD permanece bloqueada.`
           );
@@ -231,11 +238,11 @@ export function ChildEipdHistory({ load, create, reviews, review, readOnly }: Pr
             }}
           >
             <fieldset disabled={!editable || busy || !fictitious} className="space-y-3">
-              <legend>Registrar resolución documental parcial</legend>
+              <legend>Preparar documento sucesor EIPD</legend>
               <p>
-                Registra identificación y notas del documento; no declara completitud ni sustituye
-                el análisis EIPD. Se vincula al último documento de infancia guardado; los cambios
-                sin guardar no forman parte de la resolución.
+                Completa el documento y sus análisis. Puedes registrar faltantes sin declarar una
+                EIPD completa ni conceder autorización. Se vincula al último documento de infancia
+                guardado; guarda primero sus cambios en el editor de infancia.
               </p>
               <label className="block">
                 Referencia de la resolución *
@@ -263,6 +270,7 @@ export function ChildEipdHistory({ load, create, reviews, review, readOnly }: Pr
                   onChange={(e) => setDraft((d) => ({ ...d, notes: e.target.value }))}
                 />
               </label>
+              <EipdDocumentFields value={document} onChange={setDocument} />
               <button type="submit">Registrar resolución ficticia</button>
             </fieldset>
           </form>
@@ -280,6 +288,31 @@ export function ChildEipdHistory({ load, create, reviews, review, readOnly }: Pr
           {selected && (
             <>
               <h3 className="font-semibold">Resolución {selected.version} consultada</h3>
+              <EipdDocumentView value={selected.document} />
+              <button
+                type="button"
+                disabled={!editable || busy}
+                onClick={() => {
+                  const {
+                    schema_version: _,
+                    document_reference,
+                    document_version,
+                    notes,
+                    ...fields
+                  } = structuredClone(selected.document);
+                  setDraft({
+                    reference: typeof document_reference === "string" ? document_reference : "",
+                    version: typeof document_version === "string" ? document_version : "",
+                    notes: typeof notes === "string" ? notes : "",
+                  });
+                  setDocument(fields);
+                  setMessage(
+                    "Copia editable preparada. El registro original no cambia; al guardar se crea otra versión."
+                  );
+                }}
+              >
+                Preparar sucesor desde esta resolución
+              </button>
               <dl>
                 <dt>Referencia</dt>
                 <dd>{String(selected.document.document_reference ?? "Sin referencia")}</dd>

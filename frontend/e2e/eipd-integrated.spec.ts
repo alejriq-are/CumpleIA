@@ -31,6 +31,8 @@ test("formulario y cliente reales registran una negativa en API aislada", async 
       import {EipdReviewConsultation} from ${JSON.stringify(path.resolve("components/admin/EipdReviewConsultation.tsx"))};
       import {ChildAdolescentEditor} from ${JSON.stringify(path.resolve("components/licitud/ChildAdolescentEditor.tsx"))};
       import {ChildEipdHistory} from ${JSON.stringify(path.resolve("components/licitud/ChildEipdHistory.tsx"))};
+      import {documentFields} from ${JSON.stringify(path.resolve("lib/licitud/eipd-document.ts"))};
+      window.documentFields=documentFields;
       import {childEipdApi} from ${JSON.stringify(path.resolve("lib/api/child-eipd.ts"))};
       import {childApi} from ${JSON.stringify(path.resolve("lib/api/child-adolescent.ts"))};
       import {eipdReviewApi} from ${JSON.stringify(path.resolve("lib/api/eipd-review.ts"))};
@@ -76,6 +78,35 @@ test("formulario y cliente reales registran una negativa en API aislada", async 
     // HTML shell and API share the isolated server origin; no browser security override.
     await page.goto(api + "/__eipd-isolated-test");
     await page.addScriptTag({ content: await readFile(path.join(directory, "bundle.js"), "utf8") });
+    // Compara la forma editable con el esquema real de Pydantic, no con una copia manual.
+    const schema = JSON.parse(process.env.CUMPLEIA_UI_DOCUMENT_SCHEMA!);
+    const fields = await page.evaluate(() => (window as any).documentFields);
+    function parity(model: any, ui: any, prefix = "") {
+      const properties = { ...model.properties };
+      if (!prefix)
+        for (const key of ["schema_version", "document_reference", "document_version", "notes"])
+          delete properties[key];
+      expect(Object.keys(ui).sort(), prefix).toEqual(Object.keys(properties).sort());
+      for (const [key, raw] of Object.entries(properties)) {
+        const field = ui[key],
+          path = prefix + key;
+        let s: any = raw;
+        if (s.anyOf) s = s.anyOf.find((x: any) => x.type !== "null");
+        if (s.$ref) {
+          expect(Boolean(field.fields), path).toBe(true);
+          parity(schema.$defs[s.$ref.split("/").pop()], field.fields, path + ".");
+        } else if (s.type === "array" && s.items.$ref) {
+          expect(Boolean(field.item), path).toBe(true);
+          parity(schema.$defs[s.items.$ref.split("/").pop()], field.item, path + "[].");
+        } else if (s.type === "array") {
+          expect(field.kind, path).toBe("codes");
+        } else if (s.enum) {
+          expect(field.choices.map((row: any) => row[0]).sort(), path).toEqual([...s.enum].sort());
+        } else if (s.format === "date") expect(field.kind, path).toBe("date");
+        expect(Boolean(field.required), path).toBe((model.required ?? []).includes(key));
+      }
+    }
+    parity(schema, fields);
     for (const [label, value] of [
       ["Organización", process.env.CUMPLEIA_UI_ORG],
       ["Tratamiento", process.env.CUMPLEIA_UI_TREATMENT],
@@ -132,6 +163,32 @@ test("formulario y cliente reales registran una negativa en API aislada", async 
     await page
       .getByLabel("Notas de la resolución", { exact: true })
       .fill("PRUEBA: sucesor Chromium aislado");
+    await page
+      .getByText("Análisis, riesgos, medidas, fuentes y evidencias", { exact: true })
+      .click();
+    await page
+      .getByLabel("Análisis de necesidad", { exact: true })
+      .fill("PRUEBA: necesidad integrada");
+    await page.getByLabel("Necesario para la finalidad", { exact: true }).selectOption("pendiente");
+    await page
+      .getByLabel("Necesario para la finalidad — Fundamento", { exact: true })
+      .fill("PRUEBA: fundamento integrado");
+    await page.getByRole("button", { name: "Añadir riesgos", exact: true }).click();
+    await page.getByLabel("Riesgos 1 — Identificador del riesgo", { exact: true }).fill("R-PRUEBA");
+    await page
+      .getByLabel("Riesgos 1 — Análisis de impacto", { exact: true })
+      .fill("PRUEBA: impacto integrado");
+    await page.getByRole("button", { name: "Añadir medidas", exact: true }).click();
+    await page.getByLabel("Medidas 1 — Riesgos asociados", { exact: true }).fill("R-PRUEBA");
+    await page
+      .getByLabel("Medidas 1 — Análisis de eficacia", { exact: true })
+      .fill("PRUEBA: eficacia integrada");
+    await page
+      .getByRole("button", { name: "Añadir fuentes del documento — fuentes", exact: true })
+      .click();
+    await page
+      .getByLabel("Fuentes del documento — Fuentes 1 — Referencia de la fuente", { exact: true })
+      .fill("PRUEBA: fuente ficticia integrada");
     await page.getByRole("button", { name: "Registrar resolución ficticia", exact: true }).click();
     await expect(page.getByRole("status")).toContainText("Resolución documental 1 registrada");
     await page
@@ -177,6 +234,22 @@ test("formulario y cliente reales registran una negativa en API aislada", async 
     );
     expect(successor.rejected).toBe(422);
     expect(successor.resolution.document.document_reference).toBe("PRUEBA-RES-CHROMIUM-INFANCIA");
+    expect(successor.resolution.document.necessity_analysis).toBe("PRUEBA: necesidad integrada");
+    expect(successor.resolution.document.necessary_for_purpose).toEqual({
+      answer: "pendiente",
+      rationale: "PRUEBA: fundamento integrado",
+    });
+    expect(successor.resolution.document.risks[0]).toMatchObject({
+      risk_id: "R-PRUEBA",
+      impact_analysis: "PRUEBA: impacto integrado",
+    });
+    expect(successor.resolution.document.measures[0]).toMatchObject({
+      risk_ids: ["R-PRUEBA"],
+      effectiveness_analysis: "PRUEBA: eficacia integrada",
+    });
+    expect(successor.resolution.document.official_sources.sources[0].source_reference).toBe(
+      "PRUEBA: fuente ficticia integrada"
+    );
     expect(successor.event.review_context_metadata.child_coverage).toBe("contexto_v4");
     expect(successor.event.document_hash).toBe(successor.resolution.document_hash);
     expect(successor.event.can_confirm).toBe(false);

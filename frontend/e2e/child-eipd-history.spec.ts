@@ -43,6 +43,7 @@ test.beforeAll(async () => {
         }
         const saved={...resolution(demo.rows.length+1),document:body.document};demo.rows.push(saved);
         if(demo.mode==="invalid-post")saved.can_confirm=true;
+        if(demo.mode==="lost-analysis")delete saved.document.necessity_analysis;
         return new Response(JSON.stringify(saved),{status:201});
       }
       if(url.endsWith("/policy"))return new Response(JSON.stringify(demo.policy),{status:200});
@@ -395,4 +396,381 @@ test("respuesta negativa distinta de la solicitada se trata como incierta", asyn
     page.getByRole("button", { name: "Registrar revisión ficticia", exact: true })
   ).toBeDisabled();
   expect(await posts(page)).toHaveLength(1);
+});
+
+async function openDocument(page: import("@playwright/test").Page) {
+  await page.getByText("Análisis, riesgos, medidas, fuentes y evidencias", { exact: true }).click();
+}
+const analyses: Record<string, string> = {
+  report_reference: "Referencia del informe",
+  prepared_by: "Preparado por",
+  purpose_description: "Finalidad del tratamiento",
+  processing_operations: "Operaciones de tratamiento",
+  processing_context: "Contexto del tratamiento",
+  technologies_description: "Tecnologías utilizadas",
+  exceptions_coverage_analysis: "Análisis de excepciones",
+  necessity_analysis: "Análisis de necesidad",
+  proportionality_analysis: "Análisis de proporcionalidad",
+  minimization_analysis: "Análisis de minimización",
+  prior_assessment_analysis: "Análisis de evaluación previa",
+  residual_risk_summary: "Resumen del riesgo residual",
+  residual_risk_rationale: "Fundamento del riesgo residual",
+  limitations_analysis: "Limitaciones del análisis",
+  follow_up_plan: "Plan de seguimiento",
+};
+test("documento completo persiste análisis, relaciones, fuentes, consulta y evidencias sin metadata", async ({
+  page,
+}) => {
+  await mount(page);
+  await enable(page);
+  await openDocument(page);
+  await page
+    .getByLabel("Referencia de la resolución *", { exact: true })
+    .fill("PRUEBA-DOC-COMPLETO");
+  for (const [key, label] of Object.entries(analyses))
+    await page.getByLabel(label, { exact: true }).fill("PRUEBA: " + key);
+  await page.getByLabel("Fecha del documento", { exact: true }).fill("2026-10-16");
+  for (const label of [
+    "Necesario para la finalidad",
+    "Tratamiento proporcionado",
+    "Minimización abordada",
+    "Evaluación previa al tratamiento",
+  ])
+    await page.getByLabel(label, { exact: true }).selectOption("pendiente");
+  await page.getByLabel("Nivel del riesgo residual", { exact: true }).selectOption("sin_resolver");
+  await page
+    .getByLabel("Alcance del documento — Códigos de categorías de datos", { exact: true })
+    .fill("id\nsalud");
+  await page
+    .getByLabel("Alcance del documento — Códigos de titulares", { exact: true })
+    .fill("ninos");
+  await page.getByRole("button", { name: "Añadir riesgos", exact: true }).click();
+  for (const [label, value] of [
+    ["Identificador del riesgo", "R-1"],
+    ["Descripción", "PRUEBA: riesgo"],
+    ["Análisis de impacto", "PRUEBA: impacto"],
+    ["Análisis del riesgo inicial", "PRUEBA: inicial"],
+    ["Análisis del riesgo residual", "PRUEBA: residual"],
+  ])
+    await page.getByLabel("Riesgos 1 — " + label, { exact: true }).fill(value);
+  await page.getByRole("button", { name: "Añadir medidas", exact: true }).click();
+  for (const [label, value] of [
+    ["Identificador de la medida", "M-1"],
+    ["Descripción", "PRUEBA: medida"],
+    ["Análisis de eficacia", "PRUEBA: eficacia"],
+    ["Análisis de implementación", "PRUEBA: implementar"],
+    ["Riesgos asociados", "R-1"],
+  ])
+    await page.getByLabel("Medidas 1 — " + label, { exact: true }).fill(value);
+  await page.getByLabel("Medidas 1 — Medida implementada", { exact: true }).selectOption("no");
+  await page
+    .getByLabel("Fuentes del documento — Estado de identificación", { exact: true })
+    .selectOption("identificado");
+  await page
+    .getByLabel("Fuentes del documento — Fecha de consulta", { exact: true })
+    .fill("2026-10-16");
+  await page
+    .getByLabel("Fuentes del documento — Análisis de aplicabilidad", { exact: true })
+    .fill("PRUEBA: alcance de la fuente");
+  await page
+    .getByRole("button", { name: "Añadir fuentes del documento — fuentes", exact: true })
+    .click();
+  for (const [label, value] of [
+    ["Referencia de la fuente", "PRUEBA-FUENTE-FICTICIA"],
+    ["Versión de publicación", "PRUEBA-v1"],
+    ["Análisis de revisión", "PRUEBA: revisar"],
+  ])
+    await page
+      .getByLabel("Fuentes del documento — Fuentes 1 — " + label, { exact: true })
+      .fill(value);
+  await page
+    .getByLabel("Fuentes del documento — Fuentes 1 — Aplicabilidad", { exact: true })
+    .selectOption("pendiente");
+  await page
+    .getByLabel("Consulta a la autoridad — Estado de consulta", { exact: true })
+    .selectOption("en_curso");
+  for (const label of [
+    "Análisis de consulta",
+    "Referencia de consulta",
+    "Referencia de respuesta",
+    "Análisis de recomendaciones",
+    "Análisis de reevaluación",
+  ])
+    await page
+      .getByLabel("Consulta a la autoridad — " + label, { exact: true })
+      .fill("PRUEBA: " + label);
+  await page
+    .getByLabel("Consulta a la autoridad — Recomendaciones abordadas", { exact: true })
+    .selectOption("no");
+  for (const prefix of [
+    "Riesgos 1 — Evidencias",
+    "Medidas 1 — Evidencias",
+    "Fuentes del documento — Evidencias",
+    "Consulta a la autoridad — Evidencias",
+    "Evidencias",
+  ]) {
+    await page.getByRole("button", { name: "Añadir " + prefix.toLowerCase(), exact: true }).click();
+    await page.getByLabel(prefix + " 1 — Tipo de evidencia", { exact: true }).fill("PRUEBA");
+    await page.getByLabel(prefix + " 1 — Referencia", { exact: true }).fill("PRUEBA-EVIDENCIA");
+    await page.getByLabel(prefix + " 1 — Fecha de obtención", { exact: true }).fill("2026-10-16");
+    await page.getByLabel(prefix + " 1 — Mecanismo", { exact: true }).fill("PRUEBA: mecanismo");
+    await page
+      .getByLabel(prefix + " 1 — Notas", { exact: true })
+      .fill("PRUEBA: evidencia ficticia");
+  }
+  await page.getByRole("button", { name: "Registrar resolución ficticia", exact: true }).click();
+  await expect(page.getByRole("status")).toContainText("Resolución documental 2 registrada");
+  const body = JSON.parse((await posts(page))[0].options.body);
+  const d = body.document;
+  expect(body.data_kind).toBe("ficticios");
+  for (const k of Object.keys(analyses)) expect(d[k]).toBe("PRUEBA: " + k);
+  expect(d.completed_on).toBe("2026-10-16");
+  expect(d.necessary_for_purpose).toEqual({ answer: "pendiente" });
+  expect(d.proportionate_processing).toEqual({ answer: "pendiente" });
+  expect(d.minimization_addressed).toEqual({ answer: "pendiente" });
+  expect(d.performed_before_processing).toEqual({ answer: "pendiente" });
+  expect(d.residual_risk_level).toBe("sin_resolver");
+  expect(d.scope).toEqual({ data_category_codes: ["id", "salud"], data_subject_codes: ["ninos"] });
+  expect(d.risks[0]).toMatchObject({
+    risk_id: "R-1",
+    description: "PRUEBA: riesgo",
+    impact_analysis: "PRUEBA: impacto",
+    initial_assessment_analysis: "PRUEBA: inicial",
+    residual_assessment_analysis: "PRUEBA: residual",
+  });
+  expect(d.measures[0]).toMatchObject({
+    measure_id: "M-1",
+    description: "PRUEBA: medida",
+    effectiveness_analysis: "PRUEBA: eficacia",
+    implementation_analysis: "PRUEBA: implementar",
+    risk_ids: ["R-1"],
+    implemented: { answer: "no" },
+  });
+  expect(d.official_sources).toMatchObject({
+    status: "identificado",
+    checked_on: "2026-10-16",
+    applicability_analysis: "PRUEBA: alcance de la fuente",
+    sources: [
+      {
+        source_reference: "PRUEBA-FUENTE-FICTICIA",
+        publication_version: "PRUEBA-v1",
+        review_analysis: "PRUEBA: revisar",
+        applicability: "pendiente",
+      },
+    ],
+  });
+  expect(d.agency_consultation.status).toBe("en_curso");
+  expect(d.agency_consultation.recommendations_addressed).toEqual({ answer: "no" });
+  for (const obj of [d, d.risks[0], d.measures[0], d.official_sources, d.agency_consultation])
+    expect(obj.evidence).toEqual([
+      {
+        evidence_type: "PRUEBA",
+        reference: "PRUEBA-EVIDENCIA",
+        obtained_on: "2026-10-16",
+        mechanism: "PRUEBA: mecanismo",
+        notes: "PRUEBA: evidencia ficticia",
+      },
+    ]);
+  expect(d.context_binding).toBeUndefined();
+  expect(d.document_hash).toBeUndefined();
+  await page.getByText("Contenido del documento guardado", { exact: true }).click();
+  await expect(page.getByText("PRUEBA: necessity_analysis", { exact: true })).toBeVisible();
+  await expect(
+    page.getByText(
+      "Política de pruebas: fuentes pendientes, aceptación pendiente y activación deshabilitada."
+    )
+  ).toBeVisible();
+});
+test("copia para editar y guardar sucesor preserva documento e identidad históricos", async ({
+  page,
+}) => {
+  await page.evaluate(() => {
+    (window as any).demo.rows[0].document.necessity_analysis = "PRUEBA: necesidad antigua";
+    (window as any).demo.rows[0].document.risks = [
+      { risk_id: "R-antiguo", description: "PRUEBA: conservar" },
+    ];
+  });
+  await mount(page);
+  await enable(page);
+  await select(page);
+  await page
+    .getByRole("button", { name: "Preparar sucesor desde esta resolución", exact: true })
+    .click();
+  await openDocument(page);
+  await expect(page.getByLabel("Análisis de necesidad", { exact: true })).toHaveValue(
+    "PRUEBA: necesidad antigua"
+  );
+  await page.getByLabel("Análisis de necesidad", { exact: true }).fill("PRUEBA: necesidad nueva");
+  await page.getByRole("button", { name: "Registrar resolución ficticia", exact: true }).click();
+  await expect(page.getByRole("status")).toContainText("Resolución documental 2 registrada");
+  const rows = await page.evaluate(() => (window as any).demo.rows);
+  expect(rows[0].document.necessity_analysis).toBe("PRUEBA: necesidad antigua");
+  expect(rows[1].document.necessity_analysis).toBe("PRUEBA: necesidad nueva");
+  expect(rows[1].document.risks).toEqual(rows[0].document.risks);
+  expect(rows[0].id).not.toBe(rows[1].id);
+});
+test("añade y quita filas y limpia secciones sin arrastrar campos eliminados", async ({ page }) => {
+  await mount(page);
+  await enable(page);
+  await openDocument(page);
+  await page.getByLabel("Referencia de la resolución *", { exact: true }).fill("PRUEBA: quitar");
+  await page.getByRole("button", { name: "Añadir riesgos", exact: true }).click();
+  await page.getByLabel("Riesgos 1 — Descripción", { exact: true }).fill("PRUEBA: quitar");
+  await page.getByRole("button", { name: "Quitar riesgos 1", exact: true }).click();
+  await page
+    .getByLabel("Fuentes del documento — Análisis de aplicabilidad", { exact: true })
+    .fill("PRUEBA: quitar");
+  await page.getByRole("button", { name: "Limpiar fuentes del documento", exact: true }).click();
+  await page.getByRole("button", { name: "Registrar resolución ficticia", exact: true }).click();
+  await expect(page.getByRole("status")).toContainText("registrada");
+  expect(JSON.parse((await posts(page))[0].options.body).document).toMatchObject({
+    risks: [],
+    official_sources: null,
+  });
+});
+for (const mode of ["denied", "unknown"])
+  test(`documento completo conserva cambios tras ${mode}`, async ({ page }) => {
+    await mount(page);
+    await enable(page);
+    await openDocument(page);
+    await page.getByLabel("Referencia de la resolución *", { exact: true }).fill("PRUEBA: error");
+    await page
+      .getByLabel("Análisis de necesidad", { exact: true })
+      .fill("PRUEBA: conservar análisis");
+    await page.evaluate((mode) => ((window as any).demo.mode = mode), mode);
+    await page.getByRole("button", { name: "Registrar resolución ficticia", exact: true }).click();
+    await expect(page.getByRole("alert")).toBeVisible();
+    await expect(page.getByLabel("Análisis de necesidad", { exact: true })).toHaveValue(
+      "PRUEBA: conservar análisis"
+    );
+    expect(await posts(page)).toHaveLength(1);
+  });
+test("cliente rechaza metadata anidada, códigos repetidos, fechas y enums inválidos antes de HTTP", async ({
+  page,
+}) => {
+  const results = await page.evaluate(async () => {
+    const { scope, childEipdApi: a } = (window as any).api;
+    const bad = [
+      { risks: [{ context_hash: "f".repeat(64) }] },
+      { measures: [{ implemented: "activar" }] },
+      { official_sources: { checked_on: "2026-02-31" } },
+      { scope: { data_category_codes: ["id", "id"] } },
+      { evidence: [{ reference: "sin tipo" }] },
+    ];
+    return Promise.all(
+      bad.map(async (extra) => {
+        try {
+          await a.create(scope, {
+            schema_version: 1,
+            document_reference: "PRUEBA",
+            document_version: null,
+            notes: null,
+            ...extra,
+          });
+          return null;
+        } catch (e) {
+          return (e as any).status;
+        }
+      })
+    );
+  });
+  expect(results).toEqual([400, 400, 400, 400, 400]);
+  expect(await posts(page)).toHaveLength(0);
+});
+test("respuesta que pierde un análisis no afirma éxito ni permite repetir", async ({ page }) => {
+  await mount(page);
+  await enable(page);
+  await openDocument(page);
+  await page.getByLabel("Referencia de la resolución *", { exact: true }).fill("PRUEBA: perdida");
+  await page.getByLabel("Análisis de necesidad", { exact: true }).fill("PRUEBA: preservar");
+  await page.evaluate(() => ((window as any).demo.mode = "lost-analysis"));
+  await page.getByRole("button", { name: "Registrar resolución ficticia", exact: true }).click();
+  await expect(page.getByRole("alert")).toContainText("Resultado incierto");
+  await expect(
+    page.getByRole("button", { name: "Registrar resolución ficticia", exact: true })
+  ).toBeDisabled();
+});
+
+test("códigos escritos en líneas sucesivas conservan el salto y el alcance", async ({ page }) => {
+  await mount(page);
+  await enable(page);
+  await openDocument(page);
+  await page.getByLabel("Referencia de la resolución *", { exact: true }).fill("PRUEBA: códigos");
+  const codes = page.getByLabel("Alcance del documento — Códigos de categorías de datos", {
+    exact: true,
+  });
+  await codes.fill("id");
+  await codes.press("End");
+  await codes.press("Enter");
+  await codes.pressSequentially("salud");
+  await expect(codes).toHaveValue("id\nsalud");
+  await page.getByRole("button", { name: "Registrar resolución ficticia", exact: true }).click();
+  await expect(page.getByRole("status")).toContainText("registrada");
+  expect(
+    JSON.parse((await posts(page))[0].options.body).document.scope.data_category_codes
+  ).toEqual(["id", "salud"]);
+});
+test("campos completos y copia del sucesor bloqueados para consulta sin edición", async ({
+  page,
+}) => {
+  await mount(page, { readOnly: true });
+  await openDocument(page);
+  await select(page);
+  await expect(page.getByLabel("Análisis de necesidad", { exact: true })).toBeDisabled();
+  await expect(page.getByRole("button", { name: "Añadir riesgos", exact: true })).toBeDisabled();
+  await expect(
+    page.getByRole("button", { name: "Preparar sucesor desde esta resolución", exact: true })
+  ).toBeDisabled();
+  expect(await posts(page)).toHaveLength(0);
+});
+
+test("respuesta fundamentada se conserva y volver a sin declarar retira ambos campos", async ({
+  page,
+}) => {
+  await mount(page);
+  await enable(page);
+  await openDocument(page);
+  await page
+    .getByLabel("Referencia de la resolución *", { exact: true })
+    .fill("PRUEBA: declaración");
+  await page.getByLabel("Necesario para la finalidad", { exact: true }).selectOption("si");
+  await page
+    .getByLabel("Necesario para la finalidad — Fundamento", { exact: true })
+    .fill("PRUEBA: fundamento");
+  await page.getByRole("button", { name: "Registrar resolución ficticia", exact: true }).click();
+  await expect(page.getByRole("status")).toContainText("registrada");
+  expect(JSON.parse((await posts(page))[0].options.body).document.necessary_for_purpose).toEqual({
+    answer: "si",
+    rationale: "PRUEBA: fundamento",
+  });
+  await page
+    .getByRole("button", { name: "Preparar sucesor desde esta resolución", exact: true })
+    .click();
+  await page.getByLabel("Necesario para la finalidad", { exact: true }).selectOption("");
+  await expect(
+    page.getByLabel("Necesario para la finalidad — Fundamento", { exact: true })
+  ).toBeDisabled();
+  await page.getByRole("button", { name: "Registrar resolución ficticia", exact: true }).click();
+  await expect(page.getByRole("status")).toContainText("Resolución documental 3 registrada");
+  expect(JSON.parse((await posts(page))[1].options.body).document.necessary_for_purpose).toBeNull();
+});
+
+test("error de alcance repetido explica revisión y conserva campos sin registrar", async ({
+  page,
+}) => {
+  await mount(page);
+  await enable(page);
+  await openDocument(page);
+  await page
+    .getByLabel("Referencia de la resolución *", { exact: true })
+    .fill("PRUEBA: alcance duplicado");
+  await page
+    .getByLabel("Alcance del documento — Códigos de categorías de datos", { exact: true })
+    .fill("id\nid");
+  await page.getByRole("button", { name: "Registrar resolución ficticia", exact: true }).click();
+  await expect(page.getByRole("alert")).toContainText("Documento no válido");
+  await expect(
+    page.getByLabel("Alcance del documento — Códigos de categorías de datos", { exact: true })
+  ).toHaveValue("id\nid");
+  expect(await posts(page)).toHaveLength(0);
 });

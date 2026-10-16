@@ -1,6 +1,7 @@
 """Chromium -> cliente real -> HTTP/API -> PostgreSQL aislado, solo opt-in local."""
 
 import asyncio
+import json
 import os
 import socket
 from pathlib import Path
@@ -10,6 +11,7 @@ import uvicorn
 from fastapi.responses import HTMLResponse
 from sqlalchemy import text
 
+from app.schemas.licitud import EipdResolutionAssessmentV1
 from scripts.run_eipd_tests import EXPECTED_HEAD, TEST_DATABASE
 from tests import test_api_eipd_negative_review_v3 as cases
 
@@ -62,6 +64,9 @@ async def test_real_client_form_records_isolated_negative_event(
         assert server.started
         env = dict(os.environ)
         env.update(
+            CUMPLEIA_UI_DOCUMENT_SCHEMA=json.dumps(
+                EipdResolutionAssessmentV1.model_json_schema()
+            ),
             CUMPLEIA_UI_API=f"http://127.0.0.1:{port}",
             CUMPLEIA_UI_ORG=str(prepared[3]),
             CUMPLEIA_UI_TREATMENT=str(prepared[0]),

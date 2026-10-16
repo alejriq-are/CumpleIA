@@ -36,20 +36,24 @@ habilita solo su proceso de pruebas en la base aislada fija. No editar `.env`
 operativo ni inferir habilitacion por no definir ENVIRONMENT. Esta autorizacion
 tecnica no habilita EIPD ni acepta datos reales. Panel: MVP en desarrollo.
 
-Interfaz sucesora (16/10): el editor de infancia incorpora creacion de resoluciones
-**parciales** (referencia, version y notas), consulta de versiones y sus revisiones,
-y registro de `requiere_cambios` / `no_continuar` sobre la resolucion seleccionada.
-Solo declaracion ficticia; viewer/expediente no borrador sin escrituras. Cliente
-rechaza identidad/cobertura/politica incompatibles, conserva formularios en rechazos
-y bloquea repeticion tras resultado incierto. La API revalida material y permisos.
-Validacion de este bloque: 91 regresiones de cliente/UI y 19 pruebas nuevas del flujo, tipos y lint
-sin advertencias; recorrido Chromium/API/PostgreSQL aislado aprobado. Sin cambios
-de migracion ni habilitacion del entorno operativo. CI del nuevo commit se verifica
-al publicar; la CI historica citada arriba no lo acredita.
+Interfaz sucesora (16/10): editor completo del contrato documental V1: descripcion
+del tratamiento, alcance, necesidad/proporcionalidad/minimizacion, declaraciones
+con fundamento, riesgos, medidas y sus referencias, riesgo residual, fuentes,
+consulta a la autoridad y evidencias en cada nivel. Se admiten faltantes; tener
+campos completos no acredita validez ni completitud juridica. Identificar una
+fuente en el documento no la verifica ni acepta la politica.
+Puede copiarse una resolucion historica para preparar un sucesor: guardar crea
+otra version vinculada al ultimo material infancia guardado, sin actualizar el
+original. El historial muestra el contenido completo del documento seleccionado.
+Cliente valida forma editable recursivamente, excluye metadata y comprueba que
+la respuesta conserve los campos enviados. Solo datos ficticios y decisiones
+negativas; permiso/material/politica siguen revalidandose en servidor.
+Validacion local de este bloque: 30 pruebas UI/cliente (11 nuevas), tipos/lint y
+formato; recorrido Chromium/API/PostgreSQL aislado aprobado, incluido contraste
+de campos, tipos y enums del editor con Pydantic real. Sin migraciones ni cambios
+de habilitacion operativa. CI del nuevo commit se consulta tras publicar.
 
-Pendientes fuera del bloque: formulario completo de analisis/riesgos/medidas y
-fuentes del documento EIPD sucesor (la UI actual identifica un documento parcial),
-politica juridica con fuentes oficiales verificadas y aceptacion trazable,
+Pendientes fuera del bloque: politica juridica con fuentes oficiales verificadas y aceptacion trazable,
 demas rutas M3-T1. La composicion V5 y consulta actuales no promueven el
 historial anterior a cobertura infancia. Confirmacion/activacion EIPD bloqueadas. Migracion para datos reales requiere
 criterios MVP, contratos/politica revisados y pruebas previas; no se elimina
@@ -531,7 +535,7 @@ previo; contexto V2 no puede degradar esa cobertura. Sin representacion ni V3 pr
 seleccion V1/V2 historica conservada. Previous es documento validado de servidor,
 no version propuesta por cliente. Omision/null siguen responsabilidad del caller.
 
-Ocho casos nuevos; 29 pruebas writer/binding y HTTP V2 historico aprobadas en 3.51 s,
+Ocho casos nuevos; 30 pruebas writer/binding y HTTP V2 historico aprobadas en 3.51 s,
 base fija aislada verificada. Runner incorpora suite. Ruff/Black correctos. Builder
 operativo sigue proporcionando V2: falta dispatch/readiness compatible V3, metadata
 proyectada y contratos API antes de conectar su uso. Sin nuevos eventos, cambio de

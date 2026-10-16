@@ -20,7 +20,7 @@ implementados. M3-T1 sigue EN PROGRESO; solo datos ficticios hasta MVP.
   cambios y elimina diagnostico viejo; doble envio impedido. Viewer/confirmado
   solo lectura; API sigue imponiendo permisos y aislamiento del servidor.
 
-Sucesores con identidad infancia: persistencia implementada y formulario parcial
+Sucesores con identidad infancia: persistencia implementada y editor completo
 descrito abajo. Pendiente integracion de politica con fuentes y aceptacion
 explicitamente verificadas antes de cualquier capacidad positiva. No levantar gates por campos
 completos, por hashes vigentes ni por usar datos ficticios.
@@ -40,17 +40,20 @@ no concede autoridad juridica. Declaracion ficticia requerida; no prueba el
 origen de los datos. Activacion EIPD bloqueada. Migracion nueva validada en base
 aislada y desarrollo local, sin cambiar historia existente.
 
-Interfaz del sucesor (16/10): en el editor se pueden registrar referencias/version
-/notas de una resolucion parcial, listar versiones, consultar sus eventos y registrar
-solo revisiones negativas. Las resoluciones/eventos se conservan inmutables; una
-consulta historica no acredita vigencia. Usa el ultimo documento de infancia
-guardado; los cambios sin guardar no se incorporan. La habilitacion tecnica de
-escrituras ficticias continua siendo opt-in del servidor, no un control de la UI.
-Resultado de escritura incierto: no repetir; consultar historial antes de recargar.
+Interfaz del sucesor (16/10): edicion de todos los campos del documento V1,
+incluidos analisis, declaraciones con fundamento, alcance, riesgos, medidas y
+referencias de riesgos, fuentes, consulta y evidencias. Permite crear desde cero
+o copiar un registro para preparar otra version; no se actualizan documentos
+historicos. La consulta muestra el contenido guardado, sin acreditar vigencia.
+Usa el ultimo documento de infancia guardado, no cambios sin guardar. La
+habilitacion de escrituras ficticias sigue siendo opt-in del servidor.
+Un documento puede tener faltantes; el formulario completo no constituye una
+EIPD aprobada. Fuentes identificadas en el documento son declaraciones, no
+verificacion oficial ni aceptacion de politica. Resultado incierto: no repetir;
+consultar historial antes de recargar.
 
-Pendientes: edicion completa del documento sucesor (analisis, riesgos, medidas,
-fuentes y evidencias), validacion/aceptacion juridica de politica antes de considerar
-cualquier habilitacion futura. No presentar la resolucion parcial como EIPD completa.
+Pendientes: validacion/aceptacion juridica de politica y criterios de salida MVP
+antes de considerar cualquier habilitacion futura. Activacion EIPD bloqueada.
 
 Salida a MVP: la restriccion SQL `data_kind=ficticios` es intencional. Introducir
 datos reales requiere una nueva migracion revisada, contratos separados o

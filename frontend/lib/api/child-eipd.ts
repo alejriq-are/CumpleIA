@@ -1,6 +1,8 @@
+import { validDocument, documentMatches } from "@/lib/licitud/eipd-document";
 import { apiFetch, ApiError } from "./client";
 import type { ChildScope } from "./child-adolescent";
 export type ResolutionDraft = {
+  [key: string]: unknown;
   schema_version: 1;
   document_reference: string | null;
   document_version: string | null;
@@ -149,7 +151,7 @@ export function validateResolution(
       value.document &&
       typeof value.document === "object" &&
       !Array.isArray(value.document) &&
-      value.document.schema_version === 1 &&
+      validDocument(value.document) &&
       c &&
       c.context_schema_version === 4 &&
       c.child_adolescent_assessment &&
@@ -220,14 +222,15 @@ export const childEipdApi = {
     if (
       !draft ||
       draft.schema_version !== 1 ||
-      Object.keys(draft).some(
-        (k) => !["schema_version", "document_reference", "document_version", "notes"].includes(k)
-      ) ||
+      !validDocument(draft) ||
       typeof draft.document_reference !== "string" ||
       !draft.document_reference.trim() ||
       [draft.document_version, draft.notes].some((v) => v != null && typeof v !== "string")
     )
-      throw new ApiError(400, "Referencia documental requerida");
+      throw new ApiError(
+        400,
+        "Documento no válido: revisa la referencia, fechas, códigos, respuestas y evidencias."
+      );
     const saved = validateResolution(
       await apiFetch<ChildResolution>(path(scope) + "/resolutions", {
         ...scope,
@@ -237,11 +240,7 @@ export const childEipdApi = {
       }),
       scope
     );
-    valid(
-      saved.document.document_reference === draft.document_reference &&
-        (saved.document.document_version ?? null) === (draft.document_version ?? null) &&
-        (saved.document.notes ?? null) === (draft.notes ?? null)
-    );
+    valid(documentMatches(saved.document, draft));
     return saved;
   },
   reviews: async (scope: ChildScope, resolution: ChildResolution) => {

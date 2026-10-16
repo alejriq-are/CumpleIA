@@ -18,11 +18,14 @@ identifica el HEAD exacto de la tarea. Una CI anterior no prueba un commit nuevo
 
 ## Bloque funcional vigente — producto
 
-16/10: formulario parcial de sucesores de infancia integrado en el editor:
-referencia/version/notas, consulta de resoluciones y sus eventos, revisiones
-negativas con datos ficticios. EIPD sigue bloqueada; no cambiar el opt-in del
-entorno operativo. Siguiente bloque candidato: completar edicion del documento
-EIPD sucesor (analisis/riesgos/medidas/fuentes), con la misma politica negativa.
+16/10: editor completo del documento sucesor EIPD: analisis, declaraciones con
+fundamento, alcance, riesgos/medidas relacionados, fuentes, consulta y evidencias.
+Permite copiar una resolucion guardada a un borrador; guardar crea otra version,
+sin modificar el original. Historial consultable con contenido completo.
+EIPD sigue bloqueada; no cambiar el opt-in del entorno operativo. Pendientes:
+verificacion/aceptacion juridica de politica y criterios de salida a MVP.
+Validacion: 30 pruebas UI/cliente, tipos/lint/formato y recorrido real aislado;
+la integrada compara campos/estructura con el esquema Pydantic vigente.
 Estado y limites: docs/project/status.md (solo entrada operativa) y
 m3-t1-infancia-adolescencia.md. Verificar HEAD/CI actual antes de transferir.
 
