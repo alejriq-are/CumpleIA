@@ -96,3 +96,52 @@ Validacion V2: 20 backend/guardas enfocadas (siete casos V2 nuevos), 13 UI/clien
 integrada real con HTML descargado, marca/escenario/leyenda contrastados. CI del
 previo b229fb3 aprobada; comprobar candidato nuevo por HEAD exacto. Docker/WSL
 restablecido por el usuario; no repetir pruebas amplias sin causa.
+
+
+## Piloto poblado — recorrido local reproducible
+
+Desde backend: `../.venv/bin/python -m scripts.run_populated_pilot`.
+No admite argumentos ni destinos externos. Primero verifica DB fija/head,
+registro de politica vacio y runtime app_user. Luego fixtures locales conocidas
+pueblan el escenario [FICTICIA] Comercial Piloto Andes SpA. Dos RAT y LIA borrador
+se crean por API (clientes/trabajadores); la fixture infancia declara menores
+antes de crear la evaluacion. No se provisionan personas reales ni identidades
+operativas. Todos los textos/referencias propios son ficticios/simulados.
+
+Historia: resolucion inicial y sucesora tras cambio de material, revision negativa
+por cada una, evento documental requiere_cambios por cada una, otorgamiento y
+revocacion de facultad: 2 registros en cada uno de cuatro historiales. El sucesor
+no hereda aceptacion; el anterior se conserva obsoleto. Tras revocar, nuevas
+aceptaciones rechazan 403 sin borrar eventos. Acta V2 conserva marca visible,
+revision pendiente/no realizada y mvp_ready/allows_real_data/can_confirm false.
+La simulacion del acta no se persiste como revision juridica real.
+
+La variante interna poblada exige tenant de prueba fijo, nombre simulado,
+publicacion exacta de fixture y payload/hash de politica negativa del servidor,
+selector unico, head esperado y cuatro historiales ficticios del tenant. Rechaza
+publicacion ajena/politica distinta antes de copiar. El ejecutor normal de
+restauracion sigue exigiendo registro vacio. La declaracion data_kind o el nombre
+por si solos no prueban procedencia: este ensayo acredita fixtures controladas.
+
+[Resultado poblado](pilot-evidence/populated-history-restore-20261016.json): 39
+tablas y ocho registros historicos restaurados. Conteos/checksums y politicas
+coinciden; source_unchanged y temporary_database_removed true. Se contrastan por
+API RAT, evaluaciones, resoluciones/revisiones/facultades/eventos y documentos
+exactos del dossier, incluidos hashes. app_user conserva RLS y carece de
+UPDATE/DELETE/TRUNCATE en cuatro historiales; otro tenant ve cero filas. En la
+copia, confirmacion EIPD sigue 409, facultad revocada 403 y tenant ajeno 403/404.
+Autenticacion de pruebas mediante override de perfil/claim sintetico: no acredita
+login/JWT externo ni disponibilidad del sistema de autenticacion.
+
+Validacion: 41 casos dirigidos de aceptacion, preparacion, guardas y recorrido
+API aprobados; ensayo local poblado aprobado adicionalmente. Se corrigio una
+incompatibilidad del nuevo test asincrono de guardas con el loop de pytest;
+regresion combinada aprobada tras correccion. Sin cambios frontend, no se repite
+Chromium. CI corre el recorrido API sin restauracion Docker; esta ultima requiere
+el lanzador fijo local y no debe contabilizarse como cubierta por CI.
+
+Fixtures y nombre de organizacion se retiran/restauran al terminar; el reporte
+solo guarda metadatos, no dump, credenciales ni contenido personal. Copia temporal
+con marca propia retirada, ninguna base preexistente sobrescrita. Sigue siendo
+mismo servidor: no cierra backup externo/cifrado, recuperacion ante desastre,
+RPO/RTO ni validacion juridica/operativa real. No hay migracion, merge o despliegue.

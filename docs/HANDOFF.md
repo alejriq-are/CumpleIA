@@ -29,7 +29,15 @@ ni cierra gates. V1 e historiales conservados, datos reales y EIPD bloqueados.
 Docker/WSL restablecido; CI previa b229fb3 aprobada. Verificar nuevo HEAD/CI.
 [Contrato y evidencia](project/m3-t1-piloto-preparacion.md).
 Pendientes reales: empresa/actas/facultades, revision humana y controles de piloto.
-Restauracion local previa de 39 tablas con historiales vacios no certifica produccion.
+Piloto poblado local validado: clientes/trabajadores con LIA borrador e infancia
+con dos resoluciones, dos revisiones negativas, dos eventos documentales y
+otorgamiento/revocacion de facultades (ocho registros historicos). Restauracion
+de 39 tablas conserva conteos/checksums/politicas y lecturas API como app_user;
+aislamiento, facultad revocada y EIPD bloqueada comprobados en la copia.
+Ejecutor fijo: backend `python -m scripts.run_populated_pilot`; limpia solo fixtures
+y copia propias. Evidencia: project/pilot-evidence/populated-history-restore-20261016.json.
+41 pruebas dirigidas y recorrido local poblado aprobados; CI del previo 8a8903f
+aprobada. Comprobar candidato por HEAD. No certifica produccion ni backup externo.
 Sin migraciones, provision de identidades, merge o despliegue.
 
 ## Proxima transferencia

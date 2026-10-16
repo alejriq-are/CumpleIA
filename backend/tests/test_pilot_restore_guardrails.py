@@ -3,6 +3,8 @@
 import unittest
 from unittest.mock import patch
 
+import pytest
+
 from scripts import check_pilot_restore as restore
 
 
@@ -32,3 +34,24 @@ class RestoreGuards(unittest.TestCase):
             with self.assertRaisesRegex(RuntimeError, "Docker local no disponible"):
                 restore.run()
             settings.assert_not_called()
+
+
+@pytest.mark.asyncio(loop_scope="session")
+async def test_foreign_tenant_rejected_before_database():
+    with pytest.raises(RuntimeError, match="Fixture ajena"):
+        await restore.verify_populated_fixture(
+            {}, {"organization_id": "foreign", "publication_id": "foreign"}
+        )
+
+
+@pytest.mark.asyncio(loop_scope="session")
+async def test_extra_field_rejected_before_database():
+    with pytest.raises(RuntimeError, match="Fixture ajena"):
+        await restore.verify_populated_fixture(
+            {},
+            {
+                "organization_id": "a0000000-0000-0000-0000-000000000001",
+                "publication_id": "foreign",
+                "force": True,
+            },
+        )

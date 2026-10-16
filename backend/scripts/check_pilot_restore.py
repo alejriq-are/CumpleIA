@@ -91,11 +91,104 @@ def docker(command, env, stdin=None, stdout=None):
         raise RuntimeError("Herramienta PostgreSQL no completo el ensayo")
 
 
-def run():
+async def verify_populated_fixture(env, fixture):
+    """Solo la fixture conocida de piloto en la base fija; no relaja modo vacio."""
+    from sqlalchemy.ext.asyncio import create_async_engine
+
+    from app.services.eipd_policy import (
+        build_eipd_policy_hash_v1,
+        resolve_eipd_gate_policy_v1,
+    )
+    from scripts.run_eipd_tests import EXPECTED_HEAD
+
+    if (
+        set(fixture) != {"organization_id", "publication_id"}
+        or str(fixture["organization_id"]) != "a0000000-0000-0000-0000-000000000001"
+    ):
+        raise RuntimeError("Fixture ajena no admitida")
+
+    def require(condition):
+        if not condition:
+            raise RuntimeError("Fixture poblada no corresponde al piloto aislado")
+
+    admin = create_async_engine(env["DATABASE_URL"], echo=False, hide_parameters=True)
+    runtime = create_async_engine(
+        env["APP_DATABASE_URL"], echo=False, hide_parameters=True
+    )
+    try:
+        async with admin.connect() as db:
+            require(await db.scalar(text("SELECT current_database()")) == TEST_DATABASE)
+            require(
+                await db.scalar(text("SELECT version_num FROM alembic_version"))
+                == EXPECTED_HEAD
+            )
+            require(
+                await db.scalar(text("SELECT count(*) FROM eipd_policy_publications"))
+                == 1
+            )
+            require(
+                await db.scalar(text("SELECT count(*) FROM eipd_policy_selections"))
+                == 1
+            )
+            require(
+                await db.scalar(text("SELECT count(*) FROM eipd_policy_selector")) == 1
+            )
+            publication = (
+                await db.execute(
+                    text("SELECT id,policy_hash,payload FROM eipd_policy_publications")
+                )
+            ).one()
+            policy = resolve_eipd_gate_policy_v1()
+            require(policy.activation == "deshabilitada")
+            require(str(publication.id) == str(fixture["publication_id"]))
+            require(publication.policy_hash == build_eipd_policy_hash_v1(policy))
+            require(publication.payload == policy.model_dump(mode="json"))
+            require(
+                await db.scalar(text("SELECT publication_id FROM eipd_policy_selector"))
+                == publication.id
+            )
+            require(
+                await db.scalar(
+                    text("SELECT name FROM organizations WHERE id=:id"),
+                    {"id": fixture["organization_id"]},
+                )
+                == "[FICTICIA] Comercial Piloto Andes SpA"
+            )
+            for table in HISTORY_TABLES:
+                require(
+                    await db.scalar(
+                        text(
+                            "SELECT count(*) FROM "
+                            + table
+                            + " WHERE data_kind<>'ficticios' OR organization_id<>:id"
+                        ),
+                        {"id": fixture["organization_id"]},
+                    )
+                    == 0
+                )
+                require(await db.scalar(text("SELECT count(*) FROM " + table)) > 0)
+        async with runtime.connect() as db:
+            role = (
+                await db.execute(
+                    text(
+                        "SELECT current_database(),current_user,rolbypassrls,rolsuper FROM pg_roles WHERE rolname=current_user"
+                    )
+                )
+            ).one()
+            require(tuple(role) == (TEST_DATABASE, "app_user", False, False))
+    finally:
+        await admin.dispose()
+        await runtime.dispose()
+
+
+def run(*, populated_fixture=None, verify_restored=None):
     if shutil.which("docker") is None:
         raise RuntimeError("Docker local no disponible")
     env = build_environment(get_settings(), os.environ)
-    asyncio.run(verify_destination(env))
+    if populated_fixture is None:
+        asyncio.run(verify_destination(env))
+    else:
+        asyncio.run(verify_populated_fixture(env, populated_fixture))
     source = make_url(env["DATABASE_URL"]).set(drivername="postgresql")
     runtime = make_url(env["APP_DATABASE_URL"]).set(drivername="postgresql")
     if (
@@ -210,6 +303,13 @@ def run():
                                     ),
                                     {"t": table, "op": operation},
                                 )
+                    if verify_restored is not None:
+                        verify_restored(
+                            runtime.set(
+                                drivername="postgresql+asyncpg",
+                                database=RESTORE_DATABASE,
+                            )
+                        )
                     assert snapshot(src) == before, "Origen cambio durante ensayo"
                     fingerprint = hashlib.sha256(
                         json.dumps(before, sort_keys=True, default=str).encode()
@@ -229,6 +329,8 @@ def run():
                         "elapsed_seconds": round(time.monotonic() - started, 2),
                         "result": "restauracion_local_aislada_coincidente",
                         "source_unchanged": True,
+                        "populated_fixture_verified": populated_fixture is not None,
+                        "restored_api_verified": verify_restored is not None,
                         "proves_production_restore": False,
                         "mvp_ready": False,
                         "allows_real_data": False,

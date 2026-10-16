@@ -1,3 +1,17 @@
+## Bloque vigente 16/10 — piloto ficticio con historial poblado
+
+Recorrido local fijo aprobado: RAT/licitud-LIA en borrador para clientes y
+trabajadores, infancia con dos resoluciones, dos revisiones negativas, dos
+eventos documentales y grant/revocacion (ocho registros). Acta V2 marcada,
+revision juridica pendiente, datos reales/EIPD bloqueados. Restauracion PostgreSQL
+real de 39 tablas: conteos/checksums/politicas coinciden, lectura API como app_user,
+aislamiento entre organizaciones y restricciones conservadas; origen intacto,
+copia retirada y fixtures limpiadas. No cambia producto, migraciones ni entorno.
+41 pruebas enfocadas aprobadas y ensayo poblado local aprobado. CI previa 8a8903f
+success; CI nueva se verifica por HEAD. [Contrato y limites](m3-t1-piloto-preparacion.md#piloto-poblado--recorrido-local-reproducible).
+Pendiente: organizacion/evidencia autenticas, revision humana y validacion
+operativa externa (backup cifrado, restauracion fuera del servidor, RPO/RTO).
+
 ## Estado operativo M3-T1 — sucesores EIPD con infancia
 
 Rama: `feature/m3-t1-licitud-persistencia`. Base funcional publicada: `1b158cb`; formato: `507aa74`.
