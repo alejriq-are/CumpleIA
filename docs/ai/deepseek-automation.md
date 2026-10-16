@@ -1,7 +1,7 @@
 # Modalidad recomendada: lanzador local + API Deepseek
 
-Estado: implementado y probado con transporte simulado. Sin llamadas pagadas,
-sin clave configurada por Codex y sin validacion real de credenciales/servicio.
+Estado: implementado; piloto DS-001 con una generacion API real, credencial y
+saldo verificados. Retorno corregido/validado localmente: docs/ai/pilot-results.md.
 No necesita que ChatGPT tenga cuota disponible para preparar o recibir tareas.
 La revision/aceptacion del parche sigue pendiente del responsable con herramientas.
 
@@ -34,8 +34,8 @@ revision ni amplifica permisos de Deepseek.
 
 ## Presupuesto y requisitos pendientes
 
-La API cobra consumo desde saldo recargado; falta la decision del usuario sobre
-presupuesto y la configuracion privada de la cuenta/clave. No se solicitan claves
+La API cobra consumo desde saldo disponible. El usuario autorizo una prueba;
+falta definir presupuesto para nuevas tareas/lotes. Clave configurada privadamente. No se solicitan claves
 por chat. El modo por defecto no gasta. No se promete un limite monetario estricto:
 4096 tokens y un paquete acotado limitan volumen; costo real depende de tarifas y
 uso devuelto. No hay tope mensual automatico en esta version ni recarga automatica.
@@ -65,5 +65,9 @@ Un parche invalido tambien puede consumir; expense.json se guarda antes de
 validar el contenido. Una sola generacion, sin repeticion automatica.
 Fuente saldo: https://api-docs.deepseek.com/api/get-user-balance/
 
-Bloqueo pendiente: configurar privadamente CUMPLEIA_DEEPSEEK_HANDOFF_KEY. No
-pegar la clave en chats/capturas; mantenerla separada de las claves del producto.
+Clave verificada. En Windows se configura en PowerShell (no Bash); la variable
+User no pasa a WSL por si sola: debe heredarse privadamente mediante WSLENV.
+No pegar la clave en chats/capturas; mantenerla separada de las claves del producto.
+El fallo inicial HTTP401 se resolvio corrigiendo la configuracion, sin generacion.
+DS-001 ya ejecutado: no reenviarlo. Si un diff es corrupto, result.json registra
+rechazo y gasto; el ejecutor revisa, sin aplicar ni repetir automaticamente.

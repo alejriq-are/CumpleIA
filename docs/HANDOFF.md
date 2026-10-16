@@ -21,7 +21,8 @@ identifica el HEAD exacto de la tarea. Una CI anterior no prueba un commit nuevo
 Piloto DS-001: ampliar prueba de bloqueo del editor durante una respuesta
 pendiente. Solo frontend/e2e/child-adolescent-editor.spec.ts editable.
 Contrato: docs/ai/tasks/DS-001.json. Contexto: ese test y su componente.
-Estado: listo para emitir; ejecucion real en Deepseek pendiente de respuesta.
+Estado: piloto API ejecutado; retorno corregido localmente y checks aprobados.
+Ver docs/ai/pilot-results.md. DS-001 terminado; no reenviarlo como tarea pendiente.
 
 Desde raiz y checkout limpio:
 
@@ -29,9 +30,10 @@ Desde raiz y checkout limpio:
     python3 scripts/handoff.py packet --task docs/ai/tasks/DS-001.json --remote > /tmp/CumpleIA-DS-001.json
 
 Modalidad recomendada por preferencia del usuario: lanzador local + API,
-`python3 scripts/deepseek_run.py DS-001`. Hoy prepara sin gasto; `--send` requiere
-decision de presupuesto y clave dedicada configurada privadamente. Ver
-docs/ai/deepseek-automation.md. No hubo llamada pagada ni prueba real de Deepseek.
+`python3 scripts/deepseek_run.py ID`. Por defecto prepara sin gasto. Clave dedicada
+y servicio verificados en DS-001; una generacion pagada. Nuevas tareas requieren
+contrato y autorizacion de gasto; no hay lote mensual autorizado. Ver
+docs/ai/deepseek-automation.md.
 
 Fallback manual: copiar el JSON completo a Deepseek y pedir diff unificado + reporte, sin aplicar.
 Al volver, guardar el diff fuera del checkout y comprobarlo usando el HEAD del

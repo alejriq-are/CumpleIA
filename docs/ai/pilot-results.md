@@ -18,7 +18,7 @@
 | Base funcional 39dfad5 y CI 38819932076 success | CI_verificada | Codex | Git/GitHub Actions comprobados en tarea anterior; docs/HANDOFF.md | 2026-10-15 |
 | 10 pruebas del empaquetador/validador aprobadas | ejecutado_localmente | Codex | python3 -m unittest discover -s scripts/tests -v; scripts/tests/test_handoff.py | 2026-10-15 |
 | Parche de ensayo queda sin aplicar | ejecutado_localmente | Codex | test_check_does_not_apply_or_validate_tests verifica bytes intactos | 2026-10-15 |
-| Deepseek implemento DS-001 / pruebas del producto aprobadas | pendiente | Nadie | Falta intercambio real y retorno | — |
+| Retorno API DS-001 y validacion local | ejecutado_localmente | Deepseek propone; Codex corrige/valida | Resultado real detallado abajo | 2026-10-15 |
 
 Ajustes incorporados al ensayo: preservar bytes exactos del archivo al calcular
 hash (sin strip), bloquear cambios de modo/symlinks/renombres, exigir checkout
@@ -34,8 +34,8 @@ corre checks dirigidos del contrato. No fingir un ensayo independiente con otra
 instancia de ChatGPT. Si hay un fallo, devolver causa y evidencia minima; repetir
 solo checks afectados. Ajustar contexto/presupuesto/criterios segun ese resultado.
 
-Resultado externo, metricas de consumo, reintentos y ajustes posteriores:
-pendientes de la respuesta real. Hasta entonces el ADR permanece en piloto.
+Resultado externo y ajustes: ver ejecucion real siguiente. El flujo sigue en piloto;
+una tarea no acredita autonomia ni ahorro total de ChatGPT.
 
 ## Extension para API local
 
@@ -43,4 +43,40 @@ pendientes de la respuesta real. Hasta entonces el ADR permanece en piloto.
 clave ficticia, preparacion sin leer clave ni enviar, sin segunda llamada al
 reusar salida, rechazo de pruebas inventadas y base obsoleta, codigo intacto y
 sin clave en logs. Fecha 2026-10-15; ejecutor Codex; metodo unittest en scripts/tests.
-No hubo llamada API pagada. Faltan presupuesto/clave privados y respuesta real.
+Esta extension fue simulada. La llamada real posterior se registra por separado.
+
+## Ejecucion real DS-001 — 2026-10-15
+
+Base enviada: 69e2041b4fa81eb9eecc858ac2dba3acde57f014. Una generacion
+API deepseek-flash, pensamiento deshabilitado, sin reintento. Clave dedicada
+verificada; saldo API disponible USD4.70 y CNY5.39. El intento previo fallo en
+consulta de saldo HTTP401 antes de enviar contenido; la nueva salida se uso solo
+tras confirmar ese fallo y corregir la credencial.
+
+Uso del proveedor: 7878 tokens entrada, 996 salida, 8874 total, 0 cache.
+Estimacion por tarifas de referencia: USD0.0017793–0.0035586; no es factura.
+Delta inmediato: USD0.00 y CNY0.00. Precision/contabilizacion del saldo no permite
+atribuir un cargo exacto. No interpretar delta cero como prueba gratuita.
+Evidencia local fuera de Git: /tmp/cumpleia-deepseek/DS-001-69e2041b4fa8-corrected-key/
+(response.json, expense.json, balance-before.json, balance-after.json, candidate.patch).
+
+Retorno: ID/HEAD y archivo correctos; declaro todos los checks no_ejecutado.
+No aceptado directamente: diff corrupto (conteo de hunk/contexto), y duplico
+la prueba en lugar de ampliarla. Codex no aplico ese diff: adapto sus assertions
+al test existente, agrego conteo PATCH despues de liberar y valido localmente.
+Sin segunda generacion ni cambios al componente/producto. La aportacion del
+modelo y la correccion humana/Codex quedan diferenciadas.
+
+Validacion: 10 pruebas Chromium del editor y 20 unitarias del protocolo/lanzador
+aprobadas; type-check, ESLint, Prettier, Ruff y Black aprobados. Datos ficticios;
+EIPD bloqueada. No se repitio suite backend porque no cambia producto/backend.
+
+Ajustes: prompt exige ampliar test existente y diff con contexto literal/conteos;
+parche corrupto conserva gasto y genera result.json con rechazo explicito,
+cubierto con regresion simulada. No se normalizan/aplican diffs automaticamente.
+
+Conclusion: acceso API, transferencia, medicion y validacion funcionan; retorno
+requiere revision y reparacion local. No habilitar aplicacion/publicacion desatendida.
+Falta una segunda tarea independiente para validar los ajustes y definir presupuesto
+antes de lotes. No hay comparacion controlada con ChatGPT solo: no afirmar ahorro
+neto ni extrapolar costo por tarea desde esta muestra.

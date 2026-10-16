@@ -113,6 +113,28 @@ class LauncherTests(unittest.TestCase):
                     lambda *a: self.fail("Segunda API"),
                 )
 
+    def test_corrupt_patch_keeps_expense_and_explicit_failure(self):
+        self.result["patch"] = (
+            "--- a/a.txt\n+++ b/a.txt\n@@ -1,99 +1,99 @@\n-PRUEBA\n+PRUEBA NUEVA\n"
+        )
+        with patch.dict(
+            m.os.environ, {"CUMPLEIA_DEEPSEEK_HANDOFF_KEY": "PRUEBA-CLAVE-FICTICIA"}
+        ):
+            with self.assertRaisesRegex(ValueError, "Diff no aplicable o corrupto"):
+                m.run_task(
+                    self.root,
+                    self.bundle,
+                    self.output,
+                    True,
+                    self.transport,
+                    self.balance,
+                )
+        result = json.loads((self.output / "result.json").read_text())
+        self.assertEqual(result["mode"], "parche_rechazado")
+        self.assertEqual(result["requests_sent"], 1)
+        self.assertTrue((self.output / "expense.json").exists())
+        self.assertEqual((self.root / "a.txt").read_text(), "PRUEBA\n")
+
     def test_fabricated_execution_rejected(self):
         self.result["checks"] = [dict(status="passed")]
         with patch.dict(

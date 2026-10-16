@@ -180,6 +180,9 @@ test("bloquea doble envio mientras espera", async ({ page }) => {
   });
   await page.getByRole("button", { name: "Guardar documento", exact: true }).click();
   await expect(page.getByRole("button", { name: "Guardar documento", exact: true })).toBeDisabled();
+  await expect(page.getByLabel("Notas", { exact: true })).toBeDisabled();
+  await expect(page.getByRole("checkbox", { name: "Niños y niñas", exact: true })).toBeDisabled();
+  await expect(page.getByRole("button", { name: "Retirar documento del borrador" })).toBeDisabled();
   expect(
     await page.evaluate(
       () => (window as any).demo.calls.filter((c: any) => c.options.method === "PATCH").length
@@ -187,6 +190,14 @@ test("bloquea doble envio mientras espera", async ({ page }) => {
   ).toBe(1);
   await page.evaluate(() => (window as any).demo.release());
   await expect(page.getByRole("status")).toHaveText("Documento guardado.");
+  await expect(page.getByLabel("Notas", { exact: true })).toBeEnabled();
+  await expect(page.getByRole("checkbox", { name: "Niños y niñas", exact: true })).toBeEnabled();
+  await expect(page.getByRole("button", { name: "Retirar documento del borrador" })).toBeEnabled();
+  expect(
+    await page.evaluate(
+      () => (window as any).demo.calls.filter((c: any) => c.options.method === "PATCH").length
+    )
+  ).toBe(1);
 });
 test("cliente rechaza autoridad positiva y cobertura incoherente", async ({ page }) => {
   for (const variant of ["authority", "metadata", "coverage", "hash", "gate"]) {
