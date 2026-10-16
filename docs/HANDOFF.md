@@ -18,25 +18,17 @@ identifica el HEAD exacto de la tarea. Una CI anterior no prueba un commit nuevo
 
 ## Bloque funcional vigente — producto
 
-16/10: aceptacion documental por organizacion implementada para resoluciones
-sucesoras EIPD con infancia. Owner/admin registra facultad explicita por expediente;
-miembro owner/admin/editor facultado registra acepta/rechaza/requiere cambios sobre
-version y hashes exactos. Historial inmutable, revocacion y conflictos serializados.
-No es aceptacion global de politica ni confirmacion/activacion EIPD.
-Validacion: 65 backend enfocadas, 41 UI/cliente, tipos/lint/formato y recorrido
-real Chromium/API/PostgreSQL. Migracion d16a3b7c8e52 aplicada a base aislada y local:
-nueve tablas previas conservan conteos/checksums; opt-in operativo sigue false.
-CI de 5b3f29d: backend 4471 aprobadas/1 omitida/1 fallo en prueba de reversión.
-Corregido orden de migraciones en prueba, sin modificar esquema ni protecciones;
-72 pruebas dirigidas aprobadas. CI del corrector debe consultarse por HEAD.
-Siguiente bloque pendiente de concretar documentos/alcance MVP; propuesta:
-[expediente y evidencia oficial](project/m3-t1-mvp-alcance-propuesto.md).
-Contrato, recorrido y pendientes: [aceptacion por organizacion](project/m3-t1-aceptacion-organizacion.md).
-El [modelo juridico V2](project/m3-t1-politica-juridica-mvp-v2.md) queda como contrato
-base versionado, sin alterar su checksum ni afirmar aceptacion real.
-Pendientes: verificacion humana de fuentes y facultades reales, adopcion de otras
-politicas/documentos de M3-T1, gates MVP. Solo datos ficticios; politica tecnica V1
-intacta. Verificar HEAD y CI exactos antes de transferir; CI anterior no basta.
+16/10: expediente documental MVP confirmado e implementado: consulta y descarga
+JSON de RAT asociado, evaluacion de licitud/LIA y EIPD disponible; versiones,
+hashes, eventos ficticios solo sobre EIPD exacta, fuentes oficiales consultadas y
+gates MVP. G1 alcance definido; restantes pendientes/bloqueados. No acta real,
+verificacion de facultades reales ni liberacion. RAT es snapshot asociado, no
+inventario completo/atestacion de actualidad. Consulta solo development/test.
+78 backend dirigidas, ocho nuevas UI/cliente y una integrada real aprobadas;
+tipos/lint/formato correctos. No migracion ni cambio de opt-in/politica global.
+Aceptacion organizacion previa permanece ligada solo al sucesor infancia.
+[Contrato operativo y pendientes](project/m3-t1-mvp-alcance-propuesto.md).
+EIPD bloqueada; datos ficticios; sin merge/despliegue. Consultar CI del HEAD exacto.
 
 ## Proxima transferencia
 

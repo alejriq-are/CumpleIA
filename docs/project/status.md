@@ -70,11 +70,13 @@ version/hash exactos, revocacion e historial inmutable con RLS. 65 backend enfoc
 y desarrollo local; nueve tablas previas con conteo/checksum intacto, nuevas vacias
 en desarrollo. Opt-in operativo sigue false; EIPD bloqueada.
 
-Seguimiento CI 5b3f29d: backend 4471 aprobadas, una omitida y un fallo en roundtrip
-por dependencia nueva; corregido orden de reversión/restauración en prueba.
-72 pruebas enfocadas aprobadas; no cambio en migración aplicada ni protecciones.
-Siguiente alcance propuesto y fuentes oficiales consultadas:
-[mvp documental](m3-t1-mvp-alcance-propuesto.md); pendiente decidir documentos.
+Expediente MVP documental (16/10): alcance confirmado por usuario e implementado
+como consulta/descarga de RAT asociado, evaluacion de licitud/LIA y EIPD existente.
+Versiones y hashes, fuentes oficiales consultadas con checksum DO, eventos exactos
+EIPD y gates orientativos. Sin acta real/cierre juridico ni liberacion; G1 definido,
+G2-G5 pendientes, G6/G7 bloqueados. Sin migracion/cambio de politica u opt-in.
+78 backend dirigidas, ocho nuevas UI y una integrada real aprobadas.
+[Contrato y recorrido](m3-t1-mvp-alcance-propuesto.md). Verificar CI por HEAD.
 
 Pendientes fuera del bloque: revision juridica real, otras politicas/documentos, alcance y evidencia MVP,
 demas rutas M3-T1. La composicion V5 y consulta actuales no promueven el

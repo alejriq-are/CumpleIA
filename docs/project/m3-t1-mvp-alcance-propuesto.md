@@ -1,17 +1,18 @@
 # Siguiente bloque M3-T1: evidencia y alcance MVP propuestos
 
-16/10/2026. Propuesta pendiente de decision del usuario; no acta de liberacion.
+16/10/2026. Alcance documental confirmado por el usuario; no acta de liberacion.
 EIPD bloqueada; pruebas ficticias; sin habilitacion de datos reales ni despliegue.
 
-## Alcance a resolver
+## Alcance confirmado
 
 Propuesta: expediente documental de Bases de Licitud que incluya RAT, evaluacion
 juridica/LIA y documento EIPD. Cada artefacto necesita identidad/version/contexto,
 alcance de facultad y revision de obsolescencia propios; no reutilizar sin cambios
 la FK de aceptacion actual, que solo referencia resoluciones sucesoras de infancia.
-No se ha autorizado un catalogo concreto bajo la expresion "otros documentos".
-Confirmar conjunto y si se pide consulta/exportacion o persistencia/aceptacion
-versionada antes de disenar nuevas migraciones y rutas.
+Consulta y descarga del expediente confirmadas: RAT asociado, evaluacion de
+licitud/LIA y EIPD. No se extiende la aceptacion a otros documentos por inferencia.
+La adopcion/versionado propio del RAT o LIA requieren otro contrato; este bloque
+reune los documentos existentes sin modificar sus tablas o historial.
 
 ## Evidencia disponible y humana pendiente
 
@@ -38,7 +39,7 @@ fixtures; no cargar datos reales durante desarrollo.
 
 ## Gates y evidencia de candidato
 
-G1 alcance: pendiente de la decision anterior. G2 revision juridica: pendiente de
+G1 alcance: definido como expediente documental, sin acto de liberacion. G2 revision juridica: pendiente de
 organizacion piloto y fuentes aplicables. G3 contrato/politica: no promover V1;
 G4 pruebas: aceptar solo CI del candidato exacto. G5 operacion: restauracion,
 accesos/retencion/soporte e incidentes por validar. G6 datos reales: decision
@@ -50,3 +51,32 @@ un fallo en prueba de roundtrip: faltaba retirar/restaurar migracion de aceptaci
 antes/despues de la de infancia. Correccion local: orden de dependencias, sin
 CASCADE ni cambio de migracion aplicada; 72 pruebas dirigidas aprobadas. CI del
 commit corrector debe verificarse despues de publicar; no usar CI previa como pase.
+
+
+## Implementacion y validacion
+
+GET `/licitud/treatments/{tid}/assessments/{aid}/mvp-dossier/v1`, solo
+entorno development/test, permiso view_content y suscripcion activa. API conserva
+RLS y scope exacto. Bloqueo compartido de serie protege la lectura M3 frente a
+escritores de la misma serie; no se bloquea ni publica el selector de politica.
+Panel en la pagina del expediente permite consultar/descargar JSON sin guardar
+contenido en almacenamiento local del navegador. Error de consulta retira paquete
+y descarga anteriores; respuesta incompatible bloquea descarga.
+
+Tres documentos: snapshot RAT asociado a la evaluacion (no inventario completo
+ni certificacion de actualidad M2); evaluacion completa con LIA si fue aportada;
+ultima resolucion sucesora EIPD, o documento previo identificado expresamente,
+o ausencia explicita. Hashes de contenido y del paquete observado; fecha UTC.
+Documento anterior no se promueve a cobertura infancia. Eventos de organizacion
+solo sobre la resolucion exacta; sucesores no heredan eventos. Vigencia mostrada
+es orientativa. Datos de RAT/M3 no tienen procedencia verificada por esta consulta.
+
+Fuentes oficiales consultadas, copia DO con checksum comprobado y notas de
+aplicabilidad; verificador juridico permanece null. G1 definido; G2-G5 pendientes,
+G6/G7 bloqueados. mvp_ready/allows_real_data/authorizes_action/can_confirm false,
+activacion deshabilitada. G4 no se cierra automaticamente por una CI aprobada.
+
+78 backend dirigidas, ocho nuevas UI/cliente, tipos/lint/formato y una integrada
+real: descarga JSON contrastada con resolucion/evento, scope y gates bloqueados.
+No migraciones ni cambios de opt-in/politica global. Cierre juridico real,
+operacion piloto, datos reales y activacion siguen fuera de este bloque.

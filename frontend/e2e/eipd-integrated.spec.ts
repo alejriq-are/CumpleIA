@@ -30,6 +30,8 @@ test("formulario y cliente reales registran una negativa en API aislada", async 
       import {createRoot} from "react-dom/client";
       import {EipdReviewConsultation} from ${JSON.stringify(path.resolve("components/admin/EipdReviewConsultation.tsx"))};
       import {ChildAdolescentEditor} from ${JSON.stringify(path.resolve("components/licitud/ChildAdolescentEditor.tsx"))};
+      import {MvpDossierPanel} from ${JSON.stringify(path.resolve("components/licitud/MvpDossierPanel.tsx"))};
+      import {loadMvpDossier} from ${JSON.stringify(path.resolve("lib/api/mvp-dossier.ts"))};
       import {OrganizationAcceptancePanel} from ${JSON.stringify(path.resolve("components/licitud/OrganizationAcceptancePanel.tsx"))};
       import {organizationAcceptanceApi as acceptanceApi} from ${JSON.stringify(path.resolve("lib/api/organization-acceptance.ts"))};
       import {ChildEipdHistory} from ${JSON.stringify(path.resolve("components/licitud/ChildEipdHistory.tsx"))};
@@ -45,6 +47,7 @@ test("formulario y cliente reales registran una negativa en API aislada", async 
         load:async()=>{const [a,p,r]=await Promise.all([childApi.load(context),childEipdApi.policy(context),childEipdApi.list(context)]);return {status:a.status,policy:p,resolutions:r};},
         create:d=>childEipdApi.create(context,d),reviews:r=>childEipdApi.reviews(context,r),review:(r,d,f,ref)=>childEipdApi.review(context,r,d,f,ref),readOnly:false
       }));};
+      window.openDossier=(s)=>{const context=scope(s);root.render(React.createElement(MvpDossierPanel,{load:()=>loadMvpDossier(context)}));};
       window.openAcceptance=(s,r)=>{const context=scope(s);root.render(React.createElement(OrganizationAcceptancePanel,{load:()=>acceptanceApi.load(context,r),designate:(actor,p)=>acceptanceApi.designate(context,actor,p),record:(actor,p)=>acceptanceApi.record(context,r,actor,p),readOnly:false}));};
       root.render(React.createElement(EipdReviewConsultation,{
         loadPreparation:s=>eipdReviewApi.preparation(scope(s)),
@@ -299,6 +302,33 @@ test("formulario y cliente reales registran una negativa en API aislada", async 
     await expect(page.getByRole("button", { name: /confirmar|activar|^Continuar$/i })).toHaveCount(
       0
     );
+    await page.evaluate((s) => (window as any).openDossier(s), {
+      organizationId: process.env.CUMPLEIA_UI_ORG!,
+      treatmentId: process.env.CUMPLEIA_UI_TREATMENT!,
+      assessmentId: process.env.CUMPLEIA_UI_ASSESSMENT!,
+    });
+    await page
+      .getByRole("button", { name: "Consultar expediente documental", exact: true })
+      .click();
+    await expect(page.getByText(/Procedencia de los datos/)).toBeVisible();
+    await expect(page.getByRole("link")).toHaveCount(3);
+    await expect(
+      page.getByRole("button", { name: "Descargar expediente JSON", exact: true })
+    ).toBeEnabled();
+    const download = page.waitForEvent("download");
+    await page.getByRole("button", { name: "Descargar expediente JSON", exact: true }).click();
+    const artifact = await download;
+    expect(artifact.suggestedFilename()).toContain("expediente-mvp-");
+    const packet = JSON.parse(await readFile((await artifact.path())!, "utf8"));
+    expect(packet.documents.map((d: any) => d.kind)).toEqual(["rat", "licitud_lia", "eipd"]);
+    expect(packet.documents[2].content.id).toBe(successor.resolution.id);
+    expect(packet.documents[2].acceptance_events[0].evidence_reference).toBe(
+      "PRUEBA-ACTA-INTEGRADA"
+    );
+    expect(packet.documents[0].organization_acceptance).toBe("sin_flujo");
+    expect(packet.can_confirm).toBe(false);
+    expect(packet.allows_real_data).toBe(false);
+    expect(packet.release_gates[6].status).toBe("bloqueado");
   } finally {
     await rm(directory, { recursive: true, force: true });
   }
