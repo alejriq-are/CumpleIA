@@ -113,6 +113,67 @@ test("edita documento crudo sin enviar identidad y conserva referencias", async 
   );
   await expect(page.getByText("Confirmación y activación bloqueadas.")).toBeVisible();
 });
+test("anade segunda evidencia, la edita y guarda con un solo PATCH", async ({ page }) => {
+  await mount(page);
+  await page.getByRole("button", { name: "Añadir evidencia" }).click();
+  await page.getByLabel("Tipo de evidencia 2", { exact: true }).fill("PRUEBA: tipo editado");
+  await page
+    .getByLabel("Referencia de evidencia 2", { exact: true })
+    .fill("PRUEBA: referencia editada");
+  await page.getByRole("button", { name: "Guardar documento", exact: true }).click();
+  await expect(page.getByRole("status")).toHaveText("Documento guardado.");
+  const calls = await page.evaluate(() =>
+    (window as any).demo.calls.filter((c: any) => c.options.method === "PATCH")
+  );
+  expect(calls).toHaveLength(1);
+  const body = JSON.parse(calls[0].options.body);
+  const evidence = body.child_adolescent_assessment.evidence;
+  expect(evidence).toHaveLength(2);
+  expect(evidence[0].evidence_type).toBe("PRUEBA");
+  expect(evidence[0].reference).toBe("PRUEBA: evidencia");
+  expect(evidence[0].obtained_on).toBe("2026-10-01");
+  expect(evidence[0].notes).toBe("PRUEBA: conservar");
+  expect(evidence[1].evidence_type).toBe("PRUEBA: tipo editado");
+  expect(evidence[1].reference).toBe("PRUEBA: referencia editada");
+});
+test("quita la evidencia existente y guarda con un solo PATCH sin activar EIPD", async ({
+  page,
+}) => {
+  await mount(page);
+  await page.getByRole("button", { name: "Quitar evidencia 1" }).click();
+  await page.getByRole("button", { name: "Guardar documento", exact: true }).click();
+  await expect(page.getByRole("status")).toHaveText("Documento guardado.");
+  const calls = await page.evaluate(() =>
+    (window as any).demo.calls.filter((c: any) => c.options.method === "PATCH")
+  );
+  expect(calls).toHaveLength(1);
+  const body = JSON.parse(calls[0].options.body);
+  expect(body.child_adolescent_assessment.evidence).toEqual([]);
+  await expect(page.getByText("Confirmación y activación bloqueadas.")).toBeVisible();
+});
+test("marca Adolescentes, desmarca Ninos y ninas y conserva evidencia ficticia", async ({
+  page,
+}) => {
+  await mount(page);
+  await page.getByRole("checkbox", { name: "Adolescentes", exact: true }).check();
+  await page.getByRole("checkbox", { name: "Niños y niñas", exact: true }).uncheck();
+  await page.getByRole("button", { name: "Guardar documento", exact: true }).click();
+  await expect(page.getByRole("status")).toHaveText("Documento guardado.");
+  const calls = await page.evaluate(() =>
+    (window as any).demo.calls.filter((c: any) => c.options.method === "PATCH")
+  );
+  expect(calls).toHaveLength(1);
+  const body = JSON.parse(calls[0].options.body);
+  expect(body.child_adolescent_assessment.declared_groups).toEqual(["adolescentes"]);
+  expect(body.child_adolescent_assessment.evidence).toEqual([
+    {
+      evidence_type: "PRUEBA",
+      reference: "PRUEBA: evidencia",
+      obtained_on: "2026-10-01",
+      notes: "PRUEBA: conservar",
+    },
+  ]);
+});
 test("retiro envia null y no habilita acciones", async ({ page }) => {
   await mount(page);
   await page.getByRole("button", { name: "Retirar documento del borrador" }).click();

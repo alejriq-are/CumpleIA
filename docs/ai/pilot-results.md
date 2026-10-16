@@ -114,3 +114,42 @@ contratos simples en una sola planificacion, ejecutar Deepseek localmente y
 revisar un bloque coherente una vez. Siguiente ensayo: lote con presupuesto
 acordado y registro automatico; no habilitado/autorizado por estas dos pruebas.
 No nuevas mejoras al lanzador en DS-002. EIPD bloqueada; datos ficticios.
+
+## Bloque DS-003 — tres tareas, 2026-10-15
+
+Usuario autorizo presupuesto USD0.20; limite adicional tres iteraciones.
+Base 463b83589480d8b69a5f2093c3b2cbec7fc36be8. Tres pruebas nuevas de un
+mismo bloque: añadir/editar/guardar evidencia preservando la anterior; quitar
+la evidencia; cambiar grupos declarados conservando evidencia. Una sola PATCH
+por recorrido; fixtures existentes y EIPD bloqueada. Contrato DS-003.json.
+
+Ejecutor experimental fuera del checkout: /tmp/cumpleia-deepseek/DS-003/run_block.py.
+Una reserva previa por llamada y saldo consultado; limite admite volumen usando
+bytes UTF8 + margen y tarifa pico de referencia, no tope de facturacion del
+proveedor. Error de transporte incierto detiene sin duplicar la llamada.
+Entrega JSON con reemplazo old/new de ancla unica; ejecutor genera diff mediante
+difflib y verifica ID/base/ruta, preservacion del archivo y exactamente tres tests.
+Puede pedir correccion estructural hasta el limite; esa rama no se ejercito.
+Candidato guardado fuera del repo; no ejecuta codigo/comandos del modelo ni publica.
+No es aun un agente general ni un lanzador de produccion reproducible para lotes.
+
+Resultado: una generacion, 5.79 segundos (API/saldo/validacion), sin intercambios
+manuales por subtarea. 8126 tokens entrada + 1235 salida = 9361, cache 0.
+Estimacion USD0.0019599–0.0039198, no factura. Delta inmediato saldo CNY0.00 y
+USD0.00; cargo exacto no acreditado por precision/contabilizacion de saldo.
+Resumen persistido: docs/ai/results/DS-003.json. Originales locales en directorio
+DS-003 (packet, respuesta, parche, saldos, gasto y candidato aislado).
+
+Una revision final de Codex: parche aceptado sin reparaciones de codigo ni formato.
+13 pruebas Chromium aprobadas (10 existentes + 3 nuevas), type-check, ESLint y
+Prettier aprobados. Codigo de producto, permisos y activacion intactos. No se
+repitieron backend ni unitarias del lanzador porque no cambia su implementacion.
+
+Comparacion: tres tareas recibidas/validadas/publicadas juntas; ningun paso del
+usuario entre subtareas. No convertir esto en ahorro exacto ChatGPT: falta control
+comparable y medicion por tarea. La preparacion del ejecutor experimental tambien
+consume coordinacion Codex; no ocultarla ni atribuirla a trabajo Deepseek.
+Autonomia verificada: preparacion/entrega del bloque; pruebas y aceptacion ejecutadas
+por Codex. No se verifico bucle autonomo de correccion a partir de tests ni acceso
+Deepseek a terminal. Siguiente decision: consolidar ejecutor reutilizable solo si
+se decide continuar; este piloto no autoriza gasto recurrente ni lotes nuevos.
