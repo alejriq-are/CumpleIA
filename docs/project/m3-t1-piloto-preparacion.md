@@ -53,9 +53,8 @@ no evidencia de backup externo, restauracion de produccion, RPO/RTO o cifrado.
 restaurador, 11 UI/cliente (tres nuevas), tipos/lint/formato y una integrada
 Chromium/API/PostgreSQL real aprobadas. Ensayo de restauracion y negativas
 registrados. CI del anterior 01d1576 aprobada; nuevo candidato se verifica por HEAD.
-Al reanudar, Docker/WSL no disponible: comprobaciones puras del restaurador
-ejecutadas con unittest sin DB; ensayo real anterior conserva evidencia. No
-repetir DB hasta restablecer integracion. No se reiniciaron servicios.
+Docker/WSL restablecido por el usuario; pruebas locales dirigidas, integrada y
+restauracion repetidas satisfactoriamente antes de V2. No se reiniciaron servicios.
 Sin migraciones, provision de cuentas, cambios de entorno, merge o despliegue.
 
 Para cierre real faltan empresa/entorno piloto, persona y evidencia autentica de
@@ -63,3 +62,37 @@ facultad, acta de decision y alcance sobre documentos exactos, revision humana d
 fuentes/aplicabilidad, y evidencias operativas revisadas: copia externa/cifrada,
 retencion/RPO/RTO, restauracion con historial, accesos, soporte e incidentes.
 No exigir empresa real para continuar desarrollo; no afirmar G2/G5 cerrados.
+
+
+## Actas de prueba V2 — escenario indicado por el usuario
+
+Escenario fijo: [FICTICIA] Comercial Piloto Andes SpA, RUT de prueba 00.000.000-0,
+Calle Ficticia 123, Santiago, contacto@piloto.example.invalid; comercio minorista
+en linea, clientes/trabajadores y programa de fidelizacion con menores. Persona:
+[FICTICIA] Persona Facultada Piloto, RUT de prueba 00.000.001-0, Gerencia General
+(representante legal simulado), facultada@piloto.example.invalid. No se verifican
+RUT ni se presentan como contribuyentes/personas autenticados. Es un escenario,
+no un cambio de identidad del tenant o perfil tecnico de la sesion.
+
+POST `pilot-preparation/v2` agrega actas de prueba, preservando V1. Todas las
+referencias propias del acta exigen SIMULADA- con letras mayusculas, numeros o
+guiones. Acta SIMULADA-PILOTO-ACTA-001, designacion SIMULADA-PILOTO-DES-001 y fecha
+2000-01-01 explicitamente simulada. No hay documento juridico real asociado.
+Revisar pendiente/no realizada por defecto, sin referencia obligatoria ni revisor
+inventado. Si se elige otra decision, legal_review_status simulada_sin_valor_juridico;
+aceptacion real y gates siguen pendientes. Referencias tecnicas previas no se
+reescriben: el acta enlaza por ID a la facultad vigente, con referencia SIMULADA-.
+
+Descarga HTML imprimible y JSON, ambos con marca obligatoria:
+ACTA DE PRUEBA, DATOS FICTICIOS, SIN VALOR JURIDICO (acentos en interfaz/artefacto).
+El HTML repite la marca en cabecera y pie, escapa todo contenido; JSON conserva
+watermark, data_kind, estado y escenario. Actas tambien pueden descargarse con
+faltantes, explicitamente pendientes. No se persisten eventos ni se promueven
+snapshots. El prefijo o data_kind no acreditan por si solos procedencia ficticia
+ni validez juridica. mvp_ready/allows_real_data/can_confirm/authorizes_action false.
+
+Validacion V2: 20 backend/guardas enfocadas (siete casos V2 nuevos), 13 UI/cliente
+(dos negativas nuevas y descarga JSON pendiente), tipos/lint/formato y una
+integrada real con HTML descargado, marca/escenario/leyenda contrastados. CI del
+previo b229fb3 aprobada; comprobar candidato nuevo por HEAD exacto. Docker/WSL
+restablecido por el usuario; no repetir pruebas amplias sin causa.

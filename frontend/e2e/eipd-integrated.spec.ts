@@ -329,13 +329,22 @@ test("formulario y cliente reales registran una negativa en API aislada", async 
       "Referencia de soporte",
       "Referencia de incidentes",
     ]) {
-      await page.getByLabel(label, { exact: true }).fill("PRUEBA: referencia declarada integrada");
+      await page.getByLabel(label, { exact: true }).fill("SIMULADA-PILOTO-REF-INTEGRADA");
     }
     await page.getByRole("button", { name: "Validar preparación ficticia", exact: true }).click();
     await expect(page.getByRole("status")).toContainText(
       "Referencias de prueba completas; evidencia no verificada."
     );
     await expect(page.getByRole("status")).toContainText("Simulación no registrada");
+    const actDownload = page.waitForEvent("download");
+    await page.getByRole("button", { name: "Descargar acta simulada HTML", exact: true }).click();
+    const actFile = await actDownload;
+    expect(actFile.suggestedFilename()).toBe("SIMULADA-PILOTO-ACTA-001.html");
+    const actText = await readFile((await actFile.path())!, "utf8");
+    expect(actText).toContain("ACTA DE PRUEBA, DATOS FICTICIOS, SIN VALOR JURÍDICO");
+    expect(actText).toContain("[FICTICIA] Comercial Piloto Andes SpA");
+    expect(actText).toContain("REVISIÓN SIMULADA, SIN VALOR JURÍDICO");
+    expect(actText).not.toContain("<script");
     const download = page.waitForEvent("download");
     await page.getByRole("button", { name: "Descargar expediente JSON", exact: true }).click();
     const artifact = await download;

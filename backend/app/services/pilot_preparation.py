@@ -50,3 +50,27 @@ async def prepare(db, org, tid, aid, actor, payload):
         missing=missing,
         preparation_complete=not missing,
     )
+
+
+async def simulate_act(db, org, tid, aid, actor, payload):
+    from copy import deepcopy
+
+    from app.schemas.pilot_preparation import SIMULATION_SCENARIO, PilotSimulationOut
+
+    prepared = await prepare(db, org, tid, aid, actor, payload)
+    value = prepared.model_dump(
+        mode="python", exclude={"schema_version", "authority_evidence_reference"}
+    )
+    return PilotSimulationOut(
+        **value,
+        act_reference=payload.act_reference,
+        designation_reference=payload.designation_reference,
+        authority_evidence_reference="SIMULADA-ENLACE-FACULTAD-"
+        + str(prepared.authority_id).upper(),
+        scenario=deepcopy(SIMULATION_SCENARIO),
+        legal_review_status=(
+            "pendiente_no_realizada"
+            if payload.review_decision == "pendiente"
+            else "simulada_sin_valor_juridico"
+        ),
+    )

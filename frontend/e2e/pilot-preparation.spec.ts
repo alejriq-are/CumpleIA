@@ -1,3 +1,5 @@
+import { readFile } from "node:fs/promises";
+import { SIMULATION_WATERMARK, pilotScenario } from "../lib/api/pilot-preparation";
 import { test, expect } from "@playwright/test";
 import path from "node:path";
 import { browserBundle } from "./helpers/browser-bundle";
@@ -52,14 +54,27 @@ async function setup(page: any, mode: string) {
     if (p.review_decision !== "acepta") missing.push("revision_juridica_ficticia_no_aceptada");
     return route.fulfill({
       json: {
-        schema_version: 1,
+        schema_version: 2,
+        watermark: mode === "watermark" ? "ACTA" : SIMULATION_WATERMARK,
+        scenario:
+          mode === "scenario"
+            ? { ...pilotScenario, company: { ...pilotScenario.company, name: "Empresa real" } }
+            : pilotScenario,
+        act_reference: p.act_reference,
+        designation_reference: p.designation_reference,
+        scenario_notice:
+          "Escenario ficticio; no identifica ni acredita a la organización o persona real de la sesión.",
+        legal_review_status:
+          p.review_decision === "pendiente"
+            ? "pendiente_no_realizada"
+            : "simulada_sin_valor_juridico",
         data_kind: "ficticios",
         organization_id: org,
         treatment_id: tid,
         assessment_id: aid,
         actor_id: actor,
         authority_id: grant,
-        authority_evidence_reference: "PRUEBA facultad",
+        authority_evidence_reference: "SIMULADA-ENLACE-FACULTAD-001",
         document_hashes: p.document_hashes,
         declared_references: Object.fromEntries(
           Object.entries(p).filter(([k]) => k.endsWith("_reference"))
@@ -89,6 +104,18 @@ test("campos faltantes visibles y completos no liberan MVP", async ({ page }) =>
   await page.getByRole("checkbox").check();
   await page.getByRole("button", { name: "Validar preparación ficticia" }).click();
   await expect(page.getByRole("status")).toContainText("Faltan referencias");
+  await expect(page.getByLabel("Decisión de revisión ficticia")).toHaveValue("pendiente");
+  const pendingDownload = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Descargar acta simulada JSON", exact: true }).click();
+  const pendingFile = await pendingDownload;
+  const pending = JSON.parse(await readFile((await pendingFile.path())!, "utf8"));
+  expect(pending.watermark).toBe(SIMULATION_WATERMARK);
+  expect(pending.legal_review_status).toBe("pendiente_no_realizada");
+  expect(pending.declared_references.review_reference).toBeNull();
+  expect(pending.scenario.company.name).toBe("[FICTICIA] Comercial Piloto Andes SpA");
+  expect(pending.scenario.designation.date_status).toBe("simulada");
+  expect(pending.mvp_ready).toBe(false);
+
   await page.getByLabel("Decisión de revisión ficticia").selectOption("acepta");
   for (const label of [
     "Referencia de revisión jurídica ficticia",
@@ -99,27 +126,31 @@ test("campos faltantes visibles y completos no liberan MVP", async ({ page }) =>
     "Referencia de soporte",
     "Referencia de incidentes",
   ])
-    await page.getByLabel(label, { exact: true }).fill("PRUEBA");
+    await page.getByLabel(label, { exact: true }).fill("SIMULADA-PILOTO-REF-001");
   await page.getByRole("button", { name: "Validar preparación ficticia" }).click();
   await expect(page.getByRole("status")).toContainText(
     "Referencias de prueba completas; evidencia no verificada"
   );
   await expect(page.getByRole("status")).toContainText("Simulación no registrada");
+  const download = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Descargar acta simulada HTML", exact: true }).click();
+  const artifact = await download;
+  expect(artifact.suggestedFilename()).toBe("SIMULADA-PILOTO-ACTA-001.html");
   expect(posts()).toBe(2);
   await page.getByLabel("Decisión de revisión ficticia").selectOption("requiere_cambios");
   await expect(page.getByRole("status")).toHaveCount(0);
 });
-for (const mode of ["no-authority", "forged"]) {
+for (const mode of ["no-authority", "forged", "watermark", "scenario"]) {
   test(`rechazo ${mode} conserva referencias`, async ({ page }) => {
     const posts = await setup(page, mode);
     await page.getByRole("checkbox").check();
     await page
       .getByLabel("Referencia de restauración", { exact: true })
-      .fill("PRUEBA guardar referencia");
+      .fill("SIMULADA-PILOTO-REST-001");
     await page.getByRole("button", { name: "Validar preparación ficticia" }).click();
     await expect(page.getByRole("alert")).toBeVisible();
     await expect(page.getByLabel("Referencia de restauración", { exact: true })).toHaveValue(
-      "PRUEBA guardar referencia"
+      "SIMULADA-PILOTO-REST-001"
     );
     expect(posts()).toBe(mode === "no-authority" ? 0 : 1);
     await expect(page.getByRole("status")).toHaveCount(0);

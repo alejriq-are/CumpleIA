@@ -18,19 +18,19 @@ identifica el HEAD exacto de la tarea. Una CI anterior no prueba un commit nuevo
 
 ## Bloque funcional vigente — producto
 
-16/10: no existe organizacion piloto; usuario confirma preparacion con datos
-ficticios. Formulario de revision/facultad y controles operativos simula referencias
-contra hashes del expediente MVP y facultad propia vigente. Enumera faltantes;
-no registra actas/eventos reales ni cierra gates por referencias completas.
-87 API/DB dirigidas, cuatro barreras de restaurador, 11 UI/cliente y una integrada
-real aprobadas; tipos/lint/formato. CI del previo 01d1576 aprobada.
-Al reanudar, integracion Docker/WSL no disponible para repetir DB local; evidencia
-del recorrido/restauracion ya ejecutados conservada. Rehabilitar antes de repetir.
-Restauracion local aislada validada: 39 tablas, RLS/privilegios de cuatro historiales,
-origen intacto y copia propia retirada. Historiales vacios; no certifica produccion.
+16/10: piloto sigue ficticio. Usuario define escenario [FICTICIA] Comercial Piloto
+Andes SpA / [FICTICIA] Persona Facultada Piloto, contactos example.invalid y RUT
+simulados. V2 genera actas descargables HTML/JSON con marca ACTA DE PRUEBA,
+DATOS FICTICIOS, SIN VALOR JURIDICO; referencias SIMULADA- exigidas en servidor.
+Revision pendiente/no realizada por defecto; cualquier otra decision es simulada.
+Escenario no sustituye identidad tecnica de sesion, no registra aceptacion real
+ni cierra gates. V1 e historiales conservados, datos reales y EIPD bloqueados.
+20 backend/guardas, 13 UI/cliente y una integrada real aprobadas; tipos/lint/formato.
+Docker/WSL restablecido; CI previa b229fb3 aprobada. Verificar nuevo HEAD/CI.
 [Contrato y evidencia](project/m3-t1-piloto-preparacion.md).
-Sin migraciones ni cambio de opt-in/politica. G2/G5 y empresa/evidencia real pendientes;
-datos reales y EIPD bloqueados, sin merge/despliegue. Verificar CI del HEAD exacto.
+Pendientes reales: empresa/actas/facultades, revision humana y controles de piloto.
+Restauracion local previa de 39 tablas con historiales vacios no certifica produccion.
+Sin migraciones, provision de identidades, merge o despliegue.
 
 ## Proxima transferencia
 

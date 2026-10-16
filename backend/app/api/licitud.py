@@ -43,7 +43,12 @@ from app.schemas.organization_acceptance import (
     AuthorityOut,
     AuthorityState,
 )
-from app.schemas.pilot_preparation import PilotPreparationIn, PilotPreparationOut
+from app.schemas.pilot_preparation import (
+    PilotPreparationIn,
+    PilotPreparationOut,
+    PilotSimulationIn,
+    PilotSimulationOut,
+)
 from app.services import eipd_child_persistence as child_service
 from app.services import licitud as service
 from app.services import mvp_dossier, pilot_preparation
@@ -465,5 +470,22 @@ async def preparar_piloto_ficticio(
     db: AsyncSession = Depends(get_db),
 ):
     return await pilot_preparation.prepare(
+        db, x_organization_id, treatment_id, assessment_id, profile.id, payload
+    )
+
+
+@router.post(
+    "/treatments/{treatment_id}/assessments/{assessment_id}/pilot-preparation/v2",
+    response_model=PilotSimulationOut,
+)
+async def generar_acta_simulada(
+    treatment_id: uuid.UUID,
+    assessment_id: uuid.UUID,
+    payload: PilotSimulationIn,
+    x_organization_id: Annotated[uuid.UUID, Header()],
+    profile: Profile = Depends(require_permission(Permission.edit_content)),
+    db: AsyncSession = Depends(get_db),
+):
+    return await pilot_preparation.simulate_act(
         db, x_organization_id, treatment_id, assessment_id, profile.id, payload
     )

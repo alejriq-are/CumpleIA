@@ -11,11 +11,42 @@ export const pilotReferences = {
   support_reference: "Referencia de soporte",
   incident_reference: "Referencia de incidentes",
 };
+export const SIMULATION_WATERMARK = "ACTA DE PRUEBA, DATOS FICTICIOS, SIN VALOR JURÍDICO";
+export const pilotScenario = {
+  company: {
+    name: "[FICTICIA] Comercial Piloto Andes SpA",
+    test_rut: "00.000.000-0",
+    activity:
+      "Comercio minorista en línea; clientes, trabajadores y programa de fidelización con menores (escenario de prueba).",
+    address: "Calle Ficticia 123, Santiago",
+    contact: "contacto@piloto.example.invalid",
+  },
+  person: {
+    name: "[FICTICIA] Persona Facultada Piloto",
+    test_rut: "00.000.001-0",
+    position: "Gerencia General (representante legal simulado)",
+    contact: "facultada@piloto.example.invalid",
+  },
+  designation: {
+    type: "designación simulada para pruebas",
+    test_date: "2000-01-01",
+    date_status: "simulada",
+    real_legal_document: null,
+  },
+} as const;
 export type PilotForm = {
+  act_reference?: string;
+  designation_reference?: string;
   review_decision: "acepta" | "rechaza" | "requiere_cambios" | "pendiente";
 } & Record<keyof typeof pilotReferences, string | null>;
 export type PilotResult = {
-  schema_version: 1;
+  schema_version: 2;
+  watermark: typeof SIMULATION_WATERMARK;
+  scenario: typeof pilotScenario;
+  act_reference: string;
+  designation_reference: string;
+  scenario_notice: string;
+  legal_review_status: "pendiente_no_realizada" | "simulada_sin_valor_juridico";
   data_kind: "ficticios";
   organization_id: string;
   treatment_id: string;
@@ -92,11 +123,27 @@ export async function preparePilot(
       form[k as keyof typeof pilotReferences]?.trim() || null,
     ])
   );
-  const v = await apiFetch<PilotResult>(prefix + "/pilot-preparation/v1", {
+  const actReference = form.act_reference?.trim() || "SIMULADA-PILOTO-ACTA-001";
+  const designationReference = form.designation_reference?.trim() || "SIMULADA-PILOTO-DES-001";
+  const simulationReference = /^SIMULADA-[A-Z0-9][A-Z0-9-]*$/;
+  if (
+    ![
+      actReference,
+      designationReference,
+      ...Object.values(refs).filter((v): v is string => v !== null),
+    ].every((v) => simulationReference.test(v) && v.length <= 128)
+  )
+    throw new ApiError(
+      400,
+      "Usa referencias con prefijo SIMULADA- y letras mayúsculas, números o guiones"
+    );
+  const v = await apiFetch<PilotResult>(prefix + "/pilot-preparation/v2", {
     ...s,
     method: "POST",
     body: {
       data_kind: "ficticios",
+      act_reference: actReference,
+      designation_reference: designationReference,
       authority_id: grant.id,
       document_hashes: hashes,
       review_decision: form.review_decision,
@@ -105,7 +152,7 @@ export async function preparePilot(
   });
   valid(
     v &&
-      v.schema_version === 1 &&
+      v.schema_version === 2 &&
       v.data_kind === "ficticios" &&
       v.organization_id === s.organizationId &&
       v.treatment_id === s.treatmentId &&
@@ -126,6 +173,31 @@ export async function preparePilot(
       v.missing.every((x) => typeof x === "string") &&
       v.preparation_complete === (v.missing.length === 0)
   );
+  valid(
+    v.watermark === SIMULATION_WATERMARK &&
+      v.act_reference === actReference &&
+      v.designation_reference === designationReference &&
+      simulationReference.test(v.authority_evidence_reference) &&
+      v.scenario_notice ===
+        "Escenario ficticio; no identifica ni acredita a la organización o persona real de la sesión." &&
+      v.legal_review_status ===
+        (form.review_decision === "pendiente"
+          ? "pendiente_no_realizada"
+          : "simulada_sin_valor_juridico")
+  );
+  valid(
+    v.scenario &&
+      Object.keys(v.scenario).sort().join(",") === Object.keys(pilotScenario).sort().join(",")
+  );
+  for (const section of Object.keys(pilotScenario) as (keyof typeof pilotScenario)[]) {
+    valid(
+      v.scenario[section] &&
+        Object.keys(v.scenario[section]).sort().join(",") ===
+          Object.keys(pilotScenario[section]).sort().join(",")
+    );
+    for (const [key, value] of Object.entries(pilotScenario[section]))
+      valid((v.scenario?.[section] as Record<string, unknown>)?.[key] === value);
+  }
   const expectedMissing = [
     ...Object.keys(refs).filter((k) => !refs[k]),
     ...Object.keys(hashes).filter((k) => hashes[k] === null),

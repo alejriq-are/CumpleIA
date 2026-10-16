@@ -87,6 +87,14 @@ intacto, copia retirada, historiales vacios. No valida produccion ni reemplaza
 revision humana. Sin migraciones/opt-in. CI previa 01d1576 aprobada.
 [Contrato y pendientes reales](m3-t1-piloto-preparacion.md). CI por HEAD exacto.
 
+Actas de prueba V2 (16/10): escenario ficticio Andes/Persona Facultada indicado por
+usuario, sin modificar identidades del tenant. HTML/JSON con marca obligatoria y
+referencias SIMULADA-, fecha simulada y revision pendiente por defecto. Las demas
+decisiones siguen siendo simuladas; no se registran aceptaciones reales ni gates.
+20 backend/guardas, 13 UI y una integrada real aprobadas; contrato V1 conservado,
+sin migraciones/opt-in. Docker/WSL restablecido; CI previa b229fb3 aprobada.
+[Contrato vigente](m3-t1-piloto-preparacion.md). CI nueva por HEAD exacto.
+
 Pendientes fuera del bloque: revision juridica real, otras politicas/documentos, alcance y evidencia MVP,
 demas rutas M3-T1. La composicion V5 y consulta actuales no promueven el
 historial anterior a cobertura infancia. Confirmacion/activacion EIPD bloqueadas. Migracion para datos reales requiere

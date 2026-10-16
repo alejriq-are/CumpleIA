@@ -119,3 +119,73 @@ async def test_injected_real_or_server_fields_rejected(prepared, profile_a_id, c
     async with cases.client(state) as http:
         p = await body(http, state, profile_a_id)
         assert (await http.post(route(state), json={**p, **change})).status_code == 422
+
+
+async def test_v2_pending_act_and_markers_without_real_review(prepared, profile_a_id):
+    from app.schemas.pilot_preparation import SIMULATION_SCENARIO, SIMULATION_WATERMARK
+
+    state, _ = prepared
+    async with cases.client(state) as http:
+        p = await body(http, state, profile_a_id)
+        for k in list(p):
+            if k.endswith("_reference"):
+                p[k] = None
+        p["review_decision"] = "pendiente"
+        r = await http.post(route(state).replace("/v1", "/v2"), json=p)
+        assert r.status_code == 200, r.text
+        v = r.json()
+        assert v["schema_version"] == 2 and v["watermark"] == SIMULATION_WATERMARK
+        assert v["scenario"] == SIMULATION_SCENARIO
+        assert (
+            v["act_reference"] == "SIMULADA-PILOTO-ACTA-001"
+            and v["designation_reference"] == "SIMULADA-PILOTO-DES-001"
+        )
+        assert v["authority_evidence_reference"].startswith("SIMULADA-")
+        assert (
+            v["legal_review_status"] == "pendiente_no_realizada"
+            and not v["preparation_complete"]
+        )
+        assert (
+            not v["mvp_ready"]
+            and v["legal_acceptance"] == "pendiente_organizacion_piloto"
+        )
+        p["review_decision"] = "acepta"
+        for k in (
+            "review_reference",
+            "environment_reference",
+            "access_reference",
+            "restore_reference",
+            "retention_reference",
+            "support_reference",
+            "incident_reference",
+        ):
+            p[k] = "SIMULADA-PILOTO-REF-001"
+        v = (await http.post(route(state).replace("/v1", "/v2"), json=p)).json()
+        assert (
+            v["legal_review_status"] == "simulada_sin_valor_juridico"
+            and v["preparation_complete"]
+        )
+        assert not v["can_confirm"] and not v["allows_real_data"]
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        {"review_reference": "INFORME-REAL-001"},
+        {"act_reference": "ACTA-001"},
+        {"restore_reference": "SIMULADA-"},
+        {"designation_reference": "SIMULADA-../../real"},
+        {"company": "Empresa real"},
+        {"legal_review_status": "verificada"},
+    ],
+)
+async def test_v2_rejects_unmarked_or_injected_identity(prepared, profile_a_id, change):
+    state, _ = prepared
+    async with cases.client(state) as http:
+        p = await body(http, state, profile_a_id)
+        for k in list(p):
+            if k.endswith("_reference"):
+                p[k] = "SIMULADA-PILOTO-REF-001"
+        assert (
+            await http.post(route(state).replace("/v1", "/v2"), json={**p, **change})
+        ).status_code == 422

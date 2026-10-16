@@ -50,3 +50,63 @@ class PilotPreparationOut(BaseModel):
     can_confirm: Literal[False] = False
     authorizes_action: Literal[False] = False
     activation: Literal["deshabilitada"] = "deshabilitada"
+
+
+SimulationReference = Annotated[
+    str,
+    StringConstraints(
+        strip_whitespace=True, pattern=r"^SIMULADA-[A-Z0-9][A-Z0-9-]*$", max_length=128
+    ),
+]
+SIMULATION_WATERMARK = "ACTA DE PRUEBA, DATOS FICTICIOS, SIN VALOR JURÍDICO"
+SIMULATION_SCENARIO = {
+    "company": {
+        "name": "[FICTICIA] Comercial Piloto Andes SpA",
+        "test_rut": "00.000.000-0",
+        "activity": "Comercio minorista en línea; clientes, trabajadores y programa de fidelización con menores (escenario de prueba).",
+        "address": "Calle Ficticia 123, Santiago",
+        "contact": "contacto@piloto.example.invalid",
+    },
+    "person": {
+        "name": "[FICTICIA] Persona Facultada Piloto",
+        "test_rut": "00.000.001-0",
+        "position": "Gerencia General (representante legal simulado)",
+        "contact": "facultada@piloto.example.invalid",
+    },
+    "designation": {
+        "type": "designación simulada para pruebas",
+        "test_date": "2000-01-01",
+        "date_status": "simulada",
+        "real_legal_document": None,
+    },
+}
+
+
+class PilotSimulationIn(PilotPreparationIn):
+    act_reference: SimulationReference = "SIMULADA-PILOTO-ACTA-001"
+    designation_reference: SimulationReference = "SIMULADA-PILOTO-DES-001"
+    review_reference: SimulationReference | None = None
+    environment_reference: SimulationReference | None = None
+    access_reference: SimulationReference | None = None
+    restore_reference: SimulationReference | None = None
+    retention_reference: SimulationReference | None = None
+    support_reference: SimulationReference | None = None
+    incident_reference: SimulationReference | None = None
+
+
+class PilotSimulationOut(PilotPreparationOut):
+    schema_version: Literal[2] = 2
+    watermark: Literal["ACTA DE PRUEBA, DATOS FICTICIOS, SIN VALOR JURÍDICO"] = (
+        SIMULATION_WATERMARK
+    )
+    act_reference: SimulationReference
+    designation_reference: SimulationReference
+    authority_evidence_reference: SimulationReference
+    declared_references: dict[str, SimulationReference | None]
+    scenario: dict
+    legal_review_status: Literal[
+        "pendiente_no_realizada", "simulada_sin_valor_juridico"
+    ]
+    scenario_notice: Literal[
+        "Escenario ficticio; no identifica ni acredita a la organización o persona real de la sesión."
+    ] = "Escenario ficticio; no identifica ni acredita a la organización o persona real de la sesión."
