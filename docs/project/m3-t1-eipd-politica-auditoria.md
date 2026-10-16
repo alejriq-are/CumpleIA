@@ -8,6 +8,11 @@ Base: §§82–88; Ley 21.719 / Ley 19.628 reformada fija por instruccion del us
 Este contrato describe controles de producto; no introduce requisitos legales ni
 acredita verificacion de fuentes. Acciones admiten solo politica auditada deshabilitada.
 
+Expediente operativo de revision preparado al 16/10:
+[politica juridica y gates MVP](m3-t1-politica-juridica-mvp.md).
+Consulta documental no sustituye accepted_by/acta ni provision operativa.
+La politica de infancia V1 sigue pendiente y deshabilitada; no se reescribe.
+
 ## 1. Identidad, publicacion y seleccion
 
 policy_version=1 sigue siendo version del schema; no es numero de publicacion.

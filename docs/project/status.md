@@ -53,7 +53,14 @@ formato; recorrido Chromium/API/PostgreSQL aislado aprobado, incluido contraste
 de campos, tipos y enums del editor con Pydantic real. Sin migraciones ni cambios
 de habilitacion operativa. CI del nuevo commit se consulta tras publicar.
 
-Pendientes fuera del bloque: politica juridica con fuentes oficiales verificadas y aceptacion trazable,
+Revision juridica/MVP: [expediente preparado](m3-t1-politica-juridica-mvp.md),
+consulta oficial 16/10, copia DO/checksum y registro estructurado pendientes de
+revision humana. No se declaran fuentes globalmente verificadas ni politica
+aceptada. Gates G1-G7 propuestos, datos reales y activacion separados.
+Falta responsable/acta y suficiencia de fuentes para cerrar este bloque.
+Runtime y politica infancia V1 intactos.
+
+Pendientes fuera del bloque: revision/aceptacion juridica, alcance y evidencia MVP,
 demas rutas M3-T1. La composicion V5 y consulta actuales no promueven el
 historial anterior a cobertura infancia. Confirmacion/activacion EIPD bloqueadas. Migracion para datos reales requiere
 criterios MVP, contratos/politica revisados y pruebas previas; no se elimina

@@ -52,8 +52,9 @@ EIPD aprobada. Fuentes identificadas en el documento son declaraciones, no
 verificacion oficial ni aceptacion de politica. Resultado incierto: no repetir;
 consultar historial antes de recargar.
 
-Pendientes: validacion/aceptacion juridica de politica y criterios de salida MVP
-antes de considerar cualquier habilitacion futura. Activacion EIPD bloqueada.
+Pendientes: validacion/aceptacion juridica de politica y criterios de salida MVP.
+[Expediente revisable](m3-t1-politica-juridica-mvp.md) preparado con fuentes y gates,
+no aceptado; requiere responsable y acta humana. Activacion EIPD bloqueada.
 
 Salida a MVP: la restriccion SQL `data_kind=ficticios` es intencional. Introducir
 datos reales requiere una nueva migracion revisada, contratos separados o
