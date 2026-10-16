@@ -195,3 +195,43 @@ Siguiente alcance razonable: correcciones UI/test acotadas con criterios fijos y
 preservacion de assertions, ampliar permisos solo por bloque. Ahorro neto de
 ChatGPT sigue sin medicion comparable; preparacion/revision del prototipo tiene
 costo y no debe omitirse. EIPD bloqueada, datos ficticios, sin merge/despliegue.
+
+## DS-005 — funcion real y aceptacion independiente, 2026-10-15
+
+Base 9d893cccbe11e2bb0fdf2206993d9286eda1dbd5. Mejora implementada por Deepseek:
+Subir/Bajar evidencia en borrador, preservando contenido y orden al guardar.
+Solo componente y dos tests propios nuevos; no modifica imports/harness/tests
+existentes, backend, permisos ni politica. Presupuesto referencia USD0.20,
+maximo tres llamadas; sin shell libre ni credenciales heredadas a pruebas.
+
+Codex fijo siete casos independientes ANTES de generar: subir/bajar con metadatos,
+0/1 elementos, readOnly, confirmado, busy/uncertain y recuperacion 403.
+Caso subir fallo contra base sin feature; no se sembro defecto artificial.
+Aceptacion fuera del alcance del modelo, hash comprobado en cada iteracion;
+finalmente versionada como child-adolescent-order.acceptance.spec.ts.
+Ejecutor ejecuta checks fijos en copia aislada y devuelve logs automaticamente.
+
+Resultado mixto: las tres iteraciones pasaron 25 UI (16 anteriores + 2 propias
+Deepseek + 7 independientes), tipos y lint; formato fallo en las tres.
+El bucle se detuvo al limite, sin nuevas llamadas. Codex ejecuto Prettier y
+ajusto dos titulos de tests propios para que no atribuyan escenarios no cubiertos
+por esos tests; assertions intactas. Version final paso 25 UI/tipos/lint/formato.
+La logica de reordenacion no requirio reparacion Codex. No declarar autonomia
+completa ni correccion de un bug funcional: el fallo encontrado fue formato y
+no se resolvio autonomamente. UI readOnly/confirmado probada independientemente.
+
+Tres llamadas: 33989 entrada + 4948 salida = 38937 tokens, 10112 cache hit.
+Estimacion USD0.006580686–0.013161372, no factura; delta inmediato por llamada
+USD0.00/CNY0.00; cargo exacto no confirmado. Resumen docs/ai/results/DS-005.json,
+originales/logs/ejecutor experimental /tmp/cumpleia-deepseek/DS-005/.
+Deficiencia del ejecutor: feedback formato solo indicaba archivo, no diff esperado;
+repetir generacion y todos los checks para formato gasto sin beneficio funcional.
+Ajuste recomendado: Prettier como herramienta fija antes de checks, reservar
+LLM para fallos funcionales y devolver diff/error concreto; aun no validado en
+nuevo piloto ni consolidado como agente general. No hubo calls fuera del limite.
+
+Revision final: copia del array, permutacion conserva objetos/metadatos; controles
+bloquean limites y estados; sin llamadas de red/autoridad nuevas. EIPD bloqueada,
+solo datos ficticios, sin merge/despliegue. Piloto cuenta como entrega funcional
+con asistencia final, no como uno de tres bloques autonomos sin correccion.
+Mantener revision Codex y permisos por bloque; no ampliar a RLS/migraciones/legal.

@@ -235,6 +235,59 @@ test("recupera guardado 403 y reintenta con exito conservando cambios", async ({
   expect(notes).toEqual(["PRUEBA: reintento", "PRUEBA: reintento"]);
   await expect(page.getByText("Confirmación y activación bloqueadas.")).toBeVisible();
 });
+test("conserva campos al subir evidencia", async ({ page }) => {
+  await mount(page);
+  await page.getByRole("button", { name: "Añadir evidencia" }).click();
+  await page.getByLabel("Tipo de evidencia 2", { exact: true }).fill("PRUEBA: tipo segundo");
+  await page
+    .getByLabel("Referencia de evidencia 2", { exact: true })
+    .fill("PRUEBA: referencia segunda");
+  await expect(page.getByRole("button", { name: "Subir evidencia 1" })).toBeDisabled();
+  await expect(page.getByRole("button", { name: "Bajar evidencia 2" })).toBeDisabled();
+  await page.getByRole("button", { name: "Subir evidencia 2" }).click();
+  await expect(page.getByRole("button", { name: "Subir evidencia 1" })).toBeDisabled();
+  await expect(page.getByRole("button", { name: "Bajar evidencia 2" })).toBeDisabled();
+  await page.getByRole("button", { name: "Guardar documento", exact: true }).click();
+  await expect(page.getByRole("status")).toHaveText("Documento guardado.");
+  const calls = await page.evaluate(() =>
+    (window as any).demo.calls.filter((c: any) => c.options.method === "PATCH")
+  );
+  expect(calls).toHaveLength(1);
+  const body = JSON.parse(calls[0].options.body);
+  const evidence = body.child_adolescent_assessment.evidence;
+  expect(evidence).toHaveLength(2);
+  expect(evidence[0].evidence_type).toBe("PRUEBA: tipo segundo");
+  expect(evidence[0].reference).toBe("PRUEBA: referencia segunda");
+  expect(evidence[1].evidence_type).toBe("PRUEBA");
+  expect(evidence[1].reference).toBe("PRUEBA: evidencia");
+  expect(evidence[1].obtained_on).toBe("2026-10-01");
+  expect(evidence[1].notes).toBe("PRUEBA: conservar");
+  await expect(page.getByText("Confirmación y activación bloqueadas.")).toBeVisible();
+});
+test("bloquea reordenacion durante guardado y respuesta incierta", async ({ page }) => {
+  await mount(page);
+  await page.getByRole("button", { name: "Añadir evidencia" }).click();
+  await page.getByLabel("Tipo de evidencia 2", { exact: true }).fill("PRUEBA: segundo");
+  await page.evaluate(() => {
+    (window as any).demo.mode = "wait";
+  });
+  await page.getByRole("button", { name: "Guardar documento", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Subir evidencia 2" })).toBeDisabled();
+  await expect(page.getByRole("button", { name: "Bajar evidencia 1" })).toBeDisabled();
+  await page.evaluate(() => (window as any).demo.release());
+  await expect(page.getByRole("status")).toHaveText("Documento guardado.");
+  await page.evaluate(() => {
+    (window as any).demo.mode = "unknown";
+  });
+  await page.getByRole("button", { name: "Guardar documento", exact: true }).click();
+  await expect(page.getByRole("alert")).toContainText("No se confirmó el guardado");
+  await expect(page.getByRole("button", { name: "Subir evidencia 2" })).toBeDisabled();
+  await expect(page.getByRole("button", { name: "Bajar evidencia 1" })).toBeDisabled();
+  await page.evaluate(() => {
+    (window as any).demo.mode = "ok";
+  });
+  await expect(page.getByRole("button", { name: "Guardar documento", exact: true })).toBeDisabled();
+});
 test("retiro envia null y no habilita acciones", async ({ page }) => {
   await mount(page);
   await page.getByRole("button", { name: "Retirar documento del borrador" }).click();

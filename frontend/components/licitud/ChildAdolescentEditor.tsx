@@ -84,6 +84,17 @@ export function ChildAdolescentEditor({ load, save, readiness, readOnly = false 
       setBusy(false);
     }
   }
+  function moveEvidence(from: number, to: number) {
+    if (from === to || from < 0 || to < 0) return;
+    setDoc((d) => {
+      const list = d.evidence;
+      if (!list || from >= list.length || to >= list.length) return d;
+      const next = list.slice();
+      const [item] = next.splice(from, 1);
+      next.splice(to, 0, item);
+      return { ...d, evidence: next };
+    });
+  }
   function selection(
     field: "data_category_codes" | "data_subject_codes",
     value: string,
@@ -276,6 +287,28 @@ export function ChildAdolescentEditor({ load, save, readiness, readOnly = false 
                       }
                     />
                   </label>
+                  <button
+                    type="button"
+                    disabled={
+                      index === 0 || busy || uncertain || readOnly || row.status !== "borrador"
+                    }
+                    onClick={() => moveEvidence(index, index - 1)}
+                  >
+                    Subir evidencia {index + 1}
+                  </button>
+                  <button
+                    type="button"
+                    disabled={
+                      index === (doc.evidence?.length ?? 1) - 1 ||
+                      busy ||
+                      uncertain ||
+                      readOnly ||
+                      row.status !== "borrador"
+                    }
+                    onClick={() => moveEvidence(index, index + 1)}
+                  >
+                    Bajar evidencia {index + 1}
+                  </button>
                   <button
                     type="button"
                     onClick={() =>
