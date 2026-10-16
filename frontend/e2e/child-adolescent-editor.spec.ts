@@ -132,6 +132,11 @@ for (const option of [{ readOnly: true }, { confirmed: true }])
     await expect(
       page.getByRole("button", { name: "Guardar documento", exact: true })
     ).toBeDisabled();
+    await expect(page.getByLabel("Notas", { exact: true })).toBeDisabled();
+    await expect(page.getByRole("checkbox", { name: "Niños y niñas", exact: true })).toBeDisabled();
+    await expect(
+      page.getByRole("button", { name: "Retirar documento del borrador" })
+    ).toBeDisabled();
     expect(
       await page.evaluate(
         () => (window as any).demo.calls.filter((c: any) => c.options.method === "PATCH").length

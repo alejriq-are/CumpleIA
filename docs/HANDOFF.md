@@ -21,8 +21,9 @@ identifica el HEAD exacto de la tarea. Una CI anterior no prueba un commit nuevo
 Piloto DS-001: ampliar prueba de bloqueo del editor durante una respuesta
 pendiente. Solo frontend/e2e/child-adolescent-editor.spec.ts editable.
 Contrato: docs/ai/tasks/DS-001.json. Contexto: ese test y su componente.
-Estado: piloto API ejecutado; retorno corregido localmente y checks aprobados.
-Ver docs/ai/pilot-results.md. DS-001 terminado; no reenviarlo como tarea pendiente.
+Estado: DS-001 y DS-002 terminados. DS-002 aplicable sin reparacion semantica;
+solo Prettier. Checks dirigidos aprobados. Ver docs/ai/pilot-results.md.
+No reenviar pilotos terminados; ahorro neto ChatGPT aun no demostrado.
 
 Desde raiz y checkout limpio:
 
@@ -31,7 +32,7 @@ Desde raiz y checkout limpio:
 
 Modalidad recomendada por preferencia del usuario: lanzador local + API,
 `python3 scripts/deepseek_run.py ID`. Por defecto prepara sin gasto. Clave dedicada
-y servicio verificados en DS-001; una generacion pagada. Nuevas tareas requieren
+y servicio verificados; dos generaciones pagadas, una por piloto. Nuevas tareas requieren
 contrato y autorizacion de gasto; no hay lote mensual autorizado. Ver
 docs/ai/deepseek-automation.md.
 

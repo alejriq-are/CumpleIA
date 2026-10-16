@@ -80,3 +80,37 @@ requiere revision y reparacion local. No habilitar aplicacion/publicacion desate
 Falta una segunda tarea independiente para validar los ajustes y definir presupuesto
 antes de lotes. No hay comparacion controlada con ChatGPT solo: no afirmar ahorro
 neto ni extrapolar costo por tarea desde esta muestra.
+
+## Ejecucion real DS-002 — 2026-10-15
+
+Base 6c9699408d09cd5d559ddba31aa2a99817a70c10. Contrato DS-002: ampliar
+solo lectura parametrizado para Notas, checkbox y retirada deshabilitados, sin
+PATCH ni cambios a producto. Paquete con un archivo (sin componente redundante).
+Una generacion, sin reintento: 4667 entrada + 576 salida = 5243 tokens, cache 0;
+3.97 segundos para llamada/saldo/validacion. Estimacion USD0.00104565–0.0020913,
+no factura; delta saldo inmediato USD0.00/CNY0.00, cargo exacto no confirmado.
+Evidencia local: /tmp/cumpleia-deepseek/DS-002/ (paquete, respuesta, parche, gasto,
+saldos y snapshots de cuota sin credenciales).
+
+Parche aplicable con offset; ID/HEAD/alcance correctos, checks no_ejecutado.
+Se aplico tal como recibido y pasaron 10 Chromium, type-check y ESLint.
+Prettier fallo; unica correccion local: formato automatico, recheck aprobado.
+Ninguna correccion semantica, segundo envio ni nueva prueba duplicada. Cambios
+finales: cinco lineas de assertions en test existente. No suite backend/protocolo
+repetida: no se modificaron sus implementaciones.
+
+Comparacion observable: tokens Deepseek totales 8874 → 5243 (-40.9%); reparacion
+semantica requerida → ninguna. Tareas parecidas, no identicas: menor contexto y
+menor cambio tambien explican diferencia, no prueba causal de mejora del prompt.
+La primera muestra no midio cuota ChatGPT. DS-002 obtuvo snapshots Codex de cuenta
+86% → 90% en ventana 5h y 29% → 30% semanal, antes del cierre/documentacion/push.
+Son porcentajes redondeados y compartidos, sin tokens/turno, con posibles otras
+sesiones; no atribuirlos como costo exacto ni afirmar ahorro frente a ChatGPT solo.
+No hubo ejecucion control de esta tarea en ChatGPT (evita gastar dos veces).
+
+Decision: conservar revision de Codex; flujo util para ejecucion acotada, ahorro
+neto ChatGPT aun no demostrado. Para reducir coordinacion, preparar varios
+contratos simples en una sola planificacion, ejecutar Deepseek localmente y
+revisar un bloque coherente una vez. Siguiente ensayo: lote con presupuesto
+acordado y registro automatico; no habilitado/autorizado por estas dos pruebas.
+No nuevas mejoras al lanzador en DS-002. EIPD bloqueada; datos ficticios.
