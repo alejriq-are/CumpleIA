@@ -1,73 +1,82 @@
-# Modalidad recomendada: lanzador local + API Deepseek
+# Ejecutor reusable ChatGPT–Deepseek
 
-Estado: implementado; piloto DS-001 con una generacion API real, credencial y
-saldo verificados. Retorno corregido/validado localmente: docs/ai/pilot-results.md.
-No necesita que ChatGPT tenga cuota disponible para preparar o recibir tareas.
-La revision/aceptacion del parche sigue pendiente del responsable con herramientas.
+Decision vigente: delegar bloques coherentes seleccionados caso a caso. No hay
+bloque activo, gasto recurrente ni nueva llamada autorizada por esta mejora.
+ChatGPT define criterios, revisa candidatos y acepta/publica; Deepseek implementa
+el contrato. EIPD bloqueada, solo datos ficticios, sin merge/despliegue.
 
-## Operacion
+## Flujo unico
 
-Desde WSL Ubuntu-24.04, checkout limpio:
+1. Crear contrato versionado desde docs/ai/task-template.json; elegir archivos,
+   criterios, pruebas independientes y presupuesto. Checkout limpio y HEAD exacto.
+2. Preparar sin gasto: `python3 scripts/deepseek_run.py ID`.
+3. Una generacion autorizada, por ejemplo:
 
-    python3 scripts/deepseek_run.py DS-001
+       python3 scripts/deepseek_run.py ID --send --budget-usd 0.20 --max-iterations 2 --output /tmp/ID-HEAD
 
-Genera el paquete y muestra resumen sin consultar API ni leer su clave.
-Resultado en /tmp/cumpleia-deepseek/DS-001-HEAD. Ningun copiar/pegar del contexto.
-Mantener una tarea activa y el mismo directorio para la misma base.
+   El ejemplo no autoriza consumo. Variable privada CUMPLEIA_DEEPSEEK_HANDOFF_KEY,
+   independiente de claves del producto. Windows User debe heredarse a WSL mediante
+   WSLENV; configurar desde PowerShell, no pegar claves en chat/repo. Node/npm
+   existentes deben estar en PATH. Ejecutar herramientas locales desde WSL/Linux.
+4. Revisar candidate.patch y anotar su SHA256. El modelo entrega reemplazos
+   literales {path,old,new}; el ejecutor genera diff. Se admite diff antiguo,
+   checks como lista u objeto, sin aceptar afirmaciones de pruebas ejecutadas.
+5. Validar solo el candidato revisado:
 
-Tras decidir presupuesto y configurar privadamente una clave dedicada en la
-variable CUMPLEIA_DEEPSEEK_HANDOFF_KEY (fuera del chat/repo/producto):
+       python3 scripts/deepseek_validate.py --root . --task docs/ai/tasks/ID.json --base HEAD_COMPLETO --patch /tmp/ID-HEAD/candidate.patch --output /tmp/ID-HEAD/validation --reviewed-sha256 HASH_REVISADO
 
-    python3 scripts/deepseek_run.py DS-001 --send
+   Copia frontend desde Git, excluye .env y no cambia el checkout original.
+   Prettier primero, luego Playwright con pruebas explicitas, tipos y lint. No
+   instala dependencias. Comandos fijos, timeout de grupo de procesos, entorno
+   sin API keys/DB. Hash de fuentes protegidas (incluidas pruebas independientes)
+   y verificacion de que los checks no modifican codigo. No shell del modelo.
+   Esta copia NO es un sandbox del sistema operativo: sigue siendo necesaria la
+   revision de codigo antes de ejecutar. Dependencias locales se reutilizan.
+6. Si hay fallo real, validation.json y feedback.json identifican check/error.
+   Una correccion requiere accion explicita y permiso del bloque vigente:
 
-Una llamada HTTPS a api.deepseek.com, modelo deepseek-flash, pensamiento
-inactivo, JSON y maximo 4096 tokens de salida. Sin herramientas del modelo ni
-reintentos. Reserva request-started.json antes del envio; si hay timeout/fallo,
-se conserva para revisar antes de cualquier repeticion deliberada. No cambiar
-salida para repetir una solicitud cuyo costo/resultado sea incierto.
+       python3 scripts/deepseek_run.py ID --send --output /tmp/ID-HEAD --repair-from /tmp/ID-HEAD/validation
 
-Guarda respuesta/uso y candidate.patch; comprueba ID/HEAD, alcance y aplicabilidad.
-No aplica parche, ejecuta codigo recibido, ni hace commit/push. El modelo API no
-tiene terminal: se rechazan afirmaciones de pruebas ejecutadas. Codex revisa y
-valida el bloque en una sola pasada cuando este disponible. CI no sustituye esa
-revision ni amplifica permisos de Deepseek.
+   Politica de presupuesto y maximo fijada en primera llamada; no se aumenta en
+   correccion. Resultado en repair-2; revisar/validar alli antes de otra correccion.
+   Predeterminado una llamada, maximo tres. No se generan respuestas para corregir
+   formato: lo resuelve Prettier. No editar fixtures/assertions para eludir fallos.
+7. Revisar formatted.patch y resultado checks_passed_pending_acceptance. Eso no
+   autoriza por si mismo aplicar/publicar: ChatGPT decide dentro del permiso del
+   usuario. El ejecutor nunca hace commit, push, merge ni despliegue.
 
-## Presupuesto y requisitos pendientes
+## Limites de gasto y recuperacion
 
-La API cobra consumo desde saldo disponible. El usuario autorizo una prueba;
-falta definir presupuesto para nuevas tareas/lotes. Clave configurada privadamente. No se solicitan claves
-por chat. El modo por defecto no gasta. No se promete un limite monetario estricto:
-4096 tokens y un paquete acotado limitan volumen; costo real depende de tarifas y
-uso devuelto. No hay tope mensual automatico en esta version ni recarga automatica.
-Antes de habilitar un flujo desatendido, acordar control contable del presupuesto
-y validar una llamada real. Nunca confundir una simulacion con operacion verificada.
+Sin --send no se lee clave ni consulta API. Con --send se exige presupuesto
+positivo explicito (CLI o execution.budget_usd del contrato), se reserva volumen
+antes y se guarda gasto por moneda/uso incluso si el retorno es rechazado.
+Admision conservadora por bytes UTF8 + margen y tarifas Flash de referencia
+2026-10-15; NO es un tope monetario de facturacion del proveedor. Verificar tarifas
+antes de cada nuevo bloque; no hay control mensual ni recarga automatica.
+Correcciones restan gasto estimado previo y requieren uso verificable.
 
-Fuentes consultadas 2026-10-15:
+request-started.json reserva cada intento antes de consulta/envio. Timeout o
+fallo incierto bloquea repeticion; no cambiar directorio para duplicarlo.
+HTTP401/saldo no disponible identifica fase sin generacion; requiere resolver
+acceso y revisar artefactos antes de otro intento deliberado. Base obsoleta,
+checkout sucio, ancla old ambigua, candidato distinto al revisado o fuente
+protegida alterada detienen el flujo. No rebase ni normalizacion semantica automatica.
+
+Perfil consolidado: frontend TS/JS existentes, sin altas/bajas/renombres,
+validation.test_files versionados y explicitos; checks que falle detiene los
+siguientes. Backend, migraciones, RLS, reglas legales y EIPD quedan fuera de ese
+perfil. No convertir los prototipos de /tmp en otros ejecutores por tarea.
+
+## Evidencia
+
+Consolidacion probada sin API: 36 unitarias y ensayo con 25 Chromium reales,
+tipos/lint/formato; checkout original intacto. Fecha UTC 2026-10-16, fecha local
+2026-10-15. Transporte simulado para presupuesto, retorno y correccion; bucle
+pagado del ejecutor consolidado aun no probado. Los pilotos previos estan en
+pilot-results.md; comparacion BENCH-001 en benchmarks/BENCH-001.md.
+No gastar otro piloto minimo: validar operacion real cuando haya bloque adecuado.
+
+Fuentes de referencia:
 - https://api-docs.deepseek.com/quick_start/pricing/
 - https://api-docs.deepseek.com/api/create-chat-completion/
-- https://api-docs.deepseek.com/guides/json_mode/
-
-Fallback: traslado manual por chat si el usuario decide no usar saldo API.
-Esta modalidad es independiente de LLM_PROVIDER y de las claves del producto.
-
-## Piloto autorizado con credito existente
-
-Usuario autorizo una prueba pagada DS-001 el 2026-10-15. Captura de Harness:
-USD4.70 recargados y CNY5.39 de bono; no sumar monedas ni asumir que la credencial
-API dedicada comparte ese saldo hasta consultarlo. La clave dedicada no estaba
-configurada en Windows/WSL; no se extrajeron tokens de la sesion de Harness.
-
-Antes/despues se consulta /user/balance; se guardan saldos por moneda, usage del
-modelo y estimacion USD segun tarifas Flash consultadas el 15/10. El delta de
-saldo no acredita por si solo costo exacto si hubo llamadas concurrentes,
-redondeo o liquidacion pendiente. Evitar usar Harness durante la medicion.
-Un parche invalido tambien puede consumir; expense.json se guarda antes de
-validar el contenido. Una sola generacion, sin repeticion automatica.
-Fuente saldo: https://api-docs.deepseek.com/api/get-user-balance/
-
-Clave verificada. En Windows se configura en PowerShell (no Bash); la variable
-User no pasa a WSL por si sola: debe heredarse privadamente mediante WSLENV.
-No pegar la clave en chats/capturas; mantenerla separada de las claves del producto.
-El fallo inicial HTTP401 se resolvio corrigiendo la configuracion, sin generacion.
-DS-001 ya ejecutado: no reenviarlo. Si un diff es corrupto, result.json registra
-rechazo y gasto; el ejecutor revisa, sin aplicar ni repetir automaticamente.
+- https://api-docs.deepseek.com/api/get-user-balance/

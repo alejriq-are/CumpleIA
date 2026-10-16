@@ -32,6 +32,10 @@ Desde raiz y checkout limpio:
     python3 scripts/handoff.py state --remote
     python3 scripts/handoff.py packet --task docs/ai/tasks/DS-001.json --remote > /tmp/CumpleIA-DS-001.json
 
+No hay bloque Deepseek activo. Decision: seleccionar bloques coherentes caso a
+caso; microtareas directas en Codex. Ejecutor consolidado y validado localmente
+sin API: 36 unitarias + 25 Chromium. Guia: docs/ai/deepseek-automation.md.
+
 Modalidad recomendada por preferencia del usuario: lanzador local + API,
 `python3 scripts/deepseek_run.py ID`. Por defecto prepara sin gasto. Clave dedicada
 y servicio verificados; trece generaciones pagadas entre pilotos y BENCH-001. Nuevas tareas requieren

@@ -73,3 +73,14 @@ observado con fecha, nunca promesa de frescura. El script muestra errores de red
 y CI no consultada/no disponible como incertidumbre, no como aprobacion.
 No mover en bloque documentos historicos: mantener enlaces, archivar futuros
 cierres utiles y tratar compactacion existente como otra tarea.
+
+## Decision tras benchmark y ejecutor consolidado
+
+Delegar solo bloques coherentes elegidos caso a caso; no delegacion automatica de
+microtareas ni gasto recurrente. Flujo estable en deepseek-automation.md:
+reemplazos literales/diff, revision por hash, formato determinista, validacion
+aislada y feedback concreto. Pruebas independientes fuera de allowed_files.
+Correccion explicita mantiene presupuesto/base y maximo inicial (1 por defecto,
+hasta 3); nunca duplica solicitudes inciertas. Calidad final y publicacion siguen
+en ChatGPT; el resultado del ejecutor no es autorizacion. Perfil frontend actual;
+no asumir permisos o herramientas de prototipos anteriores.

@@ -4,6 +4,7 @@ on:
     paths:
       - 'scripts/handoff.py'
       - 'scripts/deepseek_run.py'
+      - 'scripts/deepseek_validate.py'
       - 'scripts/tests/**'
       - 'docs/ai/**'
       - 'docs/HANDOFF.md'
@@ -12,6 +13,7 @@ on:
     paths:
       - 'scripts/handoff.py'
       - 'scripts/deepseek_run.py'
+      - 'scripts/deepseek_validate.py'
       - 'scripts/tests/**'
       - 'docs/ai/**'
       - 'docs/HANDOFF.md'
