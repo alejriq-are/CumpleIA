@@ -2115,3 +2115,6 @@ class EipdConfirmationEvidence(Base):
         nullable=False,
         server_default=func.clock_timestamp(),
     )
+
+
+from app.db import organization_acceptance  # noqa: E402,F401

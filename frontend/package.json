@@ -11,7 +11,7 @@
     "format": "prettier --write .",
     "test:e2e": "playwright test",
     "test:e2e:install": "playwright install chromium",
-    "test:eipd-client": "playwright test e2e/eipd-api-client.spec.ts e2e/child-adolescent-editor.spec.ts e2e/child-adolescent-order.acceptance.spec.ts e2e/child-adolescent-field-regressions.spec.ts e2e/child-eipd-history.spec.ts",
+    "test:eipd-client": "playwright test e2e/eipd-api-client.spec.ts e2e/child-adolescent-editor.spec.ts e2e/child-adolescent-order.acceptance.spec.ts e2e/child-adolescent-field-regressions.spec.ts e2e/child-eipd-history.spec.ts e2e/organization-acceptance.spec.ts",
     "test:eipd-consultation": "playwright test e2e/eipd-consultation.spec.ts"
   },
   "dependencies": {

@@ -18,23 +18,20 @@ identifica el HEAD exacto de la tarea. Una CI anterior no prueba un commit nuevo
 
 ## Bloque funcional vigente — producto
 
-16/10: editor completo del documento sucesor EIPD: analisis, declaraciones con
-fundamento, alcance, riesgos/medidas relacionados, fuentes, consulta y evidencias.
-Permite copiar una resolucion guardada a un borrador; guardar crea otra version,
-sin modificar el original. Historial consultable con contenido completo.
-EIPD sigue bloqueada; no cambiar el opt-in del entorno operativo. Pendientes:
-verificacion/aceptacion juridica de politica y criterios de salida a MVP.
-Validacion: 30 pruebas UI/cliente, tipos/lint/formato y recorrido real aislado;
-la integrada compara campos/estructura con el esquema Pydantic vigente.
-Expediente de revision y gates MVP preparado, no aceptado:
-[politica juridica/MVP V2](project/m3-t1-politica-juridica-mvp-v2.md). Fuentes base
-consultadas; instrumentos complementarios no verificados en busqueda acotada.
-Responsabilidad definida: organizacion responsable mediante persona facultada.
-Desarrollar flujo tenant con actores ficticios; no exigir acta real/UUID operativo
-para avanzar. No reutilizar accepted_by global ni promover V1.
-Contrato y checksum verificados sin DB; runtime/politica/opt-in sin cambios.
-Estado y limites: docs/project/status.md (solo entrada operativa) y
-m3-t1-infancia-adolescencia.md. Verificar HEAD/CI actual antes de transferir.
+16/10: aceptacion documental por organizacion implementada para resoluciones
+sucesoras EIPD con infancia. Owner/admin registra facultad explicita por expediente;
+miembro owner/admin/editor facultado registra acepta/rechaza/requiere cambios sobre
+version y hashes exactos. Historial inmutable, revocacion y conflictos serializados.
+No es aceptacion global de politica ni confirmacion/activacion EIPD.
+Validacion: 65 backend enfocadas, 41 UI/cliente, tipos/lint/formato y recorrido
+real Chromium/API/PostgreSQL. Migracion d16a3b7c8e52 aplicada a base aislada y local:
+nueve tablas previas conservan conteos/checksums; opt-in operativo sigue false.
+Contrato, recorrido y pendientes: [aceptacion por organizacion](project/m3-t1-aceptacion-organizacion.md).
+El [modelo juridico V2](project/m3-t1-politica-juridica-mvp-v2.md) queda como contrato
+base versionado, sin alterar su checksum ni afirmar aceptacion real.
+Pendientes: verificacion humana de fuentes y facultades reales, adopcion de otras
+politicas/documentos de M3-T1, gates MVP. Solo datos ficticios; politica tecnica V1
+intacta. Verificar HEAD y CI exactos antes de transferir; CI anterior no basta.
 
 ## Proxima transferencia
 

@@ -59,11 +59,18 @@ revision humana. No se declaran fuentes globalmente verificadas ni politica
 aceptada. Gates G1-G7 propuestos, datos reales y activacion separados.
 Responsabilidad resuelta por el usuario: organizacion responsable mediante persona
 facultada. No hay bloqueo por exigir revisor externo/acta real para desarrollo.
-Pendiente implementar aceptacion tenant con datos ficticios, separada del control
-global; acta real y suficiencia de fuentes corresponden a la salida a MVP.
+Aceptacion tenant implementada para resoluciones sucesoras EIPD con infancia,
+separada del control global; acta real y suficiencia de fuentes siguen pendientes
+para la salida a MVP. Ver [contrato operativo](m3-t1-aceptacion-organizacion.md).
 Runtime y politica infancia V1 intactos.
 
-Pendientes fuera del bloque: revision/aceptacion juridica, alcance y evidencia MVP,
+Aceptacion por organizacion (16/10): facultad explicita, tres decisiones documentales,
+version/hash exactos, revocacion e historial inmutable con RLS. 65 backend enfocadas,
+41 UI/cliente y una integrada real aprobadas. Migracion d16a3b7c8e52 en base aislada
+y desarrollo local; nueve tablas previas con conteo/checksum intacto, nuevas vacias
+en desarrollo. Opt-in operativo sigue false; EIPD bloqueada.
+
+Pendientes fuera del bloque: revision juridica real, otras politicas/documentos, alcance y evidencia MVP,
 demas rutas M3-T1. La composicion V5 y consulta actuales no promueven el
 historial anterior a cobertura infancia. Confirmacion/activacion EIPD bloqueadas. Migracion para datos reales requiere
 criterios MVP, contratos/politica revisados y pruebas previas; no se elimina

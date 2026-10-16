@@ -30,6 +30,8 @@ test("formulario y cliente reales registran una negativa en API aislada", async 
       import {createRoot} from "react-dom/client";
       import {EipdReviewConsultation} from ${JSON.stringify(path.resolve("components/admin/EipdReviewConsultation.tsx"))};
       import {ChildAdolescentEditor} from ${JSON.stringify(path.resolve("components/licitud/ChildAdolescentEditor.tsx"))};
+      import {OrganizationAcceptancePanel} from ${JSON.stringify(path.resolve("components/licitud/OrganizationAcceptancePanel.tsx"))};
+      import {organizationAcceptanceApi as acceptanceApi} from ${JSON.stringify(path.resolve("lib/api/organization-acceptance.ts"))};
       import {ChildEipdHistory} from ${JSON.stringify(path.resolve("components/licitud/ChildEipdHistory.tsx"))};
       import {documentFields} from ${JSON.stringify(path.resolve("lib/licitud/eipd-document.ts"))};
       window.documentFields=documentFields;
@@ -43,6 +45,7 @@ test("formulario y cliente reales registran una negativa en API aislada", async 
         load:async()=>{const [a,p,r]=await Promise.all([childApi.load(context),childEipdApi.policy(context),childEipdApi.list(context)]);return {status:a.status,policy:p,resolutions:r};},
         create:d=>childEipdApi.create(context,d),reviews:r=>childEipdApi.reviews(context,r),review:(r,d,f,ref)=>childEipdApi.review(context,r,d,f,ref),readOnly:false
       }));};
+      window.openAcceptance=(s,r)=>{const context=scope(s);root.render(React.createElement(OrganizationAcceptancePanel,{load:()=>acceptanceApi.load(context,r),designate:(actor,p)=>acceptanceApi.designate(context,actor,p),record:(actor,p)=>acceptanceApi.record(context,r,actor,p),readOnly:false}));};
       root.render(React.createElement(EipdReviewConsultation,{
         loadPreparation:s=>eipdReviewApi.preparation(scope(s)),
         loadEvent:(s,id)=>eipdReviewApi.event(scope(s),id),
@@ -255,6 +258,44 @@ test("formulario y cliente reales registran una negativa en API aislada", async 
     expect(successor.event.can_confirm).toBe(false);
     expect(successor.event.authorizes_action).toBe(false);
 
+    await page.evaluate(({ s, r }) => (window as any).openAcceptance(s, r), {
+      s: {
+        organizationId: process.env.CUMPLEIA_UI_ORG!,
+        treatmentId: process.env.CUMPLEIA_UI_TREATMENT!,
+        assessmentId: process.env.CUMPLEIA_UI_ASSESSMENT!,
+      },
+      r: successor.resolution,
+    });
+    await page
+      .getByRole("checkbox", { name: "Declaro datos ficticios para la aceptación" })
+      .check();
+    await expect(
+      page.getByRole("button", { name: "Registrar decisión documental ficticia", exact: true })
+    ).toBeDisabled();
+    await page
+      .getByLabel("Referencia de la facultad", { exact: true })
+      .fill("PRUEBA: facultad integrada");
+    await page
+      .getByLabel("Evidencia de la facultad", { exact: true })
+      .fill("PRUEBA: evidencia facultad integrada");
+    await page.getByRole("button", { name: "Registrar facultad ficticia", exact: true }).click();
+    await expect(page.getByRole("status")).toContainText("Facultad de prueba registrada");
+    await page
+      .getByLabel("Fundamento de la decisión", { exact: true })
+      .fill("PRUEBA: aceptación documental integrada");
+    await page
+      .getByLabel("Referencia del acta ficticia", { exact: true })
+      .fill("PRUEBA-ACTA-INTEGRADA");
+    await page
+      .getByRole("button", { name: "Registrar decisión documental ficticia", exact: true })
+      .click();
+    await expect(page.getByRole("status")).toContainText(
+      "Decisión documental de prueba registrada"
+    );
+    await page
+      .getByRole("button", { name: "Actualizar aceptación de organización", exact: true })
+      .click();
+    await expect(page.getByText("PRUEBA-ACTA-INTEGRADA", { exact: true })).toBeVisible();
     await expect(page.getByRole("button", { name: /confirmar|activar|^Continuar$/i })).toHaveCount(
       0
     );

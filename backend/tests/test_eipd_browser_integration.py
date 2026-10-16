@@ -113,6 +113,31 @@ async def test_real_client_form_records_isolated_negative_event(
                 profile_a_id,
             )
 
+            acceptances = (
+                await db.execute(
+                    text(
+                        "SELECT decision,actor_id,created_by,evidence_reference FROM organization_document_acceptances WHERE assessment_id=:id"
+                    ),
+                    {"id": prepared[1]["id"]},
+                )
+            ).all()
+            assert len(acceptances) == 1
+            assert tuple(acceptances[0]) == (
+                "acepta",
+                profile_a_id,
+                profile_a_id,
+                "PRUEBA-ACTA-INTEGRADA",
+            )
+            assert (
+                await db.scalar(
+                    text(
+                        "SELECT count(*) FROM organization_acceptance_authorities WHERE assessment_id=:id AND action='otorgar'"
+                    ),
+                    {"id": prepared[1]["id"]},
+                )
+                == 1
+            )
+
             assert (
                 await db.scalar(
                     text(

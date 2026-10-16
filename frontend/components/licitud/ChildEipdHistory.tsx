@@ -1,4 +1,5 @@
 "use client";
+import { type ReactNode } from "react";
 import { EipdDocumentFields, EipdDocumentView } from "./EipdDocumentFields";
 import { useEffect, useRef, useState } from "react";
 import { ApiError } from "@/lib/api/client";
@@ -11,6 +12,7 @@ import type {
 } from "@/lib/api/child-eipd";
 type Snapshot = { policy: ChildPolicy; resolutions: ChildResolution[]; status: string };
 type Props = {
+  organizationAcceptance?: (resolution: ChildResolution, readOnly: boolean) => ReactNode;
   load: () => Promise<Snapshot>;
   create: (draft: ResolutionDraft) => Promise<ChildResolution>;
   reviews: (resolution: ChildResolution) => Promise<ChildReview[]>;
@@ -42,7 +44,14 @@ function problem(error: unknown) {
     return "No tienes permiso para registrar este evento. Conservamos el formulario.";
   return "No se pudo completar la operación. Conservamos el formulario.";
 }
-export function ChildEipdHistory({ load, create, reviews, review, readOnly }: Props) {
+export function ChildEipdHistory({
+  load,
+  create,
+  reviews,
+  review,
+  readOnly,
+  organizationAcceptance,
+}: Props) {
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
   const [selected, setSelected] = useState<ChildResolution | null>(null);
   const [events, setEvents] = useState<ChildReview[]>([]);
@@ -289,6 +298,7 @@ export function ChildEipdHistory({ load, create, reviews, review, readOnly }: Pr
             <>
               <h3 className="font-semibold">Resolución {selected.version} consultada</h3>
               <EipdDocumentView value={selected.document} />
+              {organizationAcceptance?.(selected, !editable || readOnly)}
               <button
                 type="button"
                 disabled={!editable || busy}

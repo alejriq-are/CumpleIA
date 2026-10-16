@@ -1,5 +1,7 @@
 "use client";
 import { useCallback } from "react";
+import { OrganizationAcceptancePanel } from "./OrganizationAcceptancePanel";
+import { organizationAcceptanceApi } from "@/lib/api/organization-acceptance";
 import { ChildEipdHistory } from "./ChildEipdHistory";
 import {
   childEipdApi,
@@ -59,6 +61,17 @@ export function ChildAdolescentPage({
     ) => childEipdApi.review(await scope(), resolution, decision, rationale, reference),
     [scope]
   );
+  const organizationAcceptance = useCallback(
+    (resolution: ChildResolution, historyReadOnly: boolean) => (
+      <AcceptanceForResolution
+        key={resolution.id}
+        readOnly={readOnly || historyReadOnly}
+        scope={scope}
+        resolution={resolution}
+      />
+    ),
+    [readOnly, scope]
+  );
   return (
     <div key={`${organizationId}:${treatmentId}:${assessmentId}`} className="space-y-6">
       <ChildAdolescentEditor
@@ -74,7 +87,48 @@ export function ChildAdolescentPage({
         reviews={loadReviews}
         review={createReview}
         readOnly={readOnly}
+        organizationAcceptance={organizationAcceptance}
       />
     </div>
+  );
+}
+
+function AcceptanceForResolution({
+  scope,
+  resolution,
+  readOnly,
+}: {
+  scope: () => Promise<import("@/lib/api/child-adolescent").ChildScope>;
+  resolution: ChildResolution;
+  readOnly: boolean;
+}) {
+  const load = useCallback(
+    async () => organizationAcceptanceApi.load(await scope(), resolution),
+    [scope, resolution]
+  );
+  const designate = useCallback(
+    async (actor: string, p: import("@/lib/api/organization-acceptance").Designation) =>
+      organizationAcceptanceApi.designate(await scope(), actor, p),
+    [scope]
+  );
+  const record = useCallback(
+    async (
+      actor: string,
+      p: {
+        authority_id: string;
+        decision: import("@/lib/api/organization-acceptance").Acceptance["decision"];
+        rationale: string;
+        evidence_reference: string;
+      }
+    ) => organizationAcceptanceApi.record(await scope(), resolution, actor, p),
+    [scope, resolution]
+  );
+  return (
+    <OrganizationAcceptancePanel
+      load={load}
+      designate={designate}
+      record={record}
+      readOnly={readOnly}
+    />
   );
 }
