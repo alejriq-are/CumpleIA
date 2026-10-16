@@ -1,0 +1,410 @@
+{
+  "id": "BENCH-001",
+  "base_head": "6ee359a237f9e69b92aeda3e530b0136c3c4acc9",
+  "scope": "three matched pairs of small UI test-writing blocks",
+  "date_utc": "2026-10-16",
+  "blocks": [
+    {
+      "id": "L1",
+      "arm": "Codex",
+      "pair": 1,
+      "ui_passed": 3,
+      "checks": {
+        "format": 0,
+        "ui": 0,
+        "types": 0,
+        "lint": 0
+      },
+      "mutation_detected": true,
+      "mutation_kind": "drop_field_update",
+      "wall_seconds_including_coordination": 16.71,
+      "source_chars": 931,
+      "manual_semantic_corrections": 0,
+      "fixed_formatter": true,
+      "calls": 0,
+      "codex_account_primary_delta_pp": 2,
+      "codex_account_weekly_delta_pp": 0,
+      "first_delivery_accepted": true,
+      "caveats": []
+    },
+    {
+      "id": "D1",
+      "arm": "Deepseek",
+      "pair": 1,
+      "ui_passed": 3,
+      "checks": {
+        "format": 0,
+        "ui": 0,
+        "types": 0,
+        "lint": 0
+      },
+      "mutation_detected": true,
+      "mutation_kind": "drop_field_update",
+      "wall_seconds_including_coordination": 78.82,
+      "source_chars": 1009,
+      "manual_semantic_corrections": 0,
+      "fixed_formatter": true,
+      "calls": 2,
+      "codex_account_primary_delta_pp": 6,
+      "codex_account_weekly_delta_pp": 1,
+      "first_delivery_accepted": false,
+      "caveats": []
+    },
+    {
+      "id": "D2",
+      "arm": "Deepseek",
+      "pair": 2,
+      "ui_passed": 3,
+      "checks": {
+        "format": 0,
+        "ui": 0,
+        "types": 0,
+        "lint": 0
+      },
+      "mutation_detected": true,
+      "mutation_kind": "drop_field_update",
+      "wall_seconds_including_coordination": 208.11,
+      "source_chars": 1136,
+      "manual_semantic_corrections": 1,
+      "fixed_formatter": true,
+      "calls": 2,
+      "codex_account_primary_delta_pp": 13,
+      "codex_account_weekly_delta_pp": 2,
+      "first_delivery_accepted": false,
+      "caveats": [
+        "protocol locator failure, timeout, Codex repair, later local block learned from diagnosis"
+      ]
+    },
+    {
+      "id": "L2",
+      "arm": "Codex",
+      "pair": 2,
+      "ui_passed": 3,
+      "checks": {
+        "format": 0,
+        "ui": 0,
+        "types": 0,
+        "lint": 0
+      },
+      "mutation_detected": true,
+      "mutation_kind": "drop_field_update",
+      "wall_seconds_including_coordination": 18.03,
+      "source_chars": 989,
+      "manual_semantic_corrections": 0,
+      "fixed_formatter": true,
+      "calls": 0,
+      "codex_account_primary_delta_pp": 1,
+      "codex_account_weekly_delta_pp": 1,
+      "first_delivery_accepted": true,
+      "caveats": [
+        "local block learned from D2 locator diagnosis"
+      ]
+    },
+    {
+      "id": "L3",
+      "arm": "Codex",
+      "pair": 3,
+      "ui_passed": 3,
+      "checks": {
+        "format": 0,
+        "ui": 0,
+        "types": 0,
+        "lint": 0
+      },
+      "mutation_detected": true,
+      "mutation_kind": "drop_field_update",
+      "wall_seconds_including_coordination": 16.99,
+      "source_chars": 893,
+      "manual_semantic_corrections": 0,
+      "fixed_formatter": true,
+      "calls": 0,
+      "codex_account_primary_delta_pp": 2,
+      "codex_account_weekly_delta_pp": 0,
+      "first_delivery_accepted": true,
+      "caveats": []
+    },
+    {
+      "id": "D3",
+      "arm": "Deepseek",
+      "pair": 3,
+      "ui_passed": 3,
+      "checks": {
+        "format": 0,
+        "ui": 0,
+        "types": 0,
+        "lint": 0
+      },
+      "mutation_detected": true,
+      "mutation_kind": "drop_field_update",
+      "wall_seconds_including_coordination": 39.82,
+      "source_chars": 1295,
+      "manual_semantic_corrections": 0,
+      "fixed_formatter": true,
+      "calls": 1,
+      "codex_account_primary_delta_pp": 3,
+      "codex_account_weekly_delta_pp": 0,
+      "first_delivery_accepted": true,
+      "caveats": []
+    }
+  ],
+  "quota_samples": [
+    {
+      "block": "L1",
+      "phase": "before",
+      "primary": {
+        "usedPercent": 33,
+        "windowDurationMins": 300,
+        "resetsAt": 1792128422
+      },
+      "secondary": {
+        "usedPercent": 5,
+        "windowDurationMins": 10080,
+        "resetsAt": 1792715222
+      },
+      "observed_at": "2026-10-16 00:48:47 UTC"
+    },
+    {
+      "block": "L1",
+      "phase": "after",
+      "primary": {
+        "usedPercent": 35,
+        "windowDurationMins": 300,
+        "resetsAt": 1792128422
+      },
+      "secondary": {
+        "usedPercent": 5,
+        "windowDurationMins": 10080,
+        "resetsAt": 1792715222
+      },
+      "observed_at": "2026-10-16 00:49:14 UTC"
+    },
+    {
+      "block": "D1",
+      "phase": "before",
+      "primary": {
+        "usedPercent": 35,
+        "windowDurationMins": 300,
+        "resetsAt": 1792128422
+      },
+      "secondary": {
+        "usedPercent": 5,
+        "windowDurationMins": 10080,
+        "resetsAt": 1792715222
+      },
+      "observed_at": "2026-10-16 00:49:15 UTC"
+    },
+    {
+      "block": "D1",
+      "phase": "after",
+      "primary": {
+        "usedPercent": 41,
+        "windowDurationMins": 300,
+        "resetsAt": 1792128422
+      },
+      "secondary": {
+        "usedPercent": 6,
+        "windowDurationMins": 10080,
+        "resetsAt": 1792715222
+      },
+      "observed_at": "2026-10-16 00:50:39 UTC"
+    },
+    {
+      "block": "D2",
+      "phase": "before",
+      "primary": {
+        "usedPercent": 41,
+        "windowDurationMins": 300,
+        "resetsAt": 1792128422
+      },
+      "secondary": {
+        "usedPercent": 6,
+        "windowDurationMins": 10080,
+        "resetsAt": 1792715222
+      },
+      "observed_at": "2026-10-16 00:50:40 UTC"
+    },
+    {
+      "block": "D2",
+      "phase": "after",
+      "primary": {
+        "usedPercent": 54,
+        "windowDurationMins": 300,
+        "resetsAt": 1792128422
+      },
+      "secondary": {
+        "usedPercent": 8,
+        "windowDurationMins": 10080,
+        "resetsAt": 1792715222
+      },
+      "observed_at": "2026-10-16 00:54:18 UTC"
+    },
+    {
+      "block": "L2",
+      "phase": "before",
+      "primary": {
+        "usedPercent": 54,
+        "windowDurationMins": 300,
+        "resetsAt": 1792128422
+      },
+      "secondary": {
+        "usedPercent": 8,
+        "windowDurationMins": 10080,
+        "resetsAt": 1792715222
+      },
+      "observed_at": "2026-10-16 00:54:18 UTC"
+    },
+    {
+      "block": "L2",
+      "phase": "after",
+      "primary": {
+        "usedPercent": 55,
+        "windowDurationMins": 300,
+        "resetsAt": 1792128423
+      },
+      "secondary": {
+        "usedPercent": 9,
+        "windowDurationMins": 10080,
+        "resetsAt": 1792715223
+      },
+      "observed_at": "2026-10-16 00:54:48 UTC"
+    },
+    {
+      "block": "L3",
+      "phase": "before",
+      "primary": {
+        "usedPercent": 55,
+        "windowDurationMins": 300,
+        "resetsAt": 1792128422
+      },
+      "secondary": {
+        "usedPercent": 9,
+        "windowDurationMins": 10080,
+        "resetsAt": 1792715222
+      },
+      "observed_at": "2026-10-16 00:54:50 UTC"
+    },
+    {
+      "block": "L3",
+      "phase": "after",
+      "primary": {
+        "usedPercent": 57,
+        "windowDurationMins": 300,
+        "resetsAt": 1792128422
+      },
+      "secondary": {
+        "usedPercent": 9,
+        "windowDurationMins": 10080,
+        "resetsAt": 1792715222
+      },
+      "observed_at": "2026-10-16 00:55:17 UTC"
+    },
+    {
+      "block": "D3",
+      "phase": "before",
+      "primary": {
+        "usedPercent": 57,
+        "windowDurationMins": 300,
+        "resetsAt": 1792128422
+      },
+      "secondary": {
+        "usedPercent": 9,
+        "windowDurationMins": 10080,
+        "resetsAt": 1792715222
+      },
+      "observed_at": "2026-10-16 00:55:18 UTC"
+    },
+    {
+      "block": "D3",
+      "phase": "after",
+      "primary": {
+        "usedPercent": 60,
+        "windowDurationMins": 300,
+        "resetsAt": 1792128422
+      },
+      "secondary": {
+        "usedPercent": 9,
+        "windowDurationMins": 10080,
+        "resetsAt": 1792715222
+      },
+      "observed_at": "2026-10-16 00:56:03 UTC"
+    }
+  ],
+  "aggregate": {
+    "local_observed_primary_delta_pp": 5,
+    "delegated_observed_primary_delta_pp": 22,
+    "common_preparation_observed_primary_delta_pp": 5,
+    "common_preparation_scope": "first account snapshot 28%, block L1 begins at 33%; includes protocol/adapter/docs research",
+    "closing_excluded_from_block_deltas": true,
+    "api_calls": 5,
+    "api_tokens": 37499,
+    "estimated_peak_usd": "0.010767792",
+    "estimated_off_peak_usd": "0.005383896",
+    "budget_reference_usd": "0.20",
+    "provider_usage_by_call": [
+      {
+        "prompt_tokens": 6133,
+        "completion_tokens": 504,
+        "total_tokens": 6637,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 6133
+      },
+      {
+        "prompt_tokens": 7851,
+        "completion_tokens": 447,
+        "total_tokens": 8298,
+        "prompt_tokens_details": {
+          "cached_tokens": 6016
+        },
+        "prompt_cache_hit_tokens": 6016,
+        "prompt_cache_miss_tokens": 1835
+      },
+      {
+        "prompt_tokens": 6134,
+        "completion_tokens": 1329,
+        "total_tokens": 7463,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 6134
+      },
+      {
+        "prompt_tokens": 7795,
+        "completion_tokens": 579,
+        "total_tokens": 8374,
+        "prompt_tokens_details": {
+          "cached_tokens": 6016
+        },
+        "prompt_cache_hit_tokens": 6016,
+        "prompt_cache_miss_tokens": 1779
+      },
+      {
+        "prompt_tokens": 6191,
+        "completion_tokens": 536,
+        "total_tokens": 6727,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 6191
+      }
+    ],
+    "local_tests_passed": 9,
+    "delegated_tests_passed": 9,
+    "mutation_blocks_detected": 6,
+    "local_first_delivery_success": 3,
+    "delegated_first_delivery_success": 1
+  },
+  "limitations": [
+    "rounded account-shared snapshots, not per-task OpenAI tokens or dollar cost",
+    "other sessions not verifiably excluded, usage reporting lag possible",
+    "same long chat, no independent sessions, task learning/cache/order effects",
+    "3 pairs only, not statistically significant; tasks similar not identical",
+    "pair 2 protocol defect confounds causal comparison; retain raw evidence",
+    "adapting executor still required; this is not a zero-setup steady-state benchmark"
+  ],
+  "conclusion": "no measured operational savings in this small-block workflow; cannot estimate causal token savings or generalize to larger product features"
+}

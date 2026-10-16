@@ -23,7 +23,9 @@ Estado: DS-001 a DS-005 terminados. DS-005 agrega reordenacion de evidencia;
 final de Codex. El bucle Deepseek se detuvo tras tres fallos de formato;
 no acredita autonomia completa. Ver docs/ai/pilot-results.md y results/DS-005.json.
 Permisos acotados, no agente general; no reenviar pilotos terminados.
-Ahorro neto ChatGPT aun no demostrado.
+BENCH-001: tres pares pequenos, 5 puntos cuota local vs 22 delegados; no ahorro
+observado, cuota compartida y par 2 contaminado. No extrapolar. Informe:
+docs/ai/benchmarks/BENCH-001.md. 18 regresiones nuevas, comando CI 91 aprobadas.
 
 Desde raiz y checkout limpio:
 
@@ -32,7 +34,7 @@ Desde raiz y checkout limpio:
 
 Modalidad recomendada por preferencia del usuario: lanzador local + API,
 `python3 scripts/deepseek_run.py ID`. Por defecto prepara sin gasto. Clave dedicada
-y servicio verificados; ocho generaciones pagadas entre cinco pilotos/bloques. Nuevas tareas requieren
+y servicio verificados; trece generaciones pagadas entre pilotos y BENCH-001. Nuevas tareas requieren
 contrato y autorizacion de gasto; no hay lote mensual autorizado. Ver
 docs/ai/deepseek-automation.md.
 
