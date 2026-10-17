@@ -3,7 +3,7 @@
 import uuid
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Header, status
+from fastapi import APIRouter, Depends, Header, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.deps import require_active_subscription, require_permission
@@ -34,6 +34,7 @@ from app.schemas.licitud import (
     EipdResolutionReviewOut,
     EipdResolutionReviewOutV2,
     EipdResolutionReviewOutV3,
+    LegalAssessmentSummaryOut,
 )
 from app.schemas.mvp_dossier import MvpDossierOut
 from app.schemas.organization_acceptance import (
@@ -76,6 +77,23 @@ async def crear_borrador(
 ):
     return await service.create_legal_assessment_draft_v1(
         db, x_organization_id, treatment_id, profile.id, payload
+    )
+
+
+@router.get(
+    "/treatments/{treatment_id}/assessments",
+    response_model=list[LegalAssessmentSummaryOut],
+)
+async def listar_evaluaciones(
+    treatment_id: uuid.UUID,
+    x_organization_id: Annotated[uuid.UUID, Header()],
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=50, ge=1, le=100),
+    profile: Profile = Depends(require_permission(Permission.view_content)),
+    db: AsyncSession = Depends(get_db),
+):
+    return await service.list_legal_assessments_v1(
+        db, x_organization_id, treatment_id, offset, limit
     )
 
 

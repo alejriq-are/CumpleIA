@@ -1326,6 +1326,19 @@ class RatContextSnapshotV1(BaseModel):
     special_regimes: RatSnapshotSpecialRegimesV1
 
 
+class LegalAssessmentSummaryOut(BaseModel):
+    """Indice de versiones; no expone documentos completos en el listado."""
+
+    model_config = ConfigDict(from_attributes=True)
+    id: uuid.UUID
+    treatment_id: uuid.UUID
+    organization_id: uuid.UUID
+    version: int
+    status: LegalAssessmentStatus
+    purpose_snapshot: str
+    legal_basis: LegalBasis | None
+
+
 class LegalAssessmentOut(BaseModel):
     """Expediente de una versión M3, incluidas las versiones históricas."""
 

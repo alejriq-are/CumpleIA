@@ -15,8 +15,8 @@ const MODULOS = [
   },
   {
     titulo: "Bases de licitud",
-    descripcion: "Clasificación jurídica de cada tratamiento y generación de LIA.",
-    href: null,
+    descripcion: "Evaluaciones en borrador, fundamentos y documentación LIA de cada tratamiento.",
+    href: "/dashboard/licitud",
   },
   {
     titulo: "Documentos",

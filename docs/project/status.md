@@ -1,3 +1,15 @@
+## Bloque vigente 17/10 — recorrido de Bases de licitud en frontend
+
+Panel enlaza `/dashboard/licitud`: organizacion, tratamiento RAT, indice de
+versiones paginado y crear borrador con finalidad/alcance. Expediente permite
+editar base/fundamento y nueve analisis principales LIA, preserva campos previos
+y enlaza paneles existentes de infancia/revisiones/dossier. No equivale a un
+formulario completo de cada base ni valida juridicamente la documentacion.
+Cinco UI, tres API y dos integradas Chromium/API/PostgreSQL aprobadas; tipos,
+lint/formato. EIPD/datos reales bloqueados; sin migraciones/merge/despliegue.
+[Contrato y prueba manual](m3-t1-recorrido-frontend.md). Pendiente recorrido del
+usuario con empresa ficticia y CI del candidato por HEAD; previa bea0006 success.
+
 ## Bloque vigente 16/10 — piloto ficticio con historial poblado
 
 Recorrido local fijo aprobado: RAT/licitud-LIA en borrador para clientes y

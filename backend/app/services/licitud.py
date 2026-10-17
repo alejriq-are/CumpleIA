@@ -1016,6 +1016,32 @@ async def build_rat_context_bundle_from_m2_v1(
     )
 
 
+async def list_legal_assessments_v1(
+    db, organization_id, treatment_id, offset=0, limit=50
+):
+    """Indice acotado por tenant, tratamiento y pagina; mismo permiso de lectura."""
+    await rat_service.obtener_tratamiento(db, organization_id, treatment_id)
+    result = await db.execute(
+        select(
+            LegalAssessment.id,
+            LegalAssessment.treatment_id,
+            LegalAssessment.organization_id,
+            LegalAssessment.version,
+            LegalAssessment.status,
+            LegalAssessment.purpose_snapshot,
+            LegalAssessment.legal_basis,
+        )
+        .where(
+            LegalAssessment.organization_id == organization_id,
+            LegalAssessment.treatment_id == treatment_id,
+        )
+        .order_by(LegalAssessment.version.desc(), LegalAssessment.id)
+        .offset(offset)
+        .limit(limit)
+    )
+    return result.mappings().all()
+
+
 async def get_legal_assessment_v1(
     db: AsyncSession,
     organization_id: uuid.UUID,

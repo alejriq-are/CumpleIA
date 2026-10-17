@@ -27,6 +27,7 @@ def main():
             "pytest",
             "-q",
             "tests/test_eipd_browser_integration.py",
+            "tests/test_licitud_browser_integration.py",
         ],
         env=env,
     ).returncode
