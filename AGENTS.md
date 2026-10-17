@@ -3,8 +3,8 @@
 ## 1. Antes de tocar código
 
 1. Ejecuta `git fetch` y verifica rama/HEAD/estado.
-2. Lee `docs/PROJECT_STATUS.md` o, si aún no fue incorporado al repo activo, el `PROJECT_STATUS.md` de este paquete.
-3. Lee los ADR vigentes.
+2. Lee `docs/HANDOFF.md` y el contrato de la tarea activa; estado amplio en `docs/project/status.md`.
+3. Lee los ADR vigentes aplicables, incluido `docs/adr/0003-handoff-chatgpt-deepseek.md`.
 4. Revisa `docs/backlog.md`, pero confirma cualquier afirmación contra código/Git porque el snapshot revisado contiene drift documental.
 5. No tomes notas históricas fechadas como estado vivo.
 
@@ -44,8 +44,23 @@
 
 ## 6. Estado funcional asumible solo tras verificar código
 
-Módulo 1 está construido en este snapshot. Módulos 2-5 tienen modelos/scaffolding, no funcionalidad completa. Nunca declares una feature “hecha” solo porque existe una tabla.
+El estado funcional se verifica en Git/pruebas y se resume en `docs/HANDOFF.md` y `docs/project/status.md`. Nunca declares una feature “hecha” solo porque existe una tabla.
 
 ## 7. Documentación
 
 Cuando una tarea cambia capacidad del sistema, actualiza documentación neutral. Evita crear otro archivo de estado fechado en la raíz; usa `docs/archive/` para historia.
+
+## 8. Gobernanza y handoff
+
+Roles activos: usuario, ChatGPT/Codex y Deepseek. Aplicar
+`docs/ai/handoff-contract.md`: separar jerarquia de reglas de evidencia; accesos
+por sesion; un responsable por tarea. Deepseek entrega parches acotados; Codex
+revisa/valida/publica solo con autorizacion del usuario. EIPD bloqueada, datos
+ficticios y ningun merge/despliegue. No inferir permisos por una CI aprobada.
+Reglas comunes antes distribuidas en CLAUDE.md: monolito modular; TLS en transito
+y cifrado en reposo; metadatos auditables segun contrato; no loguear
+secretos/datos personales; no almacenar sensibles en localStorage/sessionStorage;
+validar JWT/permisos en servidor; contenido legal anclado con revision humana;
+texto visible en espanol Chile; Python ruff/black, TypeScript ESLint/Prettier;
+commits Conventional Commits. No agregar cuentas, servicios/dependencias ni
+credenciales sin necesidad y autorizacion aplicable. Mantener evidencia append-only.

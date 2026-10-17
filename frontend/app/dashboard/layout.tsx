@@ -16,16 +16,16 @@ export default async function DashboardLayout({ children }: { children: React.Re
   return (
     <div className="min-h-screen bg-gray-50">
       <nav className="border-b border-gray-200 bg-white px-6 py-4">
-        <div className="mx-auto flex max-w-6xl items-center justify-between">
+        <div className="mx-auto flex max-w-6xl flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
           <span className="text-xl font-bold text-blue-800">CumpleIA</span>
-          <div className="flex items-center gap-4">
+          <div className="flex w-full min-w-0 flex-col items-start gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
             <Link
               href="/dashboard/organizacion"
-              className="text-sm text-gray-500 hover:text-gray-700"
+              className="shrink-0 text-sm text-gray-500 hover:text-gray-700"
             >
               Mi organización
             </Link>
-            <span className="text-sm text-gray-500">{user.email}</span>
+            <span className="min-w-0 max-w-full break-all text-sm text-gray-500">{user.email}</span>
             <SignOutButton />
           </div>
         </div>

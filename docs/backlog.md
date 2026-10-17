@@ -159,3 +159,707 @@ El anexo de respuestas crudas y, en general, cualquier bitácora de auditoría f
 - [x] Next production build PASS.
 
 **Siguiente:** M2-T3.3 — finalidades, categorías de datos, titulares y fuentes.
+
+
+## Módulo 3 — M3-T1, persistencia y reglas de bases de licitud
+
+**Estado:** EN PROGRESO (revisión 2026-10-06).
+
+Matriz de implementación, evidencia y brechas en
+[Revisión de aceptación M3-T1](project/m3-t1-revision-aceptacion.md).
+Diseño y alcance en [Bases de licitud](project/modulo3-licitud-diseno.md).
+Suite completa backend de CI: 3977 passed en commit 7f94bbf (§232); no acredita cierre integral ni los commits posteriores.
+
+- [x] Núcleo persistente, alcance por finalidad, snapshot/hash, RLS y lifecycle.
+- [x] Seis bases ordinarias; geolocalización y consentimiento expreso sensible
+  del titular con preparación, asociaciones y barreras de confirmación.
+- [x] Screening EIPD; positivos/pendientes mantienen bloqueo.
+- [x] Completar evidencia HTTP conjunta sensible/geolocalización (4 casos
+  focalizados aprobados: pérdida de preparación, EIPD y conservación/reemplazo).
+- [x] Ampliar concurrencia con constructor RAT real: consentimiento con
+  sensibilidad/geolocalización, 8 casos nuevos; otras cinco bases conservan
+  cobertura de concurrencia con RAT simulado.
+- [x] Priorizar próximo régimen: salud/perfil biológico; primer alcance
+  documental por consentimiento expreso, diseño §31.
+- [x] Definir contrato/matriz documental de salud (§32).
+- [x] Implementar schema de salud y pruebas (§33: 49 pruebas nuevas).
+- [x] Persistencia/exposición de salud y asociaciones compatibles (§34).
+- [x] Evaluador de salud y readiness (§35).
+- [x] Integración del gate de salud para primer soporte; restricciones y EIPD conservados (§36).
+- [x] HTTP conjunto salud/sensible/geolocalización y concurrencia de salud con RAT real
+  por consentimiento_art12/contexto otro (§37: 18 casos nuevos; 35 verificaciones focalizadas).
+- [x] Revisar alcance de representación sensible y criterios de cierre M3-T1 (§38);
+  revisión no equivale a cierre ni habilita representación.
+- [x] Verificar por HTTP representante_legal/mandatario en sensible, con y sin salud:
+  rechazo, conservación del vigente y reparación a titular.
+- [x] Validación integral posterior a representación (§39): 1429 passed.
+- [x] Revisión focalizada de cambios y cadena Alembic (§40): head aplicado,
+  46 archivos con formato/lint correctos; tablas M3 sin diferencias autogenerate.
+- [x] Investigar/corregir drift global de metadata sin eliminar índices (§41):
+  29 índices declarados y nombre de unique alineado; alembic check aprobado.
+- [x] Preparar propuesta concreta de entrega inicial y pendientes (§42):
+  [Propuesta de alcance](project/m3-t1-propuesta-entrega.md).
+- [x] Decisión explícita: continuar alcance integral (§43); entrega inicial no
+  adoptada como recorte de cierre.
+- [x] Actualizar aceptación según decisión integral (§43).
+- [x] Biometría: contrato/matriz de primera ruta consentimiento expreso (§44).
+- [x] Biometría: schemas y pruebas (§45: 53 casos nuevos; 150 contratos aprobados).
+- [x] Biometría: persistencia/API/asociaciones compatibles (§46): diez casos HTTP;
+  suite integral 1492 passed y Alembic check aprobado.
+- [x] Biometría: evaluador puro/readiness (§47): 73 pruebas puras y un caso HTTP
+  nuevos; suite integral 1566 passed.
+- [x] Biometría: integrar gate/EIPD y HTTP de primera ruta (§48): 19 pruebas
+  transversales nuevas; suite integral 1585 passed.
+- [x] Biometría: HTTP seis bases y concurrencia con RAT real (§49): 22 casos
+  nuevos; 58 verificaciones focalizadas. Concurrencia real: consentimiento_art12.
+- [x] Delimitar primera excepción biométrica: derechos art16ter -> art16bis(d),
+  con dependencia sensible art16d y barrera EIPD conservada (§50).
+- [x] Diseñar contratos/matriz de excepción sensible y biométrica de derechos (§51).
+- [x] Implementar schemas/pruebas de ambas excepciones (§52): 102 casos nuevos,
+  252 contratos seleccionados aprobados.
+- [x] Persistencia/API de ambas excepciones (§53), con barrera explicita
+  mientras falta cobertura de asociaciones y tres casos HTTP aprobados.
+- [x] Asociaciones especiales v10/EIPD v11 de ambas excepciones (§54), con
+  comparadores historicos, obsolescencia y reaporte explicito; 118 casos nuevos.
+- [x] Evaluador puro de preparacion/aplicabilidad sensible de derechos (§55);
+  172 casos aprobados, sin habilitar confirmacion.
+- [x] Readiness e integracion sensible en detector/gates (§56), residualidad
+  explicita en ambos sentidos y EIPD conservado; doce casos nuevos.
+- [x] Evaluador puro biometrico de derechos y vinculos sensibles (§57),
+  208 casos aprobados, sin habilitar confirmacion.
+- [x] Readiness e integracion biometrica en detector/gates (§58), residualidad
+  explicita y EIPD conservado; doce casos nuevos, sin confirmar excepciones.
+- [x] Delimitar resolucion EIPD acotada (§59): registro externo, revision humana
+  trazable y gate separado; screening positivo conservado, sin habilitacion actual.
+- [ ] Contratos/matriz, schemas, persistencia/eventos y evaluadores de resolucion
+  EIPD; aislamiento, obsolescencia y concurrencia antes de habilitar la frontera.
+- [ ] Verificar/registrar listas y orientaciones oficiales aplicables antes de
+  desbloquear confirmaciones; busqueda acotada no acredita inexistencia.
+- [ ] Completar demás excepciones biométricas dentro del alcance integral.
+- [ ] Completar representación, excepciones sensibles/salud y contextos restringidos,
+  infancia/adolescencia, investigación y alcance granular según diseño propio.
+- [ ] Validación y revisión final del alcance integral antes de declarar DONE.
+
+Workflow completo EIPD diferido; frontend M3 no se agrega como requisito de
+esta tarea mediante esta revisión. Sin cierre DONE ni commit.
+
+- [x] M3-T1 §60: contratos/matriz de resolucion EIPD, documento parcial, condicionales y revision humana con campos de servidor definidos (solo diseño).
+- [x] M3-T1 §61: schemas separados de resolucion/revision EIPD y 111 pruebas de contrato implementados; 419 pruebas de schemas aprobadas.
+- [x] M3-T1 §62: asociacion/hash de resolucion v1 puros implementados; 89 pruebas nuevas y 296 focalizadas aprobadas.
+- [x] M3-T1 §63: persistencia JSONB y eventos append-only/RLS de resolucion EIPD; migracion b51d3f6a9c20 y 36 casos PostgreSQL, suite integral 2470 passed.
+- [x] M3-T1 §64: API documental/binding de resolucion EIPD; 25 HTTP con RAT real y suite integral 2495 passed, historial conservado.
+- [x] M3-T1 §65: evaluador puro de preparacion documental EIPD; 159 pruebas nuevas y 455 focalizadas aprobadas, sin habilitar confirmacion.
+- [x] M3-T1 §66: readiness documental y vigencia de ultima revision EIPD; 18 pruebas nuevas aprobadas, sin habilitar confirmacion.
+- [x] M3-T1 §67: prerequisitos puros de revision EIPD; 38 pruebas nuevas y 215 focalizadas aprobadas; continuar bloqueado por frontera/fuentes pendientes.
+- [x] M3-T1 §68: accion autenticada de revision EIPD, campos de servidor, historial y relectura bajo lock; 15 pruebas nuevas aprobadas.
+- [ ] M3-T1: frontera/gates, concurrencia ampliada y fuentes pendientes antes de habilitar confirmacion.
+
+- [x] M3-T1 §69: registro trazable de busqueda/fuentes EIPD y propuesta temporal; listas/orientaciones no verificadas, requisito global pendiente.
+
+- [x] M3-T1 §70: base normativa fija autorizada por usuario y matriz/contrato de primera frontera EIPD, sin dependencia de fecha de entrada en vigor.
+- [x] M3-T1 §71: evaluador puro de frontera §70 implementado; 106 pruebas nuevas y 695 focalizadas aprobadas, screening v1 preservado.
+- [x] M3-T1 §72: deteccion EIPD v2 pura y nucleo compartido con v1; positivos e historia conservados, 56 pruebas nuevas.
+- [x] M3-T1 §73: readiness v2/frontera separado y versionado, contexto RAT actual y contratos cerrados; 14 pruebas nuevas.
+- [ ] M3-T1: composicion compartida, fuentes complementarias/aceptacion antes de habilitar continuar.
+
+- [x] M3-T1 §74: contrato/matriz de composicion comun EIPD y separacion revision/confirmacion, sin circularidad.
+- [x] M3-T1 §75: composicion pura §74 implementada; 80 pruebas nuevas y 468 focalizadas aprobadas, sin habilitar gates.
+- [x] M3-T1 §76: composicion orientativa en readiness, contratos cerrados y 17 pruebas nuevas; bloqueos conservados.
+- [x] M3-T1 §77: composicion compartida bajo lock en revision positiva/confirmacion; barreras conservadas y seis casos nuevos.
+- [x] M3-T1 §78: concurrencia real de confirmacion y HTTP seis bases ordinarias para composicion; ocho casos adicionales.
+- [x] M3-T1 §79: revision de aceptacion acotada y revalidacion registrada de fuentes; frontera no habilitada, instrumento complementario no verificado.
+- [x] M3-T1 §80: HTTP preparado de ambas rutas protegidas con/sin negativa previa; cuatro casos nuevos y barreras conservadas.
+- [x] M3-T1 §81: concurrencia real de ambas rutas protegidas preparadas, revision/confirmacion y commit/rollback; ocho casos nuevos.
+- [x] M3-T1 §82: aceptacion §§80-81 actualizada y contrato de politica/gate v2 exclusivo de servidor, sin habilitar.
+- [x] M3-T1 §83: politica pura y composicion v2 con contratos cerrados, identidad de evento/politica y 104 pruebas nuevas; v1 conservado.
+- [x] M3-T1 §84: identidad de politica nullable en eventos, migracion c62e407bad31, contratos/mapper y 35 pruebas nuevas; historicos/RLS conservados.
+- [x] M3-T1 §85: resolver fijo deshabilitado y readiness v2/identidad; una consulta de historial y 26 pruebas nuevas, gates v1 conservados.
+- [x] M3-T1 §86: prerequisitos puros de revision v2, negativos parciales y positivos con composicion/politica; 110 pruebas nuevas y suite completa 3299 passed.
+- [x] M3-T1 §87: revision autenticada v2 bajo lock con politica deshabilitada/metadatos de servidor; diez HTTP nuevos y suite completa 3309 passed.
+- [x] M3-T1 §88: decision transversal/confirmacion v2 bajo lock, alcance ordinario conservado; once HTTP nuevos, concurrencia ampliada y suite completa 3320 passed.
+- [x] M3-T1 §89: contrato de publicacion inmutable/selector auditado, orden de locks, revocacion y evidencia atomica de confirmacion; solo diseno.
+- [x] M3-T1 §90: contratos/evaluadores puros de publicacion/seleccion/evidencia, coherencia/hash y 65 pruebas nuevas; suite completa 3385 passed.
+- [x] M3-T1 §91: persistencia de control global, migracion d73f518cbe42, privilegios/RLS y consistencia diferida; 44 PostgreSQL nuevas y suite completa 3429 passed.
+- [x] M3-T1 §92: evidencia append-only tenant, migracion e84a629dcf53, FK/RLS y 29 PostgreSQL nuevas; suite completa 3458 passed.
+- [x] M3-T1 §93: servicios internos de publicacion/seleccion deshabilitada y lectura validada, bootstrap/seleccion concurrentes; 24 PostgreSQL nuevas y suite completa 3482 passed.
+- [x] M3-T1 §94: resolver transaccional/bloqueo compartido limitado, migracion f95b73aed064; 15 PostgreSQL nuevas y suite completa 3497 passed.
+- [x] M3-T1 §95: revision humana con selector auditado deshabilitado, identidad real y nueve PostgreSQL nuevas (cuatro concurrencias); Suite completa: 3506 passed en 313.64 s; Black/Ruff/Alembic check/diff correctos.
+- [x] M3-T1 §96: readiness/confirmacion con selector auditado y orden compatible, ordinario sin selector conservado; 13 PostgreSQL nuevas; Suite completa: 3519 passed en 329.62 s; Black/Ruff/Alembic check/diff correctos.
+- [x] M3-T1 §97: evidencia atomica conectada antes de reemplazo, guardia productiva conservada y 12 PostgreSQL nuevas de exitos sinteticos/fallos; Suite completa: 3531 passed en 334.47 s; Black/Ruff/Alembic check/diff correctos.
+- [x] M3-T1 §98: confirmaciones exitosas concurrentes y revocacion conservan evidencia; 12 PostgreSQL nuevas; Suite completa: 3543 passed en 343.50 s; Black/Ruff/Alembic check/diff correctos.
+- [x] M3-T1 §99: exitos independientes/aislamiento y PATCH concurrente; 12 PostgreSQL nuevas; Suite completa: 3555 passed en 345.51 s; Black/Ruff/Alembic check/diff correctos.
+- [x] M3-T1 §100: contrato de autoridad personal (JWT/superadmin/canal separado), precondicion de proteger perfiles y matriz; solo documentacion.
+- [x] M3-T1 §101: auditoria efectiva local y proteccion de identidad/autoridad de perfiles, migracion a06c84bf175e; 12 PostgreSQL nuevas; Suite completa: 3567 passed en 431.30 s; Black/Ruff/Alembic check/diff correctos.
+- [x] M3-T1 §102: barrera personal limitada perfil/rol/lock, migracion b17d95c0286f y nueve PostgreSQL nuevas; 45 focalizadas aprobadas, sin conexion a escritores.
+- [x] M3-T1 §103: escritores personales con actor derivado y 11 PostgreSQL nuevas; 44 focalizadas aprobadas; Suite completa: 3587 passed en 348.04 s; Black/Ruff/Alembic check/diff correctos.
+- [x] M3-T1 §104: pool separado y dependencia JWT/sub local/autoridad, 17 pruebas nuevas; 47 focalizadas aprobadas. Suite completa: 3604 passed en 352.09 s; Black/Ruff/Alembic check/diff correctos.
+- [x] M3-T1 §105: endpoints administrativos con JWT verificado/pool real, 38 HTTP nuevas; 85 focalizadas aprobadas. Suite completa: 3642 passed en 355.96 s; Black/Ruff/Alembic check/diff correctos.
+- [x] M3-T1 §106: doce HTTP concurrentes (revocacion/rollback/cancelacion/seleccion/unicidad); 97 focalizadas aprobadas. Suite completa: 3654 passed en 369.30 s; Black/Ruff/Alembic check/diff correctos.
+- [x] M3-T1 §107: revalidacion documental de fuentes base/busqueda complementaria y matriz de trazabilidad a commits; sin cambio de gates ni nueva suite.
+- [x] M3-T1 §108: procedimiento de provision deshabilitada preparado, JSON de ejemplo validado; sin provision real ni cambios de gates.
+- [x] M3-T1 §109: preflight readonly limitado y seis pruebas nuevas; 23 focalizadas aprobadas, sin escrituras/provision operativa.
+- [x] M3-T1 §110: permisos efectivos de grupo/login/public/RLS en preflight e informe v1; ocho nuevas, 31 focalizadas aprobadas.
+- [x] M3-T1 §111: expediente inicial con configuracion ausente/preflight failed esperado y head local comprobados; sin provision real.
+- [x] M3-T1 §112: usuario selecciona local; inspeccion readonly y accion de provision concreta preparada, sin ejecutar tras rechazo automatico.
+- [x] M3-T1 §113: provision tecnica local explicitamente autorizada, login limitado/credencial privada; preflight pending_selector (2), sin bootstrap.
+- [x] M3-T1 §115: superadmin global local explicitamente autorizado y confirmado en perfil existente; sin cambios Supabase/politicas.
+- [x] M3-T1 §116: UID aportado contrastado con perfil local autorizado; backend/rutas registrados, rechazo anonimo 401 probado.
+- [x] M3-T1 §117: proceso local separado con secreto en memoria, health/401 y Supabase/JWKS 200; vinculo staff externo verificado por consulta admin.
+- [ ] M3-T1: sesion/JWT personal real y humo autenticado, publicacion/seleccion deshabilitada y validacion/retirada operativas; fuentes/aceptacion pendientes.
+
+## M3-T1 §118 — acceso personal local (2026-10-09)
+
+- [x] Endpoint administrativo de lectura y pantalla local de comprobacion; 40 pruebas API y checks frontend aprobados.
+- [x] Comprobar acceso con sesion personal real: resultado confirmado en captura aportada por el usuario (2026-10-09).
+- [ ] Validar publicacion/seleccion de politica deshabilitada y auditoria con sesion personal.
+- [ ] Completar fuentes complementarias, aceptacion y validacion operacional integral; activacion excepcional bloqueada.
+
+## M3-T1 §119 — registro operacional
+
+- [x] Consulta administrativa autenticada del snapshot validado y pantalla de revision; 54 pruebas focalizadas aprobadas.
+- [x] Consulta con sesion personal confirmada por captura: revision 0, publicaciones 0, selecciones 0 (2026-10-09).
+- [ ] Preparar publicacion deshabilitada y comprobar persistencia/auditoria; luego seleccionar con revision vigente.
+
+## M3-T1 §120 — publicacion local deshabilitada
+
+- [x] Propuesta fija autenticada, vista revisable y publicacion explicita con comprobacion posterior; 56 pruebas focalizadas aprobadas.
+- [x] Publicacion con sesion personal confirmada por captura: 1 publicacion deshabilitada, 0 selecciones, revision 0 (2026-10-09).
+- [ ] Preparar seleccion explicita con revision vigente y verificar evento/selector en la auditoria.
+
+## M3-T1 §121 — seleccion deshabilitada
+
+- [x] Preparar seleccion con revision vigente y comprobar evento/hash/selector; checks frontend y 56 pruebas API aisladas aprobadas.
+- [x] Seleccion personal confirmada por capturas y snapshot tecnico readonly coherente: revision 1, 1 publicacion y 1 seleccion deshabilitada (2026-10-09).
+- [ ] Revisar cierre operacional y pendientes de provision/rotacion/retiro y aceptacion integral; activacion bloqueada.
+
+## M3-T1 §122 — cierre delimitado de validacion local
+
+- [x] Consolidar secuencia personal deshabilitada, coherencia persistida y preflight posterior ok; head verificado.
+- [x] Separar pendientes operacionales y juridicos en docs/project/m3-t1-eipd-cierre-validacion-local.md.
+- [x] Preparar ejecutor focalizado que exige base aislada antes de pytest: §123, 60 pruebas aprobadas. Pytest directo no queda protegido por el wrapper.
+- [ ] Validar rotacion/retiro y recuperacion, fuentes/aceptacion y alcance integral; M3-T1 EN PROGRESO.
+
+## M3-T1 §123 — pruebas aisladas
+
+- [x] Ejecutar suite focalizada mediante guardas de destino/head/roles/estado, con 60 aprobadas.
+- [x] Ejecutar ensayo aislado de rotacion/retiro y recuperacion §124: 63 pruebas aprobadas; snapshot de pruebas sin cambios.
+- [ ] Validar ciclo de vida del canal provisionado con historial real y renovacion segura de procesos; no ejecutado en §124.
+
+## M3-T1 §125 — rotacion real preparada
+
+- [x] Verificar canal/destino/head y preparar drenaje, reemplazo privado, recuperacion y comprobacion posterior.
+- [x] Rotacion real local ejecutada §126: credencial anterior rechazada en conexion nueva; nuevo canal ok y snapshot completo intacto.
+- [x] Acceso personal tras reinicio confirmado por captura y copia privada anterior retirada (§126).
+
+## M3-T1 §127 — retiro reversible real
+
+- [x] Drenar canal real, comprobar NOLOGIN con conexion nueva, restaurar LOGIN y verificar snapshot completo intacto/revision 1.
+- [x] Acceso personal tras reinicio de recuperacion confirmado por captura §127. Retiro definitivo no ejecutado.
+
+## M3-T1 §128 — investigacion documental
+
+- [x] Delimitar primer incremento de investigacion con datos no sensibles/adultos y LIA, completitud/aplicabilidad y fuente primaria.
+- [x] Implementar schema/evaluador puro §129; sin persistencia ni gates, can_confirm=false.
+- [x] Ampliar aplicabilidad/limites §130: 20 casos nuevos; suite aislada 107 aprobadas.
+- [x] Implementar binding independiente de investigacion y chequeo de obsolescencia §131; 119 pruebas aisladas aprobadas. Historicos intactos, sin conversion automatica.
+- [x] Delimitar persistencia/API §132 en docs/project/m3-t1-investigacion-integracion.md.
+- [x] Schema/modelo/migracion nullable sin backfill §133; 121 pruebas aisladas, upgrade/check en ambas bases y auditoria EIPD intacta.
+- [x] Integrar servicios/API create/GET/PATCH con binding de servidor y pruebas de acceso §134; nuevas asociaciones especiales/EIPD pendientes.
+
+### M3-T1 §134 — API del expediente de investigacion
+
+- [x] Create/GET/PATCH con binding de servidor y omision/null/reaporte; contratos cliente cerrados.
+- [x] 127 pruebas focalizadas aprobadas y 174 HTTP existentes de compatibilidad aprobadas; estados historicos protegidos.
+- [x] Readiness documental/asociacion de investigacion §135. Confirmacion sigue bloqueada; M3-T1 EN PROGRESO.
+- [ ] Nuevas versiones especiales/EIPD que cubran investigacion y aceptacion revisada antes de habilitar el gate.
+
+### M3-T1 §135 — Readiness de investigacion
+
+- [x] Completitud, aplicabilidad y asociacion vigentes/obsoletas expuestas sin escrituras; bloqueo compartido de confirmacion incluso con expediente completo.
+- [x] 303 pruebas ampliadas aisladas aprobadas; Black/Ruff aprobados.
+- [ ] Nuevas versiones de binding especial/EIPD e integracion posterior; M3-T1 EN PROGRESO y activacion bloqueada.
+
+### M3-T1 §136 — Asociaciones para investigacion
+
+- [x] Delimitar versiones sucesoras especiales V11/EIPD V12, material, compatibilidad y orden PATCH.
+- [x] Implementar contratos/funciones puras nuevos con pruebas de hashes historicos intactos §137; 145 focalizadas aprobadas.
+- [ ] Dispatch y servicio/API, luego contexto de resolucion/revision y aceptacion. Confirmacion investigacion/EIPD bloqueadas.
+
+### M3-T1 §137 — Asociaciones puras sucesoras
+
+- [x] Contratos cerrados especiales V11/EIPD V12 y hash/bind de expediente completo sin reparar bindings research.
+- [x] 16 casos nuevos y 145 focalizados aprobados; funciones historicas verificadas intactas, Black/Ruff aprobados.
+- [x] Dispatch evaluador y falta de cobertura historica §138; escritura API pendiente. Gates siguen bloqueados.
+
+### M3-T1 §138 — Evaluacion versionada de investigacion
+
+- [x] Dispatch especiales V11/screening V12 y falta de cobertura independiente para versiones anteriores con investigacion.
+- [x] 8 casos nuevos; suite ampliada aislada 327 aprobadas, Black/Ruff aprobados.
+- [x] Generacion API de asociaciones sucesoras y pruebas de orden PATCH §139. Confirmacion investigacion/EIPD bloqueadas.
+
+### M3-T1 §139 — API de asociaciones sucesoras
+
+- [x] Create/PATCH especiales V11/screening V12 con valores finales y conservacion de asociaciones omitidas.
+- [x] Dos casos HTTP nuevos; 329 ampliadas y 162 regresiones frontera/screening V2 aprobadas.
+- [ ] Revisar cobertura versionada del contexto de resolucion/revision EIPD de investigacion; gates bloqueados.
+
+### M3-T1 §140 — Resolucion/revision EIPD de investigacion
+
+- [x] Revisar cobertura V1 y delimitar contratos V2, compatibilidad historica y frontera de revision/eventos.
+- [x] Implementar contexto/binding/Stored V2 y funciones puras con pruebas V1 intactas §141.
+- [ ] Dispatch, frontera/composicion, metadatos de eventos y escritura API posteriores; gates bloqueados.
+
+### M3-T1 §141 — Asociacion pura de resolucion V2
+
+- [x] Contexto cerrado con investigacion explicitamente nullable, binding/Stored V2 separados y hashes nuevos sin reparacion.
+- [x] 323 focalizadas aisladas aprobadas (9 nuevas y regresiones V1); Black/Ruff aprobados.
+- [x] Dispatch documental/readiness/revision puro de investigacion §142; frontera/composicion/escritor pendientes. Gates bloqueados.
+
+### M3-T1 §142 — Resolucion/revision evaluadas por version
+
+- [x] Dispatch puro V1/V2 y cobertura research explicita; evento historico visible sin autoridad sintetica.
+- [x] 327 focalizadas y 272 regresiones de frontera/screening/revision aprobadas; Black/Ruff aprobados.
+- [ ] Frontera/composicion research y posterior lectura/escritura API V2; gates bloqueados.
+
+### M3-T1 §143 — Frontera/composicion investigacion
+
+- [x] Delimitar FrontierV2/ScreeningV3/CompositionV3 y cobertura ContextV2 sin reinterpretar historicos.
+- [x] Implementar frontera V2 pura y pruebas con bloqueo conservador §144; 337 focalizadas aprobadas.
+- [ ] Screening/composicion, luego API/metadatos de eventos y aceptacion revisada. Gates bloqueados.
+
+### M3-T1 §144 — Frontera pura investigacion V2
+
+- [x] Evaluacion documental/asociacion y motivos especiales/screening completos; discordancias y falta de cobertura historica detectadas.
+- [x] 10 casos nuevos y 337 focalizados aislados aprobados; Black/Ruff aprobados.
+- [ ] Screening/composicion V3 y luego API/metadatos de eventos/aceptacion. Gates bloqueados.
+
+### M3-T1 §145 — Screening V3 conservador
+
+- [x] Screening sobre ContextV2/frontera V2 conserva todos los motivos y bloquea continuacion/confirmacion.
+- [x] Contratos historicos separados; once casos nuevos.
+- [ ] Composicion V3 y posterior API/metadatos de eventos/aceptacion.
+
+### M3-T1 §146 — Composicion V3 de investigacion
+
+- [x] Contratos cerrados y composicion pura con ContextV2, screening V3 y resolucion versionada.
+- [x] Motivos completos, vigencias separadas, revision ajena/obsoleta visible y confirmacion bloqueada.
+- [ ] Lectura API versionada, escritor/metadatos de eventos y aceptacion revisada.
+
+### M3-T1 §147 — Lectura API V3 de investigacion
+
+- [x] Readiness V3 con RAT actual/research persistido y politica real o ausencia explicita.
+- [x] Contratos de salida cerrados, lectura sin escritura y bloqueo conservador.
+- [ ] Escritor de resolucion versionado, metadatos auditables de eventos y aceptacion.
+
+### M3-T1 §148 — Escritor puro versionado
+
+- [x] Seleccion V1/V2 por contexto final y antecedente persistido, sin downgrade V2.
+- [x] Research declarado sin documento conserva cobertura V2; ordinario mantiene binding V1.
+- [ ] Integrar POST/PATCH y consumidores, metadatos auditables y aceptacion.
+
+### M3-T1 §149 — Escritor API versionado
+
+- [x] POST/PATCH con contexto final, antecedente persistido, omision/null/reaporte y salida V1/V2.
+- [x] Readiness por version sin aplicar composiciones historicas a V2; acciones V2 bloqueadas sin eventos.
+- [ ] Metadatos auditables/prerequisitos versionados de revision y aceptacion.
+
+### M3-T1 §150 — Metadatos auditables puros
+
+- [x] Contrato cerrado/versiones estrictas y generador/comparador de identidad de material V1/V2.
+- [x] Ausencia historica conservada; cobertura research explicita sin autoridad ni proyeccion.
+- [ ] Persistencia append-only/lectura de metadata, prerequisitos V2 y aceptacion.
+
+### M3-T1 §151 — Almacenamiento de metadata
+
+- [x] Columna nullable sin backfill, contrato/hashes comprobados y lectura ORM/pura conservadora.
+- [x] Migracion aislada/local verificada, historia intacta y 445 pruebas aprobadas.
+- [ ] Visibilidad API, prerequisitos de eventos V2 y aceptacion; acciones bloqueadas.
+
+### M3-T1 §152 — Metadata visible en readiness V3
+
+- [x] Lectura actual/historica separada por identidad, una consulta y sin fallback ni escrituras.
+- [x] 465 pruebas aprobadas; metadata vigente no levanta bloques de revision/confirmacion.
+- [ ] Prerequisitos puros versionados de revision, registro controlado y aceptacion.
+
+### M3-T1 §153 — Prerequisitos puros V3
+
+- [x] Identidad V2/cobertura explicita generada desde servidor; negativas parciales y positivos con controles comunes.
+- [x] 560 pruebas aisladas aprobadas; sin eventos ni activacion y contratos historicos intactos.
+- [ ] Registro controlado de negativas V2 con metadata, locks/aislamiento y aceptacion; positivos bloqueados.
+
+### M3-T1 §154 — Negativas HTTP V2 con metadata
+
+- [x] Registro autenticado bajo locks/relectura con hashes y metadata de servidor atomicos.
+- [x] 578 pruebas aisladas aprobadas: negativas, tenant, obsolescencia, rollback y regresiones historicas.
+- [ ] Concurrencia especifica V2/cambio de politica, consumidores y aceptacion; positivos bloqueados.
+
+### M3-T1 §155 — Concurrencia negativa V2
+
+- [x] Relectura tras PATCH/selector, commit/rollback e historia intacta con bloqueos PostgreSQL observados.
+- [x] 603 pruebas aisladas aprobadas; escritor existente conserva garantias sin cambio productivo.
+- [ ] Negativas simultaneas/cancelacion, consumidores y aceptacion; positivos/confirmacion bloqueados.
+
+### M3-T1 §156 — Simultaneidad y cancelacion V2
+
+- [x] Negativas independientes serializadas, commit/rollback y ultimo evento con identidad exacta.
+- [x] Cancelacion libera locks sin evento parcial; reintento vigente. 607 pruebas aisladas aprobadas.
+- [ ] Lectura de prerequisitos por decision en readiness y aceptacion; positivos/confirmacion bloqueados.
+
+### M3-T1 §157 — Diagnostico documental por decision
+
+- [x] Readiness V3 expone prerequisitos y metadata actual por decision; sin autoridad ni eventos ficticios.
+- [x] Kernel compartido con validacion humana preservada; 615 pruebas aisladas aprobadas.
+- [ ] Salida versionada de eventos V2, consumidores y aceptacion; positivos/confirmacion bloqueados.
+
+### M3-T1 §158 — Respuesta auditada versionada
+
+- [x] POST/GET de representacion V2 con identidad persistida; contrato historico intacto y null sin inferir.
+- [x] Lectura por tenant/padre/estado, permisos/suscripcion y 621 pruebas aisladas aprobadas.
+- [ ] Consumidor frontend tipado y aceptacion; positivos/confirmacion/activacion bloqueados.
+
+### M3-T1 §159 — Cliente frontend de revisiones
+
+- [x] Tipos/cliente de requisitos y eventos auditados; negativos sin inyeccion ni autoridad derivada.
+- [x] 11 pruebas de red simulada y type-check/lint frontend aprobados; backend sin cambios.
+- [ ] Pantalla interna solo lectura y aceptacion; modulo/confirmacion/activacion bloqueados.
+
+### M3-T1 §160 — Consulta interna solo lectura
+
+- [x] Ruta bajo layout administrativo con sesion/contexto explicitos, requisitos y evento historico sin autoridad.
+- [x] 4 interacciones Chromium aisladas + 11 regresiones del cliente, type-check/lint aprobados.
+- [ ] Validacion real de sesion/expediente y aceptacion; modulo/confirmacion/activacion bloqueados.
+
+### M3-T1 §163 — Presentacion de motivos de consulta
+
+- [x] Etapas, campos y preguntas visibles; duplicados exactos con cantidad y detalle original.
+- [x] 5 pruebas de interaccion, tipos y lint frontend aprobados.
+- [x] Inspeccion visual con sesion y expediente ficticio local: etapas, campos y detalle original.
+- [ ] Ampliar traducciones de campos; prueba directa de API entre cuentas pendiente.
+
+### M3-T1 §164 — Etiquetas documentales
+
+- [x] Ampliar traducciones de campos manteniendo identidad original en detalle.
+- [x] Tipos y lint frontend aprobados.
+- [x] Inspeccion manual: uso exclusivo y controles en español; detalle original preservado.
+- [ ] Traducir rutas restantes (conclusion/balancing_summary/decision); API entre cuentas pendiente.
+
+### M3-T1 §165 — Etiquetas de interes legitimo
+
+- [x] Traducir secciones/campos LIA v1 y conservar identificadores del detalle.
+- [x] Tipos y lint frontend aprobados.
+- [ ] Inspeccion visual de rutas LIA en expediente ficticio; API entre cuentas pendiente.
+
+### M3-T1 §166 — Diagnostico visible en español
+
+- [x] Traducir detalle, etapas, categorias y campos; fallback desconocido en español.
+- [x] 5 interacciones Chromium, tipos y lint aprobados.
+- [x] Captura manual confirma detalle de justificacion en español (§167).
+- [ ] API entre cuentas y cobertura de otras rutas pendientes.
+
+### M3-T1 §168 — Navegacion por temas
+
+- [x] Desplegables con cantidad de motivos distintos y total de ocurrencias conservado.
+- [x] 6 interacciones Chromium, tipos y lint aprobados.
+- [ ] Inspeccion manual con expediente ficticio; API entre cuentas pendiente.
+
+### M3-T1 §169 — Amplitud y detalle
+
+- [x] Decisiones a ancho completo, motivos separados y detalle con etiquetas destacadas.
+- [x] Tipos/lint y 6 interacciones aprobados.
+- [x] Captura de escritorio confirma ancho y detalle de justificacion/investigacion.
+- [ ] Vista movil y otros temas; API entre cuentas pendiente.
+
+### M3-T1 §173 — Estado documental de ultima revision
+
+- [x] Proyeccion validada del estado existente y aviso sin autoridad separado de requisitos/historia.
+- [x] 12 cliente, 7 interacciones, tipos y lint aprobados.
+- [x] Captura del expediente ficticio: vinculo vigente, aviso sin autoridad y Continuar pendiente.
+- [x] Captura historica: evento anterior intacto, aviso historico y bloque actual ausente.
+- [ ] Prueba directa API entre cuentas y otros estados reales pendientes.
+
+### M3-T1 §174 — Vista a ancho reducido
+
+- [x] Capturas de vista general e Investigacion: ajuste de texto y detalle apilado legible.
+- [ ] Dispositivo movil, otras anchuras/temas y medicion de overflow pendientes.
+- [ ] Prueba directa API entre cuentas pendiente.
+
+### M3-T1 §175 — Emulacion de 390 pixeles
+
+- [x] Captura Edge Responsive 390 x 749: detalle de Investigacion legible y textos ajustados.
+- [ ] Medicion de overflow, formularios, otros temas y dispositivo fisico pendientes.
+- [ ] Mensajes de consola no inspeccionados; API entre cuentas pendiente.
+
+### M3-T1 §176 — Medicion a 390 pixeles
+
+- [x] Comparacion scrollWidth > clientWidth retorna false con Investigacion/detalle abiertos.
+- [ ] Otros estados/anchuras, overflow interno y dispositivo fisico pendientes.
+
+### M3-T1 §177 — Cabecera movil
+
+- [x] Titulo, cuenta y cierre apilados bajo sm; correo largo ajustable.
+- [x] Captura posterior a 390 pixeles confirma cabecera apilada y titulo legible.
+- [ ] Accion de botones y otros anchos pendientes.
+
+### M3-T1 §178 — Consulta movil
+
+- [x] Resultado manual a 390 pixeles: borrador, vinculo vigente y Continuar pendiente.
+- [ ] Consulta historica y cierre de sesion en vista movil pendientes.
+
+### M3-T1 §179 — Historia movil
+
+- [x] Captura a 390: evento original legible, aviso historico y bloque actual ausente.
+- [ ] Cierre de sesion movil y API entre cuentas pendientes.
+
+### M3-T1 §180 — Cierre de sesion movil
+
+- [x] Captura /login tras cierre y reporte de redireccion al reabrir consulta sin sesion.
+- [ ] Prueba directa API entre cuentas y revocacion no acreditadas por navegacion.
+
+### M3-T1 §181 — Reingreso movil
+
+- [x] Captura tras reingreso: panel y cuenta visibles, tres campos de expediente vacios.
+- [x] Segunda captura del final: Revision vacia y resultados anteriores ausentes.
+
+### M3-T1 §182 — Campo Organizacion requerido
+
+- [x] Captura a 390: aviso nativo en Organizacion vacia y sin resultados visibles.
+- [ ] Otros campos y validacion directa backend no acreditados por esta captura.
+
+### M3-T1 §183 — Campos de expediente requeridos
+
+- [x] Capturas a 390: aviso nativo en Tratamiento y Evaluacion vacios, sin resultados visibles.
+- [ ] Validacion directa backend no acreditada por estas capturas.
+
+### M3-T1 §184 — Revision requerida
+
+- [x] Captura a 390: Revision vacia exige completar campo con expediente identificado.
+- [ ] Validacion directa backend no acreditada por esta captura.
+
+### M3-T1 §185 — Formato de Revision
+
+- [x] Captura a 390: prueba rechazada por formato nativo, sin revision visible.
+- [ ] Peticiones de red y validacion directa backend no acreditadas por esta captura.
+
+### M3-T1 §186 — Recuperacion de consulta
+
+- [x] Captura a 390: formato corregido recupera evento original sin aviso de formato.
+- [ ] Prueba directa API entre cuentas pendiente.
+
+### M3-T1 §187 — Limpieza al cambiar Organizacion
+
+- [x] Captura a 390: Revision y resultado historico limpiados al cambiar organizacion.
+- [ ] Rechazo API y aislamiento entre cuentas no acreditados por esta captura.
+
+### M3-T1 §188 — Consulta con organizacion distinta
+
+- [x] Captura a 390: mensaje no encontrado, sin datos historicos; GET 404 visible.
+- [ ] Sesion de segunda cuenta y cobertura directa de API/RLS pendientes.
+
+### M3-T1 §189 — Recuperacion tras rechazo por organizacion
+
+- [x] Captura a 390: evento original recuperado y mensaje no encontrado ausente.
+- [ ] Prueba directa API entre cuentas pendiente.
+
+### M3-T1 §190 — Panel general adaptable
+
+- [x] Cabecera movil apilada y textos Inventario/proceso/evaluacion aclarados; tipos/lint aprobados.
+- [x] Captura posterior a 390 confirma cabecera apilada y textos actualizados legibles.
+- [ ] Acciones de enlaces, medicion nueva de overflow y API entre cuentas pendientes.
+
+### M3-T1 §191 — Redireccion segunda cuenta
+
+- [x] Reporte y captura /dashboard: segunda cuenta no accede a consulta interna.
+- [ ] Rechazo directo de API EIPD con segunda cuenta pendiente.
+
+### M3-T1 §192 — Lectura RAT segunda cuenta
+
+- [x] Captura segunda cuenta: tratamiento ajeno no encontrado, campos visibles vacios y GET RAT 404.
+- [ ] Acceso directo API EIPD y cobertura integral RLS pendientes.
+
+### M3-T1 §193 — GET historico EIPD segunda sesion
+
+- [x] Network Console: GET historico v2 correcto retorna 404 y Evaluacion juridica no encontrada.
+- [ ] Otros endpoints, escritura, reciprocidad y cobertura integral RLS pendientes.
+
+### M3-T1 §194 — GET requisitos segunda sesion
+
+- [x] Capturas readiness: GET 404 y Evaluacion juridica no encontrada, sin requisitos.
+- [x] Intento previo 401 Token expirado distinguido del ensayo de acceso.
+- [ ] Escritura, reciprocidad y cobertura integral RLS pendientes.
+
+### M3-T1 §195 — Acceso original recuperado
+
+- [x] Captura: readiness fetch 200, borrador/vinculo vigente y requisitos pendientes recuperados.
+- [ ] Reciprocidad completa y otros endpoints pendientes.
+
+### M3-T1 §196 — GET historico original 200
+
+- [x] General/Response: GET v2 200, decision original y respuesta esquema 2.
+- [ ] Escritura, reciprocidad y cobertura integral entre tenants pendientes.
+
+### M3-T1 §197 — Regresion escritura aislada
+
+- [x] 14 pruebas existentes de API negativa/writer v2 aprobadas en base aislada verificada.
+- [ ] Suite completa y escritura manual entre cuentas no cubiertas por esta corrida.
+
+### M3-T1 §198 — Permisos y confirmacion aislados
+
+- [x] 45 pruebas existentes de permisos/reviews/readiness/confirmacion aprobadas en base aislada.
+- [ ] Suite completa y escritura/reciprocidad manual entre cuentas pendientes.
+
+### M3-T1 §199 — Concurrencia aislada
+
+- [x] 26 pruebas existentes de concurrencia negativa/administrativa aprobadas en base aislada.
+- [ ] Ensayo de usuarios reales concurrentes y suite completa no cubiertos por esta corrida.
+
+### M3-T1 §200 — Balance de validacion
+
+- [x] Evidencia reciente y limites consolidados en docs/project/m3-t1-balance-validacion.md.
+- [ ] Inventario de fuentes oficiales/brechas de habilitacion excepcional; sin activar politica.
+
+### M3-T1 §201 — Inventario fuentes EIPD
+
+- [x] Fuente BCN/PDF art. 15 ter localizada; matriz contrato/brechas documentada.
+- [ ] Instrumentos Agencia, revision por rutas y aceptacion pendientes; sin habilitacion.
+
+### M3-T1 §202 — Contraste de rutas
+
+- [x] Cadena normativa sensible/biometrica contrastada con frontera tecnica.
+- [ ] Evidencias por ruta, instrumentos Agencia y aceptacion juridica pendientes.
+
+### M3-T1 §203 — Evidencia por ruta
+
+- [x] Lista revisable basada en contrato real, con resultados pendientes y limites.
+- [ ] Ensayo de fixture dedicado admitido y aceptacion documental pendientes.
+
+### M3-T1 §204 — Ensayo sintetico de frontera
+
+- [x] 60 pruebas existentes de frontier HTTP/v2/requisitos aprobadas en base aislada.
+- [x] Lista de evidencia enlaza grupos ensayados y distingue aceptacion pendiente.
+- [ ] Trazabilidad por campo y aceptacion documental pendientes.
+
+### M3-T1 §205 — Trazabilidad de campos
+
+- [x] Campos de excepciones vinculados a pruebas especificas localizadas (revision estatica).
+- [ ] Verificar/ampliar omisiones individuales en segundo sistema biometrico.
+- [ ] Trazabilidad de documento/fuentes/politica y aceptacion pendientes.
+
+### M3-T1 §206 — Omisiones segundo sistema
+
+- [x] 15 casos nuevos; modulo biometrico 229 aprobadas en base aislada, Black/Ruff correctos.
+- [ ] Respuestas no/pendiente, fundamento y evidencia parcial posteriores no cubiertos por nuevos casos.
+- [ ] Aceptacion documental pendiente.
+
+### M3-T1 §207 — Respuestas/evidencia segundo sistema
+
+- [x] 14 casos nuevos; modulo 243 aprobadas en base aislada; formato/lint correctos.
+- [ ] Combinaciones adicionales y aceptacion documental pendientes.
+
+### M3-T1 §208 — Segunda fuente documental
+
+- [x] Cinco casos nuevos; modulo 164 aprobadas en base aislada; formato/lint correctos.
+- [ ] Variantes adicionales y trazabilidad de politica/aceptacion pendientes.
+
+### M3-T1 §209 — Registros de aceptacion
+
+- [x] Ocho casos nuevos; modulo de politica 112 aprobadas en base aislada; formato/lint correctos.
+- [ ] Matriz detallada SourceRecordV1 y aceptacion real pendientes.
+
+### M3-T1 §210 — SourceRecordV1
+
+- [x] Matriz de campos y nueve casos nuevos; modulo politica 121 aprobadas en base aislada.
+- [ ] Verificacion externa y aceptacion real pendientes.
+
+### M3-T1 §211 — Regresion conjunta
+
+- [x] 545 pruebas en una corrida focalizada aislada tras ampliaciones; 8.39 s.
+- [ ] Expediente de revision de aceptacion y fuentes externas pendientes.
+
+### M3-T1 §212 — Expediente revisable
+
+- [x] Paquete de revision preparado con evidencia/limites y registro de decision pendiente.
+- [ ] Designacion de revisor, verificacion externa y aceptacion autentica pendientes.
+
+### M3-T1 §213 — Revision ficticia de desarrollo
+
+- [x] Alcance ficticio hasta MVP incorporado; aceptacion real diferida.
+- [x] Cuatro casos nuevos; modulo politica 125 aprobadas en base aislada; formato/lint correctos.
+- [ ] Validacion con empresa/revisor reales posterior a MVP.
+
+### M3-T1 §214 — Estado de politica en consulta
+
+- [x] Proyeccion validada y vista sin autoridad; 13 cliente/8 interacciones/tipos/lint aprobados.
+- [ ] Inspeccion manual con expediente ficticio pendiente.
+
+### M3-T1 §215 — Politica visible validada
+
+- [x] Captura a 480: fuentes/aceptacion pendientes, deshabilitada, aviso y readiness 200.
+- [ ] Alternancia historica manual del bloque nuevo y otros estados reales pendientes.
+
+### M3-T1 §216 — Politica/historia separadas
+
+- [x] Captura a 390: evento historico, dos bloques actuales ausentes y /v2 fetch 200.
+- [ ] Otros estados reales no cubiertos por esta captura.
+
+### M3-T1 §217 — Estados simulados UI
+
+- [x] Tres combinaciones de politica simuladas sin autoridad; 9 interacciones/tipos/lint aprobados.
+- [ ] Sin politica operativa habilitada ni validacion real inferida de mocks.
+
+- [x] M3-T1 §218: aviso visible de uso exclusivo de datos ficticios hasta MVP en consulta interna; conserva bloqueos operativos. No detecta datos reales automaticamente.
+
+- [x] M3-T1 §219: enlace de inicio de sesion ante 401 en consulta EIPD; limpieza y recuperacion comprobadas con fixtures ficticios.
+
+- [x] M3-T1 §220: compilacion de produccion frontend en copia temporal con configuracion ficticia; 23 pruebas cliente/interaccion aprobadas.
+- [x] Validar runtime Node 22 para frontend (§221): 23 pruebas, tipos/lint y build aprobados; frontend/.nvmrc compartido con CI. Servidor activo sin reinicio.
+
+- [x] M3-T1 §222: instalacion limpia Node 22 desde lockfile comprobada; CI usa npm ci y cache del lockfile. CI remoto aun no ejecutado para esta rama.
+- [x] §223: Next/eslint-config-next 15.5.27 fijados y validados en copia aislada; 23 pruebas y build aprobados.
+- [x] §224: instalacion/reinicio local aplicados: Next 15.5.27 con Node 22; login 200, admin sin sesion redirige /login, backend health 200.
+
+- [x] M3-T1 §225: usuario comprueba visualmente requisitos y revision ficticia en Edge 390 x 749 tras actualizacion local Next; sin comprobacion nueva de status HTTP o login.
+
+- [x] M3-T1 §226: ESLint CLI sustituye next lint y revisa tambien e2e/config/middleware; falso positivo callback fixture corregido sin desactivar reglas.
+
+- [x] M3-T1 §227: aviso superior de pruebas ficticias hasta MVP y bloqueos visibles completo en captura Edge 390 x 749 del usuario.
+
+- [x] M3-T1 §228: CI frontend incorpora 23 pruebas ficticias EIPD, comando verificado localmente con CI=true; ejecucion remota pendiente de PR.
+
+- [x] M3-T1 §229: formato frontend global, lint, tipos y 23 pruebas EIPD aprobados localmente; artefactos Playwright excluidos de Prettier.
+
+- [x] M3-T1 §230: 642 pruebas de las 26 suites del runner EIPD aprobadas en base aislada; verificacion posterior correcta. No suite integral del producto.
+
+- [x] M3-T1 §231: Ruff/Black global backend aprobados; migracion historica preservada con excepcion I001 exacta; correcciones restantes solo formato/imports.
+
+- [x] M3-T1 §232: PR #30 draft y CI remoto aprobado para 7f94bbf: 3977 pruebas backend y controles frontend con 23 pruebas ficticias. Sin merge/aceptacion juridica; revision tecnica pendiente.
+
+- [x] M3-T1 §233: revision focal de permisos/tenant/canal admin y bloqueos de revisiones; sin hallazgo nuevo en alcance inspeccionado. Revision integral del PR pendiente.
+
+- [x] M3-T1 §234: revision focal control global politica; docstring API actualizado y limite bloqueo servicio/SQL precisado. Sin nueva barrera SQL.
+
+- [x] §235: CI agrupa por workflow/ref y prioriza ultimo commit en PR; cancelacion efectiva pendiente de observar tras publicar configuracion.
+
+
+## Siguiente bloque funcional M3-T1 — §236
+
+Representacion sensible: [diseño preliminar de desarrollo](project/m3-t1-representacion-desarrollo.md).
+No habilitada; pruebas ficticias hasta MVP. Checklist historico no acredita facultad.
+
+- [x] Delimitar campos candidatos y matriz documental conservadora (§236).
+- [x] §237: contrato V1 separado y 39 pruebas ficticias de forma aprobadas; no persistencia, readiness o confirmacion.
+- [ ] Diseñar binding sucesor, persistencia y diagnostico manteniendo historicos/bloqueos.
+- [x] §238: binding independiente de representacion, 19 pruebas nuevas y 69 focalizadas aprobadas; can_confirm=false, sin integracion API.
+- [x] §239: evaluador documental conservador, 30 pruebas nuevas y 88 relacionadas aprobadas; completo no autoriza ni verifica facultades.
+- [ ] Representacion: integracion persistente/binding sucesor en API conservando bloqueos, historicos y limites de diagnostico.
+- [x] §240: [plan persistente de representacion](project/m3-t1-representacion-persistencia.md), semantica PATCH/historicos/tenant y limite de cobertura EIPD; implementacion pendiente.
+- [x] §241: centralizacion sin ciclo y contratos futuros Create/Update/Out, 107 pruebas relacionadas; endpoints activos sin nuevo campo. Persistencia pendiente.
+- [x] §242: migracion/storage nullable de representacion, barrera SQL no confirmado y RLS probados; 116 relacionadas aprobadas, API del campo pendiente.
+- [x] §243: CRUD de representacion conectado y gates conservadores; 127 pruebas del bloque aprobadas, readiness especifico pendiente (409 controlado).
+- [x] §244: diagnostico representacion en readiness/interfaz, cobertura pendiente explicita y vigencia global suprimida; 132 backend y 31 frontend aprobadas. Sin habilitacion.
+
+- [x] M3-T1 §260: CRUD de resolucion V3 y diagnostico V4 conectados en API; 892 pruebas aisladas y 37 frontend aprobadas; metadata2 no autoriza acciones. Migracion local aplicada sin cambios de contenido.
+- [x] M3-T1 §§261–263: motivos V4 completos y lectura historica V3 de metadata1/2/null, sin inferir autoridad.
+- [x] M3-T1 §§268–270: API/cliente/formulario de revisiones negativas V3 con identidad servidor, permisos, concurrencia y proteccion contra duplicados; confirmacion/activacion bloqueadas.
+- [x] M3-T1 §§271–273: recorrido real Chromium/cliente/API/PostgreSQL ficticio y trabajo CI integrado aprobado en dbe1080; autenticacion sintetica, no login personal.
+- [ ] M3-T1: delimitar siguiente ruta especial pendiente contra inventario §273 de [aceptacion](project/m3-t1-revision-aceptacion.md), diseno y fuentes; no retirar fallback sin evaluador y pruebas.
+- [ ] M3-T1: validacion de sesion personal y revision tecnica integral antes de cierre; fuentes/aceptacion juridica pendientes. Pruebas ficticias hasta MVP.

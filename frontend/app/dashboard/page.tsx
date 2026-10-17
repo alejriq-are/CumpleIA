@@ -4,19 +4,19 @@ import { createClient } from "@/lib/supabase/server";
 const MODULOS = [
   {
     titulo: "Autodiagnóstico",
-    descripcion: "Cuestionario CCS, scoring de brechas e informe de estado de cumplimiento.",
+    descripcion: "Cuestionario CCS, evaluación de brechas e informe de estado de cumplimiento.",
     href: "/dashboard/autodiagnostico",
   },
   {
-    titulo: "Inventario (RAT)",
+    titulo: "Inventario de tratamientos (RAT)",
     descripcion:
       "Registro de Actividades de Tratamiento y gestión del inventario de datos personales.",
     href: "/dashboard/rat",
   },
   {
     titulo: "Bases de licitud",
-    descripcion: "Clasificación jurídica de cada tratamiento y generación de LIA.",
-    href: null,
+    descripcion: "Evaluaciones en borrador, fundamentos y documentación LIA de cada tratamiento.",
+    href: "/dashboard/licitud",
   },
   {
     titulo: "Documentos",
@@ -41,16 +41,16 @@ export default async function DashboardPage() {
       {/* Encabezado */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900">Panel de adecuación</h1>
-        <p className="mt-1 text-gray-500">
-          Bienvenido/a, <span className="font-medium">{user?.email}</span>. Tu sprint de adecuación
-          a la Ley 21.719 comienza aquí.
+        <p className="mt-1 break-words text-gray-500">
+          Bienvenido/a, <span className="break-all font-medium">{user?.email}</span>. Tu proceso de
+          adecuación a la Ley 21.719 comienza aquí.
         </p>
       </div>
 
-      {/* Alerta fase 0 */}
+      {/* Estado de desarrollo */}
       <div className="mb-8 rounded-xl border border-blue-200 bg-blue-50 px-5 py-4 text-sm text-blue-800">
-        <strong>Fase 0 en curso</strong> — Los módulos se habilitarán progresivamente. Estamos
-        construyendo los cimientos del sistema.
+        <strong>MVP en desarrollo</strong> — Los módulos se habilitarán progresivamente. Las pruebas
+        se realizan con datos ficticios.
       </div>
 
       {/* Tarjetas de módulos */}

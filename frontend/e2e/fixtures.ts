@@ -14,7 +14,7 @@ type RatSession = {
 };
 
 export const test = base.extend<{ rat: RatSession }>({
-  rat: async ({ page }, use) => {
+  rat: async ({ page }, provideFixture) => {
     // No se exportan secretos a process.env ni a procesos del frontend.
     let credentials: Record<string, string | undefined>;
     try {
@@ -93,7 +93,7 @@ export const test = base.extend<{ rat: RatSession }>({
 
     const created = new Set<string>();
     try {
-      await use({
+      await provideFixture({
         page,
         organizationId,
         request,

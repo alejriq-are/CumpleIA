@@ -6,6 +6,11 @@ on:
   pull_request:
     branches: [master, main]
 
+# Priorizar el ultimo commit del mismo PR; no cancelar runs activos de main/master.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   # ── Backend Python ──────────────────────────────────────────────────────────
   backend:
@@ -43,6 +48,7 @@ jobs:
       APP_DB_PASSWORD: app_dev_password
       SUPABASE_URL: https://thsivchuzxqofrloriiy.supabase.co
       ENVIRONMENT: test
+      EIPD_CHILD_TEST_WRITES_ENABLED: "true"
       DEBUG: "false"
       # Dummies: el runner debe parecerse a un entorno real con secretos
       # presentes. Así el test que exige secretos en producción demuestra que
@@ -103,7 +109,7 @@ jobs:
 
   # ── Frontend Node.js ────────────────────────────────────────────────────────
   frontend:
-    name: Frontend (Node.js 20)
+    name: Frontend (Node.js 22)
     runs-on: ubuntu-latest
 
     defaults:
@@ -117,12 +123,12 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version-file: frontend/.nvmrc
           cache: npm
-          cache-dependency-path: frontend/package.json
+          cache-dependency-path: frontend/package-lock.json
 
       - name: Instalar dependencias
-        run: npm install
+        run: npm ci
 
       - name: Lint — ESLint
         run: npm run lint
@@ -134,5 +140,84 @@ jobs:
       - name: Comprobación de tipos — tsc
         run: npm run type-check
 
+      # Suites ficticias: no ejecutan rat.spec.ts ni necesitan servicios/secretos.
+      - name: Instalar Chromium para pruebas EIPD
+        run: npx playwright install --with-deps chromium
+
+      - name: Pruebas EIPD — cliente y consulta con datos ficticios
+        run: npx playwright test e2e/eipd-api-client.spec.ts e2e/eipd-consultation.spec.ts e2e/child-adolescent-editor.spec.ts e2e/child-adolescent-order.acceptance.spec.ts e2e/child-adolescent-field-regressions.spec.ts e2e/child-eipd-history.spec.ts e2e/organization-acceptance.spec.ts e2e/mvp-dossier.spec.ts e2e/pilot-preparation.spec.ts
+
       - name: Formato — Prettier
         run: npx prettier --check .
+
+  # Recorrido real de componentes/cliente/API/DB; sin secretos ni sesion operativa.
+  eipd-integration:
+    name: EIPD integrada (datos ficticios)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: cumpleia_eipd_tests_20261009
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/cumpleia_eipd_tests_20261009
+      APP_DATABASE_URL: postgresql+asyncpg://app_user:app_dev_password@localhost:5432/cumpleia_eipd_tests_20261009
+      APP_DB_PASSWORD: app_dev_password
+      ENVIRONMENT: development
+      EIPD_CHILD_TEST_WRITES_ENABLED: "true"
+      DEBUG: "false"
+      SUPABASE_URL: https://test-project.supabase.co
+      SUPABASE_SERVICE_ROLE_KEY: dummy-service-role-key-for-ci
+      SUPABASE_ANON_KEY: dummy-anon-key-for-ci
+      SECRET_KEY: dummy-secret-key-for-ci
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: frontend/.nvmrc
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Instalar dependencias Python
+        run: pip install -r requirements.txt
+      - name: Instalar dependencias frontend
+        working-directory: frontend
+        run: npm ci
+      - name: Instalar Chromium
+        working-directory: frontend
+        run: npx playwright install --with-deps chromium
+      - name: Preparar base exclusiva de pruebas
+        run: |
+          python - <<'PY'
+          from sqlalchemy import create_engine, text
+          engine = create_engine("postgresql://postgres:postgres@localhost:5432/cumpleia_eipd_tests_20261009")
+          with engine.begin() as db:
+              assert db.scalar(text("SELECT current_database()")) == "cumpleia_eipd_tests_20261009"
+              db.execute(text('CREATE EXTENSION IF NOT EXISTS "vector"'))
+              db.execute(text("CREATE SCHEMA IF NOT EXISTS auth"))
+          engine.dispose()
+          PY
+      - name: Aplicar migraciones en base de pruebas
+        run: alembic upgrade head
+      - name: Recorrido Chromium cliente API y PostgreSQL
+        run: python -m scripts.run_eipd_browser_test

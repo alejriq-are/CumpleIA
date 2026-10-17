@@ -38,7 +38,6 @@ from app.db.models import (
     UserRole,
 )
 
-
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 _ENV_FILE = _REPO_ROOT / ".env"
 
@@ -230,9 +229,7 @@ async def seed() -> None:
                 membership.role = UserRole.owner
 
             subscription_result = await session.execute(
-                select(Subscription).where(
-                    Subscription.organization_id == E2E_ORG_ID
-                )
+                select(Subscription).where(Subscription.organization_id == E2E_ORG_ID)
             )
             subscription = subscription_result.scalar_one_or_none()
 
