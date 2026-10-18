@@ -18,17 +18,15 @@ identifica el HEAD exacto de la tarea. Una CI anterior no prueba un commit nuevo
 
 ## Bloque funcional vigente — producto
 
-17/10: recorrido de Bases de licitud habilitado desde `/dashboard/licitud`.
-Selecciona organizacion/tratamiento RAT, crea borrador con finalidad/alcance y
-consulta versiones paginadas. Expediente agrega base/fundamento y nueve analisis
-LIA, preservando campos previos; no es formulario completo de todas las bases.
-Viewer/confirmados/reemplazados solo lectura. Enlaces conservan organizacion.
-Tres API, cinco UI y dos integradas Chromium/API/PostgreSQL aprobadas; tipos,
-lint/formato aprobados. Docker restablecido por usuario; ninguna migracion.
-Contrato y prueba manual: project/m3-t1-recorrido-frontend.md. Siguiente paso:
-usuario recorre panel -> Bases de licitud con empresa ficticia, completa RAT y
-crea/reabre borrador. EIPD/datos reales bloqueados, sin merge/despliegue.
-CI previa bea0006 success (38984108132); comprobar nueva por HEAD exacto.
+18/10: recorrido manual ficticio de Bases de licitud cerrado: clientes,
+trabajadores e infancia; guardado/reapertura, dos resoluciones, revisiones negativas,
+decision documental y grant/revocacion. Decision conservada, nuevas decisiones
+bloqueadas en UI tras recarga; JSON con faculty_current=false y EIPD/datos reales
+bloqueados. Escritura temporal local restituida a false y override retirado.
+CI funcional de 33039d3 success (39040075836), Handoff tambien success.
+No hay pruebas pendientes del recorrido acotado; pendientes de producto/operacion
+no equivalen a aprobacion para datos reales. Evidencia y limites en
+project/m3-t1-recorrido-frontend.md; hallazgos en backlog.md. Sin merge/despliegue.
 
 16/10: piloto sigue ficticio. Usuario define escenario [FICTICIA] Comercial Piloto
 Andes SpA / [FICTICIA] Persona Facultada Piloto, contactos example.invalid y RUT

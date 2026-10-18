@@ -2,6 +2,14 @@
 
 > Primer archivo de backlog trackeado en git. Hasta ahora el seguimiento de tareas vivía en archivos `Claude_*`/`Fase 1`/`Modulo 1` sin trackear (`git status` los marca `??`); este archivo empieza a fijar en el repo los ítems con criterios de aceptación explícitos, empezando por el de este trabajo.
 
+## Hallazgos de prueba manual RAT — 17/10/2026
+
+- [ ] **RAT-UX-001 — Estado de guardado visible al reabrir secciones.** Prioridad baja; no bloquea el piloto ficticio. En Fuentes de los datos, la confirmacion temporal desaparece al recargar aunque el contenido persiste, lo que genera dudas sobre el guardado. Mostrar estado derivado de datos cargados del servidor (datos guardados/sin registros), cambios sin guardar al editar y confirmacion tras respuesta exitosa. No declarar guardado ante error o respuesta incierta. Criterios: recargar o volver desde otra pagina conserva estado y contenido; editar/agregar/eliminar distingue cambios pendientes; fallo conserva el formulario sin indicar exito. Evaluar el mismo patron en las demas secciones RAT. Sin cambiar completitud documental, permisos ni bloqueo EIPD. Detectado por el usuario en el piloto de infancia.
+
+- [ ] **LIC-UX-002 — Acciones y version consultada identificables.** Hallazgo manual 18/10: registrar resolucion/decision/consulta parece texto corriente; fue dificil localizar el control y se completo un fundamento para resolucion 2 mientras estaba consultada la 1. Mostrar botones reconocibles y referencia/version junto a la decision; conservar foco/contexto al consultar. Criterio: identificar accion y version sin busqueda del navegador; no cambiar permisos ni historiales.
+- [ ] **RAT-VAL-001 — Revisar completitud de fuentes.** Una fila con tipo de fuente y descripcion vacia satisface el requisito actual de fuente registrada; distinguir existencia de fila y descripcion suficiente. Definir contrato de borrador/completitud y alinear servidor, diagnostico y UI, con pruebas de vacio/espacios y persistencia. No asumir completitud juridica ni cambiar activacion EIPD. Hallazgo del piloto, pendiente de implementacion.
+- [ ] **LIC-UX-003 — Explicar coherencia entre RAT e infancia.** Grupos del documento se declaran por separado de las marcas del RAT; no se sincronizan automaticamente. Mostrar origen, diferencias y necesidad de revisar/guardar contexto al cambiar RAT, preservando versiones historicas. Validar escenario sintetico de cambio de titulares sin afirmar actualizacion automatica ni sobrescribir decisiones.
+
 ## Modelo de organizaciones, roles y suscripción
 
 Ver `docs/adr/0001-modelo-organizaciones-roles-suscripcion.md`.
