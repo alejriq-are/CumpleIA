@@ -18,12 +18,15 @@ identifica el HEAD exacto de la tarea. Una CI anterior no prueba un commit nuevo
 
 ## Bloque funcional vigente — producto
 
-18/10: propuesta de experiencia de licitud aceptada por el usuario; documentacion
-publicada, implementacion pendiente. Cuatro pestanas por tarea, esquema de avance,
-version objetivo visible y facultades separadas. Proximo entregable: maqueta
-navegable para adultos, infancia y facultad revocada. Contrato y criterios en
-project/m3-t1-licitud-experiencia.md; backlog LIC-UX-004. No cambia producto,
-permisos ni configuracion; EIPD/datos reales bloqueados, sin merge/despliegue.
+18/10: maqueta navegable habilitada en `/dashboard/licitud/maqueta`, acceso desde
+Bases de licitud. Cuatro pestanas, esquema/siguiente paso, escenarios adultos,
+infancia y facultad revocada. Estado solo en memoria; vista previa sin eventos y
+descarga fija ficticia sin textos de ensayo. Formularios operativos intactos;
+no usa API ni cambia permisos/configuracion. Siete Chromium dirigidas aprobadas,
+tipos/lint/formato; revisadas vistas movil/escritorio. Ruta sin sesion redirige a
+login. Pendiente validacion humana de la maqueta antes de reorganizar formularios.
+Contrato: project/m3-t1-licitud-experiencia.md; LIC-UX-004 sigue abierto.
+EIPD/datos reales bloqueados, sin merge/despliegue. CI del nuevo commit por verificar.
 
 18/10: recorrido manual ficticio de Bases de licitud cerrado: clientes,
 trabajadores e infancia; guardado/reapertura, dos resoluciones, revisiones negativas,

@@ -15,6 +15,18 @@ export default async function Page() {
         Volver al panel
       </Link>
       <h1 className="text-2xl font-bold">Bases de licitud</h1>
+      <aside className="rounded-lg border border-blue-200 bg-blue-50 p-4">
+        <p className="font-semibold">Prueba una forma más clara de completar y revisar</p>
+        <p className="mt-1 text-sm">
+          Maqueta con escenarios ficticios; tus expedientes no cambian.
+        </p>
+        <Link
+          href="/dashboard/licitud/maqueta"
+          className="mt-3 inline-block rounded-md bg-blue-800 px-4 py-2 font-medium text-white hover:bg-blue-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-800"
+        >
+          Explorar maqueta de licitud
+        </Link>
+      </aside>
       {organizations.length ? (
         <LicitudWorkspace organizaciones={organizations} />
       ) : (

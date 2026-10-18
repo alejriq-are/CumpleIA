@@ -1,7 +1,7 @@
 # Propuesta de experiencia de licitud
 
-Estado: propuesta aceptada por el usuario el 18/10/2026. Implementacion pendiente.
-Esta entrega documenta y publica la decision de diseno; no modifica la aplicacion.
+Estado: propuesta aceptada; maqueta navegable implementada el 18/10/2026.
+Reorganizacion de los formularios operativos pendiente de validar la maqueta.
 Base inspeccionada: 4cb7ae1. Alcance: navegacion y presentacion del flujo existente;
 no ampliar reglas juridicas, facultades, API de aprobacion ni activacion EIPD.
 
@@ -151,3 +151,38 @@ Criterios de aceptacion del bloque de experiencia:
 Backlog de referencia: LIC-UX-004 integra esta reorganizacion y recoge LIC-UX-002,
 LIC-UX-003 y el patron de guardado RAT-UX-001 cuando corresponda. RAT-VAL-001
 mantiene su propio contrato de completitud; no se considera resuelto por el rediseno.
+
+## Maqueta navegable disponible
+
+Ruta protegida `/dashboard/licitud/maqueta`, enlazada desde Bases de licitud.
+Cuatro pestanas con esquema y siguiente paso, tres escenarios fijos: adultos,
+infancia y facultad revocada. Datos sinteticos sin IDs de organizaciones ni cuentas.
+Estado de ensayo en memoria, separado por escenario y version; navegar no descarta
+textos, recargar los reinicia. Simular guardado avanza dentro del ejemplo y declara
+explicitamente que no persiste en servidor. Revisar permite una vista previa sin
+registro; el historial permanece precargado. Facultad revocada bloquea solo la
+decision organizacional del ejemplo, conserva revision/consulta. Facultades en
+consulta separada, sin otorgar ni revocar desde la maqueta.
+
+Referencia y version junto al documento y la previsualizacion; enlaces mediante
+fragmento conservan escenario/pestana/version (no textos). Historial ofrece JSON
+solo del ejemplo fijo y su version seleccionada, excluyendo textos de ensayo.
+Roles de pestanas, flechas/Home/End y foco visible; diseno adaptable a movil.
+No usa API, cookies, almacenamiento persistente ni servicios de autenticacion
+dentro del componente. La ruta conserva la proteccion de sesion del dashboard.
+No modifica formularios operativos, servicios, DB, configuracion ni permisos.
+
+Pendiente: validacion humana de claridad y nombres en los tres escenarios. Despues
+se podra implementar el flujo en formularios reales con los contratos existentes;
+este bloque no acredita esa implementacion ni resuelve RAT-VAL-001.
+
+Verificacion local del bloque: siete pruebas Chromium dirigidas aprobadas
+(`npx playwright test e2e/licitud-prototype.spec.ts`), tipos frontend y ESLint de
+archivos modificados aprobados; formato Prettier y git diff --check. Incluye
+borradores entre pestanas/escenarios, version objetivo, revocacion, descarga sin
+textos ni solicitudes API, teclado/enlace directo, movil y reinicio al recargar.
+Capturas localmente inspeccionadas en movil (390 px) y escritorio (1280 px).
+Sin sesion, la ruta redirige a login; no se automatizo login externo. Prueba de
+componente real en Chromium con CSS compilado; no es una prueba de backend.
+Suite incluida en comandos CI existentes. No se repitieron suites backend/DB:
+no hay cambios en esos contratos. CI exacta se consulta despues del push.

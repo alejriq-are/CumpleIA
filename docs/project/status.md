@@ -1,11 +1,15 @@
-## Proximo bloque aceptado 18/10 — experiencia de licitud
+## Bloque vigente 18/10 — maqueta navegable de licitud
 
-Propuesta aceptada, documentada; implementacion pendiente. Cuatro pestanas por
-tarea, esquema de avance, siguiente accion, version objetivo visible, estados de
-guardado y bloqueos explicados; facultades fuera del formulario de revision.
-Proximo paso: maqueta navegable con adultos, infancia y facultad revocada, antes
-de reorganizar formularios. Backlog LIC-UX-004; [contrato y criterios](m3-t1-licitud-experiencia.md).
-Sin cambios de producto, permisos, entorno ni activacion EIPD en esta entrega.
+Ruta `/dashboard/licitud/maqueta` protegida por sesion, enlace desde Bases de
+licitud. Cuatro pestanas, esquema y siguiente paso; escenarios adultos, infancia
+y facultad revocada. Edicion en memoria por escenario/version, previsualizacion
+sin eventos, historial precargado y descarga de ejemplo sin textos editados.
+Siete pruebas Chromium dirigidas, tipos/lint/formato aprobados; movil/escritorio
+revisados. Sin API/DB ni cambios a formularios, permisos o configuracion.
+Pendiente validar claridad con el usuario antes de implementar el flujo operativo.
+[Contrato, uso y limites](m3-t1-licitud-experiencia.md#maqueta-navegable-disponible).
+LIC-UX-004 abierto; EIPD/datos reales bloqueados, sin merge/despliegue.
+CI de nuevo commit pendiente de consulta.
 
 ## Cierre vigente 18/10 — recorrido manual ficticio de Bases de licitud
 
