@@ -63,7 +63,7 @@ test.beforeAll(async () => {
 test.afterAll(async () => {
   if (directory) await rm(directory, { recursive: true, force: true });
 });
-async function open(page: Page, fragment = "") {
+async function open(page: Page, fragment = "", selectDefault = true) {
   requests.length = 0;
   await page.route("**/*", async (route) => {
     const request = route.request();
@@ -81,6 +81,24 @@ async function open(page: Page, fragment = "") {
   await page.addStyleTag({ content: css });
   await page.addScriptTag({ content: script });
   await expect(page.getByRole("heading", { name: "Licitud, paso a paso" })).toBeVisible();
+  if (!fragment && selectDefault) await chooseTreatment(page, "adultos");
+}
+async function chooseTreatment(
+  page: Page,
+  treatment: "adultos" | "infancia",
+  purpose = treatment === "adultos" ? "gestion" : "ensayo"
+) {
+  const change = page.getByRole("button", { name: "Cambiar tratamiento o finalidad" });
+  if (await change.isVisible()) await change.click();
+  await page.getByLabel("Tratamiento RAT de ejemplo", { exact: true }).selectOption(treatment);
+  await page.getByLabel("Finalidad a evaluar", { exact: true }).selectOption(purpose);
+  await page.getByRole("button", { name: "Abrir evaluación de ejemplo" }).click();
+}
+async function revokeFaculty(page: Page) {
+  await page
+    .getByText("Herramientas de demostración · ejemplos opcionales", { exact: true })
+    .click();
+  await page.getByLabel("Facultad simulada de la persona").selectOption("revocada");
 }
 async function tab(page: Page, name: string) {
   await page.getByRole("tab", { name, exact: true }).click();
@@ -116,15 +134,17 @@ test("infancia: datos de escenario independientes y borradores conservados al al
   page,
 }) => {
   await open(page);
-  await page.getByLabel("Escenario de prueba").selectOption("infancia");
+  await chooseTreatment(page, "infancia");
   await tab(page, "Completar datos");
   await page.getByRole("button", { name: "3. Infancia", exact: true }).click();
   await page
     .getByLabel("Análisis de edad y alcance de ensayo")
     .fill("[FICTICIA] Alcance conservado");
-  await page.getByLabel("Escenario de prueba").selectOption("adultos");
+  await chooseTreatment(page, "adultos");
+  await tab(page, "Completar datos");
   await expect(page.getByRole("button", { name: "3. Infancia", exact: true })).toHaveCount(0);
-  await page.getByLabel("Escenario de prueba").selectOption("infancia");
+  await chooseTreatment(page, "infancia");
+  await tab(page, "Completar datos");
   await page.getByRole("button", { name: "3. Infancia", exact: true }).click();
   await expect(page.getByLabel("Análisis de edad y alcance de ensayo")).toHaveValue(
     "[FICTICIA] Alcance conservado"
@@ -194,7 +214,9 @@ test("descarga ficticia sin textos editados ni eventos registrados; sin solicitu
   const download = await downloadPromise;
   const value = JSON.parse(await readFile((await download.path())!, "utf8"));
   expect(value).toMatchObject({
-    scenario: "revocada",
+    prototype_version: 2,
+    treatment: "infancia",
+    purpose: "ensayo",
     faculty_current: false,
     activation: "deshabilitada",
     allows_real_data: false,
@@ -202,7 +224,7 @@ test("descarga ficticia sin textos editados ni eventos registrados; sin solicitu
     persisted_events: 0,
     contains_user_edits: false,
   });
-  expect(download.suggestedFilename()).toBe("maqueta-licitud-revocada-v2.json");
+  expect(download.suggestedFilename()).toBe("maqueta-licitud-infancia-ensayo-v2.json");
   expect(requests).toEqual([]);
   await expect(
     page.getByRole("button", {
@@ -235,9 +257,12 @@ test("teclado, enlace directo y ancho movil permiten recorrer las cuatro pestana
       await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)
     ).toBe(true);
   }
-  await page.getByLabel("Escenario de prueba").selectOption("revocada");
+  await chooseTreatment(page, "infancia");
+  await revokeFaculty(page);
   await tab(page, "Revisar documentos");
-  await expect(page).toHaveURL(/escenario=revocada&pestana=revisar&version=2/);
+  await expect(page).toHaveURL(
+    /tratamiento=infancia&finalidad=ensayo&facultad=revocada&pestana=revisar&version=2/
+  );
   if (process.env.CUMPLEIA_PROTOTYPE_SCREENSHOT) {
     await page.getByLabel("Tipo de actuación").selectOption("decision");
     await page.screenshot({ path: process.env.CUMPLEIA_PROTOTYPE_SCREENSHOT, fullPage: true });
@@ -268,5 +293,86 @@ test("recarga reinicia textos de ensayo; resumen de escritorio sin desbordamient
       path: process.env.CUMPLEIA_PROTOTYPE_SCREENSHOT_DESKTOP,
       fullPage: true,
     });
+  expect(requests).toEqual([]);
+});
+
+test("V2: seleccion inicial obligatoria y finalidades dependen del tratamiento", async ({
+  page,
+}) => {
+  await open(page, "", false);
+  await expect(page.getByRole("tablist")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Abrir evaluación de ejemplo" })).toBeDisabled();
+  await expect(page.getByLabel("Finalidad a evaluar", { exact: true })).toBeDisabled();
+  await page.getByLabel("Tratamiento RAT de ejemplo", { exact: true }).selectOption("adultos");
+  await page.getByLabel("Finalidad a evaluar", { exact: true }).selectOption("consultas");
+  await page.getByLabel("Tratamiento RAT de ejemplo", { exact: true }).selectOption("infancia");
+  await expect(page.getByLabel("Finalidad a evaluar", { exact: true })).toHaveValue("");
+  await expect(
+    page
+      .getByLabel("Finalidad a evaluar", { exact: true })
+      .getByRole("option", { name: /Atender consultas/ })
+  ).toHaveCount(0);
+  await page.getByLabel("Finalidad a evaluar", { exact: true }).selectOption("ensayo");
+  await page.getByRole("button", { name: "Abrir evaluación de ejemplo" }).click();
+  await expect(page.getByRole("complementary", { name: "Alcance seleccionado" })).toContainText(
+    "Ensayar el análisis de infancia"
+  );
+  await expect(page.getByRole("list", { name: "Esquema del flujo" })).toContainText(
+    "Revisa el alcance seleccionado"
+  );
+  await expect(page.getByRole("tab")).toHaveCount(4);
+  expect(requests).toEqual([]);
+});
+
+test("V2: ejemplos solo precargan seleccion y facultad no cambia tratamiento ni finalidad", async ({
+  page,
+}) => {
+  await open(page, "", false);
+  await page
+    .getByText("Herramientas de demostración · ejemplos opcionales", { exact: true })
+    .click();
+  await page.getByRole("button", { name: "Cargar ejemplo de infancia" }).click();
+  await expect(page.getByLabel("Tratamiento RAT de ejemplo", { exact: true })).toHaveValue(
+    "infancia"
+  );
+  await expect(page.getByRole("tablist")).toHaveCount(0);
+  await page.getByRole("button", { name: "Abrir evaluación de ejemplo" }).click();
+  await page.getByLabel("Facultad simulada de la persona").selectOption("revocada");
+  await expect(page.getByRole("complementary", { name: "Alcance seleccionado" })).toContainText(
+    "Programa con participantes de 10 a 13 años"
+  );
+  await expect(page.getByRole("complementary", { name: "Alcance seleccionado" })).toContainText(
+    "Ensayar el análisis de infancia"
+  );
+  await tab(page, "Revisar documentos");
+  await page.getByLabel("Tipo de actuación").selectOption("decision");
+  await expect(page.getByLabel("Resultado de ensayo")).toBeDisabled();
+  expect(requests).toEqual([]);
+});
+
+test("V2: mismo tratamiento, distintas finalidades, borradores separados y contexto exacto", async ({
+  page,
+}) => {
+  await open(page);
+  await tab(page, "Completar datos");
+  await page.getByRole("button", { name: "Continuar a base y fundamento" }).click();
+  await page.getByLabel("Fundamento de ensayo", { exact: true }).fill("[FICTICIA] Solo gestion");
+  await chooseTreatment(page, "adultos", "consultas");
+  await tab(page, "Completar datos");
+  await page.getByRole("button", { name: "Continuar a base y fundamento" }).click();
+  await expect(page.getByLabel("Fundamento de ensayo", { exact: true })).not.toHaveValue(
+    "[FICTICIA] Solo gestion"
+  );
+  await page.getByLabel("Fundamento de ensayo", { exact: true }).fill("[FICTICIA] Solo consultas");
+  await tab(page, "Revisar documentos");
+  await expect(page.getByRole("article", { name: "Documento seleccionado" })).toContainText(
+    "SIMULADA-ADULTOS-CONSULTAS-002"
+  );
+  await chooseTreatment(page, "adultos", "gestion");
+  await tab(page, "Completar datos");
+  await page.getByRole("button", { name: "Continuar a base y fundamento" }).click();
+  await expect(page.getByLabel("Fundamento de ensayo", { exact: true })).toHaveValue(
+    "[FICTICIA] Solo gestion"
+  );
   expect(requests).toEqual([]);
 });

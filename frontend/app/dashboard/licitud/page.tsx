@@ -24,7 +24,7 @@ export default async function Page() {
           href="/dashboard/licitud/maqueta"
           className="mt-3 inline-block rounded-md bg-blue-800 px-4 py-2 font-medium text-white hover:bg-blue-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-800"
         >
-          Explorar maqueta de licitud
+          Explorar maqueta V2 de licitud
         </Link>
       </aside>
       {organizations.length ? (

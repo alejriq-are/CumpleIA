@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { LicitudFlowPrototype } from "@/components/licitud/LicitudFlowPrototype";
 
-export const metadata = { title: "Maqueta de licitud | CumpleIA" };
+export const metadata = { title: "Maqueta V2 de licitud | CumpleIA" };
 
 export default function Page() {
   return (

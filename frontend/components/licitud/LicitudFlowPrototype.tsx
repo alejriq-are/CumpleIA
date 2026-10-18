@@ -9,23 +9,26 @@ const tabs = [
   ["historial", "Historial y descargas"],
 ] as const;
 type Tab = (typeof tabs)[number][0];
-type Scenario = "adultos" | "infancia" | "revocada";
+type Scenario = "adultos" | "infancia";
 type Section = "alcance" | "fundamento" | "infancia" | "documento";
-const scenarios: Record<Scenario, { label: string; treatment: string; purpose: string }> = {
+const scenarios: Record<
+  Scenario,
+  { label: string; treatment: string; purposes: Record<string, string> }
+> = {
   adultos: {
-    label: "Adultos",
+    label: "Clientes adultos",
     treatment: "[FICTICIA] Gestión de clientes adultos",
-    purpose: "Ensayar una evaluación para clientes adultos con registros sintéticos.",
+    purposes: {
+      gestion: "[FICTICIA] Administrar la relación con clientes adultos sintéticos.",
+      consultas: "[FICTICIA] Atender consultas de clientes adultos sintéticos.",
+    },
   },
   infancia: {
-    label: "Infancia",
+    label: "Participantes de 10 a 13 años",
     treatment: "[FICTICIA] Programa con participantes de 10 a 13 años",
-    purpose: "Ensayar el análisis de infancia con cinco participantes sintéticos.",
-  },
-  revocada: {
-    label: "Facultad revocada",
-    treatment: "[FICTICIA] Programa con participantes de 10 a 13 años",
-    purpose: "Consultar la documentación de infancia después de revocar una facultad ficticia.",
+    purposes: {
+      ensayo: "[FICTICIA] Ensayar el análisis de infancia con cinco participantes sintéticos.",
+    },
   },
 };
 const sections: [Section, string][] = [
@@ -60,43 +63,55 @@ function Card({ title, children }: { title: string; children: ReactNode }) {
 
 export function LicitudFlowPrototype() {
   const [scenario, setScenario] = useState<Scenario>("adultos");
+  const [purpose, setPurpose] = useState("gestion");
+  const [selectedTreatment, setSelectedTreatment] = useState<Scenario | "">("");
+  const [selectedPurpose, setSelectedPurpose] = useState("");
+  const [selectionOpen, setSelectionOpen] = useState(true);
+  const [active, setActive] = useState(false);
+  const [revoked, setRevoked] = useState(false);
   const [tab, setTab] = useState<Tab>("resumen");
   const [section, setSection] = useState<Section>("alcance");
   const [version, setVersion] = useState("2");
   const [ready, setReady] = useState(false);
-  const [drafts, setDrafts] = useState<Record<Scenario, Draft>>({
-    adultos: initialDraft("adultos"),
-    infancia: initialDraft("infancia"),
-    revocada: initialDraft("revocada"),
-  });
-  const [saved, setSaved] = useState<Record<Scenario, Draft>>({
-    adultos: initialDraft("adultos"),
-    infancia: initialDraft("infancia"),
-    revocada: initialDraft("revocada"),
-  });
+  const [drafts, setDrafts] = useState<Record<string, Draft>>({});
+  const [saved, setSaved] = useState<Record<string, Draft>>({});
   const [reviews, setReviews] = useState<Record<string, ReviewDraft>>({});
   const [notice, setNotice] = useState("");
   const [facultyOpen, setFacultyOpen] = useState(false);
   const [preview, setPreview] = useState(false);
   const [copied, setCopied] = useState(false);
   const current = scenarios[scenario];
-  const draft = drafts[scenario];
-  const dirty = JSON.stringify(draft) !== JSON.stringify(saved[scenario]);
-  const reviewKey = `${scenario}:${version}`;
+  const scopeKey = `${scenario}:${purpose}`;
+  const draft = drafts[scopeKey] ?? initialDraft(scenario);
+  const dirty = JSON.stringify(draft) !== JSON.stringify(saved[scopeKey] ?? initialDraft(scenario));
+  const reviewKey = `${scopeKey}:${version}`;
   const review = reviews[reviewKey] ?? emptyReview();
-  const revoked = scenario === "revocada";
   const adult = scenario === "adultos";
   const documentName = adult
     ? "Documento de evaluación de licitud"
     : "Resolución documental de infancia";
-  const reference = `SIMULADA-${adult ? "ADULTOS" : "INFANCIA"}-00${version}`;
+  const reference = `SIMULADA-${adult ? "ADULTOS" : "INFANCIA"}${purpose === "consultas" ? "-CONSULTAS" : ""}-00${version}`;
 
   useEffect(() => {
     const readLocation = () => {
       const params = new URLSearchParams(window.location.hash.slice(1));
-      const target = params.get("escenario");
+      // Preserve old V1 demo links while keeping permissions separate from the treatment.
+      const legacy = params.get("escenario");
+      const target = params.get("tratamiento") ?? (legacy === "revocada" ? "infancia" : legacy);
       const destination = params.get("pestana");
-      if (target && Object.hasOwn(scenarios, target)) setScenario(target as Scenario);
+      if (target && Object.hasOwn(scenarios, target)) {
+        const treatment = target as Scenario;
+        const proposed = params.get("finalidad") ?? Object.keys(scenarios[treatment].purposes)[0];
+        if (Object.hasOwn(scenarios[treatment].purposes, proposed)) {
+          setScenario(treatment);
+          setPurpose(proposed);
+          setSelectedTreatment(treatment);
+          setSelectedPurpose(proposed);
+          setActive(true);
+          setSelectionOpen(false);
+        }
+      }
+      setRevoked(params.get("facultad") === "revocada" || legacy === "revocada");
       if (tabs.some(([key]) => key === destination)) setTab(destination as Tab);
       if (["1", "2"].includes(params.get("version") ?? "")) setVersion(params.get("version")!);
       setPreview(false);
@@ -107,17 +122,26 @@ export function LicitudFlowPrototype() {
     return () => window.removeEventListener("hashchange", readLocation);
   }, []);
   useEffect(() => {
-    if (!ready) return;
-    const params = new URLSearchParams({ escenario: scenario, pestana: tab, version });
+    if (!ready || !active) return;
+    const params = new URLSearchParams({
+      tratamiento: scenario,
+      finalidad: purpose,
+      facultad: revoked ? "revocada" : "vigente",
+      pestana: tab,
+      version,
+    });
     window.history.replaceState(null, "", `#${params}`);
-  }, [scenario, tab, version, ready]);
+  }, [scenario, purpose, revoked, tab, version, ready, active]);
 
   function go(target: Tab) {
     setTab(target);
     setPreview(false);
   }
   function edit(key: keyof Draft, value: string) {
-    setDrafts((all) => ({ ...all, [scenario]: { ...all[scenario], [key]: value } }));
+    setDrafts((all) => ({
+      ...all,
+      [scopeKey]: { ...(all[scopeKey] ?? initialDraft(scenario)), [key]: value },
+    }));
     setNotice("");
   }
   function changeReview(change: Partial<ReviewDraft>) {
@@ -143,7 +167,9 @@ export function LicitudFlowPrototype() {
       type: "maqueta_navegable",
       data_kind: "ficticios",
       source: "fixture_demostrativa",
-      scenario,
+      prototype_version: 2,
+      treatment: scenario,
+      purpose,
       document: { reference, version: `DEMO-${version}` },
       faculty_current: !revoked,
       illustrative_history: "Requiere cambios; ejemplo precargado",
@@ -158,7 +184,7 @@ export function LicitudFlowPrototype() {
     );
     const link = document.createElement("a");
     link.href = url;
-    link.download = `maqueta-licitud-${scenario}-v${version}.json`;
+    link.download = `maqueta-licitud-${scenario}-${purpose}-v${version}.json`;
     link.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
     setNotice("Ejemplo descargado. No contiene tus textos de ensayo ni es un expediente real.");
@@ -169,7 +195,7 @@ export function LicitudFlowPrototype() {
       <header className="space-y-4 rounded-xl border border-blue-200 bg-blue-50 p-5 sm:p-6">
         <div className="flex flex-wrap items-center gap-3">
           <span className="rounded-full bg-blue-800 px-3 py-1 text-xs font-bold text-white">
-            MAQUETA NAVEGABLE
+            MAQUETA NAVEGABLE · VERSIÓN 2
           </span>
           <span className="text-sm font-semibold">EIPD deshabilitada · Solo datos ficticios</span>
         </div>
@@ -179,569 +205,732 @@ export function LicitudFlowPrototype() {
           modifica tus expedientes.
         </p>
         <p className="text-sm">
-          Los cambios se conservan entre pestañas y escenarios durante esta visita. Al recargar se
-          reinician. No ingreses datos reales.
-        </p>
-        <label className="block max-w-md font-medium">
-          Escenario de prueba
-          <select
-            className={input}
-            value={scenario}
-            onChange={(event) => {
-              setScenario(event.target.value as Scenario);
-              setSection("alcance");
-              setNotice("");
-              setPreview(false);
-              setFacultyOpen(false);
-              setCopied(false);
-            }}
-          >
-            {Object.entries(scenarios).map(([key, value]) => (
-              <option key={key} value={key}>
-                {value.label}
-              </option>
-            ))}
-          </select>
-        </label>
-        <p className="font-semibold">{current.treatment}</p>
-        <p className="text-sm">
-          Organización: [FICTICIA] Organización de demostración · Evaluación: versión 1 · Estado:
-          borrador de ejemplo
+          Los cambios se conservan entre pestañas, tratamientos y finalidades durante esta visita.
+          Al recargar se reinician. No ingreses datos reales.
         </p>
       </header>
 
-      <div
-        aria-label="Secciones de la maqueta"
-        role="tablist"
-        className="grid grid-cols-2 gap-2 lg:grid-cols-4"
-      >
-        {tabs.map(([key, label], index) => (
-          <button
-            key={key}
-            type="button"
-            id={`prototype-tab-${key}`}
-            role="tab"
-            aria-selected={tab === key}
-            aria-controls={`prototype-panel-${key}`}
-            tabIndex={tab === key ? 0 : -1}
-            onClick={() => go(key)}
-            onKeyDown={(event) => moveTab(event, index)}
-            className={`${tab === key ? "border-blue-800 bg-blue-800 text-white" : "border-slate-300 bg-white text-slate-800 hover:bg-slate-100"} rounded-lg border p-3 text-left text-sm font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-800`}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
-      <div role="status" aria-live="polite" className="text-sm">
-        {dirty
-          ? "Cambios sin guardar en el borrador de ensayo. Se conservan al cambiar de pestaña."
-          : "Borrador de ejemplo disponible; sin cambios pendientes de ensayo."}
-        {notice && (
-          <p className="mt-2 rounded-lg border border-blue-200 bg-blue-50 p-3">{notice}</p>
-        )}
-      </div>
-      <div
-        role="tabpanel"
-        id={`prototype-panel-${tab}`}
-        aria-labelledby={`prototype-tab-${tab}`}
-        tabIndex={0}
-        className="space-y-5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-800"
-      >
-        {tab === "resumen" && (
-          <>
-            <Card title="Tu recorrido">
-              <p>
-                Completar prepara un borrador. Revisar deja una observación sobre una versión
-                concreta. Avanzar no significa aprobar.
-              </p>
-              <ol
-                className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4"
-                aria-label="Esquema del flujo"
-              >
-                {[
-                  [
-                    "Revisa el alcance RAT",
-                    "Finalidad, personas y categorías de datos.",
-                    "completar",
-                  ],
-                  [
-                    "Completa la evaluación",
-                    adult
-                      ? "Base propuesta y fundamento."
-                      : "Fundamento, infancia y documento de ensayo.",
-                    "completar",
-                  ],
-                  [
-                    "Selecciona y revisa",
-                    "Lee la versión antes de formular una revisión.",
-                    "revisar",
-                  ],
-                  ["Consulta el resultado", "Historial y descarga del ejemplo.", "historial"],
-                ].map(([title, description, destination], index) => (
-                  <li key={title} className="rounded-lg border border-slate-200 p-4">
-                    <span className="text-sm font-semibold text-blue-800">Paso {index + 1}</span>
-                    <h3 className="my-2 font-semibold">{title}</h3>
-                    <p className="mb-3 text-sm">{description}</p>
-                    <button
-                      type="button"
-                      className={secondary}
-                      onClick={() => {
-                        setSection(index === 0 ? "alcance" : "fundamento");
-                        go(destination as Tab);
-                      }}
-                    >
-                      Ir al paso {index + 1}
-                    </button>
-                  </li>
-                ))}
-              </ol>
-            </Card>
-            <Card title="Siguiente paso recomendado">
-              <p>
-                {revoked
-                  ? "La facultad está revocada. Puedes leer documentos e historial; la decisión de organización está bloqueada."
-                  : "Revisa el alcance y completa el fundamento pendiente de la evaluación de ejemplo."}
-              </p>
+      <details className="rounded-xl border border-slate-300 bg-slate-50 p-4">
+        <summary className="cursor-pointer font-semibold">
+          Herramientas de demostración · ejemplos opcionales
+        </summary>
+        <div className="mt-4 space-y-4">
+          <p>
+            Estos ejemplos solo precargan la selección inicial. No son pasos del flujo ni categorías
+            que debas elegir en el producto.
+          </p>
+          <div className="flex flex-wrap gap-3">
+            {(["adultos", "infancia"] as const).map((example) => (
               <button
+                key={example}
                 type="button"
-                className={button}
+                className={secondary}
                 onClick={() => {
-                  setSection("alcance");
-                  go(revoked ? "revisar" : "completar");
+                  setSelectedTreatment(example);
+                  setSelectedPurpose(Object.keys(scenarios[example].purposes)[0]);
+                  setSelectionOpen(true);
+                  setPreview(false);
                 }}
               >
-                {revoked ? "Consultar documento y bloqueo" : "Comenzar por el alcance"}
+                Cargar ejemplo de {example === "adultos" ? "adultos" : "infancia"}
               </button>
-              <dl className="grid gap-3 text-sm sm:grid-cols-2">
-                <div>
-                  <dt className="font-semibold">Base de licitud</dt>
-                  <dd>Pendiente de evaluación jurídica</dd>
-                </div>
-                <div>
-                  <dt className="font-semibold">Infancia</dt>
-                  <dd>
-                    {adult
-                      ? "Fuera del alcance de este ejemplo de adultos"
-                      : "Documento de infancia de ejemplo disponible"}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="font-semibold">Revisión precargada</dt>
-                  <dd>Requiere cambios · ejemplo histórico</dd>
-                </div>
-                <div>
-                  <dt className="font-semibold">Facultad de organización</dt>
-                  <dd>{revoked ? "Revocada" : "Vigente solo en el escenario simulado"}</dd>
-                </div>
-              </dl>
-              <p className="text-sm">
-                El ejemplo no determina si corresponde una EIPD. Su activación permanece
-                deshabilitada.
-              </p>
-            </Card>
-          </>
-        )}
+            ))}
+          </div>
+          <label className="block max-w-lg font-medium">
+            Facultad simulada de la persona
+            <select
+              className={input}
+              value={revoked ? "revocada" : "vigente"}
+              onChange={(e) => {
+                setRevoked(e.target.value === "revocada");
+                setPreview(false);
+              }}
+            >
+              <option value="vigente">Vigente en la demostración</option>
+              <option value="revocada">Revocada en la demostración</option>
+            </select>
+          </label>
+          <p className="text-sm">
+            La facultad es una condición de la persona, no un tipo de tratamiento RAT. Cambiarla no
+            cambia los datos seleccionados ni otorga permisos reales.
+          </p>
+        </div>
+      </details>
 
-        {tab === "completar" && (
-          <Card title="Completar un borrador">
-            <p>
-              Aquí prepara los datos la persona editora. Los documentos registrados se consultan en
-              Revisar documentos.
-            </p>
-            <nav aria-label="Secciones para completar" className="flex flex-wrap gap-2">
-              {sections
-                .filter(([key]) => !adult || key !== "infancia")
-                .map(([key, label], index) => (
-                  <button
-                    type="button"
-                    key={key}
-                    aria-current={section === key ? "step" : undefined}
-                    className={section === key ? button : secondary}
-                    onClick={() => setSection(key)}
-                  >
+      {selectionOpen && (
+        <Card title="Antes de empezar: selecciona qué vas a evaluar">
+          <p>
+            Primero elige organización, tratamiento RAT y finalidad. Después recorre los cuatro
+            pasos para ese alcance. La maqueta solo ofrece un inventario ficticio.
+          </p>
+          <p className="text-sm">
+            Organización de ejemplo: [FICTICIA] Organización de demostración.
+          </p>
+          <label className="block font-medium">
+            Tratamiento RAT de ejemplo
+            <select
+              className={input}
+              aria-label="Tratamiento RAT de ejemplo"
+              value={selectedTreatment}
+              onChange={(e) => {
+                setSelectedTreatment(e.target.value as Scenario | "");
+                setSelectedPurpose("");
+              }}
+            >
+              <option value="">Selecciona un tratamiento</option>
+              {Object.entries(scenarios).map(([key, value]) => (
+                <option key={key} value={key}>
+                  {value.treatment}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="block font-medium">
+            Finalidad a evaluar
+            <select
+              className={input}
+              disabled={!selectedTreatment}
+              aria-label="Finalidad a evaluar"
+              value={selectedPurpose}
+              onChange={(e) => setSelectedPurpose(e.target.value)}
+            >
+              <option value="">Selecciona una finalidad</option>
+              {selectedTreatment &&
+                Object.entries(scenarios[selectedTreatment].purposes).map(([key, label]) => (
+                  <option key={key} value={key}>
                     {label}
-                  </button>
+                  </option>
                 ))}
-            </nav>
-            {section === "alcance" && (
-              <section className="space-y-3" aria-label="Alcance del RAT de ejemplo">
-                <h3 className="font-semibold">Alcance asociado · solo lectura</h3>
-                <p>{current.purpose}</p>
-                <p>
-                  Titulares:{" "}
-                  {adult
-                    ? "clientes adultos sintéticos"
-                    : "participantes sintéticos de 10 a 13 años"}
-                  . Categoría: identificación. Fuente: registros generados para el ensayo.
-                </p>
-                <p className="text-sm">
-                  En la aplicación, este resumen mostrará el RAT asociado y las diferencias
-                  pendientes. En la maqueta no se edita el inventario.
-                </p>
-                <button type="button" className={button} onClick={() => setSection("fundamento")}>
-                  Continuar a base y fundamento
-                </button>
-              </section>
-            )}
-            {section === "fundamento" && (
-              <section className="space-y-4" aria-label="Base y fundamento de ensayo">
-                <h3 className="font-semibold">Base y fundamento</h3>
-                <p className="text-sm">
-                  Puedes guardar un borrador con la base pendiente. Este ejemplo no recomienda una
-                  base jurídica.
-                </p>
-                <label className="block font-medium">
-                  Base propuesta de ensayo
-                  <select
-                    className={input}
-                    value={draft.basis}
-                    onChange={(e) => edit("basis", e.target.value)}
-                  >
-                    <option value="">Pendiente de definir</option>
-                    <option value="analisis">Propuesta pendiente de análisis (ejemplo)</option>
-                  </select>
-                </label>
-                <label className="block font-medium">
-                  Fundamento de ensayo
-                  <textarea
-                    rows={4}
-                    className={input}
-                    aria-label="Fundamento de ensayo"
-                    value={draft.rationale}
-                    onChange={(e) => edit("rationale", e.target.value)}
-                  />
-                </label>
-              </section>
-            )}
-            {section === "infancia" && !adult && (
-              <section className="space-y-4" aria-label="Infancia de ensayo">
-                <h3 className="font-semibold">Infancia y adolescencia</h3>
-                <p className="text-sm">
-                  Sección ilustrativa para este escenario, no una determinación legal. En la
-                  aplicación se contrastará con el alcance del RAT.
-                </p>
-                <label className="block font-medium">
-                  Análisis de edad y alcance de ensayo
-                  <textarea
-                    rows={4}
-                    className={input}
-                    aria-label="Análisis de edad y alcance de ensayo"
-                    value={draft.age}
-                    onChange={(e) => edit("age", e.target.value)}
-                  />
-                </label>
-                <p>
-                  Interés superior, autonomía y autorización: pendientes de revisión en el ejemplo.
-                </p>
-              </section>
-            )}
-            {section === "documento" && (
-              <section className="space-y-4" aria-label="Preparar documento de ensayo">
-                <h3 className="font-semibold">Preparar documento de ensayo</h3>
-                <p>
-                  {copied
-                    ? `Copia de ${reference} preparada para explorar la edición. El original permanece intacto.`
-                    : "Prepara un borrador; registrar una versión definitiva será una acción distinta en la aplicación."}
-                </p>
-                <label className="block font-medium">
-                  Notas del documento de ensayo
-                  <textarea
-                    rows={4}
-                    className={input}
-                    aria-label="Notas del documento de ensayo"
-                    value={draft.notes}
-                    onChange={(e) => edit("notes", e.target.value)}
-                  />
-                </label>
-                <p className="text-sm">
-                  No se crea ninguna resolución ni se modifica una versión registrada desde esta
-                  maqueta.
-                </p>
-              </section>
-            )}
-            <div className="flex flex-wrap gap-3 border-t border-slate-200 pt-4">
-              <button
-                type="button"
-                className={button}
-                onClick={() => {
-                  setSaved((all) => ({ ...all, [scenario]: { ...draft } }));
-                  setNotice(
-                    "Guardado simulado en esta visita. No se guardó en el servidor; al recargar se reinicia."
-                  );
-                  const applicable = sections.filter(([key]) => !adult || key !== "infancia");
-                  const index = applicable.findIndex(([key]) => key === section);
-                  if (index < applicable.length - 1) setSection(applicable[index + 1][0]);
-                  else go("revisar");
-                }}
-              >
-                Simular guardado y continuar
-              </button>
-              <button type="button" className={secondary} onClick={() => go("revisar")}>
-                Explorar revisión sin guardar
-              </button>
-            </div>
-          </Card>
-        )}
-
-        {tab === "revisar" && (
-          <>
-            <Card title="Elegir documento y versión">
-              <p>
-                Primero lee el documento. Después elige entre revisión del documento y decisión de
-                la organización.
-              </p>
-              <label className="block max-w-lg font-medium">
-                Versión a consultar
-                <select
-                  className={input}
-                  value={version}
-                  onChange={(e) => {
-                    setVersion(e.target.value);
-                    setPreview(false);
-                    setCopied(false);
-                  }}
-                >
-                  <option value="2">Versión 2 · DEMO-2 · Requiere cambios</option>
-                  <option value="1">Versión 1 · DEMO-1 · Histórica</option>
-                </select>
-              </label>
-              <article
-                className="space-y-3 rounded-lg border-l-4 border-blue-800 bg-blue-50 p-4"
-                aria-label="Documento seleccionado"
-              >
-                <h3 className="font-semibold">
-                  {documentName} · versión {version}
-                </h3>
-                <p className="break-words font-semibold">
-                  {reference} · Etiqueta documental: DEMO-{version}
-                </p>
-                <p>Evaluación asociada: versión 1. {current.purpose}</p>
-                <p>
-                  Contenido de ejemplo registrado: análisis y evidencias pendientes.{" "}
-                  {adult
-                    ? "Solo clientes adultos sintéticos."
-                    : "Solo participantes sintéticos; sin datos sensibles."}
-                </p>
-                <p className="text-sm">
-                  Esta lectura conserva el original. Tus textos de ensayo no se incorporan a este
-                  documento.
-                </p>
-              </article>
+            </select>
+          </label>
+          <p className="text-sm">
+            Un tratamiento puede tener varias finalidades. Aquí evalúas una por vez; sus textos de
+            ensayo se conservan por separado.
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <button
+              type="button"
+              className={button}
+              disabled={!selectedTreatment || !selectedPurpose}
+              onClick={() => {
+                if (
+                  !selectedTreatment ||
+                  !Object.hasOwn(scenarios[selectedTreatment].purposes, selectedPurpose)
+                )
+                  return;
+                setScenario(selectedTreatment);
+                setPurpose(selectedPurpose);
+                setActive(true);
+                setSelectionOpen(false);
+                setTab("resumen");
+                setSection("alcance");
+                setVersion("2");
+                setPreview(false);
+                setCopied(false);
+                setNotice("");
+                setFacultyOpen(false);
+              }}
+            >
+              Abrir evaluación de ejemplo
+            </button>
+            {active && (
               <button
                 type="button"
                 className={secondary}
                 onClick={() => {
-                  setCopied(true);
-                  setSection("documento");
-                  go("completar");
-                  setNotice(`Copia de ${reference} preparada. No se registró una versión nueva.`);
+                  setSelectedTreatment(scenario);
+                  setSelectedPurpose(purpose);
+                  setSelectionOpen(false);
                 }}
               >
-                Preparar otra versión en Completar datos
+                Volver a la evaluación seleccionada
               </button>
-            </Card>
-            <Card title="Revisar la versión seleccionada">
-              <label className="block font-medium">
-                Tipo de actuación
-                <select
-                  className={input}
-                  value={review.kind}
-                  onChange={(e) =>
-                    changeReview({ kind: e.target.value as ReviewDraft["kind"], choice: "" })
-                  }
-                >
-                  <option value="revision">Revisión del documento</option>
-                  <option value="decision">Decisión documental de organización</option>
-                </select>
-              </label>
-              <p>
-                {review.kind === "revision"
-                  ? "La persona revisora documenta observaciones. Las opciones actuales son Requiere cambios y No continuar."
-                  : "La decisión de organización requiere una facultad vigente. Es distinta de la revisión del documento."}
-              </p>
-              <div className="flex flex-wrap items-center gap-3 rounded-lg bg-slate-100 p-3">
-                <p className="text-sm font-semibold">
-                  Facultad:{" "}
-                  {revoked
-                    ? "revocada; decisión de organización bloqueada"
-                    : "vigente en este ejemplo ficticio"}
-                  .
-                </p>
-                <button
-                  type="button"
-                  className={secondary}
-                  aria-expanded={facultyOpen}
-                  aria-controls="prototype-faculty"
-                  onClick={() => setFacultyOpen(!facultyOpen)}
-                >
-                  Ver gestión de facultades
-                </button>
-              </div>
-              {facultyOpen && (
-                <aside
-                  id="prototype-faculty"
-                  className="space-y-2 rounded-lg border border-slate-300 p-4"
-                  aria-label="Gestión de facultades de ejemplo"
-                >
-                  <h3 className="font-semibold">Gestión separada · administración</h3>
-                  <p>
-                    Otorgar o revocar corresponde a una gestión distinta de revisar. En esta maqueta
-                    solo se muestra el historial precargado.
-                  </p>
-                  <p>
-                    Ejemplo: revisión de facultad 1, otorgada.
-                    {revoked && " Revisión de facultad 2, revocada."}
-                  </p>
-                  <p className="text-sm">
-                    Cambiar escenario permite explorar otra situación; no otorga facultades reales.
-                  </p>
-                </aside>
-              )}
-              {review.kind === "decision" && (
-                <p
-                  id="prototype-block"
-                  className="rounded-lg border border-amber-300 bg-amber-50 p-3"
-                >
-                  {revoked
-                    ? "No puedes emitir una decisión de organización: la facultad está revocada. La decisión anterior y el historial siguen disponibles."
-                    : "En esta maqueta puedes previsualizar Requiere cambios. No se registra una aceptación ni se habilitan decisiones reales."}
-                </p>
-              )}
-              <fieldset
-                disabled={review.kind === "decision" && revoked}
-                aria-describedby={review.kind === "decision" ? "prototype-block" : undefined}
-                className="space-y-4 disabled:opacity-60"
-              >
-                <legend className="mb-2 font-semibold">
-                  {review.kind === "revision"
-                    ? "Observación de revisión"
-                    : "Decisión de organización de ensayo"}
-                </legend>
-                <label className="block font-medium">
-                  Resultado de ensayo
-                  <select
-                    className={input}
-                    value={review.choice}
-                    onChange={(e) => changeReview({ choice: e.target.value })}
-                  >
-                    <option value="">Selecciona un resultado</option>
-                    <option value="requiere_cambios">Requiere cambios</option>
-                    {review.kind === "revision" && (
-                      <option value="no_continuar">No continuar</option>
-                    )}
-                  </select>
-                </label>
-                <label className="block font-medium">
-                  Fundamento de revisión de ensayo
-                  <textarea
-                    rows={3}
-                    className={input}
-                    value={review.rationale}
-                    onChange={(e) => changeReview({ rationale: e.target.value })}
-                  />
-                </label>
-                <p className="break-words text-sm font-semibold">
-                  Actuarías sobre: {reference} · versión {version} · DEMO-{version}
-                </p>
-                <button
-                  type="button"
-                  className={button}
-                  disabled={!review.choice || !review.rationale.trim()}
-                  onClick={() => setPreview(true)}
-                >
-                  Previsualizar {review.kind === "revision" ? "revisión" : "decisión"} · versión{" "}
-                  {version}
-                </button>
-              </fieldset>
-              {preview && !(revoked && review.kind === "decision") && (
-                <aside
-                  role="note"
-                  aria-label="Vista previa sin registro"
-                  className="space-y-2 rounded-lg border border-blue-300 bg-blue-50 p-4"
-                >
-                  <h3 className="font-semibold">Vista previa · no se ha registrado</h3>
-                  <p>
-                    {reference} · versión {version} ·{" "}
-                    {review.choice === "requiere_cambios" ? "Requiere cambios" : "No continuar"}
-                  </p>
-                  <p className="whitespace-pre-wrap break-words">{review.rationale}</p>
-                  <p>
-                    La maqueta termina aquí esta actuación. No crea eventos ni cambia el historial.
-                  </p>
-                  <button type="button" className={secondary} onClick={() => go("historial")}>
-                    Consultar historial de ejemplo
-                  </button>
-                </aside>
-              )}
-            </Card>
-          </>
-        )}
+            )}
+          </div>
+        </Card>
+      )}
 
-        {tab === "historial" && (
-          <Card title="Historial y descargas de ejemplo">
+      {active && !selectionOpen && (
+        <>
+          <aside
+            className="space-y-3 rounded-xl border border-blue-200 bg-blue-50 p-4"
+            aria-label="Alcance seleccionado"
+          >
+            <p className="text-xs font-bold uppercase tracking-wide text-blue-800">
+              Evaluación sobre el alcance seleccionado
+            </p>
+            <p className="font-semibold">{current.treatment}</p>
             <p>
-              Consulta lo registrado sin mezclarlo con el borrador editable. Todos los registros
-              siguientes son ejemplos precargados.
+              <strong>Finalidad:</strong> {current.purposes[purpose]}
             </p>
-            <ol className="space-y-3" aria-label="Historial precargado">
-              <li className="rounded-lg border border-slate-200 p-4">
-                <h3 className="font-semibold">Versión 1 · DEMO-1</h3>
-                <p>Documento original de ejemplo. Revisión: requiere cambios.</p>
-                <button
-                  type="button"
-                  className={`${secondary} mt-3`}
-                  onClick={() => {
-                    setVersion("1");
-                    go("revisar");
-                  }}
-                >
-                  Consultar versión 1
-                </button>
-              </li>
-              <li className="rounded-lg border border-slate-200 p-4">
-                <h3 className="font-semibold">Versión 2 · DEMO-2</h3>
-                <p>Segunda versión de ejemplo. Decisión documental precargada: requiere cambios.</p>
-                <p>
-                  Facultad actual: {revoked ? "revocada" : "vigente en el escenario simulado"}. El
-                  registro anterior se conserva.
-                </p>
-                <button
-                  type="button"
-                  className={`${secondary} mt-3`}
-                  onClick={() => {
-                    setVersion("2");
-                    go("revisar");
-                  }}
-                >
-                  Consultar versión 2
-                </button>
-              </li>
-              {revoked && (
-                <li className="rounded-lg border border-amber-300 bg-amber-50 p-4">
-                  Facultad revocada · revisión 2. Las nuevas decisiones de organización están
-                  bloqueadas; el historial sigue disponible.
-                </li>
-              )}
-            </ol>
             <p className="text-sm">
-              La descarga contiene únicamente el escenario y la versión seleccionada ({version});
-              excluye los textos que escribiste. No es el expediente documental de la aplicación.
+              Organización ficticia · Evaluación: versión 1 · Borrador de ejemplo. Facultad de la
+              persona: {revoked ? "revocada" : "vigente en la demostración"}.
             </p>
-            <button type="button" className={button} onClick={download}>
-              Descargar ejemplo ficticio JSON
+            <button
+              type="button"
+              className={secondary}
+              onClick={() => {
+                setSelectedTreatment(scenario);
+                setSelectedPurpose(purpose);
+                setSelectionOpen(true);
+                setPreview(false);
+              }}
+            >
+              Cambiar tratamiento o finalidad
             </button>
-            <details className="rounded-lg border border-slate-200 p-3">
-              <summary className="cursor-pointer font-medium">Qué validar en esta maqueta</summary>
-              <ul className="mt-3 list-disc space-y-2 pl-5">
-                <li>¿Distingues dónde completar y dónde revisar?</li>
-                <li>¿Se reconoce la versión sobre la que actuarías?</li>
-                <li>¿Se entiende el motivo de un bloqueo y cómo consultar el historial?</li>
-                <li>¿Los siguientes pasos y los botones permiten continuar sin ayuda?</li>
-              </ul>
-            </details>
-          </Card>
-        )}
-      </div>
+          </aside>
+
+          <div
+            aria-label="Secciones de la maqueta"
+            role="tablist"
+            className="grid grid-cols-2 gap-2 lg:grid-cols-4"
+          >
+            {tabs.map(([key, label], index) => (
+              <button
+                key={key}
+                type="button"
+                id={`prototype-tab-${key}`}
+                role="tab"
+                aria-selected={tab === key}
+                aria-controls={`prototype-panel-${key}`}
+                tabIndex={tab === key ? 0 : -1}
+                onClick={() => go(key)}
+                onKeyDown={(event) => moveTab(event, index)}
+                className={`${tab === key ? "border-blue-800 bg-blue-800 text-white" : "border-slate-300 bg-white text-slate-800 hover:bg-slate-100"} rounded-lg border p-3 text-left text-sm font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-800`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          <div role="status" aria-live="polite" className="text-sm">
+            {dirty
+              ? "Cambios sin guardar en el borrador de ensayo. Se conservan al cambiar de pestaña."
+              : "Borrador de ejemplo disponible; sin cambios pendientes de ensayo."}
+            {notice && (
+              <p className="mt-2 rounded-lg border border-blue-200 bg-blue-50 p-3">{notice}</p>
+            )}
+          </div>
+          <div
+            role="tabpanel"
+            id={`prototype-panel-${tab}`}
+            aria-labelledby={`prototype-tab-${tab}`}
+            tabIndex={0}
+            className="space-y-5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-800"
+          >
+            {tab === "resumen" && (
+              <>
+                <Card title="Los cuatro pasos de esta evaluación">
+                  <p>
+                    Completar prepara un borrador. Revisar deja una observación sobre una versión
+                    concreta. Avanzar no significa aprobar.
+                  </p>
+                  <ol
+                    className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4"
+                    aria-label="Esquema del flujo"
+                  >
+                    {[
+                      [
+                        "Revisa el alcance seleccionado",
+                        "Finalidad, personas y categorías de datos.",
+                        "completar",
+                      ],
+                      [
+                        "Completa la evaluación",
+                        adult
+                          ? "Base propuesta y fundamento."
+                          : "Fundamento, infancia y documento de ensayo.",
+                        "completar",
+                      ],
+                      [
+                        "Selecciona y revisa",
+                        "Lee la versión antes de formular una revisión.",
+                        "revisar",
+                      ],
+                      ["Consulta el resultado", "Historial y descarga del ejemplo.", "historial"],
+                    ].map(([title, description, destination], index) => (
+                      <li key={title} className="rounded-lg border border-slate-200 p-4">
+                        <span className="text-sm font-semibold text-blue-800">
+                          Paso {index + 1}
+                        </span>
+                        <h3 className="my-2 font-semibold">{title}</h3>
+                        <p className="mb-3 text-sm">{description}</p>
+                        <button
+                          type="button"
+                          className={secondary}
+                          onClick={() => {
+                            setSection(index === 0 ? "alcance" : "fundamento");
+                            go(destination as Tab);
+                          }}
+                        >
+                          Ir al paso {index + 1}
+                        </button>
+                      </li>
+                    ))}
+                  </ol>
+                </Card>
+                <Card title="Siguiente paso recomendado">
+                  <p>
+                    {revoked
+                      ? "La facultad está revocada. Puedes leer documentos e historial; la decisión de organización está bloqueada."
+                      : "Revisa el alcance seleccionado y completa el fundamento pendiente de esta evaluación."}
+                  </p>
+                  <button
+                    type="button"
+                    className={button}
+                    onClick={() => {
+                      setSection("alcance");
+                      go(revoked ? "revisar" : "completar");
+                    }}
+                  >
+                    {revoked ? "Consultar documento y bloqueo" : "Comenzar por el alcance"}
+                  </button>
+                  <dl className="grid gap-3 text-sm sm:grid-cols-2">
+                    <div>
+                      <dt className="font-semibold">Base de licitud</dt>
+                      <dd>Pendiente de evaluación jurídica</dd>
+                    </div>
+                    <div>
+                      <dt className="font-semibold">Infancia</dt>
+                      <dd>
+                        {adult
+                          ? "Fuera del alcance de este ejemplo de adultos"
+                          : "Documento de infancia de ejemplo disponible"}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="font-semibold">Revisión precargada</dt>
+                      <dd>Requiere cambios · ejemplo histórico</dd>
+                    </div>
+                    <div>
+                      <dt className="font-semibold">Facultad de organización</dt>
+                      <dd>{revoked ? "Revocada" : "Vigente solo en el escenario simulado"}</dd>
+                    </div>
+                  </dl>
+                  <p className="text-sm">
+                    El ejemplo no determina si corresponde una EIPD. Su activación permanece
+                    deshabilitada.
+                  </p>
+                </Card>
+              </>
+            )}
+
+            {tab === "completar" && (
+              <Card title="Completar un borrador">
+                <p>
+                  Aquí prepara los datos la persona editora. Los documentos registrados se consultan
+                  en Revisar documentos.
+                </p>
+                <nav aria-label="Secciones para completar" className="flex flex-wrap gap-2">
+                  {sections
+                    .filter(([key]) => !adult || key !== "infancia")
+                    .map(([key, label], index) => (
+                      <button
+                        type="button"
+                        key={key}
+                        aria-current={section === key ? "step" : undefined}
+                        className={section === key ? button : secondary}
+                        onClick={() => setSection(key)}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                </nav>
+                {section === "alcance" && (
+                  <section className="space-y-3" aria-label="Alcance del RAT de ejemplo">
+                    <h3 className="font-semibold">Alcance asociado · solo lectura</h3>
+                    <p>{current.purposes[purpose]}</p>
+                    <p>
+                      Titulares:{" "}
+                      {adult
+                        ? "clientes adultos sintéticos"
+                        : "participantes sintéticos de 10 a 13 años"}
+                      . Categoría: identificación. Fuente: registros generados para el ensayo.
+                    </p>
+                    <p className="text-sm">
+                      En la aplicación, este resumen mostrará el RAT asociado y las diferencias
+                      pendientes. En la maqueta no se edita el inventario.
+                    </p>
+                    <button
+                      type="button"
+                      className={button}
+                      onClick={() => setSection("fundamento")}
+                    >
+                      Continuar a base y fundamento
+                    </button>
+                  </section>
+                )}
+                {section === "fundamento" && (
+                  <section className="space-y-4" aria-label="Base y fundamento de ensayo">
+                    <h3 className="font-semibold">Base y fundamento</h3>
+                    <p className="text-sm">
+                      Puedes guardar un borrador con la base pendiente. Este ejemplo no recomienda
+                      una base jurídica.
+                    </p>
+                    <label className="block font-medium">
+                      Base propuesta de ensayo
+                      <select
+                        className={input}
+                        value={draft.basis}
+                        onChange={(e) => edit("basis", e.target.value)}
+                      >
+                        <option value="">Pendiente de definir</option>
+                        <option value="analisis">Propuesta pendiente de análisis (ejemplo)</option>
+                      </select>
+                    </label>
+                    <label className="block font-medium">
+                      Fundamento de ensayo
+                      <textarea
+                        rows={4}
+                        className={input}
+                        aria-label="Fundamento de ensayo"
+                        value={draft.rationale}
+                        onChange={(e) => edit("rationale", e.target.value)}
+                      />
+                    </label>
+                  </section>
+                )}
+                {section === "infancia" && !adult && (
+                  <section className="space-y-4" aria-label="Infancia de ensayo">
+                    <h3 className="font-semibold">Infancia y adolescencia</h3>
+                    <p className="text-sm">
+                      Sección ilustrativa para este escenario, no una determinación legal. En la
+                      aplicación se contrastará con el alcance del RAT.
+                    </p>
+                    <label className="block font-medium">
+                      Análisis de edad y alcance de ensayo
+                      <textarea
+                        rows={4}
+                        className={input}
+                        aria-label="Análisis de edad y alcance de ensayo"
+                        value={draft.age}
+                        onChange={(e) => edit("age", e.target.value)}
+                      />
+                    </label>
+                    <p>
+                      Interés superior, autonomía y autorización: pendientes de revisión en el
+                      ejemplo.
+                    </p>
+                  </section>
+                )}
+                {section === "documento" && (
+                  <section className="space-y-4" aria-label="Preparar documento de ensayo">
+                    <h3 className="font-semibold">Preparar documento de ensayo</h3>
+                    <p>
+                      {copied
+                        ? `Copia de ${reference} preparada para explorar la edición. El original permanece intacto.`
+                        : "Prepara un borrador; registrar una versión definitiva será una acción distinta en la aplicación."}
+                    </p>
+                    <label className="block font-medium">
+                      Notas del documento de ensayo
+                      <textarea
+                        rows={4}
+                        className={input}
+                        aria-label="Notas del documento de ensayo"
+                        value={draft.notes}
+                        onChange={(e) => edit("notes", e.target.value)}
+                      />
+                    </label>
+                    <p className="text-sm">
+                      No se crea ninguna resolución ni se modifica una versión registrada desde esta
+                      maqueta.
+                    </p>
+                  </section>
+                )}
+                <div className="flex flex-wrap gap-3 border-t border-slate-200 pt-4">
+                  <button
+                    type="button"
+                    className={button}
+                    onClick={() => {
+                      setSaved((all) => ({ ...all, [scopeKey]: { ...draft } }));
+                      setNotice(
+                        "Guardado simulado en esta visita. No se guardó en el servidor; al recargar se reinicia."
+                      );
+                      const applicable = sections.filter(([key]) => !adult || key !== "infancia");
+                      const index = applicable.findIndex(([key]) => key === section);
+                      if (index < applicable.length - 1) setSection(applicable[index + 1][0]);
+                      else go("revisar");
+                    }}
+                  >
+                    Simular guardado y continuar
+                  </button>
+                  <button type="button" className={secondary} onClick={() => go("revisar")}>
+                    Explorar revisión sin guardar
+                  </button>
+                </div>
+              </Card>
+            )}
+
+            {tab === "revisar" && (
+              <>
+                <Card title="Elegir documento y versión">
+                  <p>
+                    Primero lee el documento. Después elige entre revisión del documento y decisión
+                    de la organización.
+                  </p>
+                  <label className="block max-w-lg font-medium">
+                    Versión a consultar
+                    <select
+                      className={input}
+                      value={version}
+                      onChange={(e) => {
+                        setVersion(e.target.value);
+                        setPreview(false);
+                        setCopied(false);
+                      }}
+                    >
+                      <option value="2">Versión 2 · DEMO-2 · Requiere cambios</option>
+                      <option value="1">Versión 1 · DEMO-1 · Histórica</option>
+                    </select>
+                  </label>
+                  <article
+                    className="space-y-3 rounded-lg border-l-4 border-blue-800 bg-blue-50 p-4"
+                    aria-label="Documento seleccionado"
+                  >
+                    <h3 className="font-semibold">
+                      {documentName} · versión {version}
+                    </h3>
+                    <p className="break-words font-semibold">
+                      {reference} · Etiqueta documental: DEMO-{version}
+                    </p>
+                    <p>Evaluación asociada: versión 1. {current.purposes[purpose]}</p>
+                    <p>
+                      Contenido de ejemplo registrado: análisis y evidencias pendientes.{" "}
+                      {adult
+                        ? "Solo clientes adultos sintéticos."
+                        : "Solo participantes sintéticos; sin datos sensibles."}
+                    </p>
+                    <p className="text-sm">
+                      Esta lectura conserva el original. Tus textos de ensayo no se incorporan a
+                      este documento.
+                    </p>
+                  </article>
+                  <button
+                    type="button"
+                    className={secondary}
+                    onClick={() => {
+                      setCopied(true);
+                      setSection("documento");
+                      go("completar");
+                      setNotice(
+                        `Copia de ${reference} preparada. No se registró una versión nueva.`
+                      );
+                    }}
+                  >
+                    Preparar otra versión en Completar datos
+                  </button>
+                </Card>
+                <Card title="Revisar la versión seleccionada">
+                  <label className="block font-medium">
+                    Tipo de actuación
+                    <select
+                      className={input}
+                      value={review.kind}
+                      onChange={(e) =>
+                        changeReview({ kind: e.target.value as ReviewDraft["kind"], choice: "" })
+                      }
+                    >
+                      <option value="revision">Revisión del documento</option>
+                      <option value="decision">Decisión documental de organización</option>
+                    </select>
+                  </label>
+                  <p>
+                    {review.kind === "revision"
+                      ? "La persona revisora documenta observaciones. Las opciones actuales son Requiere cambios y No continuar."
+                      : "La decisión de organización requiere una facultad vigente. Es distinta de la revisión del documento."}
+                  </p>
+                  <div className="flex flex-wrap items-center gap-3 rounded-lg bg-slate-100 p-3">
+                    <p className="text-sm font-semibold">
+                      Facultad:{" "}
+                      {revoked
+                        ? "revocada; decisión de organización bloqueada"
+                        : "vigente en este ejemplo ficticio"}
+                      .
+                    </p>
+                    <button
+                      type="button"
+                      className={secondary}
+                      aria-expanded={facultyOpen}
+                      aria-controls="prototype-faculty"
+                      onClick={() => setFacultyOpen(!facultyOpen)}
+                    >
+                      Ver gestión de facultades
+                    </button>
+                  </div>
+                  {facultyOpen && (
+                    <aside
+                      id="prototype-faculty"
+                      className="space-y-2 rounded-lg border border-slate-300 p-4"
+                      aria-label="Gestión de facultades de ejemplo"
+                    >
+                      <h3 className="font-semibold">Gestión separada · administración</h3>
+                      <p>
+                        Otorgar o revocar corresponde a una gestión distinta de revisar. En esta
+                        maqueta solo se muestra el historial precargado.
+                      </p>
+                      <p>
+                        Ejemplo: revisión de facultad 1, otorgada.
+                        {revoked && " Revisión de facultad 2, revocada."}
+                      </p>
+                      <p className="text-sm">
+                        Cambiar escenario permite explorar otra situación; no otorga facultades
+                        reales.
+                      </p>
+                    </aside>
+                  )}
+                  {review.kind === "decision" && (
+                    <p
+                      id="prototype-block"
+                      className="rounded-lg border border-amber-300 bg-amber-50 p-3"
+                    >
+                      {revoked
+                        ? "No puedes emitir una decisión de organización: la facultad está revocada. La decisión anterior y el historial siguen disponibles."
+                        : "En esta maqueta puedes previsualizar Requiere cambios. No se registra una aceptación ni se habilitan decisiones reales."}
+                    </p>
+                  )}
+                  <fieldset
+                    disabled={review.kind === "decision" && revoked}
+                    aria-describedby={review.kind === "decision" ? "prototype-block" : undefined}
+                    className="space-y-4 disabled:opacity-60"
+                  >
+                    <legend className="mb-2 font-semibold">
+                      {review.kind === "revision"
+                        ? "Observación de revisión"
+                        : "Decisión de organización de ensayo"}
+                    </legend>
+                    <label className="block font-medium">
+                      Resultado de ensayo
+                      <select
+                        className={input}
+                        value={review.choice}
+                        onChange={(e) => changeReview({ choice: e.target.value })}
+                      >
+                        <option value="">Selecciona un resultado</option>
+                        <option value="requiere_cambios">Requiere cambios</option>
+                        {review.kind === "revision" && (
+                          <option value="no_continuar">No continuar</option>
+                        )}
+                      </select>
+                    </label>
+                    <label className="block font-medium">
+                      Fundamento de revisión de ensayo
+                      <textarea
+                        rows={3}
+                        className={input}
+                        value={review.rationale}
+                        onChange={(e) => changeReview({ rationale: e.target.value })}
+                      />
+                    </label>
+                    <p className="break-words text-sm font-semibold">
+                      Actuarías sobre: {reference} · versión {version} · DEMO-{version}
+                    </p>
+                    <button
+                      type="button"
+                      className={button}
+                      disabled={!review.choice || !review.rationale.trim()}
+                      onClick={() => setPreview(true)}
+                    >
+                      Previsualizar {review.kind === "revision" ? "revisión" : "decisión"} · versión{" "}
+                      {version}
+                    </button>
+                  </fieldset>
+                  {preview && !(revoked && review.kind === "decision") && (
+                    <aside
+                      role="note"
+                      aria-label="Vista previa sin registro"
+                      className="space-y-2 rounded-lg border border-blue-300 bg-blue-50 p-4"
+                    >
+                      <h3 className="font-semibold">Vista previa · no se ha registrado</h3>
+                      <p>
+                        {reference} · versión {version} ·{" "}
+                        {review.choice === "requiere_cambios" ? "Requiere cambios" : "No continuar"}
+                      </p>
+                      <p className="whitespace-pre-wrap break-words">{review.rationale}</p>
+                      <p>
+                        La maqueta termina aquí esta actuación. No crea eventos ni cambia el
+                        historial.
+                      </p>
+                      <button type="button" className={secondary} onClick={() => go("historial")}>
+                        Consultar historial de ejemplo
+                      </button>
+                    </aside>
+                  )}
+                </Card>
+              </>
+            )}
+
+            {tab === "historial" && (
+              <Card title="Historial y descargas de ejemplo">
+                <p>
+                  Consulta lo registrado sin mezclarlo con el borrador editable. Todos los registros
+                  siguientes son ejemplos precargados.
+                </p>
+                <ol className="space-y-3" aria-label="Historial precargado">
+                  <li className="rounded-lg border border-slate-200 p-4">
+                    <h3 className="font-semibold">Versión 1 · DEMO-1</h3>
+                    <p>Documento original de ejemplo. Revisión: requiere cambios.</p>
+                    <button
+                      type="button"
+                      className={`${secondary} mt-3`}
+                      onClick={() => {
+                        setVersion("1");
+                        go("revisar");
+                      }}
+                    >
+                      Consultar versión 1
+                    </button>
+                  </li>
+                  <li className="rounded-lg border border-slate-200 p-4">
+                    <h3 className="font-semibold">Versión 2 · DEMO-2</h3>
+                    <p>
+                      Segunda versión de ejemplo. Decisión documental precargada: requiere cambios.
+                    </p>
+                    <p>
+                      Facultad actual: {revoked ? "revocada" : "vigente en el escenario simulado"}.
+                      El registro anterior se conserva.
+                    </p>
+                    <button
+                      type="button"
+                      className={`${secondary} mt-3`}
+                      onClick={() => {
+                        setVersion("2");
+                        go("revisar");
+                      }}
+                    >
+                      Consultar versión 2
+                    </button>
+                  </li>
+                  {revoked && (
+                    <li className="rounded-lg border border-amber-300 bg-amber-50 p-4">
+                      Facultad revocada · revisión 2. Las nuevas decisiones de organización están
+                      bloqueadas; el historial sigue disponible.
+                    </li>
+                  )}
+                </ol>
+                <p className="text-sm">
+                  La descarga contiene únicamente el escenario y la versión seleccionada ({version}
+                  ); excluye los textos que escribiste. No es el expediente documental de la
+                  aplicación.
+                </p>
+                <button type="button" className={button} onClick={download}>
+                  Descargar ejemplo ficticio JSON
+                </button>
+                <details className="rounded-lg border border-slate-200 p-3">
+                  <summary className="cursor-pointer font-medium">
+                    Qué validar en esta maqueta
+                  </summary>
+                  <ul className="mt-3 list-disc space-y-2 pl-5">
+                    <li>¿Distingues dónde completar y dónde revisar?</li>
+                    <li>¿Se reconoce la versión sobre la que actuarías?</li>
+                    <li>¿Se entiende el motivo de un bloqueo y cómo consultar el historial?</li>
+                    <li>¿Los siguientes pasos y los botones permiten continuar sin ayuda?</li>
+                  </ul>
+                </details>
+              </Card>
+            )}
+          </div>
+        </>
+      )}
       <footer className="border-t border-slate-200 pt-4 text-sm">
         Maqueta aislada · sin registro en servidor · sin datos reales · no confirma ni activa EIPD.
       </footer>

@@ -18,15 +18,15 @@ identifica el HEAD exacto de la tarea. Una CI anterior no prueba un commit nuevo
 
 ## Bloque funcional vigente — producto
 
-18/10: maqueta navegable habilitada en `/dashboard/licitud/maqueta`, acceso desde
-Bases de licitud. Cuatro pestanas, esquema/siguiente paso, escenarios adultos,
-infancia y facultad revocada. Estado solo en memoria; vista previa sin eventos y
-descarga fija ficticia sin textos de ensayo. Formularios operativos intactos;
-no usa API ni cambia permisos/configuracion. Siete Chromium dirigidas aprobadas,
-tipos/lint/formato; revisadas vistas movil/escritorio. Ruta sin sesion redirige a
-login. Pendiente validacion humana de la maqueta antes de reorganizar formularios.
-Contrato: project/m3-t1-licitud-experiencia.md; LIC-UX-004 sigue abierto.
-EIPD/datos reales bloqueados, sin merge/despliegue. CI del nuevo commit por verificar.
+18/10: maqueta V2 en `/dashboard/licitud/maqueta`. Seleccion inicial de tratamiento
+RAT/finalidad antes de cuatro pestanas/pasos; alcance visible. Ejemplos opcionales
+solo precargan seleccion; facultad simulada independiente del tratamiento.
+Borradores por tratamiento/finalidad y revisiones por version, solo en memoria.
+Diez Chromium dirigidas, tipos/lint/formato aprobados; movil/escritorio revisados.
+Sin API/DB ni cambios de formularios/permisos/configuracion. EIPD/datos reales
+bloqueados. Pendiente validar V2 con usuario antes de flujo operativo; LIC-UX-004
+abierto. Contrato: project/m3-t1-licitud-experiencia.md. Sin merge/despliegue.
+CI del nuevo commit por consultar.
 
 18/10: recorrido manual ficticio de Bases de licitud cerrado: clientes,
 trabajadores e infancia; guardado/reapertura, dos resoluciones, revisiones negativas,

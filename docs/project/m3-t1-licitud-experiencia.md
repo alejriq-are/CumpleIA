@@ -152,37 +152,47 @@ Backlog de referencia: LIC-UX-004 integra esta reorganizacion y recoge LIC-UX-00
 LIC-UX-003 y el patron de guardado RAT-UX-001 cuando corresponda. RAT-VAL-001
 mantiene su propio contrato de completitud; no se considera resuelto por el rediseno.
 
-## Maqueta navegable disponible
+## Maqueta navegable disponible — version 2
 
 Ruta protegida `/dashboard/licitud/maqueta`, enlazada desde Bases de licitud.
-Cuatro pestanas con esquema y siguiente paso, tres escenarios fijos: adultos,
-infancia y facultad revocada. Datos sinteticos sin IDs de organizaciones ni cuentas.
-Estado de ensayo en memoria, separado por escenario y version; navegar no descarta
-textos, recargar los reinicia. Simular guardado avanza dentro del ejemplo y declara
-explicitamente que no persiste en servidor. Revisar permite una vista previa sin
-registro; el historial permanece precargado. Facultad revocada bloquea solo la
-decision organizacional del ejemplo, conserva revision/consulta. Facultades en
-consulta separada, sin otorgar ni revocar desde la maqueta.
+V2 corrige la confusion entre seleccion inicial, recorrido y ejemplos:
 
-Referencia y version junto al documento y la previsualizacion; enlaces mediante
-fragmento conservan escenario/pestana/version (no textos). Historial ofrece JSON
-solo del ejemplo fijo y su version seleccionada, excluyendo textos de ensayo.
-Roles de pestanas, flechas/Home/End y foco visible; diseno adaptable a movil.
-No usa API, cookies, almacenamiento persistente ni servicios de autenticacion
-dentro del componente. La ruta conserva la proteccion de sesion del dashboard.
-No modifica formularios operativos, servicios, DB, configuracion ni permisos.
+- Antes del recorrido, seleccionar tratamiento RAT y finalidad del inventario
+  ficticio. La organizacion de demostracion es fija. Finalidades dependientes del
+  tratamiento; abrir evaluacion exige una seleccion valida. Adultos incluye dos
+  finalidades para explorar evaluaciones independientes del mismo tratamiento.
+- Solo entonces aparecen las cuatro pestanas y los cuatro pasos. Paso 1:
+  Revisar alcance seleccionado; paso 2: Completar evaluacion; paso 3: Seleccionar
+  version y revisar; paso 4: Consultar resultado/historial. Tratamiento y finalidad
+  visibles junto al acceso Cambiar tratamiento o finalidad.
+- Herramientas de demostracion, colapsadas y separadas del recorrido: cargar
+  ejemplo de adultos/infancia solo precarga selectores; exige abrir evaluacion.
+  Facultad vigente/revocada es una condicion independiente de la persona. Cambiarla
+  no cambia tratamiento/finalidad ni sus borradores; no otorga permisos reales.
 
-Pendiente: validacion humana de claridad y nombres en los tres escenarios. Despues
-se podra implementar el flujo en formularios reales con los contratos existentes;
-este bloque no acredita esa implementacion ni resuelve RAT-VAL-001.
+Estado de ensayo en memoria por tratamiento/finalidad y revision por version;
+navegar conserva textos, recargar los reinicia. Simular guardado avanza dentro
+del ejemplo, declara que no persiste. Revision permite vista previa sin registro;
+historial precargado intacto. Facultad revocada bloquea decision organizacional,
+conserva revision/consulta. Facultades en consulta separada, sin escrituras.
 
-Verificacion local del bloque: siete pruebas Chromium dirigidas aprobadas
-(`npx playwright test e2e/licitud-prototype.spec.ts`), tipos frontend y ESLint de
-archivos modificados aprobados; formato Prettier y git diff --check. Incluye
-borradores entre pestanas/escenarios, version objetivo, revocacion, descarga sin
-textos ni solicitudes API, teclado/enlace directo, movil y reinicio al recargar.
-Capturas localmente inspeccionadas en movil (390 px) y escritorio (1280 px).
-Sin sesion, la ruta redirige a login; no se automatizo login externo. Prueba de
-componente real en Chromium con CSS compilado; no es una prueba de backend.
-Suite incluida en comandos CI existentes. No se repitieron suites backend/DB:
-no hay cambios en esos contratos. CI exacta se consulta despues del push.
+Referencia y version junto al documento/previsualizacion. Fragmento conserva
+tratamiento/finalidad/facultad/pestana/version, sin textos; enlaces V1 compatibles.
+Descarga solo ejemplo fijo/version seleccionada, con finalidad y facultad simulada,
+sin textos escritos. No es expediente operativo. Roles de pestanas, flechas/Home/End,
+foco visible y diseno adaptable. Componente React sin API, cookies ni almacenamiento
+persistente; ruta conserva proteccion de sesion. Formularios, DB, configuracion,
+permisos y bloqueos EIPD/datos reales intactos.
+
+Verificacion local V2: diez pruebas Chromium dirigidas aprobadas
+(`npx playwright test e2e/licitud-prototype.spec.ts`), tipos frontend, ESLint y
+formato Prettier aprobados. Casos: seleccion previa, reinicio de finalidad al
+cambiar tratamiento, ejemplos solo precargan, facultad independiente, borradores
+por finalidad y entre pestanas, version objetivo, revocacion, descarga sin textos
+ni API, teclado/enlace directo, movil y reinicio al recargar. Capturas inspeccionadas
+movil (390 px) y escritorio (1280 px). Prueba de componente con CSS compilado;
+no automatiza login externo ni representa prueba backend. Suite incluida en CI;
+no repetir backend/DB sin cambio de contratos. CI del nuevo commit por consultar.
+
+Pendiente: validacion humana de la claridad de V2 antes de reorganizar formularios
+operativos. LIC-UX-004 sigue abierto; RAT-VAL-001 no resuelto por esta maqueta.

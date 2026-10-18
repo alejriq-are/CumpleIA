@@ -5,7 +5,7 @@
 ## Experiencia de licitud — propuesta aceptada 18/10/2026
 
 - [ ] **LIC-UX-004 — Flujo guiado y separacion por tareas.** Propuesta aceptada: cuatro pestanas (Resumen y siguientes pasos, Completar datos, Revisar documentos, Historial y descargas), esquema visible, facultades en acceso separado, contexto de version junto a decisiones, controles reconocibles y causas de bloqueo. Primero maqueta navegable con adultos, infancia y facultad revocada; luego implementacion y validacion asistida. Conservar borradores al navegar y refrescar dependencias tras guardar. Documento y criterios: [Experiencia de licitud](project/m3-t1-licitud-experiencia.md). Incluye hallazgos LIC-UX-002/003 y patron RAT-UX-001 segun alcance; RAT-VAL-001 sigue separado. Aceptada no equivale a implementada. Sin ampliacion de permisos, activacion EIPD ni datos reales.
-  - Maqueta navegable implementada: `/dashboard/licitud/maqueta`, escenarios adultos/infancia/facultad revocada. Pendiente validar con el usuario antes de reorganizar formularios operativos; LIC-UX-004 sigue abierto.
+  - Maqueta V2 implementada: `/dashboard/licitud/maqueta`, seleccion inicial RAT/finalidad, cuatro pasos y ejemplos opcionales separados; facultad simulada independiente. Pendiente validar V2 con el usuario antes de reorganizar formularios operativos; LIC-UX-004 sigue abierto.
 
 ## Hallazgos de prueba manual RAT — 17/10/2026
 

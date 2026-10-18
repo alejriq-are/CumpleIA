@@ -1,15 +1,15 @@
-## Bloque vigente 18/10 — maqueta navegable de licitud
+## Bloque vigente 18/10 — maqueta V2 de licitud
 
-Ruta `/dashboard/licitud/maqueta` protegida por sesion, enlace desde Bases de
-licitud. Cuatro pestanas, esquema y siguiente paso; escenarios adultos, infancia
-y facultad revocada. Edicion en memoria por escenario/version, previsualizacion
-sin eventos, historial precargado y descarga de ejemplo sin textos editados.
-Siete pruebas Chromium dirigidas, tipos/lint/formato aprobados; movil/escritorio
-revisados. Sin API/DB ni cambios a formularios, permisos o configuracion.
-Pendiente validar claridad con el usuario antes de implementar el flujo operativo.
-[Contrato, uso y limites](m3-t1-licitud-experiencia.md#maqueta-navegable-disponible).
-LIC-UX-004 abierto; EIPD/datos reales bloqueados, sin merge/despliegue.
-CI de nuevo commit pendiente de consulta.
+`/dashboard/licitud/maqueta`: seleccionar tratamiento RAT/finalidad antes del
+recorrido de cuatro pasos. Ejemplos opcionales separados; facultad de la persona
+independiente del tratamiento. Borradores por finalidad, revisiones por version,
+previsualizacion sin eventos y descarga ficticia sin textos editados.
+Diez Chromium dirigidas, tipos/lint/formato aprobados; vistas movil/escritorio
+revisadas. Sin API/DB ni cambios a formularios/permisos/configuracion.
+Pendiente validar claridad de V2 con usuario antes de implementar flujo operativo.
+[Contrato y limites](m3-t1-licitud-experiencia.md#maqueta-navegable-disponible--version-2).
+LIC-UX-004 abierto; EIPD/datos reales bloqueados. Sin merge/despliegue.
+CI del nuevo commit por consultar.
 
 ## Cierre vigente 18/10 — recorrido manual ficticio de Bases de licitud
 
