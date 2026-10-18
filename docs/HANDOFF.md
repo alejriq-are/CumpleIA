@@ -18,6 +18,13 @@ identifica el HEAD exacto de la tarea. Una CI anterior no prueba un commit nuevo
 
 ## Bloque funcional vigente — producto
 
+18/10: propuesta de experiencia de licitud aceptada por el usuario; documentacion
+publicada, implementacion pendiente. Cuatro pestanas por tarea, esquema de avance,
+version objetivo visible y facultades separadas. Proximo entregable: maqueta
+navegable para adultos, infancia y facultad revocada. Contrato y criterios en
+project/m3-t1-licitud-experiencia.md; backlog LIC-UX-004. No cambia producto,
+permisos ni configuracion; EIPD/datos reales bloqueados, sin merge/despliegue.
+
 18/10: recorrido manual ficticio de Bases de licitud cerrado: clientes,
 trabajadores e infancia; guardado/reapertura, dos resoluciones, revisiones negativas,
 decision documental y grant/revocacion. Decision conservada, nuevas decisiones

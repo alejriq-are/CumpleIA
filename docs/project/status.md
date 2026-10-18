@@ -1,3 +1,12 @@
+## Proximo bloque aceptado 18/10 — experiencia de licitud
+
+Propuesta aceptada, documentada; implementacion pendiente. Cuatro pestanas por
+tarea, esquema de avance, siguiente accion, version objetivo visible, estados de
+guardado y bloqueos explicados; facultades fuera del formulario de revision.
+Proximo paso: maqueta navegable con adultos, infancia y facultad revocada, antes
+de reorganizar formularios. Backlog LIC-UX-004; [contrato y criterios](m3-t1-licitud-experiencia.md).
+Sin cambios de producto, permisos, entorno ni activacion EIPD en esta entrega.
+
 ## Cierre vigente 18/10 — recorrido manual ficticio de Bases de licitud
 
 Recorrido asistido completado en frontend con sesion del usuario: clientes,

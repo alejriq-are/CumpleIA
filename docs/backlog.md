@@ -2,6 +2,10 @@
 
 > Primer archivo de backlog trackeado en git. Hasta ahora el seguimiento de tareas vivía en archivos `Claude_*`/`Fase 1`/`Modulo 1` sin trackear (`git status` los marca `??`); este archivo empieza a fijar en el repo los ítems con criterios de aceptación explícitos, empezando por el de este trabajo.
 
+## Experiencia de licitud — propuesta aceptada 18/10/2026
+
+- [ ] **LIC-UX-004 — Flujo guiado y separacion por tareas.** Propuesta aceptada: cuatro pestanas (Resumen y siguientes pasos, Completar datos, Revisar documentos, Historial y descargas), esquema visible, facultades en acceso separado, contexto de version junto a decisiones, controles reconocibles y causas de bloqueo. Primero maqueta navegable con adultos, infancia y facultad revocada; luego implementacion y validacion asistida. Conservar borradores al navegar y refrescar dependencias tras guardar. Documento y criterios: [Experiencia de licitud](project/m3-t1-licitud-experiencia.md). Incluye hallazgos LIC-UX-002/003 y patron RAT-UX-001 segun alcance; RAT-VAL-001 sigue separado. Aceptada no equivale a implementada. Sin ampliacion de permisos, activacion EIPD ni datos reales.
+
 ## Hallazgos de prueba manual RAT — 17/10/2026
 
 - [ ] **RAT-UX-001 — Estado de guardado visible al reabrir secciones.** Prioridad baja; no bloquea el piloto ficticio. En Fuentes de los datos, la confirmacion temporal desaparece al recargar aunque el contenido persiste, lo que genera dudas sobre el guardado. Mostrar estado derivado de datos cargados del servidor (datos guardados/sin registros), cambios sin guardar al editar y confirmacion tras respuesta exitosa. No declarar guardado ante error o respuesta incierta. Criterios: recargar o volver desde otra pagina conserva estado y contenido; editar/agregar/eliminar distingue cambios pendientes; fallo conserva el formulario sin indicar exito. Evaluar el mismo patron en las demas secciones RAT. Sin cambiar completitud documental, permisos ni bloqueo EIPD. Detectado por el usuario en el piloto de infancia.
