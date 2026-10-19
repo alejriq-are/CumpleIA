@@ -220,7 +220,7 @@ facultad revocada y edicion de infancia. Usuario confirma en prueba controlada
 separacion y conservacion de borradores entre finalidades durante la visita; no
 acredita persistencia tras recarga. Hallazgos de presentacion integrados en V3.
 
-Validacion local V3: 15 Chromium dirigidas aprobadas; tipos frontend, ESLint de
+Validacion local V3 consolidada sobre ada6d45: 18 Chromium del bloque aprobadas; tipos frontend, ESLint de
 archivos modificados, Prettier y git diff --check aprobados. Nuevos casos verifican
 contenido/faltantes, lectura invalidada al cambiar, regreso a editar, copia completa
 con infancia/notas, descarga exacta, nuevas versiones sin mutar antiguas, aislamiento
@@ -228,10 +228,15 @@ por finalidad y reinicio al recargar. Casos de copia desde una version anterior,
 proteccion de cambios pendientes, motivo obligatorio y trazabilidad en descarga
 aprobados. Vista de origen/motivo y preparacion inspeccionada. Capturas de preparacion inspeccionadas en
 390 px y 1280 px. Suite existente: `npx playwright test e2e/licitud-prototype.spec.ts`.
-Sin cambios backend, sin repetir DB ni pruebas amplias locales. CI exacta del nuevo
-commit se consulta tras push; no atribuirle ejecuciones de commits anteriores.
+Sin cambios backend, sin repetir DB ni pruebas amplias locales. Ruta protegida
+comprobada: sin sesion devuelve 307 a /login. CI funcional de ada6d45
+39321154265 aprobada (backend, frontend e integrada); Handoff 39321154299 aprobado.
+No atribuir a otro commit estas ejecuciones.
 
-Pendiente validar con usuario el ciclo actualizado crear desde version/motivo/
-preparar/registrar y su separacion de emitir revision;
-no desplegarlo en formularios operativos hasta validar el diseno. LIC-UX-004 abierto;
+Usuario confirma el ciclo DEMO-1 a DEMO-3: origen/motivo y fundamento conservados
+en JSON, original intacto, resaltado de seleccion correcto y observaciones separadas
+al alternar versiones. Se comprobaron tambien regreso a editar y notas opcionales
+vacias. Las revisiones terminan en vista previa, no se registran ni cambian historial.
+Bloque de maqueta navegable completado. Pendiente como bloque posterior trasladar
+el diseno a formularios operativos con sus contratos y validacion propia. LIC-UX-004 abierto;
 RAT-VAL-001 sigue separado. EIPD/datos reales bloqueados; sin merge/despliegue.

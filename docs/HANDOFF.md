@@ -18,15 +18,17 @@ identifica el HEAD exacto de la tarea. Una CI anterior no prueba un commit nuevo
 
 ## Bloque funcional vigente — producto
 
-19/10: maqueta V3: Crear nueva version a partir de DEMO-N copia exactamente esa
-version; origen/motivo obligatorio visibles al inicio. Protege borradores con
-cambios pendientes antes de reemplazar. Preparacion reune todo, exige lectura
-ficticia; origen/motivo conservados en version y descarga. Emitir revision sobre
-DEMO-N sigue separado del motivo de modificacion, sin revision negativa obligatoria.
-15 Chromium dirigidas, tipos/lint/formato aprobados; vista de origen/motivo revisada.
-Todo en memoria, EIPD/datos reales bloqueados. Pendiente validar el ciclo actualizado
-con usuario antes de formularios operativos; LIC-UX-004 abierto. Contrato:
-project/m3-t1-licitud-experiencia.md. Sin merge/despliegue. CI nueva por consultar.
+19/10: bloque maqueta V3 navegable consolidado, disponible desde Bases de licitud.
+Seleccion RAT/finalidad, editor, preparacion completa y registro solo en memoria;
+copia desde version con origen/motivo, originales intactos, revision separada,
+historial/JSON con seleccion visual coherente y ayudas en los siete desplegables.
+Usuario confirma ciclo DEMO-1 a DEMO-3, original intacto, descarga JSON y observaciones
+separadas por version. 18 Chromium del bloque, tipos/lint/formato aprobados sobre
+ada6d45; ruta sin sesion devuelve 307 a /login. CI funcional 39321154265 aprobada
+(backend, frontend e integrada); Handoff 39321154299 aprobado. Nada persiste al recargar.
+Bloque de maqueta completo; formularios operativos y LIC-UX-004 siguen pendientes.
+EIPD/datos reales bloqueados; sin merge/despliegue. Contrato y limites:
+project/m3-t1-licitud-experiencia.md.
 
 18/10: recorrido manual ficticio de Bases de licitud cerrado: clientes,
 trabajadores e infancia; guardado/reapertura, dos resoluciones, revisiones negativas,

@@ -1,14 +1,15 @@
-## Bloque vigente 19/10 — maqueta V3: origen y motivo de nuevas versiones
+## Bloque vigente 19/10 — maqueta V3 navegable consolidada
 
-Crear nueva version a partir de DEMO-N copia el documento seleccionado, conserva
-originales y pide motivo del cambio al inicio. Reemplazo de borrador con cambios
-pendientes exige confirmacion. Origen y motivo visibles en preparacion, version y
-JSON. Emitir revision sobre DEMO-N es una actuacion separada, sin revision negativa
-previa obligatoria. 15 Chromium dirigidas, tipos/lint/formato aprobados; vista de
-origen/motivo revisada. Todo solo en memoria; EIPD/datos reales bloqueados.
-Pendiente validar con usuario antes de modificar formularios operativos.
+Bloque de maqueta completo: acceso desde Bases de licitud; seleccion RAT/finalidad,
+edicion, preparacion con lectura ficticia, versiones inmutables con origen/motivo,
+revision separada e historial/JSON coherentes. Siete desplegables con ayudas.
+Usuario confirma DEMO-1 a DEMO-3, descarga, original intacto y observaciones
+separadas por version. 18 Chromium, tipos/lint/formato aprobados sobre ada6d45;
+acceso sin sesion redirige a login. CI 39321154265 aprobada
+(backend, frontend e integrada); Handoff 39321154299 aprobado. Solo memoria: recargar reinicia la visita.
 [Contrato](m3-t1-licitud-experiencia.md#maqueta-navegable-disponible--version-3).
-LIC-UX-004 abierto, sin merge/despliegue. CI nueva por consultar.
+Pendiente trasladar el diseno a formularios operativos como bloque posterior;
+LIC-UX-004 abierto. EIPD/datos reales bloqueados, sin merge/despliegue.
 
 ## Cierre vigente 18/10 — recorrido manual ficticio de Bases de licitud
 
