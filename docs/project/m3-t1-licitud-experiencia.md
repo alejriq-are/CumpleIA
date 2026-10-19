@@ -180,8 +180,15 @@ documento y decision organizacional siguen separadas en Revisar documentos.
 Simular registro conserva una copia completa independiente del borrador, solo en
 memoria de la visita. Queda pendiente de revision; historico consultable con
 version explicita. Editar despues no modifica la copia anterior; preparar/registrar
-otra crea DEMO-4 y siguientes. Nuevas versiones por tratamiento/finalidad;
-observaciones por version. Doble contexto: version de evaluacion 1 y version
+otra crea DEMO-4 y siguientes. Crear nueva version a partir de DEMO-N copia
+exactamente la version seleccionada (incluidos notas/analisis), no el ultimo borrador.
+Al inicio de edicion muestra origen y motivo del cambio obligatorio; el motivo
+anterior no se hereda. Si hay cambios sin guardar, exige confirmar reemplazo o
+conservar borrador; no descarta silenciosamente. Origen/motivo quedan en la copia
+y descarga; cambios invalidan lectura preparatoria. Emitir revision sobre DEMO-N
+recoge observaciones sobre ese documento registrado, separadas del motivo de la
+actualizacion. No exige revision negativa previa para crear otra version.
+Nuevas versiones por tratamiento/finalidad; observaciones por version. Doble contexto: version de evaluacion 1 y version
 documental explicita. Facultad revocada bloquea decision organizacional, conserva
 edicion/consulta del ensayo y no otorga permisos reales.
 
@@ -203,15 +210,18 @@ facultad revocada y edicion de infancia. Usuario confirma en prueba controlada
 separacion y conservacion de borradores entre finalidades durante la visita; no
 acredita persistencia tras recarga. Hallazgos de presentacion integrados en V3.
 
-Validacion local V3: 13 Chromium dirigidas aprobadas; tipos frontend, ESLint de
+Validacion local V3: 15 Chromium dirigidas aprobadas; tipos frontend, ESLint de
 archivos modificados, Prettier y git diff --check aprobados. Nuevos casos verifican
 contenido/faltantes, lectura invalidada al cambiar, regreso a editar, copia completa
 con infancia/notas, descarga exacta, nuevas versiones sin mutar antiguas, aislamiento
-por finalidad y reinicio al recargar. Capturas de preparacion inspeccionadas en
+por finalidad y reinicio al recargar. Casos de copia desde una version anterior,
+proteccion de cambios pendientes, motivo obligatorio y trazabilidad en descarga
+aprobados. Vista de origen/motivo y preparacion inspeccionada. Capturas de preparacion inspeccionadas en
 390 px y 1280 px. Suite existente: `npx playwright test e2e/licitud-prototype.spec.ts`.
 Sin cambios backend, sin repetir DB ni pruebas amplias locales. CI exacta del nuevo
 commit se consulta tras push; no atribuirle ejecuciones de commits anteriores.
 
-Pendiente validar con usuario el nuevo ciclo preparar/revisar/registrar/corregir;
+Pendiente validar con usuario el ciclo actualizado crear desde version/motivo/
+preparar/registrar y su separacion de emitir revision;
 no desplegarlo en formularios operativos hasta validar el diseno. LIC-UX-004 abierto;
 RAT-VAL-001 sigue separado. EIPD/datos reales bloqueados; sin merge/despliegue.

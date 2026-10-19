@@ -36,13 +36,22 @@ const sections: [Section, string][] = [
   ["fundamento", "Base y fundamento"],
   ["infancia", "Infancia"],
 ];
-type Draft = { basis: string; rationale: string; age: string; notes: string };
+type Draft = {
+  basis: string;
+  rationale: string;
+  age: string;
+  notes: string;
+  origin: { version: string; reference: string } | null;
+  changeReason: string;
+};
 type ReviewDraft = { kind: "revision" | "decision"; choice: string; rationale: string };
 const initialDraft = (scenario: Scenario): Draft => ({
   basis: "",
   rationale: "[FICTICIA] Evaluación pendiente. No hay autorización para operar.",
   age: scenario === "adultos" ? "" : "[FICTICIA] Cinco participantes sintéticos de 10 a 13 años.",
   notes: "",
+  origin: null,
+  changeReason: "",
 });
 type PreparedDocument = {
   version: string;
@@ -70,6 +79,8 @@ function prepareSnapshot(
   const pending = [
     "Revisión jurídica y evidencias pendientes en este ensayo. La lista no acredita completitud legal.",
   ];
+  if (draft.origin && !draft.changeReason.trim())
+    pending.unshift("Motivo del cambio sin completar.");
   if (!draft.basis) pending.unshift("Base de licitud pendiente de definir.");
   if (!draft.rationale.trim()) pending.unshift("Fundamento sin completar.");
   if (scenario === "infancia") {
@@ -97,6 +108,15 @@ function prepareSnapshot(
 }
 function DocumentContent({ document }: { document: PreparedDocument }) {
   const fields: [string, string][] = [
+    ...(document.draft.origin
+      ? [
+          [
+            "Versión de origen",
+            `${document.draft.origin.reference} · DEMO-${document.draft.origin.version}`,
+          ] as [string, string],
+          ["Motivo del cambio", document.draft.changeReason || "Sin completar"] as [string, string],
+        ]
+      : []),
     ["Organización", document.organization],
     ["Tratamiento", document.treatment],
     ["Finalidad", document.purpose],
@@ -160,6 +180,10 @@ export function LicitudFlowPrototype() {
   const [preview, setPreview] = useState(false);
   const [preparationOpen, setPreparationOpen] = useState(false);
   const [reviewedFingerprint, setReviewedFingerprint] = useState("");
+  const [copyRequest, setCopyRequest] = useState<{
+    scopeKey: string;
+    document: PreparedDocument;
+  } | null>(null);
   const [documents, setDocuments] = useState<Record<string, PreparedDocument[]>>({});
   const current = scenarios[scenario];
   const scopeKey = `${scenario}:${purpose}`;
@@ -180,6 +204,9 @@ export function LicitudFlowPrototype() {
   const candidate = prepareSnapshot(scenario, purpose, draft, nextVersion);
   const fingerprint = JSON.stringify(candidate);
   const reviewed = reviewedFingerprint === fingerprint;
+  const missingChangeReason = Boolean(draft.origin && !draft.changeReason.trim());
+  const sourceDocument =
+    selectedDocument ?? prepareSnapshot(scenario, purpose, initialDraft(scenario), version);
 
   useEffect(() => {
     const readLocation = () => {
@@ -246,7 +273,7 @@ export function LicitudFlowPrototype() {
     setReviewedFingerprint("");
   }
   function registerDocument() {
-    if (!reviewed) return;
+    if (!reviewed || missingChangeReason) return;
     const snapshot: PreparedDocument = {
       ...structuredClone(candidate),
       preparatoryReview: "lectura_simulada_sin_aceptacion_juridica",
@@ -261,11 +288,30 @@ export function LicitudFlowPrototype() {
       `Versión DEMO-${snapshot.version} registrada solo en memoria para revisión. No es aprobación jurídica ni guardado en servidor; se reinicia al recargar.`
     );
   }
+  function copyVersion(document: PreparedDocument) {
+    const nextDraft: Draft = {
+      ...structuredClone(document.draft),
+      origin: { version: document.version, reference: document.reference },
+      changeReason: "",
+    };
+    setDrafts((all) => ({ ...all, [scopeKey]: nextDraft }));
+    setCopyRequest(null);
+    backToEdit("fundamento");
+    go("completar");
+    setNotice(
+      `Se copió DEMO-${document.version} a un nuevo borrador. La versión ${document.reference} se conserva intacta. Indica el motivo del cambio.`
+    );
+  }
+  function startCopy() {
+    if (dirty) setCopyRequest({ scopeKey, document: structuredClone(sourceDocument) });
+    else copyVersion(sourceDocument);
+  }
   function go(target: Tab) {
     setTab(target);
     setPreview(false);
+    setCopyRequest(null);
   }
-  function edit(key: keyof Draft, value: string) {
+  function edit(key: Exclude<keyof Draft, "origin">, value: string) {
     setDrafts((all) => ({
       ...all,
       [scopeKey]: { ...(all[scopeKey] ?? initialDraft(scenario)), [key]: value },
@@ -666,6 +712,39 @@ export function LicitudFlowPrototype() {
                   Aquí prepara los datos la persona editora. Los documentos registrados se consultan
                   en Revisar documentos.
                 </p>
+                {draft.origin && (
+                  <section
+                    className="space-y-3 rounded-lg border border-blue-300 bg-blue-50 p-4"
+                    aria-label="Origen y motivo de la nueva versión"
+                  >
+                    <h3 className="font-semibold">
+                      Nueva versión a partir de DEMO-{draft.origin.version}
+                    </h3>
+                    <p className="break-words">
+                      <strong>Versión de origen:</strong> {draft.origin.reference} · DEMO-
+                      {draft.origin.version}
+                    </p>
+                    <p>
+                      Se copió el contenido de esa versión, no el último borrador editado. El
+                      original no cambia. No necesitas emitir una revisión negativa para justificar
+                      una actualización.
+                    </p>
+                    <label className="block font-medium">
+                      Motivo del cambio (obligatorio)
+                      <textarea
+                        aria-label="Motivo del cambio (obligatorio)"
+                        rows={3}
+                        className={input}
+                        value={draft.changeReason}
+                        onChange={(e) => edit("changeReason", e.target.value)}
+                      />
+                    </label>
+                    <p className="text-sm">
+                      Explica por qué preparas otra versión. Este motivo quedará junto al contenido
+                      registrado; es distinto de las observaciones de la persona revisora.
+                    </p>
+                  </section>
+                )}
                 <nav aria-label="Secciones para completar" className="flex flex-wrap gap-2">
                   {sections
                     .filter(([key]) => !adult || key !== "infancia")
@@ -877,11 +956,16 @@ export function LicitudFlowPrototype() {
                     <button
                       type="button"
                       className={button}
-                      disabled={!reviewed}
+                      disabled={!reviewed || missingChangeReason}
                       onClick={registerDocument}
                     >
                       Simular registro de versión DEMO-{nextVersion}
                     </button>
+                    {missingChangeReason && (
+                      <p className="font-semibold text-amber-900">
+                        Para registrar esta nueva versión, vuelve a completar el motivo del cambio.
+                      </p>
+                    )}
                     <p className="text-sm">
                       Se conservará todo el contenido mostrado en esta visita, separado del borrador
                       editable. No se envía al servidor; al recargar se pierde. Los cambios
@@ -906,6 +990,7 @@ export function LicitudFlowPrototype() {
                       value={version}
                       onChange={(e) => {
                         setVersion(e.target.value);
+                        setCopyRequest(null);
                         setPreview(false);
                         setPreparationOpen(false);
                         setReviewedFingerprint("");
@@ -958,27 +1043,61 @@ export function LicitudFlowPrototype() {
                             : "Solo participantes sintéticos; sin datos sensibles."}
                         </p>
                         <p className="text-sm">
-                          Ejemplo precargado: tus textos nuevos se incorporarán únicamente a las
-                          versiones de ensayo que prepares y registres.
+                          Ejemplo precargado: el contenido que se copiará se detalla a continuación.
+                          Tus textos nuevos se incorporan solo a versiones que prepares y registres.
                         </p>
+                        <DocumentContent document={sourceDocument} />
                       </>
                     )}
                   </article>
-                  <button
-                    type="button"
-                    className={secondary}
-                    onClick={() => {
-                      backToEdit("fundamento");
-                      go("completar");
-                      setNotice(
-                        `Puedes modificar el borrador y preparar otra versión. ${reference} se conserva intacta.`
-                      );
-                    }}
-                  >
-                    Volver a editar el borrador
+                  <button type="button" className={secondary} onClick={startCopy}>
+                    Crear nueva versión a partir de DEMO-{version}
                   </button>
+                  {copyRequest?.scopeKey === scopeKey && (
+                    <aside
+                      role="alertdialog"
+                      aria-label="Confirmar reemplazo del borrador"
+                      aria-describedby="prototype-copy-warning"
+                      className="space-y-3 rounded-lg border border-amber-400 bg-amber-50 p-4"
+                    >
+                      <h3 className="font-semibold">
+                        Hay cambios sin guardar en el borrador actual
+                      </h3>
+                      <p id="prototype-copy-warning">
+                        Copiar DEMO-{copyRequest.document.version} reemplazará esos cambios en este
+                        tratamiento y finalidad. Las versiones registradas se conservan.
+                      </p>
+                      <div className="flex flex-wrap gap-3">
+                        <button
+                          type="button"
+                          className={button}
+                          onClick={() => copyVersion(copyRequest.document)}
+                        >
+                          Reemplazar borrador y copiar DEMO-{copyRequest.document.version}
+                        </button>
+                        <button
+                          type="button"
+                          className={secondary}
+                          onClick={() => setCopyRequest(null)}
+                        >
+                          Conservar borrador actual
+                        </button>
+                      </div>
+                    </aside>
+                  )}
                 </Card>
-                <Card title="Revisar la versión seleccionada">
+                <Card
+                  title={
+                    review.kind === "revision"
+                      ? `Emitir revisión sobre DEMO-${version}`
+                      : `Emitir decisión de organización sobre DEMO-${version}`
+                  }
+                >
+                  <p>
+                    Esta sección recoge observaciones o decisiones sobre el documento ya registrado.
+                    No modifica su contenido ni explica los cambios de una nueva versión; ese motivo
+                    se completa al iniciar su edición.
+                  </p>
                   <label className="block font-medium">
                     Tipo de actuación
                     <select

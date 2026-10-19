@@ -1,15 +1,14 @@
-## Bloque vigente 19/10 — maqueta V3: preparar y versionar para revision
+## Bloque vigente 19/10 — maqueta V3: origen y motivo de nuevas versiones
 
-`/dashboard/licitud/maqueta`: editor reducido, accion Preparar documento para
-revision con contenido completo, notas opcionales, pendientes y numero propuesto.
-Lectura preparatoria del responsable ficticio antes de simular registro; cambios
-requieren releer. Copias completas en memoria, historial/descarga por version;
-editar no muta originales, nuevo registro crea otra version. Sin API ni persistencia.
-13 Chromium dirigidas, tipos/lint/formato aprobados; vistas de preparacion movil y
-escritorio revisadas. Pendiente validar V3 con usuario, luego evaluar formularios
-operativos. [Contrato](m3-t1-licitud-experiencia.md#maqueta-navegable-disponible--version-3).
-LIC-UX-004 abierto; EIPD/datos reales bloqueados, sin merge/despliegue.
-CI exacta del nuevo commit por consultar.
+Crear nueva version a partir de DEMO-N copia el documento seleccionado, conserva
+originales y pide motivo del cambio al inicio. Reemplazo de borrador con cambios
+pendientes exige confirmacion. Origen y motivo visibles en preparacion, version y
+JSON. Emitir revision sobre DEMO-N es una actuacion separada, sin revision negativa
+previa obligatoria. 15 Chromium dirigidas, tipos/lint/formato aprobados; vista de
+origen/motivo revisada. Todo solo en memoria; EIPD/datos reales bloqueados.
+Pendiente validar con usuario antes de modificar formularios operativos.
+[Contrato](m3-t1-licitud-experiencia.md#maqueta-navegable-disponible--version-3).
+LIC-UX-004 abierto, sin merge/despliegue. CI nueva por consultar.
 
 ## Cierre vigente 18/10 — recorrido manual ficticio de Bases de licitud
 
