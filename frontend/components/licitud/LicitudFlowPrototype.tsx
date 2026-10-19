@@ -1243,8 +1243,12 @@ export function LicitudFlowPrototype() {
                   versiones conservan el contenido revisado sin modificar las anteriores.
                 </p>
                 <ol className="space-y-3" aria-label="Historial documental de ensayo">
-                  <li className="rounded-lg border border-slate-200 p-4">
+                  <li
+                    aria-current={version === "1" ? "true" : undefined}
+                    className={`rounded-lg border p-4 ${version === "1" ? "border-blue-300 bg-blue-50" : "border-slate-200 bg-white"}`}
+                  >
                     <h3 className="font-semibold">Versión 1 · DEMO-1</h3>
+                    {version === "1" && <p className="font-semibold">Seleccionada para descarga</p>}
                     <p>Documento original de ejemplo. Revisión: requiere cambios.</p>
                     <button
                       type="button"
@@ -1257,8 +1261,12 @@ export function LicitudFlowPrototype() {
                       Consultar versión 1
                     </button>
                   </li>
-                  <li className="rounded-lg border border-slate-200 p-4">
+                  <li
+                    aria-current={version === "2" ? "true" : undefined}
+                    className={`rounded-lg border p-4 ${version === "2" ? "border-blue-300 bg-blue-50" : "border-slate-200 bg-white"}`}
+                  >
                     <h3 className="font-semibold">Versión 2 · DEMO-2</h3>
+                    {version === "2" && <p className="font-semibold">Seleccionada para descarga</p>}
                     <p>
                       Segunda versión de ejemplo. Decisión documental precargada: requiere cambios.
                     </p>
@@ -1280,11 +1288,15 @@ export function LicitudFlowPrototype() {
                   {prepared.map((document) => (
                     <li
                       key={document.version}
-                      className="space-y-2 rounded-lg border border-blue-300 bg-blue-50 p-4"
+                      aria-current={version === document.version ? "true" : undefined}
+                      className={`space-y-2 rounded-lg border p-4 ${version === document.version ? "border-blue-300 bg-blue-50" : "border-slate-200 bg-white"}`}
                     >
                       <h3 className="font-semibold">
                         Versión {document.version} · DEMO-{document.version}
                       </h3>
+                      {version === document.version && (
+                        <p className="font-semibold">Seleccionada para descarga</p>
+                      )}
                       <p className="break-words">
                         {document.reference} · Registrada solo durante esta visita · Pendiente de
                         revisión.

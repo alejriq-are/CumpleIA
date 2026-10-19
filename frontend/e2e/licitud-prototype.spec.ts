@@ -664,3 +664,40 @@ test("copia protege borrador pendiente y exige motivo de cambio revisado", async
   expect(value).toMatchObject({ activation: "deshabilitada", persisted_events: 0 });
   expect(requests).toEqual([]);
 });
+
+test("historial: solo resalta la version seleccionada y descarga el mismo documento", async ({
+  page,
+}) => {
+  await open(page);
+  await prepare(page);
+  await register(page, 3);
+  for (const version of ["1", "2", "3"]) {
+    await page.getByLabel("Versión a consultar").selectOption(version);
+    await tab(page, "Historial y descargas");
+    const history = page.getByRole("list", { name: "Historial documental de ensayo" });
+    const selected = history.locator('[aria-current="true"]');
+    await expect(selected).toHaveCount(1);
+    await expect(selected).toContainText(`Versión ${version} · DEMO-${version}`);
+    await expect(selected).toContainText("Seleccionada para descarga");
+    await expect(selected).toHaveCSS("background-color", "rgb(239, 246, 255)");
+    for (const other of ["1", "2", "3"].filter((value) => value !== version)) {
+      const row = history.getByRole("listitem").filter({
+        has: page.getByRole("heading", { name: `Versión ${other} · DEMO-${other}`, exact: true }),
+      });
+      await expect(row).toHaveCSS("background-color", "rgb(255, 255, 255)");
+      await expect(row).not.toContainText("Seleccionada para descarga");
+    }
+    await expect(page.getByText(`La descarga de DEMO-${version}`, { exact: false })).toBeVisible();
+    const pending = page.waitForEvent("download");
+    await page.getByRole("button", { name: "Descargar ejemplo ficticio JSON" }).click();
+    const downloaded = await pending;
+    expect(downloaded.suggestedFilename()).toBe(`maqueta-licitud-adultos-gestion-v${version}.json`);
+    const value = JSON.parse(await readFile((await downloaded.path())!, "utf8"));
+    expect(value.document.version).toBe(`DEMO-${version}`);
+    expect(value).toMatchObject({ activation: "deshabilitada", persisted_events: 0 });
+    await history
+      .getByRole("button", { name: `Consultar versión ${version}`, exact: true })
+      .click();
+  }
+  expect(requests).toEqual([]);
+});

@@ -192,7 +192,11 @@ Nuevas versiones por tratamiento/finalidad; observaciones por version. Doble con
 documental explicita. Facultad revocada bloquea decision organizacional, conserva
 edicion/consulta del ensayo y no otorga permisos reales.
 
-Historial incluye fixtures y versiones de la visita. JSON de fixture excluye textos
+Historial incluye fixtures y versiones de la visita. Solo la version seleccionada
+para descarga lleva fondo celeste, aria-current y etiqueta explicita; las demas
+tienen fondo neutro, incluidas las creadas durante la visita. Comprobacion dirigida
+en Chromium: resaltado, etiqueta, nombre de archivo y contenido JSON coinciden
+al alternar DEMO-1, DEMO-2 y DEMO-3. JSON de fixture excluye textos
 editados; JSON de version simulada incluye su copia completa, notas y pendientes,
 no cambios posteriores del borrador. Exporta tipo ficticios, contains_user_edits
 segun origen, lectura preparatoria simulada, persisted_events=0 para servidor y
