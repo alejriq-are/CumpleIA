@@ -736,3 +736,64 @@ test("ayudas: explican actuacion y resultado seleccionado sin cambiar el documen
   );
   expect(requests).toEqual([]);
 });
+
+test("todos los combos tienen ayuda vinculada y especifica para sus opciones", async ({ page }) => {
+  await open(page, "", false);
+  const treatment = page.getByLabel("Tratamiento RAT de ejemplo", { exact: true });
+  const purpose = page.getByLabel("Finalidad a evaluar", { exact: true });
+  const help = (key: string) => page.locator(`#prototype-${key}-help`);
+  const checkCombos = async () => {
+    for (const combo of await page.getByRole("combobox").all()) {
+      if (!(await combo.isVisible())) continue;
+      const id = await combo.getAttribute("aria-describedby");
+      expect(id).toBeTruthy();
+      const description = page.locator(`[id="${id}"]`);
+      await expect(description).toBeVisible();
+      await expect(description).not.toBeEmpty();
+      await expect(description).toHaveAttribute("aria-live", "polite");
+    }
+  };
+  await checkCombos();
+  await expect(help("treatment")).toContainText("Elige la actividad");
+  await expect(help("purpose")).toContainText("Primero selecciona un tratamiento");
+  await treatment.selectOption("adultos");
+  await expect(help("treatment")).toContainText("Clientes adultos");
+  await expect(help("purpose")).toContainText("Elige el objetivo concreto");
+  await purpose.selectOption("gestion");
+  await expect(help("purpose")).toContainText("Administrar la relación");
+  await purpose.selectOption("consultas");
+  await expect(help("purpose")).toContainText("Atender consultas");
+  await treatment.selectOption("infancia");
+  await expect(purpose).toHaveValue("");
+  await expect(help("treatment")).toContainText("10 a 13 años");
+  await purpose.selectOption("ensayo");
+  await expect(help("purpose")).toContainText("Completa también la sección Infancia");
+  await page
+    .getByText("Herramientas de demostración · ejemplos opcionales", { exact: true })
+    .click();
+  const faculty = page.getByLabel("Facultad simulada de la persona", { exact: true });
+  await expect(help("faculty")).toContainText("Vigente:");
+  await faculty.selectOption("revocada");
+  await expect(help("faculty")).toContainText("bloqueo de nuevas decisiones");
+  await checkCombos();
+  await page.getByRole("button", { name: "Abrir evaluación de ejemplo" }).click();
+  await tab(page, "Completar datos");
+  await page.getByRole("button", { name: "2. Base y fundamento", exact: true }).click();
+  const basis = page.getByLabel("Base propuesta de ensayo", { exact: true });
+  await expect(help("basis")).toContainText("Pendiente de definir");
+  await basis.selectOption("analisis");
+  await expect(help("basis")).toContainText("no identifica ni valida una base jurídica concreta");
+  await checkCombos();
+  await prepare(page);
+  await register(page, 3);
+  await expect(help("version")).toContainText("DEMO-3: versión creada durante esta visita");
+  await checkCombos();
+  await page.getByLabel("Versión a consultar", { exact: true }).selectOption("1");
+  await expect(help("version")).toContainText("DEMO-1: ejemplo histórico");
+  await page.getByLabel("Versión a consultar", { exact: true }).selectOption("2");
+  await expect(help("version")).toContainText("DEMO-2: segundo ejemplo");
+  await page.getByLabel("Tipo de actuación", { exact: true }).selectOption("decision");
+  await expect(page.getByLabel("Resultado de ensayo", { exact: true })).toBeDisabled();
+  await checkCombos();
+  expect(requests).toEqual([]);
+});

@@ -426,6 +426,8 @@ export function LicitudFlowPrototype() {
             <select
               className={input}
               value={revoked ? "revocada" : "vigente"}
+              aria-label="Facultad simulada de la persona"
+              aria-describedby="prototype-faculty-help"
               onChange={(e) => {
                 setRevoked(e.target.value === "revocada");
                 setPreview(false);
@@ -435,6 +437,11 @@ export function LicitudFlowPrototype() {
               <option value="revocada">Revocada en la demostración</option>
             </select>
           </label>
+          <p id="prototype-faculty-help" aria-live="polite" className="text-sm">
+            {revoked
+              ? "Revocada: elige esta situación para comprobar el bloqueo de nuevas decisiones de organización. Puedes seguir consultando documentos y preparando observaciones de revisión."
+              : "Vigente: elige esta situación para explorar la decisión de organización con una persona facultada en el ejemplo. No significa que el documento esté aceptado."}
+          </p>
           <p className="text-sm">
             La facultad es una condición de la persona, no un tipo de tratamiento RAT. Cambiarla no
             cambia los datos seleccionados ni otorga permisos reales.
@@ -456,6 +463,7 @@ export function LicitudFlowPrototype() {
             <select
               className={input}
               aria-label="Tratamiento RAT de ejemplo"
+              aria-describedby="prototype-treatment-help"
               value={selectedTreatment}
               onChange={(e) => {
                 setSelectedTreatment(e.target.value as Scenario | "");
@@ -470,12 +478,20 @@ export function LicitudFlowPrototype() {
               ))}
             </select>
           </label>
+          <p id="prototype-treatment-help" aria-live="polite" className="text-sm">
+            {!selectedTreatment
+              ? "Elige la actividad del RAT que quieres evaluar. Después selecciona para qué se utilizan los datos dentro de esa actividad."
+              : selectedTreatment === "adultos"
+                ? "Clientes adultos: permite ensayar la gestión de la relación o la atención de consultas con clientes sintéticos. Elige la finalidad concreta a continuación."
+                : "Programa de infancia: permite ensayar el caso de cinco participantes sintéticos de 10 a 13 años. Agrega una sección para analizar edad y alcance; no determina una base jurídica."}
+          </p>
           <label className="block font-medium">
             Finalidad a evaluar
             <select
               className={input}
               disabled={!selectedTreatment}
               aria-label="Finalidad a evaluar"
+              aria-describedby="prototype-purpose-help"
               value={selectedPurpose}
               onChange={(e) => setSelectedPurpose(e.target.value)}
             >
@@ -488,6 +504,17 @@ export function LicitudFlowPrototype() {
                 ))}
             </select>
           </label>
+          <p id="prototype-purpose-help" aria-live="polite" className="text-sm">
+            {!selectedTreatment
+              ? "Primero selecciona un tratamiento para conocer sus finalidades disponibles."
+              : !selectedPurpose
+                ? "Elige el objetivo concreto que vas a evaluar. Cada finalidad conserva un borrador separado durante esta visita."
+                : selectedPurpose === "gestion"
+                  ? "Administrar la relación: elige este ejemplo para evaluar el uso de datos en la gestión de clientes adultos sintéticos. Es distinto del objetivo de atender consultas."
+                  : selectedPurpose === "consultas"
+                    ? "Atender consultas: elige este ejemplo para evaluar el uso de datos al responder consultas de clientes adultos sintéticos. Sus textos se mantienen separados de la gestión de la relación."
+                    : "Ensayar el análisis de infancia: elige este objetivo para recorrer el análisis del programa con cinco participantes sintéticos. Completa también la sección Infancia."}
+          </p>
           <p className="text-sm">
             Un tratamiento puede tener varias finalidades. Aquí evalúas una por vez; sus textos de
             ensayo se conservan por separado.
@@ -806,12 +833,19 @@ export function LicitudFlowPrototype() {
                       <select
                         className={input}
                         value={draft.basis}
+                        aria-label="Base propuesta de ensayo"
+                        aria-describedby="prototype-basis-help"
                         onChange={(e) => edit("basis", e.target.value)}
                       >
                         <option value="">Pendiente de definir</option>
                         <option value="analisis">Propuesta pendiente de análisis (ejemplo)</option>
                       </select>
                     </label>
+                    <p id="prototype-basis-help" aria-live="polite" className="text-sm">
+                      {draft.basis
+                        ? "Propuesta pendiente de análisis: úsala para ensayar una propuesta que todavía debe justificarse y revisarse. Explica el razonamiento en el fundamento; esta opción ilustrativa no identifica ni valida una base jurídica concreta."
+                        : "Pendiente de definir: mantenla cuando aún no tengas una propuesta de base para este tratamiento y finalidad. Puedes preparar el documento dejando ese punto declarado como pendiente."}
+                    </p>
                     <label className="block font-medium">
                       Fundamento de ensayo
                       <textarea
@@ -988,6 +1022,8 @@ export function LicitudFlowPrototype() {
                     <select
                       className={input}
                       value={version}
+                      aria-label="Versión a consultar"
+                      aria-describedby="prototype-version-help"
                       onChange={(e) => {
                         setVersion(e.target.value);
                         setCopyRequest(null);
@@ -1006,6 +1042,13 @@ export function LicitudFlowPrototype() {
                       <option value="1">Versión 1 · DEMO-1 · Histórica</option>
                     </select>
                   </label>
+                  <p id="prototype-version-help" aria-live="polite" className="text-sm">
+                    {selectedDocument
+                      ? `DEMO-${version}: versión creada durante esta visita, pendiente de revisión. Consúltala para comprobar el contenido registrado. Las observaciones y la descarga corresponden a esta selección; editar requiere crear otra versión.`
+                      : version === "1"
+                        ? "DEMO-1: ejemplo histórico precargado. Elígelo para consultar el contenido anterior o usarlo como origen de otra versión. La descarga y las observaciones corresponden a DEMO-1."
+                        : "DEMO-2: segundo ejemplo precargado, con Requiere cambios en su historial. Elígelo para consultar esa versión o preparar otra a partir de ella. La descarga y las observaciones corresponden a DEMO-2."}
+                  </p>
                   <article
                     className="space-y-3 rounded-lg border-l-4 border-blue-800 bg-blue-50 p-4"
                     aria-label="Documento seleccionado"
