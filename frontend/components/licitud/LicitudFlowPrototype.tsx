@@ -10,7 +10,7 @@ const tabs = [
 ] as const;
 type Tab = (typeof tabs)[number][0];
 type Scenario = "adultos" | "infancia";
-type Section = "alcance" | "fundamento" | "infancia" | "documento";
+type Section = "alcance" | "fundamento" | "infancia";
 const scenarios: Record<
   Scenario,
   { label: string; treatment: string; purposes: Record<string, string> }
@@ -32,10 +32,9 @@ const scenarios: Record<
   },
 };
 const sections: [Section, string][] = [
-  ["alcance", "1. Alcance del RAT"],
-  ["fundamento", "2. Base y fundamento"],
-  ["infancia", "3. Infancia"],
-  ["documento", "4. Preparar documento"],
+  ["alcance", "Alcance del RAT"],
+  ["fundamento", "Base y fundamento"],
+  ["infancia", "Infancia"],
 ];
 type Draft = { basis: string; rationale: string; age: string; notes: string };
 type ReviewDraft = { kind: "revision" | "decision"; choice: string; rationale: string };
@@ -43,8 +42,88 @@ const initialDraft = (scenario: Scenario): Draft => ({
   basis: "",
   rationale: "[FICTICIA] Evaluación pendiente. No hay autorización para operar.",
   age: scenario === "adultos" ? "" : "[FICTICIA] Cinco participantes sintéticos de 10 a 13 años.",
-  notes: "[FICTICIA] Documento de ensayo; análisis y evidencias pendientes.",
+  notes: "",
 });
+type PreparedDocument = {
+  version: string;
+  reference: string;
+  treatment: string;
+  purpose: string;
+  subjects: string;
+  category: string;
+  source: string;
+  evaluationVersion: number;
+  organization: string;
+  preparatoryReview?: "lectura_simulada_sin_aceptacion_juridica";
+  draft: Draft;
+  pending: string[];
+};
+function referenceFor(scenario: Scenario, purpose: string, version: string) {
+  return `SIMULADA-${scenario === "adultos" ? "ADULTOS" : "INFANCIA"}${purpose === "consultas" ? "-CONSULTAS" : ""}-00${version}`;
+}
+function prepareSnapshot(
+  scenario: Scenario,
+  purpose: string,
+  draft: Draft,
+  version: string
+): PreparedDocument {
+  const pending = [
+    "Revisión jurídica y evidencias pendientes en este ensayo. La lista no acredita completitud legal.",
+  ];
+  if (!draft.basis) pending.unshift("Base de licitud pendiente de definir.");
+  if (!draft.rationale.trim()) pending.unshift("Fundamento sin completar.");
+  if (scenario === "infancia") {
+    pending.push(
+      "Interés superior, autonomía y autorización: análisis adicionales pendientes en el ejemplo."
+    );
+    if (!draft.age.trim()) pending.unshift("Análisis de edad y alcance sin completar.");
+  }
+  return {
+    version,
+    reference: referenceFor(scenario, purpose, version),
+    treatment: scenarios[scenario].treatment,
+    purpose: scenarios[scenario].purposes[purpose],
+    subjects:
+      scenario === "adultos"
+        ? "Clientes adultos sintéticos"
+        : "Participantes sintéticos de 10 a 13 años",
+    category: "Identificación",
+    source: "Registros generados para el ensayo",
+    evaluationVersion: 1,
+    organization: "[FICTICIA] Organización de demostración",
+    draft: { ...draft },
+    pending,
+  };
+}
+function DocumentContent({ document }: { document: PreparedDocument }) {
+  const fields: [string, string][] = [
+    ["Organización", document.organization],
+    ["Tratamiento", document.treatment],
+    ["Finalidad", document.purpose],
+    ["Titulares", document.subjects],
+    ["Categoría", document.category],
+    ["Fuente", document.source],
+    [
+      "Base propuesta",
+      document.draft.basis ? "Propuesta pendiente de análisis (ejemplo)" : "Pendiente de definir",
+    ],
+    ["Fundamento", document.draft.rationale || "Sin completar"],
+    ...(document.draft.age
+      ? [["Análisis de edad y alcance", document.draft.age] as [string, string]]
+      : []),
+    ["Notas específicas del documento", document.draft.notes || "Sin notas (opcional)"],
+  ];
+  return (
+    <dl className="space-y-3">
+      {fields.map(([label, value]) => (
+        <div key={label}>
+          <dt className="font-semibold">{label}</dt>
+          <dd className="whitespace-pre-wrap break-words">{value}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
 const emptyReview = (): ReviewDraft => ({ kind: "revision", choice: "", rationale: "" });
 const button =
   "rounded-md bg-blue-800 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-900 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-800";
@@ -79,7 +158,9 @@ export function LicitudFlowPrototype() {
   const [notice, setNotice] = useState("");
   const [facultyOpen, setFacultyOpen] = useState(false);
   const [preview, setPreview] = useState(false);
-  const [copied, setCopied] = useState(false);
+  const [preparationOpen, setPreparationOpen] = useState(false);
+  const [reviewedFingerprint, setReviewedFingerprint] = useState("");
+  const [documents, setDocuments] = useState<Record<string, PreparedDocument[]>>({});
   const current = scenarios[scenario];
   const scopeKey = `${scenario}:${purpose}`;
   const draft = drafts[scopeKey] ?? initialDraft(scenario);
@@ -90,7 +171,15 @@ export function LicitudFlowPrototype() {
   const documentName = adult
     ? "Documento de evaluación de licitud"
     : "Resolución documental de infancia";
-  const reference = `SIMULADA-${adult ? "ADULTOS" : "INFANCIA"}${purpose === "consultas" ? "-CONSULTAS" : ""}-00${version}`;
+  const reference = referenceFor(scenario, purpose, version);
+  const prepared = documents[scopeKey] ?? [];
+  const selectedDocument = prepared.find((document) => document.version === version);
+  const nextVersion = String(
+    Math.max(2, ...prepared.map((document) => Number(document.version))) + 1
+  );
+  const candidate = prepareSnapshot(scenario, purpose, draft, nextVersion);
+  const fingerprint = JSON.stringify(candidate);
+  const reviewed = reviewedFingerprint === fingerprint;
 
   useEffect(() => {
     const readLocation = () => {
@@ -113,7 +202,7 @@ export function LicitudFlowPrototype() {
       }
       setRevoked(params.get("facultad") === "revocada" || legacy === "revocada");
       if (tabs.some(([key]) => key === destination)) setTab(destination as Tab);
-      if (["1", "2"].includes(params.get("version") ?? "")) setVersion(params.get("version")!);
+      if (/^[1-9]\d{0,2}$/.test(params.get("version") ?? "")) setVersion(params.get("version")!);
       setPreview(false);
     };
     readLocation();
@@ -133,6 +222,45 @@ export function LicitudFlowPrototype() {
     window.history.replaceState(null, "", `#${params}`);
   }, [scenario, purpose, revoked, tab, version, ready, active]);
 
+  useEffect(() => {
+    if (
+      ready &&
+      active &&
+      Number(version) > 2 &&
+      !documents[scopeKey]?.some((row) => row.version === version)
+    ) {
+      setVersion("2");
+      setNotice(
+        "La versión de ensayo no está disponible en esta visita. Al recargar se reinician los registros simulados; se muestra DEMO-2."
+      );
+    }
+  }, [ready, active, version, documents, scopeKey]);
+  function openPreparation() {
+    setPreparationOpen(true);
+    setReviewedFingerprint("");
+    setNotice("");
+  }
+  function backToEdit(target: Section) {
+    setSection(target);
+    setPreparationOpen(false);
+    setReviewedFingerprint("");
+  }
+  function registerDocument() {
+    if (!reviewed) return;
+    const snapshot: PreparedDocument = {
+      ...structuredClone(candidate),
+      preparatoryReview: "lectura_simulada_sin_aceptacion_juridica",
+    };
+    setDocuments((all) => ({ ...all, [scopeKey]: [...(all[scopeKey] ?? []), snapshot] }));
+    setSaved((all) => ({ ...all, [scopeKey]: { ...draft } }));
+    setVersion(snapshot.version);
+    setPreparationOpen(false);
+    setReviewedFingerprint("");
+    go("revisar");
+    setNotice(
+      `Versión DEMO-${snapshot.version} registrada solo en memoria para revisión. No es aprobación jurídica ni guardado en servidor; se reinicia al recargar.`
+    );
+  }
   function go(target: Tab) {
     setTab(target);
     setPreview(false);
@@ -166,18 +294,25 @@ export function LicitudFlowPrototype() {
     const packet = {
       type: "maqueta_navegable",
       data_kind: "ficticios",
-      source: "fixture_demostrativa",
-      prototype_version: 2,
+      source: selectedDocument ? "version_ensayo_en_memoria" : "fixture_demostrativa",
+      prototype_version: 3,
       treatment: scenario,
       purpose,
-      document: { reference, version: `DEMO-${version}` },
+      document: {
+        reference,
+        version: `DEMO-${version}`,
+        ...(selectedDocument ? { content: selectedDocument } : {}),
+      },
       faculty_current: !revoked,
-      illustrative_history: "Requiere cambios; ejemplo precargado",
-      contains_user_edits: false,
+      illustrative_history: selectedDocument
+        ? "Pendiente de revisión; versión de ensayo"
+        : "Requiere cambios; ejemplo precargado",
+      contains_user_edits: Boolean(selectedDocument),
       activation: "deshabilitada",
       allows_real_data: false,
       authorizes_action: false,
       persisted_events: 0,
+      simulated_document_versions: prepared.length,
     };
     const url = URL.createObjectURL(
       new Blob([JSON.stringify(packet, null, 2)], { type: "application/json" })
@@ -187,7 +322,11 @@ export function LicitudFlowPrototype() {
     link.download = `maqueta-licitud-${scenario}-${purpose}-v${version}.json`;
     link.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
-    setNotice("Ejemplo descargado. No contiene tus textos de ensayo ni es un expediente real.");
+    setNotice(
+      selectedDocument
+        ? "Versión de ensayo descargada con sus textos ficticios. No es un expediente real."
+        : "Ejemplo descargado. No contiene tus textos de ensayo ni es un expediente real."
+    );
   }
 
   return (
@@ -195,7 +334,7 @@ export function LicitudFlowPrototype() {
       <header className="space-y-4 rounded-xl border border-blue-200 bg-blue-50 p-5 sm:p-6">
         <div className="flex flex-wrap items-center gap-3">
           <span className="rounded-full bg-blue-800 px-3 py-1 text-xs font-bold text-white">
-            MAQUETA NAVEGABLE · VERSIÓN 2
+            MAQUETA NAVEGABLE · VERSIÓN 3
           </span>
           <span className="text-sm font-semibold">EIPD deshabilitada · Solo datos ficticios</span>
         </div>
@@ -326,7 +465,8 @@ export function LicitudFlowPrototype() {
                 setSection("alcance");
                 setVersion("2");
                 setPreview(false);
-                setCopied(false);
+                setPreparationOpen(false);
+                setReviewedFingerprint("");
                 setNotice("");
                 setFacultyOpen(false);
               }}
@@ -403,14 +543,11 @@ export function LicitudFlowPrototype() {
               </button>
             ))}
           </div>
-          <div role="status" aria-live="polite" className="text-sm">
-            {dirty
-              ? "Cambios sin guardar en el borrador de ensayo. Se conservan al cambiar de pestaña."
-              : "Borrador de ejemplo disponible; sin cambios pendientes de ensayo."}
-            {notice && (
-              <p className="mt-2 rounded-lg border border-blue-200 bg-blue-50 p-3">{notice}</p>
-            )}
-          </div>
+          {notice && (
+            <p role="status" className="rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm">
+              {notice}
+            </p>
+          )}
           <div
             role="tabpanel"
             id={`prototype-panel-${tab}`}
@@ -438,8 +575,8 @@ export function LicitudFlowPrototype() {
                       [
                         "Completa la evaluación",
                         adult
-                          ? "Base propuesta y fundamento."
-                          : "Fundamento, infancia y documento de ensayo.",
+                          ? "Base, fundamento y preparación del documento para revisión."
+                          : "Fundamento e infancia; después prepara el documento para revisión.",
                         "completar",
                       ],
                       [
@@ -517,6 +654,14 @@ export function LicitudFlowPrototype() {
 
             {tab === "completar" && (
               <Card title="Completar un borrador">
+                <p
+                  role="status"
+                  className={`rounded-lg border p-3 text-sm font-semibold ${dirty ? "border-amber-400 bg-amber-50" : "border-slate-300 bg-slate-50"}`}
+                >
+                  {dirty
+                    ? "Cambios sin guardar en el borrador de ensayo. Se conservan al cambiar de pestaña."
+                    : "Borrador de ensayo sin cambios pendientes. Guardado solo durante esta visita."}
+                </p>
                 <p>
                   Aquí prepara los datos la persona editora. Los documentos registrados se consultan
                   en Revisar documentos.
@@ -530,23 +675,33 @@ export function LicitudFlowPrototype() {
                         key={key}
                         aria-current={section === key ? "step" : undefined}
                         className={section === key ? button : secondary}
-                        onClick={() => setSection(key)}
+                        onClick={() => backToEdit(key)}
                       >
-                        {label}
+                        {index + 1}. {label}
                       </button>
                     ))}
                 </nav>
-                {section === "alcance" && (
+                {!preparationOpen && section === "alcance" && (
                   <section className="space-y-3" aria-label="Alcance del RAT de ejemplo">
                     <h3 className="font-semibold">Alcance asociado · solo lectura</h3>
-                    <p>{current.purposes[purpose]}</p>
-                    <p>
-                      Titulares:{" "}
-                      {adult
-                        ? "clientes adultos sintéticos"
-                        : "participantes sintéticos de 10 a 13 años"}
-                      . Categoría: identificación. Fuente: registros generados para el ensayo.
-                    </p>
+                    <ul className="list-disc space-y-2 pl-5" aria-label="Resumen del alcance">
+                      <li>
+                        <strong>Finalidad:</strong> {current.purposes[purpose]}
+                      </li>
+                      <li>
+                        <strong>Titulares:</strong>{" "}
+                        {adult
+                          ? "clientes adultos sintéticos"
+                          : "participantes sintéticos de 10 a 13 años"}
+                        .
+                      </li>
+                      <li>
+                        <strong>Categoría:</strong> identificación.
+                      </li>
+                      <li>
+                        <strong>Fuente:</strong> registros generados para el ensayo.
+                      </li>
+                    </ul>
                     <p className="text-sm">
                       En la aplicación, este resumen mostrará el RAT asociado y las diferencias
                       pendientes. En la maqueta no se edita el inventario.
@@ -560,7 +715,7 @@ export function LicitudFlowPrototype() {
                     </button>
                   </section>
                 )}
-                {section === "fundamento" && (
+                {!preparationOpen && section === "fundamento" && (
                   <section className="space-y-4" aria-label="Base y fundamento de ensayo">
                     <h3 className="font-semibold">Base y fundamento</h3>
                     <p className="text-sm">
@@ -590,7 +745,7 @@ export function LicitudFlowPrototype() {
                     </label>
                   </section>
                 )}
-                {section === "infancia" && !adult && (
+                {!preparationOpen && section === "infancia" && !adult && (
                   <section className="space-y-4" aria-label="Infancia de ensayo">
                     <h3 className="font-semibold">Infancia y adolescencia</h3>
                     <p className="text-sm">
@@ -613,51 +768,127 @@ export function LicitudFlowPrototype() {
                     </p>
                   </section>
                 )}
-                {section === "documento" && (
-                  <section className="space-y-4" aria-label="Preparar documento de ensayo">
-                    <h3 className="font-semibold">Preparar documento de ensayo</h3>
+                {!preparationOpen && (
+                  <div className="flex flex-wrap gap-3 border-t border-slate-200 pt-4">
+                    <button
+                      type="button"
+                      className={secondary}
+                      onClick={() => {
+                        setSaved((all) => ({ ...all, [scopeKey]: { ...draft } }));
+                        setNotice(
+                          "Guardado simulado del borrador en esta visita. No se guardó en el servidor; al recargar se reinicia."
+                        );
+                      }}
+                    >
+                      Guardar borrador de ensayo
+                    </button>
+                    <button type="button" className={button} onClick={openPreparation}>
+                      Preparar documento para revisión
+                    </button>
+                  </div>
+                )}
+                {preparationOpen && (
+                  <section
+                    className="space-y-5 rounded-lg border border-blue-300 bg-blue-50 p-4"
+                    aria-label="Preparación documental"
+                  >
+                    <h3 className="text-lg font-semibold">
+                      Vista previa del documento para revisión
+                    </h3>
+                    <p className="break-words font-semibold">
+                      Se prepararía: {candidate.reference} · versión {nextVersion} · DEMO-
+                      {nextVersion}
+                    </p>
                     <p>
-                      {copied
-                        ? `Copia de ${reference} preparada para explorar la edición. El original permanece intacto.`
-                        : "Prepara un borrador; registrar una versión definitiva será una acción distinta en la aplicación."}
+                      Revisa el contenido como responsable ficticio del ensayo. Puedes volver a
+                      editar antes de registrar. Los faltantes se conservan como pendientes; no
+                      equivalen a una evaluación aprobada.
                     </p>
                     <label className="block font-medium">
-                      Notas del documento de ensayo
+                      Notas específicas del documento (opcional)
                       <textarea
-                        rows={4}
+                        aria-label="Notas específicas del documento (opcional)"
                         className={input}
-                        aria-label="Notas del documento de ensayo"
+                        rows={3}
                         value={draft.notes}
                         onChange={(e) => edit("notes", e.target.value)}
                       />
                     </label>
+                    <article
+                      aria-label="Contenido que se prepararía"
+                      className="rounded-lg border border-slate-200 bg-white p-4"
+                    >
+                      <DocumentContent document={candidate} />
+                    </article>
+                    <section
+                      aria-label="Faltantes del documento"
+                      className="space-y-2 rounded-lg border border-amber-300 bg-amber-50 p-4"
+                    >
+                      <h4 className="font-semibold">
+                        Faltantes y pendientes declarados del ejemplo
+                      </h4>
+                      <ul className="list-disc space-y-2 pl-5">
+                        {candidate.pending.map((item) => (
+                          <li key={item}>{item}</li>
+                        ))}
+                      </ul>
+                    </section>
+                    <div className="flex flex-wrap gap-3">
+                      <button
+                        type="button"
+                        className={secondary}
+                        onClick={() => backToEdit("fundamento")}
+                      >
+                        Volver a base y fundamento
+                      </button>
+                      {!adult && (
+                        <button
+                          type="button"
+                          className={secondary}
+                          onClick={() => backToEdit("infancia")}
+                        >
+                          Volver a infancia
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        className={secondary}
+                        onClick={() => backToEdit("alcance")}
+                      >
+                        Volver al alcance
+                      </button>
+                    </div>
+                    <label className="flex items-start gap-2 font-medium">
+                      <input
+                        type="checkbox"
+                        className="mt-1"
+                        checked={reviewed}
+                        onChange={(e) =>
+                          setReviewedFingerprint(e.target.checked ? fingerprint : "")
+                        }
+                      />
+                      He revisado esta vista previa como responsable ficticio del ensayo
+                    </label>
                     <p className="text-sm">
-                      No se crea ninguna resolución ni se modifica una versión registrada desde esta
-                      maqueta.
+                      Esta declaración solo confirma la lectura del ensayo. No otorga facultades ni
+                      acepta jurídicamente el documento. Al modificar contenido se debe revisar otra
+                      vez.
+                    </p>
+                    <button
+                      type="button"
+                      className={button}
+                      disabled={!reviewed}
+                      onClick={registerDocument}
+                    >
+                      Simular registro de versión DEMO-{nextVersion}
+                    </button>
+                    <p className="text-sm">
+                      Se conservará todo el contenido mostrado en esta visita, separado del borrador
+                      editable. No se envía al servidor; al recargar se pierde. Los cambios
+                      posteriores se registran en otra versión.
                     </p>
                   </section>
                 )}
-                <div className="flex flex-wrap gap-3 border-t border-slate-200 pt-4">
-                  <button
-                    type="button"
-                    className={button}
-                    onClick={() => {
-                      setSaved((all) => ({ ...all, [scopeKey]: { ...draft } }));
-                      setNotice(
-                        "Guardado simulado en esta visita. No se guardó en el servidor; al recargar se reinicia."
-                      );
-                      const applicable = sections.filter(([key]) => !adult || key !== "infancia");
-                      const index = applicable.findIndex(([key]) => key === section);
-                      if (index < applicable.length - 1) setSection(applicable[index + 1][0]);
-                      else go("revisar");
-                    }}
-                  >
-                    Simular guardado y continuar
-                  </button>
-                  <button type="button" className={secondary} onClick={() => go("revisar")}>
-                    Explorar revisión sin guardar
-                  </button>
-                </div>
               </Card>
             )}
 
@@ -676,9 +907,16 @@ export function LicitudFlowPrototype() {
                       onChange={(e) => {
                         setVersion(e.target.value);
                         setPreview(false);
-                        setCopied(false);
+                        setPreparationOpen(false);
+                        setReviewedFingerprint("");
                       }}
                     >
+                      {[...prepared].reverse().map((document) => (
+                        <option key={document.version} value={document.version}>
+                          Versión {document.version} · DEMO-{document.version} · Pendiente de
+                          revisión (ensayo)
+                        </option>
+                      ))}
                       <option value="2">Versión 2 · DEMO-2 · Requiere cambios</option>
                       <option value="1">Versión 1 · DEMO-1 · Histórica</option>
                     </select>
@@ -694,30 +932,50 @@ export function LicitudFlowPrototype() {
                       {reference} · Etiqueta documental: DEMO-{version}
                     </p>
                     <p>Evaluación asociada: versión 1. {current.purposes[purpose]}</p>
-                    <p>
-                      Contenido de ejemplo registrado: análisis y evidencias pendientes.{" "}
-                      {adult
-                        ? "Solo clientes adultos sintéticos."
-                        : "Solo participantes sintéticos; sin datos sensibles."}
-                    </p>
-                    <p className="text-sm">
-                      Esta lectura conserva el original. Tus textos de ensayo no se incorporan a
-                      este documento.
-                    </p>
+                    {selectedDocument ? (
+                      <>
+                        <p className="font-semibold">
+                          Versión de ensayo registrada en esta visita · pendiente de revisión.
+                        </p>
+                        <DocumentContent document={selectedDocument} />
+                        <h4 className="font-semibold">Pendientes conservados al registrar</h4>
+                        <ul className="list-disc space-y-2 pl-5">
+                          {selectedDocument.pending.map((item) => (
+                            <li key={item}>{item}</li>
+                          ))}
+                        </ul>
+                        <p>
+                          Este contenido se conserva sin cambios durante la visita. Editar el
+                          borrador no modifica esta versión.
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <p>
+                          Contenido de ejemplo registrado: análisis y evidencias pendientes.{" "}
+                          {adult
+                            ? "Solo clientes adultos sintéticos."
+                            : "Solo participantes sintéticos; sin datos sensibles."}
+                        </p>
+                        <p className="text-sm">
+                          Ejemplo precargado: tus textos nuevos se incorporarán únicamente a las
+                          versiones de ensayo que prepares y registres.
+                        </p>
+                      </>
+                    )}
                   </article>
                   <button
                     type="button"
                     className={secondary}
                     onClick={() => {
-                      setCopied(true);
-                      setSection("documento");
+                      backToEdit("fundamento");
                       go("completar");
                       setNotice(
-                        `Copia de ${reference} preparada. No se registró una versión nueva.`
+                        `Puedes modificar el borrador y preparar otra versión. ${reference} se conserva intacta.`
                       );
                     }}
                   >
-                    Preparar otra versión en Completar datos
+                    Volver a editar el borrador
                   </button>
                 </Card>
                 <Card title="Revisar la versión seleccionada">
@@ -862,10 +1120,10 @@ export function LicitudFlowPrototype() {
             {tab === "historial" && (
               <Card title="Historial y descargas de ejemplo">
                 <p>
-                  Consulta lo registrado sin mezclarlo con el borrador editable. Todos los registros
-                  siguientes son ejemplos precargados.
+                  Consulta versiones precargadas y las que prepares en esta visita. Las nuevas
+                  versiones conservan el contenido revisado sin modificar las anteriores.
                 </p>
-                <ol className="space-y-3" aria-label="Historial precargado">
+                <ol className="space-y-3" aria-label="Historial documental de ensayo">
                   <li className="rounded-lg border border-slate-200 p-4">
                     <h3 className="font-semibold">Versión 1 · DEMO-1</h3>
                     <p>Documento original de ejemplo. Revisión: requiere cambios.</p>
@@ -900,6 +1158,34 @@ export function LicitudFlowPrototype() {
                       Consultar versión 2
                     </button>
                   </li>
+                  {prepared.map((document) => (
+                    <li
+                      key={document.version}
+                      className="space-y-2 rounded-lg border border-blue-300 bg-blue-50 p-4"
+                    >
+                      <h3 className="font-semibold">
+                        Versión {document.version} · DEMO-{document.version}
+                      </h3>
+                      <p className="break-words">
+                        {document.reference} · Registrada solo durante esta visita · Pendiente de
+                        revisión.
+                      </p>
+                      <p>
+                        {document.pending.length} pendientes declarados; sin aprobación jurídica ni
+                        activación EIPD.
+                      </p>
+                      <button
+                        type="button"
+                        className={secondary}
+                        onClick={() => {
+                          setVersion(document.version);
+                          go("revisar");
+                        }}
+                      >
+                        Consultar versión {document.version}
+                      </button>
+                    </li>
+                  ))}
                   {revoked && (
                     <li className="rounded-lg border border-amber-300 bg-amber-50 p-4">
                       Facultad revocada · revisión 2. Las nuevas decisiones de organización están
@@ -908,9 +1194,10 @@ export function LicitudFlowPrototype() {
                   )}
                 </ol>
                 <p className="text-sm">
-                  La descarga contiene únicamente el escenario y la versión seleccionada ({version}
-                  ); excluye los textos que escribiste. No es el expediente documental de la
-                  aplicación.
+                  {selectedDocument
+                    ? `La descarga de DEMO-${version} incluye todo el contenido ficticio de esa versión registrada, incluidos los textos del ensayo. No incluye modificaciones posteriores del borrador.`
+                    : `La descarga de DEMO-${version} contiene solo el ejemplo precargado; no incluye tus textos de ensayo.`}{" "}
+                  No es un expediente real.
                 </p>
                 <button type="button" className={button} onClick={download}>
                   Descargar ejemplo ficticio JSON

@@ -18,15 +18,17 @@ identifica el HEAD exacto de la tarea. Una CI anterior no prueba un commit nuevo
 
 ## Bloque funcional vigente — producto
 
-18/10: maqueta V2 en `/dashboard/licitud/maqueta`. Seleccion inicial de tratamiento
-RAT/finalidad antes de cuatro pestanas/pasos; alcance visible. Ejemplos opcionales
-solo precargan seleccion; facultad simulada independiente del tratamiento.
-Borradores por tratamiento/finalidad y revisiones por version, solo en memoria.
-Diez Chromium dirigidas, tipos/lint/formato aprobados; movil/escritorio revisados.
-Sin API/DB ni cambios de formularios/permisos/configuracion. EIPD/datos reales
-bloqueados. Pendiente validar V2 con usuario antes de flujo operativo; LIC-UX-004
-abierto. Contrato: project/m3-t1-licitud-experiencia.md. Sin merge/despliegue.
-CI del nuevo commit por consultar.
+19/10: maqueta V3 en `/dashboard/licitud/maqueta`. Editor reducido a alcance,
+base/fundamento e infancia cuando corresponde. Preparar documento abre vista
+previa completa, pendientes y version; notas opcionales. Lectura preparatoria por
+responsable ficticio exigida antes de simular registro; cambios invalidan lectura.
+Copia en memoria independiente del borrador; modificaciones posteriores crean
+otra version, historial/descarga conservan la anterior. Sin persistencia servidor.
+13 Chromium dirigidas, tipos/lint/formato aprobados; preparacion movil/escritorio
+revisada. Aviso de cambios destacado dentro del editor y alcance en lista.
+Pendiente validar V3 con usuario antes de formularios operativos; LIC-UX-004 abierto.
+Contrato: project/m3-t1-licitud-experiencia.md. EIPD/datos reales bloqueados,
+sin merge/despliegue. CI del nuevo commit por consultar.
 
 18/10: recorrido manual ficticio de Bases de licitud cerrado: clientes,
 trabajadores e infancia; guardado/reapertura, dos resoluciones, revisiones negativas,

@@ -1,15 +1,15 @@
-## Bloque vigente 18/10 — maqueta V2 de licitud
+## Bloque vigente 19/10 — maqueta V3: preparar y versionar para revision
 
-`/dashboard/licitud/maqueta`: seleccionar tratamiento RAT/finalidad antes del
-recorrido de cuatro pasos. Ejemplos opcionales separados; facultad de la persona
-independiente del tratamiento. Borradores por finalidad, revisiones por version,
-previsualizacion sin eventos y descarga ficticia sin textos editados.
-Diez Chromium dirigidas, tipos/lint/formato aprobados; vistas movil/escritorio
-revisadas. Sin API/DB ni cambios a formularios/permisos/configuracion.
-Pendiente validar claridad de V2 con usuario antes de implementar flujo operativo.
-[Contrato y limites](m3-t1-licitud-experiencia.md#maqueta-navegable-disponible--version-2).
-LIC-UX-004 abierto; EIPD/datos reales bloqueados. Sin merge/despliegue.
-CI del nuevo commit por consultar.
+`/dashboard/licitud/maqueta`: editor reducido, accion Preparar documento para
+revision con contenido completo, notas opcionales, pendientes y numero propuesto.
+Lectura preparatoria del responsable ficticio antes de simular registro; cambios
+requieren releer. Copias completas en memoria, historial/descarga por version;
+editar no muta originales, nuevo registro crea otra version. Sin API ni persistencia.
+13 Chromium dirigidas, tipos/lint/formato aprobados; vistas de preparacion movil y
+escritorio revisadas. Pendiente validar V3 con usuario, luego evaluar formularios
+operativos. [Contrato](m3-t1-licitud-experiencia.md#maqueta-navegable-disponible--version-3).
+LIC-UX-004 abierto; EIPD/datos reales bloqueados, sin merge/despliegue.
+CI exacta del nuevo commit por consultar.
 
 ## Cierre vigente 18/10 — recorrido manual ficticio de Bases de licitud
 

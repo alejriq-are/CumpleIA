@@ -124,9 +124,12 @@ test("adultos: orientacion, edicion y guardado simulado conservan borrador entre
   await expect(page.getByLabel("Fundamento de ensayo", { exact: true })).toHaveValue(
     "[FICTICIA] Texto de ensayo adulto"
   );
-  await page.getByRole("button", { name: "Simular guardado y continuar" }).click();
-  await expect(page.getByRole("status")).toContainText("Guardado simulado");
-  await expect(page.getByLabel("Notas del documento de ensayo")).toBeVisible();
+  await page.getByRole("button", { name: "Guardar borrador de ensayo" }).click();
+  await expect(page.getByRole("status").filter({ hasText: "Guardado simulado" })).toBeVisible();
+  await page.getByRole("button", { name: "Preparar documento para revisión", exact: true }).click();
+  await expect(
+    page.getByLabel("Notas específicas del documento (opcional)", { exact: true })
+  ).toBeVisible();
   expect(requests).toEqual([]);
 });
 
@@ -172,13 +175,13 @@ test("revision vinculada a version exacta; cambios entre versiones no arrastran 
   await expect(page.getByLabel("Fundamento de revisión de ensayo")).toHaveValue(
     "[FICTICIA] Observacion solo version 2"
   );
-  await page.getByRole("button", { name: "Preparar otra versión en Completar datos" }).click();
+  await page.getByRole("button", { name: "Volver a editar el borrador" }).click();
   await expect(
-    page.getByText(/Copia de SIMULADA-INFANCIA-002 preparada para explorar/)
+    page.getByRole("status").filter({ hasText: "SIMULADA-INFANCIA-002 se conserva intacta" })
   ).toBeVisible();
   await tab(page, "Historial y descargas");
   await expect(
-    page.getByRole("list", { name: "Historial precargado" }).getByRole("listitem")
+    page.getByRole("list", { name: "Historial documental de ensayo" }).getByRole("listitem")
   ).toHaveCount(2);
   expect(requests).toEqual([]);
 });
@@ -214,7 +217,7 @@ test("descarga ficticia sin textos editados ni eventos registrados; sin solicitu
   const download = await downloadPromise;
   const value = JSON.parse(await readFile((await download.path())!, "utf8"));
   expect(value).toMatchObject({
-    prototype_version: 2,
+    prototype_version: 3,
     treatment: "infancia",
     purpose: "ensayo",
     faculty_current: false,
@@ -374,5 +377,163 @@ test("V2: mismo tratamiento, distintas finalidades, borradores separados y conte
   await expect(page.getByLabel("Fundamento de ensayo", { exact: true })).toHaveValue(
     "[FICTICIA] Solo gestion"
   );
+  expect(requests).toEqual([]);
+});
+
+async function prepare(page: Page, notes = "") {
+  await tab(page, "Completar datos");
+  await page.getByRole("button", { name: "Preparar documento para revisión", exact: true }).click();
+  if (notes)
+    await page
+      .getByLabel("Notas específicas del documento (opcional)", { exact: true })
+      .fill(notes);
+}
+async function register(page: Page, version: number) {
+  await page
+    .getByRole("checkbox", {
+      name: "He revisado esta vista previa como responsable ficticio del ensayo",
+    })
+    .check();
+  await page
+    .getByRole("button", { name: `Simular registro de versión DEMO-${version}`, exact: true })
+    .click();
+  await expect(page.getByRole("article", { name: "Documento seleccionado" })).toContainText(
+    `DEMO-${version}`
+  );
+}
+
+test("preparacion: vista previa completa, pendientes y revision invalidada por cambios", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await open(page);
+  await tab(page, "Completar datos");
+  await expect(
+    page.getByRole("navigation", { name: "Secciones para completar" }).getByRole("button")
+  ).toHaveCount(2);
+  await page.getByRole("button", { name: "Continuar a base y fundamento" }).click();
+  await page
+    .getByLabel("Fundamento de ensayo", { exact: true })
+    .fill("[FICTICIA] Fundamento reunido");
+  await prepare(page);
+  await expect(page.getByRole("article", { name: "Contenido que se prepararía" })).toContainText(
+    "[FICTICIA] Fundamento reunido"
+  );
+  await expect(page.getByRole("region", { name: "Faltantes del documento" })).toContainText(
+    "Base de licitud pendiente de definir"
+  );
+  await expect(
+    page.getByRole("button", { name: "Simular registro de versión DEMO-3", exact: true })
+  ).toBeDisabled();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(
+    true
+  );
+  if (process.env.CUMPLEIA_PREPARATION_MOBILE)
+    await page.screenshot({ path: process.env.CUMPLEIA_PREPARATION_MOBILE, fullPage: true });
+  const reviewed = page.getByRole("checkbox", {
+    name: "He revisado esta vista previa como responsable ficticio del ensayo",
+  });
+  await reviewed.check();
+  await page
+    .getByLabel("Notas específicas del documento (opcional)", { exact: true })
+    .fill("[FICTICIA] Nota posterior a lectura");
+  await expect(reviewed).not.toBeChecked();
+  await expect(
+    page.getByRole("button", { name: "Simular registro de versión DEMO-3", exact: true })
+  ).toBeDisabled();
+  await page.getByRole("button", { name: "Volver a base y fundamento", exact: true }).click();
+  await page
+    .getByLabel("Fundamento de ensayo", { exact: true })
+    .fill("[FICTICIA] Fundamento corregido");
+  await prepare(page);
+  await expect(
+    page.getByLabel("Notas específicas del documento (opcional)", { exact: true })
+  ).toHaveValue("[FICTICIA] Nota posterior a lectura");
+  await expect(reviewed).not.toBeChecked();
+  await register(page, 3);
+  await expect(page.getByRole("article", { name: "Documento seleccionado" })).toContainText(
+    "[FICTICIA] Fundamento corregido"
+  );
+  expect(requests).toEqual([]);
+});
+
+test("documentos: registrar incluye infancia y notas, descargar copia exacta, modificar crea otra version", async ({
+  page,
+}) => {
+  await open(page, "#tratamiento=infancia&finalidad=ensayo&pestana=completar&version=2");
+  await expect(
+    page.getByRole("navigation", { name: "Secciones para completar" }).getByRole("button")
+  ).toHaveCount(3);
+  await page.getByRole("button", { name: "2. Base y fundamento", exact: true }).click();
+  await page.getByLabel("Base propuesta de ensayo").selectOption("analisis");
+  await page
+    .getByLabel("Fundamento de ensayo", { exact: true })
+    .fill("[FICTICIA] Fundamento version 3");
+  await page.getByRole("button", { name: "3. Infancia", exact: true }).click();
+  await page
+    .getByLabel("Análisis de edad y alcance de ensayo")
+    .fill("[FICTICIA] Cinco participantes; sin datos sensibles");
+  await prepare(page, "[FICTICIA] Nota especifica version 3");
+  if (process.env.CUMPLEIA_PREPARATION_DESKTOP)
+    await page.screenshot({ path: process.env.CUMPLEIA_PREPARATION_DESKTOP, fullPage: true });
+  await register(page, 3);
+  const document = page.getByRole("article", { name: "Documento seleccionado" });
+  await expect(document).toContainText("[FICTICIA] Cinco participantes; sin datos sensibles");
+  await expect(document).toContainText("[FICTICIA] Nota especifica version 3");
+  await tab(page, "Historial y descargas");
+  const downloadPromise = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Descargar ejemplo ficticio JSON" }).click();
+  const value = JSON.parse(await readFile((await (await downloadPromise).path())!, "utf8"));
+  expect(value).toMatchObject({
+    contains_user_edits: true,
+    persisted_events: 0,
+    activation: "deshabilitada",
+    simulated_document_versions: 1,
+    document: {
+      reference: "SIMULADA-INFANCIA-003",
+      content: {
+        draft: {
+          basis: "analisis",
+          rationale: "[FICTICIA] Fundamento version 3",
+          age: "[FICTICIA] Cinco participantes; sin datos sensibles",
+          notes: "[FICTICIA] Nota especifica version 3",
+        },
+      },
+    },
+  });
+  await page.getByRole("button", { name: "Consultar versión 3", exact: true }).click();
+  await page.getByRole("button", { name: "Volver a editar el borrador", exact: true }).click();
+  await page
+    .getByLabel("Fundamento de ensayo", { exact: true })
+    .fill("[FICTICIA] Fundamento version 4");
+  await prepare(page, "[FICTICIA] Nota version 4");
+  await register(page, 4);
+  await page.getByLabel("Versión a consultar").selectOption("3");
+  await expect(document).toContainText("[FICTICIA] Fundamento version 3");
+  await expect(document).not.toContainText("[FICTICIA] Fundamento version 4");
+  await page.getByLabel("Versión a consultar").selectOption("4");
+  await expect(document).toContainText("[FICTICIA] Fundamento version 4");
+  expect(requests).toEqual([]);
+});
+
+test("versiones de ensayo por finalidad: no se mezclan ni reaparecen despues de recargar", async ({
+  page,
+}) => {
+  await open(page);
+  await prepare(page);
+  await register(page, 3);
+  await chooseTreatment(page, "adultos", "consultas");
+  await tab(page, "Historial y descargas");
+  await expect(page.getByRole("button", { name: "Consultar versión 3", exact: true })).toHaveCount(
+    0
+  );
+  await chooseTreatment(page, "adultos", "gestion");
+  await tab(page, "Historial y descargas");
+  await page.getByRole("button", { name: "Consultar versión 3", exact: true }).click();
+  await page.reload();
+  await page.addStyleTag({ content: css });
+  await page.addScriptTag({ content: script });
+  await expect(page.getByRole("status")).toContainText("La versión de ensayo no está disponible");
+  await expect(page.getByLabel("Versión a consultar")).toHaveValue("2");
   expect(requests).toEqual([]);
 });

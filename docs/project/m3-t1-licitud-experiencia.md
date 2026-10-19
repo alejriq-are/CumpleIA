@@ -1,6 +1,6 @@
 # Propuesta de experiencia de licitud
 
-Estado: propuesta aceptada; maqueta navegable implementada el 18/10/2026.
+Estado: propuesta aceptada; maqueta navegable V3 actualizada el 19/10/2026.
 Reorganizacion de los formularios operativos pendiente de validar la maqueta.
 Base inspeccionada: 4cb7ae1. Alcance: navegacion y presentacion del flujo existente;
 no ampliar reglas juridicas, facultades, API de aprobacion ni activacion EIPD.
@@ -152,47 +152,66 @@ Backlog de referencia: LIC-UX-004 integra esta reorganizacion y recoge LIC-UX-00
 LIC-UX-003 y el patron de guardado RAT-UX-001 cuando corresponda. RAT-VAL-001
 mantiene su propio contrato de completitud; no se considera resuelto por el rediseno.
 
-## Maqueta navegable disponible — version 2
+## Maqueta navegable disponible — version 3
 
-Ruta protegida `/dashboard/licitud/maqueta`, enlazada desde Bases de licitud.
-V2 corrige la confusion entre seleccion inicial, recorrido y ejemplos:
+Ruta protegida `/dashboard/licitud/maqueta`, acceso desde Bases de licitud.
+Seleccionar tratamiento/finalidad antes de cuatro pestanas. Ejemplos opcionales
+solo precargan seleccion; facultad simulada vigente/revocada sigue independiente.
+No usa API/DB ni cambia permisos, configuracion o formularios operativos.
 
-- Antes del recorrido, seleccionar tratamiento RAT y finalidad del inventario
-  ficticio. La organizacion de demostracion es fija. Finalidades dependientes del
-  tratamiento; abrir evaluacion exige una seleccion valida. Adultos incluye dos
-  finalidades para explorar evaluaciones independientes del mismo tratamiento.
-- Solo entonces aparecen las cuatro pestanas y los cuatro pasos. Paso 1:
-  Revisar alcance seleccionado; paso 2: Completar evaluacion; paso 3: Seleccionar
-  version y revisar; paso 4: Consultar resultado/historial. Tratamiento y finalidad
-  visibles junto al acceso Cambiar tratamiento o finalidad.
-- Herramientas de demostracion, colapsadas y separadas del recorrido: cargar
-  ejemplo de adultos/infancia solo precarga selectores; exige abrir evaluacion.
-  Facultad vigente/revocada es una condicion independiente de la persona. Cambiarla
-  no cambia tratamiento/finalidad ni sus borradores; no otorga permisos reales.
+V3, 19/10/2026: Completar datos conserva solo Alcance del RAT y Base/fundamento;
+Infancia se agrega cuando corresponde al ejemplo. Numeracion consecutiva segun
+secciones visibles. Resumen de alcance en cuatro lineas. Aviso de cambios sin
+guardar dentro del formulario, destacado; no implica persistencia en servidor.
 
-Estado de ensayo en memoria por tratamiento/finalidad y revision por version;
-navegar conserva textos, recargar los reinicia. Simular guardado avanza dentro
-del ejemplo, declara que no persiste. Revision permite vista previa sin registro;
-historial precargado intacto. Facultad revocada bloquea decision organizacional,
-conserva revision/consulta. Facultades en consulta separada, sin escrituras.
+Preparar documento para revision es una accion, no otra seccion dedicada a notas.
+Muestra referencia/version propuesta (inicia DEMO-3, tras dos fixtures), organizacion,
+tratamiento, finalidad, titulares, categoria, fuente, base, fundamento y analisis de
+infancia cuando existe. Notas especificas opcionales incluidas en la vista previa.
+Pendientes explicitos: campos vacios y analisis/revision juridica/evidencias que el
+ejemplo deja pendientes; no es diagnostico juridico exhaustivo. No exigir notas.
 
-Referencia y version junto al documento/previsualizacion. Fragmento conserva
-tratamiento/finalidad/facultad/pestana/version, sin textos; enlaces V1 compatibles.
-Descarga solo ejemplo fijo/version seleccionada, con finalidad y facultad simulada,
-sin textos escritos. No es expediente operativo. Roles de pestanas, flechas/Home/End,
-foco visible y diseno adaptable. Componente React sin API, cookies ni almacenamiento
-persistente; ruta conserva proteccion de sesion. Formularios, DB, configuracion,
-permisos y bloqueos EIPD/datos reales intactos.
+El responsable ficticio revisa la vista previa y puede volver a fundamento,
+infancia o alcance. Registrar exige confirmar lectura del contenido mostrado;
+si cambia, la confirmacion se invalida. Es revision preparatoria del ensayo, no
+aceptacion juridica, otorgamiento de facultad ni aprobacion EIPD. La revision del
+documento y decision organizacional siguen separadas en Revisar documentos.
 
-Verificacion local V2: diez pruebas Chromium dirigidas aprobadas
-(`npx playwright test e2e/licitud-prototype.spec.ts`), tipos frontend, ESLint y
-formato Prettier aprobados. Casos: seleccion previa, reinicio de finalidad al
-cambiar tratamiento, ejemplos solo precargan, facultad independiente, borradores
-por finalidad y entre pestanas, version objetivo, revocacion, descarga sin textos
-ni API, teclado/enlace directo, movil y reinicio al recargar. Capturas inspeccionadas
-movil (390 px) y escritorio (1280 px). Prueba de componente con CSS compilado;
-no automatiza login externo ni representa prueba backend. Suite incluida en CI;
-no repetir backend/DB sin cambio de contratos. CI del nuevo commit por consultar.
+Simular registro conserva una copia completa independiente del borrador, solo en
+memoria de la visita. Queda pendiente de revision; historico consultable con
+version explicita. Editar despues no modifica la copia anterior; preparar/registrar
+otra crea DEMO-4 y siguientes. Nuevas versiones por tratamiento/finalidad;
+observaciones por version. Doble contexto: version de evaluacion 1 y version
+documental explicita. Facultad revocada bloquea decision organizacional, conserva
+edicion/consulta del ensayo y no otorga permisos reales.
 
-Pendiente: validacion humana de la claridad de V2 antes de reorganizar formularios
-operativos. LIC-UX-004 sigue abierto; RAT-VAL-001 no resuelto por esta maqueta.
+Historial incluye fixtures y versiones de la visita. JSON de fixture excluye textos
+editados; JSON de version simulada incluye su copia completa, notas y pendientes,
+no cambios posteriores del borrador. Exporta tipo ficticios, contains_user_edits
+segun origen, lectura preparatoria simulada, persisted_events=0 para servidor y
+numero de versiones locales; authorizes_action=false, activation=deshabilitada,
+allows_real_data=false. No es un expediente operativo ni prueba de aceptacion.
+
+Nada se persiste en navegador/servidor: recargar reinicia borradores/versiones.
+Enlace a version local inexistente tras recarga informa y vuelve al fixture DEMO-2.
+Fragmento conserva seleccion/version, no contenido. Enlaces V1/V2 compatibles.
+Roles de pestanas, flechas/Home/End, foco y vista movil conservados.
+
+Visita guiada del usuario sobre V2: observadas seleccion/edicion, conservacion al
+navegar, observaciones por version, descarga ficticia, bloqueo organizacional con
+facultad revocada y edicion de infancia. Usuario confirma en prueba controlada
+separacion y conservacion de borradores entre finalidades durante la visita; no
+acredita persistencia tras recarga. Hallazgos de presentacion integrados en V3.
+
+Validacion local V3: 13 Chromium dirigidas aprobadas; tipos frontend, ESLint de
+archivos modificados, Prettier y git diff --check aprobados. Nuevos casos verifican
+contenido/faltantes, lectura invalidada al cambiar, regreso a editar, copia completa
+con infancia/notas, descarga exacta, nuevas versiones sin mutar antiguas, aislamiento
+por finalidad y reinicio al recargar. Capturas de preparacion inspeccionadas en
+390 px y 1280 px. Suite existente: `npx playwright test e2e/licitud-prototype.spec.ts`.
+Sin cambios backend, sin repetir DB ni pruebas amplias locales. CI exacta del nuevo
+commit se consulta tras push; no atribuirle ejecuciones de commits anteriores.
+
+Pendiente validar con usuario el nuevo ciclo preparar/revisar/registrar/corregir;
+no desplegarlo en formularios operativos hasta validar el diseno. LIC-UX-004 abierto;
+RAT-VAL-001 sigue separado. EIPD/datos reales bloqueados; sin merge/despliegue.
