@@ -188,6 +188,9 @@ conservar borrador; no descarta silenciosamente. Origen/motivo quedan en la copi
 y descarga; cambios invalidan lectura preparatoria. Emitir revision sobre DEMO-N
 recoge observaciones sobre ese documento registrado, separadas del motivo de la
 actualizacion. No exige revision negativa previa para crear otra version.
+Tipo de actuacion y Resultado de ensayo muestran ayudas contextuales accesibles
+bajo cada selector: distinguen observacion, posicion organizacional, correcciones
+y recomendacion de no continuar, con limites de la vista previa y facultad vigente.
 Nuevas versiones por tratamiento/finalidad; observaciones por version. Doble contexto: version de evaluacion 1 y version
 documental explicita. Facultad revocada bloquea decision organizacional, conserva
 edicion/consulta del ensayo y no otorga permisos reales.

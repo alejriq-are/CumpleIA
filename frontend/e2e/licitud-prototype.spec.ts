@@ -701,3 +701,38 @@ test("historial: solo resalta la version seleccionada y descarga el mismo docume
   }
   expect(requests).toEqual([]);
 });
+
+test("ayudas: explican actuacion y resultado seleccionado sin cambiar el documento", async ({
+  page,
+}) => {
+  await open(page);
+  await tab(page, "Revisar documentos");
+  const action = page.getByLabel("Tipo de actuación", { exact: true });
+  const result = page.getByLabel("Resultado de ensayo", { exact: true });
+  const actionHelp = page.locator("#prototype-action-help");
+  const resultHelp = page.locator("#prototype-result-help");
+  await expect(action).toHaveAttribute("aria-describedby", "prototype-action-help");
+  await expect(result).toHaveAttribute("aria-describedby", "prototype-result-help");
+  await expect(actionHelp).toContainText("señalar faltantes");
+  await expect(resultHelp).toContainText("Selecciona el resultado");
+  await result.selectOption("requiere_cambios");
+  await expect(resultHelp).toContainText("antes de otra revisión");
+  await result.selectOption("no_continuar");
+  await expect(resultHelp).toContainText("no detiene procesos automáticamente");
+  await action.selectOption("decision");
+  await expect(actionHelp).toContainText("facultad vigente");
+  await expect(result).toHaveValue("");
+  await expect(result.getByRole("option", { name: "No continuar", exact: true })).toHaveCount(0);
+  await result.selectOption("requiere_cambios");
+  await expect(resultHelp).toContainText("la organización solicita ajustes");
+  await revokeFaculty(page);
+  await expect(result).toBeDisabled();
+  await expect(actionHelp).toContainText("facultad vigente");
+  await action.selectOption("revision");
+  await expect(result).toBeEnabled();
+  await expect(resultHelp).toContainText("Selecciona el resultado");
+  await expect(page.getByRole("article", { name: "Documento seleccionado" })).toContainText(
+    "SIMULADA-ADULTOS-002"
+  );
+  expect(requests).toEqual([]);
+});

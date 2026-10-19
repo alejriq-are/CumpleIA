@@ -1103,6 +1103,8 @@ export function LicitudFlowPrototype() {
                     <select
                       className={input}
                       value={review.kind}
+                      aria-label="Tipo de actuación"
+                      aria-describedby="prototype-action-help"
                       onChange={(e) =>
                         changeReview({ kind: e.target.value as ReviewDraft["kind"], choice: "" })
                       }
@@ -1111,10 +1113,10 @@ export function LicitudFlowPrototype() {
                       <option value="decision">Decisión documental de organización</option>
                     </select>
                   </label>
-                  <p>
+                  <p id="prototype-action-help" aria-live="polite" className="text-sm">
                     {review.kind === "revision"
-                      ? "La persona revisora documenta observaciones. Las opciones actuales son Requiere cambios y No continuar."
-                      : "La decisión de organización requiere una facultad vigente. Es distinta de la revisión del documento."}
+                      ? "Revisión del documento: elige esta opción para señalar faltantes, pedir correcciones o recomendar no continuar sobre la versión seleccionada. No modifica el documento ni expresa una decisión de la organización."
+                      : "Decisión documental de organización: elige esta opción para expresar la posición de la organización sobre la versión seleccionada. Requiere una persona con facultad vigente. En esta maqueta solo se previsualiza Requiere cambios; no hay aceptación jurídica ni activación EIPD."}
                   </p>
                   <div className="flex flex-wrap items-center gap-3 rounded-lg bg-slate-100 p-3">
                     <p className="text-sm font-semibold">
@@ -1180,6 +1182,8 @@ export function LicitudFlowPrototype() {
                       <select
                         className={input}
                         value={review.choice}
+                        aria-label="Resultado de ensayo"
+                        aria-describedby="prototype-result-help"
                         onChange={(e) => changeReview({ choice: e.target.value })}
                       >
                         <option value="">Selecciona un resultado</option>
@@ -1189,6 +1193,15 @@ export function LicitudFlowPrototype() {
                         )}
                       </select>
                     </label>
+                    <p id="prototype-result-help" aria-live="polite" className="text-sm">
+                      {!review.choice
+                        ? "Selecciona el resultado que describa tu conclusión. Después explica los motivos y los puntos concretos que deben atenderse en el fundamento."
+                        : review.choice === "no_continuar"
+                          ? "No continuar: úsalo cuando tu conclusión sea recomendar que no se siga adelante con lo planteado en esta versión. Explica las razones en el fundamento. La vista previa no detiene procesos automáticamente ni borra el documento."
+                          : review.kind === "decision"
+                            ? "Requiere cambios: expresa que la organización solicita ajustes a esta versión antes de volver a considerarla. Indica cuáles y por qué. En la maqueta es una vista previa; no registra una decisión ni autoriza operar."
+                            : "Requiere cambios: úsalo cuando identifiques faltantes o aspectos que deben corregirse antes de otra revisión. Detalla cuáles y por qué. Para modificar el contenido se crea una nueva versión; esta observación conserva intacta la versión revisada."}
+                    </p>
                     <label className="block font-medium">
                       Fundamento de revisión de ensayo
                       <textarea
