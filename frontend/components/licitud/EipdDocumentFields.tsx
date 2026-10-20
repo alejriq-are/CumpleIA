@@ -1,7 +1,39 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { documentFields, type Fields } from "@/lib/licitud/eipd-document";
 type Value = Record<string, unknown>;
+function choiceHelp(value: unknown): string {
+  const helps: Record<string, string> = {
+    si: "Sí: declara que este punto se aborda en el análisis. Explica el fundamento y las evidencias; la selección no acredita suficiencia.",
+    no: "No: declara que este punto no está abordado o no se cumple según tu análisis. Explica la limitación y las acciones pendientes.",
+    pendiente:
+      "Pendiente: usa esta opción cuando aún no tengas antecedentes suficientes para concluir. No equivale a una respuesta negativa ni a aprobación.",
+    no_alto:
+      "No alto: registra tu conclusión sobre el riesgo residual tras las medidas, con su fundamento. No autoriza el tratamiento ni activa EIPD.",
+    alto: "Alto: registra que el riesgo residual sigue siendo alto. Explica riesgos, medidas y actuaciones que requieren revisión; no se habilita continuar.",
+    sin_resolver:
+      "Sin resolver: conserva abierta la conclusión cuando falte evaluar riesgos o eficacia de medidas. Explica qué falta resolver.",
+    identificado:
+      "Identificadas: indica que has localizado fuentes y sus referencias. Debes documentar su revisión y aplicabilidad; identificarlas no las valida.",
+    no_identificado:
+      "No identificadas: declara que todavía no has localizado fuentes para este análisis. Explica la búsqueda y los pendientes.",
+    aplicable:
+      "Aplicable: documenta por qué consideras que esta fuente corresponde al caso. La selección requiere revisión humana.",
+    no_aplicable:
+      "No aplicable: explica por qué la fuente no corresponde al alcance evaluado; conserva la referencia como antecedente.",
+    no_solicitada:
+      "No solicitada: registra que no se ha realizado una consulta. No determina si corresponde solicitarla.",
+    en_curso:
+      "En curso: registra una consulta iniciada y pendiente de respuesta. Incluye su referencia y estado.",
+    concluida:
+      "Concluida: registra la respuesta y el análisis de recomendaciones. La respuesta no se presume favorable ni habilita automáticamente EIPD.",
+  };
+  return (
+    helps[String(value)] ??
+    "Sin declarar: deja este punto abierto si no cuentas con antecedentes. Selecciona una opción solo cuando puedas explicar su fundamento."
+  );
+}
+
 function CodesInput({
   label,
   value,
@@ -47,6 +79,7 @@ function Controls({
   onChange: (v: Value) => void;
   prefix?: string;
 }) {
+  const controlId = useId();
   return (
     <div className="space-y-3">
       {Object.entries(fields).map(([key, f]) => {
@@ -88,6 +121,7 @@ function Controls({
                 {label}
                 <select
                   aria-label={label}
+                  aria-describedby={`${controlId}-${key}-help`}
                   className="block w-full rounded border p-2"
                   value={typeof current.answer === "string" ? current.answer : ""}
                   onChange={(e) =>
@@ -102,6 +136,9 @@ function Controls({
                   ))}
                 </select>
               </label>
+              <p id={`${controlId}-${key}-help`} aria-live="polite" className="text-sm">
+                {choiceHelp(current.answer)}
+              </p>
               <label className="block">
                 {label} — Fundamento
                 <textarea
@@ -137,6 +174,7 @@ function Controls({
             {f.choices ? (
               <select
                 aria-label={label}
+                aria-describedby={`${controlId}-${key}-help`}
                 className="block w-full rounded border p-2"
                 value={typeof v === "string" ? v : ""}
                 onChange={(e) => set(e.target.value || null)}
@@ -184,6 +222,15 @@ function Controls({
                 }
               />
             )}
+            {f.choices && (
+              <span
+                id={`${controlId}-${key}-help`}
+                aria-live="polite"
+                className="block text-sm font-normal"
+              >
+                {choiceHelp(v)}
+              </span>
+            )}
             {f.kind === "codes" && <span>Un código por línea.</span>}
           </label>
         );
@@ -194,10 +241,102 @@ function Controls({
 export function EipdDocumentFields({
   value,
   onChange,
+  guided = false,
 }: {
   value: Value;
   onChange: (v: Value) => void;
+  guided?: boolean;
 }) {
+  const [step, setStep] = useState(0);
+  const groups: { title: string; description: string; keys: string[] }[] = [
+    {
+      title: "1. Tratamiento y alcance",
+      description:
+        "Describe la finalidad, operaciones, tecnologías y datos incluidos. Usa el alcance de la evaluación guardada como referencia.",
+      keys: [
+        "report_reference",
+        "prepared_by",
+        "completed_on",
+        "purpose_description",
+        "processing_operations",
+        "processing_context",
+        "technologies_description",
+        "exceptions_coverage_analysis",
+        "scope",
+      ],
+    },
+    {
+      title: "2. Necesidad y proporcionalidad",
+      description:
+        "Explica por qué se necesitan los datos, las alternativas y los límites. Las respuestas requieren fundamento; no completan automáticamente la evaluación.",
+      keys: [
+        "necessity_analysis",
+        "proportionality_analysis",
+        "minimization_analysis",
+        "necessary_for_purpose",
+        "proportionate_processing",
+        "minimization_addressed",
+        "performed_before_processing",
+        "prior_assessment_analysis",
+      ],
+    },
+    {
+      title: "3. Riesgos",
+      description:
+        "Añade cada riesgo con un identificador, su impacto y el análisis inicial y residual. El sistema conserva tu análisis; no calcula una puntuación de riesgo.",
+      keys: ["risks"],
+    },
+    {
+      title: "4. Medidas",
+      description:
+        "Asocia cada medida a los identificadores de riesgos que aborda. Documenta implementación, eficacia y evidencias; una medida declarada no se considera implementada automáticamente.",
+      keys: ["measures"],
+    },
+    {
+      title: "5. Fuentes y evidencias",
+      description:
+        "Conserva referencias, revisión de aplicabilidad y evidencias. Documenta una consulta a la autoridad solo si corresponde a los antecedentes del caso.",
+      keys: ["official_sources", "agency_consultation", "evidence"],
+    },
+    {
+      title: "6. Riesgo residual y seguimiento",
+      description:
+        "Explica qué riesgo permanece después de las medidas, las limitaciones y el plan de seguimiento. Esta conclusión no aprueba ni activa EIPD.",
+      keys: [
+        "residual_risk_summary",
+        "residual_risk_rationale",
+        "residual_risk_level",
+        "limitations_analysis",
+        "follow_up_plan",
+      ],
+    },
+  ];
+  if (guided)
+    return (
+      <section className="space-y-4" aria-label="Secciones del análisis EIPD">
+        <nav aria-label="Pasos documentales EIPD" className="flex flex-wrap gap-2">
+          {groups.map((group, index) => (
+            <button
+              key={group.title}
+              type="button"
+              className={
+                step === index ? "rounded bg-blue-800 p-2 text-white" : "rounded border p-2"
+              }
+              aria-current={step === index ? "step" : undefined}
+              onClick={() => setStep(index)}
+            >
+              {group.title}
+            </button>
+          ))}
+        </nav>
+        <p>{groups[step].description}</p>
+        <Controls
+          fields={Object.fromEntries(groups[step].keys.map((key) => [key, documentFields[key]]))}
+          value={value}
+          onChange={onChange}
+        />
+      </section>
+    );
   return (
     <details>
       <summary>Análisis, riesgos, medidas, fuentes y evidencias</summary>
@@ -209,7 +348,13 @@ export function EipdDocumentFields({
     </details>
   );
 }
-export function EipdDocumentView({ value }: { value: Value }) {
+export function EipdDocumentView({
+  value,
+  expanded = false,
+}: {
+  value: Value;
+  expanded?: boolean;
+}) {
   function show(fields: Fields, v: Value, prefix = ""): React.ReactNode {
     return Object.entries(fields).map(([key, f]) => {
       const x = v[key],
@@ -240,8 +385,8 @@ export function EipdDocumentView({ value }: { value: Value }) {
     });
   }
   return (
-    <details>
-      <summary>Contenido del documento guardado</summary>
+    <details open={expanded || undefined}>
+      <summary>{expanded ? "Contenido preparado" : "Contenido del documento guardado"}</summary>
       {show(documentFields, value)}
     </details>
   );

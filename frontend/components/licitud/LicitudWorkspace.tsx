@@ -8,7 +8,7 @@ import {
   type TreatmentSummaryOut,
 } from "@/lib/api/client";
 import { createClient } from "@/lib/supabase/client";
-import { legalBases, licitudApi, type AssessmentSummary } from "@/lib/api/licitud";
+import { legalBases, legalBasisHelp, licitudApi, type AssessmentSummary } from "@/lib/api/licitud";
 
 export async function sessionToken() {
   const { data, error } = await createClient().auth.getSession();
@@ -162,6 +162,7 @@ export function LicitudWorkspace({
         <select
           className="block w-full rounded border p-2"
           aria-label="Organización"
+          aria-describedby="workspace-org-help"
           value={org}
           disabled={busy}
           onChange={(e) => setOrg(e.target.value)}
@@ -173,11 +174,16 @@ export function LicitudWorkspace({
           ))}
         </select>
       </label>
+      <p id="workspace-org-help" className="text-sm" aria-live="polite">
+        Selecciona la organización a cuyo inventario pertenece la evaluación. Solo aparecen las
+        organizaciones de tu cuenta; sus datos y permisos se mantienen separados.
+      </p>
       <label className="block">
         Tratamiento del RAT
         <select
           className="block w-full rounded border p-2"
           aria-label="Tratamiento del RAT"
+          aria-describedby="workspace-rat-help"
           value={tid}
           disabled={busy || loading}
           onChange={(e) => setTid(e.target.value)}
@@ -190,6 +196,11 @@ export function LicitudWorkspace({
           ))}
         </select>
       </label>
+      <p id="workspace-rat-help" className="text-sm" aria-live="polite">
+        {tid
+          ? "Selecciona dentro de este tratamiento la finalidad y los datos concretos que evaluarás. Puedes consultar sus evaluaciones anteriores antes de crear otra."
+          : "Elige primero una actividad del inventario RAT. Si no está disponible, completa el inventario antes de evaluar su base de licitud."}
+      </p>
       <Link prefetch={false} className="text-blue-700 underline" href="/dashboard/rat">
         Completar el inventario RAT
       </Link>
@@ -233,6 +244,7 @@ export function LicitudWorkspace({
                   className="block w-full rounded border p-2"
                   required
                   aria-label="Finalidad"
+                  aria-describedby="workspace-purpose-help"
                   value={purpose}
                   disabled={busy}
                   onChange={(e) => setPurpose(e.target.value)}
@@ -245,6 +257,11 @@ export function LicitudWorkspace({
                   ))}
                 </select>
               </label>
+              <p id="workspace-purpose-help" className="text-sm" aria-live="polite">
+                {purpose
+                  ? "Evalúas esta finalidad concreta. Incluye solo las categorías y titulares que participan en ella; otra finalidad puede necesitar una evaluación diferente."
+                  : "Selecciona para qué se utilizan los datos dentro del tratamiento. Una evaluación corresponde a una finalidad."}
+              </p>
               <fieldset disabled={busy}>
                 <legend>Categorías de datos incluidas</legend>
                 {detail.data_categories.map((c) => (
@@ -276,6 +293,7 @@ export function LicitudWorkspace({
                 <select
                   className="block w-full rounded border p-2"
                   aria-label="Base de licitud propuesta"
+                  aria-describedby="workspace-basis-help"
                   value={basis}
                   disabled={busy}
                   onChange={(e) => setBasis(e.target.value)}
@@ -288,6 +306,9 @@ export function LicitudWorkspace({
                   ))}
                 </select>
               </label>
+              <p id="workspace-basis-help" className="text-sm" aria-live="polite">
+                {legalBasisHelp[basis] ?? "Revisa la base y el fundamento propuestos."}
+              </p>
               <label className="block">
                 Fundamento
                 <textarea

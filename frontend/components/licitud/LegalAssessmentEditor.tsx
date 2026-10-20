@@ -1,18 +1,8 @@
 "use client";
-import { useEffect, useState } from "react";
-import { licitudApi, legalBases, type Assessment } from "@/lib/api/licitud";
+import { useEffect, useRef, useState } from "react";
+import { licitudApi, legalBases, legalBasisHelp, type Assessment } from "@/lib/api/licitud";
 import { sessionToken } from "./LicitudWorkspace";
-const fields = [
-  ["purpose_and_interest", "legitimate_interest", "Interés legítimo declarado"],
-  ["necessity", "necessity_analysis", "Análisis de necesidad"],
-  ["necessity", "alternatives_analysis", "Alternativas consideradas"],
-  ["nature_and_scope", "volume_and_scope", "Naturaleza y alcance"],
-  ["reasonable_expectations", "expectations_analysis", "Expectativas de los titulares"],
-  ["impact", "impact_analysis", "Impactos en los titulares"],
-  ["safeguards", "safeguards_analysis", "Medidas de protección"],
-  ["transparency_and_opposition", "opposition_procedure", "Procedimiento de oposición"],
-  ["conclusion", "balancing_summary", "Balance y fundamentos pendientes de revisión"],
-] as const;
+import { liaFields } from "@/lib/licitud/lia-fields";
 function section(doc: Record<string, unknown> | null, key: string): Record<string, unknown> {
   const value = doc?.[key];
   return value && typeof value === "object" && !Array.isArray(value)
@@ -25,12 +15,18 @@ export function LegalAssessmentEditor({
   assessmentId,
   readOnly,
   token = sessionToken,
+  onLoaded,
+  onSaved,
+  onDirty,
 }: {
   organizationId: string;
   treatmentId: string;
   assessmentId: string;
   readOnly: boolean;
   token?: () => Promise<string>;
+  onLoaded?: (row: Assessment) => void;
+  onSaved?: (row: Assessment) => void;
+  onDirty?: (dirty: boolean) => void;
 }) {
   const [row, setRow] = useState<Assessment | null>(null),
     [basis, setBasis] = useState(""),
@@ -39,6 +35,13 @@ export function LegalAssessmentEditor({
     [busy, setBusy] = useState(false),
     [error, setError] = useState(""),
     [message, setMessage] = useState("");
+  const running = useRef(false);
+  const [baseline, setBaseline] = useState("");
+  const fingerprint = JSON.stringify([basis, justification, values]);
+  const dirty = Boolean(row && baseline && fingerprint !== baseline);
+  useEffect(() => {
+    onDirty?.(dirty || busy);
+  }, [dirty, busy, onDirty]);
   useEffect(() => {
     let active = true;
     setRow(null);
@@ -54,14 +57,15 @@ export function LegalAssessmentEditor({
           setRow(out);
           setBasis(out.legal_basis ?? "");
           setJustification(out.justification ?? "");
-          setValues(
-            Object.fromEntries(
-              fields.map(([group, key]) => [
-                group + "." + key,
-                String(section(out.lia_assessment, group)[key] ?? ""),
-              ])
-            )
+          const loaded = Object.fromEntries(
+            liaFields.map(([group, key]) => [
+              group + "." + key,
+              String(section(out.lia_assessment, group)[key] ?? ""),
+            ])
           );
+          setValues(loaded);
+          setBaseline(JSON.stringify([out.legal_basis ?? "", out.justification ?? "", loaded]));
+          onLoaded?.(out);
         }
       } catch (e) {
         if (active) setError(e instanceof Error ? e.message : "No se pudo cargar la evaluación.");
@@ -70,11 +74,12 @@ export function LegalAssessmentEditor({
     return () => {
       active = false;
     };
-  }, [organizationId, treatmentId, assessmentId, token]);
+  }, [organizationId, treatmentId, assessmentId, token, onLoaded]);
   const disabled = readOnly || row?.status !== "borrador" || busy;
   async function save(e: React.FormEvent) {
     e.preventDefault();
-    if (!row || disabled) return;
+    if (!row || disabled || running.current) return;
+    running.current = true;
     setBusy(true);
     setMessage("");
     setError("");
@@ -82,7 +87,7 @@ export function LegalAssessmentEditor({
       let lia: Record<string, unknown> | undefined;
       if (basis === "interes_legitimo_art13d") {
         lia = { ...(row.lia_assessment ?? {}), schema_version: 1 };
-        for (const [group, key] of fields) {
+        for (const [group, key] of liaFields) {
           lia[group] = { ...section(lia, group), [key]: values[group + "." + key] || null };
         }
       }
@@ -96,8 +101,10 @@ export function LegalAssessmentEditor({
         }
       );
       setRow(out);
+      setBaseline(fingerprint);
+      onSaved?.(out);
       setMessage(
-        "Borrador guardado. La documentación sigue pendiente de revisión jurídica. Recarga el expediente para actualizar los diagnósticos y vínculos de los paneles inferiores."
+        "Borrador guardado. La documentación sigue pendiente de revisión jurídica. Los diagnósticos y consultas dependientes se actualizan automáticamente."
       );
     } catch (e) {
       setError(
@@ -105,6 +112,7 @@ export function LegalAssessmentEditor({
           " Conservamos tus cambios en el formulario. Si no recibiste respuesta, recarga para verificar el estado guardado."
       );
     } finally {
+      running.current = false;
       setBusy(false);
     }
   }
@@ -118,6 +126,14 @@ export function LegalAssessmentEditor({
           <p>
             {row.purpose_snapshot} — versión {row.version} ({row.status})
           </p>
+          <p
+            role="note"
+            className={dirty ? "rounded border border-amber-400 bg-amber-50 p-3" : "text-sm"}
+          >
+            {dirty
+              ? "Cambios sin guardar. Se conservan al cambiar de pestaña; guarda antes de preparar un documento."
+              : "Contenido cargado del servidor. Guardar no equivale a aprobación jurídica."}
+          </p>
           <p>
             Prueba con datos ficticios. Esta pantalla guarda borradores; no confirma ni activa EIPD.
           </p>
@@ -127,6 +143,7 @@ export function LegalAssessmentEditor({
               className="block w-full rounded border p-2"
               disabled={disabled}
               aria-label="Base de licitud propuesta"
+              aria-describedby="legal-basis-help"
               value={basis}
               onChange={(e) => {
                 setBasis(e.target.value);
@@ -141,6 +158,9 @@ export function LegalAssessmentEditor({
               ))}
             </select>
           </label>
+          <p id="legal-basis-help" className="text-sm" aria-live="polite">
+            {legalBasisHelp[basis] ?? "Revisa la base propuesta y su fundamento antes de guardar."}
+          </p>
           <label className="block">
             Fundamento
             <textarea
@@ -161,7 +181,7 @@ export function LegalAssessmentEditor({
                 Registra los análisis principales. Esto no completa automáticamente todos los
                 requisitos de la LIA.
               </p>
-              {fields.map(([group, key, label]) => (
+              {liaFields.map(([group, key, label]) => (
                 <label key={key} className="block">
                   {label}
                   <textarea

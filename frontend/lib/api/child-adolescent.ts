@@ -102,9 +102,12 @@ export function validateChildReadiness(value: ChildReadiness): ChildReadiness {
 }
 export const childApi = {
   load: (scope: ChildScope) =>
-    apiFetch<ChildAssessment>(path(scope), { ...scope, cache: "no-store" }),
+    apiFetch<ChildAssessment & Partial<import("./licitud").Assessment>>(path(scope), {
+      ...scope,
+      cache: "no-store",
+    }),
   save: (scope: ChildScope, document: ChildDocument | null) =>
-    apiFetch<ChildAssessment>(path(scope), {
+    apiFetch<ChildAssessment & Partial<import("./licitud").Assessment>>(path(scope), {
       ...scope,
       cache: "no-store",
       method: "PATCH",

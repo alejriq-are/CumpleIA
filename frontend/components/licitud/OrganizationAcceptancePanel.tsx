@@ -10,6 +10,7 @@ import type {
 type Snapshot = { state: AuthorityState; events: Acceptance[] };
 type Props = {
   readOnly: boolean;
+  guided?: boolean;
   load: () => Promise<Snapshot>;
   designate: (actor: string, p: Designation) => Promise<Authority>;
   record: (
@@ -27,7 +28,13 @@ const labels = {
   rechaza: "Rechaza el documento",
   requiere_cambios: "Requiere cambios",
 };
-export function OrganizationAcceptancePanel({ readOnly, load, designate, record }: Props) {
+export function OrganizationAcceptancePanel({
+  readOnly,
+  load,
+  designate,
+  record,
+  guided = false,
+}: Props) {
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null),
     [target, setTarget] = useState("");
   const [action, setAction] = useState<Designation["action"]>("otorgar"),
@@ -35,7 +42,7 @@ export function OrganizationAcceptancePanel({ readOnly, load, designate, record 
   const [party, setParty] = useState(""),
     [faculty, setFaculty] = useState(""),
     [evidence, setEvidence] = useState("");
-  const [choice, setChoice] = useState<Acceptance["decision"]>("acepta"),
+  const [choice, setChoice] = useState<Acceptance["decision"] | "">(guided ? "" : "acepta"),
     [rationale, setRationale] = useState(""),
     [acta, setActa] = useState("");
   const [fictitious, setFictitious] = useState(false),
@@ -43,6 +50,7 @@ export function OrganizationAcceptancePanel({ readOnly, load, designate, record 
     [uncertain, setUncertain] = useState(false),
     [error, setError] = useState(""),
     [message, setMessage] = useState("");
+  const [facultyOpen, setFacultyOpen] = useState(false);
   const running = useRef(false),
     epoch = useRef(0),
     alive = useRef(false);
@@ -125,7 +133,7 @@ export function OrganizationAcceptancePanel({ readOnly, load, designate, record 
           setFaculty("");
           setEvidence("");
         }
-      } else if (own) {
+      } else if (own && choice) {
         const saved = await record(snapshot.state.actor_id, {
           authority_id: own.id,
           decision: choice,
@@ -187,83 +195,95 @@ export function OrganizationAcceptancePanel({ readOnly, load, designate, record 
             />{" "}
             Declaro datos ficticios para la aceptación
           </label>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              void write("faculty");
-            }}
-          >
-            <fieldset disabled={disabled || !snapshot.state.may_designate} className="space-y-3">
-              <legend>Designación explícita de facultad</legend>
-              <p>
-                Administración de la organización: registra la referencia que respalda la
-                designación. El rol owner/admin no equivale a una facultad para aceptar.
-              </p>
-              <label className="block">
-                Persona facultada (identificador de prueba)
-                <input
-                  aria-label="Persona facultada (identificador de prueba)"
-                  required
-                  className="block w-full rounded border p-2"
-                  value={target}
-                  onChange={(e) => setTarget(e.target.value)}
-                />
-              </label>
-              <label className="block">
-                Acción sobre la facultad
-                <select
-                  aria-label="Acción sobre la facultad"
-                  value={action}
-                  onChange={(e) => setAction(e.target.value as Designation["action"])}
-                >
-                  <option value="otorgar">Otorgar</option>
-                  <option value="revocar">Revocar</option>
-                </select>
-              </label>
-              <label className="block">
-                Rol de la organización
-                <select
-                  aria-label="Rol de la organización"
-                  value={role}
-                  onChange={(e) => setRole(e.target.value as Designation["organization_role"])}
-                >
-                  <option value="responsable">Responsable</option>
-                  <option value="encargado">Encargado</option>
-                </select>
-              </label>
-              <label className="block">
-                Responsable por cuya cuenta actúa
-                <input
-                  aria-label="Responsable por cuya cuenta actúa"
-                  required={role === "encargado"}
-                  className="block w-full rounded border p-2"
-                  value={party}
-                  onChange={(e) => setParty(e.target.value)}
-                />
-              </label>
-              <label className="block">
-                Referencia de la facultad
-                <input
-                  aria-label="Referencia de la facultad"
-                  required
-                  className="block w-full rounded border p-2"
-                  value={faculty}
-                  onChange={(e) => setFaculty(e.target.value)}
-                />
-              </label>
-              <label className="block">
-                Evidencia de la facultad
-                <input
-                  aria-label="Evidencia de la facultad"
-                  required
-                  className="block w-full rounded border p-2"
-                  value={evidence}
-                  onChange={(e) => setEvidence(e.target.value)}
-                />
-              </label>
-              <button type="submit">Registrar facultad ficticia</button>
-            </fieldset>
-          </form>
+          {guided && (
+            <button
+              type="button"
+              className="rounded border px-3 py-2"
+              aria-expanded={facultyOpen}
+              onClick={() => setFacultyOpen(!facultyOpen)}
+            >
+              Gestionar facultades de la organización
+            </button>
+          )}
+          <div hidden={guided && !facultyOpen}>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                void write("faculty");
+              }}
+            >
+              <fieldset disabled={disabled || !snapshot.state.may_designate} className="space-y-3">
+                <legend>Designación explícita de facultad</legend>
+                <p>
+                  Administración de la organización: registra la referencia que respalda la
+                  designación. El rol owner/admin no equivale a una facultad para aceptar.
+                </p>
+                <label className="block">
+                  Persona facultada (identificador de prueba)
+                  <input
+                    aria-label="Persona facultada (identificador de prueba)"
+                    required
+                    className="block w-full rounded border p-2"
+                    value={target}
+                    onChange={(e) => setTarget(e.target.value)}
+                  />
+                </label>
+                <label className="block">
+                  Acción sobre la facultad
+                  <select
+                    aria-label="Acción sobre la facultad"
+                    value={action}
+                    onChange={(e) => setAction(e.target.value as Designation["action"])}
+                  >
+                    <option value="otorgar">Otorgar</option>
+                    <option value="revocar">Revocar</option>
+                  </select>
+                </label>
+                <label className="block">
+                  Rol de la organización
+                  <select
+                    aria-label="Rol de la organización"
+                    value={role}
+                    onChange={(e) => setRole(e.target.value as Designation["organization_role"])}
+                  >
+                    <option value="responsable">Responsable</option>
+                    <option value="encargado">Encargado</option>
+                  </select>
+                </label>
+                <label className="block">
+                  Responsable por cuya cuenta actúa
+                  <input
+                    aria-label="Responsable por cuya cuenta actúa"
+                    required={role === "encargado"}
+                    className="block w-full rounded border p-2"
+                    value={party}
+                    onChange={(e) => setParty(e.target.value)}
+                  />
+                </label>
+                <label className="block">
+                  Referencia de la facultad
+                  <input
+                    aria-label="Referencia de la facultad"
+                    required
+                    className="block w-full rounded border p-2"
+                    value={faculty}
+                    onChange={(e) => setFaculty(e.target.value)}
+                  />
+                </label>
+                <label className="block">
+                  Evidencia de la facultad
+                  <input
+                    aria-label="Evidencia de la facultad"
+                    required
+                    className="block w-full rounded border p-2"
+                    value={evidence}
+                    onChange={(e) => setEvidence(e.target.value)}
+                  />
+                </label>
+                <button type="submit">Registrar facultad ficticia</button>
+              </fieldset>
+            </form>
+          </div>
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -277,8 +297,11 @@ export function OrganizationAcceptancePanel({ readOnly, load, designate, record 
                 <select
                   aria-label="Decisión documental"
                   value={choice}
+                  required
+                  aria-describedby="organization-choice-help"
                   onChange={(e) => setChoice(e.target.value as Acceptance["decision"])}
                 >
+                  {guided && <option value="">Selecciona una decisión</option>}
                   {Object.entries(labels).map(([v, label]) => (
                     <option key={v} value={v}>
                       {label}
@@ -286,6 +309,15 @@ export function OrganizationAcceptancePanel({ readOnly, load, designate, record 
                   ))}
                 </select>
               </label>
+              <p id="organization-choice-help" aria-live="polite" className="text-sm">
+                {!choice
+                  ? "Selecciona la posición que quieres registrar sobre este documento. Explica sus motivos y aporta la referencia del acta ficticia."
+                  : choice === "requiere_cambios"
+                    ? "Requiere cambios: la organización solicita ajustes antes de volver a considerar esta versión."
+                    : choice === "rechaza"
+                      ? "Rechaza el documento: deja constancia del desacuerdo de la organización con esta versión. No borra el historial."
+                      : "Acepta el documento: registra exclusivamente una aceptación documental ficticia sobre esta resolución. No constituye aceptación jurídica real ni habilita EIPD."}
+              </p>
               <label className="block">
                 Fundamento de la decisión
                 <textarea

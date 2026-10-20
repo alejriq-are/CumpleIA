@@ -71,7 +71,7 @@ async def test_workspace_real_api(rat_m3, client_a, org_a_id, _session_factory):
             rows = (
                 await db.execute(
                     text(
-                        "SELECT status::text,lia_assessment->'necessity'->>'necessity_analysis',confirmed_at FROM legal_assessments WHERE treatment_id=:id"
+                        "SELECT status::text,lia_assessment->'necessity'->>'necessity_analysis',confirmed_at,eipd_resolution_assessment->>'document_reference',eipd_resolution_assessment->'risks'->0->>'description' FROM legal_assessments WHERE treatment_id=:id"
                     ),
                     {"id": tid},
                 )
@@ -81,6 +81,8 @@ async def test_workspace_real_api(rat_m3, client_a, org_a_id, _session_factory):
                 "borrador",
                 "[FICTICIA] Necesidad de prueba",
                 None,
+                "SIMULADA-EIPD-RECORRIDO-001",
+                "[FICTICIA] Acceso indebido de ensayo",
             )
     finally:
         if process and process.returncode is None:

@@ -240,3 +240,60 @@ vacias. Las revisiones terminan en vista previa, no se registran ni cambian hist
 Bloque de maqueta navegable completado. Pendiente como bloque posterior trasladar
 el diseno a formularios operativos con sus contratos y validacion propia. LIC-UX-004 abierto;
 RAT-VAL-001 sigue separado. EIPD/datos reales bloqueados; sin merge/despliegue.
+
+
+## Integracion del recorrido con servidor — 19/10/2026
+
+La ruta de cada evaluacion usa AssessmentFlow con cuatro pestanas y secciones
+Alcance/Base/Infancia cuando el contexto guardado o documento la requiere.
+Los componentes se mantienen montados: navegar no descarta cambios ni mezcla
+edicion con revision/descarga. URL conserva organizacion/evaluacion y fragmento;
+flechas/Home/End cambian foco. Resumen RAT en lineas separadas y ayudas en entrada/base.
+Guardado confirmado actualiza diagnostico de infancia, invalida paquete descargable
+y consulta de resoluciones sin desmontar borradores. Error conserva formulario.
+Preparar requiere guardar cambios base/infancia, vista previa del contexto guardado
+y documento, lectura ficticia que se invalida al cambiar contenido o contexto.
+Numeracion definitiva la asigna servidor; resoluciones inmutables existentes.
+Copia exige confirmar reemplazo de documento pendiente; observaciones conservadas
+por resolucion durante navegacion. Descarga usa expediente API, no formulario.
+
+Limite explicito: registro documental conectado usa contrato EIPD sucesor de infancia.
+No crea adopcion/versionado autonomo de RAT/LIA ni persiste los campos de origen/motivo
+de la maqueta como metadata nueva. No se inventa una FK ni se amplia aceptacion a
+otros documentos. Lecturas/escrituras conservan validacion de servidor, RLS y opt-in
+ficticio actual; no se habilita la escritura temporal local. Usuarios de consulta
+y expedientes historicos permanecen de solo lectura. EIPD no confirma ni activa.
+
+
+## Bloque EIPD documental guiado y conectado — 19/10/2026
+
+Documentar EIPD conecta el contrato existente eipd_resolution_assessment al PATCH
+del borrador. Seis secciones: tratamiento/alcance, necesidad/proporcionalidad,
+riesgos, medidas, fuentes/evidencias y riesgo residual/seguimiento. Conserva todo
+el documento al navegar, incluidas relaciones riesgo-medida, evidencias y notas.
+Ayudas de opciones no recomiendan una base ni calculan riesgo. Vista previa no
+registra una resolucion; guardar solo actualiza el borrador. Revisar documentos
+muestra la copia guardada, separada de resoluciones de infancia y sus revisiones.
+
+Cliente excluye metadata context_binding de entrada, rechaza documento incompatible
+sin sustituirlo y compara respuesta con contenido enviado antes de declarar exito.
+Error conserva campos; respuesta incierta bloquea repeticion. Diagnostico del servidor
+se actualiza sin reiniciar formularios; ausencia/incompatibilidad no acredita
+preparacion. Paquete descargable se invalida tras guardar para consultar uno nuevo.
+No agrega endpoints, migraciones, permisos, politica ni escrituras locales habilitadas.
+
+Validacion del bloque integrado: 71 Chromium de componentes afectados (18 editor de
+infancia, 32 historial, 12 aceptacion/facultades y 9 workspace/EIPD), tipos,
+ESLint/Prettier, Ruff/Black del test SQL. Runner fijo run_licitud_workspace_tests:
+4 aprobadas, incluyendo Chromium/API/PostgreSQL real con riesgo R1, medida M1,
+seguimiento y reapertura. SQL comprueba contenido EIPD/LIA y confirmed_at=null.
+Capturas con CSS real inspeccionadas en 390 y 1280 px; no prueba de dispositivo
+fisico ni de todas las pantallas Next con sesion externa. Datos ficticios unicamente.
+
+Limites de cierre: completo este bloque de interfaz/persistencia documental, no
+EIPD juridica u operativa integral. Registros inmutables/revisiones conectados siguen
+siendo los contratos de infancia; aceptacion/adopcion autonoma de RAT/LIA y metadata
+estructurada de origen/motivo de la maqueta no se incorporan por inferencia.
+Pendientes: validacion asistida del recorrido conectado, contrato de esos artefactos,
+cobertura de revision EIPD general y aceptacion juridica humana/fuentes/evidencias
+aplicables. No habilita confirmacion, datos reales, activacion, merge ni despliegue.

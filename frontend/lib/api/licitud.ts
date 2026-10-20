@@ -7,6 +7,21 @@ export const legalBases = [
   ["interes_legitimo_art13d", "Interés legítimo (LIA)"],
   ["defensa_derechos_art13e", "Defensa de derechos"],
 ] as const;
+export const legalBasisHelp: Record<string, string> = {
+  "": "Pendiente de definir: conserva esta opción si todavía no has identificado una base propuesta. Puedes guardar el borrador sin presentar una conclusión jurídica.",
+  consentimiento_art12:
+    "Consentimiento: documenta por qué propones esta base y cómo se obtendría y acreditaría para la finalidad. Elegirla no prueba que exista un consentimiento válido.",
+  obligaciones_economicas_art13a:
+    "Obligaciones económicas: explica la obligación y su relación con la finalidad y los datos incluidos. La selección requiere revisar el supuesto concreto y su fundamento.",
+  obligacion_legal_art13b:
+    "Obligación legal: identifica la norma y la obligación concreta que sustentarían el tratamiento. No basta señalar que la actividad está regulada.",
+  contrato_precontractual_art13c:
+    "Contrato o medidas precontractuales: explica el vínculo contractual y por qué los datos serían necesarios para esta finalidad. La selección no valida esa necesidad.",
+  interes_legitimo_art13d:
+    "Interés legítimo: completa los análisis de interés, necesidad, impactos y salvaguardas en la LIA. Guardar el balance no equivale a aprobarlo.",
+  defensa_derechos_art13e:
+    "Defensa de derechos: describe el derecho y la actuación que motivan la propuesta, su alcance y los datos necesarios. Requiere revisión del caso concreto.",
+};
 export type AssessmentSummary = {
   id: string;
   organization_id: string;
@@ -17,6 +32,14 @@ export type AssessmentSummary = {
   legal_basis: string | null;
 };
 export type Assessment = AssessmentSummary & {
+  rat_context_snapshot?: {
+    data_categories?: { category_code: string; category_name: string }[];
+    data_subjects?: { category_code: string; category_name: string }[];
+    special_regimes?: { includes_children?: boolean; includes_adolescents?: boolean };
+    data_sources?: { source_type?: string; description?: string | null }[];
+  };
+  child_adolescent_assessment?: unknown;
+  eipd_resolution_assessment?: Record<string, unknown> | null;
   justification: string | null;
   lia_assessment: Record<string, unknown> | null;
 };

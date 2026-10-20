@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { LegalAssessmentEditor } from "@/components/licitud/LegalAssessmentEditor";
-import { ChildAdolescentPage } from "@/components/licitud/ChildAdolescentPage";
+import { AssessmentFlow } from "@/components/licitud/AssessmentFlow";
 import { childEditorAccess } from "@/lib/licitud/editor-access";
 import { api } from "@/lib/api/client";
 import { createClient } from "@/lib/supabase/server";
@@ -31,19 +30,10 @@ export default async function Page({
       </Link>
       <h1 className="text-2xl font-bold">Evaluación de licitud</h1>
       <p>{organization.name}</p>
-      <LegalAssessmentEditor
+      <AssessmentFlow
+        key={`${organization.id}:${treatmentId}:${assessmentId}`}
         organizationId={organization.id}
-        treatmentId={treatmentId}
-        assessmentId={assessmentId}
-        readOnly={organization.readOnly}
-      />
-      <h2 className="text-xl font-semibold">Infancia, expediente y revisiones</h2>
-      <p>
-        Completa infancia solo cuando corresponda al tratamiento. Los requisitos pendientes no
-        habilitan la activación EIPD.
-      </p>
-      <ChildAdolescentPage
-        organizationId={organization.id}
+        organizationName={organization.name}
         treatmentId={treatmentId}
         assessmentId={assessmentId}
         readOnly={organization.readOnly}

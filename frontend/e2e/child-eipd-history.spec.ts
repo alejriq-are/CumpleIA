@@ -54,7 +54,7 @@ test.beforeAll(async () => {
     const load=async()=>({policy:await childEipdApi.policy(scope),resolutions:await childEipdApi.list(scope),status:demo.status});
     const create=draft=>childEipdApi.create(scope,draft),reviews=row=>childEipdApi.reviews(scope,row),saveReview=(row,decision,rationale,reference)=>childEipdApi.review(scope,row,decision,rationale,reference);
     const root=createRoot(document.getElementById("root"));
-    window.mount=(options={})=>{demo.status=options.confirmed?"confirmado":"borrador";root.render(React.createElement(ChildEipdHistory,{load,create,reviews,review:saveReview,readOnly:options.readOnly??false}));};
+    window.mount=(options={})=>{demo.status=options.confirmed?"confirmado":"borrador";root.render(React.createElement(ChildEipdHistory,{load,create,reviews,review:saveReview,readOnly:options.readOnly??false,view:options.view??"all"}));};
     window.contract=(mutation)=>{const p=structuredClone(policy),r=resolution(),v=review(r);mutation({p,r,v});try{validatePolicy(p);validateResolution(r,scope);validateReview(v,scope,r);return null;}catch(error){return error.status??error.message;}};
     window.api={scope,childEipdApi,resolution};
 
@@ -772,5 +772,71 @@ test("error de alcance repetido explica revisión y conserva campos sin registra
   await expect(
     page.getByLabel("Alcance del documento — Códigos de categorías de datos", { exact: true })
   ).toHaveValue("id\nid");
+  expect(await posts(page)).toHaveLength(0);
+});
+
+test("recorrido conserva observaciones por resolucion y confirma reemplazo de preparacion", async ({
+  page,
+}) => {
+  await page.evaluate(() => (window as any).demo.rows.push((window as any).api.resolution(2)));
+  await mount(page);
+  await enable(page);
+  await select(page);
+  await page.getByLabel("Decisión de la revisión", { exact: true }).selectOption("no_continuar");
+  await fillReview(page);
+  await page.getByRole("button", { name: "Consultar resolución 2", exact: true }).click();
+  await expect(page.getByLabel("Fundamento de la revisión *", { exact: true })).toHaveValue("");
+  await page.getByRole("button", { name: "Consultar resolución 1", exact: true }).click();
+  await expect(page.getByLabel("Decisión de la revisión", { exact: true })).toHaveValue(
+    "no_continuar"
+  );
+  await expect(page.getByLabel("Fundamento de la revisión *", { exact: true })).toHaveValue(
+    "PRUEBA: falta evidencia"
+  );
+  await page.getByLabel("Referencia de la resolución *", { exact: true }).fill("PRUEBA: pendiente");
+  await page
+    .getByRole("button", { name: "Preparar sucesor desde esta resolución", exact: true })
+    .click();
+  await expect(
+    page.getByRole("alertdialog", { name: "Reemplazar documento en preparación" })
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: "Conservar documento en preparación", exact: true })
+    .click();
+  await expect(page.getByLabel("Referencia de la resolución *", { exact: true })).toHaveValue(
+    "PRUEBA: pendiente"
+  );
+  await page
+    .getByRole("button", { name: "Preparar sucesor desde esta resolución", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "Reemplazar y copiar resolución seleccionada", exact: true })
+    .click();
+  await expect(page.getByLabel("Referencia de la resolución *", { exact: true })).toHaveValue(
+    "PRUEBA: resolucion 1"
+  );
+  expect((await posts(page)).length).toBe(0);
+});
+
+test("vista integrada separa revision de decision y no preselecciona resultado", async ({
+  page,
+}) => {
+  await mount(page, { view: "review" });
+  await enable(page);
+  await select(page);
+  await expect(page.getByLabel("Tipo de actuación", { exact: true })).toHaveValue("revision");
+  await expect(page.getByLabel("Decisión de la revisión", { exact: true })).toHaveValue("");
+  await page.getByLabel("Tipo de actuación", { exact: true }).selectOption("decision");
+  await expect(page.getByLabel("Decisión de la revisión", { exact: true })).toBeHidden();
+  await expect(
+    page.getByText("Decisión de organización: requiere una facultad vigente", { exact: false })
+  ).toBeVisible();
+  await page.getByLabel("Tipo de actuación", { exact: true }).selectOption("revision");
+  await page
+    .getByLabel("Decisión de la revisión", { exact: true })
+    .selectOption("requiere_cambios");
+  await expect(
+    page.getByText("Requiere cambios: identifica faltantes", { exact: false })
+  ).toBeVisible();
   expect(await posts(page)).toHaveLength(0);
 });

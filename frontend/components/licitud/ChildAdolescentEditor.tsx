@@ -7,6 +7,9 @@ type Props = {
   save: (doc: ChildDocument | null) => Promise<ChildAssessment>;
   readiness: () => Promise<ChildReadiness>;
   readOnly?: boolean;
+  refreshVersion?: number;
+  onSaved?: () => void;
+  onDirty?: (dirty: boolean) => void;
 };
 const textFields = [
   ["age_scope_analysis", "Análisis de edad y alcance"],
@@ -21,7 +24,15 @@ const groups = [
   ["adolescentes", "Adolescentes"],
   ["adolescentes_sensibles_menores_16", "Adolescentes menores de 16 con datos sensibles"],
 ] as const;
-export function ChildAdolescentEditor({ load, save, readiness, readOnly = false }: Props) {
+export function ChildAdolescentEditor({
+  load,
+  save,
+  readiness,
+  readOnly = false,
+  refreshVersion = 0,
+  onSaved,
+  onDirty,
+}: Props) {
   const [row, setRow] = useState<ChildAssessment | null>(null),
     [doc, setDoc] = useState<ChildDocument>({}),
     [ready, setReady] = useState<ChildReadiness | null>(null),
@@ -30,6 +41,29 @@ export function ChildAdolescentEditor({ load, save, readiness, readOnly = false 
     [message, setMessage] = useState("");
   const [uncertain, setUncertain] = useState(false);
   const running = useRef(false);
+  const [baseline, setBaseline] = useState("{}");
+  const dirty = Boolean(row && JSON.stringify(doc) !== baseline);
+  useEffect(() => {
+    onDirty?.(dirty || busy || uncertain);
+  }, [dirty, busy, uncertain, onDirty]);
+  useEffect(() => {
+    if (!refreshVersion) return;
+    let active = true;
+    setReady(null);
+    readiness()
+      .then((value) => {
+        if (active) setReady(value);
+      })
+      .catch(() => {
+        if (active)
+          setError(
+            "No se pudo actualizar el diagnóstico. Los cambios del formulario se conservan; consulta nuevamente antes de preparar documentos."
+          );
+      });
+    return () => {
+      active = false;
+    };
+  }, [refreshVersion, readiness]);
   useEffect(() => {
     let active = true;
     setRow(null);
@@ -41,6 +75,7 @@ export function ChildAdolescentEditor({ load, save, readiness, readOnly = false 
         if (active) {
           setRow(r);
           setDoc(r.child_adolescent_assessment?.assessment ?? {});
+          setBaseline(JSON.stringify(r.child_adolescent_assessment?.assessment ?? {}));
           setReady(d);
         }
       })
@@ -65,6 +100,8 @@ export function ChildAdolescentEditor({ load, save, readiness, readOnly = false 
       const r = await save(remove ? null : doc);
       setRow(r);
       setDoc(r.child_adolescent_assessment?.assessment ?? {});
+      setBaseline(JSON.stringify(r.child_adolescent_assessment?.assessment ?? {}));
+      onSaved?.();
       setMessage(remove ? "Documento retirado del borrador." : "Documento guardado.");
       setReady(null);
       try {
@@ -126,6 +163,14 @@ export function ChildAdolescentEditor({ load, save, readiness, readOnly = false 
       {row && (
         <>
           <p>Estado del expediente: {row.status}.</p>
+          <p
+            role="note"
+            className={dirty ? "rounded border border-amber-400 bg-amber-50 p-3" : "text-sm"}
+          >
+            {dirty
+              ? "Infancia: cambios sin guardar. Se conservan entre pestañas; guarda antes de preparar una versión."
+              : "Documento de infancia cargado del servidor; completa esta sección solo cuando corresponda al alcance."}
+          </p>
           {(readOnly || row.status !== "borrador") && <p>Consulta de solo lectura.</p>}
           <form
             onSubmit={(e) => {

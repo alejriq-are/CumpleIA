@@ -28,7 +28,7 @@ test.beforeAll(async () => {
  };
  const load=()=>api.load(scope,resolution),designate=(actor,p)=>api.designate(scope,actor,p),record=(actor,p)=>api.record(scope,resolution,actor,p);
  const root=createRoot(document.getElementById("root"));
- window.mount=(options={})=>root.render(React.createElement(OrganizationAcceptancePanel,{load,designate,record,readOnly:options.readOnly??false}));
+ window.mount=(options={})=>root.render(React.createElement(OrganizationAcceptancePanel,{load,designate,record,readOnly:options.readOnly??false,guided:options.guided??false}));
  window.acceptanceApi={api,scope,resolution,id};
  `);
 });
@@ -201,4 +201,31 @@ test("cliente rechaza identidad inyectada y continuar", async ({ page }) => {
   });
   expect(result).toEqual([400, 400]);
   expect(await posts(page)).toHaveLength(0);
+});
+
+test("vista guiada separa facultades y exige seleccionar una decision", async ({ page }) => {
+  await mount(page, { guided: true });
+  await enable(page);
+  await expect(page.getByLabel("Referencia de la facultad", { exact: true })).toBeHidden();
+  await expect(page.getByLabel("Decisión documental", { exact: true })).toHaveValue("");
+  await page
+    .getByRole("button", { name: "Gestionar facultades de la organización", exact: true })
+    .click();
+  await grant(page);
+  await fillDecision(page);
+  await page
+    .getByRole("button", { name: "Registrar decisión documental ficticia", exact: true })
+    .click();
+  expect(await posts(page)).toHaveLength(1);
+  await page.getByLabel("Decisión documental", { exact: true }).selectOption("requiere_cambios");
+  await expect(
+    page.getByText("Requiere cambios: la organización solicita ajustes", { exact: false })
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: "Registrar decisión documental ficticia", exact: true })
+    .click();
+  await expect(
+    page.getByText("Decisión documental de prueba registrada.", { exact: false })
+  ).toBeVisible();
+  expect(await posts(page)).toHaveLength(2);
 });

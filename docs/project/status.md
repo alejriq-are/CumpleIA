@@ -1,15 +1,17 @@
-## Bloque vigente 19/10 — maqueta V3 navegable consolidada
+## Bloque vigente 19/10 — recorrido conectado y EIPD documental guiada
 
-Bloque de maqueta completo: acceso desde Bases de licitud; seleccion RAT/finalidad,
-edicion, preparacion con lectura ficticia, versiones inmutables con origen/motivo,
-revision separada e historial/JSON coherentes. Siete desplegables con ayudas.
-Usuario confirma DEMO-1 a DEMO-3, descarga, original intacto y observaciones
-separadas por version. 18 Chromium, tipos/lint/formato aprobados sobre ada6d45;
-acceso sin sesion redirige a login. CI 39321154265 aprobada
-(backend, frontend e integrada); Handoff 39321154299 aprobado. Solo memoria: recargar reinicia la visita.
-[Contrato](m3-t1-licitud-experiencia.md#maqueta-navegable-disponible--version-3).
-Pendiente trasladar el diseno a formularios operativos como bloque posterior;
-LIC-UX-004 abierto. EIPD/datos reales bloqueados, sin merge/despliegue.
+Cuatro pestanas integradas a formularios/API existentes, secciones aplicables,
+avisos y borradores conservados entre vistas. Guardados actualizan consultas sin
+recarga. Preparacion de resolucion infancia exige lectura del contexto/documento;
+revision, decision y gestion de facultades separadas. Borrador EIPD general con
+seis secciones: riesgos, medidas asociadas, evidencias y seguimiento persistentes.
+71 Chromium afectados y 4 API/integracion PostgreSQL, tipos/lint/formato aprobados;
+SQL confirma contenido EIPD/LIA y confirmed_at=null. Vista 390/1280 px inspeccionada.
+CI del candidato por consultar. Sin migraciones, permisos u opt-in nuevos.
+Pendiente validacion asistida conectada y contratos de revision general/adopcion
+RAT-LIA y trazabilidad estructurada. No cierre EIPD juridico/operativo integral.
+[Contrato y limites](m3-t1-licitud-experiencia.md#bloque-eipd-documental-guiado-y-conectado--19102026).
+LIC-UX-004 abierto; EIPD/datos reales bloqueados, sin merge/despliegue.
 
 ## Cierre vigente 18/10 — recorrido manual ficticio de Bases de licitud
 

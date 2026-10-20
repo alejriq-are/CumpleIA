@@ -15,29 +15,51 @@ import {
 } from "@/lib/api/child-eipd";
 import { ChildAdolescentEditor } from "./ChildAdolescentEditor";
 import { childApi, type ChildDocument } from "@/lib/api/child-adolescent";
-import { createClient } from "@/lib/supabase/client";
-import { ApiError } from "@/lib/api/client";
+import { sessionToken } from "./LicitudWorkspace";
+import type { FlowTab } from "./AssessmentFlow";
 export function ChildAdolescentPage({
   organizationId,
   treatmentId,
   assessmentId,
   readOnly,
+  view,
+  editorVisible = true,
+  preparationVisible = true,
+  onView,
+  refreshVersion = 0,
+  onSaved,
+  onDirty,
+  preparationBlocked = false,
+  onDocumentPending,
+  token = sessionToken,
 }: {
   organizationId: string;
   treatmentId: string;
   assessmentId: string;
   readOnly: boolean;
+  view?: FlowTab;
+  editorVisible?: boolean;
+  preparationVisible?: boolean;
+  onView?: (view: FlowTab) => void;
+  refreshVersion?: number;
+  onSaved?: () => void;
+  onDirty?: (dirty: boolean) => void;
+  preparationBlocked?: boolean;
+  onDocumentPending?: (pending: boolean) => void;
+  token?: () => Promise<string>;
 }) {
   const scope = useCallback(async () => {
-    const { data, error } = await createClient().auth.getSession();
-    if (error || !data.session) throw new ApiError(401, "Sesión no disponible");
-    return { organizationId, treatmentId, assessmentId, token: data.session.access_token };
-  }, [organizationId, treatmentId, assessmentId]);
+    return { organizationId, treatmentId, assessmentId, token: await token() };
+  }, [organizationId, treatmentId, assessmentId, token]);
   const pilot = useCallback(
     async (packet: Dossier, form: PilotForm) => preparePilot(await scope(), packet, form),
     [scope]
   );
-  const dossier = useCallback(async () => loadMvpDossier(await scope()), [scope]);
+  const dossier = useCallback(async () => {
+    // Invalida paquetes observados cuando cambia material guardado.
+    void refreshVersion;
+    return loadMvpDossier(await scope());
+  }, [scope, refreshVersion]);
   const load = useCallback(async () => childApi.load(await scope()), [scope]);
   const save = useCallback(
     async (doc: ChildDocument | null) => childApi.save(await scope(), doc),
@@ -45,14 +67,15 @@ export function ChildAdolescentPage({
   );
   const readiness = useCallback(async () => childApi.readiness(await scope()), [scope]);
   const history = useCallback(async () => {
+    void refreshVersion;
     const current = await scope();
     const [assessment, policy, resolutions] = await Promise.all([
       childApi.load(current),
       childEipdApi.policy(current),
       childEipdApi.list(current),
     ]);
-    return { status: assessment.status, policy, resolutions };
-  }, [scope]);
+    return { status: assessment.status, policy, resolutions, context: assessment };
+  }, [scope, refreshVersion]);
   const createResolution = useCallback(
     async (draft: ResolutionDraft) => childEipdApi.create(await scope(), draft),
     [scope]
@@ -77,28 +100,55 @@ export function ChildAdolescentPage({
         readOnly={readOnly || historyReadOnly}
         scope={scope}
         resolution={resolution}
+        guided={view !== undefined}
       />
     ),
-    [readOnly, scope]
+    [readOnly, scope, view]
   );
   return (
     <div key={`${organizationId}:${treatmentId}:${assessmentId}`} className="space-y-6">
-      <MvpDossierPanel load={dossier} prepare={pilot} />
-      <ChildAdolescentEditor
-        key={`${organizationId}:${treatmentId}:${assessmentId}`}
-        load={load}
-        save={save}
-        readiness={readiness}
-        readOnly={readOnly}
-      />
-      <ChildEipdHistory
-        load={history}
-        create={createResolution}
-        reviews={loadReviews}
-        review={createReview}
-        readOnly={readOnly}
-        organizationAcceptance={organizationAcceptance}
-      />
+      <div id="licitud-child-downloads" hidden={view !== undefined && view !== "historial"}>
+        <MvpDossierPanel load={dossier} prepare={pilot} />
+      </div>
+      <div
+        id="licitud-child-editor"
+        hidden={view !== undefined && (view !== "completar" || !editorVisible)}
+      >
+        <h2 className="text-xl font-semibold">Infancia y adolescencia · cuando corresponda</h2>
+        <ChildAdolescentEditor
+          key={`${organizationId}:${treatmentId}:${assessmentId}`}
+          load={load}
+          save={save}
+          readiness={readiness}
+          readOnly={readOnly}
+          refreshVersion={refreshVersion}
+          onSaved={onSaved}
+          onDirty={onDirty}
+        />
+      </div>
+      <div
+        id="licitud-child-history"
+        hidden={
+          view !== undefined && view !== "revisar" && (view !== "completar" || !preparationVisible)
+        }
+      >
+        <ChildEipdHistory
+          load={history}
+          create={createResolution}
+          reviews={loadReviews}
+          review={createReview}
+          readOnly={readOnly}
+          organizationAcceptance={organizationAcceptance}
+          view={view === "completar" ? "prepare" : view ? "review" : "all"}
+          onPrepare={() => onView?.("completar")}
+          onRecorded={() => {
+            onSaved?.();
+            onView?.("revisar");
+          }}
+          preparationBlocked={preparationBlocked}
+          onPending={onDocumentPending}
+        />
+      </div>
     </div>
   );
 }
@@ -107,10 +157,12 @@ function AcceptanceForResolution({
   scope,
   resolution,
   readOnly,
+  guided,
 }: {
   scope: () => Promise<import("@/lib/api/child-adolescent").ChildScope>;
   resolution: ChildResolution;
   readOnly: boolean;
+  guided?: boolean;
 }) {
   const load = useCallback(
     async () => organizationAcceptanceApi.load(await scope(), resolution),
@@ -136,6 +188,7 @@ function AcceptanceForResolution({
   return (
     <OrganizationAcceptancePanel
       load={load}
+      guided={guided}
       designate={designate}
       record={record}
       readOnly={readOnly}

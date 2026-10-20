@@ -18,17 +18,19 @@ identifica el HEAD exacto de la tarea. Una CI anterior no prueba un commit nuevo
 
 ## Bloque funcional vigente — producto
 
-19/10: bloque maqueta V3 navegable consolidado, disponible desde Bases de licitud.
-Seleccion RAT/finalidad, editor, preparacion completa y registro solo en memoria;
-copia desde version con origen/motivo, originales intactos, revision separada,
-historial/JSON con seleccion visual coherente y ayudas en los siete desplegables.
-Usuario confirma ciclo DEMO-1 a DEMO-3, original intacto, descarga JSON y observaciones
-separadas por version. 18 Chromium del bloque, tipos/lint/formato aprobados sobre
-ada6d45; ruta sin sesion devuelve 307 a /login. CI funcional 39321154265 aprobada
-(backend, frontend e integrada); Handoff 39321154299 aprobado. Nada persiste al recargar.
-Bloque de maqueta completo; formularios operativos y LIC-UX-004 siguen pendientes.
-EIPD/datos reales bloqueados; sin merge/despliegue. Contrato y limites:
-project/m3-t1-licitud-experiencia.md.
+19/10: recorrido Bases de Licitud integrado al servidor: cuatro pestanas,
+secciones cortas, borradores conservados al navegar y diagnosticos/descargas
+invalidados tras guardar. Preparacion de resolucion infancia con vista previa,
+lectura ficticia y proteccion de reemplazo; revision/decision/facultades separadas.
+EIPD general: borrador con seis secciones, riesgos/medidas/evidencias/seguimiento,
+guardado y reapertura; copia guardada consultable sin confundirla con resolucion.
+71 Chromium afectados, 4 API/integracion con PostgreSQL aislado, tipos/lint/formato;
+SQL confirma EIPD/LIA persistidos y confirmed_at=null; vista movil/escritorio revisada.
+No nuevos endpoints, migraciones, permisos ni opt-in local. EIPD/datos reales
+bloqueados, sin merge/despliegue. CI exacta del nuevo commit por consultar.
+Pendientes: validacion asistida conectada; revision EIPD general/adopcion RAT-LIA
+y trazabilidad estructurada requieren sus contratos; cierre juridico/operativo
+no declarado. LIC-UX-004 abierto. Contrato: project/m3-t1-licitud-experiencia.md.
 
 18/10: recorrido manual ficticio de Bases de licitud cerrado: clientes,
 trabajadores e infancia; guardado/reapertura, dos resoluciones, revisiones negativas,
