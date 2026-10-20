@@ -37,6 +37,7 @@ export function AssessmentFlow({
   const [refreshVersion, setRefreshVersion] = useState(0);
   const [legalDirty, setLegalDirty] = useState(false);
   const [childDirty, setChildDirty] = useState(false);
+  const [resolutionHistory, setResolutionHistory] = useState<boolean | null>(null);
   const [documentDirty, setDocumentDirty] = useState(false);
   const [eipdDirty, setEipdDirty] = useState(false);
   const dirty = legalDirty || childDirty || eipdDirty;
@@ -46,6 +47,7 @@ export function AssessmentFlow({
     row?.rat_context_snapshot?.special_regimes?.includes_adolescents ||
     row?.child_adolescent_assessment
   );
+  const childReviewVisible = childRelevant || resolutionHistory !== false;
   const loaded = useCallback((value: Assessment) => setRow(value), []);
   const saved = useCallback((value?: Assessment) => {
     if (value) setRow(value);
@@ -300,17 +302,27 @@ export function AssessmentFlow({
               resolución registrada. Los cambios pendientes no se incluyen.
             </p>
             <EipdDocumentView value={row.eipd_resolution_assessment} />
-            <p>
-              El registro de revisiones disponible abajo corresponde a resoluciones de infancia
-              seleccionadas; no se atribuye a este borrador EIPD general.
-            </p>
+            {childReviewVisible && (
+              <p>
+                El registro de revisiones disponible abajo corresponde a resoluciones de infancia
+                seleccionadas; no se atribuye a este borrador EIPD general.
+              </p>
+            )}
           </section>
         )}
 
-        <p>
-          Elige una resolución y lee su contenido. Revisar deja una observación; decidir por la
-          organización requiere facultad vigente. Ninguna acción edita el original.
-        </p>
+        {childReviewVisible ? (
+          <p>
+            Elige una resolución y lee su contenido. Revisar deja una observación; decidir por la
+            organización requiere facultad vigente. Ninguna acción edita el original.
+          </p>
+        ) : (
+          <p>
+            {row?.eipd_resolution_assessment
+              ? "El borrador EIPD general está disponible para consulta. El registro de revisiones formales de este documento aún no está integrado."
+              : "No hay documentos guardados para consultar en esta pestaña. Puedes consultar la evaluación guardada en Historial y descargas."}
+          </p>
+        )}
       </section>
       <section
         role="tabpanel"
@@ -333,6 +345,8 @@ export function AssessmentFlow({
         view={tab}
         editorVisible={section === "infancia" && childRelevant}
         preparationVisible={section === "preparar"}
+        reviewVisible={childReviewVisible}
+        onResolutionHistory={setResolutionHistory}
         onView={(next) => {
           if (next === "completar") setSection("preparar");
           go(next);

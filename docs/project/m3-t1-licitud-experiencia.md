@@ -311,3 +311,16 @@ continua; EIPD bloqueada, sin merge/despliegue.
 Fuentes del expediente: una entrada visible Ley 21.719 enlaza a BCN; la publicacion
 original y SHA-256 quedan agrupados en sus antecedentes desplegables. Conserva
 fuentes e identidad del JSON sin modificar evidencias ni contratos del servidor.
+
+Pendiente de UX confirmado durante validacion asistida: la confirmacion de Guardar
+borrador EIPD existe arriba del formulario, pero pasa inadvertida desde el boton.
+Mostrarla destacada junto a la accion de guardado, solo tras confirmacion del
+servidor y retirarla ante nuevas ediciones. Solicitud registrada; ajuste aun no
+implementado. No confundir esta observacion con fallo de persistencia.
+
+Revision conectada: oculta resoluciones/instrucciones de infancia para alcance adulto
+solo tras consulta exitosa de historial vacio; conserva acceso cuando el alcance
+incluye infancia/adolescencia o hay antecedentes. Error de consulta sigue visible.
+Borrador EIPD general permanece consultable y aclara que sus revisiones formales
+no estan integradas. Persistencia EIPD tras recarga comprobada manualmente por el
+usuario (referencias, etiqueta y preparado por); activacion permanece bloqueada.

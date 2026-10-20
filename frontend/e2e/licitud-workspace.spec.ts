@@ -497,3 +497,71 @@ test("documento EIPD incompatible no se reemplaza y consulta no permite guardar"
     page.getByRole("button", { name: "Guardar borrador EIPD", exact: true })
   ).toHaveCount(0);
 });
+
+for (const mode of ["adultos", "infancia", "error"] as const) {
+  test(`revision muestra infancia solo si aplica y conserva errores: ${mode}`, async ({ page }) => {
+    test.skip(integrated, "Variantes de alcance e historial aisladas del servidor");
+    await draft(page);
+    await expect(page.getByRole("status")).toContainText("Borrador creado");
+    await page.evaluate(
+      ({ tid, mode }) => {
+        (window as any).demo.rows[0].rat_context_snapshot.special_regimes.includes_children =
+          mode === "infancia";
+        if (mode === "error") {
+          const previous = window.fetch;
+          window.fetch = (async (url: any, opts: any) =>
+            String(url).endsWith("/eipd-child/v4/resolutions")
+              ? new Response(JSON.stringify({ detail: "PRUEBA: historial no disponible" }), {
+                  status: 503,
+                })
+              : previous(url, opts)) as typeof fetch;
+        }
+        (window as any).flow(tid);
+      },
+      { tid: treatment, mode }
+    );
+    await page.getByRole("tab", { name: "Revisar documentos", exact: true }).click();
+    const history = page.getByRole("heading", {
+      name: "Resoluciones y revisiones de infancia",
+      exact: true,
+    });
+    if (mode === "adultos") {
+      await expect(
+        page.getByText("No hay documentos guardados para consultar en esta pestaña.", {
+          exact: false,
+        })
+      ).toBeVisible();
+      await expect(history).toBeHidden();
+      await expect(
+        page.getByText("Elige una resolución y lee su contenido.", { exact: false })
+      ).toBeHidden();
+      await page.getByRole("tab", { name: "Completar datos", exact: true }).click();
+      await page.getByRole("button", { name: "Documentar EIPD", exact: true }).click();
+      await page
+        .getByLabel("Referencia del documento EIPD", { exact: true })
+        .fill("SIMULADA-EIPD-ADULTOS-001");
+      await page.getByRole("button", { name: "Guardar borrador EIPD", exact: true }).click();
+      await expect(
+        page.getByText("Borrador EIPD guardado en servidor.", { exact: false })
+      ).toBeVisible();
+      await page.getByRole("tab", { name: "Revisar documentos", exact: true }).click();
+      await expect(
+        page.getByRole("region", { name: "Borrador EIPD guardado para consulta", exact: true })
+      ).toBeVisible();
+      await expect(
+        page.getByText("El borrador EIPD general está disponible para consulta.", { exact: false })
+      ).toBeVisible();
+      await expect(history).toBeHidden();
+      await expect(
+        page.getByText("El registro de revisiones disponible abajo", { exact: false })
+      ).toBeHidden();
+    } else {
+      await expect(history).toBeVisible();
+      if (mode === "error") await expect(page.getByRole("alert")).toBeVisible();
+      else
+        await expect(
+          page.getByText("No hay resoluciones de infancia registradas.", { exact: true })
+        ).toBeVisible();
+    }
+  });
+}

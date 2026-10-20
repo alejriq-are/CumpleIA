@@ -25,6 +25,8 @@ export function ChildAdolescentPage({
   view,
   editorVisible = true,
   preparationVisible = true,
+  reviewVisible = true,
+  onResolutionHistory,
   onView,
   refreshVersion = 0,
   onSaved,
@@ -40,6 +42,8 @@ export function ChildAdolescentPage({
   view?: FlowTab;
   editorVisible?: boolean;
   preparationVisible?: boolean;
+  reviewVisible?: boolean;
+  onResolutionHistory?: (hasRecords: boolean | null) => void;
   onView?: (view: FlowTab) => void;
   refreshVersion?: number;
   onSaved?: () => void;
@@ -68,14 +72,16 @@ export function ChildAdolescentPage({
   const readiness = useCallback(async () => childApi.readiness(await scope()), [scope]);
   const history = useCallback(async () => {
     void refreshVersion;
+    onResolutionHistory?.(null);
     const current = await scope();
     const [assessment, policy, resolutions] = await Promise.all([
       childApi.load(current),
       childEipdApi.policy(current),
       childEipdApi.list(current),
     ]);
+    onResolutionHistory?.(resolutions.length > 0);
     return { status: assessment.status, policy, resolutions, context: assessment };
-  }, [scope, refreshVersion]);
+  }, [scope, refreshVersion, onResolutionHistory]);
   const createResolution = useCallback(
     async (draft: ResolutionDraft) => childEipdApi.create(await scope(), draft),
     [scope]
@@ -129,7 +135,8 @@ export function ChildAdolescentPage({
       <div
         id="licitud-child-history"
         hidden={
-          view !== undefined && view !== "revisar" && (view !== "completar" || !preparationVisible)
+          view !== undefined &&
+          (view === "revisar" ? !reviewVisible : view !== "completar" || !preparationVisible)
         }
       >
         <ChildEipdHistory
