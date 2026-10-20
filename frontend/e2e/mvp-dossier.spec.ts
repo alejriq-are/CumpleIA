@@ -68,6 +68,8 @@ async function setup(page: any, value: any) {
   );
   await page.setContent('<div id="root"></div>');
   await page.addScriptTag({ content: bundle });
+  if (process.env.CUMPLEIA_DOSSIER_CSS)
+    await page.addStyleTag({ path: process.env.CUMPLEIA_DOSSIER_CSS });
 }
 test("consulta y descarga tres documentos sin acciones ni aceptacion real", async ({ page }) => {
   await setup(page, packet());
@@ -129,3 +131,81 @@ test("fallo al actualizar retira paquete y descarga anteriores", async ({ page }
   await expect(page.getByRole("alert")).toBeVisible();
   await expect(page.getByRole("button", { name: "Descargar expediente JSON" })).toHaveCount(0);
 });
+
+for (const successor of [false, true]) {
+  test(`expediente legible conserva descarga y separa EIPD general de resolucion: ${successor}`, async ({
+    page,
+  }) => {
+    const v = packet();
+    v.documents[0].content = {
+      purpose: "[FICTICIA] Gestionar trabajadores",
+      data_subjects: [{ category_name: "Trabajadores" }],
+      data_categories: [{ category_name: "Identificación" }],
+      data_sources: [{ description: "[FICTICIA] Formulario simulado" }],
+    };
+    v.documents[1].content = {
+      status: "borrador",
+      purpose_snapshot: "[FICTICIA] Gestionar trabajadores",
+      legal_basis: "interes_legitimo_art13d",
+      justification: "[FICTICIA] Fundamento conservado",
+      lia_assessment: { necessity: { necessity_analysis: "[FICTICIA] Análisis conservado" } },
+      additional_evidence: "[FICTICIA] Antecedente completo solo técnico",
+    };
+    const doc = {
+      schema_version: 1,
+      document_reference: "SIMULADA-EIPD-001",
+      document_version: "ENSAYO-1",
+      report_reference: "SIMULADA-INFORME-001",
+      prepared_by: "[FICTICIA] Equipo de ensayo",
+      purpose_description: "[FICTICIA] Gestionar trabajadores",
+      risks: [{ risk_id: "R1", description: "[FICTICIA] Acceso indebido" }],
+      measures: [
+        { measure_id: "M1", description: "[FICTICIA] Control de acceso", risk_ids: ["R1"] },
+      ],
+    };
+    v.documents[2] = {
+      ...v.documents[2],
+      status: "disponible",
+      version: 1,
+      content: successor
+        ? { document_reference: "SIMULADA-RES-001", document_version: "RES-1", document: doc }
+        : doc,
+      content_hash: "c".repeat(64),
+      coverage: "no se promueve a cobertura infancia ni hereda aceptacion.",
+    };
+    await setup(page, v);
+    await page.getByRole("button", { name: "Consultar expediente documental" }).click();
+    await page.getByText("RAT asociado — disponible", { exact: true }).click();
+    await expect(page.getByText("[FICTICIA] Formulario simulado", { exact: true })).toBeVisible();
+    await page.getByText("Evaluación de licitud / LIA — disponible", { exact: true }).click();
+    await expect(page.getByText("[FICTICIA] Fundamento conservado", { exact: true })).toBeVisible();
+    await expect(page.getByText("Interés legítimo (LIA)", { exact: true })).toBeVisible();
+    await expect(page.getByText("[FICTICIA] Análisis conservado", { exact: true })).toBeVisible();
+    await page.getByText("Documento EIPD — disponible", { exact: true }).click();
+    await expect(page.getByText("[FICTICIA] Equipo de ensayo", { exact: true })).toBeVisible();
+    await expect(page.getByText("[FICTICIA] Acceso indebido", { exact: true })).toBeVisible();
+    await expect(page.getByText("no se promueve", { exact: false })).toHaveCount(0);
+    await expect(page.locator("pre:visible")).toHaveCount(0);
+    await expect(
+      page.getByText(
+        successor
+          ? "Resolución documental registrada."
+          : "Borrador EIPD guardado, pendiente de completar y revisar.",
+        { exact: false }
+      )
+    ).toBeVisible();
+    const download = page.waitForEvent("download");
+    await page.getByRole("button", { name: "Descargar expediente JSON" }).click();
+    expect(JSON.parse(await readFile((await (await download).path())!, "utf8"))).toEqual(v);
+    await page.getByText("Detalle técnico del documento (JSON)", { exact: true }).nth(1).click();
+    await expect(page.locator("pre:visible")).toContainText("Antecedente completo solo técnico");
+    await page.getByText("Detalle técnico del documento (JSON)", { exact: true }).nth(1).click();
+    if (!successor && process.env.CUMPLEIA_DOSSIER_SCREENSHOT) {
+      await page.setViewportSize({ width: 390, height: 844 });
+      await expect
+        .poll(() => page.evaluate(() => document.documentElement.scrollWidth <= innerWidth))
+        .toBe(true);
+      await page.screenshot({ path: process.env.CUMPLEIA_DOSSIER_SCREENSHOT, fullPage: true });
+    }
+  });
+}

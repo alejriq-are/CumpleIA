@@ -315,8 +315,7 @@ fuentes e identidad del JSON sin modificar evidencias ni contratos del servidor.
 Pendiente de UX confirmado durante validacion asistida: la confirmacion de Guardar
 borrador EIPD existe arriba del formulario, pero pasa inadvertida desde el boton.
 Mostrarla destacada junto a la accion de guardado, solo tras confirmacion del
-servidor y retirarla ante nuevas ediciones. Solicitud registrada; ajuste aun no
-implementado. No confundir esta observacion con fallo de persistencia.
+servidor y retirarla ante nuevas ediciones. Solicitud resuelta en el bloque de presentacion descrito a continuacion. No confundir esta observacion con fallo de persistencia.
 
 Revision conectada: oculta resoluciones/instrucciones de infancia para alcance adulto
 solo tras consulta exitosa de historial vacio; conserva acceso cuando el alcance
@@ -356,3 +355,25 @@ revisar aplicabilidad de la accion Preparar documento para revision en adultos,
 pues el contrato de resoluciones conectado sigue siendo el de infancia. Revision
 formal de EIPD general/adopcion RAT-LIA y origen/motivo estructurados siguen fuera
 del bloque integrado actual. EIPD y datos reales bloqueados; sin merge/despliegue.
+
+## Cierre de pendientes de presentacion del expediente y guardado EIPD
+
+Expediente presenta RAT y evaluacion/LIA con etiquetas legibles y EIPD mediante
+la vista documental existente, incluidas referencias, notas, riesgos y medidas.
+Evaluacion/LIA se identifica como resumen; todos los antecedentes se conservan
+en detalle tecnico JSON optativo y descarga integra. Identidad tecnica plegada.
+Borrador EIPD general indica pendiente de completar/revisar y evaluacion asociada;
+no muestra la frase tecnica de cobertura infancia ni atribuye eventos de resolucion.
+Resoluciones existentes conservan su version y eventos propios. Sin cambios de
+API, paquete, hashes, evidencia original ni politica juridica.
+
+Confirmacion de Guardar borrador EIPD resaltada junto al boton, solo tras exito;
+se retira ante cambios de campos, referencias, etiqueta o notas. Error y respuesta
+incierta mantienen sus barreras. 22 Chromium dirigidas aprobadas (workspace y
+expediente), tipos/ESLint/Prettier y comprobacion movil de 390 px con CSS real.
+Prueba de descarga verifica igualdad completa del paquete, no solo campos visibles.
+Usuario comprobo recuperacion de EIPD tras recarga y ausencia de infancia en adultos;
+JSON descargado comprobado con fundamento actualizado, EIPD ENSAYO-1 y bloqueos.
+EIPD sigue incompleta y bloqueada; sin datos reales, merge ni despliegue.
+Pendiente validar asistidamente esta nueva presentacion. Acceso secundario de maqueta
+y alcance de Preparar documento en adultos siguen anotados para el siguiente bloque.

@@ -218,6 +218,19 @@ test("crea borrador, abre y guarda LIA y recupera el historial sin activar EIPD"
   await expect(
     page.getByText("Borrador EIPD guardado en servidor.", { exact: false })
   ).toBeVisible();
+  const eipdRegion = page.getByRole("region", { name: "Documento EIPD en borrador", exact: true });
+  const success = eipdRegion.getByRole("status");
+  await expect(success).toContainText("Borrador EIPD guardado en servidor");
+  const saveBox = await eipdRegion
+    .getByRole("button", { name: "Guardar borrador EIPD", exact: true })
+    .boundingBox();
+  const successBox = await success.boundingBox();
+  expect(successBox!.y).toBeGreaterThan(saveBox!.y);
+  await eipdRegion
+    .getByLabel("Etiqueta del documento EIPD", { exact: true })
+    .fill("CAMBIO-SIN-GUARDAR");
+  await expect(success).toHaveCount(0);
+  await expect(eipdRegion.getByText("EIPD: cambios sin guardar", { exact: false })).toBeVisible();
   await page.evaluate(() => (window as any).workspace());
   await expect(page.getByLabel("Tratamiento del RAT", { exact: true })).toBeVisible();
   await page.evaluate((id) => (window as any).flow(id), id);

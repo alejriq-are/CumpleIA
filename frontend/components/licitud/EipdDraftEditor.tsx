@@ -105,6 +105,9 @@ export function EipdDraftEditor({
       active = false;
     };
   }, [organizationId, treatmentId, assessmentId, token, refreshVersion]);
+  useEffect(() => {
+    if (dirty) setMessage("");
+  }, [dirty]);
   async function save() {
     if (running.current || busy || uncertain || readOnly || row?.status !== "borrador") return;
     running.current = true;
@@ -166,7 +169,6 @@ export function EipdDraftEditor({
             : "Cargando documento EIPD…"}
       </p>
       {error && <p role="alert">{error}</p>}
-      {message && <p role="status">{message}</p>}
       {row && (
         <form
           className="space-y-4"
@@ -229,6 +231,14 @@ export function EipdDraftEditor({
               </button>
             )}
           </fieldset>
+          {message && !dirty && (
+            <p
+              role="status"
+              className="rounded border border-green-600 bg-green-50 p-3 text-green-900"
+            >
+              {message}
+            </p>
+          )}
           {preview && (
             <aside
               className="space-y-2 rounded border border-blue-300 bg-blue-50 p-3"

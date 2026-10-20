@@ -1,6 +1,7 @@
 "use client";
 import { PilotPreparationPanel, type PilotPrepare } from "./PilotPreparationPanel";
 import { useState, useRef, useEffect } from "react";
+import { DossierDocumentView, record } from "./DossierDocumentView";
 import type { Dossier } from "@/lib/api/mvp-dossier";
 const labels = {
   rat: "RAT asociado",
@@ -86,12 +87,18 @@ export function MvpDossierPanel({
       {error && <p role="alert">{error}</p>}
       {packet && (
         <>
-          <p>{packet.rat_snapshot_note}</p>
+          <p>
+            El expediente conserva el contexto RAT asociado a esta evaluación. Consultarlo no
+            aprueba los documentos.
+          </p>
           <p>
             Procedencia de los datos: no verificada. Aceptación jurídica real pendiente de la
             organización piloto. EIPD bloqueada.
           </p>
-          <p className="break-all">Identidad del paquete: {packet.packet_hash}</p>
+          <details>
+            <summary>Identificación técnica del expediente</summary>
+            <p className="break-all">Identidad del paquete: {packet.packet_hash}</p>
+          </details>
           <button type="button" disabled={busy} onClick={download}>
             Descargar expediente JSON
           </button>
@@ -100,17 +107,35 @@ export function MvpDossierPanel({
               <summary>
                 {labels[d.kind]} — {d.status === "disponible" ? "disponible" : "sin documento"}
               </summary>
-              <p>{d.coverage}</p>
-              <p>
-                Versión: {d.version ?? "no disponible"}.{" "}
-                {d.organization_acceptance === "sin_flujo"
-                  ? "Sin flujo de aceptación para este documento."
-                  : "Los eventos ficticios corresponden solo a la resolución EIPD indicada."}
-              </p>
-              <pre className="overflow-auto whitespace-pre-wrap break-all">
-                {JSON.stringify(d.content, null, 2)}
-              </pre>
-              <p>{d.acceptance_events.length} eventos documentales ficticios.</p>
+              <div className="space-y-4 rounded border p-4">
+                <p>
+                  {d.kind === "rat"
+                    ? "Contexto del RAT conservado al crear la evaluación. No representa necesariamente el inventario actual."
+                    : d.kind === "licitud_lia"
+                      ? "Evaluación guardada y análisis de interés legítimo, si se completó. Su guardado no implica aprobación."
+                      : record(d.content).document
+                        ? "Resolución documental registrada. Los eventos mostrados corresponden exclusivamente a esta resolución."
+                        : "Borrador EIPD guardado, pendiente de completar y revisar. Su guardado no implica aprobación."}
+                </p>
+                <p>
+                  {d.kind === "eipd" && !record(d.content).document
+                    ? `Evaluación asociada: versión ${packet.assessment_version}.`
+                    : `Versión: ${d.version ?? "no disponible"}.`}
+                </p>
+                <DossierDocumentView document={d} />
+                {d.kind === "eipd" && Boolean(record(d.content).document) && (
+                  <p>
+                    {d.acceptance_events.length} eventos documentales ficticios asociados a esta
+                    resolución.
+                  </p>
+                )}
+                <details>
+                  <summary>Detalle técnico del documento (JSON)</summary>
+                  <pre className="overflow-auto whitespace-pre-wrap break-all">
+                    {JSON.stringify(d.content, null, 2)}
+                  </pre>
+                </details>
+              </div>
             </details>
           ))}
           <h3>Fuentes oficiales para revisión</h3>

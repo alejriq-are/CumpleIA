@@ -18,14 +18,14 @@ identifica el HEAD exacto de la tarea. Una CI anterior no prueba un commit nuevo
 
 ## Bloque funcional vigente — producto
 
-Validacion asistida pausada por el usuario el 20/10; retomar en unas horas, sin
-continuacion automatica. Ultimo funcional publicado b3fb880: ocultamiento de
-infancia no aplicable (12 Chromium/tipos/lint locales aprobados); falta comprobar
-este ajuste en pantalla y el expediente/JSON actualizado con EIPD de trabajadores.
-Persistencia de base/fundamento y campos EIPD tras recarga comprobada por usuario.
-Confirmacion visible junto a Guardar borrador EIPD pendiente de implementar.
-Punto de reanudacion y limites: project/m3-t1-licitud-experiencia.md, seccion
-Punto de pausa de validacion asistida. EIPD bloqueada, sin merge/despliegue.
+Validacion asistida retomada: usuario comprobo persistencia de base/fundamento y
+EIPD tras recarga, ocultamiento de infancia en adultos y JSON con contenido EIPD.
+Presentacion ajustada: expediente legible, JSON opcional, texto general sin cobertura
+infancia y confirmacion junto a Guardar borrador EIPD. 22 Chromium dirigidas,
+tipos/lint/formato y vista movil aprobados localmente. Falta revision asistida de
+esta presentacion. Recorrido y limites en project/m3-t1-licitud-experiencia.md.
+Acceso secundario de maqueta y alcance de Preparar documento en adultos siguen
+anotados para siguiente bloque. EIPD incompleta/bloqueada, sin merge/despliegue.
 
 19/10: recorrido Bases de Licitud integrado al servidor: cuatro pestanas,
 secciones cortas, borradores conservados al navegar y diagnosticos/descargas
