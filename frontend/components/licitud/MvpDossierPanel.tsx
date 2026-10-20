@@ -31,6 +31,17 @@ export function MvpDossierPanel({
       active.current = false;
     };
   }, [load]);
+  const originalLawSource = packet?.official_sources.find(
+    (source) =>
+      source.url ===
+      "https://www.diariooficial.interior.gob.cl/publicaciones/2024/12/13/44023/01/2583630.pdf"
+  );
+  const consultationLawSource = packet?.official_sources.find(
+    (source) => source.url === "https://www.bcn.cl/leychile/navegar?i=1209272"
+  );
+  const sources = packet?.official_sources.filter(
+    (source) => !(originalLawSource && consultationLawSource && source === originalLawSource)
+  );
   async function consult() {
     if (running.current) return;
     running.current = true;
@@ -104,13 +115,36 @@ export function MvpDossierPanel({
           ))}
           <h3>Fuentes oficiales para revisión</h3>
           <p>Consultadas, pendientes de revisión de aplicabilidad y aceptación jurídica.</p>
-          <ul>
-            {packet.official_sources.map((s) => (
+          <ul aria-label="Fuentes oficiales">
+            {sources?.map((s) => (
               <li key={s.reference}>
                 <a href={s.url} target="_blank" rel="noopener noreferrer" className="text-blue-700">
-                  {s.title}
+                  {s === consultationLawSource ? "Ley 21.719" : s.title}
                 </a>
                 <p>{s.scope_note}</p>
+                {s === consultationLawSource && originalLawSource && (
+                  <>
+                    <p>Consulta en la Biblioteca del Congreso Nacional.</p>
+                    <details>
+                      <summary>Publicación y trazabilidad de esta ley</summary>
+                      <a
+                        href={originalLawSource.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-700"
+                      >
+                        Publicación original en el Diario Oficial
+                      </a>
+                      <p>{originalLawSource.scope_note}</p>
+                      {originalLawSource.artifact_sha256 && (
+                        <p className="break-all">
+                          SHA-256 de la copia archivada: {originalLawSource.artifact_sha256}. El
+                          checksum no acredita aceptación jurídica.
+                        </p>
+                      )}
+                    </details>
+                  </>
+                )}
                 {s.artifact_sha256 && (
                   <p className="break-all">
                     SHA-256 de la copia archivada: {s.artifact_sha256}. El checksum no acredita

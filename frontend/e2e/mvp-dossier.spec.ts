@@ -1,6 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { browserBundle } from "./helpers/browser-bundle";
 import path from "node:path";
+import { readFile } from "node:fs/promises";
 let bundle: string;
 const org = "a0000000-0000-0000-0000-000000000001",
   tid = "a0000000-0000-0000-0000-000000000002",
@@ -46,6 +47,7 @@ function packet(): any {
       status: "consultada_sin_aceptacion_juridica",
       scope_note: "PRUEBA alcance",
       legal_verifier: null,
+      ...(i === 0 ? { artifact_sha256: "c".repeat(64) } : {}),
     })),
     release_gates: Array.from({ length: 7 }, (_, i) => ({
       id: `G${i + 1}`,
@@ -71,11 +73,28 @@ test("consulta y descarga tres documentos sin acciones ni aceptacion real", asyn
   await setup(page, packet());
   await page.getByRole("button", { name: "Consultar expediente documental" }).click();
   await expect(page.getByText(/Procedencia de los datos/)).toBeVisible();
-  await expect(page.getByRole("link")).toHaveCount(3);
+  const sources = page.getByRole("list", { name: "Fuentes oficiales", exact: true });
+  await expect(sources.getByRole("listitem")).toHaveCount(2);
+  await expect(sources.getByRole("link")).toHaveCount(2);
+  await expect(sources.getByRole("link", { name: "Ley 21.719", exact: true })).toHaveAttribute(
+    "href",
+    "https://www.bcn.cl/leychile/navegar?i=1209272"
+  );
+  await sources.getByText("Publicación y trazabilidad de esta ley", { exact: true }).click();
+  await expect(
+    sources.getByRole("link", { name: "Publicación original en el Diario Oficial", exact: true })
+  ).toHaveAttribute("href", packet().official_sources[0].url);
+  await expect(sources.getByText("SHA-256 de la copia archivada:", { exact: false })).toContainText(
+    "c".repeat(64)
+  );
   await expect(page.getByRole("button", { name: /aprobar|confirmar|activar/i })).toHaveCount(0);
   const download = page.waitForEvent("download");
   await page.getByRole("button", { name: "Descargar expediente JSON" }).click();
-  expect((await download).suggestedFilename()).toBe(`expediente-mvp-${aid}.json`);
+  const file = await download;
+  expect(file.suggestedFilename()).toBe(`expediente-mvp-${aid}.json`);
+  const exported = JSON.parse(await readFile((await file.path())!, "utf8"));
+  expect(exported.official_sources).toEqual(packet().official_sources);
+  expect(exported.packet_hash).toBe(packet().packet_hash);
   await page.getByText("RAT asociado — disponible", { exact: true }).click();
   expect(await page.evaluate(() => Boolean((window as any).bad))).toBe(false);
 });

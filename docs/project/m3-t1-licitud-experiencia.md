@@ -307,3 +307,7 @@ aportadas aun muestran cambios sin guardar; no acreditan por si solas persistenc
 tras recarga. Confirmacion de guardado de base/fundamento resaltada junto al boton,
 solo tras respuesta exitosa y mientras no haya nuevas ediciones. Validacion asistida
 continua; EIPD bloqueada, sin merge/despliegue.
+
+Fuentes del expediente: una entrada visible Ley 21.719 enlaza a BCN; la publicacion
+original y SHA-256 quedan agrupados en sus antecedentes desplegables. Conserva
+fuentes e identidad del JSON sin modificar evidencias ni contratos del servidor.
