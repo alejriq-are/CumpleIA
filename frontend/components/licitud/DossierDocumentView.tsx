@@ -77,8 +77,10 @@ function ValueView({ value }: { value: unknown }) {
           )
           .map(([key, item]) => (
             <div key={key}>
-              <dt className="font-medium">{names[key] ?? "Otro antecedente registrado"}</dt>
-              <dd>
+              <dt className="rounded-t border border-blue-200 bg-blue-100 px-3 py-2 font-semibold text-blue-950">
+                {names[key] ?? "Otro antecedente registrado"}
+              </dt>
+              <dd className="rounded-b border border-t-0 border-blue-200 bg-white px-3 py-3 whitespace-pre-wrap break-words text-slate-950">
                 <ValueView value={item} />
               </dd>
             </div>
@@ -94,8 +96,10 @@ function ValueView({ value }: { value: unknown }) {
 function Field({ label, value }: { label: string; value: unknown }) {
   return (
     <div>
-      <dt className="font-semibold">{label}</dt>
-      <dd className="mt-1">
+      <dt className="rounded-t border border-blue-200 bg-blue-100 px-3 py-2 font-semibold text-blue-950">
+        {label}
+      </dt>
+      <dd className="rounded-b border border-t-0 border-blue-200 bg-white px-3 py-3 whitespace-pre-wrap break-words text-slate-950">
         <ValueView value={value} />
       </dd>
     </div>

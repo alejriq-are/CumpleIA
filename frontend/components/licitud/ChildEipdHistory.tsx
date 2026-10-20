@@ -394,12 +394,22 @@ export function ChildEipdHistory({
                           resolución usa la evaluación y el documento de infancia guardados.
                         </p>
                         <dl>
-                          <dt>Referencia</dt>
-                          <dd>{draft.reference || "Pendiente de completar"}</dd>
-                          <dt>Etiqueta de versión</dt>
-                          <dd>{draft.version || "Sin etiqueta (opcional)"}</dd>
-                          <dt>Notas específicas</dt>
-                          <dd className="whitespace-pre-wrap">
+                          <dt className="rounded-t border border-blue-200 bg-blue-100 px-3 py-2 font-semibold text-blue-950">
+                            Referencia
+                          </dt>
+                          <dd className="rounded-b border border-t-0 border-blue-200 bg-white px-3 py-3 whitespace-pre-wrap break-words text-slate-950">
+                            {draft.reference || "Pendiente de completar"}
+                          </dd>
+                          <dt className="rounded-t border border-blue-200 bg-blue-100 px-3 py-2 font-semibold text-blue-950">
+                            Etiqueta de versión
+                          </dt>
+                          <dd className="rounded-b border border-t-0 border-blue-200 bg-white px-3 py-3 whitespace-pre-wrap break-words text-slate-950">
+                            {draft.version || "Sin etiqueta (opcional)"}
+                          </dd>
+                          <dt className="rounded-t border border-blue-200 bg-blue-100 px-3 py-2 font-semibold text-blue-950">
+                            Notas específicas
+                          </dt>
+                          <dd className="rounded-b border border-t-0 border-blue-200 bg-white px-3 py-3 whitespace-pre-wrap break-words text-slate-950">
                             {draft.notes || "Sin notas (opcional)"}
                           </dd>
                         </dl>
@@ -413,38 +423,48 @@ export function ChildEipdHistory({
                             </h4>
                             <dl className="space-y-2">
                               <div>
-                                <dt>Finalidad</dt>
-                                <dd>
+                                <dt className="rounded-t border border-blue-200 bg-blue-100 px-3 py-2 font-semibold text-blue-950">
+                                  Finalidad
+                                </dt>
+                                <dd className="rounded-b border border-t-0 border-blue-200 bg-white px-3 py-3 whitespace-pre-wrap break-words text-slate-950">
                                   {snapshot.context.purpose_snapshot ?? "Sin finalidad disponible"}
                                 </dd>
                               </div>
                               <div>
-                                <dt>Titulares</dt>
-                                <dd>
+                                <dt className="rounded-t border border-blue-200 bg-blue-100 px-3 py-2 font-semibold text-blue-950">
+                                  Titulares
+                                </dt>
+                                <dd className="rounded-b border border-t-0 border-blue-200 bg-white px-3 py-3 whitespace-pre-wrap break-words text-slate-950">
                                   {snapshot.context.rat_context_snapshot.data_subjects
                                     .map((v) => v.category_name)
                                     .join(", ") || "Sin titulares"}
                                 </dd>
                               </div>
                               <div>
-                                <dt>Categorías</dt>
-                                <dd>
+                                <dt className="rounded-t border border-blue-200 bg-blue-100 px-3 py-2 font-semibold text-blue-950">
+                                  Categorías
+                                </dt>
+                                <dd className="rounded-b border border-t-0 border-blue-200 bg-white px-3 py-3 whitespace-pre-wrap break-words text-slate-950">
                                   {snapshot.context.rat_context_snapshot.data_categories
                                     .map((v) => v.category_name)
                                     .join(", ") || "Sin categorías"}
                                 </dd>
                               </div>
                               <div>
-                                <dt>Base propuesta</dt>
-                                <dd>
+                                <dt className="rounded-t border border-blue-200 bg-blue-100 px-3 py-2 font-semibold text-blue-950">
+                                  Base propuesta
+                                </dt>
+                                <dd className="rounded-b border border-t-0 border-blue-200 bg-white px-3 py-3 whitespace-pre-wrap break-words text-slate-950">
                                   {legalBases.find(
                                     ([code]) => code === snapshot.context?.legal_basis
                                   )?.[1] ?? "Pendiente de definir"}
                                 </dd>
                               </div>
                               <div>
-                                <dt>Fundamento</dt>
-                                <dd className="whitespace-pre-wrap">
+                                <dt className="rounded-t border border-blue-200 bg-blue-100 px-3 py-2 font-semibold text-blue-950">
+                                  Fundamento
+                                </dt>
+                                <dd className="rounded-b border border-t-0 border-blue-200 bg-white px-3 py-3 whitespace-pre-wrap break-words text-slate-950">
                                   {snapshot.context.justification || "Pendiente de completar"}
                                 </dd>
                               </div>
@@ -455,14 +475,20 @@ export function ChildEipdHistory({
                                 )?.[key];
                                 return typeof value === "string" && value ? (
                                   <div key={key}>
-                                    <dt>{label}</dt>
-                                    <dd className="whitespace-pre-wrap">{value}</dd>
+                                    <dt className="rounded-t border border-blue-200 bg-blue-100 px-3 py-2 font-semibold text-blue-950">
+                                      {label}
+                                    </dt>
+                                    <dd className="rounded-b border border-t-0 border-blue-200 bg-white px-3 py-3 whitespace-pre-wrap break-words text-slate-950">
+                                      {value}
+                                    </dd>
                                   </div>
                                 ) : null;
                               })}
                               <div>
-                                <dt>Análisis de edad y alcance guardado</dt>
-                                <dd>
+                                <dt className="rounded-t border border-blue-200 bg-blue-100 px-3 py-2 font-semibold text-blue-950">
+                                  Análisis de edad y alcance guardado
+                                </dt>
+                                <dd className="rounded-b border border-t-0 border-blue-200 bg-white px-3 py-3 whitespace-pre-wrap break-words text-slate-950">
                                   {snapshot.context.child_adolescent_assessment?.assessment
                                     .age_scope_analysis || "Sin documento de infancia guardado"}
                                 </dd>
@@ -586,28 +612,58 @@ export function ChildEipdHistory({
                   </aside>
                 )}
                 <dl>
-                  <dt>Referencia</dt>
-                  <dd>{String(selected.document.document_reference ?? "Sin referencia")}</dd>
-                  <dt>Versión documental</dt>
-                  <dd>{String(selected.document.document_version ?? "Sin declarar")}</dd>
-                  <dt>Notas</dt>
-                  <dd className="whitespace-pre-wrap">
+                  <dt className="rounded-t border border-blue-200 bg-blue-100 px-3 py-2 font-semibold text-blue-950">
+                    Referencia
+                  </dt>
+                  <dd className="rounded-b border border-t-0 border-blue-200 bg-white px-3 py-3 whitespace-pre-wrap break-words text-slate-950">
+                    {String(selected.document.document_reference ?? "Sin referencia")}
+                  </dd>
+                  <dt className="rounded-t border border-blue-200 bg-blue-100 px-3 py-2 font-semibold text-blue-950">
+                    Versión documental
+                  </dt>
+                  <dd className="rounded-b border border-t-0 border-blue-200 bg-white px-3 py-3 whitespace-pre-wrap break-words text-slate-950">
+                    {String(selected.document.document_version ?? "Sin declarar")}
+                  </dd>
+                  <dt className="rounded-t border border-blue-200 bg-blue-100 px-3 py-2 font-semibold text-blue-950">
+                    Notas
+                  </dt>
+                  <dd className="rounded-b border border-t-0 border-blue-200 bg-white px-3 py-3 whitespace-pre-wrap break-words text-slate-950">
                     {String(selected.document.notes ?? "Sin notas")}
                   </dd>
-                  <dt>Fecha registrada (UTC)</dt>
-                  <dd>{selected.created_at}</dd>
+                  <dt className="rounded-t border border-blue-200 bg-blue-100 px-3 py-2 font-semibold text-blue-950">
+                    Fecha registrada (UTC)
+                  </dt>
+                  <dd className="rounded-b border border-t-0 border-blue-200 bg-white px-3 py-3 whitespace-pre-wrap break-words text-slate-950">
+                    {selected.created_at}
+                  </dd>
                 </dl>
                 <details>
                   <summary>Identidad del registro</summary>
                   <dl className="break-all">
-                    <dt>Resolución</dt>
-                    <dd>{selected.id}</dd>
-                    <dt>Documento</dt>
-                    <dd>{selected.document_hash}</dd>
-                    <dt>Contexto</dt>
-                    <dd>{selected.context_hash}</dd>
-                    <dt>Material de infancia</dt>
-                    <dd>{selected.child_material_hash}</dd>
+                    <dt className="rounded-t border border-blue-200 bg-blue-100 px-3 py-2 font-semibold text-blue-950">
+                      Resolución
+                    </dt>
+                    <dd className="rounded-b border border-t-0 border-blue-200 bg-white px-3 py-3 whitespace-pre-wrap break-words text-slate-950">
+                      {selected.id}
+                    </dd>
+                    <dt className="rounded-t border border-blue-200 bg-blue-100 px-3 py-2 font-semibold text-blue-950">
+                      Documento
+                    </dt>
+                    <dd className="rounded-b border border-t-0 border-blue-200 bg-white px-3 py-3 whitespace-pre-wrap break-words text-slate-950">
+                      {selected.document_hash}
+                    </dd>
+                    <dt className="rounded-t border border-blue-200 bg-blue-100 px-3 py-2 font-semibold text-blue-950">
+                      Contexto
+                    </dt>
+                    <dd className="rounded-b border border-t-0 border-blue-200 bg-white px-3 py-3 whitespace-pre-wrap break-words text-slate-950">
+                      {selected.context_hash}
+                    </dd>
+                    <dt className="rounded-t border border-blue-200 bg-blue-100 px-3 py-2 font-semibold text-blue-950">
+                      Material de infancia
+                    </dt>
+                    <dd className="rounded-b border border-t-0 border-blue-200 bg-white px-3 py-3 whitespace-pre-wrap break-words text-slate-950">
+                      {selected.child_material_hash}
+                    </dd>
                   </dl>
                 </details>
                 <p className="rounded border border-blue-300 bg-blue-50 p-3">

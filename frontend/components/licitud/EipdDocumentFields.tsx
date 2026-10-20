@@ -1,4 +1,5 @@
 "use client";
+import { EipdRiskTable } from "./EipdRiskTable";
 import { useEffect, useId, useRef, useState } from "react";
 import { documentFields, type Fields } from "@/lib/licitud/eipd-document";
 type Value = Record<string, unknown>;
@@ -363,7 +364,7 @@ export function EipdDocumentView({
       if (f.item)
         return (
           <div key={key}>
-            <h4>{label}</h4>
+            <h4 className="mt-4 rounded bg-slate-100 p-2 font-semibold text-blue-950">{label}</h4>
             {(x as Value[]).map((row, i) => (
               <div key={i}>{show(f.item!, row, `${label} ${i + 1}`)}</div>
             ))}
@@ -372,8 +373,10 @@ export function EipdDocumentView({
       if (f.fields) return <div key={key}>{show(f.fields, x as Value, label)}</div>;
       return (
         <dl key={key}>
-          <dt>{label}</dt>
-          <dd className="whitespace-pre-wrap break-words">
+          <dt className="rounded-t border border-blue-200 bg-blue-100 px-3 py-2 font-semibold text-blue-950">
+            {label}
+          </dt>
+          <dd className="rounded-b border border-t-0 border-blue-200 bg-white px-3 py-3 whitespace-pre-wrap break-words text-slate-950">
             {f.choices
               ? f.choices.find(([c]) => c === x)?.[1]
               : Array.isArray(x)
@@ -387,7 +390,24 @@ export function EipdDocumentView({
   return (
     <details open={expanded || undefined}>
       <summary>{expanded ? "Contenido preparado" : "Contenido del documento guardado"}</summary>
-      {show(documentFields, value)}
+      <EipdRiskTable value={value} />
+      <div className="mt-4 space-y-4">
+        {show(
+          Object.fromEntries(
+            Object.entries(documentFields).filter(([key]) => key !== "risks" && key !== "measures")
+          ),
+          value
+        )}
+      </div>
+      {((Array.isArray(value.risks) && value.risks.length > 0) ||
+        (Array.isArray(value.measures) && value.measures.length > 0)) && (
+        <details className="mt-4 space-y-3 rounded border p-3">
+          <summary className="font-semibold text-blue-950">
+            Análisis y evidencias por riesgo y medida
+          </summary>
+          {show({ risks: documentFields.risks, measures: documentFields.measures }, value)}
+        </details>
+      )}
     </details>
   );
 }

@@ -183,7 +183,9 @@ for (const successor of [false, true]) {
     await expect(page.getByText("[FICTICIA] Análisis conservado", { exact: true })).toBeVisible();
     await page.getByText("Documento EIPD — disponible", { exact: true }).click();
     await expect(page.getByText("[FICTICIA] Equipo de ensayo", { exact: true })).toBeVisible();
-    await expect(page.getByText("[FICTICIA] Acceso indebido", { exact: true })).toBeVisible();
+    await expect(
+      page.getByRole("table").getByText("[FICTICIA] Acceso indebido", { exact: true })
+    ).toBeVisible();
     await expect(page.getByText("no se promueve", { exact: false })).toHaveCount(0);
     await expect(page.locator("pre:visible")).toHaveCount(0);
     await expect(

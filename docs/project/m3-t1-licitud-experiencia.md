@@ -377,3 +377,31 @@ JSON descargado comprobado con fundamento actualizado, EIPD ENSAYO-1 y bloqueos.
 EIPD sigue incompleta y bloqueada; sin datos reales, merge ni despliegue.
 Pendiente validar asistidamente esta nueva presentacion. Acceso secundario de maqueta
 y alcance de Preparar documento en adultos siguen anotados para el siguiente bloque.
+
+## Vistas previas y relacion de riesgos con controles
+
+Titulos de campos destacados en azul y fondo azul claro, respuestas en fondo
+blanco y texto oscuro: vistas EIPD compartidas, expediente RAT/licitud-LIA,
+preparacion/lectura de resoluciones y maqueta. No modifica datos ni contratos.
+EIPD presenta tabla por riesgo: identificador/descripcion, impacto, analisis
+inicial, medidas asociadas, implementacion/eficacia y analisis residual. Vinculo
+por risk_ids exactos, admite multiples controles y controles compartidos; advierte
+medidas sin vinculo. Analisis completos/evidencias permanecen en desplegable.
+Nivel residual global no se atribuye a riesgos individuales. Niveles inherente y
+residual por riesgo, probabilidad/impacto y grado de mitigacion separados no existen
+en el contrato actual: se informa su ausencia y no se calculan ni infieren.
+Metodologia y ampliacion del contrato requieren bloque posterior, no aprobacion
+por apariencia de tabla. EIPD permanece bloqueada.
+
+27 Chromium dirigidas unicas aprobadas: 25 vistas/expediente/workspace y 2 vistas
+de preparacion en infancia/maqueta. Tipos, ESLint y formato aprobados; pruebas
+con CSS real, vista escritorio inspeccionada y movil 390 px sin desbordamiento de
+pagina, tabla con desplazamiento horizontal y foco de teclado. Suite eipd-preview
+incluida en script habitual y CI. Descarga conserva paquete completo.
+
+Recorrido manual EIPD completado con R1/evidencia y M1 asociado, residual sin
+resolver/seguimiento; JSON actualizado coincide. Tres fundamentos pendientes no
+se completaron en el ensayo: no se detecta perdida de datos. Proximos bloques
+acordados: anexos de respaldo; investigar filas vacias sin asumir origen y mejorar
+guardado incompleto; evidencias de consulta a autoridad segun estado conservando
+antecedentes ya guardados; definir metodologia de valoracion de riesgos.

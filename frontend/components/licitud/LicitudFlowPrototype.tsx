@@ -137,8 +137,12 @@ function DocumentContent({ document }: { document: PreparedDocument }) {
     <dl className="space-y-3">
       {fields.map(([label, value]) => (
         <div key={label}>
-          <dt className="font-semibold">{label}</dt>
-          <dd className="whitespace-pre-wrap break-words">{value}</dd>
+          <dt className="rounded-t border border-blue-200 bg-blue-100 px-3 py-2 font-semibold text-blue-950">
+            {label}
+          </dt>
+          <dd className="rounded-b border border-t-0 border-blue-200 bg-white px-3 py-3 whitespace-pre-wrap break-words text-slate-950">
+            {value}
+          </dd>
         </div>
       ))}
     </dl>
@@ -697,24 +701,38 @@ export function LicitudFlowPrototype() {
                   </button>
                   <dl className="grid gap-3 text-sm sm:grid-cols-2">
                     <div>
-                      <dt className="font-semibold">Base de licitud</dt>
-                      <dd>Pendiente de evaluación jurídica</dd>
+                      <dt className="rounded-t border border-blue-200 bg-blue-100 px-3 py-2 font-semibold text-blue-950">
+                        Base de licitud
+                      </dt>
+                      <dd className="rounded-b border border-t-0 border-blue-200 bg-white px-3 py-3 whitespace-pre-wrap break-words text-slate-950">
+                        Pendiente de evaluación jurídica
+                      </dd>
                     </div>
                     <div>
-                      <dt className="font-semibold">Infancia</dt>
-                      <dd>
+                      <dt className="rounded-t border border-blue-200 bg-blue-100 px-3 py-2 font-semibold text-blue-950">
+                        Infancia
+                      </dt>
+                      <dd className="rounded-b border border-t-0 border-blue-200 bg-white px-3 py-3 whitespace-pre-wrap break-words text-slate-950">
                         {adult
                           ? "Fuera del alcance de este ejemplo de adultos"
                           : "Documento de infancia de ejemplo disponible"}
                       </dd>
                     </div>
                     <div>
-                      <dt className="font-semibold">Revisión precargada</dt>
-                      <dd>Requiere cambios · ejemplo histórico</dd>
+                      <dt className="rounded-t border border-blue-200 bg-blue-100 px-3 py-2 font-semibold text-blue-950">
+                        Revisión precargada
+                      </dt>
+                      <dd className="rounded-b border border-t-0 border-blue-200 bg-white px-3 py-3 whitespace-pre-wrap break-words text-slate-950">
+                        Requiere cambios · ejemplo histórico
+                      </dd>
                     </div>
                     <div>
-                      <dt className="font-semibold">Facultad de organización</dt>
-                      <dd>{revoked ? "Revocada" : "Vigente solo en el escenario simulado"}</dd>
+                      <dt className="rounded-t border border-blue-200 bg-blue-100 px-3 py-2 font-semibold text-blue-950">
+                        Facultad de organización
+                      </dt>
+                      <dd className="rounded-b border border-t-0 border-blue-200 bg-white px-3 py-3 whitespace-pre-wrap break-words text-slate-950">
+                        {revoked ? "Revocada" : "Vigente solo en el escenario simulado"}
+                      </dd>
                     </div>
                   </dl>
                   <p className="text-sm">
