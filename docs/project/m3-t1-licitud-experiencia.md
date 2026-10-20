@@ -324,3 +324,35 @@ incluye infancia/adolescencia o hay antecedentes. Error de consulta sigue visibl
 Borrador EIPD general permanece consultable y aclara que sus revisiones formales
 no estan integradas. Persistencia EIPD tras recarga comprobada manualmente por el
 usuario (referencias, etiqueta y preparado por); activacion permanece bloqueada.
+
+## Punto de pausa de validacion asistida — 20/10/2026
+
+Usuario solicita detener las pruebas y retomarlas en unas horas. No hay pruebas
+en ejecucion ni se programa continuacion automatica.
+
+Comprobado con datos ficticios de trabajadores adultos: alcance RAT separado;
+base/fundamento conserva ediciones entre pestanas, guarda y recupera tras recarga;
+borrador EIPD conserva datos al navegar y recupera referencia, etiqueta, referencia
+de informe y preparado por tras recarga. Copia EIPD guardada consultable en Revisar
+documentos, con finalidad y operaciones. Documento incompleto (33 pendientes en
+la captura), sin aprobacion ni activacion.
+
+Ultimo cambio publicado: b3fb880, oculta bloque e instrucciones de infancia cuando
+no aplican y el historial esta vacio; conserva antecedentes y errores de consulta.
+12 pruebas Chromium del recorrido, tipos y lint aprobados localmente. Rama
+feature/m3-t1-licitud-persistencia; no se declara CI remota de este commit validada.
+Cambios anteriores: c7b7fa6 confirmacion de guardado base/fundamento y 2bcb6a5
+referencia visual unica de Ley 21.719 con antecedentes desplegables.
+
+Retomar: recargar la evaluacion ficticia de trabajadores y abrir Revisar documentos
+para validar manualmente el ocultamiento publicado en b3fb880. Luego Historial y
+descargas: consultar expediente actualizado y verificar contenido/JSON con EIPD.
+No se ha validado manualmente todavia ese ultimo ocultamiento ni la exportacion
+actualizada con el borrador EIPD de trabajadores.
+
+Pendientes de UX: destacar confirmacion junto a Guardar borrador EIPD (registrado,
+sin implementar); relegar acceso de maqueta V3 y actualizar su texto de entrada;
+revisar aplicabilidad de la accion Preparar documento para revision en adultos,
+pues el contrato de resoluciones conectado sigue siendo el de infancia. Revision
+formal de EIPD general/adopcion RAT-LIA y origen/motivo estructurados siguen fuera
+del bloque integrado actual. EIPD y datos reales bloqueados; sin merge/despliegue.
