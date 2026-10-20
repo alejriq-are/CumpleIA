@@ -147,6 +147,10 @@ test("crea borrador, abre y guarda LIA y recupera el historial sin activar EIPD"
     .fill("[FICTICIA] Necesidad de prueba");
   await page.getByRole("button", { name: "Guardar borrador", exact: true }).click();
   await expect(page.getByRole("status")).toContainText("Borrador guardado");
+  await expect(page.getByRole("status")).toContainText(
+    "Los cambios se guardaron correctamente en el servidor"
+  );
+  await expect(page.getByText("Cambios sin guardar.", { exact: false })).toHaveCount(0);
   await page.evaluate(() => (window as any).workspace());
   await expect(page.getByLabel("Tratamiento del RAT", { exact: true })).toBeVisible();
   await page.getByLabel("Tratamiento del RAT").selectOption(treatment);

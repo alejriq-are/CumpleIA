@@ -104,7 +104,7 @@ export function LegalAssessmentEditor({
       setBaseline(fingerprint);
       onSaved?.(out);
       setMessage(
-        "Borrador guardado. La documentación sigue pendiente de revisión jurídica. Los diagnósticos y consultas dependientes se actualizan automáticamente."
+        "Borrador guardado. Los cambios se guardaron correctamente en el servidor. La evaluación continúa en borrador, pendiente de revisión jurídica."
       );
     } catch (e) {
       setError(
@@ -120,7 +120,6 @@ export function LegalAssessmentEditor({
     <section className="space-y-4 rounded border p-4">
       <h2 className="text-xl font-semibold">Evaluación y fundamento</h2>
       {error && <p role="alert">{error}</p>}
-      {message && <p role="status">{message}</p>}
       {row ? (
         <form onSubmit={save} className="space-y-4">
           <p>
@@ -206,6 +205,14 @@ export function LegalAssessmentEditor({
             >
               {busy ? "Guardando…" : "Guardar borrador"}
             </button>
+          )}
+          {message && !dirty && (
+            <p
+              role="status"
+              className="rounded border border-green-600 bg-green-50 p-3 text-green-900"
+            >
+              {message}
+            </p>
           )}
         </form>
       ) : (

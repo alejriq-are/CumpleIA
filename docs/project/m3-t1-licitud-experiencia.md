@@ -297,3 +297,13 @@ estructurada de origen/motivo de la maqueta no se incorporan por inferencia.
 Pendientes: validacion asistida del recorrido conectado, contrato de esos artefactos,
 cobertura de revision EIPD general y aceptacion juridica humana/fuentes/evidencias
 aplicables. No habilita confirmacion, datos reales, activacion, merge ni despliegue.
+
+
+## Validacion asistida del recorrido conectado — 20/10/2026
+
+Usuario confirma alcance separado, aviso de cambios pendientes y conservacion del
+fundamento al navegar entre pestanas con trabajadores ficticios. Las capturas
+aportadas aun muestran cambios sin guardar; no acreditan por si solas persistencia
+tras recarga. Confirmacion de guardado de base/fundamento resaltada junto al boton,
+solo tras respuesta exitosa y mientras no haya nuevas ediciones. Validacion asistida
+continua; EIPD bloqueada, sin merge/despliegue.
