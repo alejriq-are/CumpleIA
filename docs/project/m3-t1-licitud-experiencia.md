@@ -405,3 +405,9 @@ se completaron en el ensayo: no se detecta perdida de datos. Proximos bloques
 acordados: anexos de respaldo; investigar filas vacias sin asumir origen y mejorar
 guardado incompleto; evidencias de consulta a autoridad segun estado conservando
 antecedentes ya guardados; definir metodologia de valoracion de riesgos.
+
+Accion de Completar datos renombrada a Preparar resolucion documental de infancia,
+coherente con el formulario y contrato que abre. No prepara una resolucion general
+para adultos ni crea una version independiente de licitud/LIA. Aplicabilidad de
+esta accion en alcance adulto y consulta integral en Revisar documentos siguen
+pendientes de un bloque de navegacion coherente.

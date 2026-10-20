@@ -348,7 +348,7 @@ test("recorrido integrado conserva ambos borradores, refresca consultas y exige 
     "[FICTICIA] Cinco participantes"
   );
   await page
-    .getByRole("button", { name: "Preparar documento para revisión", exact: true })
+    .getByRole("button", { name: "Preparar resolución documental de infancia", exact: true })
     .first()
     .click();
   await expect(
@@ -364,7 +364,7 @@ test("recorrido integrado conserva ambos borradores, refresca consultas y exige 
     0
   );
   await page
-    .getByRole("button", { name: "Preparar documento para revisión", exact: true })
+    .getByRole("button", { name: "Preparar resolución documental de infancia", exact: true })
     .first()
     .click();
   await page

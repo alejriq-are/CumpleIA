@@ -207,7 +207,7 @@ export function AssessmentFlow({
             className={section === "preparar" ? "bg-blue-800 text-white" : "bg-white"}
             onClick={() => setSection("preparar")}
           >
-            Preparar documento para revisión
+            Preparar resolución documental de infancia
           </button>
         </nav>
         <div hidden={section !== "alcance"}>
