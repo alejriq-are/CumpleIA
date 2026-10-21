@@ -4,7 +4,7 @@ import path from "node:path";
 let bundle: string;
 test.beforeAll(async () => {
   bundle = await browserBundle(
-    `import React from "react";import {createRoot} from "react-dom/client";import {EipdDocumentView} from ${JSON.stringify(path.resolve("components/licitud/EipdDocumentFields.tsx"))};window.renderPreview=value=>createRoot(document.getElementById("root")).render(React.createElement(EipdDocumentView,{value,expanded:true}));`
+    `import React from "react";import {createRoot} from "react-dom/client";import {EipdDocumentView} from ${JSON.stringify(path.resolve("components/licitud/EipdDocumentFields.tsx"))};window.renderPreview=(value,valuation)=>createRoot(document.getElementById("root")).render(React.createElement(EipdDocumentView,{value,expanded:true,valuation}));`
   );
 });
 const value = {
@@ -119,3 +119,58 @@ test("documento sin riesgos conserva medidas y datos sin fabricar asociaciones",
   await page.getByText("Análisis y evidencias por riesgo y medida", { exact: true }).click();
   await expect(page.getByText("[FICTICIA] Medida sin riesgos", { exact: true })).toBeVisible();
 });
+
+for (const current of [true, false])
+  test(`tabla distingue valoración vigente de histórica: ${current}`, async ({ page }) => {
+    await setup(page, value);
+    const valuation = {
+      revision: 1,
+      current,
+      analysis: {
+        risks: [
+          {
+            risk_id: "R1",
+            harm: "[FICTICIA] Discriminación",
+            inherent: { probability: 2, impact: 3 },
+            projected: { probability: 1, impact: 3 },
+            residual: { probability: null, impact: null },
+          },
+        ],
+        controls: [
+          {
+            measure_id: "M1",
+            dimension: "probabilidad",
+            effectiveness: "parcial",
+            status: "propuesta",
+            rationale: "[FICTICIA] Pendiente verificar",
+          },
+        ],
+      },
+      result: {
+        risks: [{ risk_id: "R1", inherent: "alto", projected: "medio", residual: "sin_resolver" }],
+      },
+    };
+    await page.evaluate(
+      ({ value, valuation }) => {
+        document.getElementById("root")!.remove();
+        const root = document.createElement("div");
+        root.id = "root";
+        document.querySelector("main")!.append(root);
+        (window as any).renderPreview(value, valuation);
+      },
+      { value, valuation }
+    );
+    const first = page.getByRole("table").getByRole("row").nth(1);
+    if (current) {
+      await expect(first).toContainText("Probabilidad: Media. Impacto: Grave.");
+      await expect(first).toContainText("Nivel por riesgo: Alto.");
+      await expect(first).toContainText("Residual actual: Sin resolver. Previsto: Medio.");
+    } else {
+      await expect(first).toContainText("Nivel por riesgo: Sin resolver.");
+      await expect(first).not.toContainText("Probabilidad: Media.");
+    }
+    if (current && process.env.CUMPLEIA_PREVIEW_CSS) {
+      await page.setViewportSize({ width: 1440, height: 1000 });
+      await page.screenshot({ path: "/tmp/cumpleia-risks-desktop.png", fullPage: true });
+    }
+  });

@@ -147,7 +147,9 @@ export function ChildAdolescentPage({
           readOnly={readOnly}
           organizationAcceptance={organizationAcceptance}
           view={view === "completar" ? "prepare" : view ? "review" : "all"}
-          onPrepare={() => onView?.("completar")}
+          onPrepare={() => {
+            if (!preparationBlocked) onView?.("completar");
+          }}
           onRecorded={() => {
             onSaved?.();
             onView?.("revisar");

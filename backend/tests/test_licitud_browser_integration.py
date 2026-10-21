@@ -76,6 +76,18 @@ async def test_workspace_real_api(rat_m3, client_a, org_a_id, _session_factory):
                     {"id": tid},
                 )
             ).all()
+            support = (
+                await db.execute(
+                    text(
+                        "SELECT kind,payload FROM assessment_support_records WHERE treatment_id=:id ORDER BY kind"
+                    ),
+                    {"id": tid},
+                )
+            ).all()
+            assert [r[0] for r in support] == ["annex", "risk"]
+            assert support[0][1]["reference"] == "SIMULADA-ANEXO-R1"
+            assert support[1][1]["result"]["risks"][0]["inherent"] == "alto"
+            assert support[1][1]["result"]["unresolved"] is True
             assert len(rows) == 1
             assert tuple(rows[0]) == (
                 "borrador",

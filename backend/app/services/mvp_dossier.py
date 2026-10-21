@@ -178,7 +178,10 @@ async def build(db, org, tid, aid):
                 "Documento previo si existe; no se promueve a cobertura infancia ni hereda aceptacion.",
             )
         )
+    from app.services.assessment_support import snapshot
+
     payload = dict(
+        support=await snapshot(db, org, tid, aid),
         organization_id=org,
         treatment_id=tid,
         assessment_id=aid,

@@ -6,6 +6,9 @@ import { LegalAssessmentEditor } from "./LegalAssessmentEditor";
 import { sessionToken } from "./LicitudWorkspace";
 import { EipdDocumentView } from "./EipdDocumentFields";
 import { EipdDraftEditor } from "./EipdDraftEditor";
+import { AssessmentSupportPanel } from "./AssessmentSupportPanel";
+import { DossierDocumentView } from "./DossierDocumentView";
+import type { Support } from "@/lib/api/assessment-support";
 import { ChildAdolescentPage } from "./ChildAdolescentPage";
 export type FlowTab = "resumen" | "completar" | "revisar" | "historial";
 const tabs: [FlowTab, string][] = [
@@ -30,9 +33,9 @@ export function AssessmentFlow({
   token?: () => Promise<string>;
 }) {
   const [tab, setTab] = useState<FlowTab>("resumen");
-  const [section, setSection] = useState<"alcance" | "base" | "infancia" | "preparar" | "eipd">(
-    "alcance"
-  );
+  const [section, setSection] = useState<
+    "alcance" | "base" | "infancia" | "preparar" | "eipd" | "valorar" | "anexos"
+  >("alcance");
   const [row, setRow] = useState<Assessment | null>(null);
   const [refreshVersion, setRefreshVersion] = useState(0);
   const [legalDirty, setLegalDirty] = useState(false);
@@ -40,8 +43,10 @@ export function AssessmentFlow({
   const [resolutionHistory, setResolutionHistory] = useState<boolean | null>(null);
   const [documentDirty, setDocumentDirty] = useState(false);
   const [eipdDirty, setEipdDirty] = useState(false);
+  const [supportDirty, setSupportDirty] = useState(false);
+  const [support, setSupport] = useState<Support | null>(null);
   const dirty = legalDirty || childDirty || eipdDirty;
-  const hasUnsaved = dirty || documentDirty;
+  const hasUnsaved = dirty || documentDirty || supportDirty;
   const childRelevant = Boolean(
     row?.rat_context_snapshot?.special_regimes?.includes_children ||
     row?.rat_context_snapshot?.special_regimes?.includes_adolescents ||
@@ -204,11 +209,27 @@ export function AssessmentFlow({
           </button>
           <button
             type="button"
-            className={section === "preparar" ? "bg-blue-800 text-white" : "bg-white"}
-            onClick={() => setSection("preparar")}
+            className={section === "valorar" ? "bg-blue-800 text-white" : "bg-white"}
+            onClick={() => setSection("valorar")}
           >
-            Preparar resolución documental de infancia
+            Valorar riesgos
           </button>
+          <button
+            type="button"
+            className={section === "anexos" ? "bg-blue-800 text-white" : "bg-white"}
+            onClick={() => setSection("anexos")}
+          >
+            Anexos de respaldo
+          </button>
+          {childRelevant && (
+            <button
+              type="button"
+              className={section === "preparar" ? "bg-blue-800 text-white" : "bg-white"}
+              onClick={() => setSection("preparar")}
+            >
+              Preparar resolución documental de infancia
+            </button>
+          )}
         </nav>
         <div hidden={section !== "alcance"}>
           <section aria-label="Alcance RAT asociado" className="space-y-2 rounded border p-4">
@@ -277,6 +298,7 @@ export function AssessmentFlow({
             onDirty={setEipdDirty}
             onSaved={saved}
             onLoaded={loaded}
+            valuation={support?.risk_evaluation}
           />
         </div>
       </section>
@@ -289,6 +311,56 @@ export function AssessmentFlow({
         className="space-y-3"
       >
         <h2 className="text-xl font-semibold">Revisar documentos guardados</h2>
+        <p>
+          Consulta lo guardado; las ediciones pendientes no se incluyen. Consultar contenido no
+          emite una revisión formal.
+        </p>
+        {row && (
+          <>
+            <section aria-label="Alcance RAT guardado" className="space-y-3 rounded border p-4">
+              <h3 className="font-semibold">Alcance RAT asociado guardado</h3>
+              <details>
+                <summary>Consultar alcance RAT</summary>
+                <DossierDocumentView
+                  document={{
+                    kind: "rat",
+                    status: "disponible",
+                    version: 1,
+                    coverage: "",
+                    content_hash: null,
+                    organization_acceptance: "sin_flujo",
+                    acceptance_events: [],
+                    content: { ...row.rat_context_snapshot, purpose: row.purpose_snapshot },
+                  }}
+                />
+              </details>
+            </section>
+            <section
+              aria-label="Evaluación de licitud guardada"
+              className="space-y-3 rounded border p-4"
+            >
+              <h3 className="font-semibold">
+                Base de licitud, fundamento y LIA · evaluación versión {row.version}
+              </h3>
+              <details>
+                <summary>Consultar evaluación de licitud y LIA</summary>
+                <DossierDocumentView
+                  document={{
+                    kind: "licitud_lia",
+                    status: "disponible",
+                    version: row.version,
+                    coverage: "",
+                    content_hash: null,
+                    organization_acceptance: "sin_flujo",
+                    acceptance_events: [],
+                    content: { ...row },
+                  }}
+                />
+              </details>
+            </section>
+          </>
+        )}
+
         {row?.eipd_resolution_assessment && (
           <section
             className="space-y-3 rounded border p-4"
@@ -301,7 +373,24 @@ export function AssessmentFlow({
               Consulta el contenido guardado en servidor. Es un borrador documental, distinto de una
               resolución registrada. Los cambios pendientes no se incluyen.
             </p>
-            <EipdDocumentView value={row.eipd_resolution_assessment} />
+            <dl className="space-y-3">
+              <div>
+                <dt className="bg-blue-100 p-2 font-semibold text-blue-950">Referencia EIPD</dt>
+                <dd className="bg-white p-3">
+                  {String(row.eipd_resolution_assessment.document_reference ?? "Sin referencia")}
+                </dd>
+              </div>
+              <div>
+                <dt className="bg-blue-100 p-2 font-semibold text-blue-950">Etiqueta documental</dt>
+                <dd className="bg-white p-3">
+                  {String(row.eipd_resolution_assessment.document_version ?? "Sin etiqueta")}
+                </dd>
+              </div>
+            </dl>
+            <EipdDocumentView
+              value={row.eipd_resolution_assessment}
+              valuation={support?.risk_evaluation}
+            />
             {childReviewVisible && (
               <p>
                 El registro de revisiones disponible abajo corresponde a resoluciones de infancia
@@ -320,7 +409,7 @@ export function AssessmentFlow({
           <p>
             {row?.eipd_resolution_assessment
               ? "El borrador EIPD general está disponible para consulta. El registro de revisiones formales de este documento aún no está integrado."
-              : "No hay documentos guardados para consultar en esta pestaña. Puedes consultar la evaluación guardada en Historial y descargas."}
+              : "No hay un documento EIPD guardado. El alcance RAT y la evaluación de licitud están disponibles arriba."}
           </p>
         )}
       </section>
@@ -336,6 +425,32 @@ export function AssessmentFlow({
           El expediente reúne lo guardado. Los cambios pendientes del formulario no se incluyen.
         </p>
       </section>
+      <AssessmentSupportPanel
+        organizationId={organizationId}
+        treatmentId={treatmentId}
+        assessmentId={assessmentId}
+        token={token}
+        row={row}
+        readOnly={readOnly}
+        blocked={dirty || !row}
+        refreshVersion={refreshVersion}
+        mode={
+          tab === "completar" && section === "valorar"
+            ? "risks"
+            : tab === "completar" && section === "anexos"
+              ? "annexes"
+              : "review"
+        }
+        hidden={
+          !(
+            tab === "revisar" ||
+            (tab === "completar" && (section === "valorar" || section === "anexos"))
+          )
+        }
+        onSaved={childSaved}
+        onLoaded={setSupport}
+        onDirty={setSupportDirty}
+      />
       <ChildAdolescentPage
         organizationId={organizationId}
         treatmentId={treatmentId}
@@ -344,17 +459,17 @@ export function AssessmentFlow({
         token={token}
         view={tab}
         editorVisible={section === "infancia" && childRelevant}
-        preparationVisible={section === "preparar"}
+        preparationVisible={section === "preparar" && childRelevant}
         reviewVisible={childReviewVisible}
         onResolutionHistory={setResolutionHistory}
         onView={(next) => {
-          if (next === "completar") setSection("preparar");
+          if (next === "completar") setSection(childRelevant ? "preparar" : "alcance");
           go(next);
         }}
         refreshVersion={refreshVersion}
         onSaved={childSaved}
         onDirty={setChildDirty}
-        preparationBlocked={dirty || !row}
+        preparationBlocked={dirty || supportDirty || !row || !childRelevant}
         onDocumentPending={setDocumentDirty}
       />
     </div>

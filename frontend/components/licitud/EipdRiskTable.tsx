@@ -1,4 +1,5 @@
 "use client";
+import { type RiskEvaluation, levelLabels } from "@/lib/api/assessment-support";
 type Value = Record<string, unknown>;
 function rows(value: unknown): Value[] {
   return Array.isArray(value)
@@ -10,8 +11,27 @@ function rows(value: unknown): Value[] {
 function text(value: unknown, fallback = "Sin información registrada") {
   return typeof value === "string" && value.trim() ? value : fallback;
 }
+const controlLabels: Record<string, string> = {
+  probabilidad: "Probabilidad",
+  impacto: "Impacto",
+  ambos: "Probabilidad e impacto",
+  no_evaluada: "No evaluada",
+  insuficiente: "Insuficiente",
+  parcial: "Parcial",
+  suficiente: "Suficiente",
+  propuesta: "Propuesta",
+  en_implementacion: "En implementación",
+  verificada: "Verificada",
+};
 const answers: Record<string, string> = { si: "Sí", no: "No", pendiente: "Pendiente" };
-export function EipdRiskTable({ value }: { value: Value }) {
+export function EipdRiskTable({
+  value,
+  valuation,
+}: {
+  value: Value;
+  valuation?: RiskEvaluation | null;
+}) {
+  const current = valuation?.current ? valuation : null;
   const risks = rows(value.risks),
     measures = rows(value.measures);
   if (!risks.length) return null;
@@ -32,9 +52,10 @@ export function EipdRiskTable({ value }: { value: Value }) {
         Relación entre riesgos, controles y riesgo residual
       </h3>
       <p className="text-sm">
-        La tabla muestra los análisis registrados. El formulario actual no registra niveles
-        estructurados por riesgo ni una valoración separada de la mitigación sobre probabilidad e
-        impacto. El nivel residual general se presenta aparte y no se atribuye a cada riesgo.
+        {current
+          ? `Valoración CUMPLEIA-CUALITATIVA-1 · revisión ${current.revision}. Los niveles son orientativos y no autorizan el tratamiento.`
+          : "Sin valoración estructurada vigente. Completa Valorar riesgos; los análisis del documento se conservan."}{" "}
+        El nivel residual general se presenta aparte y no se atribuye a cada riesgo.
       </p>
       <div
         role="region"
@@ -51,7 +72,7 @@ export function EipdRiskTable({ value }: { value: Value }) {
               {[
                 "Riesgo",
                 "Impacto en las personas",
-                "Riesgo inicial",
+                "Riesgo inherente",
                 "Medidas de control",
                 "Eficacia y mitigación",
                 "Riesgo residual",
@@ -65,6 +86,14 @@ export function EipdRiskTable({ value }: { value: Value }) {
           <tbody>
             {risks.map((risk, index) => {
               const controls = linked(risk);
+              const result = current?.result.risks.find((item) => item.risk_id === risk.risk_id);
+              const rating = current?.analysis.risks.find((item) => item.risk_id === risk.risk_id);
+              const ranks = (
+                point: { probability: number | null; impact: number | null } | undefined
+              ) =>
+                point
+                  ? `Probabilidad: ${point.probability ? ["Baja", "Media", "Alta", "Muy alta"][point.probability - 1] : "Sin evaluar"}. Impacto: ${point.impact ? ["Bajo", "Moderado", "Grave", "Muy grave"][point.impact - 1] : "Sin evaluar"}.`
+                  : "";
               return (
                 <tr key={index} className="bg-white even:bg-slate-50">
                   <th
@@ -78,11 +107,13 @@ export function EipdRiskTable({ value }: { value: Value }) {
                   </th>
                   <td className="whitespace-pre-wrap break-words border border-slate-300 p-3 align-top">
                     {text(risk.impact_analysis)}
+                    {rating?.harm && <p className="mt-2">Daño valorado: {rating.harm}</p>}
                   </td>
                   <td className="whitespace-pre-wrap break-words border border-slate-300 p-3 align-top">
                     <p>{text(risk.initial_assessment_analysis)}</p>
                     <p className="mt-2 font-medium text-slate-700">
-                      Nivel por riesgo: no registrado.
+                      Nivel por riesgo: {levelLabels[result?.inherent ?? "sin_resolver"]}.
+                      {rating && <span className="block">{ranks(rating.inherent)}</span>}
                     </p>
                   </td>
                   <td className="border border-slate-300 p-3 align-top">
@@ -133,7 +164,14 @@ export function EipdRiskTable({ value }: { value: Value }) {
                               )}
                             </p>
                             <p className="font-medium text-slate-700">
-                              Mitigación sobre probabilidad o impacto: no valorada por separado.
+                              {(() => {
+                                const rating = current?.analysis.controls.find(
+                                  (item) => item.measure_id === measure.measure_id
+                                );
+                                return rating
+                                  ? `Dimensión: ${controlLabels[rating.dimension ?? ""] ?? "Sin declarar"}. Eficacia: ${controlLabels[rating.effectiveness]}. Estado: ${controlLabels[rating.status]}. ${rating.rationale}`
+                                  : "Mitigación: pendiente de valoración estructurada.";
+                              })()}
                             </p>
                           </div>
                         ))
@@ -142,7 +180,14 @@ export function EipdRiskTable({ value }: { value: Value }) {
                   <td className="whitespace-pre-wrap break-words border border-slate-300 p-3 align-top">
                     <p>{text(risk.residual_assessment_analysis)}</p>
                     <p className="mt-2 font-medium text-slate-700">
-                      Nivel por riesgo: no registrado.
+                      Residual actual: {levelLabels[result?.residual ?? "sin_resolver"]}. Previsto:{" "}
+                      {levelLabels[result?.projected ?? "sin_resolver"]}.
+                      {rating && (
+                        <>
+                          <span className="block">Actual: {ranks(rating.residual)}</span>
+                          <span className="block">Previsto: {ranks(rating.projected)}</span>
+                        </>
+                      )}
                     </p>
                   </td>
                 </tr>

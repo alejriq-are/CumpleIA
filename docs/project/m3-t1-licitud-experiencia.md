@@ -1,9 +1,9 @@
 # Propuesta de experiencia de licitud
 
-Estado: propuesta aceptada; maqueta navegable V3 actualizada el 19/10/2026.
-Reorganizacion de los formularios operativos pendiente de validar la maqueta.
-Base inspeccionada: 4cb7ae1. Alcance: navegacion y presentacion del flujo existente;
-no ampliar reglas juridicas, facultades, API de aprobacion ni activacion EIPD.
+Estado vigente: recorrido conectado implementado y probado; ampliado con
+valoración estructurada y anexos de respaldo. [Contrato actual y límites](m3-t1-riesgos-anexos.md).
+La propuesta y las versiones de maqueta siguientes son antecedentes del diseño;
+no amplían aprobación jurídica ni activación EIPD.
 
 ## Problema observado
 

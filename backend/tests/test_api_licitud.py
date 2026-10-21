@@ -97,6 +97,13 @@ async def rat_m3(_session_factory, org_a_id, negative_controls):
     }
     async with _session_factory() as db:
         # Limpieza administrativa explicita, exclusivamente de fixtures ficticias.
+        from app.db.assessment_support import AssessmentSupportRecord
+
+        await db.execute(
+            delete(AssessmentSupportRecord).where(
+                AssessmentSupportRecord.treatment_id == treatment_id
+            )
+        )
         from app.db.organization_acceptance import (
             OrganizationAcceptanceAuthority,
             OrganizationDocumentAcceptance,

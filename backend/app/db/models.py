@@ -2117,4 +2117,7 @@ class EipdConfirmationEvidence(Base):
     )
 
 
-from app.db import organization_acceptance  # noqa: E402,F401
+from app.db import (  # noqa: E402
+    assessment_support,  # noqa: E402,F401
+    organization_acceptance,  # noqa: E402,F401
+)

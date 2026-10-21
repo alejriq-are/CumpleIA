@@ -122,7 +122,7 @@ export function MvpDossierPanel({
                     ? `Evaluación asociada: versión ${packet.assessment_version}.`
                     : `Versión: ${d.version ?? "no disponible"}.`}
                 </p>
-                <DossierDocumentView document={d} />
+                <DossierDocumentView document={d} support={packet.support} />
                 {d.kind === "eipd" && Boolean(record(d.content).document) && (
                   <p>
                     {d.acceptance_events.length} eventos documentales ficticios asociados a esta
@@ -138,6 +138,22 @@ export function MvpDossierPanel({
               </div>
             </details>
           ))}
+          {packet.support && (
+            <section className="rounded border p-3" aria-label="Índice de respaldo y valoración">
+              <h3 className="font-semibold">Valoración y anexos del expediente</h3>
+              <p>
+                {packet.support.annexes.length} anexos con referencias y hashes incluidos en la
+                descarga. Descarga los archivos desde Revisar documentos.
+              </p>
+              <p>
+                Valoración:{" "}
+                {packet.support.risk_evaluation
+                  ? `revisión ${packet.support.risk_evaluation.revision}${packet.support.risk_evaluation.current ? " asociada al documento actual" : " histórica, requiere reevaluación"}`
+                  : "sin registro"}
+                .
+              </p>
+            </section>
+          )}
           <h3>Fuentes oficiales para revisión</h3>
           <p>Consultadas, pendientes de revisión de aplicabilidad y aceptación jurídica.</p>
           <ul aria-label="Fuentes oficiales">

@@ -1,5 +1,10 @@
 import { apiFetch, ApiError } from "./client";
-import { documentFields, documentMatches, validDocument } from "@/lib/licitud/eipd-document";
+import {
+  documentFields,
+  documentMatches,
+  validDocument,
+  compactDocument,
+} from "@/lib/licitud/eipd-document";
 import type { Assessment, Scope } from "./licitud";
 export type EipdValue = Record<string, unknown>;
 export type EipdDraftRow = Assessment & { eipd_resolution_assessment: EipdValue | null };
@@ -58,6 +63,7 @@ export const eipdDraftApi = {
     return value;
   },
   save: async (scope: Scope, id: string, document: EipdValue) => {
+    document = compactDocument(document);
     if (!validDocument(document))
       throw new ApiError(400, "Revisa los campos, fechas y referencias del documento EIPD.");
     const value = await apiFetch<EipdDraftRow>(path(scope, id), {

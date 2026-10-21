@@ -1,3 +1,4 @@
+import type { Support } from "./assessment-support";
 import { apiFetch, ApiError } from "./client";
 import type { ChildScope } from "./child-adolescent";
 export type Dossier = {
@@ -10,6 +11,7 @@ export type Dossier = {
   data_provenance: "no_verificada";
   scope: "expediente_documental_rat_licitud_lia_eipd";
   rat_snapshot_note: string;
+  support?: Support | null;
   documents: {
     kind: "rat" | "licitud_lia" | "eipd";
     status: "disponible" | "sin_documento";

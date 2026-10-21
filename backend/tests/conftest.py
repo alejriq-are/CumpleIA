@@ -127,6 +127,12 @@ async def _seed_test_data(_session_factory):
     """Crea orgs, perfiles y membresías de test. Se limpia al final de la sesión."""
     async with _session_factory() as session:
         # Limpiar datos previos en orden FK-seguro (sin ORM cascade)
+        await session.execute(
+            text(
+                "DELETE FROM assessment_support_records WHERE organization_id IN (:a,:b)"
+            ),
+            {"a": _ORG_A_ID, "b": _ORG_B_ID},
+        )
         # Historial protegido: limpieza administrativa explicita solo para tenants de test.
         await session.execute(
             text(
@@ -267,6 +273,12 @@ async def _seed_test_data(_session_factory):
             delete(EipdResolutionReview).where(
                 EipdResolutionReview.organization_id.in_([_ORG_A_ID, _ORG_B_ID])
             )
+        )
+        await session.execute(
+            text(
+                "DELETE FROM assessment_support_records WHERE organization_id IN (:a,:b)"
+            ),
+            {"a": _ORG_A_ID, "b": _ORG_B_ID},
         )
         await session.execute(
             delete(Subscription).where(

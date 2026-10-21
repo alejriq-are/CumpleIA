@@ -197,6 +197,7 @@ function fieldsValid(value: unknown, fields: Fields): boolean {
       );
     return (
       typeof v === "string" &&
+      (!f.required || Boolean(v.trim())) &&
       (!f.choices || f.choices.some(([code]) => code === v)) &&
       (f.kind !== "date" || date(v))
     );
@@ -220,4 +221,22 @@ export function documentMatches(actual: unknown, expected: unknown): boolean {
       object(actual) && Object.entries(expected).every(([k, v]) => documentMatches(actual[k], v))
     );
   return actual === expected;
+}
+
+// Discard only wholly empty optional array rows in a copy at save time.
+// A partially completed evidence is retained and must identify its type.
+export function compactDocument(value: Record<string, unknown>): Record<string, unknown> {
+  const empty = (item: unknown): boolean =>
+    item == null ||
+    item === "" ||
+    (typeof item === "string" && !item.trim()) ||
+    (Array.isArray(item) && item.every(empty)) ||
+    (object(item) && Object.values(item).every(empty));
+  const walk = (item: unknown): unknown =>
+    Array.isArray(item)
+      ? item.filter((row) => !empty(row)).map(walk)
+      : object(item)
+        ? Object.fromEntries(Object.entries(item).map(([key, child]) => [key, walk(child)]))
+        : item;
+  return walk(value) as Record<string, unknown>;
 }

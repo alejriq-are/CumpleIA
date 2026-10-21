@@ -1,17 +1,14 @@
-## Bloque vigente 19/10 — recorrido conectado y EIPD documental guiada
+## Bloque vigente — valoración de riesgos y anexos
 
-Cuatro pestanas integradas a formularios/API existentes, secciones aplicables,
-avisos y borradores conservados entre vistas. Guardados actualizan consultas sin
-recarga. Preparacion de resolucion infancia exige lectura del contexto/documento;
-revision, decision y gestion de facultades separadas. Borrador EIPD general con
-seis secciones: riesgos, medidas asociadas, evidencias y seguimiento persistentes.
-71 Chromium afectados y 4 API/integracion PostgreSQL, tipos/lint/formato aprobados;
-SQL confirma contenido EIPD/LIA y confirmed_at=null. Vista 390/1280 px inspeccionada.
-CI del candidato por consultar. Sin migraciones, permisos u opt-in nuevos.
-Pendiente validacion asistida conectada y contratos de revision general/adopcion
-RAT-LIA y trazabilidad estructurada. No cierre EIPD juridico/operativo integral.
-[Contrato y limites](m3-t1-licitud-experiencia.md#bloque-eipd-documental-guiado-y-conectado--19102026).
-LIC-UX-004 abierto; EIPD/datos reales bloqueados, sin merge/despliegue.
+Método interno CUMPLEIA-CUALITATIVA-1: daño a titulares, probabilidad/gravedad,
+inherente, mitigación cualitativa y residual previsto/actual con evidencias.
+Historial independiente; anexos ficticios versionados PDF/TXT; RLS y descarga
+comprobada. Revisión unificada RAT/licitud-LIA/EIPD, infancia según alcance y
+consulta de autoridad condicional. Migración e67a4b829c10 aplicada localmente,
+38 tablas previas con conteos/checksums conservados. Validación dirigida e
+integrada aprobada; CI nueva por HEAD. [Contrato y evidencia](m3-t1-riesgos-anexos.md).
+Pendiente revisión asistida ampliada y contratos de adopción/revisión formal.
+EIPD/datos reales bloqueados; sin merge/despliegue.
 
 ## Cierre vigente 18/10 — recorrido manual ficticio de Bases de licitud
 

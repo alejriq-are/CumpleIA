@@ -1,4 +1,5 @@
 "use client";
+import type { Support } from "@/lib/api/assessment-support";
 import type { Dossier } from "@/lib/api/mvp-dossier";
 import { legalBases } from "@/lib/api/licitud";
 import { liaFields } from "@/lib/licitud/lia-fields";
@@ -107,8 +108,10 @@ function Field({ label, value }: { label: string; value: unknown }) {
 }
 export function DossierDocumentView({
   document: entry,
+  support,
 }: {
   document: Dossier["documents"][number];
+  support?: Support | null;
 }) {
   if (entry.status !== "disponible" || !entry.content) return <p>No hay documento guardado.</p>;
   const value = record(entry.content);
@@ -126,7 +129,11 @@ export function DossierDocumentView({
             value={value.document_version ?? document.document_version}
           />
         </dl>
-        <EipdDocumentView value={document} expanded />
+        <EipdDocumentView
+          value={document}
+          expanded
+          valuation={value.document ? null : support?.risk_evaluation}
+        />
         <dl>
           <Field label="Notas del documento" value={document.notes ?? value.notes} />
         </dl>

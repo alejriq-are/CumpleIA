@@ -1,4 +1,5 @@
 "use client";
+import type { RiskEvaluation } from "@/lib/api/assessment-support";
 import { EipdRiskTable } from "./EipdRiskTable";
 import { useEffect, useId, useRef, useState } from "react";
 import { documentFields, type Fields } from "@/lib/licitud/eipd-document";
@@ -151,6 +152,51 @@ function Controls({
                 />
               </label>
             </div>
+          );
+        }
+        if (key === "agency_consultation" && f.fields) {
+          const current = (v as Value) || {};
+          const detailsValue = Object.fromEntries(
+            Object.entries(current).filter(([field]) => field !== "status")
+          );
+          const hasDetails = Object.values(detailsValue).some((item) =>
+            Array.isArray(item)
+              ? item.length > 0
+              : item && typeof item === "object"
+                ? Object.values(item).some(Boolean)
+                : Boolean(item)
+          );
+          const showDetails =
+            current.status === "en_curso" || current.status === "concluida" || hasDetails;
+          return (
+            <fieldset key={key} className="space-y-3 rounded border p-3">
+              <legend>{label}</legend>
+              <Controls
+                fields={{ status: f.fields.status }}
+                value={current}
+                prefix={label}
+                onChange={set}
+              />
+              <details
+                open={showDetails || undefined}
+                key={showDetails ? "con-antecedentes" : "sin-antecedentes"}
+                className="space-y-3"
+              >
+                <summary>Antecedentes y evidencias de consulta a la autoridad</summary>
+                <p>
+                  Completa estos antecedentes cuando exista una consulta. Los datos guardados
+                  permanecen visibles aunque cambies su estado.
+                </p>
+                <Controls
+                  fields={Object.fromEntries(
+                    Object.entries(f.fields).filter(([field]) => field !== "status")
+                  )}
+                  value={current}
+                  prefix={label}
+                  onChange={set}
+                />
+              </details>
+            </fieldset>
           );
         }
         if (f.fields)
@@ -352,9 +398,11 @@ export function EipdDocumentFields({
 export function EipdDocumentView({
   value,
   expanded = false,
+  valuation,
 }: {
   value: Value;
   expanded?: boolean;
+  valuation?: RiskEvaluation | null;
 }) {
   function show(fields: Fields, v: Value, prefix = ""): React.ReactNode {
     return Object.entries(fields).map(([key, f]) => {
@@ -390,7 +438,7 @@ export function EipdDocumentView({
   return (
     <details open={expanded || undefined}>
       <summary>{expanded ? "Contenido preparado" : "Contenido del documento guardado"}</summary>
-      <EipdRiskTable value={value} />
+      <EipdRiskTable value={value} valuation={valuation} />
       <div className="mt-4 space-y-4">
         {show(
           Object.fromEntries(

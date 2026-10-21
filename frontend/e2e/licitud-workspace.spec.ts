@@ -33,6 +33,7 @@ test.beforeAll(async () => {
  if(!${integrated})window.fetch=async(url,opts)=>{
   const method=opts.method??"GET";window.demo.calls.push({url,method,body:opts.body?JSON.parse(opts.body):null});
   const result=value=>new Response(JSON.stringify(value),{status:200});
+  if(url.endsWith("/support"))return result({schema_version:1,organization_id:org,treatment_id:tid,assessment_id:tid,document_hash:"f".repeat(64),risk_evaluation:null,risk_history:[],annexes:[],can_confirm:false,activation:"deshabilitada"});
   if(url.endsWith("/readiness"))return result({assessment_id:tid,rat_context_current:true,eipd_resolution:window.demo.rows[0]?.eipd_resolution_assessment?{result:"incompleto",issues:[{field:"risks",code:"analisis_pendiente",category:"incompleto"}]}:null,eipd_controls_v5:null});
   if(url.endsWith("/eipd-child/v4/policy"))return result({policy:{policy_schema_version:1,policy_reference:"m3-t1-infancia-pruebas-negativas-v1",sources_status:"pendiente",acceptance_status:"pendiente",activation:"deshabilitada",allowed_decisions:["requiere_cambios","no_continuar"],global_policy_identity:{policy_version:1,policy_reference:"PRUEBA",policy_hash:"d".repeat(64)}},policy_hash:"e".repeat(64),authorizes_action:false,can_confirm:false});
   if(url.endsWith("/eipd-child/v4/resolutions"))return result([]);
@@ -262,6 +263,66 @@ test("crea borrador, abre y guarda LIA y recupera el historial sin activar EIPD"
   await expect(
     page.getByRole("region", { name: "Borrador EIPD guardado para consulta", exact: true })
   ).toContainText("borrador documental");
+  if (integrated) {
+    await page.getByRole("tab", { name: "Completar datos", exact: true }).click();
+    await page.getByRole("button", { name: "Valorar riesgos", exact: true }).click();
+    const support = page.getByRole("region", {
+      name: "Valoración y anexos de la evaluación",
+      exact: true,
+    });
+    await support
+      .getByLabel("R1 — Daño potencial a las personas", { exact: true })
+      .fill("[FICTICIA] Exposición y pérdida de control");
+    await support
+      .getByLabel("R1 — Inherente, antes de controles — Probabilidad", { exact: true })
+      .selectOption("2");
+    await support
+      .getByLabel("R1 — Inherente, antes de controles — Impacto", { exact: true })
+      .selectOption("3");
+    await support
+      .getByLabel("R1 — Inherente, antes de controles — Fundamento", { exact: true })
+      .fill("[FICTICIA] Escenario plausible y daño grave");
+    await support
+      .getByRole("button", { name: "Guardar valoración de riesgos", exact: true })
+      .click();
+    await expect(support.getByRole("status")).toContainText("Valoración guardada");
+    await page.getByRole("button", { name: "Anexos de respaldo", exact: true }).click();
+    await support
+      .getByLabel("Referencia del anexo (SIMULADA-)", { exact: true })
+      .fill("SIMULADA-ANEXO-R1");
+    await support
+      .getByLabel("Descripción del anexo", { exact: true })
+      .fill("[FICTICIA] Matriz de acceso para R1");
+    await support
+      .getByLabel("Riesgos asociados al anexo, uno por línea", { exact: true })
+      .fill("R1");
+    await support.getByLabel("Archivo ficticio PDF o TXT", { exact: true }).setInputFiles({
+      name: "matriz-ensayo.txt",
+      mimeType: "text/plain",
+      buffer: Buffer.from("[FICTICIA] Acceso simulado"),
+    });
+    await support
+      .getByText("Confirmo que el archivo y sus datos son ficticios", { exact: true })
+      .check();
+    await support.getByRole("button", { name: "Guardar anexo ficticio", exact: true }).click();
+    await expect(support.getByRole("status")).toContainText("Anexo ficticio guardado");
+    const download = page.waitForEvent("download");
+    await support
+      .getByRole("button", { name: "Descargar SIMULADA-ANEXO-R1 versión 1", exact: true })
+      .click();
+    expect((await download).suggestedFilename()).toBe("matriz-ensayo.txt");
+    await page.getByRole("tab", { name: "Revisar documentos", exact: true }).click();
+    await page.getByText("Contenido del documento guardado", { exact: true }).first().click();
+    await expect(
+      page.getByRole("table").getByText("Nivel por riesgo: Alto.", { exact: false })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("region", { name: "Alcance RAT guardado", exact: true })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("region", { name: "Evaluación de licitud guardada", exact: true })
+    ).toBeVisible();
+  }
   await expect(page.getByRole("button", { name: /Confirmar|Activar/ })).toHaveCount(0);
   if (!integrated) {
     const calls = await page.evaluate(() => (window as any).demo.calls);
@@ -540,7 +601,7 @@ for (const mode of ["adultos", "infancia", "error"] as const) {
     });
     if (mode === "adultos") {
       await expect(
-        page.getByText("No hay documentos guardados para consultar en esta pestaña.", {
+        page.getByText("No hay un documento EIPD guardado.", {
           exact: false,
         })
       ).toBeVisible();
@@ -570,7 +631,8 @@ for (const mode of ["adultos", "infancia", "error"] as const) {
       ).toBeHidden();
     } else {
       await expect(history).toBeVisible();
-      if (mode === "error") await expect(page.getByRole("alert")).toBeVisible();
+      if (mode === "error")
+        await expect(page.locator("#licitud-child-history").getByRole("alert")).toBeVisible();
       else
         await expect(
           page.getByText("No hay resoluciones de infancia registradas.", { exact: true })
@@ -578,3 +640,60 @@ for (const mode of ["adultos", "infancia", "error"] as const) {
     }
   });
 }
+
+test("fuentes vacias no aparecen al navegar y borrador incompleto conserva datos parciales", async ({
+  page,
+}) => {
+  test.skip(integrated, "Variantes aisladas");
+  await draft(page);
+  const editor = page.getByRole("region", { name: "Documento EIPD en borrador", exact: true });
+  await expect(page.getByRole("status")).toContainText("Borrador creado");
+  await page.evaluate((tid) => (window as any).flow(tid), treatment);
+  await page.getByRole("tab", { name: "Completar datos", exact: true }).click();
+  await page.getByRole("button", { name: "Documentar EIPD", exact: true }).click();
+  await page.getByRole("button", { name: "5. Fuentes y evidencias", exact: true }).click();
+  await expect(
+    editor.getByLabel("Fuentes del documento — Fuentes 1 — Referencia de la fuente", {
+      exact: true,
+    })
+  ).toHaveCount(0);
+  await expect(
+    editor.getByRole("button", { name: "Añadir consulta a la autoridad — evidencias", exact: true })
+  ).toBeHidden();
+  await editor
+    .getByLabel("Consulta a la autoridad — Estado de consulta", { exact: true })
+    .selectOption("en_curso");
+  await expect(
+    editor.getByRole("button", { name: "Añadir consulta a la autoridad — evidencias", exact: true })
+  ).toBeVisible();
+  await editor
+    .getByLabel("Consulta a la autoridad — Referencia de consulta", { exact: true })
+    .fill("SIMULADA-CONSULTA-001");
+  await editor
+    .getByLabel("Consulta a la autoridad — Estado de consulta", { exact: true })
+    .selectOption("no_solicitada");
+  await expect(
+    editor.getByLabel("Consulta a la autoridad — Referencia de consulta", { exact: true })
+  ).toHaveValue("SIMULADA-CONSULTA-001");
+  await page
+    .getByRole("button", { name: "Añadir fuentes del documento — evidencias", exact: true })
+    .click();
+  await page.getByRole("button", { name: "Guardar borrador EIPD", exact: true }).click();
+  await expect(
+    page.getByText("Borrador EIPD guardado en servidor.", { exact: false })
+  ).toBeVisible();
+  const saved = await page.evaluate(() => (window as any).demo.rows[0].eipd_resolution_assessment);
+  expect(saved.official_sources.evidence).toEqual([]);
+  expect(saved.agency_consultation.consultation_reference).toBe("SIMULADA-CONSULTA-001");
+  await page
+    .getByRole("button", { name: "Añadir fuentes del documento — evidencias", exact: true })
+    .click();
+  await editor
+    .getByLabel("Fuentes del documento — Evidencias 1 — Referencia", { exact: true })
+    .fill("SIMULADA-PARCIAL-001");
+  await page.getByRole("button", { name: "Guardar borrador EIPD", exact: true }).click();
+  await expect(page.getByRole("alert")).toContainText("rechazado");
+  await expect(
+    editor.getByLabel("Fuentes del documento — Evidencias 1 — Referencia", { exact: true })
+  ).toHaveValue("SIMULADA-PARCIAL-001");
+});

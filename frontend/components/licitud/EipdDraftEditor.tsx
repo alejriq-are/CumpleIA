@@ -1,4 +1,5 @@
 "use client";
+import type { RiskEvaluation } from "@/lib/api/assessment-support";
 import { useEffect, useRef, useState } from "react";
 import { documentFields } from "@/lib/licitud/eipd-document";
 import { ApiError } from "@/lib/api/client";
@@ -21,6 +22,7 @@ export function EipdDraftEditor({
   onDirty,
   onSaved,
   onLoaded,
+  valuation,
 }: {
   organizationId: string;
   treatmentId: string;
@@ -31,6 +33,7 @@ export function EipdDraftEditor({
   onDirty?: (dirty: boolean) => void;
   onSaved?: (row: EipdDraftRow) => void;
   onLoaded?: (row: EipdDraftRow) => void;
+  valuation?: RiskEvaluation | null;
 }) {
   const [row, setRow] = useState<EipdDraftRow | null>(null);
   const [doc, setDoc] = useState<EipdValue>({ schema_version: 1 });
@@ -172,6 +175,7 @@ export function EipdDraftEditor({
       {row && (
         <form
           className="space-y-4"
+          noValidate
           onSubmit={(event) => {
             event.preventDefault();
             void save();
@@ -244,7 +248,7 @@ export function EipdDraftEditor({
               className="space-y-2 rounded border border-blue-300 bg-blue-50 p-3"
               aria-label="Vista previa del borrador EIPD"
             >
-              <EipdDocumentView value={doc} expanded />
+              <EipdDocumentView value={doc} expanded valuation={dirty ? null : valuation} />
               <p>
                 Guardar actualiza el borrador; no registra una resolución inmutable. En infancia,
                 preparar y registrar una resolución es una acción separada.

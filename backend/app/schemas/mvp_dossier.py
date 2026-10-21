@@ -55,6 +55,7 @@ class MvpDossierOut(Closed):
         "expediente_documental_rat_licitud_lia_eipd"
     )
     rat_snapshot_note: str
+    support: dict[str, Any] | None = None
     documents: list[DossierDocument]
     official_sources: list[OfficialSource]
     release_gates: list[ReleaseGate]

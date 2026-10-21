@@ -18,19 +18,15 @@ identifica el HEAD exacto de la tarea. Una CI anterior no prueba un commit nuevo
 
 ## Bloque funcional vigente — producto
 
-Validacion asistida retomada: usuario comprobo persistencia de base/fundamento y
-EIPD tras recarga, ocultamiento de infancia en adultos y JSON con contenido EIPD.
-Presentacion ajustada: expediente legible, JSON opcional, texto general sin cobertura
-infancia y confirmacion junto a Guardar borrador EIPD. 22 Chromium dirigidas,
-tipos/lint/formato y vista movil aprobados localmente. Falta revision asistida de
-esta presentacion. Recorrido y limites en project/m3-t1-licitud-experiencia.md.
-Vistas previas ahora distinguen titulos/respuestas y EIPD incorpora tabla por
-riesgo con controles asociados y analisis residual. 27 Chromium dirigidas locales,
-tipos/lint/formato y vista escritorio/movil comprobados. Sin nuevos niveles ni
-calculos: metodologia estructurada por definir; EIPD sigue bloqueada. Anexos,
-filas vacias y despliegue de evidencias de autoridad son proximos bloques acordados.
-Acceso secundario de maqueta y alcance de Preparar documento en adultos siguen
-anotados para siguiente bloque. EIPD incompleta/bloqueada, sin merge/despliegue.
+Bloque de riesgos/anexos implementado: metodología interna de cuatro niveles,
+inherente/residual previsto/actual, controles fundamentados y respaldo PDF/TXT
+versionado. Revisar documentos reúne RAT, licitud/LIA y EIPD. Preparación infancia
+oculta en adultos; consulta de autoridad condicional y filas vacías corregidas.
+Migración e67a4b829c10 en pruebas y desarrollo local; 38 tablas previas intactas.
+Pruebas dirigidas, tipos/lint/formato y recorrido real aislado aprobados; detalle en
+[contrato vigente](project/m3-t1-riesgos-anexos.md). Pendiente validación asistida
+ampliada y revisión/adopción formal EIPD general/RAT-LIA; EIPD/datos reales bloqueados.
+CI del candidato por comprobar; sin merge/despliegue.
 
 19/10: recorrido Bases de Licitud integrado al servidor: cuatro pestanas,
 secciones cortas, borradores conservados al navegar y diagnosticos/descargas
