@@ -312,7 +312,23 @@ test("formulario y cliente reales registran una negativa en API aislada", async 
       .getByRole("button", { name: "Consultar expediente documental", exact: true })
       .click();
     await expect(page.getByText(/Procedencia de los datos/)).toBeVisible();
-    await expect(page.getByRole("link")).toHaveCount(3);
+    const officialSources = page.getByRole("list", { name: "Fuentes oficiales", exact: true });
+    await expect(
+      officialSources.getByRole("link", { name: "Ley 21.719", exact: true })
+    ).toHaveCount(1);
+    await expect(officialSources.getByRole("link", { name: /Decreto 662/ })).toBeVisible();
+    const publication = officialSources.getByRole("link", {
+      name: "Publicación original en el Diario Oficial",
+      exact: true,
+    });
+    await expect(publication).toBeHidden();
+    await officialSources
+      .getByText("Publicación y trazabilidad de esta ley", { exact: true })
+      .click();
+    await expect(publication).toBeVisible();
+    await officialSources
+      .getByText("Publicación y trazabilidad de esta ley", { exact: true })
+      .click();
     await expect(
       page.getByRole("button", { name: "Descargar expediente JSON", exact: true })
     ).toBeEnabled();

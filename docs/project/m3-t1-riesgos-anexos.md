@@ -73,7 +73,10 @@ Validación local: 24 backend dirigidas de matriz/API/RLS/expediente/runner;
 35 Chromium de soporte, recorrido, tabla y expediente, más 50 regresiones de
 editores e historial de infancia. Cuatro pruebas de listado/integración real con
 Chromium, API y PostgreSQL aislado; incluye guardar/reabrir valoración y anexo,
-descarga exacta y bloqueo de confirmación. Tipos/lint/formato y escritorio/móvil.
+descarga exacta y bloqueo de confirmación. También pasó el recorrido integrado de
+resoluciones, revisiones negativas, decisión y actas ficticias: la prueba exige una
+sola referencia visible a la ley y procedencia opcional, en lugar de contar enlaces.
+Tipos/lint/formato y escritorio/móvil.
 Alembic check sin operaciones nuevas tras alinear índices históricos de modelos.
 No se ejecutó otra batería backend completa sin causa. CI del commit publicado
 se comprueba por HEAD; validación local no equivale a CI aprobada.
