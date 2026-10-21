@@ -78,6 +78,10 @@ resoluciones, revisiones negativas, decisión y actas ficticias: la prueba exige
 sola referencia visible a la ley y procedencia opcional, en lugar de contar enlaces.
 Tipos/lint/formato y escritorio/móvil.
 Alembic check sin operaciones nuevas tras alinear índices históricos de modelos.
+Los ensayos de migraciones ancestrales aíslan/restablecen la FK nueva solo dentro
+de una transacción revertida, en base exclusiva de pruebas y con soporte vacío;
+no eliminan historial ni cambian migraciones publicadas. Dos ensayos de migración
+más 14 regresiones de soporte aprobados tras ajustar esa dependencia.
 No se ejecutó otra batería backend completa sin causa. CI del commit publicado
 se comprueba por HEAD; validación local no equivale a CI aprobada.
 
