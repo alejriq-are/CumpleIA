@@ -1,5 +1,5 @@
 "use client";
-import type { RiskEvaluation } from "@/lib/api/assessment-support";
+import type { RiskEvaluation, Annex } from "@/lib/api/assessment-support";
 import { EipdRiskTable } from "./EipdRiskTable";
 import { useEffect, useId, useRef, useState } from "react";
 import { documentFields, type Fields } from "@/lib/licitud/eipd-document";
@@ -285,97 +285,116 @@ function Controls({
     </div>
   );
 }
+export const eipdGroups: { title: string; description: string; keys: string[] }[] = [
+  {
+    title: "1. Tratamiento y alcance",
+    description:
+      "Describe la finalidad, operaciones, tecnologías y datos incluidos. Usa el alcance de la evaluación guardada como referencia.",
+    keys: [
+      "report_reference",
+      "prepared_by",
+      "completed_on",
+      "purpose_description",
+      "processing_operations",
+      "processing_context",
+      "technologies_description",
+      "exceptions_coverage_analysis",
+      "scope",
+    ],
+  },
+  {
+    title: "2. Necesidad y proporcionalidad",
+    description:
+      "Explica por qué se necesitan los datos, las alternativas y los límites. Las respuestas requieren fundamento; no completan automáticamente la evaluación.",
+    keys: [
+      "necessity_analysis",
+      "proportionality_analysis",
+      "minimization_analysis",
+      "necessary_for_purpose",
+      "proportionate_processing",
+      "minimization_addressed",
+      "performed_before_processing",
+      "prior_assessment_analysis",
+    ],
+  },
+  {
+    title: "3. Riesgos",
+    description:
+      "Añade cada riesgo con un identificador, su impacto y el análisis inicial y residual. El sistema conserva tu análisis; no calcula una puntuación de riesgo.",
+    keys: ["risks"],
+  },
+  {
+    title: "4. Valorar riesgos",
+    description:
+      "Valora el riesgo para las personas y compara el riesgo inherente con el residual previsto y actual verificado.",
+    keys: [],
+  },
+  {
+    title: "5. Medidas",
+    description:
+      "Asocia cada medida a los identificadores de riesgos que aborda. Documenta implementación, eficacia y evidencias; una medida declarada no se considera implementada automáticamente.",
+    keys: ["measures"],
+  },
+  {
+    title: "6. Fuentes y evidencias",
+    description:
+      "Conserva referencias, revisión de aplicabilidad y evidencias. Documenta una consulta a la autoridad solo si corresponde a los antecedentes del caso.",
+    keys: ["official_sources", "agency_consultation", "evidence"],
+  },
+  {
+    title: "7. Riesgo residual y seguimiento",
+    description:
+      "Explica qué riesgo permanece después de las medidas, las limitaciones y el plan de seguimiento. Esta conclusión no aprueba ni activa EIPD.",
+    keys: [
+      "residual_risk_summary",
+      "residual_risk_rationale",
+      "residual_risk_level",
+      "limitations_analysis",
+      "follow_up_plan",
+    ],
+  },
+];
+
+export function EipdSteps({ step, onChange }: { step: number; onChange: (step: number) => void }) {
+  return (
+    <nav aria-label="Pasos documentales EIPD" className="flex flex-wrap gap-2">
+      {eipdGroups.map((group, index) => (
+        <button
+          key={group.title}
+          type="button"
+          className={
+            step === index
+              ? "rounded bg-blue-800 p-2 font-semibold text-white"
+              : "rounded border bg-white p-2"
+          }
+          aria-current={step === index ? "step" : undefined}
+          aria-controls={index === 3 ? "licitud-support-panel" : undefined}
+          onClick={() => onChange(index)}
+        >
+          {group.title}
+        </button>
+      ))}
+    </nav>
+  );
+}
 export function EipdDocumentFields({
   value,
   onChange,
   guided = false,
+  activeStep,
 }: {
   value: Value;
   onChange: (v: Value) => void;
   guided?: boolean;
+  activeStep?: number;
 }) {
-  const [step, setStep] = useState(0);
-  const groups: { title: string; description: string; keys: string[] }[] = [
-    {
-      title: "1. Tratamiento y alcance",
-      description:
-        "Describe la finalidad, operaciones, tecnologías y datos incluidos. Usa el alcance de la evaluación guardada como referencia.",
-      keys: [
-        "report_reference",
-        "prepared_by",
-        "completed_on",
-        "purpose_description",
-        "processing_operations",
-        "processing_context",
-        "technologies_description",
-        "exceptions_coverage_analysis",
-        "scope",
-      ],
-    },
-    {
-      title: "2. Necesidad y proporcionalidad",
-      description:
-        "Explica por qué se necesitan los datos, las alternativas y los límites. Las respuestas requieren fundamento; no completan automáticamente la evaluación.",
-      keys: [
-        "necessity_analysis",
-        "proportionality_analysis",
-        "minimization_analysis",
-        "necessary_for_purpose",
-        "proportionate_processing",
-        "minimization_addressed",
-        "performed_before_processing",
-        "prior_assessment_analysis",
-      ],
-    },
-    {
-      title: "3. Riesgos",
-      description:
-        "Añade cada riesgo con un identificador, su impacto y el análisis inicial y residual. El sistema conserva tu análisis; no calcula una puntuación de riesgo.",
-      keys: ["risks"],
-    },
-    {
-      title: "4. Medidas",
-      description:
-        "Asocia cada medida a los identificadores de riesgos que aborda. Documenta implementación, eficacia y evidencias; una medida declarada no se considera implementada automáticamente.",
-      keys: ["measures"],
-    },
-    {
-      title: "5. Fuentes y evidencias",
-      description:
-        "Conserva referencias, revisión de aplicabilidad y evidencias. Documenta una consulta a la autoridad solo si corresponde a los antecedentes del caso.",
-      keys: ["official_sources", "agency_consultation", "evidence"],
-    },
-    {
-      title: "6. Riesgo residual y seguimiento",
-      description:
-        "Explica qué riesgo permanece después de las medidas, las limitaciones y el plan de seguimiento. Esta conclusión no aprueba ni activa EIPD.",
-      keys: [
-        "residual_risk_summary",
-        "residual_risk_rationale",
-        "residual_risk_level",
-        "limitations_analysis",
-        "follow_up_plan",
-      ],
-    },
-  ];
+  const [localStep, setStep] = useState(0);
+  const step = activeStep ?? localStep;
+  const groups = eipdGroups;
   if (guided)
     return (
       <section className="space-y-4" aria-label="Secciones del análisis EIPD">
-        <nav aria-label="Pasos documentales EIPD" className="flex flex-wrap gap-2">
-          {groups.map((group, index) => (
-            <button
-              key={group.title}
-              type="button"
-              className={
-                step === index ? "rounded bg-blue-800 p-2 text-white" : "rounded border p-2"
-              }
-              aria-current={step === index ? "step" : undefined}
-              onClick={() => setStep(index)}
-            >
-              {group.title}
-            </button>
-          ))}
-        </nav>
+        {activeStep === undefined && <EipdSteps step={step} onChange={setStep} />}
         <p>{groups[step].description}</p>
         <Controls
           fields={Object.fromEntries(groups[step].keys.map((key) => [key, documentFields[key]]))}
@@ -399,10 +418,12 @@ export function EipdDocumentView({
   value,
   expanded = false,
   valuation,
+  annexes,
 }: {
   value: Value;
   expanded?: boolean;
   valuation?: RiskEvaluation | null;
+  annexes?: Annex[];
 }) {
   function show(fields: Fields, v: Value, prefix = ""): React.ReactNode {
     return Object.entries(fields).map(([key, f]) => {
@@ -438,7 +459,7 @@ export function EipdDocumentView({
   return (
     <details open={expanded || undefined}>
       <summary>{expanded ? "Contenido preparado" : "Contenido del documento guardado"}</summary>
-      <EipdRiskTable value={value} valuation={valuation} />
+      <EipdRiskTable value={value} valuation={valuation} annexes={annexes} />
       <div className="mt-4 space-y-4">
         {show(
           Object.fromEntries(

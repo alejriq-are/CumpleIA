@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { licitudApi, legalBases, legalBasisHelp, type Assessment } from "@/lib/api/licitud";
+import { SaveFeedback } from "./SaveFeedback";
 import { sessionToken } from "./LicitudWorkspace";
 import { liaFields } from "@/lib/licitud/lia-fields";
 function section(doc: Record<string, unknown> | null, key: string): Record<string, unknown> {
@@ -119,20 +120,13 @@ export function LegalAssessmentEditor({
   return (
     <section className="space-y-4 rounded border p-4">
       <h2 className="text-xl font-semibold">Evaluación y fundamento</h2>
-      {error && <p role="alert">{error}</p>}
+      {!row && error && <SaveFeedback error={error} />}
       {row ? (
         <form onSubmit={save} className="space-y-4">
           <p>
             {row.purpose_snapshot} — versión {row.version} ({row.status})
           </p>
-          <p
-            role="note"
-            className={dirty ? "rounded border border-amber-400 bg-amber-50 p-3" : "text-sm"}
-          >
-            {dirty
-              ? "Cambios sin guardar. Se conservan al cambiar de pestaña; guarda antes de preparar un documento."
-              : "Contenido cargado del servidor. Guardar no equivale a aprobación jurídica."}
-          </p>
+          <p>Contenido cargado del servidor. Guardar no equivale a aprobación jurídica.</p>
           <p>
             Prueba con datos ficticios. Esta pantalla guarda borradores; no confirma ni activa EIPD.
           </p>
@@ -196,6 +190,13 @@ export function LegalAssessmentEditor({
               ))}
             </fieldset>
           )}
+          <SaveFeedback
+            error={error}
+            message={message}
+            busy={busy}
+            dirty={dirty}
+            dirtyMessage="Cambios sin guardar. Se conservan al cambiar de pestaña; guarda antes de preparar un documento."
+          />
           {row.status !== "borrador" || readOnly ? (
             <p>Consulta de solo lectura.</p>
           ) : (
@@ -205,14 +206,6 @@ export function LegalAssessmentEditor({
             >
               {busy ? "Guardando…" : "Guardar borrador"}
             </button>
-          )}
-          {message && !dirty && (
-            <p
-              role="status"
-              className="rounded border border-green-600 bg-green-50 p-3 text-green-900"
-            >
-              {message}
-            </p>
           )}
         </form>
       ) : (

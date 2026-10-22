@@ -33,13 +33,15 @@ test.beforeAll(async () => {
  if(!${integrated})window.fetch=async(url,opts)=>{
   const method=opts.method??"GET";window.demo.calls.push({url,method,body:opts.body?JSON.parse(opts.body):null});
   const result=value=>new Response(JSON.stringify(value),{status:200});
-  if(url.endsWith("/support"))return result({schema_version:1,organization_id:org,treatment_id:tid,assessment_id:tid,document_hash:"f".repeat(64),risk_evaluation:null,risk_history:[],annexes:[],can_confirm:false,activation:"deshabilitada"});
+  if(url.endsWith("/support"))return result(window.demo.support??{schema_version:1,organization_id:org,treatment_id:tid,assessment_id:tid,document_hash:"f".repeat(64),risk_evaluation:null,risk_history:[],annexes:[],can_confirm:false,activation:"deshabilitada"});
+  if(url.endsWith("/readiness")&&window.demo.mode==="diagnostic-down")return new Response(JSON.stringify({detail:"PRUEBA diagnóstico no disponible"}),{status:503});
   if(url.endsWith("/readiness"))return result({assessment_id:tid,rat_context_current:true,eipd_resolution:window.demo.rows[0]?.eipd_resolution_assessment?{result:"incompleto",issues:[{field:"risks",code:"analisis_pendiente",category:"incompleto"}]}:null,eipd_controls_v5:null});
   if(url.endsWith("/eipd-child/v4/policy"))return result({policy:{policy_schema_version:1,policy_reference:"m3-t1-infancia-pruebas-negativas-v1",sources_status:"pendiente",acceptance_status:"pendiente",activation:"deshabilitada",allowed_decisions:["requiere_cambios","no_continuar"],global_policy_identity:{policy_version:1,policy_reference:"PRUEBA",policy_hash:"d".repeat(64)}},policy_hash:"e".repeat(64),authorizes_action:false,can_confirm:false});
   if(url.endsWith("/eipd-child/v4/resolutions"))return result([]);
   if(url.includes("/rat/treatments"))return result(url.endsWith("/rat/treatments")?[detail]:detail);
   if(method==="POST"){
    if(window.demo.mode==="denied")return new Response(JSON.stringify({detail:"PRUEBA: sin permiso"}),{status:403});
+   if(window.demo.mode==="conflict")return new Response(JSON.stringify({detail:"Ya existe un borrador para esta finalidad"}),{status:409});
    const body=JSON.parse(opts.body);const row={id:tid,organization_id:org,treatment_id:tid,version:1,status:"borrador",purpose_snapshot:detail.purposes[0].purpose,rat_context_snapshot:detail,child_adolescent_assessment:null,eipd_resolution_assessment:null,...body,lia_assessment:null};window.demo.rows=[row];return new Response(JSON.stringify(row),{status:201});
   }
   if(method==="PATCH"){
@@ -88,7 +90,7 @@ test.beforeAll(async () => {
   });
   script = await readFile(path.join(directory, "bundle.js"), "utf8");
   const source = path.join(directory, "styles.css");
-  await writeFile(source, "@tailwind base;@tailwind components;@tailwind utilities;");
+  await writeFile(source, await readFile(path.resolve("app/globals.css"), "utf8"));
   execFileSync(process.execPath, [
     require.resolve("tailwindcss/lib/cli.js"),
     "-i",
@@ -199,14 +201,14 @@ test("crea borrador, abre y guarda LIA y recupera el historial sin activar EIPD"
   await page
     .getByLabel("Riesgos 1 — Descripción", { exact: true })
     .fill("[FICTICIA] Acceso indebido de ensayo");
-  await page.getByRole("button", { name: "4. Medidas", exact: true }).click();
+  await page.getByRole("button", { name: "5. Medidas", exact: true }).click();
   await page.getByRole("button", { name: "Añadir medidas", exact: true }).click();
   await page.getByLabel("Medidas 1 — Identificador de la medida", { exact: true }).fill("M1");
   await page
     .getByLabel("Medidas 1 — Descripción", { exact: true })
     .fill("[FICTICIA] Control de accesos");
   await page.getByLabel("Medidas 1 — Riesgos asociados", { exact: true }).fill("R1");
-  await page.getByRole("button", { name: "6. Riesgo residual y seguimiento", exact: true }).click();
+  await page.getByRole("button", { name: "7. Riesgo residual y seguimiento", exact: true }).click();
   await page
     .getByRole("region", { name: "Documento EIPD en borrador", exact: true })
     .getByLabel("Nivel del riesgo residual", { exact: true })
@@ -216,9 +218,13 @@ test("crea borrador, abre y guarda LIA y recupera el historial sin activar EIPD"
     .getByLabel("Plan de seguimiento", { exact: true })
     .fill("[FICTICIA] Revisar eficacia y evidencias");
   await page.getByRole("button", { name: "Guardar borrador EIPD", exact: true }).click();
-  await expect(
-    page.getByText("Borrador EIPD guardado en servidor.", { exact: false })
-  ).toBeVisible();
+  await expect(page.getByText("Borrador EIPD guardado en servidor.", { exact: false }))
+    .toBeVisible()
+    .catch(async (cause) => {
+      throw new Error(
+        `${cause.message}\nAvisos del guardado ficticio: ${(await page.getByRole("alert").allTextContents()).join("; ")}`
+      );
+    });
   const eipdRegion = page.getByRole("region", { name: "Documento EIPD en borrador", exact: true });
   const success = eipdRegion.getByRole("status");
   await expect(success).toContainText("Borrador EIPD guardado en servidor");
@@ -226,7 +232,7 @@ test("crea borrador, abre y guarda LIA y recupera el historial sin activar EIPD"
     .getByRole("button", { name: "Guardar borrador EIPD", exact: true })
     .boundingBox();
   const successBox = await success.boundingBox();
-  expect(successBox!.y).toBeGreaterThan(saveBox!.y);
+  expect(Math.abs(successBox!.y - saveBox!.y)).toBeLessThan(250);
   await eipdRegion
     .getByLabel("Etiqueta del documento EIPD", { exact: true })
     .fill("CAMBIO-SIN-GUARDAR");
@@ -244,7 +250,7 @@ test("crea borrador, abre y guarda LIA y recupera el historial sin activar EIPD"
   await expect(page.getByLabel("Riesgos 1 — Descripción", { exact: true })).toHaveValue(
     "[FICTICIA] Acceso indebido de ensayo"
   );
-  await page.getByRole("button", { name: "4. Medidas", exact: true }).click();
+  await page.getByRole("button", { name: "5. Medidas", exact: true }).click();
   await expect(page.getByLabel("Medidas 1 — Riesgos asociados", { exact: true })).toHaveValue("R1");
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(
     true
@@ -265,7 +271,7 @@ test("crea borrador, abre y guarda LIA y recupera el historial sin activar EIPD"
   ).toContainText("borrador documental");
   if (integrated) {
     await page.getByRole("tab", { name: "Completar datos", exact: true }).click();
-    await page.getByRole("button", { name: "Valorar riesgos", exact: true }).click();
+    await page.getByRole("button", { name: "4. Valorar riesgos", exact: true }).click();
     const support = page.getByRole("region", {
       name: "Valoración y anexos de la evaluación",
       exact: true,
@@ -314,7 +320,9 @@ test("crea borrador, abre y guarda LIA y recupera el historial sin activar EIPD"
     await page.getByRole("tab", { name: "Revisar documentos", exact: true }).click();
     await page.getByText("Contenido del documento guardado", { exact: true }).first().click();
     await expect(
-      page.getByRole("table").getByText("Nivel por riesgo: Alto.", { exact: false })
+      page
+        .getByRole("table", { name: "Valoración cualitativa de R1", exact: true })
+        .getByText("Alto", { exact: true })
     ).toBeVisible();
     await expect(
       page.getByRole("region", { name: "Alcance RAT guardado", exact: true })
@@ -651,7 +659,7 @@ test("fuentes vacias no aparecen al navegar y borrador incompleto conserva datos
   await page.evaluate((tid) => (window as any).flow(tid), treatment);
   await page.getByRole("tab", { name: "Completar datos", exact: true }).click();
   await page.getByRole("button", { name: "Documentar EIPD", exact: true }).click();
-  await page.getByRole("button", { name: "5. Fuentes y evidencias", exact: true }).click();
+  await page.getByRole("button", { name: "6. Fuentes y evidencias", exact: true }).click();
   await expect(
     editor.getByLabel("Fuentes del documento — Fuentes 1 — Referencia de la fuente", {
       exact: true,
@@ -696,4 +704,151 @@ test("fuentes vacias no aparecen al navegar y borrador incompleto conserva datos
   await expect(
     editor.getByLabel("Fuentes del documento — Evidencias 1 — Referencia", { exact: true })
   ).toHaveValue("SIMULADA-PARCIAL-001");
+});
+
+test("conflicto conocido conserva formulario y permite abrir borrador sin sugerir reintento incierto", async ({
+  page,
+}) => {
+  test.skip(integrated, "Escenario de interfaz con fixtures ficticios");
+  await draft(page);
+  await expect(page.getByRole("status")).toContainText("Borrador creado");
+  await page.evaluate(() => {
+    (window as any).demo.mode = "conflict";
+  });
+  await page.getByLabel("Confirmo que ingreso únicamente datos ficticios de prueba").check();
+  await page.getByRole("button", { name: "Crear borrador", exact: true }).click();
+  const alert = page.getByRole("alert");
+  await expect(alert).toContainText("No se creó otra evaluación");
+  await expect(alert).not.toContainText("Si no recibiste respuesta");
+  await expect(page.getByRole("link", { name: /Abrir borrador existente:/ })).toHaveAttribute(
+    "href",
+    new RegExp(`/dashboard/licitud/${treatment}/`)
+  );
+  await expect(page.getByLabel("Fundamento", { exact: true })).toHaveValue(
+    "[FICTICIA] Prueba de recorrido"
+  );
+  await expect(alert).toBeFocused();
+});
+test("paso 4 de EIPD conserva borradores al navegar y el aviso de base precede Guardar", async ({
+  page,
+}) => {
+  test.skip(integrated, "Escenario de interfaz con fixtures ficticios");
+  await draft(page);
+  await page.evaluate(() => {
+    const d = (window as any).demo;
+    d.rows[0].rat_context_snapshot.special_regimes = {
+      includes_children: false,
+      includes_adolescents: false,
+    };
+  });
+  await page.evaluate((id) => (window as any).flow(id), treatment);
+  await page.getByRole("tab", { name: "Completar datos", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Valorar riesgos", exact: true })).toHaveCount(0);
+  await page.getByRole("button", { name: "2. Base y fundamento", exact: true }).click();
+  await page.getByLabel("Fundamento", { exact: true }).fill("[FICTICIA] Cambio pendiente");
+  const notice = page.getByRole("note").filter({ hasText: "Cambios sin guardar" });
+  expect(
+    await notice.evaluate((el) => el.parentElement?.nextElementSibling?.textContent)
+  ).toContain("Guardar borrador");
+  await page.getByRole("button", { name: "Documentar EIPD", exact: true }).click();
+  await page
+    .getByLabel("Referencia del documento EIPD", { exact: true })
+    .fill("SIMULADA-PENDIENTE");
+  await page.getByRole("button", { name: "4. Valorar riesgos", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Valorar riesgos para las personas" })
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Guardar valoración de riesgos", exact: true })
+  ).toBeDisabled();
+  await expect(page.getByRole("button", { name: "5. Medidas", exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "6. Fuentes y evidencias", exact: true })
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "7. Riesgo residual y seguimiento", exact: true })
+  ).toBeVisible();
+  await page.getByRole("button", { name: "1. Tratamiento y alcance", exact: true }).click();
+  await expect(page.getByLabel("Referencia del documento EIPD", { exact: true })).toHaveValue(
+    "SIMULADA-PENDIENTE"
+  );
+  await page.getByRole("button", { name: "2. Base y fundamento", exact: true }).click();
+  await expect(page.getByLabel("Fundamento", { exact: true })).toHaveValue(
+    "[FICTICIA] Cambio pendiente"
+  );
+  await page.getByRole("tab", { name: "Resumen y siguientes pasos", exact: true }).click();
+  await expect(page.getByText(/contrato documental EIPD de infancia/)).toHaveCount(0);
+});
+
+test("valoración y anexo pendientes se conservan entre pasos EIPD y pestañas", async ({ page }) => {
+  test.skip(integrated, "Escenario de interfaz con fixtures ficticios");
+  await draft(page);
+  await expect(page.getByRole("status")).toContainText("Borrador creado");
+  await page.evaluate(() => {
+    const d = (window as any).demo;
+    d.rows[0].eipd_resolution_assessment = {
+      schema_version: 1,
+      document_reference: "SIMULADA-NAVEGACION",
+      risks: [{ risk_id: "R1" }],
+      measures: [{ measure_id: "M1", risk_ids: ["R1"] }],
+    };
+    d.rows[0].rat_context_snapshot.special_regimes = {
+      includes_children: false,
+      includes_adolescents: false,
+    };
+  });
+  await page.evaluate((id) => (window as any).flow(id), treatment);
+  await page.getByRole("tab", { name: "Completar datos", exact: true }).click();
+  await page.getByRole("button", { name: "Documentar EIPD", exact: true }).click();
+  await page.getByRole("button", { name: "4. Valorar riesgos", exact: true }).click();
+  const harm = page.getByLabel("R1 — Daño potencial a las personas", { exact: true });
+  await harm.fill("[FICTICIA] Borrador de valoración conservado");
+  await page.getByRole("button", { name: "5. Medidas", exact: true }).click();
+  await page.getByRole("button", { name: "Anexos de respaldo", exact: true }).click();
+  await page
+    .getByLabel("Descripción del anexo", { exact: true })
+    .fill("[FICTICIA] Anexo pendiente");
+  await page.getByRole("tab", { name: "Revisar documentos", exact: true }).click();
+  await page.getByRole("tab", { name: "Completar datos", exact: true }).click();
+  await page.getByRole("button", { name: "Documentar EIPD", exact: true }).click();
+  await page.getByRole("button", { name: "4. Valorar riesgos", exact: true }).click();
+  await expect(harm).toHaveValue("[FICTICIA] Borrador de valoración conservado");
+  await page.getByRole("button", { name: "Anexos de respaldo", exact: true }).click();
+  await expect(page.getByLabel("Descripción del anexo", { exact: true })).toHaveValue(
+    "[FICTICIA] Anexo pendiente"
+  );
+  expect(
+    await page.evaluate(
+      () =>
+        (window as any).demo.calls.filter(
+          (c: any) => c.method === "POST" && /risk-evaluations|annexes/.test(c.url)
+        ).length
+    )
+  ).toBe(0);
+});
+
+test("guardado confirmado permanece visible aunque falle el diagnóstico posterior", async ({
+  page,
+}) => {
+  test.skip(integrated, "Fallo controlado de diagnóstico");
+  await draft(page);
+  await expect(page.getByRole("status")).toContainText("Borrador creado");
+  await page.evaluate((id) => (window as any).flow(id), treatment);
+  await page.getByRole("tab", { name: "Completar datos", exact: true }).click();
+  await page.getByRole("button", { name: "Documentar EIPD", exact: true }).click();
+  await page
+    .getByLabel("Referencia del documento EIPD", { exact: true })
+    .fill("SIMULADA-DIAGNOSTICO");
+  await page.evaluate(() => ((window as any).demo.mode = "diagnostic-down"));
+  await page.getByRole("button", { name: "Guardar borrador EIPD", exact: true }).click();
+  const region = page.getByRole("region", { name: "Documento EIPD en borrador", exact: true });
+  await expect(region.getByRole("status")).toContainText("Borrador EIPD guardado en servidor");
+  await expect(region.getByRole("alert")).toContainText(
+    "se guardó, pero el diagnóstico no está disponible"
+  );
+  expect(
+    await page.evaluate(
+      () => (window as any).demo.rows[0].eipd_resolution_assessment.document_reference
+    )
+  ).toBe("SIMULADA-DIAGNOSTICO");
 });

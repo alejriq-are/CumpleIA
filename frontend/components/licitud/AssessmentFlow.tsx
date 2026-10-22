@@ -34,8 +34,9 @@ export function AssessmentFlow({
 }) {
   const [tab, setTab] = useState<FlowTab>("resumen");
   const [section, setSection] = useState<
-    "alcance" | "base" | "infancia" | "preparar" | "eipd" | "valorar" | "anexos"
+    "alcance" | "base" | "infancia" | "preparar" | "eipd" | "anexos"
   >("alcance");
+  const [eipdStep, setEipdStep] = useState(0);
   const [row, setRow] = useState<Assessment | null>(null);
   const [refreshVersion, setRefreshVersion] = useState(0);
   const [legalDirty, setLegalDirty] = useState(false);
@@ -82,7 +83,7 @@ export function AssessmentFlow({
     window.history.replaceState(null, "", `#${next}`);
   }
   return (
-    <div className="space-y-5 [&_button]:rounded [&_button]:border [&_button]:px-3 [&_button]:py-2 [&_button:disabled]:opacity-50">
+    <div className="licitud-ui space-y-5 [&_button]:rounded [&_button]:border [&_button]:px-3 [&_button]:py-2 [&_button:disabled]:opacity-50">
       <p className="rounded border border-blue-200 bg-blue-50 p-4">
         Recorrido conectado al servidor · Solo datos ficticios. Guardar y revisar no confirman ni
         activan EIPD.
@@ -95,8 +96,8 @@ export function AssessmentFlow({
           {readOnly && "Tu rol permite solo consulta."}
         </p>
         <p className="text-sm">
-          La versión de la evaluación y la versión de una resolución documental son registros
-          distintos. Las revisiones se vinculan a la resolución seleccionada.
+          Estás trabajando en la evaluación guardada. Cada resolución documental conserva su propia
+          versión y las revisiones que le corresponden.
         </p>
       </aside>
       <div
@@ -170,8 +171,9 @@ export function AssessmentFlow({
           Ir a completar datos
         </button>
         <p>
-          La preparación disponible corresponde al contrato documental EIPD de infancia. No crea una
-          versión autónoma de RAT o LIA ni determina que una EIPD sea obligatoria.
+          Completa y guarda los datos de esta evaluación. Luego podrás consultar el alcance del RAT,
+          la base de licitud y el documento EIPD guardado, si existe. Guardar no equivale a aprobar
+          la evaluación.
         </p>
       </section>
       <section
@@ -206,13 +208,6 @@ export function AssessmentFlow({
             onClick={() => setSection("eipd")}
           >
             Documentar EIPD
-          </button>
-          <button
-            type="button"
-            className={section === "valorar" ? "bg-blue-800 text-white" : "bg-white"}
-            onClick={() => setSection("valorar")}
-          >
-            Valorar riesgos
           </button>
           <button
             type="button"
@@ -283,8 +278,8 @@ export function AssessmentFlow({
             onDirty={setLegalDirty}
           />
           <p className="text-sm">
-            Guarda el borrador antes de preparar una versión documental. Los análisis de infancia se
-            completan en su sección cuando corresponden al alcance guardado.
+            Guarda el borrador para que tus cambios aparezcan en Revisar documentos.
+            {childRelevant && " Los análisis de infancia se completan en su sección específica."}
           </p>
         </div>
         <div hidden={section !== "eipd"}>
@@ -299,6 +294,9 @@ export function AssessmentFlow({
             onSaved={saved}
             onLoaded={loaded}
             valuation={support?.risk_evaluation}
+            annexes={support?.annexes}
+            step={eipdStep}
+            onStepChange={setEipdStep}
           />
         </div>
       </section>
@@ -390,6 +388,7 @@ export function AssessmentFlow({
             <EipdDocumentView
               value={row.eipd_resolution_assessment}
               valuation={support?.risk_evaluation}
+              annexes={support?.annexes}
             />
             {childReviewVisible && (
               <p>
@@ -435,7 +434,7 @@ export function AssessmentFlow({
         blocked={dirty || !row}
         refreshVersion={refreshVersion}
         mode={
-          tab === "completar" && section === "valorar"
+          tab === "completar" && section === "eipd" && eipdStep === 3
             ? "risks"
             : tab === "completar" && section === "anexos"
               ? "annexes"
@@ -444,7 +443,8 @@ export function AssessmentFlow({
         hidden={
           !(
             tab === "revisar" ||
-            (tab === "completar" && (section === "valorar" || section === "anexos"))
+            (tab === "completar" &&
+              ((section === "eipd" && eipdStep === 3) || section === "anexos"))
           )
         }
         onSaved={childSaved}

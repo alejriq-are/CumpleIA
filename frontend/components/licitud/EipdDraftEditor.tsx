@@ -1,5 +1,5 @@
 "use client";
-import type { RiskEvaluation } from "@/lib/api/assessment-support";
+import type { RiskEvaluation, Annex } from "@/lib/api/assessment-support";
 import { useEffect, useRef, useState } from "react";
 import { documentFields } from "@/lib/licitud/eipd-document";
 import { ApiError } from "@/lib/api/client";
@@ -10,7 +10,8 @@ import {
   type EipdDiagnostic,
   type EipdDraftRow,
 } from "@/lib/api/eipd-draft";
-import { EipdDocumentFields, EipdDocumentView } from "./EipdDocumentFields";
+import { SaveFeedback } from "./SaveFeedback";
+import { EipdDocumentFields, EipdDocumentView, EipdSteps } from "./EipdDocumentFields";
 import { sessionToken } from "./LicitudWorkspace";
 export function EipdDraftEditor({
   organizationId,
@@ -23,6 +24,9 @@ export function EipdDraftEditor({
   onSaved,
   onLoaded,
   valuation,
+  annexes,
+  step = 0,
+  onStepChange,
 }: {
   organizationId: string;
   treatmentId: string;
@@ -34,7 +38,14 @@ export function EipdDraftEditor({
   onSaved?: (row: EipdDraftRow) => void;
   onLoaded?: (row: EipdDraftRow) => void;
   valuation?: RiskEvaluation | null;
+  annexes?: Annex[];
+  step?: number;
+  onStepChange?: (step: number) => void;
 }) {
+  const [localStep, setLocalStep] = useState(0);
+  const activeStep = onStepChange ? step : localStep;
+  const changeStep = onStepChange ?? setLocalStep;
+  const ratingStep = activeStep === 3;
   const [row, setRow] = useState<EipdDraftRow | null>(null);
   const [doc, setDoc] = useState<EipdValue>({ schema_version: 1 });
   const [baseline, setBaseline] = useState("");
@@ -145,7 +156,7 @@ export function EipdDraftEditor({
         setError(
           unknown
             ? "Resultado incierto del guardado EIPD. Conservamos los campos; consulta el expediente antes de reintentar."
-            : "Guardado EIPD rechazado. Revisa el formato, permisos y coherencia del contexto; conservamos los cambios."
+            : `Guardado EIPD rechazado. ${cause.message} Conservamos los cambios para corregirlos.`
         );
       }
     } finally {
@@ -155,25 +166,34 @@ export function EipdDraftEditor({
   }
   const disabled = readOnly || row?.status !== "borrador" || busy || uncertain;
   return (
-    <section aria-label="Documento EIPD en borrador" className="space-y-4 rounded border p-4">
+    <section
+      aria-label="Documento EIPD en borrador"
+      aria-owns={ratingStep ? "licitud-support-panel" : undefined}
+      className="space-y-4 rounded border p-4"
+    >
       <h2 className="text-xl font-semibold">Documentar EIPD</h2>
       <p>
         Este formulario documenta análisis y evidencias de prueba. Abrirlo no determina que una EIPD
         sea obligatoria. La confirmación y la activación permanecen bloqueadas.
       </p>
-      <p
-        role="note"
-        className={dirty ? "rounded border border-amber-400 bg-amber-50 p-3" : "text-sm"}
-      >
-        {dirty
-          ? "EIPD: cambios sin guardar; se conservan al navegar entre secciones y pestañas."
-          : row
+      {!dirty && (
+        <p role="note">
+          {row
             ? "Documento EIPD cargado del servidor. Los pendientes jurídicos no se resuelven al guardar."
             : "Cargando documento EIPD…"}
-      </p>
-      {error && <p role="alert">{error}</p>}
+        </p>
+      )}
+      <EipdSteps step={activeStep} onChange={changeStep} />
+      {!row && error && <SaveFeedback error={error} />}
+      {ratingStep && dirty && (
+        <p className="rounded border border-amber-400 bg-amber-50 p-3">
+          Guarda los cambios del documento desde su sección antes de guardar la valoración. Los
+          campos se conservan al navegar.
+        </p>
+      )}
       {row && (
         <form
+          hidden={ratingStep}
           className="space-y-4"
           noValidate
           onSubmit={(event) => {
@@ -212,6 +232,7 @@ export function EipdDraftEditor({
                 setMessage("");
               }}
               guided
+              activeStep={activeStep}
             />
             <label className="block">
               Notas del borrador EIPD (opcional)
@@ -222,6 +243,13 @@ export function EipdDraftEditor({
                 onChange={(e) => setDoc((value) => ({ ...value, notes: e.target.value || null }))}
               />
             </label>
+            <SaveFeedback
+              error={error}
+              message={message}
+              busy={busy}
+              dirty={dirty}
+              dirtyMessage="EIPD: cambios sin guardar; se conservan al navegar entre secciones y pestañas."
+            />
             <button
               type="button"
               className="rounded border px-4 py-2"
@@ -235,29 +263,30 @@ export function EipdDraftEditor({
               </button>
             )}
           </fieldset>
-          {message && !dirty && (
-            <p
-              role="status"
-              className="rounded border border-green-600 bg-green-50 p-3 text-green-900"
-            >
-              {message}
-            </p>
-          )}
           {preview && (
             <aside
               className="space-y-2 rounded border border-blue-300 bg-blue-50 p-3"
               aria-label="Vista previa del borrador EIPD"
             >
-              <EipdDocumentView value={doc} expanded valuation={dirty ? null : valuation} />
+              <EipdDocumentView
+                value={doc}
+                expanded
+                valuation={dirty ? null : valuation}
+                annexes={annexes}
+              />
               <p>
-                Guardar actualiza el borrador; no registra una resolución inmutable. En infancia,
-                preparar y registrar una resolución es una acción separada.
+                Guardar actualiza el borrador. La revisión formal y cualquier decisión posterior son
+                acciones separadas.
               </p>
             </aside>
           )}
         </form>
       )}
-      <section aria-label="Diagnóstico del documento EIPD" className="space-y-2 rounded border p-3">
+      <section
+        hidden={ratingStep}
+        aria-label="Diagnóstico del documento EIPD"
+        className="space-y-2 rounded border p-3"
+      >
         <h3 className="font-semibold">Diagnóstico del servidor</h3>
         {!diagnostic ? (
           <p>Diagnóstico no disponible. No se presume que el documento esté preparado.</p>
@@ -299,8 +328,8 @@ export function EipdDraftEditor({
           </>
         )}
         <p>
-          Activación EIPD: bloqueada. Sin aprobación jurídica automática ni puntuación de riesgo
-          calculada por el sistema.
+          Activación EIPD: bloqueada. Los niveles de la valoración son orientativos y requieren
+          revisión humana; no equivalen a aprobación jurídica.
         </p>
       </section>
     </section>

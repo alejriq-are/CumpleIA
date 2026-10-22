@@ -4,7 +4,7 @@ import path from "node:path";
 let bundle: string;
 test.beforeAll(async () => {
   bundle = await browserBundle(
-    `import React from "react";import {createRoot} from "react-dom/client";import {EipdDocumentView} from ${JSON.stringify(path.resolve("components/licitud/EipdDocumentFields.tsx"))};window.renderPreview=(value,valuation)=>createRoot(document.getElementById("root")).render(React.createElement(EipdDocumentView,{value,expanded:true,valuation}));`
+    `import React from "react";import {createRoot} from "react-dom/client";import {EipdDocumentView} from ${JSON.stringify(path.resolve("components/licitud/EipdDocumentFields.tsx"))};window.renderPreview=(value,valuation,annexes)=>createRoot(document.getElementById("root")).render(React.createElement(EipdDocumentView,{value,expanded:true,valuation,annexes}));`
   );
 });
 const value = {
@@ -47,34 +47,50 @@ const value = {
     { measure_id: "M3", description: "[FICTICIA] Sin asociación", risk_ids: ["R99"] },
   ],
 };
-async function setup(page: import("@playwright/test").Page, doc: unknown) {
+async function setup(
+  page: import("@playwright/test").Page,
+  doc: unknown,
+  valuation?: unknown,
+  annexes?: unknown
+) {
   await page.setContent(
-    '<main style="max-width:1200px;margin:auto;padding:16px"><div id="root"></div></main>'
+    '<main class="licitud-ui" style="max-width:1200px;margin:auto;padding:16px"><div id="root"></div></main>'
   );
   if (process.env.CUMPLEIA_PREVIEW_CSS)
     await page.addStyleTag({ path: process.env.CUMPLEIA_PREVIEW_CSS });
   await page.addScriptTag({ content: bundle });
-  await page.evaluate((doc) => (window as any).renderPreview(doc), doc);
+  await page.evaluate(
+    ({ doc, valuation, annexes }) => (window as any).renderPreview(doc, valuation, annexes),
+    { doc, valuation, annexes }
+  );
 }
 test("relaciona riesgos y controles sin asignar niveles ni perder las evidencias", async ({
   page,
 }) => {
   await setup(page, value);
-  const table = page.getByRole("table");
-  const first = table.getByRole("row").nth(1),
-    second = table.getByRole("row").nth(2),
-    third = table.getByRole("row").nth(3);
-  await expect(first).toContainText("M1");
-  await expect(first).toContainText("M2");
-  await expect(first).toContainText("Implementada: Pendiente");
-  await expect(first).toContainText("Residual R1");
-  await expect(second).toContainText("M2");
-  await expect(second).not.toContainText("M1");
-  await expect(second).toContainText("Residual R2");
+  const first = page.getByRole("region", { name: "Detalle del riesgo R1", exact: true }),
+    second = page.getByRole("region", { name: "Detalle del riesgo R2", exact: true }),
+    third = page.getByRole("region", { name: "Detalle del riesgo R3", exact: true });
+  await expect(
+    first.getByRole("table", { name: "Controles asociados a R1", exact: true })
+  ).toContainText("M1");
+  await expect(
+    first.getByRole("table", { name: "Controles asociados a R1", exact: true })
+  ).toContainText("M2");
+  await expect(
+    second.getByRole("table", { name: "Controles asociados a R2", exact: true })
+  ).toContainText("M2");
+  await expect(
+    second.getByRole("table", { name: "Controles asociados a R2", exact: true })
+  ).not.toContainText("M1");
   await expect(third).toContainText("Sin medidas asociadas a este riesgo");
-  await expect(table).not.toContainText("M3");
   await expect(page.getByRole("note")).toContainText("M3");
-  await expect(table).not.toContainText("Alto");
+  await expect(
+    first.getByRole("table", { name: "Valoración cualitativa de R1", exact: true })
+  ).not.toContainText("Alto");
+  await first.getByText("Fundamentos, evidencias y seguimiento de R1", { exact: true }).click();
+  await expect(first).toContainText("Residual R1");
+  await expect(first.getByText("SIMULADA-EVIDENCIA-R1", { exact: false })).toBeVisible();
   await expect(page.getByText("Alto", { exact: true })).toBeVisible();
   await page.getByText("Análisis y evidencias por riesgo y medida", { exact: true }).click();
   await expect(page.getByText("SIMULADA-EVIDENCIA-R1", { exact: true })).toBeVisible();
@@ -87,7 +103,7 @@ test("titulos y respuestas diferenciados y tabla navegable en movil", async ({ p
   await expect(title).toHaveClass(/bg-blue-100/);
   await expect(title.locator("+ dd")).toHaveClass(/bg-white/);
   const region = page.getByRole("region", {
-    name: "Tabla de riesgos y controles; desplazamiento horizontal",
+    name: "Valoración cualitativa de R1; desplazamiento horizontal",
     exact: true,
   });
   await expect(region).toHaveAttribute("tabindex", "0");
@@ -160,17 +176,115 @@ for (const current of [true, false])
       },
       { value, valuation }
     );
-    const first = page.getByRole("table").getByRole("row").nth(1);
+    const table = page.getByRole("table", { name: "Valoración cualitativa de R1", exact: true });
+    const first = table.getByRole("row").nth(1),
+      projected = table.getByRole("row").nth(2),
+      actual = table.getByRole("row").nth(3);
     if (current) {
-      await expect(first).toContainText("Probabilidad: Media. Impacto: Grave.");
-      await expect(first).toContainText("Nivel por riesgo: Alto.");
-      await expect(first).toContainText("Residual actual: Sin resolver. Previsto: Medio.");
+      await expect(first).toContainText("Media");
+      await expect(first).toContainText("Grave");
+      await expect(first).toContainText("Alto");
+      await expect(projected).toContainText("Medio");
+      await expect(actual).toContainText("Sin evaluar");
+      await expect(actual).not.toContainText("Medio");
+      const detail = page.getByRole("region", { name: "Detalle del riesgo R1", exact: true });
+      await detail
+        .getByText("Fundamentos, evidencias y seguimiento de R1", { exact: true })
+        .click();
+      await expect(detail).toContainText("[FICTICIA] Pendiente verificar");
     } else {
-      await expect(first).toContainText("Nivel por riesgo: Sin resolver.");
-      await expect(first).not.toContainText("Probabilidad: Media.");
+      await expect(first).toContainText("Pendiente");
+      await expect(first).not.toContainText("Media");
+      await expect(page.getByText(/Sus niveles no se presentan como actuales/)).toBeVisible();
     }
     if (current && process.env.CUMPLEIA_PREVIEW_CSS) {
       await page.setViewportSize({ width: 1440, height: 1000 });
       await page.screenshot({ path: "/tmp/cumpleia-risks-desktop.png", fullPage: true });
     }
   });
+
+test("detalle muestra fundamentos vigentes, horizonte, seguimiento y anexos sin confundir implementación con verificación", async ({
+  page,
+}) => {
+  const valuation = {
+    revision: 4,
+    current: true,
+    analysis: {
+      horizon: "12 meses",
+      risks: [
+        {
+          risk_id: "R1",
+          harm: "[FICTICIA] Pérdida de control",
+          frequency_context: "[FICTICIA] Acceso frecuente",
+          inherent: {
+            probability: 2,
+            impact: 3,
+            rationale: "[FICTICIA] Fundamento inherente vigente",
+          },
+          projected: { probability: 1, impact: 3, rationale: "[FICTICIA] Previsión condicionada" },
+          residual: { probability: null, impact: null, rationale: "" },
+          action: "[FICTICIA] Revisar permisos",
+          owner_reference: "[FICTICIA] Equipo de ensayo",
+          review_on: "2026-11-22",
+        },
+      ],
+      controls: [
+        {
+          measure_id: "M1",
+          dimension: "probabilidad",
+          effectiveness: "parcial",
+          status: "propuesta",
+          rationale: "[FICTICIA] Reducción esperada",
+          evidence_references: ["SIMULADA-EVIDENCIA-M1"],
+        },
+      ],
+    },
+    result: {
+      risks: [{ risk_id: "R1", inherent: "alto", projected: "medio", residual: "sin_resolver" }],
+    },
+  };
+  const annexes = [1, 2].map((version) => ({
+    id: `anexo-${version}`,
+    reference: "SIMULADA-ANEXO-R1-M1",
+    version,
+    filename: `permisos-v${version}.txt`,
+    description: "[FICTICIA] Propuesta",
+    risk_ids: ["R1"],
+    measure_ids: ["M1"],
+  }));
+  await setup(page, value, valuation, annexes);
+  const detail = page.getByRole("region", { name: "Detalle del riesgo R1", exact: true });
+  await expect(page.getByText("Horizonte temporal:", { exact: true }).locator("..")).toContainText(
+    "12 meses"
+  );
+  await expect(detail).toContainText("[FICTICIA] Acceso frecuente");
+  const controls = detail.getByRole("table", { name: "Controles asociados a R1", exact: true });
+  await expect(controls).toContainText("Implementación declarada");
+  await expect(controls).toContainText("Pendiente");
+  await expect(controls).toContainText("Propuesta");
+  await detail.getByText("Fundamentos, evidencias y seguimiento de R1", { exact: true }).click();
+  for (const fragment of [
+    "Fundamento inherente vigente",
+    "Previsión condicionada",
+    "Reducción esperada",
+    "SIMULADA-EVIDENCIA-M1",
+    "permisos-v1.txt",
+    "permisos-v2.txt",
+    "2026-11-22",
+    "Equipo de ensayo",
+  ]) {
+    await expect(detail).toContainText(fragment);
+  }
+  await expect(detail).toContainText("Análisis inicial del documento");
+  await expect(detail).toContainText("Análisis inicial R1");
+  await expect(detail).toContainText("Referencias de verificación del control");
+  if (process.env.CUMPLEIA_PREVIEW_CSS) {
+    await page.setViewportSize({ width: 1440, height: 1000 });
+    await page.screenshot({ path: "/tmp/cumpleia-ux-risk-desktop.png", fullPage: true });
+    await page.setViewportSize({ width: 390, height: 844 });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+      true
+    );
+    await page.screenshot({ path: "/tmp/cumpleia-ux-risk-mobile.png", fullPage: true });
+  }
+});

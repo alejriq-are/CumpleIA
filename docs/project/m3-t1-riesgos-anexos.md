@@ -60,6 +60,26 @@ no se eliminaron ni modificaron índices en la base. Sin merge/despliegue.
 
 ## Experiencia y validación
 
+### Recorrido y ajustes vigentes
+
+Recorrido de trabajadores adultos: persistencia R1/M1, residual previsto y rechazo
+de actual sin controles verificados comprobados; evidencia parcial/vacía, consulta
+condicional, anexos v1/v2 y exportación íntegra revisados. Estado y siguientes pasos
+en el [checklist operativo](m3-t1-checklist-recorrido-licitud.md).
+
+Bloque UX del 22/10: LIC-UX-005 a LIC-UX-012 implementados. Valoración dentro de
+Documentar EIPD como paso 4, navegación de siete pasos y borradores conservados.
+Tipografía/etiquetas/casillas coherentes, avisos cerca de Guardar y errores con foco.
+Tabla por riesgo separa descripción, niveles por etapa y controles; fundamentos,
+frecuencia/horizonte, seguimiento y anexos están identificados en el detalle.
+Conflicto de creación conocido no sugiere reintento incierto. Archivo inválido,
+vacío o mayor que 2 MiB muestra motivo concreto. Si falla el diagnóstico tras guardar,
+se conserva la confirmación de escritura y se informa la advertencia por separado.
+Validación: 34 Chromium dirigidas y 4 aisladas de listado/recorrido con API y DB;
+tipos/lint/formato correctos; capturas ficticias escritorio/móvil revisadas.
+Sin cambios de contrato, metodología, hashes, permisos, base operativa ni activación.
+Pendiente revisión visual asistida; LIC-RISK-001 y LIC-AUD-001 requieren diseño separado.
+
 Revisar documentos reúne alcance RAT asociado, licitud/LIA, EIPD, valoración y
 anexos. Distingue etiquetas/respuestas; tabla por riesgo muestra niveles,
 probabilidad/impacto, controles, mitigación y residual actual/previsto.

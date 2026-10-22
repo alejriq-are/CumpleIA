@@ -10,7 +10,7 @@ export default async function Page() {
   if (!session) redirect("/login");
   const organizations = await api.me.organizations(session.access_token);
   return (
-    <div className="space-y-6">
+    <div className="licitud-ui space-y-6">
       <Link href="/dashboard" className="text-blue-700">
         Volver al panel
       </Link>

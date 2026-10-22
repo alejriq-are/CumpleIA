@@ -199,3 +199,60 @@ test("metodología y formulario accesibles en móvil", async ({ page }) => {
     await page.screenshot({ path: "/tmp/cumpleia-risk-method-mobile.png", fullPage: true });
   }
 });
+
+for (const [filename, size, reason] of [
+  ["prueba.csv", 20, "Formato no admitido"],
+  ["grande.txt", 2097153, "supera el tamaño máximo"],
+  ["vacio.txt", 0, "está vacío"],
+] as const) {
+  test(`anexo ${filename}: motivo junto al selector, foco en error y campos conservados`, async ({
+    page,
+  }) => {
+    const { writes } = await setup(page, "annexes");
+    await page
+      .getByLabel("Referencia del anexo (SIMULADA-)", { exact: true })
+      .fill("SIMULADA-VALIDACION");
+    await page
+      .getByLabel("Descripción del anexo", { exact: true })
+      .fill("[FICTICIA] Descripción conservada");
+    const input = page.getByLabel("Archivo ficticio PDF o TXT", { exact: true });
+    await input.setInputFiles({
+      name: filename,
+      mimeType: "text/plain",
+      buffer: Buffer.alloc(size, 88),
+    });
+    await expect(input).toHaveAttribute("aria-invalid", "true");
+    await expect(page.locator("#annex-file-help")).toContainText(reason);
+    await page.getByLabel("Confirmo que el archivo y sus datos son ficticios").check();
+    await page.getByRole("button", { name: "Guardar anexo ficticio", exact: true }).click();
+    const error = page.getByRole("alert");
+    await expect(error).toContainText(reason);
+    await expect(error).toBeFocused();
+    expect(writes).toHaveLength(0);
+    await expect(page.getByLabel("Descripción del anexo", { exact: true })).toHaveValue(
+      "[FICTICIA] Descripción conservada"
+    );
+    await expect(page.getByRole("status")).toHaveCount(0);
+    await input.setInputFiles({
+      name: "corregido.txt",
+      mimeType: "text/plain",
+      buffer: Buffer.from("[FICTICIA] Corregido"),
+    });
+    await expect(input).toHaveAttribute("aria-invalid", "false");
+    await expect(page.getByRole("alert")).toHaveCount(0);
+    await page.getByRole("button", { name: "Guardar anexo ficticio", exact: true }).click();
+    await expect(page.getByRole("status")).toContainText("Anexo ficticio guardado");
+    expect(writes).toHaveLength(1);
+  });
+}
+test("resumen pendiente no inventa un mayor residual evaluado", async ({ page }) => {
+  await setup(page);
+  await fillRisk(page);
+  await page.getByRole("button", { name: "Guardar valoración de riesgos", exact: true }).click();
+  await expect(page.getByRole("status")).toContainText("Valoración guardada");
+  await page.evaluate(() => (window as any).show("review"));
+  await expect(
+    page.getByText("Evaluación del riesgo residual actual pendiente.", { exact: true })
+  ).toBeVisible();
+  await expect(page.getByText(/Mayor residual actual registrado/)).toHaveCount(0);
+});

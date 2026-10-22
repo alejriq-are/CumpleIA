@@ -1,9 +1,11 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import type { Assessment } from "@/lib/api/licitud";
+import { SaveFeedback } from "./SaveFeedback";
 import { ApiError } from "@/lib/api/client";
 import {
   supportApi,
+  annexFileError,
   type Support,
   type Analysis,
   type Rating,
@@ -68,16 +70,19 @@ function TextField({
 }
 function RatingFields({
   label,
+  help,
   value,
   onChange,
 }: {
   label: string;
+  help?: string;
   value: Rating;
   onChange: (value: Rating) => void;
 }) {
   return (
     <fieldset className="space-y-3 rounded border p-3">
       <legend className="font-semibold">{label}</legend>
+      {help && <p className="rounded bg-blue-50 p-3 text-base leading-relaxed">{help}</p>}
       <div className="grid gap-3 md:grid-cols-2">
         {(["probability", "impact"] as const).map((key) => (
           <label key={key}>
@@ -317,6 +322,7 @@ export function AssessmentSupportPanel(props: Props) {
   const valuation = valid ? support?.risk_evaluation : null;
   return (
     <section
+      id="licitud-support-panel"
       hidden={props.hidden}
       className="min-w-0 space-y-4 break-words rounded border p-4"
       aria-label="Valoración y anexos de la evaluación"
@@ -332,18 +338,13 @@ export function AssessmentSupportPanel(props: Props) {
         Solo datos ficticios. Los registros se conservan con nuevas revisiones; no modifican
         resoluciones anteriores ni habilitan EIPD.
       </p>
-      {error && <p role="alert">{error}</p>}
+      {props.mode === "review" && <SaveFeedback error={error} />}
       <button type="button" disabled={busy} onClick={() => void loadRef.current()}>
         Consultar valoración y anexos
       </button>
       {props.blocked && (
         <p role="note">
           Guarda primero los cambios del documento antes de valorar riesgos o adjuntar respaldo.
-        </p>
-      )}
-      {dirty && props.mode !== "review" && (
-        <p className="rounded border border-amber-400 bg-amber-50 p-3">
-          Cambios pendientes de guardar en valoración o anexos. Se conservan al navegar.
         </p>
       )}
       {valuation && !valuation.current && (
@@ -442,6 +443,13 @@ export function AssessmentSupportPanel(props: Props) {
                   <RatingFields
                     key={key}
                     label={`${item.risk_id} — ${label}`}
+                    help={
+                      key === "projected"
+                        ? "Es el riesgo que se espera que permanezca si las medidas propuestas se implementan y funcionan como se prevé. Sirve para planificar; no acredita una reducción del riesgo actual."
+                        : key === "residual"
+                          ? "Es el riesgo que permanece con las medidas ya implementadas y su funcionamiento comprobado mediante evidencias. Mientras falte esa verificación, deja esta valoración sin evaluar y utiliza el residual previsto."
+                          : undefined
+                    }
                     value={item[key]}
                     onChange={(next) => risk(index, { ...item, [key]: next })}
                   />
@@ -542,13 +550,20 @@ export function AssessmentSupportPanel(props: Props) {
                 />
               </section>
             ))}
+            <SaveFeedback
+              error={error}
+              message={message}
+              busy={busy}
+              dirty={analysisDirty}
+              dirtyMessage="Cambios pendientes de guardar en valoración. Se conservan al navegar."
+            />
             <button
               className="rounded bg-blue-800 px-3 py-2 text-white disabled:opacity-50"
               type="button"
               disabled={disabled || !analysis.risks.length}
               onClick={() => void mutate("risk")}
             >
-              Guardar valoración de riesgos
+              {busy ? "Guardando valoración…" : "Guardar valoración de riesgos"}
             </button>
           </fieldset>
         </>
@@ -563,12 +578,27 @@ export function AssessmentSupportPanel(props: Props) {
                   ? "asociada al documento actual"
                   : "histórica, requiere reevaluación"}
               </p>
-              <p>
-                Mayor residual actual registrado: {levelLabels[valuation.result.worst_residual]}.{" "}
-                {valuation.result.unresolved
-                  ? "Existen riesgos sin resolver; el conjunto no está cerrado."
-                  : "Requiere revisión humana; no es aprobación."}
-              </p>
+              {valuation.result.worst_residual === "sin_resolver" ? (
+                <p>
+                  <strong>Evaluación del riesgo residual actual pendiente.</strong> Hay riesgos sin
+                  evaluar o sin verificación suficiente de sus controles. Todavía no puede
+                  determinarse el nivel residual actual del conjunto.
+                </p>
+              ) : (
+                <>
+                  <p>
+                    Nivel más alto de riesgo residual actual entre los riesgos evaluados:{" "}
+                    <strong>{levelLabels[valuation.result.worst_residual]}</strong>.
+                  </p>
+                  {valuation.result.unresolved && (
+                    <p>
+                      Hay riesgos pendientes de evaluación o verificación. Este nivel no resume el
+                      conjunto completo.
+                    </p>
+                  )}
+                  <p>Requiere revisión humana; no equivale a aprobación.</p>
+                </>
+              )}
             </div>
           ) : (
             <p>Sin valoración estructurada guardada.</p>
@@ -663,9 +693,26 @@ export function AssessmentSupportPanel(props: Props) {
                   className="block max-w-full"
                   accept=".pdf,.txt"
                   aria-label="Archivo ficticio PDF o TXT"
-                  onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+                  aria-describedby="annex-file-help"
+                  aria-invalid={Boolean(file && annexFileError(file))}
+                  onChange={(e) => {
+                    setFile(e.target.files?.[0] ?? null);
+                    setError("");
+                    setMessage("");
+                  }}
                 />
               </label>
+              <p
+                id="annex-file-help"
+                className={
+                  file && annexFileError(file)
+                    ? "rounded border border-red-600 bg-red-50 p-3 text-red-950"
+                    : "text-slate-700"
+                }
+              >
+                {(file && annexFileError(file)) ||
+                  "Formatos admitidos: PDF o TXT UTF-8. Tamaño máximo: 2 MiB por archivo."}
+              </p>
               <label className="block">
                 <input
                   type="checkbox"
@@ -674,22 +721,24 @@ export function AssessmentSupportPanel(props: Props) {
                 />{" "}
                 Confirmo que el archivo y sus datos son ficticios
               </label>
+              <SaveFeedback
+                error={error}
+                message={message}
+                busy={busy}
+                dirty={annexDirty && !message}
+                dirtyMessage="Anexo pendiente de guardar. Los campos se conservan al corregir el archivo."
+              />
               <button
                 className="rounded bg-blue-800 px-3 py-2 text-white disabled:opacity-50"
                 type="button"
                 disabled={disabled || !file || !fictitious}
                 onClick={() => void mutate("annex")}
               >
-                Guardar anexo ficticio
+                {busy ? "Guardando anexo…" : "Guardar anexo ficticio"}
               </button>
             </fieldset>
           )}
         </>
-      )}
-      {message && (
-        <p role="status" className="rounded border border-green-600 bg-green-50 p-3 text-green-900">
-          {message}
-        </p>
       )}
       <p>
         Activación EIPD bloqueada. Guardar una valoración o adjuntar documentos no equivale a

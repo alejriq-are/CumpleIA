@@ -95,6 +95,14 @@ function check(value: Support, scope: SupportScope): Support {
     throw new ApiError(502, "Soporte documental incompatible; guardado bloqueado.");
   return value;
 }
+export function annexFileError(file: File): string {
+  if (!/\.(pdf|txt)$/i.test(file.name))
+    return "Formato no admitido. Selecciona un archivo PDF o TXT UTF-8.";
+  if (file.size === 0) return "El archivo está vacío. Selecciona un PDF o TXT UTF-8 con contenido.";
+  if (file.size > 2097152)
+    return "El archivo supera el tamaño máximo de 2 MiB. Selecciona un archivo más pequeño.";
+  return "";
+}
 export const supportApi = {
   load: async (s: SupportScope) =>
     check(await apiFetch<Support>(path(s) + "/support", { ...s, cache: "no-store" }), s),
@@ -128,8 +136,8 @@ export const supportApi = {
     file: File,
     requestId: string
   ) => {
-    if (!file.size || file.size > 2097152 || !/\.(pdf|txt)$/i.test(file.name))
-      throw new ApiError(422, "Selecciona un PDF o TXT de hasta 2 MiB.");
+    const fileError = annexFileError(file);
+    if (fileError) throw new ApiError(422, fileError);
     const encoded = await new Promise<string>((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = () => resolve(String(reader.result).split(",")[1]);

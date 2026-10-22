@@ -3,10 +3,12 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import {
   api,
+  ApiError,
   type OrganizationMembershipOut,
   type TreatmentDetailOut,
   type TreatmentSummaryOut,
 } from "@/lib/api/client";
+import { SaveFeedback } from "./SaveFeedback";
 import { createClient } from "@/lib/supabase/client";
 import { legalBases, legalBasisHelp, licitudApi, type AssessmentSummary } from "@/lib/api/licitud";
 
@@ -38,6 +40,9 @@ export function LicitudWorkspace({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  const [createError, setCreateError] = useState("");
+  const [existing, setExisting] = useState<AssessmentSummary[]>([]);
+  const [creating, setCreating] = useState(false);
   const writable = ["owner", "admin", "editor"].includes(
     organizaciones.find((o) => o.id === org)?.role ?? ""
   );
@@ -50,6 +55,8 @@ export function LicitudWorkspace({
     setDetail(null);
     setRows([]);
     setMessage("");
+    setCreateError("");
+    setExisting([]);
     (async () => {
       try {
         const list = await api.rat.treatments(await token(), org);
@@ -77,6 +84,8 @@ export function LicitudWorkspace({
     setMessage("");
     setError("");
     setOffset(0);
+    setCreateError("");
+    setExisting([]);
     if (!tid) return;
     setLoading(true);
     (async () => {
@@ -119,7 +128,10 @@ export function LicitudWorkspace({
   async function create(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
+    setCreating(true);
     setError("");
+    setCreateError("");
+    setExisting([]);
     setMessage("");
     try {
       const scope = { token: await token(), organizationId: org, treatmentId: tid };
@@ -141,18 +153,44 @@ export function LicitudWorkspace({
         );
       }
     } catch (e) {
-      setError(
-        (e instanceof Error ? e.message : "No se pudo crear el borrador.") +
-          " Si no recibiste respuesta, vuelve a consultar el historial antes de reintentar."
-      );
+      const conflict =
+        e instanceof ApiError && e.status === 409 && /Ya existe un borrador/.test(e.message);
+      if (conflict) {
+        setCreateError(
+          "Ya existe un borrador para esta finalidad. No se creó otra evaluación ni se guardaron los cambios de este formulario. Abre el borrador existente desde las evaluaciones disponibles."
+        );
+        try {
+          const list = await licitudApi.list({
+            token: await token(),
+            organizationId: org,
+            treatmentId: tid,
+          });
+          setRows(list);
+          setOffset(0);
+          setExisting(list.filter((item) => item.status === "borrador"));
+        } catch {
+          setCreateError(
+            "Ya existe un borrador para esta finalidad. No se creó otra evaluación. Usa Actualizar historial para localizar el borrador existente; tus campos se conservan."
+          );
+        }
+      } else {
+        const unknown = !(e instanceof ApiError) || e.status >= 500 || e.status === 408;
+        setCreateError(
+          unknown
+            ? "Resultado incierto. Conservamos el formulario; consulta el historial antes de volver a crear para evitar duplicados."
+            : `${e.message} No se creó el borrador. Conservamos los campos para corregirlos.`
+        );
+      }
     } finally {
       setBusy(false);
+      setCreating(false);
     }
   }
+
   const checkbox = (values: string[], set: (v: string[]) => void, code: string) =>
     set(values.includes(code) ? values.filter((v) => v !== code) : [...values, code]);
   return (
-    <div className="space-y-6">
+    <div className="licitud-ui space-y-6">
       <p className="rounded-lg bg-blue-50 p-4">
         Pruebas de desarrollo: utiliza únicamente datos ficticios. Guardar un borrador no acredita
         validez jurídica. La activación EIPD permanece bloqueada.
@@ -206,7 +244,7 @@ export function LicitudWorkspace({
       </Link>
       {loading && <p role="status">Cargando…</p>}
       {error && <p role="alert">{error}</p>}
-      {message && <p role="status">{message}</p>}
+
       {detail && (
         <>
           <section className="rounded border p-4">
@@ -236,7 +274,15 @@ export function LicitudWorkspace({
             </button>
           </section>
           {writable ? (
-            <form onSubmit={create} className="space-y-4 rounded border p-4">
+            <form
+              onSubmit={create}
+              onChange={() => {
+                setMessage("");
+                setCreateError("");
+                setExisting([]);
+              }}
+              className="space-y-4 rounded border p-4"
+            >
               <h2 className="text-xl font-semibold">Crear evaluación en borrador</h2>
               <label className="block">
                 Finalidad
@@ -335,6 +381,22 @@ export function LicitudWorkspace({
                   Completa finalidades, categorías y titulares en el RAT antes de crear la
                   evaluación.
                 </p>
+              )}
+              <SaveFeedback error={createError} message={message} busy={creating} />
+              {existing.length > 0 && (
+                <div aria-label="Borradores existentes" className="space-y-2">
+                  <p>Abre el borrador que corresponde a la finalidad que quieres evaluar:</p>
+                  {existing.map((item) => (
+                    <Link
+                      key={item.id}
+                      prefetch={false}
+                      className="block font-semibold text-blue-800 underline"
+                      href={`/dashboard/licitud/${tid}/${item.id}?organizationId=${encodeURIComponent(org)}`}
+                    >
+                      Abrir borrador existente: {item.purpose_snapshot} — versión {item.version}
+                    </Link>
+                  ))}
+                </div>
               )}
               <button
                 className="rounded bg-blue-700 px-4 py-2 text-white disabled:opacity-50"

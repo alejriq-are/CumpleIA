@@ -26,7 +26,14 @@ Migración e67a4b829c10 en pruebas y desarrollo local; 38 tablas previas intacta
 Pruebas dirigidas, tipos/lint/formato y recorrido real aislado aprobados; detalle en
 [contrato vigente](project/m3-t1-riesgos-anexos.md). Pendiente validación asistida
 ampliada y revisión/adopción formal EIPD general/RAT-LIA; EIPD/datos reales bloqueados.
-CI del candidato por comprobar; sin merge/despliegue.
+CI base 6bf7870 aprobada: 4518 backend (2 omitidas), 211 frontend y 2 integradas.
+Bloque UX del 22/10 implementado: LIC-UX-005 a 012, siete pasos EIPD con valoración
+como paso 4, tablas completas por riesgo, tipografía y avisos cercanos al guardado.
+34 Chromium y 4 aisladas de recorrido/listado aprobadas; tipos/lint/formato y
+capturas escritorio/móvil revisados. Checklist consolida el recorrido asistido:
+[estado vigente](project/m3-t1-checklist-recorrido-licitud.md).
+Pendiente revisión visual del usuario y CI del nuevo bloque; metodología configurable
+y auditoría completa requieren diseño separado. EIPD bloqueada; sin merge/despliegue.
 
 19/10: recorrido Bases de Licitud integrado al servidor: cuatro pestanas,
 secciones cortas, borradores conservados al navegar y diagnosticos/descargas
