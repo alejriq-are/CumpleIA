@@ -34,6 +34,15 @@ type Props = {
   onLoaded: (value: Support | null) => void;
   onDirty: (dirty: boolean) => void;
 };
+const annexSections: Record<string, string> = {
+  alcance: "Alcance",
+  base: "Base y fundamento",
+  necesidad: "Necesidad y proporcionalidad",
+  riesgos: "Riesgos",
+  medidas: "Medidas",
+  fuentes: "Fuentes y evidencias",
+  seguimiento: "Seguimiento",
+};
 const textClass = "block w-full rounded border p-2";
 function TextField({
   label,
@@ -622,10 +631,26 @@ export function AssessmentSupportPanel(props: Props) {
               <p>
                 {item.filename} — {item.description}
               </p>
-              <p>
-                Sección: {item.section}; riesgos: {item.risk_ids.join(", ") || "sin asociación"};
-                medidas: {item.measure_ids.join(", ") || "sin asociación"}.
-              </p>
+              <dl className="space-y-1">
+                <div>
+                  <dt className="inline font-semibold">Sección relacionada: </dt>
+                  <dd className="inline">
+                    {annexSections[item.section] ?? "Sección no identificada"}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="inline font-semibold">Riesgos vinculados: </dt>
+                  <dd className="inline">
+                    {item.risk_ids.join(", ") || "Sin vínculos registrados"}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="inline font-semibold">Medidas vinculadas: </dt>
+                  <dd className="inline">
+                    {item.measure_ids.join(", ") || "Sin vínculos registrados"}
+                  </dd>
+                </div>
+              </dl>
               <button
                 type="button"
                 disabled={busy}
@@ -660,15 +685,7 @@ export function AssessmentSupportPanel(props: Props) {
                   value={annex.section}
                   onChange={(e) => setAnnex((v) => ({ ...v, section: e.target.value }))}
                 >
-                  {[
-                    ["alcance", "Alcance"],
-                    ["base", "Base y fundamento"],
-                    ["necesidad", "Necesidad y proporcionalidad"],
-                    ["riesgos", "Riesgos"],
-                    ["medidas", "Medidas"],
-                    ["fuentes", "Fuentes y evidencias"],
-                    ["seguimiento", "Seguimiento"],
-                  ].map(([code, label]) => (
+                  {Object.entries(annexSections).map(([code, label]) => (
                     <option key={code} value={code}>
                       {label}
                     </option>

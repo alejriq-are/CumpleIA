@@ -95,6 +95,8 @@ Integridad de anexos comprobada:
 - [x] Prueba visual de corrección de archivo: al sustituir CSV por TXT válido desaparece el aviso rojo y permanecen referencia SIMULADA-PRUEBA-CONSERVACION-001 y descripción ficticia; no se guardó el anexo.
 - [x] Formulario de anexos aclarado: la sección clasifica qué parte del documento respalda el archivo; vínculos R/M opcionales en bloque desplegable separado, con códigos de ejemplo e indicación de que pueden quedar vacíos. Cambiar sección conserva vínculos. Once pruebas dirigidas aprobadas, tipos/lint/formato; comprobación de guardado ampliada confirma conservación de R1/M1 al cambiar sección y descarga intacta. Pendiente revisión visual del usuario.
 
+- [x] Captura del usuario confirma ayuda de sección y desplegable de vínculos opcionales con etiquetas de códigos R1/M1. Anexos guardados ahora muestran el nombre completo de la sección y filas separadas para riesgos/medidas vinculados; nombres compartidos con el selector, sin modificar asociaciones guardadas. Prueba dirigida de guardado/descarga y nombres legibles aprobada; tipos, lint y formato correctos. Pendiente confirmación visual de las filas.
+
 ## 4. Pruebas o decisiones que siguen pendientes
 
 - [ ] Coherencia del contenido del ensayo: Limitaciones del análisis conserva «sin anexos de respaldo adjuntos» pese a los anexos v1/v2 existentes. Revisar y actualizar ese texto mediante edición explícita; no confundir anexos ficticios adjuntos con controles verificados. No modificado durante la prueba de consulta.

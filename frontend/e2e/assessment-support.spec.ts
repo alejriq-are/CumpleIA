@@ -167,6 +167,12 @@ test("requiere declaración ficticia, guarda anexo y descarga exactamente sus by
   await page.getByLabel("Confirmo que el archivo y sus datos son ficticios").check();
   await page.getByRole("button", { name: "Guardar anexo ficticio", exact: true }).click();
   await expect(page.getByRole("status")).toContainText("Anexo ficticio guardado");
+  const savedAnnex = page.getByRole("article").filter({ hasText: "SIMULADA-A1 · versión 1" });
+  await expect(savedAnnex.locator("dl > div").nth(0)).toHaveText(
+    "Sección relacionada: Base y fundamento"
+  );
+  await expect(savedAnnex.locator("dl > div").nth(1)).toHaveText("Riesgos vinculados: R1");
+  await expect(savedAnnex.locator("dl > div").nth(2)).toHaveText("Medidas vinculadas: M1");
   expect(writes[0].section).toBe("base");
   expect(writes[0].risk_ids).toEqual(["R1"]);
   expect(writes[0].measure_ids).toEqual(["M1"]);
