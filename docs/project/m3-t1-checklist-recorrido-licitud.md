@@ -71,12 +71,15 @@ Integridad de anexos comprobada:
 
 ## 3. Validación del bloque
 
+- [x] Revisión visual asistida de Base y fundamento: capturas del usuario confirman títulos/etiquetas destacados, ayudas legibles y aviso de cambios sin guardar inmediatamente entre Fundamento y Guardar (LIC-UX-005). Texto temporal [FICTICIA] Prueba visual del aviso añadido sin guardar; pendiente descartarlo mediante recarga.
+
+
 - [x] **34 pruebas Chromium** dirigidas a creación/edición, navegación, preservación de borradores, errores, roles, anexos y tablas.
 - [x] **4 pruebas aisladas** de listado/recorrido; incluye Chromium con API y PostgreSQL temporal, JWT ficticio y comprobación de datos guardados y confirmed_at null.
 - [x] Tipos, lint y formato de los archivos afectados.
 - [x] Capturas ficticias revisadas en escritorio y móvil, sin desbordamiento de la página; tablas anchas con desplazamiento propio.
 - [ ] Confirmación visual asistida del usuario sobre las pantallas actualizadas.
-- [ ] Comprobar CI del commit publicado de este bloque; la CI anterior no acredita este cambio.
+- [ ] CI d74e3e8: backend e integración aprobados; frontend 218/220, dos aserciones de expediente aún buscaban descripción en tabla antigua. Corregidas para comprobar bloque descriptivo, tres etapas y control asociado; 10 pruebas dirigidas de expediente aprobadas localmente. Pendiente nueva CI.
 
 ## 4. Pruebas o decisiones que siguen pendientes
 

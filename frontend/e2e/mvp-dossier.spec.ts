@@ -183,9 +183,14 @@ for (const successor of [false, true]) {
     await expect(page.getByText("[FICTICIA] Análisis conservado", { exact: true })).toBeVisible();
     await page.getByText("Documento EIPD — disponible", { exact: true }).click();
     await expect(page.getByText("[FICTICIA] Equipo de ensayo", { exact: true })).toBeVisible();
+    const risk = page.getByRole("region", { name: "Detalle del riesgo R1", exact: true });
+    await expect(risk.getByText("[FICTICIA] Acceso indebido", { exact: true })).toBeVisible();
+    const ratings = risk.getByRole("table", { name: "Valoración cualitativa de R1", exact: true });
+    await expect(ratings.getByRole("row")).toHaveCount(4);
+    await expect(ratings.getByText("Residual actual verificado", { exact: true })).toBeVisible();
     await expect(
-      page.getByRole("table").getByText("[FICTICIA] Acceso indebido", { exact: true })
-    ).toBeVisible();
+      risk.getByRole("table", { name: "Controles asociados a R1", exact: true })
+    ).toContainText("[FICTICIA] Control de acceso");
     await expect(page.getByText("no se promueve", { exact: false })).toHaveCount(0);
     await expect(page.locator("pre:visible")).toHaveCount(0);
     await expect(
