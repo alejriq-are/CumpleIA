@@ -299,8 +299,9 @@ test("crea borrador, abre y guarda LIA y recupera el historial sin activar EIPD"
     await support
       .getByLabel("Descripción del anexo", { exact: true })
       .fill("[FICTICIA] Matriz de acceso para R1");
+    await support.getByText("Vínculos opcionales con riesgos y medidas", { exact: true }).click();
     await support
-      .getByLabel("Riesgos asociados al anexo, uno por línea", { exact: true })
+      .getByLabel("Códigos de riesgos vinculados (opcional; ejemplo: R1)", { exact: true })
       .fill("R1");
     await support.getByLabel("Archivo ficticio PDF o TXT", { exact: true }).setInputFiles({
       name: "matriz-ensayo.txt",

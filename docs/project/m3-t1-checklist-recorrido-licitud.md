@@ -71,7 +71,7 @@ Integridad de anexos comprobada:
 
 ## 3. Validación del bloque
 
-- [x] Revisión visual asistida de Base y fundamento: capturas del usuario confirman títulos/etiquetas destacados, ayudas legibles y aviso de cambios sin guardar inmediatamente entre Fundamento y Guardar (LIC-UX-005). Texto temporal [FICTICIA] Prueba visual del aviso añadido sin guardar; pendiente descartarlo mediante recarga.
+- [x] Revisión visual asistida de Base y fundamento: capturas del usuario confirman títulos/etiquetas destacados, ayudas legibles y aviso de cambios sin guardar inmediatamente entre Fundamento y Guardar (LIC-UX-005). Texto temporal [FICTICIA] Prueba visual del aviso añadido sin guardar; descartado mediante recarga: la captura posterior del fundamento guardado no contiene el texto temporal.
 
 
 - [x] **34 pruebas Chromium** dirigidas a creación/edición, navegación, preservación de borradores, errores, roles, anexos y tablas.
@@ -84,7 +84,20 @@ Integridad de anexos comprobada:
 
 - [x] Presentación LIA ajustada: títulos generales «Base de licitud y fundamento»; LIA vigente solo con interés legítimo. LIA guardada con otra base permanece consultable como antecedente previo que no fundamenta la base actual; descarga conserva los datos originales. Ocho pruebas Chromium dirigidas, tipos y lint aprobados; CI del nuevo ajuste pendiente.
 
+- [x] Revisión visual asistida de LIA: captura del usuario confirma título «Base de licitud y fundamento», consulta sin mención a LIA con base «Pendiente de definir» y fundamento guardado completo, sin el texto temporal del ensayo visual.
+
+- [x] Capturas del usuario verifican fundamentos inherente y residual previsto de R1, residual actual sin fundamento registrado, evidencia SIMULADA-EVIDENCIA-R1-001 y anexos versiones 1 y 2 vinculados al control. Revisión 4 vigente, resumen de residual actual pendiente y ambas descargas visibles. Acción, responsable y fecha aparecen sin registrar, coherentes con los campos no completados del ensayo.
+
+- [x] Validación visual de tamaño de anexo: al seleccionar TXT de prueba superior a 2 MiB aparece junto al selector «El archivo supera el tamaño máximo de 2 MiB. Selecciona un archivo más pequeño». Guardar visible deshabilitado; v1/v2 siguen en la lista. Formulario vacío y confirmación ficticia desmarcada: esta captura no acredita conservación de campos escritos ni bloqueo atribuible únicamente al tamaño.
+
+- [x] Validación visual de formato: al sustituir el TXT sobredimensionado por el CSV de prueba, el aviso junto al selector cambia a «Formato no admitido. Selecciona un archivo PDF o TXT UTF-8». La captura muestra Guardar deshabilitado, confirmación desmarcada y campos vacíos; conservación de campos escritos pendiente de ensayo asistido.
+
+- [x] Prueba visual de corrección de archivo: al sustituir CSV por TXT válido desaparece el aviso rojo y permanecen referencia SIMULADA-PRUEBA-CONSERVACION-001 y descripción ficticia; no se guardó el anexo.
+- [x] Formulario de anexos aclarado: la sección clasifica qué parte del documento respalda el archivo; vínculos R/M opcionales en bloque desplegable separado, con códigos de ejemplo e indicación de que pueden quedar vacíos. Cambiar sección conserva vínculos. Once pruebas dirigidas aprobadas, tipos/lint/formato; comprobación de guardado ampliada confirma conservación de R1/M1 al cambiar sección y descarga intacta. Pendiente revisión visual del usuario.
+
 ## 4. Pruebas o decisiones que siguen pendientes
+
+- [ ] Coherencia del contenido del ensayo: Limitaciones del análisis conserva «sin anexos de respaldo adjuntos» pese a los anexos v1/v2 existentes. Revisar y actualizar ese texto mediante edición explícita; no confundir anexos ficticios adjuntos con controles verificados. No modificado durante la prueba de consulta.
 
 - [ ] Creación manual nueva con otra finalidad ficticia adecuada. La creación y persistencia del flujo se probaron en el entorno integrado aislado, no como nueva evaluación de la cuenta del usuario.
 - [ ] Verificación positiva de controles con implementación/evidencia ficticia y residual actual, si se incluye en el siguiente recorrido. La prueba negativa ya pasó; M1 del expediente sigue Propuesta.

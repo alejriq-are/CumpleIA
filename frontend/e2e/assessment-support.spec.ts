@@ -139,8 +139,21 @@ test("conserva valoración fundamentada y la recupera sin presumir residual veri
 test("requiere declaración ficticia, guarda anexo y descarga exactamente sus bytes", async ({
   page,
 }) => {
-  await setup(page, "annexes");
+  const { writes } = await setup(page, "annexes");
   await page.getByLabel("Referencia del anexo (SIMULADA-)", { exact: true }).fill("SIMULADA-A1");
+  const riskLink = page.getByLabel("Códigos de riesgos vinculados (opcional; ejemplo: R1)", {
+    exact: true,
+  });
+  const measureLink = page.getByLabel("Códigos de medidas vinculadas (opcional; ejemplo: M1)", {
+    exact: true,
+  });
+  await expect(riskLink).toBeHidden();
+  await page.getByText("Vínculos opcionales con riesgos y medidas", { exact: true }).click();
+  await riskLink.fill("R1");
+  await measureLink.fill("M1");
+  await page.getByLabel("Sección relacionada", { exact: true }).selectOption("base");
+  await expect(riskLink).toHaveValue("R1");
+  await expect(measureLink).toHaveValue("M1");
   await page
     .getByLabel("Descripción del anexo", { exact: true })
     .fill("[FICTICIA] Matriz de permisos");
@@ -154,6 +167,9 @@ test("requiere declaración ficticia, guarda anexo y descarga exactamente sus by
   await page.getByLabel("Confirmo que el archivo y sus datos son ficticios").check();
   await page.getByRole("button", { name: "Guardar anexo ficticio", exact: true }).click();
   await expect(page.getByRole("status")).toContainText("Anexo ficticio guardado");
+  expect(writes[0].section).toBe("base");
+  expect(writes[0].risk_ids).toEqual(["R1"]);
+  expect(writes[0].measure_ids).toEqual(["M1"]);
   const pending = page.waitForEvent("download");
   await page.getByRole("button", { name: "Descargar SIMULADA-A1 versión 1", exact: true }).click();
   const downloaded = await pending;

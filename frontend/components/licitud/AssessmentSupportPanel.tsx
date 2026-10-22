@@ -675,16 +675,29 @@ export function AssessmentSupportPanel(props: Props) {
                   ))}
                 </select>
               </label>
-              <TextField
-                label="Riesgos asociados al anexo, uno por línea"
-                value={annex.risk_ids}
-                onChange={(risk_ids) => setAnnex((v) => ({ ...v, risk_ids }))}
-              />
-              <TextField
-                label="Medidas asociadas al anexo, una por línea"
-                value={annex.measure_ids}
-                onChange={(measure_ids) => setAnnex((v) => ({ ...v, measure_ids }))}
-              />
+              <p className="text-sm">
+                Elige la parte del documento que respalda este archivo. Puedes adjuntar respaldo de
+                alcance, base de licitud u otra sección sin vincularlo a riesgos o medidas.
+              </p>
+              <details className="space-y-3 rounded border p-3">
+                <summary>Vínculos opcionales con riesgos y medidas</summary>
+                <p className="text-sm">
+                  Completa estos vínculos solo si el archivo respalda riesgos o medidas específicos.
+                  Son independientes de la sección elegida; puedes dejarlos vacíos. Usa códigos ya
+                  guardados en esta evaluación, un código por línea, no descripciones. Cambiar la
+                  sección conserva los vínculos que hayas escrito.
+                </p>
+                <TextField
+                  label="Códigos de riesgos vinculados (opcional; ejemplo: R1)"
+                  value={annex.risk_ids}
+                  onChange={(risk_ids) => setAnnex((v) => ({ ...v, risk_ids }))}
+                />
+                <TextField
+                  label="Códigos de medidas vinculadas (opcional; ejemplo: M1)"
+                  value={annex.measure_ids}
+                  onChange={(measure_ids) => setAnnex((v) => ({ ...v, measure_ids }))}
+                />
+              </details>
               <label className="block">
                 Archivo ficticio PDF o TXT
                 <input
