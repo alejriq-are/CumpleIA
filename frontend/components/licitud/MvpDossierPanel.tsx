@@ -5,7 +5,7 @@ import { DossierDocumentView, record } from "./DossierDocumentView";
 import type { Dossier } from "@/lib/api/mvp-dossier";
 const labels = {
   rat: "RAT asociado",
-  licitud_lia: "Evaluación de licitud / LIA",
+  licitud_lia: "Base de licitud y fundamento",
   eipd: "Documento EIPD",
 };
 export function MvpDossierPanel({
@@ -78,8 +78,8 @@ export function MvpDossierPanel({
     <section aria-label="Expediente documental MVP" className="space-y-4 rounded border p-4">
       <h2 className="text-xl font-bold">Expediente documental MVP</h2>
       <p>
-        RAT asociado, evaluación de licitud/LIA y EIPD. Solo desarrollo con datos ficticios.
-        Consultar o descargar no aprueba documentos ni libera el MVP.
+        RAT asociado, base de licitud y EIPD. La LIA corresponde a interés legítimo. Solo desarrollo
+        con datos ficticios. Consultar o descargar no aprueba documentos ni libera el MVP.
       </p>
       <button type="button" disabled={busy} onClick={() => void consult()}>
         Consultar expediente documental
@@ -105,14 +105,19 @@ export function MvpDossierPanel({
           {packet.documents.map((d) => (
             <details key={d.kind}>
               <summary>
-                {labels[d.kind]} — {d.status === "disponible" ? "disponible" : "sin documento"}
+                {labels[d.kind]}
+                {d.kind === "licitud_lia" &&
+                record(d.content).legal_basis === "interes_legitimo_art13d"
+                  ? " · LIA"
+                  : ""}{" "}
+                — {d.status === "disponible" ? "disponible" : "sin documento"}
               </summary>
               <div className="space-y-4 rounded border p-4">
                 <p>
                   {d.kind === "rat"
                     ? "Contexto del RAT conservado al crear la evaluación. No representa necesariamente el inventario actual."
                     : d.kind === "licitud_lia"
-                      ? "Evaluación guardada y análisis de interés legítimo, si se completó. Su guardado no implica aprobación."
+                      ? "Evaluación guardada. La LIA corresponde a la base de interés legítimo; los antecedentes previos se identifican por separado. Su guardado no implica aprobación."
                       : record(d.content).document
                         ? "Resolución documental registrada. Los eventos mostrados corresponden exclusivamente a esta resolución."
                         : "Borrador EIPD guardado, pendiente de completar y revisar. Su guardado no implica aprobación."}

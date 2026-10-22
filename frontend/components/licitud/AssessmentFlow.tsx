@@ -338,10 +338,15 @@ export function AssessmentFlow({
               className="space-y-3 rounded border p-4"
             >
               <h3 className="font-semibold">
-                Base de licitud, fundamento y LIA · evaluación versión {row.version}
+                Base de licitud y fundamento
+                {row.legal_basis === "interes_legitimo_art13d" ? " · LIA" : ""} · evaluación versión{" "}
+                {row.version}
               </h3>
               <details>
-                <summary>Consultar evaluación de licitud y LIA</summary>
+                <summary>
+                  Consultar evaluación de licitud
+                  {row.legal_basis === "interes_legitimo_art13d" ? " y LIA" : ""}
+                </summary>
                 <DossierDocumentView
                   document={{
                     kind: "licitud_lia",

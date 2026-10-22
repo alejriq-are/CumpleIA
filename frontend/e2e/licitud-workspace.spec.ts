@@ -852,3 +852,28 @@ test("guardado confirmado permanece visible aunque falle el diagnóstico posteri
     )
   ).toBe("SIMULADA-DIAGNOSTICO");
 });
+
+for (const basis of [null, "consentimiento_art12", "interes_legitimo_art13d"]) {
+  test(`título de consulta menciona LIA solo para interés legítimo: ${basis}`, async ({ page }) => {
+    test.skip(integrated, "Escenario de interfaz con fixtures ficticios");
+    await draft(page);
+    await expect(page.getByRole("status")).toContainText("Borrador creado");
+    await page.evaluate((basis) => {
+      (window as any).demo.rows[0].legal_basis = basis;
+    }, basis);
+    await page.evaluate((id) => (window as any).flow(id), treatment);
+    await page.getByRole("tab", { name: "Revisar documentos", exact: true }).click();
+    const region = page.getByRole("region", {
+      name: "Evaluación de licitud guardada",
+      exact: true,
+    });
+    const active = basis === "interes_legitimo_art13d";
+    await expect(region.getByRole("heading")).toHaveText(
+      `Base de licitud y fundamento${active ? " · LIA" : ""} · evaluación versión 1`
+    );
+    await region
+      .getByText(`Consultar evaluación de licitud${active ? " y LIA" : ""}`, { exact: true })
+      .click();
+    await expect(region.getByRole("region", { name: /LIA/ })).toHaveCount(0);
+  });
+}

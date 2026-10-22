@@ -177,7 +177,9 @@ for (const successor of [false, true]) {
     await page.getByRole("button", { name: "Consultar expediente documental" }).click();
     await page.getByText("RAT asociado — disponible", { exact: true }).click();
     await expect(page.getByText("[FICTICIA] Formulario simulado", { exact: true })).toBeVisible();
-    await page.getByText("Evaluación de licitud / LIA — disponible", { exact: true }).click();
+    await page
+      .getByText("Base de licitud y fundamento · LIA — disponible", { exact: true })
+      .click();
     await expect(page.getByText("[FICTICIA] Fundamento conservado", { exact: true })).toBeVisible();
     await expect(page.getByText("Interés legítimo (LIA)", { exact: true })).toBeVisible();
     await expect(page.getByText("[FICTICIA] Análisis conservado", { exact: true })).toBeVisible();
@@ -214,5 +216,38 @@ for (const successor of [false, true]) {
         .toBe(true);
       await page.screenshot({ path: process.env.CUMPLEIA_DOSSIER_SCREENSHOT, fullPage: true });
     }
+  });
+}
+
+for (const basis of [null, "consentimiento_art12", "interes_legitimo_art13d"]) {
+  test(`LIA guardada se distingue según base propuesta: ${basis}`, async ({ page }) => {
+    const v = packet();
+    v.documents[1].content = {
+      legal_basis: basis,
+      lia_assessment: { necessity: { necessity_analysis: "[FICTICIA] Necesidad conservada" } },
+    };
+    await setup(page, v);
+    await page.getByRole("button", { name: "Consultar expediente documental" }).click();
+    const active = basis === "interes_legitimo_art13d";
+    await page
+      .getByText(`Base de licitud y fundamento${active ? " · LIA" : ""} — disponible`, {
+        exact: true,
+      })
+      .click();
+    await expect(
+      page.getByRole("region", {
+        name: active
+          ? "Evaluación del interés legítimo (LIA)"
+          : "LIA guardada como antecedente previo",
+        exact: true,
+      })
+    ).toBeVisible();
+    await expect(page.getByText("[FICTICIA] Necesidad conservada", { exact: true })).toBeVisible();
+    await expect(
+      page.getByText("No fundamenta la base de licitud propuesta actualmente.", { exact: false })
+    ).toHaveCount(active ? 0 : 1);
+    const downloaded = page.waitForEvent("download");
+    await page.getByRole("button", { name: "Descargar expediente JSON" }).click();
+    expect(JSON.parse(await readFile((await (await downloaded).path())!, "utf8"))).toEqual(v);
   });
 }

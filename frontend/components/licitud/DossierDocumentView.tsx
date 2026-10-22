@@ -185,8 +185,23 @@ export function DossierDocumentView({
         <Field label="Fundamento" value={value.justification} />
       </dl>
       {value.lia_assessment != null && (
-        <section aria-label="Análisis de interés legítimo">
-          <h4 className="font-semibold">Análisis de interés legítimo</h4>
+        <section
+          aria-label={
+            value.legal_basis === "interes_legitimo_art13d"
+              ? "Evaluación del interés legítimo (LIA)"
+              : "LIA guardada como antecedente previo"
+          }
+        >
+          <h4 className="font-semibold">
+            {value.legal_basis === "interes_legitimo_art13d"
+              ? "Evaluación del interés legítimo (LIA)"
+              : "LIA guardada como antecedente previo"}
+          </h4>
+          {value.legal_basis !== "interes_legitimo_art13d" && (
+            <p>
+              Se conserva para consulta. No fundamenta la base de licitud propuesta actualmente.
+            </p>
+          )}
           <dl className="space-y-3">
             {liaFields.map(([group, key, label]) => (
               <Field

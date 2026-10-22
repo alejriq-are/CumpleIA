@@ -78,8 +78,11 @@ Integridad de anexos comprobada:
 - [x] **4 pruebas aisladas** de listado/recorrido; incluye Chromium con API y PostgreSQL temporal, JWT ficticio y comprobación de datos guardados y confirmed_at null.
 - [x] Tipos, lint y formato de los archivos afectados.
 - [x] Capturas ficticias revisadas en escritorio y móvil, sin desbordamiento de la página; tablas anchas con desplazamiento propio.
-- [ ] Confirmación visual asistida del usuario sobre las pantallas actualizadas.
-- [ ] CI d74e3e8: backend e integración aprobados; frontend 218/220, dos aserciones de expediente aún buscaban descripción en tabla antigua. Corregidas para comprobar bloque descriptivo, tres etapas y control asociado; 10 pruebas dirigidas de expediente aprobadas localmente. Pendiente nueva CI.
+- [x] Capturas del usuario confirman valoración dentro de Documentar EIPD como paso 4 y tablas separadas de descripción, valoración y controles.
+- [ ] Continuar confirmación visual asistida de los ajustes restantes.
+- [x] CI d01b555 aprobada: corrección de las aserciones de expediente validada por GitHub Actions (39868291972); no equivale a validar cambios posteriores.
+
+- [x] Presentación LIA ajustada: títulos generales «Base de licitud y fundamento»; LIA vigente solo con interés legítimo. LIA guardada con otra base permanece consultable como antecedente previo que no fundamenta la base actual; descarga conserva los datos originales. Ocho pruebas Chromium dirigidas, tipos y lint aprobados; CI del nuevo ajuste pendiente.
 
 ## 4. Pruebas o decisiones que siguen pendientes
 
