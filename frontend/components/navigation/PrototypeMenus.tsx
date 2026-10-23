@@ -60,15 +60,21 @@ export function MainModules({ module, go }: { module: ModuleId; go: (module: Mod
         {modules.map((item, i) => (
           <button
             key={item.id}
+            disabled={item.upcoming}
             aria-current={item.id === module ? "page" : undefined}
-            className={`flex items-start gap-3 rounded-lg border-l-4 px-3 py-3 text-left font-semibold ${focus} ${item.id === module ? "border-orange-600 bg-orange-100 text-orange-950" : "border-transparent text-slate-700 hover:bg-slate-100"}`}
+            className={`flex items-start gap-3 rounded-lg border-l-4 px-3 py-3 text-left font-semibold disabled:cursor-not-allowed disabled:text-slate-500 disabled:hover:bg-white ${focus} ${item.id === module ? "border-orange-600 bg-orange-100 text-orange-950" : "border-transparent text-slate-700 hover:bg-slate-100"}`}
             onClick={() => {
               setExpanded(false);
               go(item.id);
             }}
           >
             <Icon index={i} />
-            <span>{item.id === "panel" ? "Inicio / Panel principal" : item.title}</span>
+            <span>
+              {item.id === "panel" ? "Inicio / Panel principal" : item.title}
+              {item.upcoming && (
+                <span className="mt-1 block text-xs font-normal">Próximamente</span>
+              )}
+            </span>
           </button>
         ))}
       </nav>

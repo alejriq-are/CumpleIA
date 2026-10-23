@@ -56,9 +56,13 @@ de la implementación ni adopción en el producto conectado.
 - RAT: alcance, fuentes/sistemas, conservación/eliminación, terceros/transferencias.
 - Licitud: alcance consultable, base/fundamento, infancia condicional, EIPD,
   riesgos, medidas, anexos y preparación de resolución de infancia.
-- Documentos: consulta de campos guardados, paneles de evidencia y vínculos de riesgos.
-- Evidencia: localización de respaldos y acceso a añadir un anexo simulado.
-- Organización: datos ficticios, equipo e historial de facultad revocada.
+- Consultas dentro de Bases de licitud: campos guardados, paneles de evidencia y vínculos de riesgos.
+- Documentos y Carpeta de evidencias: accesos visibles con «Próximamente», deshabilitados
+  en menú principal y tarjetas del Panel. No representan módulos disponibles.
+- Mi organización: abre directamente nombre, RUT, rubro/industria y tamaño, con los
+  valores de demostración de la captura aportada (CumpleIA Demo, 1111111-0, Consultoría,
+  Pequeña empresa PYME). Guardado solo en memoria; los mismos datos se mantienen
+  al alternar escenarios. Facultades siguen consultables dentro del recorrido de infancia.
 - Historial y descargas: versiones de infancia, actividad de la visita y JSON de ejemplo.
 
 ### Estado y conservación
@@ -96,8 +100,8 @@ ni decisiones anteriores. No se concede facultad ni se habilita operación real.
 - Descarga `maqueta-cumpleia-*.json`, con marca propia y can_confirm=false,
   activation=deshabilitada. No es el contrato de expediente MVP ni contiene huellas
   auditables o aceptación jurídica. Consultas y simulación no alteran el producto.
-- Documentos y Evidencia incluyen pantallas conceptuales para probar homogeneidad;
-  no habilitan módulos futuros en el dashboard conectado.
+- Documentos y Carpeta de evidencias están marcados Próximamente. Las consultas y
+  los anexos dentro de Bases de licitud siguen disponibles en la maqueta.
 
 ## Validación técnica local
 
@@ -116,8 +120,11 @@ descarga solo guardada, reinicio, estados de guardado y móvil 390/320 sin desbo
 Capturas adicionales para escritorio 1440 y móvil 390. Ejecución local con
 MAQUETA_SCREENSHOTS produce las imágenes; sin esa variable se omite solo la captura.
 La segunda versión añade pruebas de desplegables por clic/teclado, acceso directo
-a preparación y tamaños 1440/1024/768/640/390/320. Resultado local: 13 pruebas
-aprobadas (12 funcionales y una de capturas), en 14.8 s. Tipos, ESLint y formato
+a preparación y tamaños 1440/1024/768/640/390/320. Resultado previo: 13 pruebas
+aprobadas (12 funcionales y una de capturas). Ajuste de organización y Próximamente
+validado con la suite actualizada: 14 pruebas aprobadas en 14.6 s. Tras limitar
+Mi organización a sus cuatro campos, caso específico y capturas repetidos: 2 aprobados.
+Captura final de organización inspeccionada visualmente; tipos/lint/formato aprobados. Tipos, ESLint y formato
 comprobados. Capturas revisadas de Panel, RAT, Infancia, menús EIPD y resoluciones,
 escritorio y móvil. Ajuste final de reinicio de anexos validado con el caso dirigido.
 Ruta local responde 307 hacia autenticación sin sesión; no se usaron credenciales

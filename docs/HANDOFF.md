@@ -21,7 +21,8 @@ identifica el HEAD exacto de la tarea. Una CI anterior no prueba un commit nuevo
 Maqueta integral NAV-UX-001 en `/dashboard/maqueta`: Panel principal y seis módulos,
 menú principal izquierdo y opciones superiores por módulo según bosquejo del usuario,
 submenús por clic/teclado y formularios centrales, escenarios ficticios separados,
-guardado en memoria y consultas/ventanas de detalle. Accesos desde dashboard y
+Mi organización con nombre/RUT/rubro/tamaño, Documentos y Carpeta de evidencias
+marcados Próximamente. Guardado en memoria y consultas/ventanas de detalle. Accesos desde dashboard y
 licitud. [Contrato y guion de prueba](project/maqueta-navegacion-integral.md).
 No sustituye producto ni implementa consentimientos/LIA completos; validación
 asistida del diseño y adopción pendientes. Recargar reinicia la demostración.

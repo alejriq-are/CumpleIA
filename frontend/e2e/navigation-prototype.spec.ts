@@ -114,7 +114,7 @@ const visibleNames: Record<ModuleId, string> = {
   rat: "Inventario de tratamientos",
   licitud: "Bases de licitud",
   documentos: "Documentos",
-  evidencia: "Carpeta de evidencia",
+  evidencia: "Carpeta de evidencias",
   organizacion: "Mi organización",
 };
 async function currentModule(page: Page): Promise<ModuleId> {
@@ -133,7 +133,11 @@ async function module(page: Page, name: string) {
     .click();
 }
 async function navigate(page: Page, destination: Destination) {
-  const scenario = (await page.getByLabel("Escenario de prueba").inputValue()) as Scenario;
+  const scenario = (
+    (await page.getByLabel("Escenario de prueba").count())
+      ? await page.getByLabel("Escenario de prueba").inputValue()
+      : "adultos"
+  ) as Scenario;
   const group = moduleNavigation(destination.module, scenario).find((group) =>
     groupDestinations(group, scenario).some(
       (item) => item.task === destination.task && item.section === destination.section
@@ -154,7 +158,11 @@ async function navigate(page: Page, destination: Destination) {
 }
 async function task(page: Page, name: string) {
   const mod = await currentModule(page);
-  const scenario = (await page.getByLabel("Escenario de prueba").inputValue()) as Scenario;
+  const scenario = (
+    (await page.getByLabel("Escenario de prueba").count())
+      ? await page.getByLabel("Escenario de prueba").inputValue()
+      : "adultos"
+  ) as Scenario;
   const tasks: Record<string, TaskId> = {
     Resumen: "resumen",
     "Completar datos": "completar",
@@ -166,7 +174,11 @@ async function task(page: Page, name: string) {
 }
 async function step(page: Page, name: string) {
   const mod = await currentModule(page);
-  const scenario = (await page.getByLabel("Escenario de prueba").inputValue()) as Scenario;
+  const scenario = (
+    (await page.getByLabel("Escenario de prueba").count())
+      ? await page.getByLabel("Escenario de prueba").inputValue()
+      : "adultos"
+  ) as Scenario;
   const destination = moduleNavigation(mod, scenario)
     .flatMap((group) => groupDestinations(group, scenario))
     .find((item) => labels[item.section]?.includes(name))!;
@@ -182,14 +194,7 @@ test("todos los módulos y destinos abren contenido con foco, sin red ni capas g
   page,
 }) => {
   await open(page);
-  for (const name of [
-    "Diagnóstico",
-    "Inventario RAT",
-    "Bases de licitud",
-    "Documentos",
-    "Evidencia",
-    "Organización",
-  ]) {
+  for (const name of ["Diagnóstico", "Inventario RAT", "Bases de licitud", "Organización"]) {
     await module(page, name);
     const mod = moduleNames[name];
     for (const group of moduleNavigation(mod, "adultos")) {
@@ -484,6 +489,13 @@ test("capturas de escritorio y móvil para revisión visual", async ({ page }) =
   await page.evaluate(() => window.scrollTo(0, 0));
   await page.evaluate(() => new Promise(requestAnimationFrame));
   await page.screenshot({ path: path.join(dir, "maqueta-infancia-mobile.png"), fullPage: true });
+  await page.setViewportSize({ width: 1440, height: 1100 });
+  await module(page, "Organización");
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.screenshot({
+    path: path.join(dir, "maqueta-organizacion-desktop.png"),
+    fullPage: true,
+  });
 });
 
 test("menú EIPD abre por clic, permanece visible y cierra con Escape, selección o clic exterior", async ({
@@ -568,4 +580,47 @@ test("menús completos sin desborde en escritorio, tableta y móvil", async ({ p
       await page.keyboard.press("Escape");
     }
   }
+});
+
+test("Mi organización reproduce los cuatro datos y los módulos futuros indican Próximamente", async ({
+  page,
+}) => {
+  await open(page);
+  for (const title of ["Documentos", "Carpeta de evidencias"]) {
+    await expect(
+      moduleNav(page).getByRole("button", { name: new RegExp(`^${title}`) })
+    ).toBeDisabled();
+    await expect(
+      moduleNav(page).getByRole("button", { name: new RegExp(`^${title}`) })
+    ).toContainText("Próximamente");
+    await expect(work(page).getByRole("button", { name: new RegExp(`^${title}`) })).toBeDisabled();
+    await expect(work(page).getByRole("button", { name: new RegExp(`^${title}`) })).toContainText(
+      "Próximamente"
+    );
+  }
+  await module(page, "Organización");
+  await expect(page.locator("#prototype-section-title")).toHaveText("Datos de la organización");
+  await expect(
+    page.getByRole("textbox", { name: "Nombre de la organización", exact: true })
+  ).toHaveValue("CumpleIA Demo");
+  await expect(page.getByRole("textbox", { name: "RUT", exact: true })).toHaveValue("1111111-0");
+  await expect(page.getByRole("textbox", { name: "Rubro / industria", exact: true })).toHaveValue(
+    "Consultoría"
+  );
+  await expect(page.getByLabel("Tamaño", { exact: true })).toHaveValue("Pequeña empresa (PYME)");
+  await expect(page.getByLabel("Tamaño").locator("option")).toHaveCount(5);
+  await expect(page.getByLabel("Escenario de prueba")).toHaveCount(0);
+  await page
+    .getByRole("textbox", { name: "Rubro / industria", exact: true })
+    .fill("[FICTICIA] Servicios");
+  await page.getByRole("button", { name: "Guardar cambios", exact: true }).click();
+  await expect(page.getByRole("status")).toContainText("Guardado en la maqueta");
+  await module(page, "Bases de licitud");
+  await page.getByLabel("Escenario de prueba").selectOption("infancia");
+  await expect(optionsNav(page).locator('[data-nav-group="consultas"]')).toBeEnabled();
+  await module(page, "Organización");
+  await expect(page.getByRole("textbox", { name: "Rubro / industria", exact: true })).toHaveValue(
+    "[FICTICIA] Servicios"
+  );
+  expect(requests).toEqual([]);
 });

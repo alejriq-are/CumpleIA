@@ -29,6 +29,9 @@ export function moduleNavigation(module: ModuleId, scenario: Scenario): Navigati
     "historial",
     steps(module, "historial", scenario)
   );
+  if (module === "documentos" || module === "evidencia") return [];
+  if (module === "organizacion")
+    return [group("datos", "Datos de la organización", "completar", ["organizacion"])];
   if (module === "panel")
     return [
       group("inicio", "Vista general", "resumen", ["estado"]),

@@ -3,8 +3,20 @@ export type ModuleId =
 export type TaskId = "resumen" | "completar" | "revisar" | "historial";
 export type Scenario = "adultos" | "infancia";
 export type Values = Record<string, string>;
-export type Field = { key: string; label: string; options?: string[]; hint?: string };
-export const modules: { id: ModuleId; title: string; short: string; description: string }[] = [
+export type Field = {
+  key: string;
+  label: string;
+  options?: string[];
+  hint?: string;
+  singleLine?: boolean;
+};
+export const modules: {
+  id: ModuleId;
+  title: string;
+  short: string;
+  description: string;
+  upcoming?: boolean;
+}[] = [
   {
     id: "panel",
     title: "Panel principal",
@@ -33,19 +45,21 @@ export const modules: { id: ModuleId; title: string; short: string; description:
     id: "documentos",
     title: "Documentos",
     short: "Documentos",
-    description: "Encuentra los documentos y abre sus antecedentes.",
+    description: "Módulo próximamente disponible.",
+    upcoming: true,
   },
   {
     id: "evidencia",
-    title: "Carpeta de evidencia",
+    title: "Carpeta de evidencias",
     short: "Evidencia",
-    description: "Consulta los respaldos y sus relaciones.",
+    description: "Módulo próximamente disponible.",
+    upcoming: true,
   },
   {
     id: "organizacion",
     title: "Mi organización",
     short: "Organización",
-    description: "Consulta el equipo y las facultades del ejemplo.",
+    description: "Nombre, RUT, rubro y tamaño de la organización.",
   },
 ];
 export const tasks: { id: TaskId; label: string }[] = [
@@ -88,11 +102,12 @@ export const labels: Record<string, string> = {
   informe: "Informe de ejemplo",
   biblioteca: "Biblioteca documental",
   respaldos: "Respaldos vinculados",
-  organizacion: "Datos de organización",
+  organizacion: "Datos de la organización",
   equipo: "Equipo del ejemplo",
 };
 export function steps(module: ModuleId, task: TaskId, scenario: Scenario): string[] {
   if (module === "panel") return ["estado", "ayuda"];
+  if (module === "organizacion") return ["organizacion"];
   if (task === "resumen") return ["estado"];
   if (task === "historial") return ["versiones", "eventos", "descargas"];
   if (module === "licitud") {
@@ -124,8 +139,6 @@ export function steps(module: ModuleId, task: TaskId, scenario: Scenario): strin
     return task === "completar"
       ? ["respuestas", ...Array.from({ length: 9 }, (_, i) => `respuesta${i + 2}`)]
       : ["resultados", "informe"];
-  if (module === "organizacion")
-    return task === "completar" ? ["organizacion", "equipo"] : ["equipo", "facultades"];
   if (module === "documentos") return ["biblioteca", "documentos"];
   return ["respaldos", "anexos"];
 }
@@ -257,8 +270,20 @@ export const fields: Record<string, Field[]> = {
     { key: "diagnostico.notas", label: "Antecedentes de la respuesta" },
   ],
   organizacion: [
-    { key: "organizacion.nombre", label: "Nombre ficticio de la organización" },
-    { key: "organizacion.area", label: "Área del ensayo" },
+    { key: "organizacion.nombre", label: "Nombre de la organización", singleLine: true },
+    { key: "organizacion.rut", label: "RUT", singleLine: true },
+    { key: "organizacion.rubro", label: "Rubro / industria", singleLine: true },
+    {
+      key: "organizacion.tamano",
+      label: "Tamaño",
+      options: [
+        "Sin especificar",
+        "Micro empresa",
+        "Pequeña empresa (PYME)",
+        "Mediana empresa (PYME)",
+        "Gran Empresa",
+      ],
+    },
   ],
 };
 for (let i = 2; i <= 10; i++) {
@@ -283,7 +308,10 @@ export const initial = (s: Scenario): Values => ({
     s === "adultos" ? "Clientes adultos sintéticos" : "Participantes sintéticos de 10 a 13 años",
   "rat.fuentes": "[FICTICIA] Registros sintéticos preparados para la maqueta.",
   "rat.conservacion": "[FICTICIA] Plazo del ensayo pendiente de revisión.",
-  "organizacion.nombre": "[FICTICIA] Organización de ejemplo",
+  "organizacion.nombre": "CumpleIA Demo",
+  "organizacion.rut": "1111111-0",
+  "organizacion.rubro": "Consultoría",
+  "organizacion.tamano": "Pequeña empresa (PYME)",
   "base.tipo": "Pendiente de definir",
   "base.fundamento": "[FICTICIA] Análisis pendiente. No existe autorización para operar.",
   "infancia.edad": "[FICTICIA] Participantes sintéticos de 10 a 13 años.",

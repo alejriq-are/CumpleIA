@@ -130,12 +130,21 @@ export function NavigationPrototype() {
     }
   }, [overlay]);
   function go(mod: ModuleId, t?: TaskId, s?: string) {
-    t = t ?? (mod === "licitud" ? "completar" : "resumen");
+    if (modules.find((item) => item.id === mod)?.upcoming) return;
+    t = t ?? (["licitud", "organizacion"].includes(mod) ? "completar" : "resumen");
     setNotice("");
-    setLocation({ module: mod, task: t, section: s ?? steps(mod, t, scenario)[0] });
+    setLocation({
+      module: mod,
+      task: t,
+      section: s ?? (mod === "organizacion" ? "organizacion" : steps(mod, t, scenario)[0]),
+    });
   }
   function edit(key: string, value: string) {
-    setDrafts((old) => ({ ...old, [scenario]: { ...old[scenario], [key]: value } }));
+    setDrafts((old) =>
+      key.startsWith("organizacion.")
+        ? { adultos: { ...old.adultos, [key]: value }, infancia: { ...old.infancia, [key]: value } }
+        : { ...old, [scenario]: { ...old[scenario], [key]: value } }
+    );
     setNotice("");
   }
   function changeScenario(s: Scenario) {
@@ -168,11 +177,28 @@ export function NavigationPrototype() {
     if (!fs || (section === "anexos" && !validAnnex)) return;
     const next = { ...stored };
     for (const f of fs) next[f.key] = values[f.key] ?? "";
-    setSaved((old) => ({ ...old, [scenario]: next }));
-    setSavedSteps((old) => ({
-      ...old,
-      [scenario]: Array.from(new Set([...old[scenario], section])),
-    }));
+    setSaved((old) =>
+      section === "organizacion"
+        ? {
+            adultos: {
+              ...old.adultos,
+              ...Object.fromEntries(fs.map((f) => [f.key, values[f.key] ?? ""])),
+            },
+            infancia: {
+              ...old.infancia,
+              ...Object.fromEntries(fs.map((f) => [f.key, values[f.key] ?? ""])),
+            },
+          }
+        : { ...old, [scenario]: next }
+    );
+    setSavedSteps((old) =>
+      section === "organizacion"
+        ? {
+            adultos: Array.from(new Set([...old.adultos, section])),
+            infancia: Array.from(new Set([...old.infancia, section])),
+          }
+        : { ...old, [scenario]: Array.from(new Set([...old[scenario], section])) }
+    );
     if (section === "anexos") {
       setAnnexes((old) => ({
         ...old,
@@ -219,6 +245,12 @@ export function NavigationPrototype() {
     const readOnly = module === "licitud" && section === "alcance";
     return (
       <>
+        {section === "organizacion" && (
+          <p className="text-sm text-slate-600">
+            Esta información aparece en el encabezado de los informes exportados. En la maqueta, los
+            cambios se guardan solo durante esta visita.
+          </p>
+        )}
         {readOnly && (
           <p className="rounded-lg border border-sky-200 bg-sky-50 p-4">
             Información del RAT de ejemplo. Aquí solo se consulta; el acceso inferior abre su
@@ -252,6 +284,14 @@ export function NavigationPrototype() {
                   <option key={v}>{v}</option>
                 ))}
               </select>
+            ) : f.singleLine ? (
+              <input
+                type="text"
+                aria-label={f.label}
+                className={input}
+                value={values[f.key] ?? ""}
+                onChange={(e) => edit(f.key, e.target.value)}
+              />
             ) : (
               <textarea
                 rows={f.key.endsWith("notas") ? 4 : 3}
@@ -381,7 +421,9 @@ export function NavigationPrototype() {
               >
                 {section === "preparar"
                   ? "Abrir vista previa de la resolución →"
-                  : "Guardar cambios en la maqueta"}
+                  : section === "organizacion"
+                    ? "Guardar cambios"
+                    : "Guardar cambios en la maqueta"}
               </button>
               {menu.indexOf(section) < menu.length - 1 && (
                 <button
@@ -591,13 +633,14 @@ export function NavigationPrototype() {
               .map((v) => (
                 <button
                   key={v.id}
-                  className="rounded-xl border border-slate-200 bg-white p-5 text-left shadow-sm transition hover:border-blue-600 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-800"
+                  disabled={v.upcoming}
+                  className="rounded-xl border border-slate-200 bg-white p-5 text-left shadow-sm transition hover:border-blue-600 hover:shadow-md disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-500 disabled:hover:border-slate-200 disabled:hover:shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-800"
                   onClick={() => go(v.id)}
                 >
                   <span className="text-lg font-bold text-slate-950">{v.title}</span>
                   <p className="mt-2 text-slate-600">{v.description}</p>
                   <span className="mt-4 inline-block font-semibold text-blue-800">
-                    Abrir módulo →
+                    {v.upcoming ? "Próximamente" : "Abrir módulo →"}
                   </span>
                 </button>
               ))}
@@ -933,21 +976,26 @@ export function NavigationPrototype() {
                 <p className="text-xs font-semibold text-slate-500">Inicio / {m.title}</p>
                 <h2 className="mt-1 text-xl font-bold text-slate-950">{m.title}</h2>
                 <p className="mt-1 text-xs text-slate-600">
-                  Organización de ejemplo · {scenarioNames[scenario]} · Evaluación v1
+                  {stored["organizacion.nombre"]} ·{" "}
+                  {module === "organizacion"
+                    ? "Datos de la organización"
+                    : `${scenarioNames[scenario]} · Evaluación v1`}
                 </p>
               </div>
-              <label className="w-full min-w-0 text-xs font-semibold sm:w-auto">
-                Escenario de prueba
-                <select
-                  aria-label="Escenario de prueba"
-                  className="mt-1 block w-full max-w-full rounded-lg border border-slate-300 bg-white p-2 text-sm sm:w-auto"
-                  value={scenario}
-                  onChange={(e) => changeScenario(e.target.value as Scenario)}
-                >
-                  <option value="adultos">Clientes adultos</option>
-                  <option value="infancia">Programa con menores</option>
-                </select>
-              </label>
+              {module !== "organizacion" && (
+                <label className="w-full min-w-0 text-xs font-semibold sm:w-auto">
+                  Escenario de prueba
+                  <select
+                    aria-label="Escenario de prueba"
+                    className="mt-1 block w-full max-w-full rounded-lg border border-slate-300 bg-white p-2 text-sm sm:w-auto"
+                    value={scenario}
+                    onChange={(e) => changeScenario(e.target.value as Scenario)}
+                  >
+                    <option value="adultos">Clientes adultos</option>
+                    <option value="infancia">Programa con menores</option>
+                  </select>
+                </label>
+              )}
             </div>
             <ModuleOptions
               location={location}
@@ -962,15 +1010,17 @@ export function NavigationPrototype() {
               }
             />
           </div>
-          <div className="mb-4 rounded-lg border border-slate-200 bg-white p-3 text-sm">
-            <p className="font-semibold">{values["rat.nombre"]}</p>
-            <p className="mt-1 text-slate-600">{values["rat.finalidad"]}</p>
-            {dirty && (
-              <p className="mt-2 font-semibold text-amber-900">
-                Cambios sin guardar · Se conservan al navegar durante esta visita.
-              </p>
-            )}
-          </div>
+          {module !== "organizacion" && (
+            <div className="mb-4 rounded-lg border border-slate-200 bg-white p-3 text-sm">
+              <p className="font-semibold">{values["rat.nombre"]}</p>
+              <p className="mt-1 text-slate-600">{values["rat.finalidad"]}</p>
+              {dirty && (
+                <p className="mt-2 font-semibold text-amber-900">
+                  Cambios sin guardar · Se conservan al navegar durante esta visita.
+                </p>
+              )}
+            </div>
+          )}
           <section
             ref={contentRef}
             id="prototype-content"
