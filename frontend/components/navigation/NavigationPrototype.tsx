@@ -5,7 +5,12 @@ import {
   steps,
   fields,
   labels,
-  initial,
+  initialEvaluations,
+  evaluationRecords,
+  evaluationOptions,
+  purposeOptions,
+  treatmentOptions,
+  type EvaluationId,
   scenarioNames,
   purpose,
   seedResolutions,
@@ -42,25 +47,19 @@ export function NavigationPrototype() {
     task: "resumen",
     section: "estado",
   });
-  const [scenario, setScenario] = useState<Scenario>("adultos");
-  const [drafts, setDrafts] = useState<Record<Scenario, Values>>({
-    adultos: initial("adultos"),
-    infancia: initial("infancia"),
-  });
-  const [saved, setSaved] = useState<Record<Scenario, Values>>({
-    adultos: initial("adultos"),
-    infancia: initial("infancia"),
-  });
-  const [savedSteps, setSavedSteps] = useState<Record<Scenario, string[]>>({
-    adultos: [],
-    infancia: [],
-  });
+  const [evaluationId, setEvaluationId] = useState<EvaluationId>("adultos");
+  const currentEvaluation = evaluationOptions.find((item) => item.id === evaluationId)!;
+  const scenario = currentEvaluation.treatment;
+  const selectedPurpose = purposeOptions.find((item) => item.id === currentEvaluation.purposeId)!;
+  const [drafts, setDrafts] = useState(initialEvaluations);
+  const [saved, setSaved] = useState(initialEvaluations);
+  const [savedSteps, setSavedSteps] = useState(() => evaluationRecords<string[]>(() => []));
   const [resolutions, setResolutions] = useState(seedResolutions);
   const [selected, setSelected] = useState(2);
   const [origin, setOrigin] = useState<string | null>(null);
   const [overlay, setOverlay] = useState<Overlay | null>(null);
   const [notice, setNotice] = useState("");
-  const [events, setEvents] = useState<string[]>([]);
+  const [events, setEvents] = useState(() => evaluationRecords<string[]>(() => []));
   const [choice, setChoice] = useState("");
   const [rationale, setRationale] = useState("");
   const [reference, setReference] = useState("");
@@ -68,10 +67,17 @@ export function NavigationPrototype() {
     { version: number; choice: string; text: string; reference: string }[]
   >([]);
   const [fictitious, setFictitious] = useState(false);
-  const [fileName, setFileName] = useState("");
-  const [fileError, setFileError] = useState("");
+  const [files, setFiles] = useState(() => evaluationRecords(() => ({ name: "", error: "" })));
+  const fileName = files[evaluationId].name;
+  const fileError = files[evaluationId].error;
+  function setFileName(name: string) {
+    setFiles((old) => ({ ...old, [evaluationId]: { ...old[evaluationId], name } }));
+  }
+  function setFileError(error: string) {
+    setFiles((old) => ({ ...old, [evaluationId]: { ...old[evaluationId], error } }));
+  }
   const [fileKey, setFileKey] = useState(0);
-  const [annexes, setAnnexes] = useState<Record<Scenario, string[]>>({ adultos: [], infancia: [] });
+  const [annexes, setAnnexes] = useState(() => evaluationRecords<string[]>(() => []));
   const contentRef = useRef<HTMLElement>(null);
   const navigationRef = useRef<HTMLDivElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -81,8 +87,8 @@ export function NavigationPrototype() {
   const { module, task, section } = location;
   const m = modules.find((v) => v.id === module)!;
   const menu = steps(module, task, scenario);
-  const values = drafts[scenario];
-  const stored = saved[scenario];
+  const values = drafts[evaluationId];
+  const stored = saved[evaluationId];
   const fs = fields[section];
   const inlineNotice = Boolean(
     fs && section !== "preparar" && !(module === "licitud" && section === "alcance")
@@ -125,7 +131,7 @@ export function NavigationPrototype() {
     }
     contentRef.current?.focus({ preventScroll: true });
     contentRef.current?.scrollIntoView({ block: "start" });
-  }, [location, scenario]);
+  }, [location, evaluationId]);
   useEffect(() => {
     if (overlay && dialogRef.current && !dialogRef.current.open) {
       dialogTrigger.current = document.activeElement as HTMLElement;
@@ -145,22 +151,27 @@ export function NavigationPrototype() {
   function edit(key: string, value: string) {
     setDrafts((old) =>
       key.startsWith("organizacion.")
-        ? { adultos: { ...old.adultos, [key]: value }, infancia: { ...old.infancia, [key]: value } }
-        : { ...old, [scenario]: { ...old[scenario], [key]: value } }
+        ? evaluationRecords((item) => ({ ...old[item.id], [key]: value }))
+        : { ...old, [evaluationId]: { ...old[evaluationId], [key]: value } }
     );
     setNotice("");
   }
-  function changeScenario(s: Scenario) {
-    setScenario(s);
-    setLocation((old) => ({ ...old, section: steps(old.module, old.task, s)[0] }));
+  function selectEvaluation(id: EvaluationId) {
+    const target = evaluationOptions.find((item) => item.id === id)!;
+    setEvaluationId(id);
+    setLocation((old) => {
+      const available = steps(old.module, old.task, target.treatment);
+      return { ...old, section: available.includes(old.section) ? old.section : available[0] };
+    });
     setFictitious(false);
-    setFileName("");
-    setFileError("");
-    setFileKey((v) => v + 1);
+    setFileKey((value) => value + 1);
     setChoice("");
     setRationale("");
     setReference("");
     setNotice("");
+  }
+  function changeScenario(treatment: Scenario) {
+    selectEvaluation(evaluationOptions.find((item) => item.treatment === treatment)!.id);
   }
   function close() {
     dialogRef.current?.close();
@@ -180,33 +191,24 @@ export function NavigationPrototype() {
     if (!fs || (section === "anexos" && !validAnnex)) return;
     const next = { ...stored };
     for (const f of fs) next[f.key] = values[f.key] ?? "";
+    const organizationChanges = Object.fromEntries(
+      fs.map((field) => [field.key, values[field.key] ?? ""])
+    );
     setSaved((old) =>
       section === "organizacion"
-        ? {
-            adultos: {
-              ...old.adultos,
-              ...Object.fromEntries(fs.map((f) => [f.key, values[f.key] ?? ""])),
-            },
-            infancia: {
-              ...old.infancia,
-              ...Object.fromEntries(fs.map((f) => [f.key, values[f.key] ?? ""])),
-            },
-          }
-        : { ...old, [scenario]: next }
+        ? evaluationRecords((item) => ({ ...old[item.id], ...organizationChanges }))
+        : { ...old, [evaluationId]: next }
     );
     setSavedSteps((old) =>
       section === "organizacion"
-        ? {
-            adultos: Array.from(new Set([...old.adultos, section])),
-            infancia: Array.from(new Set([...old.infancia, section])),
-          }
-        : { ...old, [scenario]: Array.from(new Set([...old[scenario], section])) }
+        ? evaluationRecords((item) => Array.from(new Set([...old[item.id], section])))
+        : { ...old, [evaluationId]: Array.from(new Set([...old[evaluationId], section])) }
     );
     if (section === "anexos") {
       setAnnexes((old) => ({
         ...old,
-        [scenario]: [
-          ...old[scenario],
+        [evaluationId]: [
+          ...old[evaluationId],
           `${values["anexos.referencia"]} · ${values["anexos.seccion"]} · ${fileName}`,
         ],
       }));
@@ -214,7 +216,13 @@ export function NavigationPrototype() {
       setFileKey((v) => v + 1);
       setFictitious(false);
     }
-    setEvents((old) => [`${scenarioNames[scenario]} · ${title}: guardado simulado.`, ...old]);
+    setEvents((old) => ({
+      ...old,
+      [evaluationId]: [
+        `${currentEvaluation.label} · ${title}: guardado simulado.`,
+        ...old[evaluationId],
+      ],
+    }));
     setNotice("Guardado en la maqueta durante esta visita. Recargar reinicia el ejemplo.");
   }
   function download() {
@@ -224,9 +232,16 @@ export function NavigationPrototype() {
           {
             type: "maqueta_sin_valor_juridico",
             scenario,
+            treatment: scenario,
+            purposeId: currentEvaluation.purposeId,
+            evaluation: {
+              id: evaluationId,
+              version: currentEvaluation.version,
+              label: currentEvaluation.label,
+            },
             values: stored,
             resolutions: scenario === "infancia" ? resolutions : [],
-            annexes: annexes[scenario],
+            annexes: annexes[evaluationId],
             can_confirm: false,
             activation: "deshabilitada",
           },
@@ -239,7 +254,7 @@ export function NavigationPrototype() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `maqueta-cumpleia-${scenario}.json`;
+    a.download = `maqueta-cumpleia-${evaluationId}.json`;
     a.click();
     URL.revokeObjectURL(url);
     setNotice("Descargaste el ejemplo guardado. No incluye cambios pendientes.");
@@ -272,6 +287,11 @@ export function NavigationPrototype() {
             registrar agrega una versión al ejemplo.
           </p>
         )}
+        {module === "rat" && section === "alcance" && (
+          <p className="text-sm text-slate-600">
+            El tratamiento y la finalidad se eligen en los selectores de contexto de arriba.
+          </p>
+        )}
         {fs.map((f) => (
           <label key={f.key} className="block font-semibold text-slate-800">
             {f.label}
@@ -301,7 +321,7 @@ export function NavigationPrototype() {
                 aria-label={f.label}
                 className={input}
                 value={values[f.key] ?? ""}
-                readOnly={readOnly}
+                readOnly={readOnly || ["rat.nombre", "rat.finalidad"].includes(f.key)}
                 onChange={(e) => edit(f.key, e.target.value)}
               />
             )}{" "}
@@ -365,6 +385,11 @@ export function NavigationPrototype() {
                 "Hasta 2 MiB. El archivo no se carga a ningún servidor; la maqueta solo conserva su nombre."}
             </p>
           </>
+        )}
+        {section === "anexos" && fileName && (
+          <p className="text-sm text-slate-600">
+            Archivo de ejemplo seleccionado: {fileName}. Solo se conserva su nombre.
+          </p>
         )}
         {["anexos", "preparar"].includes(section) && (
           <label className="flex items-start gap-3">
@@ -671,7 +696,7 @@ export function NavigationPrototype() {
           <div className="grid gap-4 sm:grid-cols-2">
             <Card title="Avance documental">
               <p className="text-3xl font-bold text-blue-900">
-                {savedSteps[scenario].length} pasos
+                {savedSteps[evaluationId].length} pasos
               </p>
               <p className="mt-2">guardados en esta visita, entre los módulos del ejemplo.</p>
             </Card>
@@ -751,19 +776,16 @@ export function NavigationPrototype() {
               </div>
             ))
           ) : (
-            <p>
-              Ejemplo inicial · Versión 1 · Borrador ficticio. No hay registros reales en esta
-              maqueta.
-            </p>
+            <p>{currentEvaluation.label}. No hay registros reales en esta maqueta.</p>
           )}
         </Card>
       );
     if (section === "eventos")
       return (
         <Card title="Actividad de esta visita">
-          {events.length ? (
+          {events[evaluationId].length ? (
             <ol className="space-y-3">
-              {events.map((e, i) => (
+              {events[evaluationId].map((e, i) => (
                 <li key={i} className="rounded-lg bg-slate-50 p-3">
                   {e}
                 </li>
@@ -858,7 +880,7 @@ export function NavigationPrototype() {
               </button>
             </Card>
           )}
-          {["eipd", "proporcionalidad"].some((item) => savedSteps[scenario].includes(item)) && (
+          {["eipd", "proporcionalidad"].some((item) => savedSteps[evaluationId].includes(item)) && (
             <Card title="Documento EIPD guardado en la maqueta">
               <p className="font-bold">{stored["eipd.referencia"]}</p>
               <p className="mt-3 whitespace-pre-wrap">{stored["eipd.analisis"]}</p>
@@ -902,8 +924,8 @@ export function NavigationPrototype() {
             </button>
           )}
           <Card title="Anexos guardados del ejemplo">
-            {annexes[scenario].length ? (
-              annexes[scenario].map((a, i) => (
+            {annexes[evaluationId].length ? (
+              annexes[evaluationId].map((a, i) => (
                 <p key={i} className="mb-3 rounded-lg bg-slate-50 p-3">
                   {a} · Solo nombre; archivo no almacenado.
                 </p>
@@ -977,6 +999,82 @@ export function NavigationPrototype() {
       <div className="grid items-start gap-5 md:grid-cols-[240px_minmax(0,1fr)]">
         <MainModules module={module} go={(mod) => go(mod)} />
         <div className="min-w-0">
+          {["rat", "licitud"].includes(module) && (
+            <section
+              aria-label="Seleccionar tratamiento, finalidad y evaluación"
+              className="mb-4 rounded-xl border border-blue-200 bg-blue-50 p-4"
+            >
+              <p className="text-sm font-semibold text-blue-950">
+                Organización: {stored["organizacion.nombre"]}
+              </p>
+              <div className="mt-3 grid gap-3 lg:grid-cols-3">
+                <label className="min-w-0 text-sm font-semibold">
+                  Tratamiento del RAT
+                  <select
+                    aria-label="Tratamiento del RAT"
+                    className={`${input} text-sm`}
+                    value={scenario}
+                    onChange={(event) => changeScenario(event.target.value as Scenario)}
+                  >
+                    {treatmentOptions.map((item) => (
+                      <option key={item.id} value={item.id}>
+                        {item.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="min-w-0 text-sm font-semibold">
+                  Finalidad de la evaluación
+                  <select
+                    aria-label="Finalidad de la evaluación"
+                    className={`${input} text-sm`}
+                    value={currentEvaluation.purposeId}
+                    onChange={(event) =>
+                      selectEvaluation(
+                        evaluationOptions.find(
+                          (item) =>
+                            item.treatment === scenario && item.purposeId === event.target.value
+                        )!.id
+                      )
+                    }
+                  >
+                    {purposeOptions
+                      .filter((item) => item.treatment === scenario)
+                      .map((item) => (
+                        <option key={item.id} value={item.id}>
+                          {item.label}
+                        </option>
+                      ))}
+                  </select>
+                </label>
+                <label className="min-w-0 text-sm font-semibold">
+                  Evaluación
+                  <select
+                    aria-label="Evaluación"
+                    className={`${input} text-sm`}
+                    value={evaluationId}
+                    onChange={(event) => selectEvaluation(event.target.value as EvaluationId)}
+                  >
+                    {evaluationOptions
+                      .filter(
+                        (item) =>
+                          item.treatment === scenario &&
+                          item.purposeId === currentEvaluation.purposeId
+                      )
+                      .map((item) => (
+                        <option key={item.id} value={item.id}>
+                          {item.label}
+                        </option>
+                      ))}
+                  </select>
+                </label>
+              </div>
+              <p className="mt-3 text-xs text-slate-600">
+                Cada evaluación conserva su propio borrador y sus guardados durante esta visita.
+                Cambiar de selección no copia datos entre evaluaciones.
+              </p>
+            </section>
+          )}
           <div
             ref={navigationRef}
             className="top-0 z-20 mb-5 sm:sticky rounded-xl border border-slate-200 bg-gray-50 p-3 shadow-sm"
@@ -990,23 +1088,12 @@ export function NavigationPrototype() {
                   {stored["organizacion.nombre"]} ·{" "}
                   {module === "organizacion"
                     ? "Datos de la organización"
-                    : `${scenarioNames[scenario]} · Evaluación v1`}
+                    : `${scenarioNames[scenario]} · Evaluación v${currentEvaluation.version}`}
                 </p>
+                {["rat", "licitud"].includes(module) && (
+                  <p className="mt-1 text-xs text-slate-600">Finalidad: {selectedPurpose.label}</p>
+                )}
               </div>
-              {module !== "organizacion" && (
-                <label className="w-full min-w-0 text-xs font-semibold sm:w-auto">
-                  Escenario de prueba
-                  <select
-                    aria-label="Escenario de prueba"
-                    className="mt-1 block w-full max-w-full rounded-lg border border-slate-300 bg-white p-2 text-sm sm:w-auto"
-                    value={scenario}
-                    onChange={(e) => changeScenario(e.target.value as Scenario)}
-                  >
-                    <option value="adultos">Clientes adultos</option>
-                    <option value="infancia">Programa con menores</option>
-                  </select>
-                </label>
-              )}
             </div>
             <ModuleOptions
               location={location}
@@ -1015,7 +1102,7 @@ export function NavigationPrototype() {
               status={(item) =>
                 stepDirty(item)
                   ? "Cambios sin guardar"
-                  : savedSteps[scenario].includes(item)
+                  : savedSteps[evaluationId].includes(item)
                     ? "Guardado en maqueta"
                     : ""
               }
@@ -1189,10 +1276,13 @@ export function NavigationPrototype() {
                       },
                     }));
                     setOrigin(null);
-                    setEvents((old) => [
-                      `Infancia · Resolución ${version} registrada en la maqueta.`,
+                    setEvents((old) => ({
                       ...old,
-                    ]);
+                      infancia: [
+                        `Infancia · Resolución ${version} registrada en la maqueta.`,
+                        ...old.infancia,
+                      ],
+                    }));
                     go("licitud", "revisar", "resoluciones");
                     setNotice(
                       `Resolución ${version} agregada solo al ejemplo. Las anteriores se conservan.`
@@ -1217,18 +1307,17 @@ export function NavigationPrototype() {
                 <button
                   className={primary}
                   onClick={() => {
-                    setDrafts({ adultos: initial("adultos"), infancia: initial("infancia") });
-                    setSaved({ adultos: initial("adultos"), infancia: initial("infancia") });
-                    setSavedSteps({ adultos: [], infancia: [] });
-                    setAnnexes({ adultos: [], infancia: [] });
+                    setDrafts(initialEvaluations());
+                    setSaved(initialEvaluations());
+                    setSavedSteps(evaluationRecords(() => []));
+                    setAnnexes(evaluationRecords(() => []));
                     setResolutions(seedResolutions());
                     setSelected(2);
                     setOrigin(null);
                     setReviews([]);
-                    setEvents([]);
+                    setEvents(evaluationRecords(() => []));
                     setFictitious(false);
-                    setFileName("");
-                    setFileError("");
+                    setFiles(evaluationRecords(() => ({ name: "", error: "" })));
                     setFileKey((v) => v + 1);
                     setChoice("");
                     setRationale("");

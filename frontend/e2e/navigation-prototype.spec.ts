@@ -134,8 +134,8 @@ async function module(page: Page, name: string) {
 }
 async function navigate(page: Page, destination: Destination) {
   const scenario = (
-    (await page.getByLabel("Escenario de prueba").count())
-      ? await page.getByLabel("Escenario de prueba").inputValue()
+    (await page.getByLabel("Tratamiento del RAT").count())
+      ? await page.getByLabel("Tratamiento del RAT").inputValue()
       : "adultos"
   ) as Scenario;
   const group = moduleNavigation(destination.module, scenario).find((group) =>
@@ -159,8 +159,8 @@ async function navigate(page: Page, destination: Destination) {
 async function task(page: Page, name: string) {
   const mod = await currentModule(page);
   const scenario = (
-    (await page.getByLabel("Escenario de prueba").count())
-      ? await page.getByLabel("Escenario de prueba").inputValue()
+    (await page.getByLabel("Tratamiento del RAT").count())
+      ? await page.getByLabel("Tratamiento del RAT").inputValue()
       : "adultos"
   ) as Scenario;
   const tasks: Record<string, TaskId> = {
@@ -175,8 +175,8 @@ async function task(page: Page, name: string) {
 async function step(page: Page, name: string) {
   const mod = await currentModule(page);
   const scenario = (
-    (await page.getByLabel("Escenario de prueba").count())
-      ? await page.getByLabel("Escenario de prueba").inputValue()
+    (await page.getByLabel("Tratamiento del RAT").count())
+      ? await page.getByLabel("Tratamiento del RAT").inputValue()
       : "adultos"
   ) as Scenario;
   const destination = moduleNavigation(mod, scenario)
@@ -186,8 +186,8 @@ async function step(page: Page, name: string) {
   await navigate(page, destination);
 }
 async function children(page: Page) {
-  await page.getByLabel("Escenario de prueba").selectOption("infancia");
   await module(page, "Bases de licitud");
+  await page.getByLabel("Tratamiento del RAT").selectOption("infancia");
 }
 
 test("todos los módulos y destinos abren contenido con foco, sin red ni capas genéricas", async ({
@@ -250,12 +250,12 @@ test("borradores conservados entre módulos, escenarios separados y consulta sol
 
   await task(page, "Documentos y revisiones");
   await expect(work(page).getByText(value, { exact: true })).toBeVisible();
-  await page.getByLabel("Escenario de prueba").selectOption("infancia");
+  await page.getByLabel("Tratamiento del RAT").selectOption("infancia");
   await task(page, "Completar datos");
   await step(page, "Base y fundamento");
   await expect(page.getByLabel("Fundamento", { exact: true })).not.toHaveValue(value);
   await expect(optionsNav(page).locator('[data-nav-group="infancia"]')).toBeVisible();
-  await page.getByLabel("Escenario de prueba").selectOption("adultos");
+  await page.getByLabel("Tratamiento del RAT").selectOption("adultos");
   await expect(optionsNav(page).locator('[data-nav-group="infancia"]')).toHaveCount(0);
 });
 
@@ -474,6 +474,12 @@ test("capturas de escritorio y móvil para revisión visual", async ({ page }) =
   await page.evaluate(() => window.scrollTo(0, 0));
   await page.evaluate(() => new Promise(requestAnimationFrame));
   await page.screenshot({ path: path.join(dir, "maqueta-panel-desktop.png"), fullPage: true });
+  await module(page, "Bases de licitud");
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.screenshot({
+    path: path.join(dir, "maqueta-seleccion-finalidad-desktop.png"),
+    fullPage: true,
+  });
   await children(page);
   await task(page, "Completar datos");
   await step(page, "Infancia y adolescencia");
@@ -623,18 +629,98 @@ test("Mi organización reproduce los cuatro datos y los módulos futuros indican
   );
   await expect(page.getByLabel("Tamaño", { exact: true })).toHaveValue("Pequeña empresa (PYME)");
   await expect(page.getByLabel("Tamaño").locator("option")).toHaveCount(5);
-  await expect(page.getByLabel("Escenario de prueba")).toHaveCount(0);
+  await expect(page.getByLabel("Tratamiento del RAT")).toHaveCount(0);
   await page
     .getByRole("textbox", { name: "Rubro / industria", exact: true })
     .fill("[FICTICIA] Servicios");
   await page.getByRole("button", { name: "Guardar cambios", exact: true }).click();
   await expect(page.getByRole("status")).toContainText("Guardado en la maqueta");
   await module(page, "Bases de licitud");
-  await page.getByLabel("Escenario de prueba").selectOption("infancia");
+  await page.getByLabel("Tratamiento del RAT").selectOption("infancia");
   await expect(optionsNav(page).locator('[data-nav-group="consultas"]')).toBeEnabled();
   await module(page, "Organización");
   await expect(page.getByRole("textbox", { name: "Rubro / industria", exact: true })).toHaveValue(
     "[FICTICIA] Servicios"
   );
   expect(requests).toEqual([]);
+});
+
+test("tratamiento, finalidad y evaluación filtran opciones y conservan borradores separados", async ({
+  page,
+}) => {
+  await open(page);
+  await module(page, "Bases de licitud");
+  await expect(page.getByLabel("Finalidad de la evaluación").locator("option")).toHaveCount(2);
+  await expect(page.getByLabel("Evaluación", { exact: true }).locator("option")).toHaveCount(2);
+  await step(page, "Base y fundamento");
+  await page.getByLabel("Fundamento", { exact: true }).fill("[FICTICIA] CITAS V1 GUARDADO");
+  await page.getByRole("button", { name: "Guardar cambios en la maqueta", exact: true }).click();
+  await page.getByLabel("Fundamento", { exact: true }).fill("[FICTICIA] CITAS V1 PENDIENTE");
+  await page.getByLabel("Evaluación", { exact: true }).selectOption("adultos-citas-v2");
+  await expect(page.getByLabel("Fundamento", { exact: true })).not.toHaveValue(/CITAS V1/);
+  await page.getByLabel("Fundamento", { exact: true }).fill("[FICTICIA] CITAS V2 PENDIENTE");
+  await page.getByLabel("Finalidad de la evaluación").selectOption("comercial");
+  await expect(page.getByLabel("Evaluación", { exact: true })).toHaveValue("adultos-comercial");
+  await expect(page.getByLabel("Evaluación", { exact: true }).locator("option")).toHaveCount(1);
+  await expect(page.getByLabel("Fundamento", { exact: true })).not.toHaveValue(/CITAS/);
+  await page.getByLabel("Fundamento", { exact: true }).fill("[FICTICIA] COMERCIAL GUARDADO");
+  await page.getByRole("button", { name: "Guardar cambios en la maqueta", exact: true }).click();
+  await page.getByLabel("Finalidad de la evaluación").selectOption("citas");
+  await expect(page.getByLabel("Fundamento", { exact: true })).toHaveValue(
+    "[FICTICIA] CITAS V1 PENDIENTE"
+  );
+  await task(page, "Documentos y revisiones");
+  await expect(work(page)).toContainText("[FICTICIA] CITAS V1 GUARDADO");
+  await expect(work(page)).not.toContainText("[FICTICIA] COMERCIAL GUARDADO");
+  await expect(work(page)).not.toContainText("[FICTICIA] CITAS V1 PENDIENTE");
+  await page.getByLabel("Evaluación", { exact: true }).selectOption("adultos-citas-v2");
+  await step(page, "Base y fundamento");
+  await expect(page.getByLabel("Fundamento", { exact: true })).toHaveValue(
+    "[FICTICIA] CITAS V2 PENDIENTE"
+  );
+  await module(page, "Inventario RAT");
+  await expect(page.getByLabel("Evaluación", { exact: true })).toHaveValue("adultos-citas-v2");
+  await page.getByLabel("Tratamiento del RAT").selectOption("infancia");
+  await expect(page.getByLabel("Finalidad de la evaluación")).toHaveValue("programa");
+  await expect(page.getByLabel("Finalidad de la evaluación").locator("option")).toHaveCount(1);
+  await expect(page.getByLabel("Evaluación", { exact: true })).toHaveValue("infancia");
+  await module(page, "Bases de licitud");
+  await expect(optionsNav(page).locator('[data-nav-group="infancia"]')).toBeVisible();
+  expect(requests).toEqual([]);
+});
+
+test("anexos, actividad y JSON corresponden a la finalidad y evaluación seleccionadas", async ({
+  page,
+}) => {
+  await open(page);
+  await module(page, "Bases de licitud");
+  await step(page, "Anexos de respaldo");
+  await page.getByLabel("Referencia del anexo de ejemplo").fill("SIMULADA-SOLO-CITAS-V1");
+  await page.getByLabel("Descripción del respaldo").fill("[FICTICIA] Solo citas v1");
+  await page.getByRole("checkbox").check();
+  await page.getByLabel("Archivo PDF o TXT de ejemplo").setInputFiles({
+    name: "citas.txt",
+    mimeType: "text/plain",
+    buffer: Buffer.from("[FICTICIA]"),
+  });
+  await page.getByRole("button", { name: "Guardar cambios en la maqueta", exact: true }).click();
+  await page.getByLabel("Finalidad de la evaluación").selectOption("comercial");
+  await task(page, "Documentos y revisiones");
+  await expect(work(page)).not.toContainText("SIMULADA-SOLO-CITAS-V1");
+  await task(page, "Historial y descargas");
+  await step(page, "Actividad del ejemplo");
+  await expect(work(page)).toContainText("Aún no hay actividad nueva");
+  await step(page, "Descargas");
+  const pending = page.waitForEvent("download");
+  await page.getByRole("button", { name: /Descargar JSON de demostración/ }).click();
+  const download = await pending;
+  const packet = JSON.parse(await readFile((await download.path())!, "utf8"));
+  expect(packet.purposeId).toBe("comercial");
+  expect(packet.evaluation.id).toBe("adultos-comercial");
+  expect(packet.evaluation.version).toBe(1);
+  expect(packet.annexes).toEqual([]);
+  expect(packet.can_confirm).toBe(false);
+  await page.getByLabel("Finalidad de la evaluación").selectOption("citas");
+  await task(page, "Documentos y revisiones");
+  await expect(work(page)).toContainText("SIMULADA-SOLO-CITAS-V1");
 });

@@ -20,7 +20,9 @@ identifica el HEAD exacto de la tarea. Una CI anterior no prueba un commit nuevo
 
 Maqueta integral NAV-UX-001 en `/dashboard/maqueta`: Panel principal y seis módulos,
 menú principal izquierdo y opciones superiores por módulo según bosquejo del usuario,
-submenús por clic/teclado y formularios centrales, escenarios ficticios separados,
+submenús por clic/teclado y formularios centrales. Selección explícita de tratamiento,
+finalidad y evaluación: dos tratamientos, tres finalidades y cuatro evaluaciones
+ficticias con borradores/guardados/anexos separados; adopción conectada NAV-UX-002 pendiente,
 Mi organización con nombre/RUT/rubro/tamaño, Documentos y Carpeta de evidencias
 marcados Próximamente. Guardado en memoria y consultas/ventanas de detalle. Accesos desde dashboard y
 licitud. [Contrato y guion de prueba](project/maqueta-navegacion-integral.md).

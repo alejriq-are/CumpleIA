@@ -346,3 +346,69 @@ export const seedResolutions = (): Resolution[] => [
     notes: "[FICTICIA] Segundo documento del ejemplo. Requiere revisión; no autoriza acciones.",
   },
 ];
+
+export type EvaluationId = "adultos" | "adultos-citas-v2" | "adultos-comercial" | "infancia";
+export const treatmentOptions: { id: Scenario; label: string }[] = [
+  { id: "adultos", label: "[FICTICIA] Gestión de clientes" },
+  { id: "infancia", label: "[FICTICIA] Programa de fidelización con menores" },
+];
+export const purposeOptions = [
+  { id: "citas", treatment: "adultos", label: purpose.adultos },
+  {
+    id: "comercial",
+    treatment: "adultos",
+    label: "[FICTICIA] Atender consultas y realizar seguimiento comercial de clientes adultos.",
+  },
+  { id: "programa", treatment: "infancia", label: purpose.infancia },
+];
+export type ExampleEvaluation = {
+  id: EvaluationId;
+  treatment: Scenario;
+  purposeId: string;
+  version: number;
+  label: string;
+};
+export const evaluationOptions: ExampleEvaluation[] = [
+  {
+    id: "adultos",
+    treatment: "adultos",
+    purposeId: "citas",
+    version: 1,
+    label: "Evaluación de citas · versión 1 · Borrador",
+  },
+  {
+    id: "adultos-citas-v2",
+    treatment: "adultos",
+    purposeId: "citas",
+    version: 2,
+    label: "Evaluación de citas · versión 2 · Borrador",
+  },
+  {
+    id: "adultos-comercial",
+    treatment: "adultos",
+    purposeId: "comercial",
+    version: 1,
+    label: "Evaluación de seguimiento comercial · versión 1 · Borrador",
+  },
+  {
+    id: "infancia",
+    treatment: "infancia",
+    purposeId: "programa",
+    version: 1,
+    label: "Evaluación del programa con menores · versión 1 · Borrador",
+  },
+];
+export function evaluationRecords<T>(
+  factory: (evaluation: ExampleEvaluation) => T
+): Record<EvaluationId, T> {
+  return Object.fromEntries(
+    evaluationOptions.map((evaluation) => [evaluation.id, factory(evaluation)])
+  ) as Record<EvaluationId, T>;
+}
+export function initialEvaluations(): Record<EvaluationId, Values> {
+  return evaluationRecords((evaluation) => ({
+    ...initial(evaluation.treatment),
+    "rat.finalidad": purposeOptions.find((item) => item.id === evaluation.purposeId)!.label,
+    "eipd.referencia": `SIMULADA-MAQUETA-EIPD-${evaluation.id.toUpperCase()}`,
+  }));
+}

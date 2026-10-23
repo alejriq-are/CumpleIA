@@ -67,9 +67,14 @@ de la implementación ni adopción en el producto conectado.
 
 ### Estado y conservación
 
-Dos escenarios separados: Clientes adultos y Programa con menores de 10 a 13 años.
+Dos tratamientos ficticios: Gestión de clientes y Programa con menores de 10 a 13 años.
+La selección explícita usa tratamiento → finalidad → evaluación: dos finalidades de
+clientes (citas y seguimiento comercial), una de infancia y cuatro evaluaciones
+predefinidas, incluidas dos versiones de citas. No crea ni adopta evaluaciones reales.
 Borradores y guardados se mantienen en memoria React mientras no se recargue;
-cambiar tarea/módulo/escenario no borra los textos. Los pasos con nuevas ediciones
+cambiar módulo/finalidad/evaluación no borra los textos. Los valores guardados, estados,
+anexos y actividad se separan por evaluación; los datos de organización se comparten
+solo entre los ejemplos de esa misma organización. Los pasos con nuevas ediciones
 muestran Cambios sin guardar aunque antes se hayan guardado. La consulta y el JSON
 usan valores guardados; no incorporan los cambios pendientes.
 No localStorage/sessionStorage, peticiones API, DB ni almacenamiento de archivos.
@@ -145,7 +150,7 @@ candidato debe verificarse por HEAD, no se infiere de estos resultados.
    cerrar con botón o Escape y comprobar el retorno de foco.
 6. Abrir Documentar EIPD, elegir Valorar riesgos y después Valorar medidas.
    Comprobar que las cinco opciones se encuentran sin buscar botones al pie.
-7. Cambiar a Programa con menores. Abrir Infancia; después Resoluciones y revisiones
+7. Seleccionar el tratamiento Programa con menores. Abrir Infancia; después Resoluciones y revisiones
    y Preparar resolución documental. Comprobar ubicación, título y contenido central.
 8. Consultar resolución 2, probar copiar/cancelar conservando el texto temporal;
    opcionalmente completar vista previa y registro exclusivamente simulado.
@@ -177,3 +182,39 @@ como consulta de una evaluación (captura be1d7c1e). Se adopta «Políticas y re
 normativas» en menú izquierdo y tarjeta del Panel, manteniendo Próximamente y el acceso
 deshabilitado. Documentos guardados sigue siendo la consulta interna de cada evaluación.
 El cambio es de nombre en la maqueta; no implementa políticas ni búsqueda normativa.
+
+## Selección de contexto incorporada durante el recorrido
+
+Usuario pregunta dónde se selecciona la finalidad y autoriza incorporarla ahora a
+la maqueta, dejando la adopción conectada en backlog. En RAT y Bases de licitud se
+muestran Organización (contexto único ficticio), Tratamiento del RAT, Finalidad de la
+evaluación y Evaluación. Las opciones dependen de la selección anterior. Cambiar de
+tratamiento/finalidad selecciona su primera evaluación válida sin copiar el borrador.
+La selección se conserva al cambiar de módulo; al navegar dentro de la evaluación se
+mantiene el paso si es aplicable. Infancia desaparece al seleccionar un tratamiento
+adulto y el paso cambia si deja de corresponder. Cabecera persistente muestra finalidad
+y versión correctas. Los nombres y finalidades del alcance se consultan desde este
+contexto; su edición libre queda fuera del ejemplo para no contradecir la selección.
+
+Fundamentos, guardados/pendientes, valoración ilustrativa editable, nombres de anexos,
+selección de archivo de ejemplo y actividad pertenecen a cada evaluación. Cambiar el
+contexto desmarca declaraciones ficticias y limpia los campos transitorios de revisión.
+Los datos de Mi organización se reflejan en los cuatro ejemplos. Las dos resoluciones
+predefinidas y sus revisiones pertenecen únicamente a la evaluación de infancia.
+El JSON añade tratamiento, finalidad e identidad/versión de evaluación; sigue siendo
+una descarga propia de maqueta, sin API, DB ni equivalencia con el expediente MVP.
+Reiniciar restablece las cuatro evaluaciones; recargar continúa reiniciando la visita.
+
+Prueba asistida nueva: seleccionar Gestión de clientes → Citas → versión 1, editar un
+fundamento, cambiar a versión 2 y volver. Seleccionar Seguimiento comercial y comprobar
+que no aparecen el fundamento, anexos ni actividad de Citas. Volver a Citas y confirmar
+su conservación. Después seleccionar Programa con menores y continuar Infancia.
+
+Validación de este bloque: 16 recorridos Chromium aprobados en 16.0 s, con tipos,
+ESLint y formato de archivos afectados comprobados. Nuevos casos prueban filtrado de
+opciones dependientes, retorno entre finalidades/versiones con borradores separados,
+consulta exclusiva de guardados y aislamiento de anexos/actividad/JSON. Casos previos
+de infancia, copia/cancelación/registro, facultad revocada, reinicio y móvil siguen
+aprobados. Capturas de selección en escritorio y de infancia en móvil inspeccionadas.
+Validación asistida de los nuevos selectores por el usuario pendiente; CI remota no
+verificada para este candidato. No cambios de servidor, permisos o expedientes.
