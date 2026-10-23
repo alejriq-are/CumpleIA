@@ -53,6 +53,19 @@ export default async function DashboardPage() {
         se realizan con datos ficticios.
       </div>
 
+      <aside className="mb-8 rounded-xl border border-blue-200 bg-blue-50 p-5">
+        <h2 className="text-lg font-bold text-blue-950">Nueva propuesta de navegación integral</h2>
+        <p className="mt-2 text-slate-700">
+          Explora el panel, los módulos y los recorridos de adultos e infancia con ejemplos
+          ficticios. Tus expedientes no cambian.
+        </p>
+        <Link
+          href="/dashboard/maqueta"
+          className="mt-4 inline-block rounded-lg bg-blue-800 px-4 py-3 font-semibold text-white hover:bg-blue-900"
+        >
+          Abrir maqueta integral de CumpleIA →
+        </Link>
+      </aside>
       {/* Tarjetas de módulos */}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {MODULOS.map((m) => {

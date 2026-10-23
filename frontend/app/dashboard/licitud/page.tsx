@@ -21,10 +21,10 @@ export default async function Page() {
           Maqueta con escenarios ficticios; tus expedientes no cambian.
         </p>
         <Link
-          href="/dashboard/licitud/maqueta"
+          href="/dashboard/maqueta"
           className="mt-3 inline-block rounded-md bg-blue-800 px-4 py-2 font-medium text-white hover:bg-blue-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-800"
         >
-          Explorar maqueta V3 de licitud
+          Abrir maqueta integral de CumpleIA
         </Link>
       </aside>
       {organizations.length ? (

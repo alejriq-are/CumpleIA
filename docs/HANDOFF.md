@@ -18,6 +18,13 @@ identifica el HEAD exacto de la tarea. Una CI anterior no prueba un commit nuevo
 
 ## Bloque funcional vigente — producto
 
+Maqueta integral NAV-UX-001 en `/dashboard/maqueta`: Panel principal y seis módulos,
+tareas superiores y pasos laterales/selector móvil, escenarios ficticios separados,
+guardado en memoria y consultas/ventanas de detalle. Accesos desde dashboard y
+licitud. [Contrato y guion de prueba](project/maqueta-navegacion-integral.md).
+No sustituye producto ni implementa consentimientos/LIA completos; validación
+asistida del diseño y adopción pendientes. Recargar reinicia la demostración.
+
 Pendiente LIC-UX-013: consulta del residual por riesgo junto con medidas, dimensión,
 eficacia, verificación y respaldos. Alcance y criterios detallados en [backlog](backlog.md);
 registrado para desarrollo posterior, sin cambios de producto. Preservar procedencia
