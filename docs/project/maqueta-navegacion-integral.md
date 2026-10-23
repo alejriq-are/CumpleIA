@@ -169,3 +169,11 @@ formulario, lejos de Guardar. Se reubica inmediatamente sobre los botones de gua
 en los formularios editables de la maqueta, una sola vez y con role=status. Los avisos
 de consulta, copia y registro conservan su ubicación. No se modifica persistencia.
 La confirmación temporal se limpia al navegar; ello no borra los valores guardados.
+
+## Nombres diferenciados durante la revisión asistida
+
+Usuario observa confusión entre Documentos del menú principal y Documentos guardados
+como consulta de una evaluación (captura be1d7c1e). Se adopta «Políticas y referencias
+normativas» en menú izquierdo y tarjeta del Panel, manteniendo Próximamente y el acceso
+deshabilitado. Documentos guardados sigue siendo la consulta interna de cada evaluación.
+El cambio es de nombre en la maqueta; no implementa políticas ni búsqueda normativa.

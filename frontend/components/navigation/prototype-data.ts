@@ -43,8 +43,8 @@ export const modules: {
   },
   {
     id: "documentos",
-    title: "Documentos",
-    short: "Documentos",
+    title: "Políticas y referencias normativas",
+    short: "Políticas y referencias normativas",
     description: "Módulo próximamente disponible.",
     upcoming: true,
   },

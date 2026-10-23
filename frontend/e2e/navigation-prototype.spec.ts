@@ -113,7 +113,7 @@ const visibleNames: Record<ModuleId, string> = {
   diagnostico: "Autodiagnóstico",
   rat: "Inventario de tratamientos",
   licitud: "Bases de licitud",
-  documentos: "Documentos",
+  documentos: "Políticas y referencias normativas",
   evidencia: "Carpeta de evidencias",
   organizacion: "Mi organización",
 };
@@ -600,7 +600,7 @@ test("Mi organización reproduce los cuatro datos y los módulos futuros indican
   page,
 }) => {
   await open(page);
-  for (const title of ["Documentos", "Carpeta de evidencias"]) {
+  for (const title of ["Políticas y referencias normativas", "Carpeta de evidencias"]) {
     await expect(
       moduleNav(page).getByRole("button", { name: new RegExp(`^${title}`) })
     ).toBeDisabled();
