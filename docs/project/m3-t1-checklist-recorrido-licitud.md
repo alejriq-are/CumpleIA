@@ -101,6 +101,8 @@ Integridad de anexos comprobada:
 
 - [x] Ensayo visual LIA sin guardar: tras selección temporal de Interés legítimo, captura confirma «LIA: análisis en borrador», nueve campos de análisis vacíos y aviso de cambios sin guardar junto a Guardar borrador. Captura posterior confirma LIA oculta con Consentimiento y fundamento conservado; pendiente descartar selección temporal mediante recarga; no se declaró persistencia ni se guardó LIA.
 
+- [x] Originales ES - DESCARGABLE CONSENTIMIENTO.xlsx y ES - DESCARGABLE LIA.xlsx recibidos y revisados en lectura: cotejo de 19/31 preguntas y estados/conclusiones, con celdas y SHA-256. Actualizada auditoría LIC-FORM-001; implementación de formularios completos sigue pendiente.
+
 ## 4. Pruebas o decisiones que siguen pendientes
 
 - [ ] **LIC-FORM-001:** completar consentimiento/LIA en la interfaz. Auditoría confirma contratos y controles existentes en servidor, consentimiento sin formulario y LIA parcial (nueve textos). 190 pruebas existentes aprobadas; formularios completos aún pendientes. Ver [cobertura y aceptación](m3-t1-consentimiento-lia-cobertura.md). La prueba manual mantiene selección Consentimiento sin guardar; recargar para volver a Pendiente de definir.

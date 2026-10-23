@@ -18,10 +18,20 @@ CONSENTIMIENTO.md y LIA.xlsx/LIA.md son referencias comparadas de estructura y U
 las reglas se adaptan a Chile. Se acordó checklist estructurado para consentimiento
 y evaluación estructurada para interés legítimo.
 
-Las plantillas originales no se encontraron en los archivos disponibles de esta
-sesión: sources/ está vacío y docs/fuentes contiene las leyes y material CCS.
-Esta revisión confirma el acuerdo registrado, pero no certifica traslado íntegro
-campo por campo desde esos adjuntos originales.
+El usuario aportó los originales ES - DESCARGABLE CONSENTIMIENTO.xlsx y
+ES - DESCARGABLE LIA.xlsx el 23/10/2026. Se leyeron todas sus hojas y celdas
+con contenido, sin modificar los archivos. Ambos incluyen Introducción y una hoja
+operativa con columnas Preguntas, Respuestas y Comentarios. El cotejo siguiente
+cubre las 19 preguntas operativas de consentimiento y las 31 de LIA, más sus
+estados/conclusiones. Reemplaza la limitación anterior de originales no disponibles.
+Las celdas comerciales de introducción/contacto no forman parte de los controles.
+
+Identidad de fuentes originales:
+- ES - DESCARGABLE CONSENTIMIENTO.xlsx: SHA-256 `f751ad4b0a0661038d93872f0683f09547dd3f83d3844150ea88f3f063eff3ad`.
+- ES - DESCARGABLE LIA.xlsx: SHA-256 `60ae2ad591af5e8d3e0d901b2e2346227ab3fa5ab58da96d43d9a086579afb85`.
+
+Las referencias a hojas/celdas siguientes identifican el criterio original. No
+atribuyen al derecho chileno el texto europeo ni declaran validez jurídica automática.
 
 Fuente oficial contrastada: [Ley 21.719, BCN](https://www.bcn.cl/leychile/navegar?i=1209272),
 artículos 12 y 13 d), definición de consentimiento y deberes relacionados.
@@ -73,8 +83,8 @@ Evidencia de código:
    al cambiar de base, distinguir antecedentes previos y evitar pérdidas de campos
    fuera del editor. Mostrar checklist y LIA completos en Revisar documentos.
 6. **Trazabilidad de criterios.** Mapear cada pregunta a fuente chilena/artículo y
-   versión aplicable, identificando aparte las recomendaciones metodológicas. Cotejar
-   con las plantillas originales cuando estén disponibles. Coordinar la bitácora
+   versión aplicable, identificando aparte las recomendaciones metodológicas. Usar
+   el cotejo de originales incluido en este informe al implementar cada criterio. Coordinar la bitácora
    completa con LIC-AUD-001 sin darla por implementada en este formulario.
 
 ## Aceptación propuesta para implementación
@@ -95,9 +105,111 @@ Evidencia de código:
 ## Verificación ejecutada
 
 190 pruebas aprobadas: test_services_consentimiento.py, test_services_lia.py y
- test_schemas_lia.py. Comprueban servicios/esquemas existentes; no prueban los
+test_schemas_lia.py. Comprueban servicios/esquemas existentes; no prueban los
 formularios ausentes, ni constituyen certificación de cumplimiento legal.
 
 La captura del usuario confirma LIA oculta al elegir Consentimiento y fundamento
 conservado. Ese cambio es temporal, sin guardar: falta recargar para recuperar
 la base persistida Pendiente de definir. No guardar Consentimiento para esta prueba.
+
+## Cotejo de los originales aportados
+
+Cobertura significa correspondencia temática con el contrato existente, no un
+control independiente ya disponible en la pantalla. Consentimiento no tiene editor;
+sus respuestas generales agrupan varias buenas prácticas del original. Ninguna de
+las 19 se considera resuelta en UX por existir un campo genérico en el servidor.
+LIA tiene campos para la mayoría de los temas, pero su interfaz solo expone nueve
+textos. No copiar automáticamente decisiones, recomendaciones o escalas del Excel.
+
+### Consentimiento: hoja Checklist
+
+| Celda original | Criterio resumido | Contrato actual relacionado | Adaptación/incorporación |
+| --- | --- | --- | --- |
+| A4 | Ausencia de obligación | `consentimiento_libre` | Desglosar voluntariedad y su fundamento. |
+| A5 | Consecuencias de rechazar | `consentimiento_libre` | Documentar consecuencias reales de no consentir. |
+| A6 | Separación de condiciones generales | `consentimiento_libre` | Control explícito de presentación separada. |
+| A7 | Condicionamiento de contrato/servicio | `contexto_contrato_servicio; tratamiento_necesario_contrato_servicio` | Aplicar según contexto y necesidad; revisión del caso. |
+| A8 | Presiones o influencias | `consentimiento_libre` | Control explícito y comentario/evidencia. |
+| A9 | Desequilibrio de poder | `consentimiento_libre` | Analizar libertad real, especialmente en trabajadores; no convertir presencia de desequilibrio en conclusión automática. |
+| A11 | Granularidad por finalidad | `consentimiento_especifico_finalidad; evaluación por finalidad RAT` | Separar finalidades y registrar evidencia de la elección. |
+| A13 | Lenguaje comprensible | `consentimiento_informado` | Desglosar claridad y accesibilidad de la información. |
+| A14 | Información de uso, responsable, finalidad y datos | `consentimiento_informado; evidence` | Identificar aviso y versión; adaptar contenido informativo chileno. |
+| A15 | Información sobre revocación | `consentimiento_informado; revocacion_posible` | Documentar canal y cómo se comunica. |
+| A17 | Acto afirmativo distinguible | `accion_afirmativa_clara; grant_method` | Registrar mecanismo y soporte verificable. |
+| A18 | Ausencia de casillas premarcadas | `accion_afirmativa_clara` | Desglosar control del mecanismo. |
+| A19 | Ausencia de aceptación por inacción | `voluntad_inequivoca; accion_afirmativa_clara` | No inferir consentimiento del silencio o de no desmarcar. |
+| A20 | Consentimiento explícito frente a implícito | `voluntad_inequivoca; grant_method` | Adaptar al art. 12; no confundir inequívoco ordinario con requisitos de consentimiento expreso de regímenes especiales. |
+| A22 | Facilidad y disponibilidad de revocación | `seis controles de revocación existentes` | Conservar condiciones chilenas; no exigir motivo para revocar. |
+| A23 | Revocación en comunicaciones publicitarias | `revocacion_posible; evidence` | Condicional a marketing; revisar además normativa chilena de consumo aplicable antes de fijar reglas específicas. |
+| A24 | Tratamiento tras revocación | `Sin control dedicado de efectos posteriores` | Adaptar: revisar cese, supresión y conservación según otras bases y obligaciones; no programar borrado automático universal. |
+| A26 | Evidencia del consentimiento | `responsable_puede_acreditar; evidence` | Vincular referencia/versión, mecanismo y fecha al criterio evaluado. |
+| A27 | Revisión periódica del consentimiento | `Sin control dedicado de seguimiento` | Recomendación, no caducidad periódica universal; revisar cambios de finalidad/contexto y plan de revisión. |
+
+Checklist A29 es estado y A30 es conclusión. Derivar estado documental de respuestas,
+pendientes y aplicabilidad. La conclusión requiere fundamento y revisión humana;
+no sustituirla por una suma de casillas. Hay que decidir y versionar expresamente
+cómo conservar el desglose adicional (presión, perjuicio, casillas, revocación y
+seguimiento) sin introducir claves que el contrato no guarda o alterar históricos.
+El diseño chileno agrega controles como carácter previo, representación y medios
+específicos de revocación que no deben eliminarse por no ser una copia del Excel.
+
+### LIA: hoja LIA
+
+| Celda original | Criterio resumido | Contrato actual relacionado | Adaptación/incorporación |
+| --- | --- | --- | --- |
+| A4 | Finalidad explícita | `purpose_and_interest.purpose_description` | Contrastar con finalidad RAT. |
+| A5 | Beneficio del responsable | `purpose_and_interest.controller_benefit` | Condicional al titular del interés. |
+| A6 | Beneficio de terceros | `purpose_and_interest.third_party_benefit` | Condicional al titular del interés. |
+| A7 | Beneficio público | `purpose_and_interest.public_benefit` | No confundir beneficio declarado con habilitación legal. |
+| A8 | Importancia del interés | `purpose_and_interest.interest_importance` | Exponer análisis y fundamento. |
+| A9 | Consecuencias de no tratar | `purpose_and_interest.consequences_without_processing` | Exponer análisis y alternativas. |
+| A10 | Reglas aplicables | `purpose_and_interest.relevant_rules` | Sustituir referencias europeas por régimen chileno pertinente; fuente y versión. |
+| A11 | Consideraciones éticas | `purpose_and_interest.ethical_considerations` | Identificar criterio metodológico y fundamento. |
+| A13 | Contribución a la finalidad | `necessity.contributes_to_purpose; linked_to_interest` | Exponer respuesta estructurada. |
+| A14 | Proporcionalidad | `necessity.proportionality_analysis` | Exponer análisis y fundamento. |
+| A15 | Alternativa sin datos personales | `necessity.achievable_without_personal_data; alternatives_analysis` | Exponer respuesta y alternativa. |
+| A16 | Menos datos o menor intrusión | `necessity.less_intrusive_alternative; fewer_data_possible; minimization_analysis` | Exponer respuestas y análisis. |
+| A18 | Categorías especiales e infracciones | `RAT special_regimes; nature_and_scope.special_rules_description` | Clasificar según Chile; una LIA general no sustituye condiciones especiales de licitud. |
+| A19 | Datos especialmente privados | `nature_and_scope.additional_risk_factors; impact.intrusion_analysis` | Distinguir percepción de privacidad de categoría sensible legal. |
+| A20 | Infancia y vulnerabilidad | `RAT special_regimes; impact.vulnerable_people_impact` | Aplicar controles específicos, no extrapolar umbrales europeos. |
+| A21 | Contexto profesional exclusivo | `nature_and_scope.exclusively_professional_context` | No inferir bajo riesgo solo por contexto laboral. |
+| A23 | Relación previa | `reasonable_expectations.prior_relationship; relationship_description` | Exponer respuesta y condicional. |
+| A24 | Cambio significativo de uso | `reasonable_expectations.significant_change_of_use` | Exponer respuesta y contexto. |
+| A25 | Información en recogida directa | `reasonable_expectations.informed_at_direct_collection` | Aplicabilidad según origen RAT. |
+| A26 | Información cuando el origen es tercero | `reasonable_expectations.third_party_information` | Revisar origen, deber informativo y compatibilidad jurídica; no presumir autorización por provenir de tercero. |
+| A27 | Cambios tecnológicos o de contexto | `reasonable_expectations.technology_or_context_changes` | Registrar cambio y temporalidad en el análisis. |
+| A28 | Previsibilidad de finalidad/método | `reasonable_expectations.foreseeable_purpose_and_method` | Exponer respuesta estructurada. |
+| A29 | Tratamiento innovador | `reasonable_expectations.innovative_processing` | Exponer respuesta; innovación no equivale automáticamente a prohibición. |
+| A30 | Evidencia de expectativas | `reasonable_expectations.expectations_evidence` | Referenciar soporte y versión. |
+| A31 | Otros factores de expectativas | `reasonable_expectations.expectations_analysis` | Texto ya editable, completar contexto. |
+| A33 | Efectos negativos | `impact.negative_effects; impact_analysis` | Exponer análisis completo. |
+| A34 | Pérdida de control | `impact.loss_of_control` | Exponer respuesta estructurada. |
+| A35 | Probabilidad y gravedad | `impact.likelihood; severity` | Exponer campos existentes; no equiparar automáticamente con matriz EIPD de cuatro niveles. |
+| A36 | Oposición e intrusión | `impact.reasonable_opposition_likelihood; intrusion_analysis` | Exponer respuesta y análisis. |
+| A37 | Explicación transparente | `impact.transparently_explainable` | Reformular como capacidad de explicar y justificar, no preferencia del responsable. |
+| A38 | Salvaguardas | `safeguards.measures; safeguards_analysis` | Relacionar cada medida con el impacto que mitiga. |
+
+LIA A40 es estado y A41 conclusión: corresponde a conclusion.decision y a su
+fundamentación. Exponer los campos de conclusión del contrato, separando decisión
+aportada, preparación documental y revisión jurídica. Transparencia/oposición es
+un grupo propio del contrato chileno y debe conservarse aunque no figure con ese
+título en el original. Los datos RAT existentes deben reutilizarse, mostrando origen
+y pendientes sin rellenar respuestas favorables automáticamente.
+
+### Ajustes normativos que requieren especial cuidado
+
+- Checklist A24: la supresión posterior a revocación depende de las condiciones y
+  excepciones aplicables; el art. 7 reformado contempla otra base legal y excepciones.
+  [Fuente oficial chilena](https://www.bcn.cl/leychile/navegar?i=1209272).
+- Checklist A20: redacción ordinaria debe documentar voluntad inequívoca y acto
+  afirmativo; los supuestos de consentimiento expreso tienen controles propios.
+- Checklist A27: revisión periódica es recomendación del original, no un plazo de
+  caducidad general impuesto por Chile.
+- LIA A18/A20: categorías y personas sujetas a protección especial requieren su
+  régimen chileno; interés legítimo general no basta por sí solo.
+- LIA A37: evaluar posibilidad de informar y explicar, no si al responsable le
+  gustaría hacerlo. Mantener las garantías de información/oposición chilenas.
+
+El alcance de LIC-FORM-001 incluye este cotejo. Implementación aún pendiente;
+la entrega de los archivos resuelve la disponibilidad de referencias, no la brecha
+funcional ni la revisión jurídica humana de la redacción final.
