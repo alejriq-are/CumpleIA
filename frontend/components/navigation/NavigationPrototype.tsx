@@ -84,6 +84,9 @@ export function NavigationPrototype() {
   const values = drafts[scenario];
   const stored = saved[scenario];
   const fs = fields[section];
+  const inlineNotice = Boolean(
+    fs && section !== "preparar" && !(module === "licitud" && section === "alcance")
+  );
   const title = labels[section];
   const row = resolutions.find((r) => r.version === selected)!;
   const dirty = Object.keys(values).some((k) => values[k] !== stored[k]);
@@ -394,6 +397,14 @@ export function NavigationPrototype() {
             {section === "preparar" && (
               <p id="prepare-help">
                 Para revisar: referencia SIMULADA-, notas, motivo del cambio y declaración ficticia.
+              </p>
+            )}
+            {notice && inlineNotice && (
+              <p
+                role="status"
+                className="rounded-lg border border-teal-300 bg-teal-50 p-4 text-teal-950"
+              >
+                {notice}
               </p>
             )}
             <div className="flex flex-wrap gap-3">
@@ -1047,7 +1058,7 @@ export function NavigationPrototype() {
                   : "Consultar no registra decisiones. Elige una opción del menú superior para continuar."}
               </p>
             </header>
-            {notice && (
+            {notice && !inlineNotice && (
               <p
                 role="status"
                 className="mb-5 rounded-lg border border-teal-300 bg-teal-50 p-4 text-teal-950"

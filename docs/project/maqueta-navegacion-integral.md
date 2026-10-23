@@ -158,3 +158,14 @@ Registrar dificultad para encontrar opciones, número de clics, comprensión del
 contexto y diferencia entre consulta/guardar/registrar. Ajustar la maqueta antes de
 trasladar el patrón al producto conectado. NAV-UX-001 y LIC-UX-015 siguen abiertos
 hasta la validación asistida y la adopción correspondiente.
+
+## Ajuste observado durante la prueba asistida
+
+Capturas 9c344647, 0d6da390 y a40ce6e1: el usuario confirma que Sistemas utilizados
+conserva el texto ficticio tras cambiar de módulo; la primera captura posterior
+muestra confirmación de guardado y la siguiente conserva el texto sin aviso de
+cambios pendientes. El usuario observa que la confirmación estaba al inicio del
+formulario, lejos de Guardar. Se reubica inmediatamente sobre los botones de guardado
+en los formularios editables de la maqueta, una sola vez y con role=status. Los avisos
+de consulta, copia y registro conservan su ubicación. No se modifica persistencia.
+La confirmación temporal se limpia al navegar; ello no borra los valores guardados.
