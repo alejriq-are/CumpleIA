@@ -18,6 +18,11 @@ identifica el HEAD exacto de la tarea. Una CI anterior no prueba un commit nuevo
 
 ## Bloque funcional vigente — producto
 
+Pendiente LIC-UX-013: consulta del residual por riesgo junto con medidas, dimensión,
+eficacia, verificación y respaldos. Alcance y criterios detallados en [backlog](backlog.md);
+registrado para desarrollo posterior, sin cambios de producto. Preservar procedencia
+y revisión histórica; no atribuir reducciones individuales no evaluadas.
+
 Pendiente LIC-FORM-001: formularios completos de consentimiento/LIA. Originales Excel
 aportados y 50 preguntas cotejadas; servidor existente no equivale a UI completa.
 Para retomar leer [contrato de implementación](project/m3-t1-consentimiento-lia-implementacion.md)
