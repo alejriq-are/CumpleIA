@@ -234,6 +234,20 @@ test("borradores conservados entre módulos, escenarios separados y consulta sol
   await step(page, "Base y fundamento");
   await page.getByRole("button", { name: "Guardar cambios en la maqueta", exact: true }).click();
   await expect(page.getByRole("status")).toContainText("Guardado en la maqueta");
+  const feedbackBounds = await page.getByRole("status").boundingBox();
+  const fieldBounds = await page.getByLabel("Fundamento", { exact: true }).boundingBox();
+  const saveBounds = await page
+    .getByRole("button", { name: "Guardar cambios en la maqueta", exact: true })
+    .boundingBox();
+  expect(feedbackBounds!.y).toBeGreaterThanOrEqual(fieldBounds!.y + fieldBounds!.height);
+  expect(feedbackBounds!.y + feedbackBounds!.height).toBeLessThanOrEqual(saveBounds!.y);
+  if (process.env.MAQUETA_SCREENSHOTS) {
+    await page.screenshot({
+      path: path.join(process.env.MAQUETA_SCREENSHOTS, "maqueta-confirmacion-sobre-guardar.png"),
+      fullPage: true,
+    });
+  }
+
   await task(page, "Documentos y revisiones");
   await expect(work(page).getByText(value, { exact: true })).toBeVisible();
   await page.getByLabel("Escenario de prueba").selectOption("infancia");
