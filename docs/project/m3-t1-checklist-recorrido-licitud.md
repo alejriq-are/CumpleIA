@@ -291,3 +291,18 @@ al obtener nueva evidencia; no duplicar historial ni repetir pruebas amplias sin
 
 - Captura `codex-clipboard-14b2c648-c352-4766-b7f3-b02573153047.png`: tras Preparar sucesor desde esta resolución, aparece aviso de que copiar reemplazará el documento en preparación y conservará original/versiones registradas. Opciones «Reemplazar y copiar resolución seleccionada» y «Conservar documento en preparación» visibles. No hay evidencia de haber confirmado la copia ni de nuevo registro; no se declara comprobado aún el formulario copiado.
 - Usuario indica dificultad para localizar «Preparar documento para revisión» y pide destacar para todos los casos las opciones que abren formularios o información adicional. Registrado ajuste transversal LIC-UX-015 con jerarquía, estados accesibles, destino/foco y comprobación en adultos/infancia, no solo un botón. Implementación pendiente durante este recorrido de pruebas.
+
+
+### Formulario temporal tras cerrar confirmación de copia
+
+- Captura 3c026ee0: aviso de reemplazo ya cerrado; siguen visibles resolución 2, decisión histórica, material obsoleto y facultad no disponible. No muestra el contenido del formulario temporal.
+- Captura `codex-clipboard-7de04187-628d-4125-99be-e07227634dda.png`: modo preparación contiene RES-002, PRUEBA-2 y notas originales de resolución 2; declaración ficticia desmarcada y Preparar documento para revisión deshabilitado. No hay confirmación de nuevo registro. La preparación inicial 636986a2 estaba vacía; la secuencia no documenta en qué acción se pobló, así que no atribuir estos datos a un fallo de cancelación.
+- Inspección puntual: el botón de sucesor solicita confirmación si pending; Conservar documento en preparación solo ejecuta setConfirmCopy(false). Pendiente prueba inequívoca con una marca temporal en Notas, volver a solicitar copia, cancelar y verificar que la marca se conserva sin registrar resolución. No dar por validada conservación de texto no observado antes de cancelar.
+
+
+### Marca temporal conservada al volver de cancelar copia
+
+- Captura 25b98b8e: formulario temporal de preparación con RES-002/PRUEBA-2 y notas de ensayo. Se indicó añadir marca temporal sin guardar, consultar resolución 2, solicitar copia y seleccionar Conservar documento en preparación.
+- Captura 006d2032: consulta de resolución 2 conserva notas históricas completas, sin marca temporal; revisión No continuar y decisión con material obsoleto siguen visibles. No se observa en esa captura la pulsación de cancelación.
+- Captura `codex-clipboard-28ccd819-fb8a-4355-952e-05724549b1a9.png`: al volver al formulario de preparación, Notas conserva «[FICTICIA] MARCA TEMPORAL: conservar al cancelar copia.», referencia RES-002 y versión PRUEBA-2. Conservación visual del texto temporal en la secuencia guiada verificada; no equivale a persistencia en servidor. Declaración ficticia aparece ahora marcada, a diferencia de capturas previas; no se infiere registro por marcarla ni se dio instrucción de guardar.
+- No se observa mensaje de creación ni una resolución nueva; pendiente descartar el formulario temporal mediante recarga sin registrar para dejar limpio el ensayo. La consulta histórica no incorporó la marca temporal. No confundir este formulario con el documento de infancia cuya tercera edición sí se verificó mediante JSON (3).
