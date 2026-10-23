@@ -103,6 +103,8 @@ Integridad de anexos comprobada:
 
 - [x] Originales ES - DESCARGABLE CONSENTIMIENTO.xlsx y ES - DESCARGABLE LIA.xlsx recibidos y revisados en lectura: cotejo de 19/31 preguntas y estados/conclusiones, con celdas y SHA-256. Actualizada auditoría LIC-FORM-001; implementación de formularios completos sigue pendiente.
 
+- [x] Contrato LIC-FORM-001 registrado para desarrollo posterior: inventario completo de campos, referencia a 50 preguntas originales, estados/condicionales, evidencias, persistencia/compatibilidad, decisiones pendientes y pruebas de aceptación. [Implementación posterior](m3-t1-consentimiento-lia-implementacion.md). No se implementaron nuevos formularios en este bloque documental.
+
 ## 4. Pruebas o decisiones que siguen pendientes
 
 - [ ] **LIC-FORM-001:** completar consentimiento/LIA en la interfaz. Auditoría confirma contratos y controles existentes en servidor, consentimiento sin formulario y LIA parcial (nueve textos). 190 pruebas existentes aprobadas; formularios completos aún pendientes. Ver [cobertura y aceptación](m3-t1-consentimiento-lia-cobertura.md). La prueba manual mantiene selección Consentimiento sin guardar; recargar para volver a Pendiente de definir.

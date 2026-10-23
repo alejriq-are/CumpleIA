@@ -4,6 +4,9 @@ Revisión: 23/10/2026. Base inspeccionada: 7325bff, rama
 feature/m3-t1-licitud-persistencia. Auditoría de código y diseño; sin modificar
 el expediente del usuario ni implementar nuevos formularios en esta revisión.
 
+
+Contrato para desarrollo posterior: [LIC-FORM-001 — implementación](m3-t1-consentimiento-lia-implementacion.md).
+
 ## Resultado
 
 Cobertura parcial. El servidor dispone de contratos, persistencia y evaluadores

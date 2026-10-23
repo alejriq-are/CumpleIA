@@ -18,6 +18,13 @@ identifica el HEAD exacto de la tarea. Una CI anterior no prueba un commit nuevo
 
 ## Bloque funcional vigente — producto
 
+Pendiente LIC-FORM-001: formularios completos de consentimiento/LIA. Originales Excel
+aportados y 50 preguntas cotejadas; servidor existente no equivale a UI completa.
+Para retomar leer [contrato de implementación](project/m3-t1-consentimiento-lia-implementacion.md)
+y [auditoría de cobertura](project/m3-t1-consentimiento-lia-cobertura.md). Desarrollo
+no iniciado en este bloque documental; preservación/versionado/evidencias requieren
+las decisiones indicadas. Usuario pidió registro detallado para implementación posterior.
+
 Bloque de riesgos/anexos implementado: metodología interna de cuatro niveles,
 inherente/residual previsto/actual, controles fundamentados y respaldo PDF/TXT
 versionado. Revisar documentos reúne RAT, licitud/LIA y EIPD. Preparación infancia
