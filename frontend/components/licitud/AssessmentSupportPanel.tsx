@@ -605,7 +605,10 @@ export function AssessmentSupportPanel(props: Props) {
                       conjunto completo.
                     </p>
                   )}
-                  <p>Requiere revisión humana; no equivale a aprobación.</p>
+                  <p>
+                    La valoración está guardada. Una persona responsable debe revisar sus
+                    fundamentos y evidencias antes de aprobarla.
+                  </p>
                 </>
               )}
             </div>
