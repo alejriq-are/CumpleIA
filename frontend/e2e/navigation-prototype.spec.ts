@@ -3,6 +3,18 @@ import { mkdtemp, readFile, writeFile, rm } from "node:fs/promises";
 import { execFileSync } from "node:child_process";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import {
+  moduleNavigation,
+  groupDestinations,
+  type Destination,
+} from "../components/navigation/prototype-navigation";
+import {
+  labels,
+  steps,
+  type ModuleId,
+  type TaskId,
+  type Scenario,
+} from "../components/navigation/prototype-data";
 
 let directory: string;
 let script: string;
@@ -54,7 +66,7 @@ test.beforeAll(async () => {
       "-o",
       path.join(directory, "style.css"),
       "--content",
-      path.resolve("components/navigation/NavigationPrototype.tsx"),
+      path.resolve("components/navigation/*.tsx"),
     ],
     { stdio: "pipe" }
   );
@@ -85,37 +97,88 @@ async function open(page: Page) {
   await expect(page.getByRole("heading", { name: "Maqueta integral", exact: true })).toBeVisible();
 }
 const moduleNav = (page: Page) => page.getByRole("navigation", { name: "Módulos de la maqueta" });
-const taskNav = (page: Page) => page.getByRole("navigation", { name: "Tareas del módulo" });
-const stepNav = (page: Page) => page.getByRole("navigation", { name: "Pasos de la tarea" });
+const optionsNav = (page: Page) => page.getByRole("navigation", { name: "Opciones del módulo" });
 const work = (page: Page) => page.locator("#prototype-content");
+const moduleNames: Record<string, ModuleId> = {
+  "Panel principal": "panel",
+  Diagnóstico: "diagnostico",
+  "Inventario RAT": "rat",
+  "Bases de licitud": "licitud",
+  Documentos: "documentos",
+  Evidencia: "evidencia",
+  Organización: "organizacion",
+};
+const visibleNames: Record<ModuleId, string> = {
+  panel: "Inicio / Panel principal",
+  diagnostico: "Autodiagnóstico",
+  rat: "Inventario de tratamientos",
+  licitud: "Bases de licitud",
+  documentos: "Documentos",
+  evidencia: "Carpeta de evidencia",
+  organizacion: "Mi organización",
+};
+async function currentModule(page: Page): Promise<ModuleId> {
+  const current = await page
+    .locator("#prototype-global-menu")
+    .locator('button[aria-current="page"]')
+    .textContent();
+  return (Object.entries(visibleNames).find(([, name]) => current?.includes(name))?.[0] ??
+    "panel") as ModuleId;
+}
 async function module(page: Page, name: string) {
-  if (await page.getByLabel("Módulo de la maqueta", { exact: true }).isVisible()) {
-    const values: Record<string, string> = {
-      "Panel principal": "panel",
-      Diagnóstico: "diagnostico",
-      "Inventario RAT": "rat",
-      "Bases de licitud": "licitud",
-      Documentos: "documentos",
-      Evidencia: "evidencia",
-      Organización: "organizacion",
-    };
-    await page.getByLabel("Módulo de la maqueta", { exact: true }).selectOption(values[name]);
-  } else await moduleNav(page).getByRole("button", { name, exact: true }).click();
+  const toggle = page.getByRole("button", { name: "Abrir menú", exact: true });
+  if (await toggle.isVisible()) await toggle.click();
+  await moduleNav(page)
+    .getByRole("button", { name: visibleNames[moduleNames[name]], exact: true })
+    .click();
+}
+async function navigate(page: Page, destination: Destination) {
+  const scenario = (await page.getByLabel("Escenario de prueba").inputValue()) as Scenario;
+  const group = moduleNavigation(destination.module, scenario).find((group) =>
+    groupDestinations(group, scenario).some(
+      (item) => item.task === destination.task && item.section === destination.section
+    )
+  )!;
+  const mobile = page.getByRole("button", { name: "Opciones del módulo", exact: true });
+  if ((await mobile.isVisible()) && (await mobile.getAttribute("aria-expanded")) === "false")
+    await mobile.click();
+  const opener = optionsNav(page).locator(`[data-nav-group="${group.id}"]`);
+  if (groupDestinations(group, scenario).length === 1) await opener.click();
+  else {
+    if ((await opener.getAttribute("aria-expanded")) !== "true") await opener.click();
+    const index = groupDestinations(group, scenario).findIndex(
+      (item) => item.section === destination.section && item.task === destination.task
+    );
+    await page.locator(`[data-group="${group.id}"]`).getByRole("button").nth(index).click();
+  }
 }
 async function task(page: Page, name: string) {
-  await taskNav(page).getByRole("button", { name, exact: true }).click();
+  const mod = await currentModule(page);
+  const scenario = (await page.getByLabel("Escenario de prueba").inputValue()) as Scenario;
+  const tasks: Record<string, TaskId> = {
+    Resumen: "resumen",
+    "Completar datos": "completar",
+    "Documentos y revisiones": "revisar",
+    "Historial y descargas": "historial",
+  };
+  const t = tasks[name];
+  await navigate(page, { module: mod, task: t, section: steps(mod, t, scenario)[0] });
 }
 async function step(page: Page, name: string) {
-  await stepNav(page)
-    .getByRole("button", { name: new RegExp(name) })
-    .click();
+  const mod = await currentModule(page);
+  const scenario = (await page.getByLabel("Escenario de prueba").inputValue()) as Scenario;
+  const destination = moduleNavigation(mod, scenario)
+    .flatMap((group) => groupDestinations(group, scenario))
+    .find((item) => labels[item.section]?.includes(name))!;
+  if (!destination) throw new Error(`Destino ausente: ${name}`);
+  await navigate(page, destination);
 }
 async function children(page: Page) {
   await page.getByLabel("Escenario de prueba").selectOption("infancia");
   await module(page, "Bases de licitud");
 }
 
-test("todos los módulos y sus tareas tienen destino, foco y menú consistente sin red", async ({
+test("todos los módulos y destinos abren contenido con foco, sin red ni capas genéricas", async ({
   page,
 }) => {
   await open(page);
@@ -128,23 +191,21 @@ test("todos los módulos y sus tareas tienen destino, foco y menú consistente s
     "Organización",
   ]) {
     await module(page, name);
-    for (const t of [
-      "Resumen",
-      "Completar datos",
-      "Documentos y revisiones",
-      "Historial y descargas",
-    ]) {
-      await task(page, t);
-      const count = await stepNav(page).getByRole("button").count();
-      for (let i = 0; i < count; i++) {
-        await stepNav(page).getByRole("button").nth(i).click();
+    const mod = moduleNames[name];
+    for (const group of moduleNavigation(mod, "adultos")) {
+      for (const destination of groupDestinations(group, "adultos")) {
+        await navigate(page, destination);
         await expect(work(page)).toBeFocused();
-        await expect(work(page).locator("#prototype-section-title")).not.toBeEmpty();
+        await expect(work(page).locator("#prototype-section-title")).toHaveText(
+          labels[destination.section]
+        );
+        await expect(optionsNav(page).locator("[data-group]")).toHaveCount(0);
       }
     }
   }
   await module(page, "Panel principal");
   await expect(page.getByRole("heading", { name: "Continúa donde lo dejaste" })).toBeVisible();
+  await expect(page.getByRole("navigation", { name: "Tareas del módulo" })).toHaveCount(0);
   expect(requests).toEqual([]);
 });
 
@@ -174,13 +235,9 @@ test("borradores conservados entre módulos, escenarios separados y consulta sol
   await task(page, "Completar datos");
   await step(page, "Base y fundamento");
   await expect(page.getByLabel("Fundamento", { exact: true })).not.toHaveValue(value);
-  await expect(
-    stepNav(page).getByRole("button", { name: /Infancia y adolescencia/ })
-  ).toBeVisible();
+  await expect(optionsNav(page).locator('[data-nav-group="infancia"]')).toBeVisible();
   await page.getByLabel("Escenario de prueba").selectOption("adultos");
-  await expect(stepNav(page).getByRole("button", { name: /Infancia y adolescencia/ })).toHaveCount(
-    0
-  );
+  await expect(optionsNav(page).locator('[data-nav-group="infancia"]')).toHaveCount(0);
 });
 
 test("cancelar copia conserva marca temporal y confirmar copia preserva original", async ({
@@ -275,6 +332,12 @@ test("anexo inválido bloquea guardado, conserva campos y corrige selección", a
   await page.getByRole("button", { name: "Guardar cambios en la maqueta", exact: true }).click();
   await task(page, "Documentos y revisiones");
   await expect(work(page)).toContainText("SIMULADA-ANEXO-PRUEBA · Base y fundamento · valido.txt");
+  await page.getByRole("button", { name: "Reiniciar ejemplos", exact: true }).click();
+  await page.getByRole("button", { name: "Reiniciar maqueta", exact: true }).click();
+  await module(page, "Bases de licitud");
+  await task(page, "Documentos y revisiones");
+  await expect(work(page)).toContainText("Sin anexos añadidos durante esta visita.");
+  await expect(work(page)).not.toContainText("SIMULADA-ANEXO-PRUEBA");
 });
 
 test("panel de detalle, Escape y restauración de foco", async ({ page }) => {
@@ -335,12 +398,12 @@ test("reinicio pide confirmación y permite conservar visita", async ({ page }) 
   await expect(page.getByLabel("Notas de infancia")).not.toHaveValue("[FICTICIA] CAMBIO");
 });
 
-test("móvil sin desborde, selector de pasos y diálogo utilizable", async ({ page }) => {
+test("móvil sin desborde, menús desplegables y diálogo utilizable", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await open(page);
   await children(page);
   await task(page, "Completar datos");
-  await page.getByLabel("Paso de la tarea", { exact: true }).selectOption("preparar");
+  await step(page, "Preparar resolución");
   await expect(page.getByLabel("Motivo del cambio")).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(
     true
@@ -368,17 +431,17 @@ test("infancia guardada se consulta y el estado vuelve a pendiente al editar", a
   await page
     .getByLabel("Notas de infancia", { exact: true })
     .fill("[FICTICIA] NOTA GUARDADA DE INFANCIA");
-  await expect(
-    stepNav(page).getByRole("button", { name: /Infancia y adolescencia/ })
-  ).toContainText("Cambios sin guardar");
+  await expect(optionsNav(page).locator('[data-nav-group="infancia"]')).toContainText(
+    "Cambios sin guardar"
+  );
   await page.getByRole("button", { name: "Guardar cambios en la maqueta", exact: true }).click();
-  await expect(
-    stepNav(page).getByRole("button", { name: /Infancia y adolescencia/ })
-  ).toContainText("Guardado en maqueta");
+  await expect(optionsNav(page).locator('[data-nav-group="infancia"]')).toContainText(
+    "Guardado en maqueta"
+  );
   await page.getByLabel("Notas de infancia", { exact: true }).fill("[FICTICIA] NOTA SIN GUARDAR");
-  await expect(
-    stepNav(page).getByRole("button", { name: /Infancia y adolescencia/ })
-  ).toContainText("Cambios sin guardar");
+  await expect(optionsNav(page).locator('[data-nav-group="infancia"]')).toContainText(
+    "Cambios sin guardar"
+  );
   await task(page, "Documentos y revisiones");
   await expect(work(page)).toContainText("[FICTICIA] NOTA GUARDADA DE INFANCIA");
   await expect(work(page).getByText("[FICTICIA] NOTA SIN GUARDAR", { exact: true })).toHaveCount(0);
@@ -398,6 +461,18 @@ test("capturas de escritorio y móvil para revisión visual", async ({ page }) =
   await page.evaluate(() => window.scrollTo(0, 0));
   await page.evaluate(() => new Promise(requestAnimationFrame));
   await page.screenshot({ path: path.join(dir, "maqueta-infancia-desktop.png"), fullPage: true });
+  await optionsNav(page).locator('[data-nav-group="eipd"]').click();
+  await page.screenshot({ path: path.join(dir, "maqueta-menu-eipd-desktop.png"), fullPage: false });
+  await page.keyboard.press("Escape");
+  await optionsNav(page).locator('[data-nav-group="resoluciones"]').click();
+  await page.screenshot({
+    path: path.join(dir, "maqueta-menu-resoluciones-desktop.png"),
+    fullPage: false,
+  });
+  await page.keyboard.press("Escape");
+  await module(page, "Inventario RAT");
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.screenshot({ path: path.join(dir, "maqueta-rat-desktop.png"), fullPage: true });
   await page.setViewportSize({ width: 390, height: 844 });
   await module(page, "Panel principal");
   await page.evaluate(() => window.scrollTo(0, 0));
@@ -405,8 +480,92 @@ test("capturas de escritorio y móvil para revisión visual", async ({ page }) =
   await page.screenshot({ path: path.join(dir, "maqueta-panel-mobile.png"), fullPage: true });
   await module(page, "Bases de licitud");
   await task(page, "Completar datos");
-  await page.getByLabel("Paso de la tarea", { exact: true }).selectOption("infancia");
+  await step(page, "Infancia y adolescencia");
   await page.evaluate(() => window.scrollTo(0, 0));
   await page.evaluate(() => new Promise(requestAnimationFrame));
   await page.screenshot({ path: path.join(dir, "maqueta-infancia-mobile.png"), fullPage: true });
+});
+
+test("menú EIPD abre por clic, permanece visible y cierra con Escape, selección o clic exterior", async ({
+  page,
+}) => {
+  await open(page);
+  await module(page, "Bases de licitud");
+  const trigger = optionsNav(page).getByRole("button", { name: "Documentar EIPD", exact: false });
+  await trigger.hover();
+  await expect(trigger).toHaveAttribute("aria-expanded", "false");
+  await trigger.click();
+  await expect(trigger).toHaveAttribute("aria-expanded", "true");
+  await page.mouse.move(1, 1);
+  await expect(page.locator('[data-group="eipd"]')).toBeVisible();
+  await expect(page.locator('[data-group="eipd"]').getByRole("button")).toHaveCount(5);
+  await page.keyboard.press("Escape");
+  await expect(trigger).toBeFocused();
+  await expect(trigger).toHaveAttribute("aria-expanded", "false");
+  await trigger.press("ArrowDown");
+  await expect(page.locator('[data-group="eipd"]').getByRole("button").first()).toBeFocused();
+  await page.keyboard.press("End");
+  await expect(page.locator('[data-group="eipd"]').getByRole("button").last()).toBeFocused();
+  await page.keyboard.press("Home");
+  await page.keyboard.press("ArrowDown");
+  await page.keyboard.press("Enter");
+  await expect(work(page)).toBeFocused();
+  await expect(page.locator("#prototype-section-title")).toHaveText("Necesidad y proporcionalidad");
+  await page
+    .getByRole("textbox", { name: "Necesidad y proporcionalidad", exact: true })
+    .fill("[FICTICIA] JUSTIFICACIÓN CONSERVADA");
+  await trigger.click();
+  await work(page).click();
+  await expect(trigger).toHaveAttribute("aria-expanded", "false");
+  await step(page, "Riesgos y valoración");
+  await step(page, "Necesidad y proporcionalidad");
+  await expect(
+    page.getByRole("textbox", { name: "Necesidad y proporcionalidad", exact: true })
+  ).toHaveValue("[FICTICIA] JUSTIFICACIÓN CONSERVADA");
+});
+
+test("preparar resolución se encuentra desde su menú sin pasar por Completar datos", async ({
+  page,
+}) => {
+  await open(page);
+  await children(page);
+  const trigger = optionsNav(page).getByRole("button", { name: /Resoluciones y revisiones/ });
+  await expect(trigger).toBeVisible();
+  await trigger.click();
+  await page
+    .locator('[data-group="resoluciones"]')
+    .getByRole("button", { name: /Preparar resolución documental/ })
+    .click();
+  await expect(page.locator("#prototype-section-title")).toHaveText(
+    "Preparar resolución documental"
+  );
+  await expect(page.getByLabel("Referencia de la nueva resolución")).toBeVisible();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await expect(moduleNav(page).locator('button[aria-current="page"]')).toContainText(
+    "Bases de licitud"
+  );
+  await expect(optionsNav(page).locator('[data-nav-group="resoluciones"]')).toHaveClass(
+    /border-orange-600/
+  );
+});
+
+test("menús completos sin desborde en escritorio, tableta y móvil", async ({ page }) => {
+  await open(page);
+  for (const width of [1440, 1024, 768, 640, 390, 320]) {
+    await page.setViewportSize({ width, height: 900 });
+    await children(page);
+    const mobile = page.getByRole("button", { name: "Opciones del módulo", exact: true });
+    if (await mobile.isVisible()) await mobile.click();
+    for (const id of ["eipd", "resoluciones", "historial"]) {
+      const trigger = optionsNav(page).locator(`[data-nav-group="${id}"]`);
+      await trigger.click();
+      const bounds = await page.locator(`[data-group="${id}"]`).boundingBox();
+      expect(bounds!.x).toBeGreaterThanOrEqual(0);
+      expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(width);
+      expect(
+        await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)
+      ).toBe(true);
+      await page.keyboard.press("Escape");
+    }
+  }
 });

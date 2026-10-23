@@ -68,11 +68,13 @@ export const labels: Record<string, string> = {
   terceros: "Terceros y transferencias",
   base: "Base y fundamento",
   infancia: "Infancia y adolescencia",
-  eipd: "Documento EIPD",
+  eipd: "Tratamiento y alcance de la EIPD",
   riesgos: "Riesgos y valoración",
   medidas: "Medidas de mitigación",
   anexos: "Anexos de respaldo",
-  preparar: "Preparar resolución",
+  preparar: "Preparar resolución documental",
+  proporcionalidad: "Necesidad y proporcionalidad",
+  eipd_fuentes: "Fuentes y evidencias de la EIPD",
   documentos: "Documentos guardados",
   resoluciones: "Resoluciones",
   revisiones: "Revisiones del documento",
@@ -100,8 +102,10 @@ export function steps(module: ModuleId, task: TaskId, scenario: Scenario): strin
         "base",
         ...(scenario === "infancia" ? ["infancia"] : []),
         "eipd",
+        "proporcionalidad",
         "riesgos",
         "medidas",
+        "eipd_fuentes",
         "anexos",
         ...(scenario === "infancia" ? ["preparar"] : []),
       ];
@@ -117,7 +121,9 @@ export function steps(module: ModuleId, task: TaskId, scenario: Scenario): strin
       ? ["alcance", "fuentes", "conservacion", "terceros"]
       : ["documentos"];
   if (module === "diagnostico")
-    return task === "completar" ? ["respuestas"] : ["resultados", "informe"];
+    return task === "completar"
+      ? ["respuestas", ...Array.from({ length: 9 }, (_, i) => `respuesta${i + 2}`)]
+      : ["resultados", "informe"];
   if (module === "organizacion")
     return task === "completar" ? ["organizacion", "equipo"] : ["equipo", "facultades"];
   if (module === "documentos") return ["biblioteca", "documentos"];
@@ -173,9 +179,11 @@ export const fields: Record<string, Field[]> = {
   ],
   eipd: [
     { key: "eipd.referencia", label: "Referencia del documento EIPD" },
-    { key: "eipd.analisis", label: "Necesidad y proporcionalidad" },
+    { key: "eipd.tratamiento", label: "Tratamiento y alcance de la EIPD" },
     { key: "eipd.seguimiento", label: "Riesgo residual y seguimiento" },
   ],
+  proporcionalidad: [{ key: "eipd.analisis", label: "Necesidad y proporcionalidad" }],
+  eipd_fuentes: [{ key: "eipd.fuentes", label: "Fuentes y evidencias del análisis" }],
   riesgos: [
     { key: "riesgos.descripcion", label: "R1 · Descripción del riesgo" },
     {
@@ -253,6 +261,17 @@ export const fields: Record<string, Field[]> = {
     { key: "organizacion.area", label: "Área del ensayo" },
   ],
 };
+for (let i = 2; i <= 10; i++) {
+  labels[`respuesta${i}`] = `Sección ${i} del autodiagnóstico`;
+  fields[`respuesta${i}`] = [
+    {
+      key: `diagnostico.seccion${i}`,
+      label: `Observaciones de la sección ${i} de ejemplo`,
+      hint: "Campo ilustrativo para probar navegación. No reproduce el cuestionario completo ni calcula resultados.",
+    },
+  ];
+}
+labels.respuestas = "Sección 1 · Tratamientos identificados";
 export const initial = (s: Scenario): Values => ({
   "rat.nombre":
     s === "adultos"
