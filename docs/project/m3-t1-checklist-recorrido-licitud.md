@@ -105,6 +105,13 @@ Integridad de anexos comprobada:
 
 - [x] Contrato LIC-FORM-001 registrado para desarrollo posterior: inventario completo de campos, referencia a 50 preguntas originales, estados/condicionales, evidencias, persistencia/compatibilidad, decisiones pendientes y pruebas de aceptación. [Implementación posterior](m3-t1-consentimiento-lia-implementacion.md). No se implementaron nuevos formularios en este bloque documental.
 
+- [x] Prueba manual del 23/10: guardado EIPD confirma éxito y recarga conserva la consulta ficticia En curso y ambos textos. No equivale a una consulta real ni a revisión/aprobación jurídica; captura posterior confirma revisión 4 histórica y requiere reevaluación tras el cambio documental.
+
+- [x] Cambio documental de consulta a autoridad: captura de Revisar documentos muestra «El documento cambió desde la revisión 4», revisión 4 histórica/requiere reevaluación y residual actual pendiente. Permanecen visibles los tres anexos.
+- [x] Tras recarga y consulta sin editar desaparece «Guarda primero los cambios del documento» y permanece revisión 4 histórica/requiere reevaluación. La captura no reproduce un aviso de cambios pendientes tras descartar ediciones; no se confirmó defecto. Tres anexos conservados.
+
+- [x] Nueva valoración tras cambio documental: captura confirma revisión 5 asociada al documento actual, sin aviso de revisión histórica; residual actual permanece pendiente y tres anexos conservados. Captura previa del editor muestra inherente Media/Grave/Alto, previsto Baja/Grave/Medio, actual sin evaluar y M1 Probabilidad/Parcial/Propuesta con fundamentos. No se ha visto el mensaje de guardado en esta secuencia; pendiente cotejo del JSON para historia y asociación actual.
+
 ## 4. Pruebas o decisiones que siguen pendientes
 
 - [ ] **LIC-FORM-001:** completar consentimiento/LIA en la interfaz. Auditoría confirma contratos y controles existentes en servidor, consentimiento sin formulario y LIA parcial (nueve textos). 190 pruebas existentes aprobadas; formularios completos aún pendientes. Ver [cobertura y aceptación](m3-t1-consentimiento-lia-cobertura.md). La prueba manual mantiene selección Consentimiento sin guardar; recargar para volver a Pendiente de definir.
@@ -113,7 +120,8 @@ Integridad de anexos comprobada:
 
 - [ ] Creación manual nueva con otra finalidad ficticia adecuada. La creación y persistencia del flujo se probaron en el entorno integrado aislado, no como nueva evaluación de la cuenta del usuario.
 - [ ] Verificación positiva de controles con implementación/evidencia ficticia y residual actual, si se incluye en el siguiente recorrido. La prueba negativa ya pasó; M1 del expediente sigue Propuesta.
-- [ ] Persistencia de una consulta a autoridad guardada y conservación de sus datos al cambiar estado; el ensayo manual actual se limitó al formulario sin guardar.
+- [x] Persistencia de consulta ficticia a autoridad: confirmación de guardado y captura posterior a recarga con estado En curso, referencia SIMULADA-CONSULTA-001 y análisis «[FICTICIA] Ensayo de registro y persistencia. No corresponde a una consulta real.». Respuesta/recomendaciones/evidencias vacías, recomendaciones abordadas Sin declarar; diagnóstico conserva 24 pendientes y EIPD bloqueada.
+- [x] Conservación de antecedentes guardados al cambiar estado: captura muestra No solicitada con análisis ficticio y SIMULADA-CONSULTA-001 intactos y visibles. Cambio temporal sin guardar; captura posterior de consulta tras recarga confirma descartado el estado local pendiente. En curso ya comprobado como estado persistido. Las capturas previas ya verificaron En curso persistido tras recarga.
 - [ ] Recorrido ampliado de infancia con el bloque visual actualizado, si se prioriza. La visibilidad por alcance tiene pruebas dirigidas y antecedentes previos; no repetir automáticamente el recorrido completo.
 - [ ] **LIC-RISK-001:** definir alcance de criterios configurables: solo descripciones/umbrales o también escalas, matriz y reglas. Congelar método/versión por valoración, sin recalificar históricos silenciosamente. No implementado en este bloque.
 - [ ] **LIC-AUD-001:** diseñar bitácora de acciones exitosas/rechazadas, actor, fecha, resultado/motivo, correlación, integridad, aislamiento, permisos, retención y consulta/exportación; coordinar con Carpeta de Evidencia. Historial de revisiones existente no equivale a cobertura completa. No implementado en este bloque.
