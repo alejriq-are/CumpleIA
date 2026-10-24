@@ -36,7 +36,7 @@ function Icon({ index }: { index: number }) {
 export function MainModules({ module, go }: { module: ModuleId; go: (module: ModuleId) => void }) {
   const [expanded, setExpanded] = useState(false);
   return (
-    <aside className="min-w-0 self-start rounded-xl border border-slate-200 bg-white shadow-sm md:sticky md:top-4 md:max-h-[calc(100dvh-2rem)] md:overflow-y-auto">
+    <aside className="sticky top-0 z-40 min-w-0 max-h-[100dvh] self-start overflow-y-auto rounded-xl border border-slate-200 bg-white shadow-sm md:top-4 md:max-h-[calc(100dvh-2rem)]">
       <div className="flex items-center justify-between gap-2 border-b border-slate-100 p-4">
         <div>
           <p className="text-lg font-bold text-blue-900">CumpleIA</p>

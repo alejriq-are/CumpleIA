@@ -26,6 +26,10 @@ ficticias con borradores/guardados/anexos separados; adopción conectada NAV-UX-
 Mi organización con nombre/RUT/rubro/tamaño, Documentos y Carpeta de evidencias
 marcados Próximamente. Guardado en memoria y consultas/ventanas de detalle. Accesos desde dashboard y
 licitud. [Contrato y guion de prueba](project/maqueta-navegacion-integral.md).
+Ajuste asistido: menú principal persistente también en ventana estrecha al bajar
+por formularios; 17 pruebas locales aprobadas, captura opcional omitida, tipos/lint
+aprobados. Cuestionario completo de 50 preguntas requerido para integración;
+campos actuales del diagnóstico son ilustrativos. CI del ajuste no verificada.
 No sustituye producto ni implementa consentimientos/LIA completos; validación
 asistida del diseño y adopción pendientes. Recargar reinicia la demostración.
 

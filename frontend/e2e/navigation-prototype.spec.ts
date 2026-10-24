@@ -456,6 +456,27 @@ test("móvil sin desborde, menús desplegables y diálogo utilizable", async ({ 
   );
 });
 
+test("menú principal accesible al bajar por formularios en ventana estrecha", async ({ page }) => {
+  await open(page);
+  await children(page);
+  await step(page, "Infancia y adolescencia");
+  for (const width of [640, 390, 320]) {
+    await page.setViewportSize({ width, height: 740 });
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+    const trigger = page.getByRole("button", { name: "Abrir menú", exact: true });
+    await expect(trigger).toBeInViewport();
+    await trigger.click();
+    const target = moduleNav(page).getByRole("button", { name: "Autodiagnóstico", exact: true });
+    await expect(target).toBeInViewport();
+    await target.click();
+    await expect(page.locator("#prototype-global-menu button[aria-current=page]")).toContainText(
+      "Autodiagnóstico"
+    );
+    await children(page);
+    await step(page, "Infancia y adolescencia");
+  }
+});
+
 test("infancia guardada se consulta y el estado vuelve a pendiente al editar", async ({ page }) => {
   await open(page);
   await children(page);

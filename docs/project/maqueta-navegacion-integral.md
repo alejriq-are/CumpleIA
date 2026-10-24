@@ -250,3 +250,27 @@ motivo para los registros previos ni se modifica el archivo del usuario. Caso di
 verifica motivo de nueva resolución en pantalla y descarga, resolución 2 sin cambios
 y bloqueos conservados. Para repetir manualmente se necesita un nuevo registro de
 prueba; volver a descargar la resolución 3 anterior no recupera un motivo descartado.
+
+
+## Ventana estrecha y recorrido asistido
+
+Usuario confirma guardado/consulta del anexo TXT de infancia y ausencia en adultos;
+se conserva al retornar a infancia. Autodiagnóstico sección 6 conserva borrador al
+ir a sección 7 y volver, y guardado tras pasar por Panel principal. Resultados e
+informe muestran sus títulos y contenido ilustrativo. El enlace al alcance RAT
+conserva tratamiento, finalidad y evaluación de citas v1.
+
+Requisito explícito del usuario para integración: reemplazar campos ilustrativos
+del autodiagnóstico por las 50 preguntas del cuestionario del servidor, con sus
+opciones, guardado y resultados. La validación actual es solo de navegación.
+
+Hallazgo asistido en ventana estrecha: al bajar por un formulario, el acceso
+Abrir menú quedaba fuera de vista. Se mantiene fija durante el desplazamiento la
+cabecera del menú principal también bajo 768 px; la barra contextual se desplaza
+con el contenido en ese tamaño para no superponer dos cabeceras. El menú expandido
+permite desplazamiento dentro del alto disponible. Sin cambios de datos/servidor.
+
+Validación local del ajuste: 17 pruebas de navegación aprobadas; una captura
+opcional omitida. Caso nuevo comprueba acceso visible al final del formulario
+y cambio de módulo en anchos 640/390/320 px. Tipos y ESLint aprobados.
+CI remota no verificada para este ajuste; aceptación visual del usuario pendiente.

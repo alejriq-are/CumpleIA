@@ -1080,7 +1080,7 @@ export function NavigationPrototype() {
           )}
           <div
             ref={navigationRef}
-            className="top-0 z-20 mb-5 sm:sticky rounded-xl border border-slate-200 bg-gray-50 p-3 shadow-sm"
+            className="top-0 z-20 mb-5 md:sticky rounded-xl border border-slate-200 bg-gray-50 p-3 shadow-sm"
             aria-label="Navegación del módulo"
           >
             <div className="mb-3 flex flex-col items-start justify-between gap-3 sm:flex-row sm:flex-wrap">
