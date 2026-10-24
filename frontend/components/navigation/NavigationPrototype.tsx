@@ -1275,6 +1275,16 @@ export function NavigationPrototype() {
                         "preparar.motivo": "",
                       },
                     }));
+                    // Clear only the completed preparation baseline; other edits stay pending.
+                    setSaved((old) => ({
+                      ...old,
+                      infancia: {
+                        ...old.infancia,
+                        "preparar.referencia": "",
+                        "preparar.notas": "",
+                        "preparar.motivo": "",
+                      },
+                    }));
                     setOrigin(null);
                     setEvents((old) => ({
                       ...old,

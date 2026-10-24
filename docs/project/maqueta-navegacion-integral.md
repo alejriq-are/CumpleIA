@@ -218,3 +218,19 @@ de infancia, copia/cancelación/registro, facultad revocada, reinicio y móvil s
 aprobados. Capturas de selección en escritorio y de infancia en móvil inspeccionadas.
 Validación asistida de los nuevos selectores por el usuario pendiente; CI remota no
 verificada para este candidato. No cambios de servidor, permisos o expedientes.
+
+## Registro simulado y aviso de cambios pendientes
+
+Prueba asistida: capturas a57a2854 y confirmación del usuario indican que ahora se
+encuentra más fácilmente Preparar resolución documental. Cancelar copia conserva
+la marca temporal y cerrar vista previa conserva referencia/notas/motivo (91eae0e2,
+76ceb658). Capturas a87e45eb y 86a3eaa1 muestran resolución 3 registrada con sus notas
+y resolución 2 con su contenido anterior, sin incorporar la marca de resolución 3.
+
+Hallazgo: el aviso general de cambios pendientes seguía apareciendo tras registrar.
+Causa comprobada: se vaciaba el formulario de preparación, pero su referencia de
+comparación conservaba los valores iniciales. Se limpia también esa referencia
+solo para los tres campos de preparación consumidos. No se marcan como guardados
+los demás campos, ni se modifican resoluciones registradas. Validación dirigida
+comprueba ausencia de aviso falso y conservación de avisos y textos realmente
+pendientes en Infancia. No requiere reiniciar el recorrido actual del usuario.

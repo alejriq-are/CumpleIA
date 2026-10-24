@@ -297,6 +297,7 @@ test("cancelar copia conserva marca temporal y confirmar copia preserva original
   await expect(page.getByRole("dialog")).toContainText("Todavía no se creó otra resolución");
   await page.getByRole("button", { name: /Continuar al registro de ejemplo/ }).click();
   await page.getByRole("button", { name: "Registrar resolución solo en maqueta" }).click();
+  await expect(page.getByText(/^Cambios sin guardar ·/)).toHaveCount(0);
   await expect(
     page.getByRole("button", { name: "Consultar resolución 3", exact: true })
   ).toBeVisible();
@@ -723,4 +724,33 @@ test("anexos, actividad y JSON corresponden a la finalidad y evaluación selecci
   await page.getByLabel("Finalidad de la evaluación").selectOption("citas");
   await task(page, "Documentos y revisiones");
   await expect(work(page)).toContainText("SIMULADA-SOLO-CITAS-V1");
+});
+
+test("registrar resolución consume su preparación y conserva otros cambios pendientes", async ({
+  page,
+}) => {
+  await open(page);
+  await children(page);
+  await step(page, "Infancia y adolescencia");
+  await page
+    .getByLabel("Notas de infancia", { exact: true })
+    .fill("[FICTICIA] INFANCIA SIGUE PENDIENTE");
+  await step(page, "Preparar resolución");
+  await page.getByLabel("Motivo del cambio").fill("[FICTICIA] Ensayo de registro independiente");
+  await page.getByRole("checkbox").check();
+  await page.getByRole("button", { name: /Abrir vista previa de la resolución/ }).click();
+  await page.getByRole("button", { name: /Continuar al registro de ejemplo/ }).click();
+  await page.getByRole("button", { name: "Registrar resolución solo en maqueta" }).click();
+  await expect(
+    page.getByRole("button", { name: "Consultar resolución 3", exact: true })
+  ).toBeVisible();
+  await expect(page.getByText(/^Cambios sin guardar ·/)).toBeVisible();
+  await task(page, "Documentos y revisiones");
+  await expect(work(page)).not.toContainText("[FICTICIA] INFANCIA SIGUE PENDIENTE");
+  await step(page, "Infancia y adolescencia");
+  await expect(page.getByLabel("Notas de infancia", { exact: true })).toHaveValue(
+    "[FICTICIA] INFANCIA SIGUE PENDIENTE"
+  );
+  await page.getByRole("button", { name: "Guardar cambios en la maqueta", exact: true }).click();
+  await expect(page.getByText(/^Cambios sin guardar ·/)).toHaveCount(0);
 });
