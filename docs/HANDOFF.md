@@ -2,7 +2,9 @@
 
 ## Entrada y limites
 
-Participan usuario, ChatGPT/Codex y Deepseek. Claude no tiene rol activo.
+Participan usuario, ChatGPT/Codex y Deepseek. El usuario incorporó a Claude como
+revisor puntual de navegación: aportó informe de solo lectura y propuesta HTML.
+Codex valida e implementa; esto no delega operación, permisos ni publicación a Claude.
 Leer AGENTS.md y docs/ai/handoff-contract.md. Para una tarea acotada, leer solo
 su paquete y los ADR relevantes, no toda la historia de status.md.
 EIPD bloqueada; datos ficticios; sin merge/despliegue. Credenciales nunca via chat.
@@ -17,6 +19,14 @@ Antes de transferir, generar scripts/handoff.py state --remote: ese resultado
 identifica el HEAD exacto de la tarea. Una CI anterior no prueba un commit nuevo.
 
 ## Bloque funcional vigente — producto
+
+24/10: usuario aprueba propuesta de Claude; rediseño de maqueta sobre base a9d3ab4,
+rama feature/maqueta-navegacion-review. Menú oscuro, contexto Cambiar con confirmación,
+agrupación por intención, historial Atrás/Adelante, recuerdo por módulo/evaluación,
+Continuar real, salida protegida y cajón/ubicación móvil. Formularios y bloqueos
+conservados. [Respuesta hallazgo por hallazgo y oportunidades](project/maqueta-revision-claude.md).
+25 Chromium (incluidas capturas), tipos/ESLint aprobados localmente; revisión
+asistida y CI remota pendientes. Lo siguiente describe el antecedente de la maqueta.
 
 Maqueta integral NAV-UX-001 en `/dashboard/maqueta`: Panel principal y seis módulos,
 menú principal izquierdo y opciones superiores por módulo según bosquejo del usuario,

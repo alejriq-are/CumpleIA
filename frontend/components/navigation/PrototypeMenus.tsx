@@ -5,10 +5,9 @@ import {
   moduleNavigation,
   groupDestinations,
   destinationLabel,
+  actionLabel,
   type Destination,
 } from "./prototype-navigation";
-const focus =
-  "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-800";
 function Icon({ index }: { index: number }) {
   const paths = [
     "M3 10 12 3l9 7v11h-6v-7H9v7H3Z",
@@ -33,57 +32,122 @@ function Icon({ index }: { index: number }) {
     </svg>
   );
 }
-export function MainModules({ module, go }: { module: ModuleId; go: (module: ModuleId) => void }) {
-  const [expanded, setExpanded] = useState(false);
-  return (
-    <aside className="sticky top-0 z-40 min-w-0 max-h-[100dvh] self-start overflow-y-auto rounded-xl border border-slate-200 bg-white shadow-sm md:top-4 md:max-h-[calc(100dvh-2rem)]">
-      <div className="flex items-center justify-between gap-2 border-b border-slate-100 p-4">
-        <div>
-          <p className="text-lg font-bold text-blue-900">CumpleIA</p>
-          <p className="text-xs text-slate-500">Menú principal</p>
-        </div>
-        <button
-          type="button"
-          className={`rounded-lg border border-slate-300 p-2 text-sm font-semibold md:hidden ${focus}`}
-          aria-expanded={expanded}
-          aria-controls="prototype-global-menu"
-          onClick={() => setExpanded(!expanded)}
-        >
-          {expanded ? "Cerrar menú" : "Abrir menú"}
-        </button>
-      </div>
-      <nav
-        id="prototype-global-menu"
-        aria-label="Módulos de la maqueta"
-        className={`${expanded ? "flex" : "hidden"} flex-col gap-1 p-2 md:flex`}
-      >
-        {modules.map((item, i) => (
-          <button
-            key={item.id}
-            disabled={item.upcoming}
-            aria-current={item.id === module ? "page" : undefined}
-            className={`flex items-start gap-3 rounded-lg border-l-4 px-3 py-3 text-left font-semibold disabled:cursor-not-allowed disabled:text-slate-500 disabled:hover:bg-white ${focus} ${item.id === module ? "border-orange-600 bg-orange-100 text-orange-950" : "border-transparent text-slate-700 hover:bg-slate-100"}`}
-            onClick={() => {
-              setExpanded(false);
-              go(item.id);
-            }}
-          >
-            <Icon index={i} />
-            <span>
-              {item.id === "panel" ? "Inicio / Panel principal" : item.title}
-              {item.upcoming && (
-                <span className="mt-1 block text-xs font-normal">Próximamente</span>
-              )}
-            </span>
+
+export function MainModules({
+  module,
+  go,
+  expanded,
+  setExpanded,
+  notify,
+}: {
+  module: ModuleId;
+  go: (module: ModuleId) => void;
+  expanded: boolean;
+  setExpanded: (open: boolean) => void;
+  notify: (text: string) => void;
+}) {
+  const [mobile, setMobile] = useState(false);
+  const [unavailable, setUnavailable] = useState("");
+  const dialog = useRef<HTMLDialogElement>(null);
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 767px)");
+    const update = () => {
+      setMobile(media.matches);
+      setExpanded(false);
+    };
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, [setExpanded]);
+  useEffect(() => {
+    if (mobile && expanded && !dialog.current?.open) dialog.current?.showModal();
+    if (!expanded) dialog.current?.close();
+  }, [expanded, mobile]);
+  function close() {
+    setExpanded(false);
+    requestAnimationFrame(() => document.getElementById("prototype-menu-trigger")?.focus());
+  }
+  const nav = (
+    <>
+      <div className="prototype-brand">
+        <strong>CumpleIA</strong>
+        <small>Cumplimiento de datos personales</small>
+        {mobile && (
+          <button className="prototype-drawer-close" onClick={close}>
+            Cerrar menú
           </button>
+        )}
+      </div>
+      <nav id="prototype-global-menu" aria-label="Módulos de la maqueta">
+        {[
+          { title: "Trabajo", ids: ["panel", "diagnostico", "rat", "licitud"] },
+          { title: "Próximas funciones", ids: ["documentos", "evidencia"] },
+          { title: "Cuenta", ids: ["organizacion"] },
+        ].map((group) => (
+          <div key={group.title}>
+            <h2>{group.title}</h2>
+            {modules
+              .filter((item) => group.ids.includes(item.id))
+              .map((item) => (
+                <button
+                  key={item.id}
+                  title={item.title}
+                  aria-label={item.title + (item.upcoming ? " · Próximamente" : "")}
+                  aria-disabled={item.upcoming || undefined}
+                  aria-current={item.id === module ? "page" : undefined}
+                  onClick={() => {
+                    if (item.upcoming) {
+                      const message = `${item.title}: próximamente. Aún no está disponible.`;
+                      notify(message);
+                      setUnavailable(message);
+                      return;
+                    }
+                    setExpanded(false);
+                    go(item.id);
+                  }}
+                >
+                  <Icon index={modules.indexOf(item)} />
+                  <span className="prototype-rail-label">
+                    {item.title}
+                    {item.upcoming && <small>Próximamente</small>}
+                  </span>
+                </button>
+              ))}
+          </div>
         ))}
       </nav>
-      <p className="hidden border-t border-slate-100 p-4 text-xs text-slate-500 md:block">
-        Maqueta navegable
-        <br />
-        Datos ficticios durante esta visita
-      </p>
-    </aside>
+      {mobile && unavailable && (
+        <p role="status" className="p-3 text-sm text-white">
+          {unavailable}
+        </p>
+      )}
+    </>
+  );
+  return mobile ? (
+    <dialog
+      ref={dialog}
+      className="prototype-rail prototype-drawer"
+      aria-label="Menú principal"
+      onCancel={(event) => {
+        event.preventDefault();
+        close();
+      }}
+      onClick={(event) => {
+        if (event.target === event.currentTarget) {
+          const rect = event.currentTarget.getBoundingClientRect();
+          if (
+            event.clientX > rect.right ||
+            event.clientY > rect.bottom ||
+            event.clientX < rect.left
+          )
+            close();
+        }
+      }}
+    >
+      {nav}
+    </dialog>
+  ) : (
+    <aside className="prototype-rail">{nav}</aside>
   );
 }
 export function ModuleOptions({
@@ -91,43 +155,64 @@ export function ModuleOptions({
   scenario,
   go,
   status,
+  mobileExpanded,
+  setMobileExpanded,
 }: {
   location: Destination;
   scenario: Scenario;
   go: (module: ModuleId, task: Destination["task"], section: string) => void;
   status: (section: string) => string;
+  mobileExpanded: boolean;
+  setMobileExpanded: (expanded: boolean) => void;
 }) {
   const [open, setOpen] = useState<string | null>(null);
-  const [mobileExpanded, setMobileExpanded] = useState(false);
   const root = useRef<HTMLElement>(null);
+  const wrapper = useRef<HTMLDivElement>(null);
   const triggers = useRef<Record<string, HTMLButtonElement | null>>({});
   const groups = moduleNavigation(location.module, scenario);
   useEffect(() => {
     setOpen(null);
     setMobileExpanded(false);
-  }, [location, scenario]);
+  }, [location, scenario, setMobileExpanded]);
   useEffect(() => {
-    if (!open) return;
+    if (!open && !mobileExpanded) return;
     const outside = (event: PointerEvent) => {
-      if (!root.current?.contains(event.target as Node)) setOpen(null);
-    };
-    const escape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        event.preventDefault();
+      if (
+        !wrapper.current?.contains(event.target as Node) &&
+        !(event.target as HTMLElement).closest("#prototype-sections-trigger")
+      ) {
         setOpen(null);
-        triggers.current[open]?.focus();
+        setMobileExpanded(false);
       }
     };
-    const resize = () => setOpen(null);
-    window.addEventListener("resize", resize);
+    const escape = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      event.preventDefault();
+      if (open) {
+        triggers.current[open]?.focus();
+        setOpen(null);
+      } else {
+        setMobileExpanded(false);
+        document.getElementById("prototype-sections-trigger")?.focus();
+      }
+    };
+    let width = window.innerWidth;
+    const resize = () => {
+      if (window.innerWidth !== width) {
+        width = window.innerWidth;
+        setOpen(null);
+        setMobileExpanded(false);
+      }
+    };
     document.addEventListener("pointerdown", outside);
     document.addEventListener("keydown", escape);
+    window.addEventListener("resize", resize);
     return () => {
-      window.removeEventListener("resize", resize);
       document.removeEventListener("pointerdown", outside);
       document.removeEventListener("keydown", escape);
+      window.removeEventListener("resize", resize);
     };
-  }, [open]);
+  }, [open, mobileExpanded, setMobileExpanded]);
   function focusItem(id: string, last = false) {
     requestAnimationFrame(() => {
       const items = root.current?.querySelectorAll<HTMLButtonElement>(
@@ -137,46 +222,43 @@ export function ModuleOptions({
     });
   }
   return (
-    <div>
-      <button
-        className={`mb-2 flex w-full items-center justify-between rounded-lg border border-orange-500 bg-orange-50 p-3 text-left text-sm font-bold text-orange-950 sm:hidden ${focus}`}
-        aria-expanded={mobileExpanded}
-        aria-controls="prototype-module-options"
-        onClick={() => setMobileExpanded(!mobileExpanded)}
-      >
-        Opciones del módulo <span aria-hidden="true">{mobileExpanded ? "▴" : "▾"}</span>
-      </button>
-      <nav
-        ref={root}
-        id="prototype-module-options"
-        aria-label="Opciones del módulo"
-        className={`${mobileExpanded ? "grid" : "hidden"} max-h-[55dvh] grid-cols-1 gap-2 overflow-y-auto sm:flex sm:max-h-none sm:flex-wrap sm:overflow-visible`}
-      >
+    <div ref={wrapper} className={`prototype-section-options ${mobileExpanded ? "is-open" : ""}`}>
+      <nav ref={root} id="prototype-module-options" aria-label="Opciones del módulo">
         {groups.map((group) => {
           const items = groupDestinations(group, scenario);
           const direct = items.length === 1;
           const active = items.some(
             (item) => item.task === location.task && item.section === location.section
           );
-          const expanded = open === group.id;
+          const dirtyCount = items.filter(
+            (item) => status(item.section) === "Cambios sin guardar"
+          ).length;
+          const temporary = items.some((item) => status(item.section) === "Borrador temporal");
+          const hasSaved = items.some((item) => status(item.section) === "Guardado en maqueta");
+          const state = dirtyCount
+            ? `${dirtyCount} con cambios sin guardar`
+            : temporary
+              ? "Borrador temporal"
+              : hasSaved
+                ? "Guardado en maqueta"
+                : "";
           return (
-            <div className="relative min-w-0" key={group.id}>
+            <div className="prototype-tab" key={group.id}>
               <button
                 ref={(node) => {
                   triggers.current[group.id] = node;
                 }}
                 data-nav-group={group.id}
                 type="button"
-                aria-expanded={direct ? undefined : expanded}
+                aria-expanded={direct ? undefined : open === group.id}
                 aria-controls={direct ? undefined : `prototype-options-${group.id}`}
-                aria-current={active ? "step" : undefined}
-                className={`flex min-h-12 w-full items-center justify-between gap-3 rounded-lg border px-3 py-3 text-left text-sm font-semibold ${focus} ${active ? "border-orange-600 bg-orange-100 text-orange-950" : group.accent ? "border-blue-700 bg-blue-50 text-blue-900 hover:bg-blue-100" : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"}`}
+                aria-current={active ? "page" : undefined}
                 onClick={() => {
                   if (direct) {
                     setOpen(null);
                     setMobileExpanded(false);
                     go(items[0].module, items[0].task, items[0].section);
-                  } else setOpen(expanded ? null : group.id);
+                  } else setOpen(open === group.id ? null : group.id);
                 }}
                 onKeyDown={(event) => {
                   if (!direct && ["ArrowDown", "ArrowUp"].includes(event.key)) {
@@ -186,32 +268,29 @@ export function ModuleOptions({
                   }
                 }}
               >
-                <span>
-                  {group.label}
-                  {direct && status(items[0].section) && (
-                    <span className="mt-1 block text-xs font-normal">
-                      {status(items[0].section)}
-                    </span>
-                  )}
-                </span>
-                {!direct && (
-                  <span aria-hidden="true" className="text-base">
-                    {expanded ? "▴" : "▾"}
-                  </span>
+                {direct ? destinationLabel(items[0].section, items[0].module) : group.label}
+                {state && (
+                  <>
+                    <span
+                      aria-hidden="true"
+                      className={`prototype-dot ${!dirtyCount && !temporary ? "saved" : ""}`}
+                    />
+                    <span className="sr-only">{state}</span>
+                  </>
                 )}
+                {!direct && <span aria-hidden="true">{open === group.id ? "▴" : "▾"}</span>}
               </button>
-              {!direct && expanded && (
+              {!direct && open === group.id && (
                 <div
                   id={`prototype-options-${group.id}`}
                   data-group={group.id}
+                  className="prototype-pop"
                   ref={(node) => {
-                    if (!node || window.innerWidth < 640) return;
+                    if (!node || window.innerWidth < 768) return;
                     node.style.left = "0px";
-                    node.style.right = "auto";
-                    const bounds = node.getBoundingClientRect();
-                    node.style.left = `${Math.max(16 - bounds.left, Math.min(0, window.innerWidth - 16 - bounds.right))}px`;
+                    const rect = node.getBoundingClientRect();
+                    node.style.left = `${Math.max(12 - rect.left, Math.min(0, window.innerWidth - 12 - rect.right))}px`;
                   }}
-                  className={`relative z-30 mt-2 sm:absolute sm:top-full max-h-[55dvh] w-full overflow-y-auto rounded-xl border border-slate-300 bg-white p-2 shadow-xl sm:w-80 left-0`}
                   onBlur={(event) => {
                     if (
                       event.relatedTarget &&
@@ -226,28 +305,25 @@ export function ModuleOptions({
                       event.currentTarget.querySelectorAll<HTMLButtonElement>("button")
                     );
                     const i = buttons.indexOf(document.activeElement as HTMLButtonElement);
-                    const next =
+                    buttons[
                       event.key === "Home"
                         ? 0
                         : event.key === "End"
                           ? buttons.length - 1
                           : (i + (event.key === "ArrowUp" ? -1 : 1) + buttons.length) %
-                            buttons.length;
-                    buttons[next]?.focus();
+                            buttons.length
+                    ]?.focus();
                   }}
                 >
-                  <p className="px-3 py-2 text-xs font-bold uppercase tracking-wide text-slate-500">
-                    {group.label}
-                  </p>
+                  <p className="prototype-pop-title">{group.label}</p>
                   {items.map((item) => (
                     <button
                       key={item.section}
                       aria-current={
                         item.section === location.section && item.task === location.task
-                          ? "step"
+                          ? "page"
                           : undefined
                       }
-                      className={`mb-1 flex w-full items-start justify-between gap-3 rounded-lg px-3 py-3 text-left text-sm ${focus} ${item.section === location.section && item.task === location.task ? "bg-orange-100 font-bold text-orange-950" : "text-slate-800 hover:bg-blue-50"}`}
                       onClick={() => {
                         setOpen(null);
                         setMobileExpanded(false);
@@ -255,14 +331,18 @@ export function ModuleOptions({
                       }}
                     >
                       <span>
-                        {destinationLabel(item.section)}
+                        {destinationLabel(item.section, item.module)}
                         {status(item.section) && (
-                          <span className="mt-1 block text-xs font-normal text-slate-600">
+                          <small className="block text-xs text-slate-500">
                             {status(item.section)}
-                          </span>
+                          </small>
                         )}
                       </span>
-                      <span aria-hidden="true">→</span>
+                      <span
+                        className={`prototype-verb ${actionLabel(item, scenario) === "Decisión" ? "decision" : ""}`}
+                      >
+                        {actionLabel(item, scenario)}
+                      </span>
                     </button>
                   ))}
                 </div>

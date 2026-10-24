@@ -6,6 +6,7 @@ import path from "node:path";
 import {
   moduleNavigation,
   groupDestinations,
+  destinationLabel,
   type Destination,
 } from "../components/navigation/prototype-navigation";
 import {
@@ -21,6 +22,12 @@ let script: string;
 let css: string;
 const requests: string[] = [];
 test.setTimeout(30000);
+test.beforeEach(async ({ page }) => {
+  page.on("dialog", async (dialog) => {
+    if (dialog.type() === "beforeunload") await dialog.accept();
+    else await dialog.dismiss();
+  });
+});
 test.beforeAll(async () => {
   directory = await mkdtemp(path.join(tmpdir(), "cumpleia-navigation-"));
   const loader = path.join(directory, "loader.cjs");
@@ -70,12 +77,14 @@ test.beforeAll(async () => {
     ],
     { stdio: "pipe" }
   );
-  css = await readFile(path.join(directory, "style.css"), "utf8");
+  css =
+    (await readFile(path.join(directory, "style.css"), "utf8")) +
+    (await readFile(path.resolve("components/navigation/navigation-prototype.css"), "utf8"));
 });
 test.afterAll(async () => {
   if (directory) await rm(directory, { recursive: true, force: true });
 });
-async function open(page: Page) {
+async function open(page: Page, fragment = "") {
   requests.length = 0;
   await page.route("**/*", async (route) => {
     if (
@@ -84,17 +93,17 @@ async function open(page: Page) {
     ) {
       await route.fulfill({
         contentType: "text/html",
-        body: '<main style="max-width:1152px;margin:auto;padding:24px"><div id="root"></div></main>',
+        body: '<div id="root"></div>',
       });
     } else {
       requests.push(`${route.request().method()} ${route.request().url()}`);
       await route.abort();
     }
   });
-  await page.goto("http://prototype.invalid/dashboard/maqueta");
+  await page.goto("http://prototype.invalid/dashboard/maqueta" + fragment);
   await page.addStyleTag({ content: css });
   await page.addScriptTag({ content: script });
-  await expect(page.getByRole("heading", { name: "Maqueta integral", exact: true })).toBeVisible();
+  await expect(page.locator("#prototype-section-title")).toBeVisible();
 }
 const moduleNav = (page: Page) => page.getByRole("navigation", { name: "Módulos de la maqueta" });
 const optionsNav = (page: Page) => page.getByRole("navigation", { name: "Opciones del módulo" });
@@ -109,7 +118,7 @@ const moduleNames: Record<string, ModuleId> = {
   Organización: "organizacion",
 };
 const visibleNames: Record<ModuleId, string> = {
-  panel: "Inicio / Panel principal",
+  panel: "Panel principal",
   diagnostico: "Autodiagnóstico",
   rat: "Inventario de tratamientos",
   licitud: "Bases de licitud",
@@ -133,11 +142,9 @@ async function module(page: Page, name: string) {
     .click();
 }
 async function navigate(page: Page, destination: Destination) {
-  const scenario = (
-    (await page.getByLabel("Tratamiento del RAT").count())
-      ? await page.getByLabel("Tratamiento del RAT").inputValue()
-      : "adultos"
-  ) as Scenario;
+  const scenario = (await page
+    .locator(".prototype-app")
+    .getAttribute("data-treatment")) as Scenario;
   const group = moduleNavigation(destination.module, scenario).find((group) =>
     groupDestinations(group, scenario).some(
       (item) => item.task === destination.task && item.section === destination.section
@@ -158,11 +165,9 @@ async function navigate(page: Page, destination: Destination) {
 }
 async function task(page: Page, name: string) {
   const mod = await currentModule(page);
-  const scenario = (
-    (await page.getByLabel("Tratamiento del RAT").count())
-      ? await page.getByLabel("Tratamiento del RAT").inputValue()
-      : "adultos"
-  ) as Scenario;
+  const scenario = (await page
+    .locator(".prototype-app")
+    .getAttribute("data-treatment")) as Scenario;
   const tasks: Record<string, TaskId> = {
     Resumen: "resumen",
     "Completar datos": "completar",
@@ -174,20 +179,27 @@ async function task(page: Page, name: string) {
 }
 async function step(page: Page, name: string) {
   const mod = await currentModule(page);
-  const scenario = (
-    (await page.getByLabel("Tratamiento del RAT").count())
-      ? await page.getByLabel("Tratamiento del RAT").inputValue()
-      : "adultos"
-  ) as Scenario;
+  const scenario = (await page
+    .locator(".prototype-app")
+    .getAttribute("data-treatment")) as Scenario;
   const destination = moduleNavigation(mod, scenario)
     .flatMap((group) => groupDestinations(group, scenario))
     .find((item) => labels[item.section]?.includes(name))!;
   if (!destination) throw new Error(`Destino ausente: ${name}`);
   await navigate(page, destination);
 }
+async function openContext(page: Page) {
+  await page.getByRole("button", { name: "Cambiar contexto de trabajo", exact: true }).click();
+  await expect(page.getByRole("dialog")).toBeVisible();
+}
+async function chooseContext(page: Page, label: string, value: string) {
+  await openContext(page);
+  await page.getByRole("dialog").getByLabel(label, { exact: true }).selectOption(value);
+  await page.getByRole("button", { name: "Usar esta evaluación", exact: true }).click();
+}
 async function children(page: Page) {
   await module(page, "Bases de licitud");
-  await page.getByLabel("Tratamiento del RAT").selectOption("infancia");
+  await chooseContext(page, "Tratamiento del RAT", "infancia");
 }
 
 test("todos los módulos y destinos abren contenido con foco, sin red ni capas genéricas", async ({
@@ -202,7 +214,7 @@ test("todos los módulos y destinos abren contenido con foco, sin red ni capas g
         await navigate(page, destination);
         await expect(work(page)).toBeFocused();
         await expect(work(page).locator("#prototype-section-title")).toHaveText(
-          labels[destination.section]
+          destinationLabel(destination.section, destination.module)
         );
         await expect(optionsNav(page).locator("[data-group]")).toHaveCount(0);
       }
@@ -250,13 +262,13 @@ test("borradores conservados entre módulos, escenarios separados y consulta sol
 
   await task(page, "Documentos y revisiones");
   await expect(work(page).getByText(value, { exact: true })).toBeVisible();
-  await page.getByLabel("Tratamiento del RAT").selectOption("infancia");
+  await chooseContext(page, "Tratamiento del RAT", "infancia");
   await task(page, "Completar datos");
   await step(page, "Base y fundamento");
   await expect(page.getByLabel("Fundamento", { exact: true })).not.toHaveValue(value);
-  await expect(optionsNav(page).locator('[data-nav-group="infancia"]')).toBeVisible();
-  await page.getByLabel("Tratamiento del RAT").selectOption("adultos");
-  await expect(optionsNav(page).locator('[data-nav-group="infancia"]')).toHaveCount(0);
+  await expect(page.locator(".prototype-app")).toHaveAttribute("data-treatment", "infancia");
+  await chooseContext(page, "Tratamiento del RAT", "adultos");
+  await expect(page.locator(".prototype-app")).toHaveAttribute("data-treatment", "adultos");
 });
 
 test("cancelar copia conserva marca temporal y confirmar copia preserva original", async ({
@@ -273,9 +285,7 @@ test("cancelar copia conserva marca temporal y confirmar copia preserva original
   await step(page, "Resoluciones");
   await page.getByRole("button", { name: /Preparar sucesor desde/ }).click();
   await expect(page.getByRole("dialog")).toBeVisible();
-  await page
-    .getByRole("button", { name: "Conservar documento en preparación", exact: true })
-    .click();
+  await page.getByRole("button", { name: "Cancelar y conservar mi borrador", exact: true }).click();
   await task(page, "Completar datos");
   await step(page, "Preparar resolución");
   await expect(page.getByLabel("Notas de la resolución en preparación")).toHaveValue(
@@ -297,7 +307,9 @@ test("cancelar copia conserva marca temporal y confirmar copia preserva original
   await expect(page.getByRole("dialog")).toContainText("Todavía no se creó otra resolución");
   await page.getByRole("button", { name: /Continuar al registro de ejemplo/ }).click();
   await page.getByRole("button", { name: "Registrar resolución solo en maqueta" }).click();
-  await expect(page.getByText(/^Cambios sin guardar ·/)).toHaveCount(0);
+  await expect(
+    page.locator('.prototype-context [aria-label="Esta evaluación tiene cambios pendientes"]')
+  ).toHaveCount(0);
   await expect(
     page.getByRole("button", { name: "Consultar resolución 3", exact: true })
   ).toBeVisible();
@@ -485,16 +497,16 @@ test("infancia guardada se consulta y el estado vuelve a pendiente al editar", a
   await page
     .getByLabel("Notas de infancia", { exact: true })
     .fill("[FICTICIA] NOTA GUARDADA DE INFANCIA");
-  await expect(optionsNav(page).locator('[data-nav-group="infancia"]')).toContainText(
-    "Cambios sin guardar"
+  await expect(optionsNav(page).locator('[data-nav-group="preparar"]')).toHaveAccessibleName(
+    /con cambios sin guardar/
   );
   await page.getByRole("button", { name: "Guardar cambios en la maqueta", exact: true }).click();
-  await expect(optionsNav(page).locator('[data-nav-group="infancia"]')).toContainText(
-    "Guardado en maqueta"
+  await expect(optionsNav(page).locator('[data-nav-group="preparar"]')).toHaveAccessibleName(
+    /Guardado en maqueta/
   );
   await page.getByLabel("Notas de infancia", { exact: true }).fill("[FICTICIA] NOTA SIN GUARDAR");
-  await expect(optionsNav(page).locator('[data-nav-group="infancia"]')).toContainText(
-    "Cambios sin guardar"
+  await expect(optionsNav(page).locator('[data-nav-group="preparar"]')).toHaveAccessibleName(
+    /con cambios sin guardar/
   );
   await task(page, "Documentos y revisiones");
   await expect(work(page)).toContainText("[FICTICIA] NOTA GUARDADA DE INFANCIA");
@@ -521,10 +533,10 @@ test("capturas de escritorio y móvil para revisión visual", async ({ page }) =
   await page.evaluate(() => window.scrollTo(0, 0));
   await page.evaluate(() => new Promise(requestAnimationFrame));
   await page.screenshot({ path: path.join(dir, "maqueta-infancia-desktop.png"), fullPage: true });
-  await optionsNav(page).locator('[data-nav-group="eipd"]').click();
+  await optionsNav(page).locator('[data-nav-group="preparar"]').click();
   await page.screenshot({ path: path.join(dir, "maqueta-menu-eipd-desktop.png"), fullPage: false });
   await page.keyboard.press("Escape");
-  await optionsNav(page).locator('[data-nav-group="resoluciones"]').click();
+  await optionsNav(page).locator('[data-nav-group="revisar"]').click();
   await page.screenshot({
     path: path.join(dir, "maqueta-menu-resoluciones-desktop.png"),
     fullPage: false,
@@ -544,7 +556,18 @@ test("capturas de escritorio y móvil para revisión visual", async ({ page }) =
   await page.evaluate(() => window.scrollTo(0, 0));
   await page.evaluate(() => new Promise(requestAnimationFrame));
   await page.screenshot({ path: path.join(dir, "maqueta-infancia-mobile.png"), fullPage: true });
+  await page.getByRole("button", { name: "Opciones del módulo", exact: true }).click();
+  await optionsNav(page).locator('[data-nav-group="preparar"]').click();
+  await page.screenshot({ path: path.join(dir, "maqueta-secciones-mobile.png"), fullPage: false });
+  await page.keyboard.press("Escape");
+  await page.keyboard.press("Escape");
+  await page.getByRole("button", { name: "Abrir menú", exact: true }).click();
+  await page.screenshot({ path: path.join(dir, "maqueta-menu-mobile.png"), fullPage: false });
+  await page.keyboard.press("Escape");
   await page.setViewportSize({ width: 1440, height: 1100 });
+  await openContext(page);
+  await page.screenshot({ path: path.join(dir, "maqueta-contexto-desktop.png"), fullPage: false });
+  await page.keyboard.press("Escape");
   await module(page, "Organización");
   await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({
@@ -558,22 +581,23 @@ test("menú EIPD abre por clic, permanece visible y cierra con Escape, selecció
 }) => {
   await open(page);
   await module(page, "Bases de licitud");
-  const trigger = optionsNav(page).getByRole("button", { name: "Documentar EIPD", exact: false });
+  const trigger = optionsNav(page).locator('[data-nav-group="preparar"]');
   await trigger.hover();
   await expect(trigger).toHaveAttribute("aria-expanded", "false");
   await trigger.click();
   await expect(trigger).toHaveAttribute("aria-expanded", "true");
   await page.mouse.move(1, 1);
-  await expect(page.locator('[data-group="eipd"]')).toBeVisible();
-  await expect(page.locator('[data-group="eipd"]').getByRole("button")).toHaveCount(5);
+  await expect(page.locator('[data-group="preparar"]')).toBeVisible();
+  await expect(page.locator('[data-group="preparar"]').getByRole("button")).toHaveCount(7);
   await page.keyboard.press("Escape");
   await expect(trigger).toBeFocused();
   await expect(trigger).toHaveAttribute("aria-expanded", "false");
   await trigger.press("ArrowDown");
-  await expect(page.locator('[data-group="eipd"]').getByRole("button").first()).toBeFocused();
+  await expect(page.locator('[data-group="preparar"]').getByRole("button").first()).toBeFocused();
   await page.keyboard.press("End");
-  await expect(page.locator('[data-group="eipd"]').getByRole("button").last()).toBeFocused();
+  await expect(page.locator('[data-group="preparar"]').getByRole("button").last()).toBeFocused();
   await page.keyboard.press("Home");
+  await page.keyboard.press("ArrowDown");
   await page.keyboard.press("ArrowDown");
   await page.keyboard.press("Enter");
   await expect(work(page)).toBeFocused();
@@ -582,7 +606,7 @@ test("menú EIPD abre por clic, permanece visible y cierra con Escape, selecció
     .getByRole("textbox", { name: "Necesidad y proporcionalidad", exact: true })
     .fill("[FICTICIA] JUSTIFICACIÓN CONSERVADA");
   await trigger.click();
-  await work(page).click();
+  await work(page).click({ position: { x: (await work(page).boundingBox())!.width - 12, y: 12 } });
   await expect(trigger).toHaveAttribute("aria-expanded", "false");
   await step(page, "Riesgos y valoración");
   await step(page, "Necesidad y proporcionalidad");
@@ -596,11 +620,11 @@ test("preparar resolución se encuentra desde su menú sin pasar por Completar d
 }) => {
   await open(page);
   await children(page);
-  const trigger = optionsNav(page).getByRole("button", { name: /Resoluciones y revisiones/ });
+  const trigger = optionsNav(page).locator('[data-nav-group="preparar"]');
   await expect(trigger).toBeVisible();
   await trigger.click();
   await page
-    .locator('[data-group="resoluciones"]')
+    .locator('[data-group="preparar"]')
     .getByRole("button", { name: /Preparar resolución documental/ })
     .click();
   await expect(page.locator("#prototype-section-title")).toHaveText(
@@ -611,8 +635,9 @@ test("preparar resolución se encuentra desde su menú sin pasar por Completar d
   await expect(moduleNav(page).locator('button[aria-current="page"]')).toContainText(
     "Bases de licitud"
   );
-  await expect(optionsNav(page).locator('[data-nav-group="resoluciones"]')).toHaveClass(
-    /border-orange-600/
+  await expect(optionsNav(page).locator('[data-nav-group="preparar"]')).toHaveAttribute(
+    "aria-current",
+    "page"
   );
 });
 
@@ -623,7 +648,7 @@ test("menús completos sin desborde en escritorio, tableta y móvil", async ({ p
     await children(page);
     const mobile = page.getByRole("button", { name: "Opciones del módulo", exact: true });
     if (await mobile.isVisible()) await mobile.click();
-    for (const id of ["eipd", "resoluciones", "historial"]) {
+    for (const id of ["preparar", "revisar", "historial"]) {
       const trigger = optionsNav(page).locator(`[data-nav-group="${id}"]`);
       await trigger.click();
       const bounds = await page.locator(`[data-group="${id}"]`).boundingBox();
@@ -671,8 +696,8 @@ test("Mi organización reproduce los cuatro datos y los módulos futuros indican
   await page.getByRole("button", { name: "Guardar cambios", exact: true }).click();
   await expect(page.getByRole("status")).toContainText("Guardado en la maqueta");
   await module(page, "Bases de licitud");
-  await page.getByLabel("Tratamiento del RAT").selectOption("infancia");
-  await expect(optionsNav(page).locator('[data-nav-group="consultas"]')).toBeEnabled();
+  await chooseContext(page, "Tratamiento del RAT", "infancia");
+  await expect(optionsNav(page).locator('[data-nav-group="revisar"]')).toBeEnabled();
   await module(page, "Organización");
   await expect(page.getByRole("textbox", { name: "Rubro / industria", exact: true })).toHaveValue(
     "[FICTICIA] Servicios"
@@ -680,47 +705,50 @@ test("Mi organización reproduce los cuatro datos y los módulos futuros indican
   expect(requests).toEqual([]);
 });
 
-test("tratamiento, finalidad y evaluación filtran opciones y conservan borradores separados", async ({
+test("contexto filtra opciones, aplica al confirmar y conserva borradores por evaluación", async ({
   page,
 }) => {
   await open(page);
   await module(page, "Bases de licitud");
-  await expect(page.getByLabel("Finalidad de la evaluación").locator("option")).toHaveCount(2);
-  await expect(page.getByLabel("Evaluación", { exact: true }).locator("option")).toHaveCount(2);
   await step(page, "Base y fundamento");
   await page.getByLabel("Fundamento", { exact: true }).fill("[FICTICIA] CITAS V1 GUARDADO");
   await page.getByRole("button", { name: "Guardar cambios en la maqueta", exact: true }).click();
   await page.getByLabel("Fundamento", { exact: true }).fill("[FICTICIA] CITAS V1 PENDIENTE");
+  await openContext(page);
+  await expect(page.getByLabel("Finalidad de la evaluación").locator("option")).toHaveCount(2);
+  await expect(page.getByLabel("Evaluación", { exact: true }).locator("option")).toHaveCount(2);
   await page.getByLabel("Evaluación", { exact: true }).selectOption("adultos-citas-v2");
+  await page.getByRole("button", { name: "Cancelar", exact: true }).click();
+  await expect(page.locator(".prototype-app")).toHaveAttribute("data-evaluation-id", "adultos");
+  await chooseContext(page, "Evaluación", "adultos-citas-v2");
   await expect(page.getByLabel("Fundamento", { exact: true })).not.toHaveValue(/CITAS V1/);
   await page.getByLabel("Fundamento", { exact: true }).fill("[FICTICIA] CITAS V2 PENDIENTE");
-  await page.getByLabel("Finalidad de la evaluación").selectOption("comercial");
-  await expect(page.getByLabel("Evaluación", { exact: true })).toHaveValue("adultos-comercial");
-  await expect(page.getByLabel("Evaluación", { exact: true }).locator("option")).toHaveCount(1);
-  await expect(page.getByLabel("Fundamento", { exact: true })).not.toHaveValue(/CITAS/);
+  await chooseContext(page, "Finalidad de la evaluación", "comercial");
   await page.getByLabel("Fundamento", { exact: true }).fill("[FICTICIA] COMERCIAL GUARDADO");
   await page.getByRole("button", { name: "Guardar cambios en la maqueta", exact: true }).click();
-  await page.getByLabel("Finalidad de la evaluación").selectOption("citas");
+  await chooseContext(page, "Finalidad de la evaluación", "citas");
   await expect(page.getByLabel("Fundamento", { exact: true })).toHaveValue(
     "[FICTICIA] CITAS V1 PENDIENTE"
   );
   await task(page, "Documentos y revisiones");
   await expect(work(page)).toContainText("[FICTICIA] CITAS V1 GUARDADO");
-  await expect(work(page)).not.toContainText("[FICTICIA] COMERCIAL GUARDADO");
   await expect(work(page)).not.toContainText("[FICTICIA] CITAS V1 PENDIENTE");
-  await page.getByLabel("Evaluación", { exact: true }).selectOption("adultos-citas-v2");
+  await expect(work(page)).not.toContainText("[FICTICIA] COMERCIAL GUARDADO");
+  await chooseContext(page, "Evaluación", "adultos-citas-v2");
   await step(page, "Base y fundamento");
   await expect(page.getByLabel("Fundamento", { exact: true })).toHaveValue(
     "[FICTICIA] CITAS V2 PENDIENTE"
   );
   await module(page, "Inventario RAT");
-  await expect(page.getByLabel("Evaluación", { exact: true })).toHaveValue("adultos-citas-v2");
-  await page.getByLabel("Tratamiento del RAT").selectOption("infancia");
+  await expect(page.locator(".prototype-app")).toHaveAttribute(
+    "data-evaluation-id",
+    "adultos-citas-v2"
+  );
+  await chooseContext(page, "Tratamiento del RAT", "infancia");
+  await openContext(page);
   await expect(page.getByLabel("Finalidad de la evaluación")).toHaveValue("programa");
   await expect(page.getByLabel("Finalidad de la evaluación").locator("option")).toHaveCount(1);
-  await expect(page.getByLabel("Evaluación", { exact: true })).toHaveValue("infancia");
-  await module(page, "Bases de licitud");
-  await expect(optionsNav(page).locator('[data-nav-group="infancia"]')).toBeVisible();
+  await page.getByRole("button", { name: "Cancelar", exact: true }).click();
   expect(requests).toEqual([]);
 });
 
@@ -739,7 +767,7 @@ test("anexos, actividad y JSON corresponden a la finalidad y evaluación selecci
     buffer: Buffer.from("[FICTICIA]"),
   });
   await page.getByRole("button", { name: "Guardar cambios en la maqueta", exact: true }).click();
-  await page.getByLabel("Finalidad de la evaluación").selectOption("comercial");
+  await chooseContext(page, "Finalidad de la evaluación", "comercial");
   await task(page, "Documentos y revisiones");
   await expect(work(page)).not.toContainText("SIMULADA-SOLO-CITAS-V1");
   await task(page, "Historial y descargas");
@@ -755,7 +783,7 @@ test("anexos, actividad y JSON corresponden a la finalidad y evaluación selecci
   expect(packet.evaluation.version).toBe(1);
   expect(packet.annexes).toEqual([]);
   expect(packet.can_confirm).toBe(false);
-  await page.getByLabel("Finalidad de la evaluación").selectOption("citas");
+  await chooseContext(page, "Finalidad de la evaluación", "citas");
   await task(page, "Documentos y revisiones");
   await expect(work(page)).toContainText("SIMULADA-SOLO-CITAS-V1");
 });
@@ -778,7 +806,9 @@ test("registrar resolución consume su preparación y conserva otros cambios pen
   await expect(
     page.getByRole("button", { name: "Consultar resolución 3", exact: true })
   ).toBeVisible();
-  await expect(page.getByText(/^Cambios sin guardar ·/)).toBeVisible();
+  await expect(
+    page.locator('.prototype-context [aria-label="Esta evaluación tiene cambios pendientes"]')
+  ).toBeVisible();
   await task(page, "Documentos y revisiones");
   await expect(work(page)).not.toContainText("[FICTICIA] INFANCIA SIGUE PENDIENTE");
   await step(page, "Infancia y adolescencia");
@@ -786,5 +816,155 @@ test("registrar resolución consume su preparación y conserva otros cambios pen
     "[FICTICIA] INFANCIA SIGUE PENDIENTE"
   );
   await page.getByRole("button", { name: "Guardar cambios en la maqueta", exact: true }).click();
-  await expect(page.getByText(/^Cambios sin guardar ·/)).toHaveCount(0);
+  await expect(
+    page.locator('.prototype-context [aria-label="Esta evaluación tiene cambios pendientes"]')
+  ).toHaveCount(0);
+});
+
+test("Atrás y Adelante restauran sección, contexto y borrador sin salir de la maqueta", async ({
+  page,
+}) => {
+  await open(page);
+  await module(page, "Bases de licitud");
+  await step(page, "Base y fundamento");
+  await page.getByLabel("Fundamento", { exact: true }).fill("[FICTICIA] BORRADOR ATRÁS");
+  await step(page, "Riesgos y valoración");
+  await page.goBack();
+  await expect(page.locator("#prototype-section-title")).toHaveText("Base y fundamento");
+  await expect(page.getByLabel("Fundamento", { exact: true })).toHaveValue(
+    "[FICTICIA] BORRADOR ATRÁS"
+  );
+  await page.goForward();
+  await expect(page.locator("#prototype-section-title")).toHaveText("Riesgos y valoración");
+  await chooseContext(page, "Finalidad de la evaluación", "comercial");
+  await page.goBack();
+  await expect(page.locator(".prototype-app")).toHaveAttribute("data-evaluation-id", "adultos");
+  await expect(page).toHaveURL(/dashboard\/maqueta#/);
+});
+
+test("volver a un módulo y Continuar recuerdan el destino real", async ({ page }) => {
+  await open(page);
+  await module(page, "Bases de licitud");
+  await step(page, "Medidas de mitigación");
+  await module(page, "Diagnóstico");
+  await module(page, "Bases de licitud");
+  await expect(page.locator("#prototype-section-title")).toHaveText("Medidas de mitigación");
+  await module(page, "Panel principal");
+  await page
+    .getByRole("button", { name: "Continuar en Medidas de mitigación →", exact: true })
+    .click();
+  await expect(page.locator("#prototype-section-title")).toHaveText("Medidas de mitigación");
+  await page
+    .getByRole("navigation", { name: "Ubicación", exact: true })
+    .getByRole("link", { name: "Inicio", exact: true })
+    .click();
+  await expect(page.locator("#prototype-section-title")).toHaveText("Panel principal");
+});
+
+test("salida pide confirmar incluso para datos guardados y permite conservar visita", async ({
+  page,
+}) => {
+  await open(page);
+  await module(page, "Bases de licitud");
+  await step(page, "Base y fundamento");
+  await page.getByLabel("Fundamento", { exact: true }).fill("[FICTICIA] CONSERVAR AL SALIR");
+  await page.getByRole("button", { name: "Guardar cambios en la maqueta", exact: true }).click();
+  await page.getByRole("link", { name: "Salir de la maqueta", exact: true }).click();
+  await expect(page.getByRole("dialog")).toContainText("se perderán los borradores y guardados");
+  await page.getByRole("button", { name: "Seguir en la maqueta", exact: true }).click();
+  await expect(page.getByLabel("Fundamento", { exact: true })).toHaveValue(
+    "[FICTICIA] CONSERVAR AL SALIR"
+  );
+});
+
+test("cabecera compacta, estados agregados y preparación sin promesa de guardar", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1366, height: 768 });
+  await open(page);
+  await module(page, "Bases de licitud");
+  await step(page, "Base y fundamento");
+  expect(
+    (await page.getByLabel("Base de licitud propuesta", { exact: true }).boundingBox())!.y
+  ).toBeLessThan(600);
+  await page.getByLabel("Fundamento", { exact: true }).fill("[FICTICIA] Estado agregado");
+  await expect(optionsNav(page).locator('[data-nav-group="preparar"]')).toHaveAccessibleName(
+    /1 con cambios sin guardar/
+  );
+  await page.setViewportSize({ width: 1024, height: 768 });
+  expect(
+    (await page.getByLabel("Navegación del módulo", { exact: true }).boundingBox())!.height
+  ).toBeLessThanOrEqual(120);
+  if (process.env.MAQUETA_SCREENSHOTS)
+    await writeFile(
+      path.join(process.env.MAQUETA_SCREENSHOTS, "metricas-cabecera.json"),
+      JSON.stringify(
+        {
+          width: 1024,
+          height: 768,
+          header: await page.getByLabel("Navegación del módulo", { exact: true }).boundingBox(),
+          firstField: await page
+            .getByLabel("Base de licitud propuesta", { exact: true })
+            .boundingBox(),
+        },
+        null,
+        2
+      )
+    );
+  await children(page);
+  await step(page, "Preparar resolución");
+  await expect(work(page)).toContainText("Borrador temporal");
+  await expect(work(page)).not.toContainText("Puedes guardar");
+  await expect(work(page)).not.toContainText("Cambios sin guardar");
+});
+
+test("móvil conserva ubicación y acceso a secciones, Escape y cambio solo de alto", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await open(page);
+  await module(page, "Bases de licitud");
+  await step(page, "Riesgos y valoración");
+  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+  await expect(page.locator(".prototype-mobile-bar")).toBeInViewport();
+  await expect(page.locator(".prototype-mobile-bar")).toContainText("Riesgos y valoración");
+  const sections = page.getByRole("button", { name: "Opciones del módulo", exact: true });
+  await sections.click();
+  await optionsNav(page).locator('[data-nav-group="preparar"]').click();
+  await page.setViewportSize({ width: 390, height: 744 });
+  await expect(page.locator('[data-group="preparar"]')).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(optionsNav(page).locator('[data-nav-group="preparar"]')).toBeFocused();
+  await page.keyboard.press("Escape");
+  await expect(sections).toBeFocused();
+  const menu = page.getByRole("button", { name: "Abrir menú", exact: true });
+  await menu.click();
+  await expect(page.getByRole("dialog", { name: "Menú principal", exact: true })).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(menu).toBeFocused();
+});
+
+test("enlace a sección valida identificadores y abre la evaluación correcta", async ({ page }) => {
+  await open(page, "#/licitud/completar/medidas?evaluacion=adultos-citas-v2");
+  await expect(page.locator("#prototype-section-title")).toHaveText("Medidas de mitigación");
+  await expect(page.locator(".prototype-app")).toHaveAttribute(
+    "data-evaluation-id",
+    "adultos-citas-v2"
+  );
+  await open(page, "#/documentos/completar/inventado?evaluacion=inventada");
+  await expect(page.locator("#prototype-section-title")).toHaveText("Panel principal");
+  await expect(page.locator(".prototype-app")).toHaveAttribute("data-evaluation-id", "adultos");
+});
+
+test("funciones futuras son descubribles con teclado y no navegan", async ({ page }) => {
+  await open(page);
+  const future = moduleNav(page).getByRole("button", {
+    name: "Políticas y referencias normativas · Próximamente",
+    exact: true,
+  });
+  await future.focus();
+  await expect(future).toBeFocused();
+  await future.press("Enter");
+  await expect(page.locator("#prototype-section-title")).toHaveText("Panel principal");
+  await expect(page.getByRole("status")).toContainText("Aún no está disponible");
 });

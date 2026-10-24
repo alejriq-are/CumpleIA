@@ -12,6 +12,19 @@ Estado: implementada como demostración aislada; validación dirigida y visual l
 realizada. Prueba asistida y aceptación del diseño por el usuario pendientes.
 No sustituye los recorridos conectados ni implementa sus cambios pendientes.
 
+## Versión vigente: propuesta de Claude adaptada (24/10/2026)
+
+El usuario aprobó el HTML de navegación y solicitó validar el informe de revisión.
+Se implementa el patrón visual sobre los formularios funcionales de la maqueta:
+menú oscuro Trabajo / Próximas funciones / Cuenta; contexto en diálogo Cambiar;
+Bases de licitud agrupado en Alcance, Preparar, Revisar y decidir, Registro;
+historial de sección/evaluación en fragmento, recuerdo por módulo/evaluación,
+continuidad real desde Panel, migas y ubicación persistente móvil. Se conserva
+la autenticación existente y los bloqueos. El marco antiguo descrito a continuación
+es antecedente histórico; esta sección y el [análisis de la revisión](maqueta-revision-claude.md)
+describen la implementación vigente. Autodiagnóstico completo de 50 preguntas y
+adopción conectada siguen pendientes. No hay merge ni despliegue.
+
 ## Estructura común aprobada a partir del bosquejo del usuario
 
 El usuario revisó la primera maqueta y señaló que aún costaba encontrar opciones.

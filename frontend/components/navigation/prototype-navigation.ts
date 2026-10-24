@@ -14,9 +14,12 @@ export function moduleNavigation(module: ModuleId, scenario: Scenario): Navigati
     accent,
     items: sections.map((section) => ({ module, task, section })),
   });
-  const summary = group("resumen", module === "rat" ? "Catálogo" : "Resumen", "resumen", [
-    "estado",
-  ]);
+  const summary = group(
+    "resumen",
+    module === "rat" ? "Catálogo de tratamientos" : labels.estado,
+    "resumen",
+    ["estado"]
+  );
   const documents = group(
     "documentos",
     "Documentos y revisiones",
@@ -34,39 +37,24 @@ export function moduleNavigation(module: ModuleId, scenario: Scenario): Navigati
     return [group("datos", "Datos de la organización", "completar", ["organizacion"])];
   if (module === "panel")
     return [
-      group("inicio", "Vista general", "resumen", ["estado"]),
+      group("inicio", "Panel principal", "resumen", ["estado"]),
       group("ayuda", "Cómo probar la maqueta", "resumen", ["ayuda"]),
     ];
   if (module === "licitud")
     return [
-      group("alcance", "Alcance del RAT", "completar", ["alcance"]),
-      group("base", "Base y fundamento", "completar", ["base"]),
-      ...(scenario === "infancia"
-        ? [group("infancia", "Infancia", "completar", ["infancia"])]
-        : []),
-      group("eipd", "Documentar EIPD", "completar", [
+      group("alcance", labels.alcance, "completar", ["alcance"]),
+      group("preparar", "Preparar", "completar", [
+        ...(scenario === "infancia" ? ["preparar"] : []),
+        "base",
+        ...(scenario === "infancia" ? ["infancia"] : []),
         "eipd",
         "proporcionalidad",
         "riesgos",
         "medidas",
         "eipd_fuentes",
+        "anexos",
       ]),
-      group("anexos", "Anexos de respaldo", "completar", ["anexos"]),
-      ...(scenario === "infancia"
-        ? [
-            group(
-              "resoluciones",
-              "Resoluciones y revisiones",
-              "revisar",
-              ["resoluciones", "revisiones", "decisiones", "facultades"],
-              true
-            ),
-          ]
-        : []),
-      group("consultas", "Documentos guardados", "revisar", [
-        "documentos",
-        ...(scenario === "adultos" ? ["revisiones"] : []),
-      ]),
+      group("revisar", "Revisar y decidir", "revisar", steps(module, "revisar", scenario)),
       history,
     ];
   if (module === "rat")
@@ -109,20 +97,47 @@ export function moduleNavigation(module: ModuleId, scenario: Scenario): Navigati
     history,
   ];
 }
-export function groupDestinations(group: NavigationGroup, scenario: Scenario): Destination[] {
-  return group.id === "resoluciones" && scenario === "infancia"
-    ? [{ module: "licitud", task: "completar", section: "preparar" }, ...group.items]
-    : group.items;
+export function groupDestinations(group: NavigationGroup, _scenario: Scenario): Destination[] {
+  return group.items;
 }
-export function destinationLabel(section: string): string {
-  return (
-    (
-      {
-        eipd: "Tratamiento y alcance",
-        riesgos: "Valorar riesgos",
-        medidas: "Valorar medidas",
-        eipd_fuentes: "Fuentes y evidencias",
-      } as Record<string, string>
-    )[section] ?? labels[section]
-  );
+export function destinationLabel(section: string, module?: ModuleId): string {
+  if (section === "estado" && module === "rat") return "Catálogo de tratamientos";
+  if (section === "estado" && module === "panel") return "Panel principal";
+  return labels[section] ?? section;
+}
+export function actionLabel(destination: Destination, scenario?: Scenario): string {
+  if (destination.section === "preparar") return "Preparación";
+  if (
+    destination.module === "licitud" &&
+    destination.section === "revisiones" &&
+    scenario === "infancia"
+  )
+    return "Revisión";
+  if (destination.module === "licitud" && destination.section === "decisiones") return "Decisión";
+  if (
+    destination.task === "completar" &&
+    !(destination.module === "licitud" && destination.section === "alcance")
+  )
+    return "Editar";
+  return "Consulta";
+}
+export function destinationHint(destination: Destination, scenario?: Scenario): string {
+  if (
+    destination.module === "licitud" &&
+    destination.section === "revisiones" &&
+    scenario !== "infancia"
+  )
+    return "Acceso previsto a la revisión documental de adultos. Aquí solo se consulta; no registra observaciones.";
+  switch (actionLabel(destination, scenario)) {
+    case "Preparación":
+      return "Borrador temporal. La vista previa permite revisar antes de registrar una nueva resolución simulada.";
+    case "Revisión":
+      return "Registra observaciones sobre la resolución seleccionada. No es una decisión de la organización.";
+    case "Decisión":
+      return "Decisión de la organización, separada de la revisión documental y sujeta a facultades vigentes.";
+    case "Editar":
+      return "Completa los antecedentes del ejemplo y guarda antes de consultar el documento.";
+    default:
+      return "Consulta del ejemplo. Abrir esta pantalla no modifica los registros.";
+  }
 }

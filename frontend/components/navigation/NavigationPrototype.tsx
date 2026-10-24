@@ -9,9 +9,7 @@ import {
   evaluationRecords,
   evaluationOptions,
   purposeOptions,
-  treatmentOptions,
   type EvaluationId,
-  scenarioNames,
   purpose,
   seedResolutions,
   type ModuleId,
@@ -20,16 +18,22 @@ import {
   type Values,
 } from "./prototype-data";
 import { MainModules, ModuleOptions } from "./PrototypeMenus";
-import { moduleNavigation, groupDestinations } from "./prototype-navigation";
+import {
+  moduleNavigation,
+  destinationLabel,
+  actionLabel,
+  destinationHint,
+} from "./prototype-navigation";
+import { usePrototypeNavigation } from "./usePrototypeNavigation";
+import { PrototypeContext } from "./PrototypeContext";
 const primary =
   "rounded-lg bg-blue-800 px-4 py-3 font-semibold text-white hover:bg-blue-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-800 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-600";
 const secondary =
   "rounded-lg border border-slate-300 bg-white px-4 py-3 font-semibold text-slate-800 hover:border-blue-700 hover:bg-blue-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-800";
 const input =
   "mt-2 block w-full rounded-lg border border-slate-300 bg-white p-3 font-normal text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-700";
-type Location = { module: ModuleId; task: TaskId; section: string };
 type Overlay = {
-  kind: "detail" | "copy" | "preview" | "register" | "reset";
+  kind: "detail" | "copy" | "preview" | "register" | "reset" | "context" | "exit";
   title: string;
   text?: string;
 };
@@ -42,12 +46,17 @@ function Card({ title, children }: { title: string; children: ReactNode }) {
   );
 }
 export function NavigationPrototype() {
-  const [location, setLocation] = useState<Location>({
-    module: "panel",
-    task: "resumen",
-    section: "estado",
-  });
-  const [evaluationId, setEvaluationId] = useState<EvaluationId>("adultos");
+  const {
+    location,
+    evaluationId,
+    go: navigate,
+    selectEvaluation: navigateEvaluation,
+    resume,
+    hasResume,
+    resetNavigation,
+  } = usePrototypeNavigation();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [sectionsOpen, setSectionsOpen] = useState(false);
   const currentEvaluation = evaluationOptions.find((item) => item.id === evaluationId)!;
   const scenario = currentEvaluation.treatment;
   const selectedPurpose = purposeOptions.find((item) => item.id === currentEvaluation.purposeId)!;
@@ -93,9 +102,38 @@ export function NavigationPrototype() {
   const inlineNotice = Boolean(
     fs && section !== "preparar" && !(module === "licitud" && section === "alcance")
   );
-  const title = labels[section];
+  const title =
+    module === "panel" && section === "estado"
+      ? "Panel principal"
+      : destinationLabel(section, module);
   const row = resolutions.find((r) => r.version === selected)!;
-  const dirty = Object.keys(values).some((k) => values[k] !== stored[k]);
+  function evaluationPending(id: EvaluationId) {
+    return (
+      Object.keys(drafts[id]).some((key) => drafts[id][key] !== saved[id][key]) ||
+      Boolean(files[id].name)
+    );
+  }
+  const sessionChanged =
+    JSON.stringify(drafts) !== JSON.stringify(initialEvaluations()) ||
+    resolutions.length > 2 ||
+    reviews.length > 0 ||
+    Object.values(annexes).some((items) => items.length > 0) ||
+    Object.values(files).some((file) => file.name) ||
+    Boolean(choice || rationale || reference) ||
+    Object.values(savedSteps).some((items) => items.length > 0);
+  const allowExit = useRef(false);
+  useEffect(() => {
+    const warn = (event: BeforeUnloadEvent) => {
+      if (!sessionChanged || allowExit.current) return;
+      event.preventDefault();
+      event.returnValue = "";
+    };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [sessionChanged]);
+  useEffect(() => {
+    setNotice("");
+  }, [location, evaluationId]);
   const validAnnex = Boolean(
     values["anexos.referencia"]?.startsWith("SIMULADA-") &&
     values["anexos.descripcion"]?.trim() &&
@@ -139,14 +177,8 @@ export function NavigationPrototype() {
     }
   }, [overlay]);
   function go(mod: ModuleId, t?: TaskId, s?: string) {
-    if (modules.find((item) => item.id === mod)?.upcoming) return;
-    t = t ?? (["licitud", "organizacion"].includes(mod) ? "completar" : "resumen");
     setNotice("");
-    setLocation({
-      module: mod,
-      task: t,
-      section: s ?? (mod === "organizacion" ? "organizacion" : steps(mod, t, scenario)[0]),
-    });
+    navigate(mod, t, s);
   }
   function edit(key: string, value: string) {
     setDrafts((old) =>
@@ -156,19 +188,16 @@ export function NavigationPrototype() {
     );
     setNotice("");
   }
-  function selectEvaluation(id: EvaluationId) {
-    const target = evaluationOptions.find((item) => item.id === id)!;
-    setEvaluationId(id);
-    setLocation((old) => {
-      const available = steps(old.module, old.task, target.treatment);
-      return { ...old, section: available.includes(old.section) ? old.section : available[0] };
-    });
+  useEffect(() => {
     setFictitious(false);
     setFileKey((value) => value + 1);
     setChoice("");
     setRationale("");
     setReference("");
     setNotice("");
+  }, [evaluationId]);
+  function selectEvaluation(id: EvaluationId) {
+    navigateEvaluation(id);
   }
   function changeScenario(treatment: Scenario) {
     selectEvaluation(evaluationOptions.find((item) => item.treatment === treatment)!.id);
@@ -223,7 +252,7 @@ export function NavigationPrototype() {
         ...old[evaluationId],
       ],
     }));
-    setNotice("Guardado en la maqueta durante esta visita. Recargar reinicia el ejemplo.");
+    setNotice("Guardado en la maqueta.");
   }
   function download() {
     const blob = new Blob(
@@ -289,7 +318,7 @@ export function NavigationPrototype() {
         )}
         {module === "rat" && section === "alcance" && (
           <p className="text-sm text-slate-600">
-            El tratamiento y la finalidad se eligen en los selectores de contexto de arriba.
+            El tratamiento y la finalidad se eligen en Cambiar contexto.
           </p>
         )}
         {fs.map((f) => (
@@ -341,7 +370,7 @@ export function NavigationPrototype() {
                 )
               }
             >
-              Abrir información del formulario previsto ↗
+              Abrir información del formulario previsto
             </button>
           )}
         {section === "anexos" && (
@@ -409,9 +438,13 @@ export function NavigationPrototype() {
         ) : (
           <div className="space-y-3 rounded-xl border border-blue-200 bg-blue-50 p-4">
             <p>
-              {fs.some((f) => (values[f.key] ?? "") !== (stored[f.key] ?? ""))
-                ? "Cambios sin guardar en este paso. Navegar conserva tus cambios durante esta visita."
-                : "Puedes guardar el ejemplo o continuar navegando."}
+              {section === "preparar"
+                ? "Borrador temporal: abrir la vista previa no registra nada. Puedes cerrarla y seguir editando."
+                : stepDirty(section)
+                  ? "Cambios sin guardar. Se conservan al navegar; guarda antes de consultar."
+                  : savedSteps[evaluationId].includes(section)
+                    ? "Sin cambios pendientes."
+                    : "Puedes guardar el ejemplo cuando termines."}
             </p>
             {section === "anexos" && !validAnnex && (
               <p id="save-help">
@@ -655,15 +688,17 @@ export function NavigationPrototype() {
         <>
           <div className="rounded-xl bg-slate-900 p-6 text-white">
             <p className="text-sm font-semibold text-sky-200">TU ESPACIO DE TRABAJO</p>
-            <h3 className="mt-2 text-2xl font-bold">Continúa donde lo dejaste</h3>
+            <h3 className="mt-2 text-2xl font-bold">
+              {hasResume ? "Continúa donde lo dejaste" : "Siguiente tarea sugerida"}
+            </h3>
             <p className="mt-2 text-slate-200">
-              Escenario: {scenarioNames[scenario]}. Encuentra cada tarea desde el mismo lugar.
+              {currentEvaluation.label} · {selectedPurpose.label}
             </p>
             <button
               className="mt-5 rounded-lg bg-white px-4 py-3 font-bold text-blue-900 hover:bg-blue-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-300"
-              onClick={() => go("licitud", "completar", "base")}
+              onClick={() => go(resume.module, resume.task, resume.section)}
             >
-              Continuar evaluación de ejemplo →
+              Continuar en {destinationLabel(resume.section, resume.module)} →
             </button>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
@@ -672,9 +707,13 @@ export function NavigationPrototype() {
               .map((v) => (
                 <button
                   key={v.id}
-                  disabled={v.upcoming}
+                  aria-disabled={v.upcoming || undefined}
                   className="rounded-xl border border-slate-200 bg-white p-5 text-left shadow-sm transition hover:border-blue-600 hover:shadow-md disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-500 disabled:hover:border-slate-200 disabled:hover:shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-800"
-                  onClick={() => go(v.id)}
+                  onClick={() =>
+                    v.upcoming
+                      ? setNotice(`${v.title}: próximamente. Aún no está disponible.`)
+                      : go(v.id)
+                  }
                 >
                   <span className="text-lg font-bold text-slate-950">{v.title}</span>
                   <p className="mt-2 text-slate-600">{v.description}</p>
@@ -699,9 +738,16 @@ export function NavigationPrototype() {
           <div className="grid gap-4 sm:grid-cols-2">
             <Card title="Avance documental">
               <p className="text-3xl font-bold text-blue-900">
-                {savedSteps[evaluationId].length} pasos
+                {
+                  steps(module, "completar", scenario).filter((item) =>
+                    savedSteps[evaluationId].includes(item)
+                  ).length
+                }{" "}
+                /{" "}
+                {steps(module, "completar", scenario).filter((item) => item !== "preparar").length}{" "}
+                secciones
               </p>
-              <p className="mt-2">guardados en esta visita, entre los módulos del ejemplo.</p>
+              <p className="mt-2">guardadas en este módulo. No indica aprobación.</p>
             </Card>
             <Card title="Revisión pendiente">
               <p>
@@ -826,6 +872,25 @@ export function NavigationPrototype() {
           </button>
         </Card>
       );
+    if (section === "informe")
+      return (
+        <Card title="Estructura del informe de autodiagnóstico">
+          <p>
+            Vista ilustrativa del informe: antecedentes de la organización, respuestas por sección,
+            resultados y próximas tareas.
+          </p>
+          <p className="mt-3">
+            El cuestionario completo de 50 preguntas y sus resultados se incorporarán desde el
+            servidor. Esta maqueta no calcula ni exporta un diagnóstico real.
+          </p>
+          <button
+            className={`${secondary} mt-4`}
+            onClick={() => go("diagnostico", "revisar", "resultados")}
+          >
+            Ver resultados del ejemplo
+          </button>
+        </Card>
+      );
     if (["resultados", "informe"].includes(section))
       return (
         <Card title="Diagnóstico de demostración">
@@ -868,7 +933,7 @@ export function NavigationPrototype() {
                 )
               }
             >
-              Abrir detalle del alcance ↗
+              Abrir detalle del alcance
             </button>
           </Card>
           {scenario === "infancia" && (
@@ -918,7 +983,7 @@ export function NavigationPrototype() {
                 )
               }
             >
-              Consultar evidencia y versión ↗
+              Consultar evidencia y versión
             </button>
           </Card>
           {scenario === "infancia" && (
@@ -961,7 +1026,7 @@ export function NavigationPrototype() {
             )
           }
         >
-          Abrir alcance de revisión previsto ↗
+          Abrir alcance de revisión previsto
         </button>
       </Card>
     );
@@ -970,183 +1035,191 @@ export function NavigationPrototype() {
   return (
     <div
       ref={rootRef}
-      className="text-base leading-relaxed text-slate-800 [overflow-wrap:anywhere]"
+      data-evaluation-id={evaluationId}
+      data-treatment={scenario}
+      className="prototype-app text-base leading-relaxed text-slate-800 [overflow-wrap:anywhere]"
     >
       <a
         href="#prototype-content"
-        className="sr-only focus:not-sr-only focus:mb-4 focus:block focus:rounded focus:bg-blue-800 focus:p-3 focus:text-white"
+        className="prototype-skip"
+        onClick={(event) => {
+          event.preventDefault();
+          contentRef.current?.focus();
+          contentRef.current?.scrollIntoView();
+        }}
       >
         Saltar al contenido de la maqueta
       </a>
-      <header className="mb-5 flex flex-wrap items-start justify-between gap-4">
+      <a
+        href="#prototype-module-options"
+        className="prototype-skip"
+        onClick={(event) => {
+          event.preventDefault();
+          setSectionsOpen(true);
+          requestAnimationFrame(() =>
+            document.querySelector<HTMLButtonElement>("#prototype-module-options button")?.focus()
+          );
+        }}
+      >
+        Saltar a las secciones
+      </a>
+      <div className="prototype-demo">
+        <span>
+          <strong>Maqueta integral · Datos ficticios.</strong> Recargar reinicia. Sin conexión a
+          expedientes. Confirmación y activación EIPD bloqueadas.
+        </span>
         <div>
-          <p className="text-sm font-bold uppercase tracking-widest text-blue-800">
-            CumpleIA · Diseño de navegación
-          </p>
-          <h1 className="mt-1 text-2xl font-bold text-slate-950">Maqueta integral</h1>
-          <p className="mt-1 text-sm text-slate-600">Menú lateral y opciones por módulo</p>
-        </div>
-        <button
-          className={secondary}
-          onClick={() =>
-            setOverlay({ kind: "reset", title: "Reiniciar los ejemplos de la maqueta" })
-          }
-        >
-          Reiniciar ejemplos
-        </button>
-      </header>
-      <aside className="mb-5 rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-950">
-        <strong>Entorno de demostración.</strong> Solo ejemplos ficticios. Los guardados duran esta
-        visita; recargar reinicia la maqueta. Tus expedientes no cambian.
-      </aside>
-      <div className="grid items-start gap-5 md:grid-cols-[240px_minmax(0,1fr)]">
-        <MainModules module={module} go={(mod) => go(mod)} />
-        <div className="min-w-0">
-          {["rat", "licitud"].includes(module) && (
-            <section
-              aria-label="Seleccionar tratamiento, finalidad y evaluación"
-              className="mb-4 rounded-xl border border-blue-200 bg-blue-50 p-4"
-            >
-              <p className="text-sm font-semibold text-blue-950">
-                Organización: {stored["organizacion.nombre"]}
-              </p>
-              <div className="mt-3 grid gap-3 lg:grid-cols-3">
-                <label className="min-w-0 text-sm font-semibold">
-                  Tratamiento del RAT
-                  <select
-                    aria-label="Tratamiento del RAT"
-                    className={`${input} text-sm`}
-                    value={scenario}
-                    onChange={(event) => changeScenario(event.target.value as Scenario)}
-                  >
-                    {treatmentOptions.map((item) => (
-                      <option key={item.id} value={item.id}>
-                        {item.label}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label className="min-w-0 text-sm font-semibold">
-                  Finalidad de la evaluación
-                  <select
-                    aria-label="Finalidad de la evaluación"
-                    className={`${input} text-sm`}
-                    value={currentEvaluation.purposeId}
-                    onChange={(event) =>
-                      selectEvaluation(
-                        evaluationOptions.find(
-                          (item) =>
-                            item.treatment === scenario && item.purposeId === event.target.value
-                        )!.id
-                      )
-                    }
-                  >
-                    {purposeOptions
-                      .filter((item) => item.treatment === scenario)
-                      .map((item) => (
-                        <option key={item.id} value={item.id}>
-                          {item.label}
-                        </option>
-                      ))}
-                  </select>
-                </label>
-                <label className="min-w-0 text-sm font-semibold">
-                  Evaluación
-                  <select
-                    aria-label="Evaluación"
-                    className={`${input} text-sm`}
-                    value={evaluationId}
-                    onChange={(event) => selectEvaluation(event.target.value as EvaluationId)}
-                  >
-                    {evaluationOptions
-                      .filter(
-                        (item) =>
-                          item.treatment === scenario &&
-                          item.purposeId === currentEvaluation.purposeId
-                      )
-                      .map((item) => (
-                        <option key={item.id} value={item.id}>
-                          {item.label}
-                        </option>
-                      ))}
-                  </select>
-                </label>
-              </div>
-              <p className="mt-3 text-xs text-slate-600">
-                Cada evaluación conserva su propio borrador y sus guardados durante esta visita.
-                Cambiar de selección no copia datos entre evaluaciones.
-              </p>
-            </section>
-          )}
-          <div
-            ref={navigationRef}
-            className="top-0 z-20 mb-5 md:sticky rounded-xl border border-slate-200 bg-gray-50 p-3 shadow-sm"
-            aria-label="Navegación del módulo"
+          <button
+            onClick={() =>
+              setOverlay({ kind: "reset", title: "Reiniciar los ejemplos de la maqueta" })
+            }
           >
-            <div className="mb-3 flex flex-col items-start justify-between gap-3 sm:flex-row sm:flex-wrap">
-              <div className="w-full min-w-0 sm:w-auto sm:flex-1">
-                <p className="text-xs font-semibold text-slate-500">Inicio / {m.title}</p>
-                <h2 className="mt-1 text-xl font-bold text-slate-950">{m.title}</h2>
-                <p className="mt-1 text-xs text-slate-600">
-                  {stored["organizacion.nombre"]} ·{" "}
-                  {module === "organizacion"
-                    ? "Datos de la organización"
-                    : `${scenarioNames[scenario]} · Evaluación v${currentEvaluation.version}`}
-                </p>
-                {["rat", "licitud"].includes(module) && (
-                  <p className="mt-1 text-xs text-slate-600">Finalidad: {selectedPurpose.label}</p>
+            Reiniciar ejemplos
+          </button>
+          <a
+            href="/dashboard"
+            onClick={(event) => {
+              if (sessionChanged) {
+                event.preventDefault();
+                setOverlay({ kind: "exit", title: "Salir de la maqueta" });
+              }
+            }}
+          >
+            Salir de la maqueta
+          </a>
+        </div>
+      </div>
+      <div className="prototype-layout">
+        <MainModules
+          module={module}
+          go={(mod) => go(mod)}
+          expanded={menuOpen}
+          setExpanded={setMenuOpen}
+          notify={setNotice}
+        />
+        <div className="min-w-0">
+          <div ref={navigationRef} className="prototype-top" aria-label="Navegación del módulo">
+            <div className="prototype-mobile-bar">
+              <button
+                id="prototype-menu-trigger"
+                aria-label="Abrir menú"
+                aria-expanded={menuOpen}
+                aria-controls="prototype-global-menu"
+                onClick={() => {
+                  setSectionsOpen(false);
+                  setMenuOpen(true);
+                }}
+              >
+                ☰ Menú
+              </button>
+              <span title={`${m.title} › ${title}`}>
+                {m.title} › {title}
+              </span>
+              <button
+                id="prototype-sections-trigger"
+                aria-label="Opciones del módulo"
+                aria-expanded={sectionsOpen}
+                aria-controls="prototype-module-options"
+                onClick={() => setSectionsOpen(!sectionsOpen)}
+              >
+                Secciones
+              </button>
+            </div>
+            <div className="prototype-context-row">
+              <nav aria-label="Ubicación" className="prototype-crumbs">
+                <a
+                  href="#/panel/resumen/estado"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    go("panel", "resumen", "estado");
+                  }}
+                >
+                  Inicio
+                </a>
+                {module !== "panel" && (
+                  <>
+                    <span aria-hidden="true">›</span>
+                    <a
+                      href={`#/${module}`}
+                      onClick={(event) => {
+                        event.preventDefault();
+                        const target = moduleNavigation(module, scenario)[0].items[0];
+                        go(target.module, target.task, target.section);
+                      }}
+                    >
+                      {m.title}
+                    </a>
+                  </>
                 )}
-              </div>
+                <span aria-hidden="true">›</span>
+                <span aria-current="page">{title}</span>
+              </nav>
+              {module !== "organizacion" && (
+                <button
+                  className="prototype-context"
+                  aria-label="Cambiar contexto de trabajo"
+                  aria-haspopup="dialog"
+                  title={`${stored["organizacion.nombre"]} · ${values["rat.nombre"]} · ${selectedPurpose.label} · ${currentEvaluation.label}`}
+                  onClick={() => setOverlay({ kind: "context", title: "Contexto de trabajo" })}
+                >
+                  <span>
+                    <b>{values["rat.nombre"].replace("[FICTICIA] ", "")}</b> ·{" "}
+                    {selectedPurpose.id === "citas"
+                      ? "Citas"
+                      : selectedPurpose.id === "comercial"
+                        ? "Seguimiento comercial"
+                        : "Programa con menores"}
+                  </span>
+                  <span className="prototype-evaluation" title={currentEvaluation.label}>
+                    v{currentEvaluation.version} · Borrador
+                  </span>
+                  {evaluationPending(evaluationId) && (
+                    <span
+                      className="prototype-dot"
+                      aria-label="Esta evaluación tiene cambios pendientes"
+                    />
+                  )}
+                  <strong>Cambiar</strong>
+                </button>
+              )}
             </div>
             <ModuleOptions
               location={location}
               scenario={scenario}
               go={go}
+              mobileExpanded={sectionsOpen}
+              setMobileExpanded={setSectionsOpen}
               status={(item) =>
                 stepDirty(item)
-                  ? "Cambios sin guardar"
+                  ? item === "preparar"
+                    ? "Borrador temporal"
+                    : "Cambios sin guardar"
                   : savedSteps[evaluationId].includes(item)
                     ? "Guardado en maqueta"
                     : ""
               }
             />
           </div>
-          {module !== "organizacion" && (
-            <div className="mb-4 rounded-lg border border-slate-200 bg-white p-3 text-sm">
-              <p className="font-semibold">{values["rat.nombre"]}</p>
-              <p className="mt-1 text-slate-600">{values["rat.finalidad"]}</p>
-              {dirty && (
-                <p className="mt-2 font-semibold text-amber-900">
-                  Cambios sin guardar · Se conservan al navegar durante esta visita.
-                </p>
-              )}
-            </div>
-          )}
           <section
             ref={contentRef}
             id="prototype-content"
-            style={{ scrollMarginTop: "calc(var(--navigation-height, 190px) + 16px)" }}
+            style={{ scrollMarginTop: "calc(var(--navigation-height, 120px) + 12px)" }}
             tabIndex={-1}
             aria-labelledby="prototype-section-title"
-            className="min-w-0 rounded-xl border border-slate-200 bg-white p-5 shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-700 sm:p-6"
+            className="prototype-work focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-700"
           >
-            <header className="mb-6 border-b border-slate-200 pb-4">
-              <p className="text-sm font-semibold text-blue-800">
-                {m.title} /{" "}
-                {moduleNavigation(module, scenario).find((group) =>
-                  groupDestinations(group, scenario).some(
-                    (item) => item.task === task && item.section === section
-                  )
-                )?.label ?? "Resumen"}
-              </p>
-              <h2 id="prototype-section-title" className="mt-1 text-xl font-bold text-slate-950">
-                {title}
-              </h2>
-              <p className="mt-2 text-sm text-slate-600">
-                {task === "completar"
-                  ? "Navegar conserva tus cambios durante esta visita. Guarda antes de consultar el documento."
-                  : "Consultar no registra decisiones. Elige una opción del menú superior para continuar."}
-              </p>
+            <header className="prototype-content-heading">
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 id="prototype-section-title">{title}</h1>
+                <span className="prototype-verb">{actionLabel(location, scenario)}</span>
+              </div>
+              <p>{destinationHint(location, scenario)}</p>
+              {module === "diagnostico" && task === "completar" && (
+                <p className="mt-2 rounded-lg bg-amber-50 p-3">
+                  Campos ilustrativos para probar la navegación. El formulario definitivo tendrá las
+                  50 preguntas del cuestionario del servidor.
+                </p>
+              )}
             </header>
             {notice && !inlineNotice && (
               <p
@@ -1160,10 +1233,6 @@ export function NavigationPrototype() {
           </section>
         </div>
       </div>
-      <footer className="mt-6 text-sm text-slate-500">
-        Propuesta para pruebas de navegación · Sin conexión a expedientes · Confirmación y
-        activación EIPD bloqueadas.
-      </footer>
       {overlay && (
         <dialog
           ref={dialogRef}
@@ -1183,6 +1252,41 @@ export function NavigationPrototype() {
               Cerrar
             </button>
           </div>
+          {overlay.kind === "context" && (
+            <PrototypeContext
+              id={evaluationId}
+              organization={stored["organizacion.nombre"]}
+              pending={evaluationPending}
+              cancel={close}
+              apply={(id) => {
+                dialogRef.current?.close();
+                setOverlay(null);
+                selectEvaluation(id);
+              }}
+            />
+          )}
+          {overlay.kind === "exit" && (
+            <>
+              <p>
+                Al salir se perderán los borradores y guardados de esta visita. Si quieres conservar
+                una copia de lo guardado, cancela y usa Historial y descargas.
+              </p>
+              <div className="mt-5 flex flex-wrap gap-3">
+                <button className={secondary} onClick={close}>
+                  Seguir en la maqueta
+                </button>
+                <button
+                  className={primary}
+                  onClick={() => {
+                    allowExit.current = true;
+                    window.location.assign("/dashboard");
+                  }}
+                >
+                  Salir y descartar esta visita
+                </button>
+              </div>
+            </>
+          )}
           {overlay.kind === "detail" && <p className="whitespace-pre-wrap">{overlay.text}</p>}
           {overlay.kind === "copy" && (
             <>
@@ -1215,7 +1319,7 @@ export function NavigationPrototype() {
                   Reemplazar y copiar a preparación
                 </button>
                 <button className={secondary} onClick={close}>
-                  Conservar documento en preparación
+                  Cancelar y conservar mi borrador
                 </button>
               </div>
             </>
@@ -1314,8 +1418,8 @@ export function NavigationPrototype() {
           {overlay.kind === "reset" && (
             <>
               <p>
-                Se descartarán los cambios de ambos escenarios de la maqueta. Los expedientes de
-                CumpleIA no se modifican.
+                Se descartarán los cambios de las cuatro evaluaciones de la maqueta. Los expedientes
+                de CumpleIA no se modifican.
               </p>
               <div className="mt-5 flex flex-wrap gap-3">
                 <button
@@ -1337,7 +1441,7 @@ export function NavigationPrototype() {
                     setRationale("");
                     setReference("");
                     setOverlay(null);
-                    go("panel");
+                    resetNavigation();
                     setNotice("Ejemplos reiniciados.");
                   }}
                 >
