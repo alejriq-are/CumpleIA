@@ -19,6 +19,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 
 from app.db.base import Base
+from app.db.child_eipd import EipdChildResolution, EipdChildReview  # noqa: F401
 
 # ── Enums ────────────────────────────────────────────────────────────────────
 
@@ -53,14 +54,6 @@ class FindingStatus(str, enum.Enum):
     en_proceso = "en_proceso"
     cerrado = "cerrado"
     no_aplica = "no_aplica"
-
-
-class LegalBasis(str, enum.Enum):
-    consentimiento = "consentimiento"
-    contrato = "contrato"
-    obligacion_legal = "obligacion_legal"
-    interes_legitimo = "interes_legitimo"
-    otra = "otra"
 
 
 class ThirdPartyRole(str, enum.Enum):
@@ -144,7 +137,10 @@ class Profile(Base):
 
 class Membership(Base):
     __tablename__ = "memberships"
-    __table_args__ = (UniqueConstraint("organization_id", "profile_id"),)
+    __table_args__ = (
+        sa.Index("ix_memberships_organization_id", "organization_id"),
+        UniqueConstraint("organization_id", "profile_id"),
+    )
 
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid()
@@ -271,6 +267,14 @@ class Pregunta(Base):
 
 class ConfigVersion(Base):
     __tablename__ = "config_versiones"
+    __table_args__ = (
+        sa.Index(
+            "ux_config_versiones_activa",
+            "activa",
+            unique=True,
+            postgresql_where=sa.text("activa"),
+        ),
+    )
 
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid()
@@ -387,6 +391,7 @@ class Diagnostic(Base):
     )
 
     __table_args__ = (
+        sa.Index("ix_diagnostics_organization_id", "organization_id"),
         CheckConstraint(
             "status IN ('en_progreso', 'completado')",
             name="status_valido",
@@ -397,7 +402,12 @@ class Diagnostic(Base):
 class DiagnosticAnswer(Base):
     __tablename__ = "diagnostic_answers"
     __table_args__ = (
-        UniqueConstraint("diagnostic_id", "pregunta_id"),
+        sa.Index("ix_diagnostic_answers_organization_id", "organization_id"),
+        UniqueConstraint(
+            "diagnostic_id",
+            "pregunta_id",
+            name="uq_diagnostic_answers_diagnostic_id_pregunta_id",
+        ),
         CheckConstraint(
             "answer IN ('Sí', 'Parcial', 'No', 'N/A')",
             name="answer_valido",
@@ -443,6 +453,7 @@ class DiagnosticAnswer(Base):
 class Finding(Base):
     __tablename__ = "findings"
     __table_args__ = (
+        sa.Index("ix_findings_organization_id", "organization_id"),
         UniqueConstraint(
             "diagnostic_id",
             "pregunta_id",
@@ -507,6 +518,7 @@ class ReferenceDocument(Base):
 
     __tablename__ = "reference_documents"
     __table_args__ = (
+        sa.Index("ix_reference_documents_organization_id", "organization_id"),
         CheckConstraint(
             "tipo IN ('politica_interna_gobernanza', 'instructivo_agencia')",
             name="tipo_valido",
@@ -555,6 +567,7 @@ class ReferenceDocument(Base):
 class System(Base):
     __tablename__ = "systems"
     __table_args__ = (
+        sa.Index("ix_systems_organization_id", "organization_id"),
         UniqueConstraint(
             "id",
             "organization_id",
@@ -609,6 +622,7 @@ class System(Base):
 class Vendor(Base):
     __tablename__ = "vendors"
     __table_args__ = (
+        sa.Index("ix_vendors_organization_id", "organization_id"),
         UniqueConstraint(
             "id",
             "organization_id",
@@ -674,6 +688,7 @@ class Vendor(Base):
 class Treatment(Base):
     __tablename__ = "treatments"
     __table_args__ = (
+        sa.Index("ix_treatments_organization_id", "organization_id"),
         UniqueConstraint(
             "id",
             "organization_id",
@@ -811,6 +826,8 @@ class Treatment(Base):
 class TreatmentPurpose(Base):
     __tablename__ = "treatment_purposes"
     __table_args__ = (
+        sa.Index("ix_treatment_purposes_organization_id", "organization_id"),
+        sa.Index("ix_treatment_purposes_treatment_id", "treatment_id"),
         sa.ForeignKeyConstraint(
             ["treatment_id", "organization_id"],
             ["treatments.id", "treatments.organization_id"],
@@ -878,6 +895,8 @@ class TreatmentPurpose(Base):
 class TreatmentDataCategory(Base):
     __tablename__ = "treatment_data_categories"
     __table_args__ = (
+        sa.Index("ix_treatment_data_categories_organization_id", "organization_id"),
+        sa.Index("ix_treatment_data_categories_treatment_id", "treatment_id"),
         sa.ForeignKeyConstraint(
             ["treatment_id", "organization_id"],
             ["treatments.id", "treatments.organization_id"],
@@ -938,6 +957,8 @@ class TreatmentDataCategory(Base):
 class TreatmentDataSubject(Base):
     __tablename__ = "treatment_data_subjects"
     __table_args__ = (
+        sa.Index("ix_treatment_data_subjects_organization_id", "organization_id"),
+        sa.Index("ix_treatment_data_subjects_treatment_id", "treatment_id"),
         sa.ForeignKeyConstraint(
             ["treatment_id", "organization_id"],
             ["treatments.id", "treatments.organization_id"],
@@ -1008,6 +1029,8 @@ class TreatmentDataSubject(Base):
 class TreatmentDataSource(Base):
     __tablename__ = "treatment_data_sources"
     __table_args__ = (
+        sa.Index("ix_treatment_data_sources_organization_id", "organization_id"),
+        sa.Index("ix_treatment_data_sources_treatment_id", "treatment_id"),
         sa.ForeignKeyConstraint(
             ["treatment_id", "organization_id"],
             ["treatments.id", "treatments.organization_id"],
@@ -1068,6 +1091,9 @@ class TreatmentDataSource(Base):
 class TreatmentSystem(Base):
     __tablename__ = "treatment_systems"
     __table_args__ = (
+        sa.Index("ix_treatment_systems_organization_id", "organization_id"),
+        sa.Index("ix_treatment_systems_system_id", "system_id"),
+        sa.Index("ix_treatment_systems_treatment_id", "treatment_id"),
         sa.ForeignKeyConstraint(
             ["treatment_id", "organization_id"],
             ["treatments.id", "treatments.organization_id"],
@@ -1130,6 +1156,9 @@ class TreatmentSystem(Base):
 class TreatmentVendor(Base):
     __tablename__ = "treatment_vendors"
     __table_args__ = (
+        sa.Index("ix_treatment_vendors_organization_id", "organization_id"),
+        sa.Index("ix_treatment_vendors_treatment_id", "treatment_id"),
+        sa.Index("ix_treatment_vendors_vendor_id", "vendor_id"),
         sa.ForeignKeyConstraint(
             ["treatment_id", "organization_id"],
             ["treatments.id", "treatments.organization_id"],
@@ -1218,6 +1247,9 @@ class TreatmentVendor(Base):
 class InternationalTransfer(Base):
     __tablename__ = "international_transfers"
     __table_args__ = (
+        sa.Index("ix_international_transfers_organization_id", "organization_id"),
+        sa.Index("ix_international_transfers_treatment_id", "treatment_id"),
+        sa.Index("ix_international_transfers_vendor_id", "vendor_id"),
         sa.ForeignKeyConstraint(
             ["treatment_id", "organization_id"],
             ["treatments.id", "treatments.organization_id"],
@@ -1300,14 +1332,30 @@ class InternationalTransfer(Base):
 # ── Módulo 3 — Bases de licitud ───────────────────────────────────────────────
 
 
-class LegalBase(Base):
-    __tablename__ = "legal_bases"
+class LegalAssessmentSeries(Base):
+    __tablename__ = "legal_assessment_series"
     __table_args__ = (
         sa.ForeignKeyConstraint(
             ["treatment_id", "organization_id"],
             ["treatments.id", "treatments.organization_id"],
-            name="fk_legal_bases_treatment_tenant",
+            name="fk_legal_assessment_series_treatment_tenant",
             ondelete="CASCADE",
+        ),
+        UniqueConstraint(
+            "id",
+            "treatment_id",
+            "organization_id",
+            name="uq_legal_assessment_series_identity_tenant",
+        ),
+        UniqueConstraint(
+            "organization_id",
+            "treatment_id",
+            "purpose_key",
+            name="uq_legal_assessment_series_treatment_purpose",
+        ),
+        CheckConstraint(
+            "next_version >= 1",
+            name="ck_legal_assessment_series_next_version",
         ),
     )
 
@@ -1320,34 +1368,20 @@ class LegalBase(Base):
         UUID(as_uuid=True),
         ForeignKey("organizations.id", ondelete="CASCADE"),
         nullable=False,
+        index=True,
     )
-
-    # La FK simple se mantiene porque existe desde 0001.
     treatment_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
-        ForeignKey("treatments.id", ondelete="CASCADE"),
         nullable=False,
+        index=True,
     )
-
-    basis: Mapped[LegalBasis] = mapped_column(
-        sa.Enum(
-            LegalBasis,
-            name="legal_basis",
-            create_type=False,
-        ),
+    purpose_key: Mapped[str] = mapped_column(Text, nullable=False)
+    purpose_text: Mapped[str] = mapped_column(Text, nullable=False)
+    next_version: Mapped[int] = mapped_column(
+        Integer,
         nullable=False,
+        server_default="1",
     )
-    justification: Mapped[str | None] = mapped_column(Text, nullable=True)
-    confidence: Mapped[float | None] = mapped_column(
-        Numeric(4, 3),
-        nullable=True,
-    )
-    approved: Mapped[bool] = mapped_column(
-        Boolean,
-        nullable=False,
-        server_default="false",
-    )
-    lia: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         sa.TIMESTAMP(timezone=True),
         nullable=False,
@@ -1358,6 +1392,405 @@ class LegalBase(Base):
         nullable=False,
         server_default=func.now(),
     )
+    created_by: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("profiles.id"),
+        nullable=True,
+    )
+    updated_by: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("profiles.id"),
+        nullable=True,
+    )
+
+
+class LegalAssessment(Base):
+    __tablename__ = "legal_assessments"
+    __table_args__ = (
+        sa.ForeignKeyConstraint(
+            ["series_id", "treatment_id", "organization_id"],
+            [
+                "legal_assessment_series.id",
+                "legal_assessment_series.treatment_id",
+                "legal_assessment_series.organization_id",
+            ],
+            name="fk_legal_assessments_series_treatment_tenant",
+            ondelete="CASCADE",
+        ),
+        UniqueConstraint(
+            "id",
+            "series_id",
+            "organization_id",
+            name="uq_legal_assessments_identity_series_tenant",
+        ),
+        sa.ForeignKeyConstraint(
+            ["replaced_by_assessment_id", "series_id", "organization_id"],
+            [
+                "legal_assessments.id",
+                "legal_assessments.series_id",
+                "legal_assessments.organization_id",
+            ],
+            name="fk_legal_assessments_replaced_by_same_series",
+        ),
+        UniqueConstraint(
+            "series_id",
+            "version",
+            name="uq_legal_assessments_series_version",
+        ),
+        UniqueConstraint(
+            "id", "organization_id", name="uq_legal_assessments_id_tenant"
+        ),
+        UniqueConstraint(
+            "id", "treatment_id", "organization_id", name="uq_assessment_child_parent"
+        ),
+        CheckConstraint(
+            "eipd_resolution_assessment IS NULL OR jsonb_typeof(eipd_resolution_assessment) = 'object'",
+            name="ck_legal_assessments_eipd_resolution_object",
+        ),
+        CheckConstraint(
+            "eipd_screening IS NULL OR jsonb_typeof(eipd_screening) = 'object'",
+            name="ck_legal_assessments_eipd_screening_object",
+        ),
+        CheckConstraint(
+            "contract_assessment IS NULL OR jsonb_typeof(contract_assessment) = 'object'",
+            name="ck_legal_assessments_contract_assessment_object",
+        ),
+        CheckConstraint(
+            "legal_obligation_assessment IS NULL OR jsonb_typeof(legal_obligation_assessment) = 'object'",
+            name="ck_legal_assessments_legal_obligation_object",
+        ),
+        CheckConstraint(
+            "rights_defense_assessment IS NULL OR jsonb_typeof(rights_defense_assessment) = 'object'",
+            name="ck_legal_assessments_rights_defense_object",
+        ),
+        CheckConstraint(
+            "economic_obligations_assessment IS NULL OR jsonb_typeof(economic_obligations_assessment) = 'object'",
+            name="ck_legal_assessments_economic_obligations_object",
+        ),
+        CheckConstraint(
+            "geolocation_assessment IS NULL OR jsonb_typeof(geolocation_assessment) = 'object'",
+            name="ck_legal_assessments_geolocation_object",
+        ),
+        CheckConstraint(
+            "sensitive_consent_assessment IS NULL OR jsonb_typeof(sensitive_consent_assessment) = 'object'",
+            name="ck_legal_assessments_sensitive_consent_object",
+        ),
+        CheckConstraint(
+            "sensitive_rights_exception_assessment IS NULL OR jsonb_typeof(sensitive_rights_exception_assessment) = 'object'",
+            name="ck_legal_assessments_sensitive_rights_exception_object",
+        ),
+        CheckConstraint(
+            "biometric_rights_exception_assessment IS NULL OR jsonb_typeof(biometric_rights_exception_assessment) = 'object'",
+            name="ck_legal_assessments_biometric_rights_exception_object",
+        ),
+        CheckConstraint(
+            "biometric_assessment IS NULL OR jsonb_typeof(biometric_assessment) = 'object'",
+            name="ck_legal_assessments_biometric_object",
+        ),
+        CheckConstraint(
+            "health_assessment IS NULL OR jsonb_typeof(health_assessment) = 'object'",
+            name="ck_legal_assessments_health_object",
+        ),
+        CheckConstraint(
+            "research_assessment IS NULL OR jsonb_typeof(research_assessment) = 'object'",
+            name="ck_legal_assessments_research_object",
+        ),
+        CheckConstraint(
+            "sensitive_representation_assessment IS NULL OR jsonb_typeof(sensitive_representation_assessment) = 'object'",
+            name="ck_legal_assessments_sensitive_representation_object",
+        ),
+        CheckConstraint(
+            "sensitive_representation_assessment IS NULL OR status <> 'confirmado'",
+            name="ck_legal_assessments_sensitive_representation_no_confirmation",
+        ),
+        CheckConstraint(
+            "child_adolescent_assessment IS NULL OR jsonb_typeof(child_adolescent_assessment) = 'object'",
+            name="ck_legal_assessments_child_adolescent_object",
+        ),
+        CheckConstraint(
+            "child_adolescent_assessment IS NULL OR status <> 'confirmado'",
+            name="ck_legal_assessments_child_adolescent_no_confirmation",
+        ),
+        CheckConstraint("version >= 1", name="ck_legal_assessments_version"),
+        CheckConstraint(
+            "schema_version >= 1",
+            name="ck_legal_assessments_schema_version",
+        ),
+        CheckConstraint(
+            "rat_context_schema_version >= 1",
+            name="ck_legal_assessments_rat_context_schema_version",
+        ),
+        CheckConstraint(
+            "status IN ('borrador', 'confirmado', 'reemplazado')",
+            name="ck_legal_assessments_status",
+        ),
+        CheckConstraint(
+            "legal_basis IS NULL OR legal_basis IN ("
+            "'consentimiento_art12', "
+            "'obligaciones_economicas_art13a', "
+            "'obligacion_legal_art13b', "
+            "'contrato_precontractual_art13c', "
+            "'interes_legitimo_art13d', "
+            "'defensa_derechos_art13e'"
+            ")",
+            name="ck_legal_assessments_legal_basis",
+        ),
+        CheckConstraint(
+            "replaced_by_assessment_id IS NULL " "OR replaced_by_assessment_id <> id",
+            name="ck_legal_assessments_not_self_replaced",
+        ),
+        CheckConstraint(
+            "("
+            "status = 'borrador' "
+            "AND confirmed_at IS NULL "
+            "AND confirmed_by IS NULL "
+            "AND replaced_at IS NULL "
+            "AND replaced_by_assessment_id IS NULL"
+            ") OR ("
+            "status = 'confirmado' "
+            "AND confirmed_at IS NOT NULL "
+            "AND confirmed_by IS NOT NULL "
+            "AND replaced_at IS NULL "
+            "AND replaced_by_assessment_id IS NULL"
+            ") OR ("
+            "status = 'reemplazado' "
+            "AND confirmed_at IS NOT NULL "
+            "AND confirmed_by IS NOT NULL "
+            "AND replaced_at IS NOT NULL "
+            "AND replaced_by_assessment_id IS NOT NULL"
+            ")",
+            name="ck_legal_assessments_lifecycle_fields",
+        ),
+        sa.Index(
+            "uq_legal_assessments_one_draft_per_series",
+            "series_id",
+            unique=True,
+            postgresql_where=sa.text("status = 'borrador'"),
+        ),
+        sa.Index(
+            "uq_legal_assessments_one_confirmed_per_series",
+            "series_id",
+            unique=True,
+            postgresql_where=sa.text("status = 'confirmado'"),
+        ),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        server_default=func.gen_random_uuid(),
+    )
+    organization_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("organizations.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    series_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        nullable=False,
+        index=True,
+    )
+    treatment_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        nullable=False,
+        index=True,
+    )
+    version: Mapped[int] = mapped_column(Integer, nullable=False)
+    status: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+        server_default="borrador",
+    )
+    legal_basis: Mapped[str | None] = mapped_column(Text, nullable=True)
+    justification: Mapped[str | None] = mapped_column(Text, nullable=True)
+    purpose_snapshot: Mapped[str] = mapped_column(Text, nullable=False)
+    rat_context_hash: Mapped[str] = mapped_column(Text, nullable=False)
+    rat_context_snapshot: Mapped[dict] = mapped_column(JSONB, nullable=False)
+    consent_assessment: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    lia_assessment: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    geolocation_assessment: Mapped[dict | None] = mapped_column(
+        JSONB(none_as_null=True), nullable=True
+    )
+    sensitive_consent_assessment: Mapped[dict | None] = mapped_column(
+        JSONB(none_as_null=True), nullable=True
+    )
+    sensitive_rights_exception_assessment: Mapped[dict | None] = mapped_column(
+        JSONB(none_as_null=True), nullable=True
+    )
+    biometric_rights_exception_assessment: Mapped[dict | None] = mapped_column(
+        JSONB(none_as_null=True), nullable=True
+    )
+    biometric_assessment: Mapped[dict | None] = mapped_column(
+        JSONB(none_as_null=True), nullable=True
+    )
+    research_assessment: Mapped[dict | None] = mapped_column(
+        JSONB(none_as_null=True), nullable=True
+    )
+    child_adolescent_assessment: Mapped[dict | None] = mapped_column(
+        JSONB(none_as_null=True), nullable=True
+    )
+    sensitive_representation_assessment: Mapped[dict | None] = mapped_column(
+        JSONB(none_as_null=True), nullable=True
+    )
+    health_assessment: Mapped[dict | None] = mapped_column(
+        JSONB(none_as_null=True), nullable=True
+    )
+    economic_obligations_assessment: Mapped[dict | None] = mapped_column(
+        JSONB(none_as_null=True), nullable=True
+    )
+    rights_defense_assessment: Mapped[dict | None] = mapped_column(
+        JSONB(none_as_null=True), nullable=True
+    )
+    legal_obligation_assessment: Mapped[dict | None] = mapped_column(
+        JSONB(none_as_null=True), nullable=True
+    )
+    contract_assessment: Mapped[dict | None] = mapped_column(
+        JSONB(none_as_null=True), nullable=True
+    )
+    special_conditions: Mapped[dict | None] = mapped_column(
+        JSONB(none_as_null=True), nullable=True
+    )
+    eipd_screening: Mapped[dict | None] = mapped_column(
+        JSONB(none_as_null=True), nullable=True
+    )
+    eipd_resolution_assessment: Mapped[dict | None] = mapped_column(
+        JSONB(none_as_null=True), nullable=True
+    )
+    schema_version: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        server_default="1",
+    )
+    rat_context_schema_version: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        server_default="1",
+    )
+    confirmed_at: Mapped[datetime | None] = mapped_column(
+        sa.TIMESTAMP(timezone=True),
+        nullable=True,
+    )
+    confirmed_by: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("profiles.id"),
+        nullable=True,
+    )
+    replaced_at: Mapped[datetime | None] = mapped_column(
+        sa.TIMESTAMP(timezone=True),
+        nullable=True,
+    )
+    replaced_by_assessment_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        nullable=True,
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        sa.TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        sa.TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+    created_by: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("profiles.id"),
+        nullable=True,
+    )
+    updated_by: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("profiles.id"),
+        nullable=True,
+    )
+
+
+class EipdResolutionReview(Base):
+    """Historial de revision EIPD; runtime solo puede insertar y leer."""
+
+    __tablename__ = "eipd_resolution_reviews"
+    __table_args__ = (
+        CheckConstraint(
+            "(review_context_metadata IS NULL OR (\njsonb_typeof(review_context_metadata) = 'object'\nAND review_context_metadata ?& ARRAY['metadata_schema_version','resolution_binding_version','context_schema_version','research_coverage','document_hash','context_hash','research_material_hash']\nAND review_context_metadata - ARRAY['metadata_schema_version','resolution_binding_version','context_schema_version','research_coverage','document_hash','context_hash','research_material_hash'] = '{}'::jsonb\nAND jsonb_typeof(review_context_metadata->'metadata_schema_version') = 'number'\nAND review_context_metadata->>'metadata_schema_version' = '1'\nAND jsonb_typeof(review_context_metadata->'resolution_binding_version') = 'number'\nAND review_context_metadata->>'resolution_binding_version' IN ('1','2')\nAND jsonb_typeof(review_context_metadata->'context_schema_version') = 'number'\nAND review_context_metadata->>'context_schema_version' = review_context_metadata->>'resolution_binding_version'\nAND jsonb_typeof(review_context_metadata->'research_coverage') = 'string'\nAND review_context_metadata->>'research_coverage' = CASE WHEN review_context_metadata->>'context_schema_version' = '2' THEN 'contexto_v2' ELSE 'no_cubierta' END\nAND jsonb_typeof(review_context_metadata->'document_hash') = 'string'\nAND review_context_metadata->>'document_hash' = document_hash\nAND jsonb_typeof(review_context_metadata->'context_hash') = 'string'\nAND review_context_metadata->>'context_hash' = context_hash\nAND (review_context_metadata->'research_material_hash' = 'null'::jsonb OR\n    (review_context_metadata->>'context_schema_version' = '2'\n     AND jsonb_typeof(review_context_metadata->'research_material_hash') = 'string'\n     AND review_context_metadata->>'research_material_hash' ~ '^[0-9a-f]{64}$'))\n) IS TRUE) OR ((jsonb_typeof(review_context_metadata) = 'object'\nAND review_context_metadata ?& ARRAY['metadata_schema_version','resolution_binding_version','context_schema_version','research_coverage','representation_coverage','document_hash','context_hash','research_material_hash','representation_material_hash']\nAND review_context_metadata - ARRAY['metadata_schema_version','resolution_binding_version','context_schema_version','research_coverage','representation_coverage','document_hash','context_hash','research_material_hash','representation_material_hash'] = '{}'::jsonb\nAND jsonb_typeof(review_context_metadata->'metadata_schema_version') = 'number'\nAND review_context_metadata->>'metadata_schema_version' = '2'\nAND jsonb_typeof(review_context_metadata->'resolution_binding_version') = 'number'\nAND review_context_metadata->>'resolution_binding_version' = '3'\nAND jsonb_typeof(review_context_metadata->'context_schema_version') = 'number'\nAND review_context_metadata->>'context_schema_version' = '3'\nAND jsonb_typeof(review_context_metadata->'research_coverage') = 'string'\nAND review_context_metadata->>'research_coverage' = 'contexto_v3'\nAND jsonb_typeof(review_context_metadata->'representation_coverage') = 'string'\nAND review_context_metadata->>'representation_coverage' = 'contexto_v3'\nAND jsonb_typeof(review_context_metadata->'document_hash') = 'string'\nAND review_context_metadata->>'document_hash' = document_hash\nAND jsonb_typeof(review_context_metadata->'context_hash') = 'string'\nAND review_context_metadata->>'context_hash' = context_hash\nAND (review_context_metadata->'research_material_hash' = 'null'::jsonb OR (jsonb_typeof(review_context_metadata->'research_material_hash') = 'string' AND review_context_metadata->>'research_material_hash' ~ '^[0-9a-f]{64}$'))\nAND (review_context_metadata->'representation_material_hash' = 'null'::jsonb OR (jsonb_typeof(review_context_metadata->'representation_material_hash') = 'string' AND review_context_metadata->>'representation_material_hash' ~ '^[0-9a-f]{64}$'))) IS TRUE)",
+            name="ck_eipd_reviews_context_metadata",
+        ),
+        UniqueConstraint(
+            "id",
+            "assessment_id",
+            "organization_id",
+            "document_hash",
+            "context_hash",
+            "policy_version",
+            "policy_reference",
+            "policy_hash",
+            "decision",
+            name="uq_eipd_reviews_confirmation_binding",
+        ),
+        sa.ForeignKeyConstraint(
+            ["assessment_id", "organization_id"],
+            ["legal_assessments.id", "legal_assessments.organization_id"],
+            name="fk_eipd_resolution_reviews_assessment_tenant",
+        ),
+        CheckConstraint(
+            "decision IN ('continuar', 'requiere_cambios', 'no_continuar')",
+            name="ck_eipd_resolution_reviews_decision",
+        ),
+        CheckConstraint(
+            "rationale ~ '[^[:space:]]'", name="ck_eipd_resolution_reviews_rationale"
+        ),
+        CheckConstraint(
+            "review_reference ~ '[^[:space:]]'",
+            name="ck_eipd_resolution_reviews_reference",
+        ),
+        CheckConstraint(
+            "document_hash ~ '^[0-9a-f]{64}$'",
+            name="ck_eipd_resolution_reviews_document_hash",
+        ),
+        CheckConstraint(
+            "context_hash ~ '^[0-9a-f]{64}$'",
+            name="ck_eipd_resolution_reviews_context_hash",
+        ),
+        CheckConstraint(
+            "(policy_version IS NULL AND policy_reference IS NULL AND policy_hash IS NULL) OR (policy_version IS NOT NULL AND policy_reference IS NOT NULL AND policy_hash IS NOT NULL AND policy_version = 1 AND policy_reference ~ '[^[:space:]]' AND policy_hash ~ '^[0-9a-f]{64}$')",
+            name="ck_eipd_resolution_reviews_policy_identity",
+        ),
+        sa.Index("ix_eipd_resolution_reviews_organization_id", "organization_id"),
+        sa.Index(
+            "ix_eipd_resolution_reviews_assessment_history",
+            "organization_id",
+            "assessment_id",
+            "created_at",
+            "id",
+        ),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid()
+    )
+    organization_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("organizations.id"), nullable=False
+    )
+    assessment_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
+    decision: Mapped[str] = mapped_column(Text, nullable=False)
+    rationale: Mapped[str] = mapped_column(Text, nullable=False)
+    review_reference: Mapped[str] = mapped_column(Text, nullable=False)
+    document_hash: Mapped[str] = mapped_column(Text, nullable=False)
+    context_hash: Mapped[str] = mapped_column(Text, nullable=False)
+    review_context_metadata: Mapped[dict | None] = mapped_column(
+        JSONB(none_as_null=True), nullable=True
+    )
+    policy_version: Mapped[int | None] = mapped_column(sa.Integer, nullable=True)
+    policy_reference: Mapped[str | None] = mapped_column(Text, nullable=True)
+    policy_hash: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_by: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("profiles.id"), nullable=False
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        sa.TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=func.clock_timestamp(),
+    )
 
 
 # ── Módulo 4 — Documentos generados ──────────────────────────────────────────
@@ -1365,6 +1798,7 @@ class LegalBase(Base):
 
 class Document(Base):
     __tablename__ = "documents"
+    __table_args__ = (sa.Index("ix_documents_organization_id", "organization_id"),)
 
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid()
@@ -1401,6 +1835,9 @@ class Document(Base):
 
 class EvidenceEvent(Base):
     __tablename__ = "evidence_events"
+    __table_args__ = (
+        sa.Index("ix_evidence_events_organization_id", "organization_id"),
+    )
 
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid()
@@ -1428,6 +1865,14 @@ class EvidenceEvent(Base):
 
 class KnowledgeChunk(Base):
     __tablename__ = "knowledge_chunks"
+    __table_args__ = (
+        sa.Index(
+            "knowledge_chunks_embedding_idx",
+            "embedding",
+            postgresql_using="hnsw",
+            postgresql_ops={"embedding": "vector_cosine_ops"},
+        ),
+    )
 
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid()
@@ -1439,3 +1884,240 @@ class KnowledgeChunk(Base):
     created_at: Mapped[datetime] = mapped_column(
         sa.TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
     )
+
+
+class EipdPolicyPublication(Base):
+    """Control global; escritura solo por canal administrativo separado."""
+
+    __tablename__ = "eipd_policy_publications"
+    __table_args__ = (
+        UniqueConstraint(
+            "id",
+            "policy_version",
+            "policy_reference",
+            "policy_hash",
+            name="uq_eipd_publications_confirmation_binding",
+        ),
+        UniqueConstraint("policy_reference"),
+        UniqueConstraint("id", "policy_hash"),
+        CheckConstraint("policy_version = 1", name="policy_version"),
+        CheckConstraint("policy_reference ~ '[^[:space:]]'", name="reference"),
+        CheckConstraint("policy_hash ~ '^[0-9a-f]{64}$'", name="hash"),
+        CheckConstraint(
+            "rationale ~ '[^[:space:]]' AND evidence_reference ~ '[^[:space:]]'",
+            name="evidence",
+        ),
+        CheckConstraint(
+            "jsonb_typeof(payload) = 'object' AND payload ? 'policy_version' AND payload ? 'policy_reference' AND payload->>'policy_version' = '1' AND payload->>'policy_reference' = policy_reference",
+            name="payload_identity",
+        ),
+    )
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid()
+    )
+    policy_version: Mapped[int] = mapped_column(Integer, nullable=False)
+    policy_reference: Mapped[str] = mapped_column(Text, nullable=False)
+    policy_hash: Mapped[str] = mapped_column(Text, nullable=False)
+    payload: Mapped[dict] = mapped_column(JSONB, nullable=False)
+    created_by: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("profiles.id"), nullable=False
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        sa.TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=func.clock_timestamp(),
+    )
+    rationale: Mapped[str] = mapped_column(Text, nullable=False)
+    evidence_reference: Mapped[str] = mapped_column(Text, nullable=False)
+
+
+class EipdPolicySelection(Base):
+    __tablename__ = "eipd_policy_selections"
+    __table_args__ = (
+        UniqueConstraint("revision"),
+        UniqueConstraint("publication_id"),
+        UniqueConstraint(
+            "revision",
+            "publication_id",
+            "policy_hash",
+            name="uq_eipd_policy_selections_revision_publication_hash",
+        ),
+        UniqueConstraint(
+            "revision",
+            "publication_id",
+            "id",
+            name="uq_eipd_policy_selections_revision_publication_id",
+        ),
+        sa.ForeignKeyConstraint(
+            ["publication_id", "policy_hash"],
+            ["eipd_policy_publications.id", "eipd_policy_publications.policy_hash"],
+        ),
+        sa.ForeignKeyConstraint(
+            ["previous_revision", "previous_publication_id", "previous_policy_hash"],
+            [
+                "eipd_policy_selections.revision",
+                "eipd_policy_selections.publication_id",
+                "eipd_policy_selections.policy_hash",
+            ],
+        ),
+        CheckConstraint(
+            "revision > 0 AND previous_revision >= 0 AND revision = previous_revision + 1",
+            name="revision",
+        ),
+        CheckConstraint(
+            "(previous_revision = 0 AND previous_publication_id IS NULL AND previous_policy_hash IS NULL) OR (previous_revision > 0 AND previous_publication_id IS NOT NULL AND previous_policy_hash IS NOT NULL)",
+            name="previous_identity",
+        ),
+        CheckConstraint(
+            "publication_id IS DISTINCT FROM previous_publication_id",
+            name="no_reselection",
+        ),
+        CheckConstraint(
+            "rationale ~ '[^[:space:]]' AND evidence_reference ~ '[^[:space:]]'",
+            name="evidence",
+        ),
+    )
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid()
+    )
+    previous_revision: Mapped[int] = mapped_column(Integer, nullable=False)
+    revision: Mapped[int] = mapped_column(Integer, nullable=False)
+    previous_publication_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), nullable=True
+    )
+    previous_policy_hash: Mapped[str | None] = mapped_column(Text, nullable=True)
+    publication_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), nullable=False
+    )
+    policy_hash: Mapped[str] = mapped_column(Text, nullable=False)
+    created_by: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("profiles.id"), nullable=False
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        sa.TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=func.clock_timestamp(),
+    )
+    rationale: Mapped[str] = mapped_column(Text, nullable=False)
+    evidence_reference: Mapped[str] = mapped_column(Text, nullable=False)
+
+
+class EipdPolicySelector(Base):
+    __tablename__ = "eipd_policy_selector"
+    __table_args__ = (
+        CheckConstraint("id = 1", name="singleton"),
+        CheckConstraint("revision > 0", name="revision"),
+        sa.ForeignKeyConstraint(
+            ["revision", "publication_id", "selection_id"],
+            [
+                "eipd_policy_selections.revision",
+                "eipd_policy_selections.publication_id",
+                "eipd_policy_selections.id",
+            ],
+        ),
+    )
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    revision: Mapped[int] = mapped_column(Integer, nullable=False)
+    publication_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), nullable=False
+    )
+    selection_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
+
+
+class EipdConfirmationEvidence(Base):
+    """Evidencia tenant append-only; no habilita por si misma la confirmacion."""
+
+    __tablename__ = "eipd_confirmation_evidence"
+    __table_args__ = (
+        UniqueConstraint("assessment_id"),
+        sa.ForeignKeyConstraint(
+            ["assessment_id", "organization_id"],
+            ["legal_assessments.id", "legal_assessments.organization_id"],
+        ),
+        sa.ForeignKeyConstraint(
+            [
+                "review_id",
+                "assessment_id",
+                "organization_id",
+                "document_hash",
+                "context_hash",
+                "policy_version",
+                "policy_reference",
+                "policy_hash",
+                "review_decision",
+            ],
+            [
+                "eipd_resolution_reviews.id",
+                "eipd_resolution_reviews.assessment_id",
+                "eipd_resolution_reviews.organization_id",
+                "eipd_resolution_reviews.document_hash",
+                "eipd_resolution_reviews.context_hash",
+                "eipd_resolution_reviews.policy_version",
+                "eipd_resolution_reviews.policy_reference",
+                "eipd_resolution_reviews.policy_hash",
+                "eipd_resolution_reviews.decision",
+            ],
+        ),
+        sa.ForeignKeyConstraint(
+            ["publication_id", "policy_version", "policy_reference", "policy_hash"],
+            [
+                "eipd_policy_publications.id",
+                "eipd_policy_publications.policy_version",
+                "eipd_policy_publications.policy_reference",
+                "eipd_policy_publications.policy_hash",
+            ],
+        ),
+        sa.ForeignKeyConstraint(
+            ["selector_revision", "publication_id", "selection_id"],
+            [
+                "eipd_policy_selections.revision",
+                "eipd_policy_selections.publication_id",
+                "eipd_policy_selections.id",
+            ],
+        ),
+        CheckConstraint("review_decision = 'continuar'", name="positive_review"),
+        CheckConstraint(
+            "policy_version = 1 AND selector_revision > 0", name="versions"
+        ),
+        CheckConstraint("policy_reference ~ '[^[:space:]]'", name="policy_reference"),
+        CheckConstraint(
+            "policy_hash ~ '^[0-9a-f]{64}$' AND document_hash ~ '^[0-9a-f]{64}$' AND context_hash ~ '^[0-9a-f]{64}$'",
+            name="hashes",
+        ),
+        sa.Index("ix_eipd_confirmation_evidence_organization_id", "organization_id"),
+    )
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid()
+    )
+    organization_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("organizations.id"), nullable=False
+    )
+    assessment_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
+    review_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
+    publication_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), nullable=False
+    )
+    selector_revision: Mapped[int] = mapped_column(Integer, nullable=False)
+    selection_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
+    policy_version: Mapped[int] = mapped_column(Integer, nullable=False)
+    policy_reference: Mapped[str] = mapped_column(Text, nullable=False)
+    policy_hash: Mapped[str] = mapped_column(Text, nullable=False)
+    document_hash: Mapped[str] = mapped_column(Text, nullable=False)
+    context_hash: Mapped[str] = mapped_column(Text, nullable=False)
+    review_decision: Mapped[str] = mapped_column(
+        Text, nullable=False, server_default="continuar"
+    )
+    created_by: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("profiles.id"), nullable=False
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        sa.TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=func.clock_timestamp(),
+    )
+
+
+from app.db import (  # noqa: E402
+    assessment_support,  # noqa: E402,F401
+    organization_acceptance,  # noqa: E402,F401
+)

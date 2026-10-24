@@ -1,0 +1,35 @@
+{
+  "id": "DS-005",
+  "objective": "Permitir reordenar evidencias en borrador mediante Subir evidencia N y Bajar evidencia N, con pruebas propias.",
+  "acceptance": [
+    "Preservar todos los campos de evidencia al permutar; guardar conserva orden y una PATCH",
+    "Primera evidencia no puede subir; ultima no puede bajar; 0/1 elementos sin operaciones validas",
+    "Bloqueado en readOnly, confirmado, busy y uncertain; tras 403 permite editar/reintentar sin cambios de politica",
+    "Mantener botones Quitar y Añadir, imports/harness/tests existentes y activacion EIPD bloqueada",
+    "Dos pruebas propias nuevas, ninguna prueba independiente puede editarse"
+  ],
+  "allowed_files": [
+    "frontend/components/licitud/ChildAdolescentEditor.tsx",
+    "frontend/e2e/child-adolescent-editor.spec.ts"
+  ],
+  "context_files": [
+    "frontend/components/licitud/ChildAdolescentEditor.tsx",
+    "frontend/e2e/child-adolescent-editor.spec.ts"
+  ],
+  "limits": {
+    "budget_reference_usd": "0.20",
+    "max_calls": 3,
+    "no_merge": true,
+    "no_deploy": true,
+    "fictitious_only": true,
+    "eipd_blocked": true
+  },
+  "checks": [
+    "Chromium editor y aceptacion independiente",
+    "type-check",
+    "ESLint",
+    "Prettier"
+  ],
+  "independent_tests": "frontend/e2e/child-adolescent-order.acceptance.spec.ts",
+  "acceptance_sha256": "079bfb823bffe65f74e56e12a61fd0e154860814eddc913fe59a1ba3daa71782"
+}

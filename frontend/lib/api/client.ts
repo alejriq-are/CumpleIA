@@ -268,11 +268,13 @@ export type TreatmentUpdate = Partial<TreatmentCreate> & {
 
 export class ApiError extends Error {
   status: number;
+  detail: unknown;
 
-  constructor(status: number, message: string) {
+  constructor(status: number, message: string, detail?: unknown) {
     super(message);
     this.name = "ApiError";
     this.status = status;
+    this.detail = detail;
   }
 }
 
@@ -281,9 +283,10 @@ type FetchOptions = {
   organizationId?: string;
   method?: string;
   body?: unknown;
+  cache?: RequestCache;
 };
 
-async function apiFetch<T>(path: string, opts: FetchOptions): Promise<T> {
+export async function apiFetch<T>(path: string, opts: FetchOptions): Promise<T> {
   const { token, organizationId, method = "GET", body } = opts;
 
   const headers: Record<string, string> = {
@@ -299,13 +302,16 @@ async function apiFetch<T>(path: string, opts: FetchOptions): Promise<T> {
     method,
     headers,
     body: body !== undefined ? JSON.stringify(body) : undefined,
+    ...(opts.cache ? { cache: opts.cache } : {}),
   });
 
   if (!res.ok) {
     const detail = await res.json().catch(() => ({ detail: res.statusText }));
+    const reason: unknown = (detail as { detail?: unknown })?.detail;
     throw new ApiError(
       res.status,
-      (detail as { detail?: string })?.detail ?? `Error ${res.status}`
+      typeof reason === "string" ? reason : `Error ${res.status}`,
+      reason
     );
   }
 
@@ -332,9 +338,11 @@ async function apiFetchOrNull<T>(path: string, opts: FetchOptions): Promise<T | 
 
   if (!res.ok) {
     const detail = await res.json().catch(() => ({ detail: res.statusText }));
+    const reason: unknown = (detail as { detail?: unknown })?.detail;
     throw new ApiError(
       res.status,
-      (detail as { detail?: string })?.detail ?? `Error ${res.status}`
+      typeof reason === "string" ? reason : `Error ${res.status}`,
+      reason
     );
   }
 

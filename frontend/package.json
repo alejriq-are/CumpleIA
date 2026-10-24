@@ -6,30 +6,33 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx --ignore-pattern .next/ --ignore-pattern test-results/ --ignore-pattern playwright-report/",
     "type-check": "tsc --noEmit",
     "format": "prettier --write .",
     "test:e2e": "playwright test",
-    "test:e2e:install": "playwright install chromium"
+    "test:e2e:install": "playwright install chromium",
+    "test:eipd-client": "playwright test e2e/eipd-api-client.spec.ts e2e/child-adolescent-editor.spec.ts e2e/child-adolescent-order.acceptance.spec.ts e2e/child-adolescent-field-regressions.spec.ts e2e/child-eipd-history.spec.ts e2e/organization-acceptance.spec.ts e2e/eipd-preview.spec.ts e2e/mvp-dossier.spec.ts e2e/pilot-preparation.spec.ts e2e/assessment-support.spec.ts e2e/licitud-workspace.spec.ts e2e/licitud-prototype.spec.ts e2e/navigation-prototype.spec.ts",
+    "test:eipd-consultation": "playwright test e2e/eipd-consultation.spec.ts",
+    "test:navigation-prototype": "playwright test e2e/navigation-prototype.spec.ts"
   },
   "dependencies": {
-    "next": "15.0.0",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
+    "@supabase/ssr": "^0.5.1",
     "@supabase/supabase-js": "^2.45.4",
-    "@supabase/ssr": "^0.5.1"
+    "next": "15.5.27",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
-    "typescript": "^5.6.3",
+    "@playwright/test": "1.63.0",
     "@types/node": "^22.7.5",
     "@types/react": "^18.3.11",
     "@types/react-dom": "^18.3.1",
+    "autoprefixer": "^10.4.20",
     "eslint": "^8.57.1",
-    "eslint-config-next": "15.0.0",
+    "eslint-config-next": "15.5.27",
+    "postcss": "^8.4.47",
     "prettier": "^3.3.3",
     "tailwindcss": "^3.4.14",
-    "postcss": "^8.4.47",
-    "autoprefixer": "^10.4.20",
-    "@playwright/test": "1.63.0"
+    "typescript": "^5.6.3"
   }
 }

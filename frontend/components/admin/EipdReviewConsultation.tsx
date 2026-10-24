@@ -1,0 +1,548 @@
+"use client";
+
+import { useRef, useState, type FormEvent } from "react";
+import { EipdReviewIssues } from "./EipdReviewIssues";
+import { ApiError } from "@/lib/api/client";
+import type {
+  EipdReviewPreparationOut,
+  EipdResolutionReviewReadOut,
+  EipdNegativeReviewIn,
+} from "@/lib/api/eipd-review";
+
+type Scope = { organizationId: string; treatmentId: string; assessmentId: string };
+type Props = {
+  loadPreparation: (scope: Scope) => Promise<EipdReviewPreparationOut>;
+  loadEvent: (scope: Scope, reviewId: string) => Promise<EipdResolutionReviewReadOut>;
+  recordNegative?: (
+    scope: Scope,
+    request: EipdNegativeReviewIn
+  ) => Promise<EipdResolutionReviewReadOut>;
+};
+const labels = {
+  continuar: "Continuar",
+  requiere_cambios: "Requiere cambios",
+  no_continuar: "No continuar",
+} as const;
+const uuidPattern = "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}";
+export function consultationError(error: unknown): string {
+  if (error instanceof ApiError) {
+    const messages: Record<number, string> = {
+      401: "La sesión no es válida. Vuelve a iniciar sesión.",
+      402: "La suscripción de esta organización no permite la consulta.",
+      403: "No tienes permiso para consultar este expediente.",
+      404: "No se encontró el expediente o la revisión en esta organización.",
+      409: "El estado del expediente no permite completar esta consulta.",
+    };
+    return messages[error.status] ?? "No se pudo completar la consulta.";
+  }
+  return "No se pudo consultar el expediente. Revisa los identificadores y la conexión.";
+}
+
+export function PreparationView({
+  value,
+  negativeRecordingAvailable = false,
+}: {
+  value: EipdReviewPreparationOut;
+  negativeRecordingAvailable?: boolean;
+}) {
+  const current = value.review_prerequisites_v4 ?? null;
+  const result =
+    current ??
+    (value.representation_context_coverage === "pendiente" ? null : value.review_prerequisites_v3);
+  return (
+    <section aria-labelledby="preparation-heading" className="space-y-4">
+      <h2 id="preparation-heading" className="text-xl font-semibold">
+        Requisitos de revisión
+      </h2>
+      <p>Estado del expediente: {value.status}.</p>
+      <p className="text-sm text-gray-600">
+        Cumplir estos requisitos documentales no concede permiso ni registra una decisión.
+      </p>
+      {value.policy_status !== null && (
+        <section aria-labelledby="policy-status-heading" className="rounded-lg border bg-white p-4">
+          <h3 id="policy-status-heading" className="font-semibold">
+            Estado de la política EIPD
+          </h3>
+          <dl className="mt-3 grid grid-cols-1 gap-2 text-sm sm:grid-cols-[9rem_1fr]">
+            <dt className="font-semibold">Fuentes oficiales</dt>
+            <dd>
+              {value.policy_status.sources_status === "pendiente"
+                ? "Pendientes de verificación"
+                : "Verificadas según el registro"}
+            </dd>
+            <dt className="font-semibold">Aceptación</dt>
+            <dd>
+              {value.policy_status.acceptance_status === "pendiente"
+                ? "Pendiente"
+                : "Aceptada según el registro"}
+            </dd>
+            <dt className="font-semibold">Habilitación</dt>
+            <dd>
+              {value.policy_status.activation === "deshabilitada"
+                ? "Deshabilitada"
+                : "Habilitada según el registro"}
+            </dd>
+          </dl>
+          <p className="mt-3 text-sm text-gray-600">
+            Este estado corresponde a la política actual. No aprueba el expediente ni autoriza por
+            sí solo continuar, confirmar o activar.
+          </p>
+        </section>
+      )}
+      {value.sensitive_representation && (
+        <section
+          aria-labelledby="representation-heading"
+          className="space-y-3 rounded-lg border bg-white p-4"
+        >
+          <h3 id="representation-heading" className="font-semibold">
+            Representación del consentimiento sensible
+          </h3>
+          <p>
+            {
+              {
+                no_aplicable: "No aplica este diagnóstico.",
+                incompleto: "Documentación incompleta.",
+                requiere_revision: "La documentación requiere revisión.",
+                completo: "Campos documentales completos.",
+              }[value.sensitive_representation.result]
+            }
+          </p>
+          <p className="text-sm text-gray-600">
+            Este diagnóstico no verifica facultades ni autenticidad y no autoriza confirmar el
+            expediente.
+          </p>
+          {value.sensitive_representation.issues.length > 0 && (
+            <EipdReviewIssues issues={value.sensitive_representation.issues} />
+          )}
+        </section>
+      )}
+      {value.representation_context_coverage === "pendiente" && (
+        <p role="status" className="rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm">
+          {current !== null
+            ? negativeRecordingAvailable
+              ? "El diagnóstico actual incluye la representación. La revisión negativa se solicita en el formulario separado; el servidor comprobará la identidad actual. No autoriza continuar, confirmar ni activar."
+              : "El diagnóstico actual incluye la representación. Consultarlo no acredita la vigencia de revisiones guardadas ni permite registrar una nueva revisión EIPD o confirmar."
+            : "Las revisiones EIPD anteriores no cubren este material de representación. La integración de esa cobertura está pendiente; no se presenta vigencia global ni se permite registrar una nueva revisión EIPD o confirmar."}
+        </p>
+      )}
+      {value.latest_review_context_status !== null &&
+        value.representation_context_coverage !== "pendiente" && (
+          <section
+            aria-labelledby="latest-review-heading"
+            className="rounded-lg border border-blue-200 bg-blue-50 p-4"
+          >
+            <h3 id="latest-review-heading" className="font-semibold">
+              Vínculo de la última revisión con el material actual
+            </h3>
+            <p className="mt-2">
+              {
+                {
+                  sin_revision: "No hay una revisión guardada para este expediente.",
+                  sin_metadatos:
+                    "La última revisión no tiene identidad documental registrada; no se puede comparar con el material actual.",
+                  vigente:
+                    "El vínculo documental de la última revisión corresponde al material actual.",
+                  obsoleta:
+                    "El vínculo documental de la última revisión está desactualizado respecto del material actual.",
+                }[value.latest_review_context_status]
+              }
+            </p>
+            <p className="mt-2 text-sm text-gray-600">
+              Este estado no aprueba el expediente ni autoriza continuar, confirmar o activar. Se
+              refiere a la última revisión, aunque consultes otro evento histórico.
+            </p>
+          </section>
+        )}
+      {value.current_control_issues_v4 && value.current_control_issues_v4.length > 0 && (
+        <section
+          aria-labelledby="current-controls-heading"
+          className="space-y-3 rounded-lg border bg-white p-4"
+        >
+          <h3 id="current-controls-heading" className="font-semibold">
+            Motivos del expediente actual
+          </h3>
+          <p className="text-sm text-gray-600">
+            Incluye los controles documentales y los bloqueos de revisión y confirmación. Las
+            repeticiones idénticas se agrupan.
+          </p>
+          <EipdReviewIssues issues={value.current_control_issues_v4} />
+        </section>
+      )}
+      {result === null ? (
+        <p>
+          {value.representation_context_coverage === "pendiente"
+            ? "Requisitos de revisión EIPD pendientes de integrar con la representación."
+            : "Este expediente no tiene diagnóstico de revisión V3 disponible."}
+        </p>
+      ) : (
+        <div className="space-y-4">
+          {(Object.keys(labels) as (keyof typeof labels)[]).map((decision) => {
+            const diagnostic = result[decision];
+            return (
+              <article key={decision} className="rounded-lg border bg-white p-5">
+                <h3 className="text-lg font-semibold">{labels[decision]}</h3>
+                <p className="mt-2">
+                  {diagnostic.prerequisites_met
+                    ? "Requisitos documentales cumplidos."
+                    : "Requisitos documentales pendientes."}
+                </p>
+                <p className="mt-2 text-sm">
+                  {current !== null
+                    ? negativeRecordingAvailable && decision !== "continuar"
+                      ? "El registro negativo se solicita en el formulario separado y requiere validación del servidor."
+                      : "Registro de revisión no habilitado."
+                    : diagnostic.context_metadata === null
+                      ? "Identidad auditable no disponible."
+                      : "Identidad del material actual disponible."}
+                </p>
+                {diagnostic.issues.length > 0 && <EipdReviewIssues issues={diagnostic.issues} />}
+              </article>
+            );
+          })}
+        </div>
+      )}
+    </section>
+  );
+}
+
+export function EventView({ value }: { value: EipdResolutionReviewReadOut }) {
+  return (
+    <section aria-labelledby="event-heading" className="space-y-3 rounded-lg border bg-white p-5">
+      <h2 id="event-heading" className="text-xl font-semibold">
+        Revisión guardada
+      </h2>
+      <dl className="space-y-2 break-words text-sm">
+        <div>
+          <dt className="font-semibold">Decisión</dt>
+          <dd>{labels[value.decision]}</dd>
+        </div>
+        <div>
+          <dt className="font-semibold">Fundamento</dt>
+          <dd className="whitespace-pre-wrap">{value.rationale}</dd>
+        </div>
+        <div>
+          <dt className="font-semibold">Referencia</dt>
+          <dd>{value.review_reference}</dd>
+        </div>
+        <div>
+          <dt className="font-semibold">Fecha registrada (UTC)</dt>
+          <dd>{value.created_at}</dd>
+        </div>
+        <div>
+          <dt className="font-semibold">Política registrada</dt>
+          <dd>{value.policy_reference ?? "Sin identidad de política registrada."}</dd>
+        </div>
+        <div>
+          <dt className="font-semibold">Metadatos auditables</dt>
+          <dd>
+            {value.review_context_metadata === null
+              ? "Sin metadatos registrados; no se reconstruyen."
+              : value.review_context_metadata.metadata_schema_version === 2
+                ? `Contexto versión 3. Cobertura: contexto de investigación y representación. Material de representación: ${value.review_context_metadata.representation_material_hash === null ? "sin material registrado" : "identidad registrada"}.`
+                : `Contexto versión ${value.review_context_metadata.context_schema_version}. Cobertura: ${value.review_context_metadata.research_coverage === "contexto_v2" ? "contexto de investigación" : "sin cobertura de investigación"}.`}
+          </dd>
+        </div>
+      </dl>
+      <p className="text-sm text-gray-600">
+        Esta es la identidad guardada con el evento. Su consulta no acredita vigencia del expediente
+        actual.
+      </p>
+    </section>
+  );
+}
+
+export function EipdReviewConsultation({ loadPreparation, loadEvent, recordNegative }: Props) {
+  const [scope, setScope] = useState<Scope>({
+    organizationId: "",
+    treatmentId: "",
+    assessmentId: "",
+  });
+  const [reviewId, setReviewId] = useState("");
+  const inFlight = useRef(false);
+  const [decision, setDecision] = useState<EipdNegativeReviewIn["decision"]>("requiere_cambios");
+  const [rationale, setRationale] = useState("");
+  const [reference, setReference] = useState("");
+  const [fictitious, setFictitious] = useState(false);
+  const [recordLocked, setRecordLocked] = useState(false);
+  const [recordMessage, setRecordMessage] = useState("");
+
+  const [busy, setBusy] = useState(false);
+  const [writing, setWriting] = useState(false);
+  const [error, setError] = useState("");
+  const [sessionExpired, setSessionExpired] = useState(false);
+  const [preparation, setPreparation] = useState<EipdReviewPreparationOut | null>(null);
+  const [event, setEvent] = useState<EipdResolutionReviewReadOut | null>(null);
+  function changeScope(field: keyof Scope, value: string) {
+    if (inFlight.current) return;
+    setScope({ ...scope, [field]: value });
+    setDecision("requiere_cambios");
+    setRationale("");
+    setReference("");
+    setFictitious(false);
+    setRecordLocked(false);
+    setRecordMessage("");
+    setPreparation(null);
+    setEvent(null);
+    setReviewId("");
+    setError("");
+    setSessionExpired(false);
+  }
+  async function consult(e: FormEvent, kind: "preparation" | "event") {
+    e.preventDefault();
+    if (inFlight.current) return;
+    inFlight.current = true;
+    setBusy(true);
+    setError("");
+    setSessionExpired(false);
+    setPreparation(null);
+    setEvent(null);
+    try {
+      if (kind === "preparation") setPreparation(await loadPreparation(scope));
+      else setEvent(await loadEvent(scope, reviewId));
+    } catch (failure) {
+      setError(consultationError(failure));
+      setSessionExpired(failure instanceof ApiError && failure.status === 401);
+    } finally {
+      inFlight.current = false;
+      setBusy(false);
+    }
+  }
+  async function submitNegative(e: FormEvent) {
+    e.preventDefault();
+    if (
+      inFlight.current ||
+      recordLocked ||
+      !recordNegative ||
+      !fictitious ||
+      !rationale.trim() ||
+      !reference.trim()
+    )
+      return;
+    inFlight.current = true;
+    setBusy(true);
+    setWriting(true);
+    setError("");
+    setSessionExpired(false);
+    setRecordMessage("");
+    try {
+      const saved = await recordNegative(scope, {
+        decision,
+        rationale,
+        review_reference: reference,
+      });
+      setEvent(saved);
+      setReviewId(saved.id);
+      setPreparation(null);
+      setRecordLocked(true);
+      setRationale("");
+      setReference("");
+      setFictitious(false);
+      setRecordMessage(
+        "Revisión negativa guardada. No autoriza continuar, confirmar ni activar EIPD."
+      );
+    } catch (failure) {
+      if (failure instanceof ApiError && [401, 402, 403, 404, 409, 422].includes(failure.status)) {
+        const messages: Record<number, string> = {
+          401: "La sesión venció. Vuelve a iniciar sesión antes de registrar.",
+          402: "La suscripción no permite registrar esta revisión.",
+          403: "No tienes permiso para registrar revisiones en esta organización.",
+          404: "No se encontró el expediente en esta organización.",
+          409: "El material actual no permite registrar la revisión. Consulta de nuevo los requisitos.",
+          422: "Revisa la decisión, el fundamento y la referencia.",
+        };
+        setError(messages[failure.status]);
+        if (failure.status === 409) setPreparation(null);
+        setSessionExpired(failure.status === 401);
+      } else {
+        setRecordLocked(true);
+        setError(
+          "No se pudo verificar si la revisión quedó guardada. No vuelvas a enviarla: verifica el historial con su responsable antes de repetir el registro."
+        );
+      }
+    } finally {
+      inFlight.current = false;
+      setBusy(false);
+      setWriting(false);
+    }
+  }
+  const canOfferNegative =
+    recordNegative &&
+    preparation?.status === "borrador" &&
+    preparation.review_prerequisites_v4 != null &&
+    preparation.policy_status?.activation === "deshabilitada";
+  return (
+    <div className="mx-auto max-w-4xl space-y-6">
+      <h1 className="text-2xl font-bold">Consulta interna de revisiones EIPD</h1>
+      <p>
+        Selecciona el expediente mediante sus identificadores. Las revisiones negativas se registran
+        en un formulario separado cuando está disponible.
+      </p>
+      <p className="rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm">
+        Pruebas de desarrollo: utiliza únicamente datos ficticios hasta disponer de la versión MVP.
+        M3-T1 en progreso. La confirmación y la activación EIPD permanecen bloqueadas.
+      </p>
+      <form
+        onSubmit={(e) => consult(e, "preparation")}
+        className="space-y-4 rounded-lg border bg-white p-5"
+        aria-busy={busy}
+      >
+        <fieldset disabled={busy} className="space-y-4">
+          <legend className="mb-3 font-semibold">Expediente a consultar</legend>
+          {(
+            [
+              ["organizationId", "Organización"],
+              ["treatmentId", "Tratamiento"],
+              ["assessmentId", "Evaluación"],
+            ] as const
+          ).map(([field, label]) => (
+            <label key={field} className="block text-sm font-medium">
+              {label} (identificador)
+              <input
+                required
+                pattern={uuidPattern}
+                value={scope[field]}
+                onChange={(e) => changeScope(field, e.target.value)}
+                className="mt-1 block w-full rounded border p-2 font-normal"
+                autoComplete="off"
+                spellCheck={false}
+              />
+            </label>
+          ))}
+          <button type="submit" className="rounded bg-blue-700 px-4 py-2 text-white">
+            Consultar requisitos
+          </button>
+        </fieldset>
+      </form>
+      {Object.values(scope).every((value) => new RegExp(`^${uuidPattern}$`).test(value)) && (
+        <a
+          className="block text-blue-700 underline"
+          href={`/dashboard/licitud/${scope.treatmentId}/${scope.assessmentId}?organizationId=${encodeURIComponent(scope.organizationId)}`}
+        >
+          Editar documento de infancia y adolescencia
+        </a>
+      )}
+      <form
+        onSubmit={(e) => consult(e, "event")}
+        className="space-y-3 rounded-lg border bg-white p-5"
+        aria-busy={busy}
+      >
+        <fieldset
+          disabled={
+            busy ||
+            Object.values(scope).some((value) => !new RegExp(`^${uuidPattern}$`).test(value))
+          }
+          className="space-y-3"
+        >
+          <legend className="mb-3 font-semibold">Consultar un evento guardado</legend>
+          <label className="block text-sm font-medium">
+            Revisión (identificador)
+            <input
+              required
+              pattern={uuidPattern}
+              value={reviewId}
+              onChange={(e) => {
+                setReviewId(e.target.value);
+                setEvent(null);
+                setError("");
+                setSessionExpired(false);
+              }}
+              className="mt-1 block w-full rounded border p-2 font-normal"
+              autoComplete="off"
+              spellCheck={false}
+            />
+          </label>
+          <button type="submit" className="rounded bg-blue-700 px-4 py-2 text-white">
+            Consultar revisión
+          </button>
+        </fieldset>
+      </form>
+      <div role="status" aria-live="polite">
+        {busy ? (writing ? "Guardando revisión…" : "Consultando…") : ""}
+      </div>
+      {error && (
+        <p role="alert" className="rounded border border-red-200 bg-red-50 p-4 text-red-800">
+          {error}
+          {sessionExpired && (
+            <a href="/login" className="mt-2 block font-medium underline">
+              Volver a iniciar sesión
+            </a>
+          )}
+        </p>
+      )}
+      {recordMessage && (
+        <p role="status" className="rounded border border-blue-200 bg-blue-50 p-4">
+          {recordMessage}
+        </p>
+      )}
+      {preparation && (
+        <PreparationView
+          value={preparation}
+          negativeRecordingAvailable={Boolean(canOfferNegative)}
+        />
+      )}
+      {canOfferNegative && (
+        <form
+          onSubmit={submitNegative}
+          aria-labelledby="negative-heading"
+          aria-busy={busy}
+          className="space-y-4 rounded-lg border bg-white p-5"
+        >
+          <h2 id="negative-heading" className="text-xl font-semibold">
+            Registrar revisión negativa de prueba
+          </h2>
+          <p className="text-sm">
+            El servidor comprobará la identidad del material actual. Registrar esta decisión no
+            aprueba el expediente ni permite continuar, confirmar o activar EIPD.
+          </p>
+          <fieldset disabled={busy || recordLocked} className="space-y-4">
+            <label className="block">
+              Decisión negativa
+              <select
+                value={decision}
+                onChange={(e) => setDecision(e.target.value as EipdNegativeReviewIn["decision"])}
+                className="mt-1 block w-full rounded border p-2"
+              >
+                <option value="requiere_cambios">Requiere cambios</option>
+                <option value="no_continuar">No continuar</option>
+              </select>
+            </label>
+            <label className="block">
+              Fundamento de la revisión
+              <textarea
+                required
+                value={rationale}
+                onChange={(e) => setRationale(e.target.value)}
+                className="mt-1 block w-full rounded border p-2"
+              />
+            </label>
+            <label className="block">
+              Referencia de la revisión
+              <input
+                required
+                value={reference}
+                onChange={(e) => setReference(e.target.value)}
+                className="mt-1 block w-full rounded border p-2"
+              />
+            </label>
+            <label className="flex items-start gap-2">
+              <input
+                type="checkbox"
+                checked={fictitious}
+                onChange={(e) => setFictitious(e.target.checked)}
+              />
+              Estoy usando únicamente datos ficticios.
+            </label>
+            <button
+              type="submit"
+              disabled={!fictitious || !rationale.trim() || !reference.trim()}
+              className="rounded bg-blue-700 px-4 py-2 text-white disabled:opacity-50"
+            >
+              Guardar revisión negativa
+            </button>
+          </fieldset>
+        </form>
+      )}
+      {event && <EventView value={event} />}
+    </div>
+  );
+}

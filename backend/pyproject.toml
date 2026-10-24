@@ -6,6 +6,12 @@ line-length = 88
 select = ["E", "W", "F", "I", "B", "UP"]
 ignore = ["E501", "B008", "UP042"]
 
+# Migracion historica aplicada: conservar su contenido (AGENTS.md, append-only).
+[tool.ruff.lint.per-file-ignores]
+"alembic/versions/5997a757f17b_modulo3_licitud_persistencia.py" = ["I001"]
+# DDL congelado y aplicado: conservar los espacios del SQL compilado.
+"alembic/versions/b84e9f1a5c32_child_eipd_successors.py" = ["W291"]
+
 [tool.ruff.lint.isort]
 known-first-party = ["app"]
 

@@ -283,7 +283,6 @@ async def test_activation_rejects_pending_declaration(
             await db.commit()
 
 
-
 @pytest.mark.asyncio
 async def test_activation_validates_international_transfer_adequacy_status(
     _session_factory, org_a_id, profile_a_id, _seed_test_data

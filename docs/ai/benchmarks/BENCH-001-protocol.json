@@ -1,0 +1,90 @@
+{
+  "id": "BENCH-001",
+  "base_head": "6ee359a237f9e69b92aeda3e530b0136c3c4acc9",
+  "scope": "UI regression test generation; not general product complexity",
+  "blocks": [
+    {
+      "id": "L1",
+      "arm": "Codex",
+      "pair": 1,
+      "kind": "text",
+      "label": "Análisis de edad y alcance",
+      "field": "age_scope_analysis",
+      "value": "PRUEBA: alcance"
+    },
+    {
+      "id": "D1",
+      "arm": "Deepseek",
+      "pair": 1,
+      "kind": "text",
+      "label": "Interés superior",
+      "field": "best_interests_analysis",
+      "value": "PRUEBA: interes"
+    },
+    {
+      "id": "L2",
+      "arm": "Codex",
+      "pair": 2,
+      "kind": "select",
+      "label": "Datos sensibles de adolescentes menores de 16",
+      "field": "sensitive_under16",
+      "value": "si"
+    },
+    {
+      "id": "D2",
+      "arm": "Deepseek",
+      "pair": 2,
+      "kind": "select",
+      "label": "Ruta propuesta",
+      "field": "proposed_authorization_route",
+      "value": "consentimiento"
+    },
+    {
+      "id": "L3",
+      "arm": "Codex",
+      "pair": 3,
+      "kind": "checkbox",
+      "label": "Identidad",
+      "field": "data_category_codes",
+      "value": "id"
+    },
+    {
+      "id": "D3",
+      "arm": "Deepseek",
+      "pair": 3,
+      "kind": "checkbox",
+      "label": "Clientes",
+      "field": "data_subject_codes",
+      "value": "clientes"
+    }
+  ],
+  "order": [
+    "L1",
+    "D1",
+    "D2",
+    "L2",
+    "L3",
+    "D3"
+  ],
+  "order_rule": "predeclared alternating starting arms; not randomized",
+  "criteria": [
+    "exactly three tests per block",
+    "text/select: save specified value, clear after setting -> null, readOnly disabled zero PATCH",
+    "checkbox: uncheck -> [], uncheck/check -> [specified code], readOnly disabled zero PATCH",
+    "savedBody shared asserts exactly one PATCH, all evidence metadata and EIPD blocked",
+    "same base/harness/prettier/Chromium/type-check/lint",
+    "mutation must be detected; no weakening tests; no production changes",
+    "Deepseek exact usage; Codex account percentages approximate, reset/shared-session uncertainty",
+    "measure common setup and closing separately, no dollar conversion of subscription percentages"
+  ],
+  "budget_reference_usd": "0.20",
+  "max_api_calls_total": 6,
+  "max_api_calls_per_delegated_block": 2,
+  "inference_rule": "descriptive 3 pairs; no significance or causal savings claim if measurement cannot support it",
+  "amendment_after_D2_failure": {
+    "selector_locator": "combobox with unique accessible label prefix",
+    "test_timeout_seconds": 10,
+    "reason": "fixture label includes option text; initial exact locator instruction invalid for selects",
+    "causal_comparison_caveat": true
+  }
+}

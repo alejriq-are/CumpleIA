@@ -1,0 +1,11 @@
+{
+  "id": "DS-001",
+  "objective": "Ampliar la prueba existente de bloqueo mientras el editor infancia espera respuesta: comprobar que Notas, checkbox Niños y niñas y Retirar documento estan deshabilitados; tras liberar respuesta, campos de borrador habilitados.",
+  "acceptance": ["Reutilizar harness y fixture ficticia existentes", "Comprobar controles durante espera y despues de liberar", "Conservar una unica llamada PATCH", "No cambiar componente, cliente, backend ni significado juridico"],
+  "allowed_files": ["frontend/e2e/child-adolescent-editor.spec.ts"],
+  "context_files": ["frontend/e2e/child-adolescent-editor.spec.ts", "frontend/components/licitud/ChildAdolescentEditor.tsx"],
+  "checks": ["cd frontend && npx playwright test e2e/child-adolescent-editor.spec.ts", "cd frontend && npm run type-check", "cd frontend && npm run lint", "cd frontend && npx prettier --check e2e/child-adolescent-editor.spec.ts"],
+  "return": {"task_id":"DS-001", "base_head":"COPIAR state.head", "changed_files":[], "checks":[], "limitations":[], "patch":"diff unificado separado"},
+  "stop_conditions": ["Falta un archivo o no coincide la base", "Se requiere cambiar produccion o dependencias", "No se puede devolver un diff aplicable"],
+  "permissions": {"implement_patch":true,"commit":false,"push":false,"merge":false,"deploy":false,"activate_eipd":false}
+}
