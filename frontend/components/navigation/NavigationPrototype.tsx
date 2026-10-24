@@ -507,6 +507,9 @@ export function NavigationPrototype() {
         <Card title={`Resolución ${selected} · ${row.reference}`}>
           <p className="whitespace-pre-wrap">{row.notes}</p>
           {row.origin && <p className="mt-3">Origen: {row.origin}</p>}
+          {row.reason && (
+            <p className="mt-3 whitespace-pre-wrap">Motivo del cambio: {row.reason}</p>
+          )}
           <button
             className={`${secondary} mt-4`}
             onClick={() =>
@@ -1260,6 +1263,7 @@ export function NavigationPrototype() {
                         version,
                         reference: values["preparar.referencia"],
                         notes: values["preparar.notas"],
+                        reason: values["preparar.motivo"],
                         origin: origin ?? undefined,
                       },
                     ]);

@@ -234,3 +234,19 @@ solo para los tres campos de preparación consumidos. No se marcan como guardado
 los demás campos, ni se modifican resoluciones registradas. Validación dirigida
 comprueba ausencia de aviso falso y conservación de avisos y textos realmente
 pendientes en Infancia. No requiere reiniciar el recorrido actual del usuario.
+
+## Descarga revisada al cerrar infancia
+
+Archivo aportado por el usuario maqueta-cumpleia-infancia.json: 12 comprobaciones
+aprobadas de identidad del ejemplo, contexto infancia/programa/evaluación v1, edades
+sintéticas, referencias/resoluciones 1-3, marca temporal solo en resolución 3,
+contenido de resolución 2 conservado, anexos vacíos y bloqueos de confirmación/activación.
+No se infiere aceptación global del diseño ni persistencia en servidor.
+
+Hallazgo adicional: el motivo obligatorio mostrado en la vista previa no se copiaba
+al registro de resolución. Se incorpora reason en los nuevos registros de maqueta,
+consulta y JSON. Es opcional en ejemplos anteriores: no se inventa ni completa un
+motivo para los registros previos ni se modifica el archivo del usuario. Caso dirigido
+verifica motivo de nueva resolución en pantalla y descarga, resolución 2 sin cambios
+y bloqueos conservados. Para repetir manualmente se necesita un nuevo registro de
+prueba; volver a descargar la resolución 3 anterior no recupera un motivo descartado.

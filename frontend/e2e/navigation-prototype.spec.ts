@@ -301,6 +301,7 @@ test("cancelar copia conserva marca temporal y confirmar copia preserva original
   await expect(
     page.getByRole("button", { name: "Consultar resolución 3", exact: true })
   ).toBeVisible();
+  await expect(work(page)).toContainText("Motivo del cambio: Prueba ficticia de versión");
   await page.getByRole("button", { name: "Consultar resolución 2", exact: true }).click();
   await expect(work(page).getByText("[FICTICIA] SUCESOR MODIFICADO", { exact: true })).toHaveCount(
     0
@@ -311,6 +312,18 @@ test("cancelar copia conserva marca temporal y confirmar copia preserva original
     page.getByRole("button", { name: "Registrar decisión de organización", exact: true })
   ).toBeDisabled();
   await expect(work(page)).toContainText("facultad de la persona de ejemplo está revocada");
+  await task(page, "Historial y descargas");
+  await step(page, "Descargas");
+  const pending = page.waitForEvent("download");
+  await page.getByRole("button", { name: /Descargar JSON de demostración/ }).click();
+  const downloaded = await pending;
+  const packet = JSON.parse(await readFile((await downloaded.path())!, "utf8"));
+  expect(packet.resolutions.find((item: { version: number }) => item.version === 3).reason).toBe(
+    "Prueba ficticia de versión"
+  );
+  expect(
+    packet.resolutions.find((item: { version: number }) => item.version === 2).reason
+  ).toBeUndefined();
   expect(requests).toEqual([]);
 });
 

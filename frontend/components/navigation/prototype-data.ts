@@ -333,7 +333,13 @@ export const initial = (s: Scenario): Values => ({
   "preparar.referencia": "SIMULADA-MAQUETA-RES-003",
   "preparar.notas": "[FICTICIA] Preparación temporal del ejemplo.",
 });
-export type Resolution = { reference: string; version: number; notes: string; origin?: string };
+export type Resolution = {
+  reference: string;
+  version: number;
+  notes: string;
+  origin?: string;
+  reason?: string;
+};
 export const seedResolutions = (): Resolution[] => [
   {
     reference: "SIMULADA-MAQUETA-RES-001",
