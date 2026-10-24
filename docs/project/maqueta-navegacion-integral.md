@@ -12,6 +12,17 @@ Estado: implementada como demostración aislada; validación dirigida y visual l
 realizada. Prueba asistida y aceptación del diseño por el usuario pendientes.
 No sustituye los recorridos conectados ni implementa sus cambios pendientes.
 
+## Ajuste vigente: determinar antes de completar (24/10/2026)
+
+Solicitud adicional del usuario: EIPD e infancia no deben aparecer como formularios
+obligatorios en todos los casos. Se añade Determinar aplicabilidad, con dos
+conclusiones fundamentadas e independientes por evaluación. Los accesos Completar
+EIPD e Infancia aparecen únicamente tras guardar Corresponde. Los otros estados
+no habilitan edición; los datos y versiones previas se conservan. Filtro común en
+menús, navegación y enlaces. [Contrato, límites y prueba](maqueta-aplicabilidad.md).
+29 Chromium, tipos/ESLint y capturas aprobados localmente; validación asistida y
+adopción conectada pendientes. Esta sección prevalece sobre la presentación previa.
+
 ## Versión vigente: propuesta de Claude adaptada (24/10/2026)
 
 El usuario aprobó el HTML de navegación y solicitó validar el informe de revisión.

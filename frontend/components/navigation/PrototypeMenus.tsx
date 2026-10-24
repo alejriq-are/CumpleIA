@@ -151,6 +151,7 @@ export function MainModules({
   );
 }
 export function ModuleOptions({
+  scope,
   location,
   scenario,
   go,
@@ -159,6 +160,7 @@ export function ModuleOptions({
   setMobileExpanded,
 }: {
   location: Destination;
+  scope: import("./prototype-applicability").DocumentScope;
   scenario: Scenario;
   go: (module: ModuleId, task: Destination["task"], section: string) => void;
   status: (section: string) => string;
@@ -169,7 +171,7 @@ export function ModuleOptions({
   const root = useRef<HTMLElement>(null);
   const wrapper = useRef<HTMLDivElement>(null);
   const triggers = useRef<Record<string, HTMLButtonElement | null>>({});
-  const groups = moduleNavigation(location.module, scenario);
+  const groups = moduleNavigation(location.module, scenario, scope);
   useEffect(() => {
     setOpen(null);
     setMobileExpanded(false);
@@ -268,7 +270,9 @@ export function ModuleOptions({
                   }
                 }}
               >
-                {direct ? destinationLabel(items[0].section, items[0].module) : group.label}
+                {direct && group.id !== "infancia"
+                  ? destinationLabel(items[0].section, items[0].module)
+                  : group.label}
                 {state && (
                   <>
                     <span

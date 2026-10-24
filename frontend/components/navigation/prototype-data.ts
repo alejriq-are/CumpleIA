@@ -81,6 +81,7 @@ export const labels: Record<string, string> = {
   conservacion: "Conservación y eliminación",
   terceros: "Terceros y transferencias",
   base: "Base y fundamento",
+  aplicabilidad: "Determinar aplicabilidad",
   infancia: "Infancia y adolescencia",
   eipd: "Tratamiento y alcance de la EIPD",
   riesgos: "Riesgos y valoración",
@@ -113,6 +114,7 @@ export function steps(module: ModuleId, task: TaskId, scenario: Scenario): strin
   if (module === "licitud") {
     if (task === "completar")
       return [
+        "aplicabilidad",
         "alcance",
         "base",
         ...(scenario === "infancia" ? ["infancia"] : []),
@@ -143,6 +145,38 @@ export function steps(module: ModuleId, task: TaskId, scenario: Scenario): strin
   return ["respaldos", "anexos"];
 }
 export const fields: Record<string, Field[]> = {
+  aplicabilidad: [
+    {
+      key: "aplicabilidad.eipd",
+      label: "¿Corresponde realizar una EIPD?",
+      options: [
+        "Pendiente de analizar",
+        "Corresponde",
+        "No corresponde",
+        "Información insuficiente",
+      ],
+    },
+    {
+      key: "aplicabilidad.eipd_fundamento",
+      label: "Fundamento sobre EIPD",
+      hint: "Explica el análisis del alcance, contexto y riesgos. La presencia de menores no determina por sí sola una EIPD.",
+    },
+    {
+      key: "aplicabilidad.infancia",
+      label: "¿Corresponde documentar infancia y adolescencia?",
+      options: [
+        "Pendiente de analizar",
+        "Corresponde",
+        "No corresponde",
+        "Información insuficiente",
+      ],
+    },
+    {
+      key: "aplicabilidad.infancia_fundamento",
+      label: "Fundamento sobre infancia y adolescencia",
+      hint: "Indica si los datos conciernen a niños, niñas o adolescentes y contrasta la conclusión con el alcance del RAT.",
+    },
+  ],
   alcance: [
     { key: "rat.nombre", label: "Nombre del tratamiento" },
     { key: "rat.finalidad", label: "Finalidad" },
@@ -414,6 +448,10 @@ export function evaluationRecords<T>(
 export function initialEvaluations(): Record<EvaluationId, Values> {
   return evaluationRecords((evaluation) => ({
     ...initial(evaluation.treatment),
+    "aplicabilidad.eipd": "Pendiente de analizar",
+    "aplicabilidad.eipd_fundamento": "",
+    "aplicabilidad.infancia": "Pendiente de analizar",
+    "aplicabilidad.infancia_fundamento": "",
     "rat.finalidad": purposeOptions.find((item) => item.id === evaluation.purposeId)!.label,
     "eipd.referencia": `SIMULADA-MAQUETA-EIPD-${evaluation.id.toUpperCase()}`,
   }));

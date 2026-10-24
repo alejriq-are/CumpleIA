@@ -1,7 +1,12 @@
 import { labels, steps, type ModuleId, type TaskId, type Scenario } from "./prototype-data";
+import { pendingScope, type DocumentScope, eipdSections } from "./prototype-applicability";
 export type Destination = { module: ModuleId; task: TaskId; section: string };
 export type NavigationGroup = { id: string; label: string; items: Destination[]; accent?: boolean };
-export function moduleNavigation(module: ModuleId, scenario: Scenario): NavigationGroup[] {
+export function moduleNavigation(
+  module: ModuleId,
+  scenario: Scenario,
+  scope: DocumentScope = pendingScope
+): NavigationGroup[] {
   const group = (
     id: string,
     label: string,
@@ -42,18 +47,17 @@ export function moduleNavigation(module: ModuleId, scenario: Scenario): Navigati
     ];
   if (module === "licitud")
     return [
-      group("alcance", labels.alcance, "completar", ["alcance"]),
       group("preparar", "Preparar", "completar", [
-        ...(scenario === "infancia" ? ["preparar"] : []),
+        "aplicabilidad",
+        "alcance",
         "base",
-        ...(scenario === "infancia" ? ["infancia"] : []),
-        "eipd",
-        "proporcionalidad",
-        "riesgos",
-        "medidas",
-        "eipd_fuentes",
         "anexos",
+        ...(scenario === "infancia" && scope.infancia ? ["preparar"] : []),
       ]),
+      ...(scope.eipd ? [group("eipd", "Completar EIPD", "completar", eipdSections)] : []),
+      ...(scope.infancia
+        ? [group("infancia", "Completar infancia y adolescencia", "completar", ["infancia"])]
+        : []),
       group("revisar", "Revisar y decidir", "revisar", steps(module, "revisar", scenario)),
       history,
     ];

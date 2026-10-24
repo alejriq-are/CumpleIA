@@ -2,6 +2,9 @@
 
 ## Visibilidad de accesos que abren formularios o información
 
+- [ ] **NAV-UX-004 — Integrar determinación de aplicabilidad EIPD/infancia antes de completar.** Solicitado el 24/10 e implementado en maqueta con decisiones independientes, estados pendientes/positivos/negativos/información insuficiente y fundamento obligatorio. Pendiente adopción conectada: alcance estructurado y permisos del servidor, normativa vigente/revisión humana, trazabilidad y versionado de determinaciones, revisión por cambios de alcance y preservación de antecedentes. No inferir obligación EIPD de la sola presencia de menores ni convertir un campo en autorización. Mantener filtros coherentes en navegación, consultas e historial, sin ocultar evidencia previa. [Contrato](project/maqueta-aplicabilidad.md).
+
+
 - [ ] **NAV-UX-003 — Adoptar el marco de navegación validado en el producto conectado.** Propuesta de Claude aprobada por usuario el 24/10 e implementada en la maqueta: menú oscuro agrupado, contexto compacto, historial interno, continuidad y acciones con semántica explícita. Antes de adopción: recorrido de aceptación, reutilización del catálogo real de 50 preguntas y sus secciones/progreso, rutas/contextos autorizados por servidor, recuperación de borradores/guardados tras recarga y comprobaciones de permisos/aislamiento/versionado. Coordinar con NAV-UX-002; no duplicar selección de contexto ni declarar resueltos los formularios LIC-FORM-001. [Resolución y oportunidades](project/maqueta-revision-claude.md). Sin merge, despliegue ni habilitación EIPD.
 
 

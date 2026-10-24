@@ -20,6 +20,14 @@ identifica el HEAD exacto de la tarea. Una CI anterior no prueba un commit nuevo
 
 ## Bloque funcional vigente — producto
 
+24/10, ajuste posterior: aplicabilidad independiente de EIPD e infancia. Bases de
+licitud abre Determinar aplicabilidad; estado Corresponde guardado con fundamento
+habilita su menú de completar. Pendiente/No corresponde/Información insuficiente
+no habilitan edición. Datos previos conservados, filtros también en historial,
+Continuar y enlaces. No clasificador jurídico ni cambios de servidor. 29 Chromium,
+tipos/ESLint aprobados; [contrato y prueba](project/maqueta-aplicabilidad.md).
+Validación asistida y publicación de este ajuste pendientes.
+
 24/10: usuario aprueba propuesta de Claude; rediseño de maqueta sobre base a9d3ab4,
 rama feature/maqueta-navegacion-review. Menú oscuro, contexto Cambiar con confirmación,
 agrupación por intención, historial Atrás/Adelante, recuerdo por módulo/evaluación,

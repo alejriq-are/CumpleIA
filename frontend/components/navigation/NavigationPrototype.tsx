@@ -25,6 +25,7 @@ import {
   destinationHint,
 } from "./prototype-navigation";
 import { usePrototypeNavigation } from "./usePrototypeNavigation";
+import { scopeFrom, applicabilityError } from "./prototype-applicability";
 import { PrototypeContext } from "./PrototypeContext";
 const primary =
   "rounded-lg bg-blue-800 px-4 py-3 font-semibold text-white hover:bg-blue-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-800 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-600";
@@ -46,6 +47,9 @@ function Card({ title, children }: { title: string; children: ReactNode }) {
   );
 }
 export function NavigationPrototype() {
+  const [drafts, setDrafts] = useState(initialEvaluations);
+  const [saved, setSaved] = useState(initialEvaluations);
+
   const {
     location,
     evaluationId,
@@ -54,14 +58,12 @@ export function NavigationPrototype() {
     resume,
     hasResume,
     resetNavigation,
-  } = usePrototypeNavigation();
+  } = usePrototypeNavigation(evaluationRecords((item) => scopeFrom(saved[item.id])));
   const [menuOpen, setMenuOpen] = useState(false);
   const [sectionsOpen, setSectionsOpen] = useState(false);
   const currentEvaluation = evaluationOptions.find((item) => item.id === evaluationId)!;
   const scenario = currentEvaluation.treatment;
   const selectedPurpose = purposeOptions.find((item) => item.id === currentEvaluation.purposeId)!;
-  const [drafts, setDrafts] = useState(initialEvaluations);
-  const [saved, setSaved] = useState(initialEvaluations);
   const [savedSteps, setSavedSteps] = useState(() => evaluationRecords<string[]>(() => []));
   const [resolutions, setResolutions] = useState(seedResolutions);
   const [selected, setSelected] = useState(2);
@@ -95,7 +97,13 @@ export function NavigationPrototype() {
   const first = useRef(true);
   const { module, task, section } = location;
   const m = modules.find((v) => v.id === module)!;
-  const menu = steps(module, task, scenario);
+  const scope = scopeFrom(saved[evaluationId]);
+  const available = (mod: ModuleId, t: TaskId) =>
+    moduleNavigation(mod, scenario, scope)
+      .flatMap((group) => group.items)
+      .filter((item) => item.task === t)
+      .map((item) => item.section);
+  const menu = available(module, task);
   const values = drafts[evaluationId];
   const stored = saved[evaluationId];
   const fs = fields[section];
@@ -132,8 +140,18 @@ export function NavigationPrototype() {
     return () => window.removeEventListener("beforeunload", warn);
   }, [sessionChanged]);
   useEffect(() => {
-    setNotice("");
-  }, [location, evaluationId]);
+    const restore = () => {
+      setNotice("");
+      setOverlay(null);
+      dialogRef.current?.close();
+    };
+    window.addEventListener("popstate", restore);
+    window.addEventListener("hashchange", restore);
+    return () => {
+      window.removeEventListener("popstate", restore);
+      window.removeEventListener("hashchange", restore);
+    };
+  }, []);
   const validAnnex = Boolean(
     values["anexos.referencia"]?.startsWith("SIMULADA-") &&
     values["anexos.descripcion"]?.trim() &&
@@ -177,6 +195,8 @@ export function NavigationPrototype() {
     }
   }, [overlay]);
   function go(mod: ModuleId, t?: TaskId, s?: string) {
+    setOverlay(null);
+    dialogRef.current?.close();
     setNotice("");
     navigate(mod, t, s);
   }
@@ -217,7 +237,12 @@ export function NavigationPrototype() {
     );
   }
   function save() {
-    if (!fs || (section === "anexos" && !validAnnex)) return;
+    if (
+      !fs ||
+      (section === "anexos" && !validAnnex) ||
+      (section === "aplicabilidad" && applicabilityError(values, scenario))
+    )
+      return;
     const next = { ...stored };
     for (const f of fs) next[f.key] = values[f.key] ?? "";
     const organizationChanges = Object.fromEntries(
@@ -269,6 +294,16 @@ export function NavigationPrototype() {
               label: currentEvaluation.label,
             },
             values: stored,
+            applicability: {
+              eipd: {
+                state: stored["aplicabilidad.eipd"],
+                reason: stored["aplicabilidad.eipd_fundamento"],
+              },
+              infancia: {
+                state: stored["aplicabilidad.infancia"],
+                reason: stored["aplicabilidad.infancia_fundamento"],
+              },
+            },
             resolutions: scenario === "infancia" ? resolutions : [],
             annexes: annexes[evaluationId],
             can_confirm: false,
@@ -292,6 +327,46 @@ export function NavigationPrototype() {
     const readOnly = module === "licitud" && section === "alcance";
     return (
       <>
+        {section === "aplicabilidad" && (
+          <>
+            <p className="rounded-lg border border-sky-200 bg-sky-50 p-4">
+              Registra por separado si corresponde EIPD e infancia. Al guardar, aparecerán los
+              accesos para completar cada bloque.
+            </p>
+            <div className="grid grid-cols-2 gap-3" aria-label="Aplicabilidad guardada">
+              <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm">
+                <strong>EIPD</strong>
+                <p>{stored["aplicabilidad.eipd"]}</p>
+              </div>
+              <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm">
+                <strong>Infancia y adolescencia</strong>
+                <p>{stored["aplicabilidad.infancia"]}</p>
+              </div>
+            </div>
+            <details className="rounded-lg border border-slate-200 bg-white p-3 text-sm">
+              <summary className="cursor-pointer font-semibold text-blue-800">
+                ¿Cómo determinarlo?
+              </summary>
+              <p className="mt-2">
+                EIPD: revisa si el tratamiento puede producir alto riesgo para los derechos de las
+                personas y los casos previstos en el artículo 15 ter.
+              </p>
+              <p className="mt-2">
+                Infancia y adolescencia: revisa si los datos conciernen a niños, niñas o
+                adolescentes y el alcance declarado en el RAT, conforme al artículo 16 quáter. Son
+                análisis independientes.
+              </p>
+              <a
+                className="mt-2 inline-block text-blue-800 underline"
+                href="https://www.bcn.cl/leychile/Navegar?idNorma=1209272&idVersion=2026-12-01"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Consultar Ley 21.719 · texto con vigencia desde el 1 de diciembre de 2026
+              </a>
+            </details>
+          </>
+        )}
         {section === "organizacion" && (
           <p className="text-sm text-slate-600">
             Esta información aparece en el encabezado de los informes exportados. En la maqueta, los
@@ -431,6 +506,20 @@ export function NavigationPrototype() {
             Declaro que este ejemplo usa únicamente datos ficticios.
           </label>
         )}
+        {section === "aplicabilidad" && (scope.eipd || scope.infancia) && (
+          <div className="flex flex-wrap gap-3" aria-label="Documentación que corresponde">
+            {scope.eipd && (
+              <button className={secondary} onClick={() => go("licitud", "completar", "eipd")}>
+                Completar EIPD →
+              </button>
+            )}
+            {scope.infancia && (
+              <button className={secondary} onClick={() => go("licitud", "completar", "infancia")}>
+                Completar infancia y adolescencia →
+              </button>
+            )}
+          </div>
+        )}
         {readOnly ? (
           <button className={secondary} onClick={() => go("rat", "completar", "alcance")}>
             Abrir edición en Inventario RAT →
@@ -446,6 +535,21 @@ export function NavigationPrototype() {
                     ? "Sin cambios pendientes."
                     : "Puedes guardar el ejemplo cuando termines."}
             </p>
+            {section === "aplicabilidad" && applicabilityError(values, scenario) && (
+              <p
+                id="applicability-help"
+                role="alert"
+                className="rounded-lg border border-amber-300 bg-amber-50 p-3"
+              >
+                {applicabilityError(values, scenario)}
+              </p>
+            )}
+            {section === "aplicabilidad" && (
+              <p className="text-sm text-slate-600">
+                Determinación de prueba: no es un dictamen automático ni una autorización. Cambiar
+                aplicabilidad conserva los antecedentes previos.
+              </p>
+            )}
             {section === "anexos" && !validAnnex && (
               <p id="save-help">
                 Para guardar: referencia SIMULADA-, descripción, PDF/TXT válido y declaración
@@ -469,15 +573,18 @@ export function NavigationPrototype() {
               <button
                 className={primary}
                 disabled={
+                  (section === "aplicabilidad" && Boolean(applicabilityError(values, scenario))) ||
                   (section === "anexos" && !validAnnex) ||
                   (section === "preparar" && !validPreparation)
                 }
                 aria-describedby={
-                  section === "anexos"
-                    ? "save-help"
-                    : section === "preparar"
-                      ? "prepare-help"
-                      : undefined
+                  section === "aplicabilidad" && applicabilityError(values, scenario)
+                    ? "applicability-help"
+                    : section === "anexos"
+                      ? "save-help"
+                      : section === "preparar"
+                        ? "prepare-help"
+                        : undefined
                 }
                 onClick={() =>
                   section === "preparar"
@@ -490,9 +597,11 @@ export function NavigationPrototype() {
               >
                 {section === "preparar"
                   ? "Abrir vista previa de la resolución →"
-                  : section === "organizacion"
-                    ? "Guardar cambios"
-                    : "Guardar cambios en la maqueta"}
+                  : section === "aplicabilidad"
+                    ? "Guardar determinación en la maqueta"
+                    : section === "organizacion"
+                      ? "Guardar cambios"
+                      : "Guardar cambios en la maqueta"}
               </button>
               {menu.indexOf(section) < menu.length - 1 && (
                 <button
@@ -546,10 +655,14 @@ export function NavigationPrototype() {
           <button
             className={`${secondary} mt-4`}
             onClick={() =>
-              setOverlay({ kind: "copy", title: "Preparar una copia de esta resolución" })
+              scope.infancia
+                ? setOverlay({ kind: "copy", title: "Preparar una copia de esta resolución" })
+                : go("licitud", "completar", "aplicabilidad")
             }
           >
-            Preparar sucesor desde esta resolución →
+            {scope.infancia
+              ? "Preparar sucesor desde esta resolución →"
+              : "Determinar aplicabilidad antes de preparar →"}
           </button>
         </Card>
         {section === "resoluciones" && (
@@ -739,12 +852,11 @@ export function NavigationPrototype() {
             <Card title="Avance documental">
               <p className="text-3xl font-bold text-blue-900">
                 {
-                  steps(module, "completar", scenario).filter((item) =>
+                  available(module, "completar").filter((item) =>
                     savedSteps[evaluationId].includes(item)
                   ).length
                 }{" "}
-                /{" "}
-                {steps(module, "completar", scenario).filter((item) => item !== "preparar").length}{" "}
+                / {available(module, "completar").filter((item) => item !== "preparar").length}{" "}
                 secciones
               </p>
               <p className="mt-2">guardadas en este módulo. No indica aprobación.</p>
@@ -916,6 +1028,22 @@ export function NavigationPrototype() {
     if (["documentos", "biblioteca", "respaldos"].includes(section))
       return (
         <>
+          <Card title="Aplicabilidad guardada en la maqueta">
+            <p>EIPD: {stored["aplicabilidad.eipd"]}</p>
+            <p className="mt-2">
+              {stored["aplicabilidad.eipd_fundamento"] || "Sin fundamento registrado."}
+            </p>
+            <p className="mt-3">Infancia y adolescencia: {stored["aplicabilidad.infancia"]}</p>
+            <p className="mt-2">
+              {stored["aplicabilidad.infancia_fundamento"] || "Sin fundamento registrado."}
+            </p>
+            <button
+              className={`${secondary} mt-3`}
+              onClick={() => go("licitud", "completar", "aplicabilidad")}
+            >
+              Revisar aplicabilidad
+            </button>
+          </Card>
           <Card title="Alcance y base guardados en la maqueta">
             <p className="font-bold">{stored["rat.finalidad"]}</p>
             <p className="mt-3">Base: {stored["base.tipo"]}</p>
@@ -936,20 +1064,35 @@ export function NavigationPrototype() {
               Abrir detalle del alcance
             </button>
           </Card>
-          {scenario === "infancia" && (
-            <Card title="Documento de infancia guardado en la maqueta">
-              <p>{stored["infancia.edad"]}</p>
-              <p className="mt-3 whitespace-pre-wrap">{stored["infancia.notas"]}</p>
-              <button
-                className={`${secondary} mt-4`}
-                onClick={() => go("licitud", "completar", "infancia")}
-              >
-                Abrir editor de infancia →
-              </button>
-            </Card>
-          )}
+          {scenario === "infancia" &&
+            (scope.infancia || savedSteps[evaluationId].includes("infancia")) && (
+              <Card title="Documento de infancia guardado en la maqueta">
+                {!scope.infancia && (
+                  <p className="mb-3 rounded-lg bg-amber-50 p-3">
+                    Antecedente previo conservado. La determinación actual no habilita completar
+                    infancia.
+                  </p>
+                )}
+                <p>{stored["infancia.edad"]}</p>
+                <p className="mt-3 whitespace-pre-wrap">{stored["infancia.notas"]}</p>
+                <button
+                  className={`${secondary} mt-4`}
+                  onClick={() =>
+                    go("licitud", "completar", scope.infancia ? "infancia" : "aplicabilidad")
+                  }
+                >
+                  {scope.infancia ? "Abrir editor de infancia →" : "Revisar aplicabilidad →"}
+                </button>
+              </Card>
+            )}
           {["eipd", "proporcionalidad"].some((item) => savedSteps[evaluationId].includes(item)) && (
             <Card title="Documento EIPD guardado en la maqueta">
+              {!scope.eipd && (
+                <p className="mb-3 rounded-lg bg-amber-50 p-3">
+                  Antecedente previo conservado. La determinación actual no habilita completar la
+                  EIPD.
+                </p>
+              )}
               <p className="font-bold">{stored["eipd.referencia"]}</p>
               <p className="mt-3 whitespace-pre-wrap">{stored["eipd.analisis"]}</p>
               <p className="mt-3 whitespace-pre-wrap">
@@ -957,35 +1100,37 @@ export function NavigationPrototype() {
               </p>
             </Card>
           )}
-          <Card title="Riesgo y medida que lo sustenta">
-            <p className="text-sm font-bold text-slate-600">
-              EJEMPLO DE LECTURA FIJO · NO RECALCULADO
-            </p>
-            <div className="mt-4 grid gap-4 sm:grid-cols-2">
-              <div className="rounded-lg bg-slate-50 p-4">
-                <p className="font-bold">R1 · Residual del ejemplo: Medio</p>
-                <p>Baja probabilidad · Impacto grave</p>
+          {scope.eipd && (
+            <Card title="Riesgo y medida que lo sustenta">
+              <p className="text-sm font-bold text-slate-600">
+                EJEMPLO DE LECTURA FIJO · NO RECALCULADO
+              </p>
+              <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                <div className="rounded-lg bg-slate-50 p-4">
+                  <p className="font-bold">R1 · Residual del ejemplo: Medio</p>
+                  <p>Baja probabilidad · Impacto grave</p>
+                </div>
+                <div className="rounded-lg bg-slate-50 p-4">
+                  <p className="font-bold">M1 · Restricción de acceso</p>
+                  <p>Probabilidad · Eficacia parcial · Verificación sintética</p>
+                </div>
               </div>
-              <div className="rounded-lg bg-slate-50 p-4">
-                <p className="font-bold">M1 · Restricción de acceso</p>
-                <p>Probabilidad · Eficacia parcial · Verificación sintética</p>
-              </div>
-            </div>
-            <p className="mt-3">
-              Ilustración independiente de los campos editables. No acredita controles reales.
-            </p>
-            <button
-              className={`${secondary} mt-4`}
-              onClick={() =>
-                detail(
-                  "Evidencia vinculada a R1 y M1",
-                  "SIMULADA-MAQUETA-EVIDENCIA-001 · Versión 1 · Sección Medidas. Acta sintética con casos predefinidos de acceso. No representa pruebas ejecutadas ni un archivo del expediente real."
-                )
-              }
-            >
-              Consultar evidencia y versión
-            </button>
-          </Card>
+              <p className="mt-3">
+                Ilustración independiente de los campos editables. No acredita controles reales.
+              </p>
+              <button
+                className={`${secondary} mt-4`}
+                onClick={() =>
+                  detail(
+                    "Evidencia vinculada a R1 y M1",
+                    "SIMULADA-MAQUETA-EVIDENCIA-001 · Versión 1 · Sección Medidas. Acta sintética con casos predefinidos de acceso. No representa pruebas ejecutadas ni un archivo del expediente real."
+                  )
+                }
+              >
+                Consultar evidencia y versión
+              </button>
+            </Card>
+          )}
           {scenario === "infancia" && (
             <button className={primary} onClick={() => go("licitud", "revisar", "resoluciones")}>
               Abrir resoluciones de infancia →
@@ -1037,6 +1182,8 @@ export function NavigationPrototype() {
       ref={rootRef}
       data-evaluation-id={evaluationId}
       data-treatment={scenario}
+      data-eipd-applicable={String(scope.eipd)}
+      data-infancia-applicable={String(scope.infancia)}
       className="prototype-app text-base leading-relaxed text-slate-800 [overflow-wrap:anywhere]"
     >
       <a
@@ -1143,7 +1290,7 @@ export function NavigationPrototype() {
                       href={`#/${module}`}
                       onClick={(event) => {
                         event.preventDefault();
-                        const target = moduleNavigation(module, scenario)[0].items[0];
+                        const target = moduleNavigation(module, scenario, scope)[0].items[0];
                         go(target.module, target.task, target.section);
                       }}
                     >
@@ -1184,6 +1331,7 @@ export function NavigationPrototype() {
               )}
             </div>
             <ModuleOptions
+              scope={scope}
               location={location}
               scenario={scenario}
               go={go}
