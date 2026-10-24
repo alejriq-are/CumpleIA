@@ -298,3 +298,65 @@ Validación local del ajuste: 17 pruebas de navegación aprobadas; una captura
 opcional omitida. Caso nuevo comprueba acceso visible al final del formulario
 y cambio de módulo en anchos 640/390/320 px. Tipos y ESLint aprobados.
 CI remota no verificada para este ajuste; aceptación visual del usuario pendiente.
+
+
+## Ajuste asistido: secciones en panel lateral móvil — 24/10/2026
+
+El usuario solicita que Secciones funcione como Menú principal en ventana estrecha.
+Secciones queda junto a Menú y abre un diálogo lateral con las opciones disponibles
+agrupadas por intención. Seleccionar una opción cierra el panel y abre su área de
+trabajo con el foco en el contenido, conservando los datos. Escape, Cerrar secciones
+y pulsar fuera cierran el panel; el cierre explícito devuelve el foco al botón.
+El panel permite desplazamiento propio y mantiene los filtros de aplicabilidad.
+La presentación de escritorio se conserva. Sin cambios de servidor o persistencia.
+
+Validación del ajuste: 29 pruebas Chromium (incluidas capturas), tipos y ESLint
+aprobados localmente. Revisión visual del panel móvil realizada; aceptación
+asistida y publicación pendientes.
+
+Incidencia asistida posterior: usuario informa que Escape no cierra el panel.
+Se refuerza el manejo de teclado directamente en ambos diálogos laterales, con
+cierre inmediato, sincronización del estado al cerrar y retorno de foco al botón.
+Prueba ampliada: Escape desde una opción enfocada, reapertura y cierre, además
+del recorrido móvil. Tipos/ESLint y seis pruebas funcionales focalizadas aprobados;
+una prueba opcional de capturas omitida. Revalidación en la ventana Edge del usuario pendiente.
+
+Segunda incidencia asistida: Escape y clic exterior siguen sin funcionar en Edge
+según usuario; no se pudo inspeccionar esa pestaña con el conector disponible.
+Se incorpora cierre compartido de ambos paneles en captura de eventos de ventana,
+antes de los manejadores interiores. Nueva prueba a 390 y 680 px: Escape desde la
+última opción enfocada, clic real sobre el fondo, reapertura y borrador intacto;
+aprobada junto a la prueba móvil previa, tipos y ESLint. La reproducción y aceptación
+en la sesión Edge del usuario siguen pendientes; no se atribuye causa confirmada.
+
+Tercera revisión tras confirmación de persistencia en ambos paneles: reemplazados
+los diálogos nativos móviles por PrototypeDrawer, compartido, con portal fuera del
+área de trabajo, fondo explícito, cierre por pointerdown exterior y Escape en captura.
+Confinamiento de Tab/Shift+Tab, fondo inert y bloqueo/restauración de desplazamiento;
+los menús cerrados mantienen su estructura oculta para preservar recorridos existentes.
+La llamada pública de localhost desde Windows confirmó que el servidor entrega los
+ajustes, sin inspeccionar la sesión privada de Edge. 30 pruebas Chromium aprobadas
+incluidas capturas, tipos/ESLint correctos; validación visual local realizada.
+Nueva señal visible en Secciones: «Escape o clic en el fondo para cerrar».
+Pendiente aceptación del cierre en la ventana Edge del usuario; no se afirma haber
+reproducido ni determinado la causa del fallo original en esa sesión.
+
+
+## Aceptación asistida de navegación — 24/10/2026
+
+El usuario confirma OK en el recorrido reiniciado: estado inicial pendiente,
+habilitación de EIPD con fundamento, Atrás/Adelante con contexto y borrador,
+guardado separado de riesgos y medidas, retirada/restauración de aplicabilidad
+sin pérdida, infancia independiente, aislamiento de evaluaciones, coexistencia
+de EIPD e infancia, cierre de ambos paneles móviles con Escape/clic exterior,
+cambio de módulo conservando borrador, cancelar contexto/reinicio/salida y
+Continuar en la sección recordada. Incidencia de cierre aclarada por el usuario:
+Escape cierra el panel abierto y vuelve al formulario, no al menú principal;
+clic exterior significa fondo sombreado, no espacio vacío dentro del panel.
+Dos navegadores mantienen copias de prueba independientes; no hay sincronización.
+
+Usuario acepta la navegación probada y autoriza commit/push de estos resultados.
+Documentos guardados, anexos, resoluciones, historial y descargas se difieren
+expresamente para la validación de la navegación conectada al servidor. Esta
+aceptación de diseño no acredita persistencia, permisos o aceptación jurídica.
+Solicita proceder con la integración de navegación al producto conectado.

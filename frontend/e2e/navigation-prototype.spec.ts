@@ -169,7 +169,8 @@ async function navigate(page: Page, destination: Destination) {
   const opener = optionsNav(page).locator(`[data-nav-group="${group.id}"]`);
   if (groupDestinations(group, scenario).length === 1) await opener.click();
   else {
-    if ((await opener.getAttribute("aria-expanded")) !== "true") await opener.click();
+    if (!(await mobile.isVisible()) && (await opener.getAttribute("aria-expanded")) !== "true")
+      await opener.click();
     const index = groupDestinations(group, scenario).findIndex(
       (item) => item.section === destination.section && item.task === destination.task
     );
@@ -600,7 +601,6 @@ test("capturas de escritorio y móvil para revisión visual", async ({ page }) =
   await page.evaluate(() => new Promise(requestAnimationFrame));
   await page.screenshot({ path: path.join(dir, "maqueta-infancia-mobile.png"), fullPage: true });
   await page.getByRole("button", { name: "Opciones del módulo", exact: true }).click();
-  await optionsNav(page).locator('[data-nav-group="preparar"]').click();
   await page.screenshot({ path: path.join(dir, "maqueta-secciones-mobile.png"), fullPage: false });
   await page.keyboard.press("Escape");
   await page.keyboard.press("Escape");
@@ -697,7 +697,8 @@ test("menús completos sin desborde en escritorio, tableta y móvil", async ({ p
       await reopen.click();
     for (const id of ["preparar", "eipd", "revisar", "historial"]) {
       const trigger = optionsNav(page).locator(`[data-nav-group="${id}"]`);
-      await trigger.click();
+      if (!(await mobile.isVisible())) await trigger.click();
+      else if ((await mobile.getAttribute("aria-expanded")) === "false") await mobile.click();
       const bounds = await page.locator(`[data-group="${id}"]`).boundingBox();
       expect(bounds!.x).toBeGreaterThanOrEqual(0);
       expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(width);
@@ -978,16 +979,32 @@ test("móvil conserva ubicación y acceso a secciones, Escape y cambio solo de a
   await expect(page.locator(".prototype-mobile-bar")).toContainText("Riesgos y valoración");
   const sections = page.getByRole("button", { name: "Opciones del módulo", exact: true });
   await sections.click();
-  await optionsNav(page).locator('[data-nav-group="preparar"]').click();
+  const drawer = page.getByRole("dialog", { name: "Secciones del módulo", exact: true });
+  await expect(drawer).toBeVisible();
+  const riskOption = drawer.getByRole("button", { name: /Riesgos y valoración/ });
+  await riskOption.focus();
+  await page.keyboard.press("Escape");
+  await expect(drawer).not.toBeVisible();
+  await expect(sections).toBeFocused();
+  await sections.click();
+  await expect(drawer).toBeVisible();
+  await expect(drawer.getByRole("button", { name: /Determinar aplicabilidad/ })).toBeVisible();
   await page.setViewportSize({ width: 390, height: 744 });
-  await expect(page.locator('[data-group="preparar"]')).toBeVisible();
+  await expect(drawer).toBeVisible();
   await page.keyboard.press("Escape");
-  await expect(optionsNav(page).locator('[data-nav-group="preparar"]')).toBeFocused();
-  await page.keyboard.press("Escape");
+  await expect(drawer).not.toBeVisible();
+  await expect(sections).toBeFocused();
+  await sections.click();
+  await drawer.getByRole("button", { name: /Medidas de mitigación/ }).click();
+  await expect(drawer).not.toBeVisible();
+  await expect(page.locator("#prototype-section-title")).toHaveText("Medidas de mitigación");
+  await sections.click();
+  await drawer.getByRole("button", { name: "Cerrar secciones" }).click();
   await expect(sections).toBeFocused();
   const menu = page.getByRole("button", { name: "Abrir menú", exact: true });
   await menu.click();
   await expect(page.getByRole("dialog", { name: "Menú principal", exact: true })).toBeVisible();
+  await moduleNav(page).getByRole("button", { name: "Autodiagnóstico", exact: true }).focus();
   await page.keyboard.press("Escape");
   await expect(menu).toBeFocused();
 });
@@ -1166,4 +1183,52 @@ test("determinaciones aisladas por evaluación y descarga con fundamento sin hab
   expect(packet.applicability.infancia.state).toBe("Pendiente de analizar");
   expect(packet.can_confirm).toBe(false);
   expect(packet.activation).toBe("deshabilitada");
+});
+
+test("paneles laterales cierran con Escape y clic en el fondo al reabrir", async ({ page }) => {
+  for (const width of [390, 680]) {
+    await page.setViewportSize({ width, height: 844 });
+    await open(page);
+    await module(page, "Bases de licitud");
+    await step(page, "Riesgos y valoración");
+    await page
+      .getByLabel("R1 · Descripción del riesgo", { exact: true })
+      .fill("[FICTICIA] Conservar al cerrar paneles.");
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+    for (const config of [
+      { trigger: "Opciones del módulo", title: "Secciones del módulo" },
+      { trigger: "Abrir menú", title: "Menú principal" },
+    ]) {
+      const trigger = page.getByRole("button", { name: config.trigger, exact: true });
+      const drawer = page.getByRole("dialog", { name: config.title, exact: true });
+      await trigger.click();
+      await expect(page.locator(".prototype-app")).toHaveJSProperty("inert", true);
+      const firstOption = drawer.getByRole("button").first();
+      const lastOption = drawer.getByRole("button").last();
+      await expect(firstOption).toBeFocused();
+      await page.keyboard.press("Shift+Tab");
+      await expect(lastOption).toBeFocused();
+      await page.keyboard.press("Tab");
+      await expect(firstOption).toBeFocused();
+      await drawer.getByRole("heading").first().click();
+      await expect(drawer).toBeVisible();
+      await lastOption.focus();
+      await page.keyboard.press("Escape");
+      await expect(drawer).not.toBeVisible();
+      await expect(page.locator(".prototype-app")).toHaveJSProperty("inert", false);
+      await expect(trigger).toBeFocused();
+      await trigger.click();
+      const box = (await drawer.boundingBox())!;
+      await page.mouse.click((box.x + box.width + width) / 2, 300);
+      await expect(drawer).not.toBeVisible();
+      await expect(trigger).toBeFocused();
+      await trigger.click();
+      await expect(drawer).toBeVisible();
+      await page.keyboard.press("Escape");
+      await expect(drawer).not.toBeVisible();
+    }
+    await expect(page.getByLabel("R1 · Descripción del riesgo", { exact: true })).toHaveValue(
+      "[FICTICIA] Conservar al cerrar paneles."
+    );
+  }
 });

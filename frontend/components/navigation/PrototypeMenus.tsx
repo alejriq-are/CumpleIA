@@ -1,5 +1,6 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { PrototypeDrawer } from "./PrototypeDrawer";
 import { modules, type ModuleId, type Scenario } from "./prototype-data";
 import {
   moduleNavigation,
@@ -48,7 +49,6 @@ export function MainModules({
 }) {
   const [mobile, setMobile] = useState(false);
   const [unavailable, setUnavailable] = useState("");
-  const dialog = useRef<HTMLDialogElement>(null);
   useEffect(() => {
     const media = window.matchMedia("(max-width: 767px)");
     const update = () => {
@@ -59,14 +59,10 @@ export function MainModules({
     media.addEventListener("change", update);
     return () => media.removeEventListener("change", update);
   }, [setExpanded]);
-  useEffect(() => {
-    if (mobile && expanded && !dialog.current?.open) dialog.current?.showModal();
-    if (!expanded) dialog.current?.close();
-  }, [expanded, mobile]);
-  function close() {
+  const close = useCallback(() => {
     setExpanded(false);
     requestAnimationFrame(() => document.getElementById("prototype-menu-trigger")?.focus());
-  }
+  }, [setExpanded]);
   const nav = (
     <>
       <div className="prototype-brand">
@@ -124,28 +120,14 @@ export function MainModules({
     </>
   );
   return mobile ? (
-    <dialog
-      ref={dialog}
-      className="prototype-rail prototype-drawer"
-      aria-label="Menú principal"
-      onCancel={(event) => {
-        event.preventDefault();
-        close();
-      }}
-      onClick={(event) => {
-        if (event.target === event.currentTarget) {
-          const rect = event.currentTarget.getBoundingClientRect();
-          if (
-            event.clientX > rect.right ||
-            event.clientY > rect.bottom ||
-            event.clientX < rect.left
-          )
-            close();
-        }
-      }}
+    <PrototypeDrawer
+      open={expanded}
+      label="Menú principal"
+      className="prototype-rail"
+      close={close}
     >
       {nav}
-    </dialog>
+    </PrototypeDrawer>
   ) : (
     <aside className="prototype-rail">{nav}</aside>
   );
@@ -170,6 +152,23 @@ export function ModuleOptions({
   const [open, setOpen] = useState<string | null>(null);
   const root = useRef<HTMLElement>(null);
   const wrapper = useRef<HTMLDivElement>(null);
+  const [mobile, setMobile] = useState(false);
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 767px)");
+    const update = () => {
+      setMobile(media.matches);
+      setMobileExpanded(false);
+    };
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, [setMobileExpanded]);
+  const closeSections = useCallback(() => {
+    setOpen(null);
+    setMobileExpanded(false);
+    requestAnimationFrame(() => document.getElementById("prototype-sections-trigger")?.focus());
+  }, [setMobileExpanded]);
+
   const triggers = useRef<Record<string, HTMLButtonElement | null>>({});
   const groups = moduleNavigation(location.module, scenario, scope);
   useEffect(() => {
@@ -177,7 +176,7 @@ export function ModuleOptions({
     setMobileExpanded(false);
   }, [location, scenario, setMobileExpanded]);
   useEffect(() => {
-    if (!open && !mobileExpanded) return;
+    if (mobile || !open) return;
     const outside = (event: PointerEvent) => {
       if (
         !wrapper.current?.contains(event.target as Node) &&
@@ -190,7 +189,9 @@ export function ModuleOptions({
     const escape = (event: KeyboardEvent) => {
       if (event.key !== "Escape") return;
       event.preventDefault();
-      if (open) {
+      if (mobileExpanded) {
+        closeSections();
+      } else if (open) {
         triggers.current[open]?.focus();
         setOpen(null);
       } else {
@@ -214,7 +215,7 @@ export function ModuleOptions({
       document.removeEventListener("keydown", escape);
       window.removeEventListener("resize", resize);
     };
-  }, [open, mobileExpanded, setMobileExpanded]);
+  }, [open, mobileExpanded, setMobileExpanded, closeSections, mobile]);
   function focusItem(id: string, last = false) {
     requestAnimationFrame(() => {
       const items = root.current?.querySelectorAll<HTMLButtonElement>(
@@ -223,29 +224,31 @@ export function ModuleOptions({
       items?.[last ? items.length - 1 : 0]?.focus();
     });
   }
-  return (
-    <div ref={wrapper} className={`prototype-section-options ${mobileExpanded ? "is-open" : ""}`}>
-      <nav ref={root} id="prototype-module-options" aria-label="Opciones del módulo">
-        {groups.map((group) => {
-          const items = groupDestinations(group, scenario);
-          const direct = items.length === 1;
-          const active = items.some(
-            (item) => item.task === location.task && item.section === location.section
-          );
-          const dirtyCount = items.filter(
-            (item) => status(item.section) === "Cambios sin guardar"
-          ).length;
-          const temporary = items.some((item) => status(item.section) === "Borrador temporal");
-          const hasSaved = items.some((item) => status(item.section) === "Guardado en maqueta");
-          const state = dirtyCount
-            ? `${dirtyCount} con cambios sin guardar`
-            : temporary
-              ? "Borrador temporal"
-              : hasSaved
-                ? "Guardado en maqueta"
-                : "";
-          return (
-            <div className="prototype-tab" key={group.id}>
+  const nav = (
+    <nav ref={root} id="prototype-module-options" aria-label="Opciones del módulo">
+      {groups.map((group) => {
+        const items = groupDestinations(group, scenario);
+        const direct = items.length === 1;
+        const active = items.some(
+          (item) => item.task === location.task && item.section === location.section
+        );
+        const dirtyCount = items.filter(
+          (item) => status(item.section) === "Cambios sin guardar"
+        ).length;
+        const temporary = items.some((item) => status(item.section) === "Borrador temporal");
+        const hasSaved = items.some((item) => status(item.section) === "Guardado en maqueta");
+        const state = dirtyCount
+          ? `${dirtyCount} con cambios sin guardar`
+          : temporary
+            ? "Borrador temporal"
+            : hasSaved
+              ? "Guardado en maqueta"
+              : "";
+        return (
+          <div className="prototype-tab" key={group.id}>
+            {mobile && !direct ? (
+              <h3 className="prototype-section-group-title">{group.label}</h3>
+            ) : (
               <button
                 ref={(node) => {
                   triggers.current[group.id] = node;
@@ -284,77 +287,99 @@ export function ModuleOptions({
                 )}
                 {!direct && <span aria-hidden="true">{open === group.id ? "▴" : "▾"}</span>}
               </button>
-              {!direct && open === group.id && (
-                <div
-                  id={`prototype-options-${group.id}`}
-                  data-group={group.id}
-                  className="prototype-pop"
-                  ref={(node) => {
-                    if (!node || window.innerWidth < 768) return;
-                    node.style.left = "0px";
-                    const rect = node.getBoundingClientRect();
-                    node.style.left = `${Math.max(12 - rect.left, Math.min(0, window.innerWidth - 12 - rect.right))}px`;
-                  }}
-                  onBlur={(event) => {
-                    if (
-                      event.relatedTarget &&
-                      !event.currentTarget.parentElement?.contains(event.relatedTarget as Node)
-                    )
+            )}
+            {!direct && (mobile || open === group.id) && (
+              <div
+                id={`prototype-options-${group.id}`}
+                data-group={group.id}
+                className="prototype-pop"
+                ref={(node) => {
+                  if (!node || window.innerWidth < 768) return;
+                  node.style.left = "0px";
+                  const rect = node.getBoundingClientRect();
+                  node.style.left = `${Math.max(12 - rect.left, Math.min(0, window.innerWidth - 12 - rect.right))}px`;
+                }}
+                onBlur={(event) => {
+                  if (
+                    event.relatedTarget &&
+                    !event.currentTarget.parentElement?.contains(event.relatedTarget as Node)
+                  )
+                    setOpen(null);
+                }}
+                onKeyDown={(event) => {
+                  if (!["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) return;
+                  event.preventDefault();
+                  const buttons = Array.from(
+                    event.currentTarget.querySelectorAll<HTMLButtonElement>("button")
+                  );
+                  const i = buttons.indexOf(document.activeElement as HTMLButtonElement);
+                  buttons[
+                    event.key === "Home"
+                      ? 0
+                      : event.key === "End"
+                        ? buttons.length - 1
+                        : (i + (event.key === "ArrowUp" ? -1 : 1) + buttons.length) % buttons.length
+                  ]?.focus();
+                }}
+              >
+                <p className="prototype-pop-title">{group.label}</p>
+                {items.map((item) => (
+                  <button
+                    key={item.section}
+                    aria-current={
+                      item.section === location.section && item.task === location.task
+                        ? "page"
+                        : undefined
+                    }
+                    onClick={() => {
                       setOpen(null);
-                  }}
-                  onKeyDown={(event) => {
-                    if (!["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) return;
-                    event.preventDefault();
-                    const buttons = Array.from(
-                      event.currentTarget.querySelectorAll<HTMLButtonElement>("button")
-                    );
-                    const i = buttons.indexOf(document.activeElement as HTMLButtonElement);
-                    buttons[
-                      event.key === "Home"
-                        ? 0
-                        : event.key === "End"
-                          ? buttons.length - 1
-                          : (i + (event.key === "ArrowUp" ? -1 : 1) + buttons.length) %
-                            buttons.length
-                    ]?.focus();
-                  }}
-                >
-                  <p className="prototype-pop-title">{group.label}</p>
-                  {items.map((item) => (
-                    <button
-                      key={item.section}
-                      aria-current={
-                        item.section === location.section && item.task === location.task
-                          ? "page"
-                          : undefined
-                      }
-                      onClick={() => {
-                        setOpen(null);
-                        setMobileExpanded(false);
-                        go(item.module, item.task, item.section);
-                      }}
+                      setMobileExpanded(false);
+                      go(item.module, item.task, item.section);
+                    }}
+                  >
+                    <span>
+                      {destinationLabel(item.section, item.module)}
+                      {status(item.section) && (
+                        <small className="block text-xs text-slate-500">
+                          {status(item.section)}
+                        </small>
+                      )}
+                    </span>
+                    <span
+                      className={`prototype-verb ${actionLabel(item, scenario) === "Decisión" ? "decision" : ""}`}
                     >
-                      <span>
-                        {destinationLabel(item.section, item.module)}
-                        {status(item.section) && (
-                          <small className="block text-xs text-slate-500">
-                            {status(item.section)}
-                          </small>
-                        )}
-                      </span>
-                      <span
-                        className={`prototype-verb ${actionLabel(item, scenario) === "Decisión" ? "decision" : ""}`}
-                      >
-                        {actionLabel(item, scenario)}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </nav>
+                      {actionLabel(item, scenario)}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </nav>
+  );
+  return (
+    <div ref={wrapper} className="prototype-section-options">
+      {mobile ? (
+        <PrototypeDrawer
+          open={mobileExpanded}
+          label="Secciones del módulo"
+          className="prototype-sections-drawer"
+          close={closeSections}
+        >
+          <div className="prototype-sections-heading">
+            <h2 id="prototype-sections-title">Secciones del módulo</h2>
+            <button className="prototype-drawer-close" onClick={closeSections}>
+              Cerrar secciones
+            </button>
+          </div>
+          <p className="px-2 pb-2 text-xs text-slate-600">Escape o clic en el fondo para cerrar.</p>
+          {nav}
+        </PrototypeDrawer>
+      ) : (
+        nav
+      )}
     </div>
   );
 }

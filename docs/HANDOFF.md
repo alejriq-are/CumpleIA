@@ -20,6 +20,27 @@ identifica el HEAD exacto de la tarea. Una CI anterior no prueba un commit nuevo
 
 ## Bloque funcional vigente — producto
 
+24/10, aceptación asistida: usuario confirma OK navegación de la maqueta y cierres
+móviles; aclara que Escape vuelve al formulario y clic exterior es fondo sombreado.
+Aprueba commit/push de resultados y solicita integrar navegación al servidor.
+Documentos/anexos/resoluciones/historial/descargas se probarán tras conexión.
+Las menciones siguientes a aceptación pendiente son antecedentes superados por
+este recorrido; no se declara aceptado el producto conectado ni habilitada EIPD.
+
+Incidencia móvil de cierre persistente comunicada por usuario en ambos paneles:
+solución local actual reemplaza diálogos nativos por PrototypeDrawer con portal,
+fondo explícito, Escape/clic exterior, foco confinado y fondo inert. 30 Chromium
+incluidas capturas y tipos/ESLint aprobados. Falta validar en Edge del usuario;
+los ajustes previos de eventos no resolvieron su reporte. Sin commit/push nuevo.
+
+24/10, prueba asistida: usuario confirma borradores/guardados de riesgos y medidas,
+retirada/restauración EIPD sin pérdida, independencia infancia/EIPD y separación
+entre evaluaciones. Solicita Secciones junto a Menú con panel lateral móvil:
+implementado localmente, selección abre formulario y cierra panel, Escape/Cerrar
+restauran foco; 29 Chromium incluidas capturas, tipos/ESLint aprobados. Validación
+asistida del panel y publicación pendientes. NAV-UX-005 registra alcance mixto
+adultos/hijos para desarrollo posterior, sin modificar la restricción del ejemplo.
+
 24/10, ajuste posterior: aplicabilidad independiente de EIPD e infancia. Bases de
 licitud abre Determinar aplicabilidad; estado Corresponde guardado con fundamento
 habilita su menú de completar. Pendiente/No corresponde/Información insuficiente

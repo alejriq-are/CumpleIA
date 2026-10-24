@@ -1259,18 +1259,22 @@ export function NavigationPrototype() {
               >
                 ☰ Menú
               </button>
-              <span title={`${m.title} › ${title}`}>
-                {m.title} › {title}
-              </span>
               <button
                 id="prototype-sections-trigger"
                 aria-label="Opciones del módulo"
                 aria-expanded={sectionsOpen}
                 aria-controls="prototype-module-options"
-                onClick={() => setSectionsOpen(!sectionsOpen)}
+                onClick={() => {
+                  setMenuOpen(false);
+                  setSectionsOpen(true);
+                }}
+                aria-haspopup="dialog"
               >
                 Secciones
               </button>
+              <span title={`${m.title} › ${title}`}>
+                {m.title} › {title}
+              </span>
             </div>
             <div className="prototype-context-row">
               <nav aria-label="Ubicación" className="prototype-crumbs">
