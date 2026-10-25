@@ -2,7 +2,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { AssessmentFlow, type AssessmentLocation } from "@/components/licitud/AssessmentFlow";
 import type { Applicability } from "@/lib/api/navigation";
-import { ConnectedApplicability, type ApplicabilityLoadState } from "./ConnectedApplicability";
+import {
+  ConnectedApplicability,
+  determinationLabels,
+  type ApplicabilityLoadState,
+} from "./ConnectedApplicability";
 import type { WorkLocation } from "./connected-navigation";
 export function ConnectedAssessment({
   location,
@@ -24,7 +28,9 @@ export function ConnectedAssessment({
   const [refreshVersion, setRefreshVersion] = useState(0);
   const refresh = useCallback(() => setRefreshVersion((n) => n + 1), []);
   const [loadState, setLoadState] = useState<ApplicabilityLoadState>({ loading: true, error: "" });
+  const [relocation, setRelocation] = useState<{ signature: string; text: string } | null>(null);
   const [saved, setSaved] = useState<Applicability | null>(null);
+  const signature = saved ? `${saved.context_hash}:${saved.revision}:${saved.current}` : "";
   const [appDirty, setAppDirty] = useState(false);
   const [flowDirty, setFlowDirty] = useState(false);
   const key = `${location.organizationId}:${location.treatmentId}:${location.assessmentId}`;
@@ -47,9 +53,23 @@ export function ConnectedAssessment({
     if (
       (location.section === "eipd" && !scope.eipd) ||
       (["infancia", "preparar"].includes(location.section) && !scope.infancia)
-    )
+    ) {
+      const topic = location.section === "eipd" ? "EIPD" : "infancia y adolescencia";
+      const determination = location.section === "eipd" ? saved.eipd : saved.infancia;
+      setRelocation({
+        signature,
+        text:
+          saved.revision === 0
+            ? "Volviste a Determinar aplicabilidad porque todavía no hay una determinación guardada para esta evaluación. Su formulario no está habilitado."
+            : saved.current
+              ? `Volviste a Determinar aplicabilidad porque ${topic} figura como «${determinationLabels[determination.state]}» en la determinación guardada. Su formulario no está habilitado.`
+              : `Volviste a Determinar aplicabilidad porque la determinación guardada de ${topic} requiere revisión para el alcance asociado a esta evaluación.`,
+      });
       go({ ...location, section: "aplicabilidad", step: 0 }, true);
-  }, [active, saved, loadState, scope.eipd, scope.infancia, location, go]);
+    } else if (location.section !== "aplicabilidad") {
+      setRelocation(null);
+    }
+  }, [active, saved, signature, loadState, scope.eipd, scope.infancia, location, go]);
   const section = location.section;
   const conditional = ["eipd", "infancia", "preparar"].includes(section);
   const flow: AssessmentLocation = {
@@ -68,6 +88,29 @@ export function ConnectedAssessment({
   };
   return (
     <div className="space-y-5">
+      {section === "aplicabilidad" && relocation?.signature === signature && (
+        <section
+          aria-label="Cambio de sección"
+          className="space-y-3 rounded border border-amber-400 bg-amber-50 p-4"
+        >
+          <p role="status">{relocation.text}</p>
+          <p>
+            {appDirty || flowDirty ? "Hay cambios sin guardar en esta evaluación. " : ""}Los
+            borradores abiertos se conservan durante esta visita.
+          </p>
+          <p>Los documentos anteriores, si existen, siguen disponibles para consulta.</p>
+          <button
+            type="button"
+            className="rounded border p-3"
+            onClick={() => go({ ...location, section: "revisar", step: 0 })}
+          >
+            Ir a Revisar y decidir
+          </button>
+          <button type="button" className="rounded border p-3" onClick={() => setRelocation(null)}>
+            Cerrar aviso
+          </button>
+        </section>
+      )}
       {section !== "aplicabilidad" && loadState.loading && (
         <p role="status" className="rounded border bg-blue-50 p-4">
           Cargando evaluación y aplicabilidad… Los borradores de esta visita se conservan.
@@ -100,6 +143,7 @@ export function ConnectedAssessment({
           onSaved={loaded}
           onDirty={setAppDirty}
           onLoadState={setLoadState}
+          onOpen={(section) => go({ ...location, section, step: 0 })}
         />
       </div>
       <div

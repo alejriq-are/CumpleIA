@@ -201,11 +201,12 @@ test.beforeEach(async ({ page }) => {
       if (method === "GET" && mode === "app-readonly")
         return result({ ...applicability(id), editable: false });
       if (method === "GET" && mode === "app-offline") return route.abort("internetdisconnected");
-      if (method === "GET" && mode === "app-hold-fail") {
+      if (method === "GET" && ["app-hold-fail", "app-hold"].includes(mode)) {
+        const fail = mode === "app-hold-fail";
         await new Promise<void>((resolve) => {
           releaseApplicability = resolve;
         });
-        return result({ detail: "PRUEBA determinación no disponible" }, 503);
+        if (fail) return result({ detail: "PRUEBA determinación no disponible" }, 503);
       }
       if (method === "GET" && mode === "app-fail")
         return result({ detail: "PRUEBA determinación no disponible" }, 503);
@@ -929,6 +930,198 @@ test("contexto explica dependencia y evaluación faltante conservando selección
   await expect(apply).toHaveAccessibleDescription(/El contexto está listo/);
   await capture(page, "lote3-contexto-requisitos.png");
   await dialog.getByRole("button", { name: "Cancelar", exact: true }).click();
+  expect(calls.some((v) => v.method !== "GET")).toBe(false);
+  expect(errors).toEqual([]);
+});
+
+const availability = (page: Page) =>
+  main(page).getByRole("region", { name: "Disponibilidad de formularios", exact: true });
+const relocation = (page: Page) =>
+  main(page).getByRole("region", { name: "Cambio de sección", exact: true });
+for (const state of ["pendiente", "corresponde", "no_corresponde", "informacion_insuficiente"]) {
+  test(`resultado guardado explica accesos para ambos temas: ${state}`, async ({ page }) => {
+    await legal(page);
+    await expect(availability(page)).toContainText("Sin determinación guardada");
+    for (const topic of ["EIPD", "infancia y adolescencia"]) {
+      await main(page)
+        .getByLabel(`¿Corresponde documentar ${topic}?`, { exact: true })
+        .selectOption(state);
+      if (state !== "pendiente")
+        await main(page)
+          .getByLabel(`Fundamento sobre ${topic}`, { exact: true })
+          .fill(`[FICTICIA] Análisis ${topic}`);
+    }
+    await expect(
+      availability(page).getByRole("button", { name: "Completar EIPD", exact: true })
+    ).not.toBeVisible();
+    await main(page)
+      .getByLabel("Declaro que esta prueba utiliza únicamente datos ficticios.")
+      .check();
+    await main(page).getByRole("button", { name: "Guardar determinación", exact: true }).click();
+    await expect(
+      main(page).getByText("Determinación guardada en el servidor.", { exact: true })
+    ).toBeVisible();
+    await expect(availability(page)).toContainText("Accesos según la determinación guardada");
+    for (const topic of ["EIPD", "infancia y adolescencia"]) {
+      const button = availability(page).getByRole("button", {
+        name: `Completar ${topic}`,
+        exact: true,
+      });
+      if (state === "corresponde") await expect(button).toBeVisible();
+      else await expect(button).not.toBeVisible();
+    }
+    if (state === "corresponde") {
+      await main(page)
+        .getByLabel("¿Corresponde documentar EIPD?", { exact: true })
+        .selectOption("no_corresponde");
+      await availability(page).getByRole("button", { name: "Completar EIPD", exact: true }).click();
+      await expect(page).toHaveURL(/\/licitud\/eipd\?/);
+    } else {
+      await expect(availability(page)).toContainText("El formulario no está habilitado");
+      await availability(page)
+        .getByRole("button", { name: "Ir a Revisar y decidir", exact: true })
+        .click();
+      await expect(page).toHaveURL(/\/licitud\/revisar\?/);
+    }
+    expect(calls.filter((v) => v.method === "POST")).toHaveLength(1);
+    expect(errors).toEqual([]);
+  });
+}
+
+test("resultado positivo de EIPD no habilita infancia y ofrece acceso directo", async ({
+  page,
+}) => {
+  await legal(page);
+  await enable(page);
+  await expect(
+    availability(page).getByRole("button", { name: "Completar EIPD", exact: true })
+  ).toBeVisible();
+  await expect(
+    availability(page).getByRole("button", {
+      name: "Completar infancia y adolescencia",
+      exact: true,
+    })
+  ).not.toBeVisible();
+  await availability(page).scrollIntoViewIfNeeded();
+  await capture(page, "lote4-resultado-eipd.png");
+  await availability(page).getByRole("button", { name: "Completar EIPD", exact: true }).click();
+  await expect(page).toHaveURL(/\/licitud\/eipd\?/);
+  expect(calls.filter((v) => v.method === "POST")).toHaveLength(1);
+  expect(errors).toEqual([]);
+});
+for (const target of ["eipd", "infancia", "preparar"]) {
+  test(`reubicación desde ${target} explica causa y conserva borradores`, async ({ page }) => {
+    if (target !== "eipd")
+      await page.setViewportSize({ width: target === "infancia" ? 390 : 320, height: 844 });
+    determinations[aid] = {
+      ...applicability(aid),
+      current: true,
+      revision: 1,
+      eipd: { state: "corresponde", reason: "[FICTICIA] EIPD guardada" },
+      infancia: { state: "corresponde", reason: "[FICTICIA] Infancia guardada" },
+    };
+    await legal(page);
+    if (target === "eipd") {
+      await section(page, "Tratamiento y alcance de la EIPD");
+      await main(page)
+        .getByRole("textbox", { name: "Notas del borrador EIPD (opcional)", exact: true })
+        .fill("[FICTICIA] Conservar al reubicar");
+      await section(page, "Determinar aplicabilidad");
+    }
+    mode = "app-hold";
+    await main(page)
+      .getByRole("button", {
+        name: "Actualizar estado guardado sin descartar el borrador",
+        exact: true,
+      })
+      .click();
+    await expect.poll(() => !!releaseApplicability).toBe(true);
+    await section(
+      page,
+      target === "eipd"
+        ? "Tratamiento y alcance de la EIPD"
+        : target === "infancia"
+          ? "Completar infancia y adolescencia"
+          : "Preparar resolución documental"
+    );
+    const topic = target === "eipd" ? "eipd" : "infancia";
+    determinations[aid] = {
+      ...determinations[aid],
+      revision: 2,
+      [topic]: { state: "no_corresponde", reason: "[FICTICIA] Cambio guardado" },
+    };
+    mode = "ok";
+    releaseApplicability!();
+    await expect(relocation(page)).toContainText("No corresponde");
+    await expect(relocation(page)).toContainText("se conservan durante esta visita");
+    await expect(
+      relocation(page).getByRole("button", { name: "Ir a Revisar y decidir", exact: true })
+    ).toBeVisible();
+    await expect(page).toHaveURL(/\/licitud\/aplicabilidad\?/);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+      true
+    );
+    await capture(page, `lote4-reubicacion-${target}.png`);
+    if (target === "eipd") {
+      await expect(relocation(page)).toContainText("Hay cambios sin guardar en esta evaluación");
+      determinations[aid] = {
+        ...determinations[aid],
+        revision: 3,
+        eipd: { state: "corresponde", reason: "[FICTICIA] Aplicabilidad restaurada" },
+      };
+      await main(page)
+        .getByRole("button", {
+          name: "Actualizar estado guardado sin descartar el borrador",
+          exact: true,
+        })
+        .click();
+      await expect(relocation(page)).not.toBeVisible();
+      await availability(page).getByRole("button", { name: "Completar EIPD", exact: true }).click();
+      await expect(
+        main(page).getByRole("textbox", { name: "Notas del borrador EIPD (opcional)", exact: true })
+      ).toHaveValue("[FICTICIA] Conservar al reubicar");
+    }
+    expect(calls.some((v) => v.method !== "GET")).toBe(false);
+    expect(errors).toEqual([]);
+  });
+}
+
+test("determinación desasociada explica revisión y conserva acceso a consulta", async ({
+  page,
+}) => {
+  determinations[aid] = {
+    ...applicability(aid),
+    revision: 1,
+    current: false,
+    eipd: { state: "corresponde", reason: "[FICTICIA] Alcance anterior" },
+  };
+  await page.evaluate((hash) => {
+    window.location.hash = hash;
+  }, `#/licitud/eipd?organizationId=${org}&treatmentId=${tid}&assessmentId=${aid}`);
+  await expect(relocation(page)).toContainText("requiere revisión");
+  await expect(availability(page)).toContainText("requiere revisión");
+  await expect(
+    availability(page).getByRole("button", { name: "Completar EIPD", exact: true })
+  ).not.toBeVisible();
+  await expect(
+    availability(page).getByRole("button", { name: "Ir a Revisar y decidir", exact: true })
+  ).toBeVisible();
+  expect(calls.some((v) => v.method !== "GET")).toBe(false);
+  expect(errors).toEqual([]);
+});
+
+test("enlace sin determinación explica ausencia de guardado y permite cerrar el aviso", async ({
+  page,
+}) => {
+  await page.evaluate((hash) => {
+    window.location.hash = hash;
+  }, `#/licitud/eipd?organizationId=${org}&treatmentId=${tid}&assessmentId=${aid}`);
+  await expect(relocation(page)).toContainText("todavía no hay una determinación guardada");
+  await expect(relocation(page)).not.toContainText("requiere revisión");
+  await expect(availability(page)).toContainText("Sin determinación guardada");
+  await relocation(page).getByRole("button", { name: "Cerrar aviso", exact: true }).click();
+  await expect(relocation(page)).not.toBeVisible();
+  await expect(availability(page)).toBeVisible();
   expect(calls.some((v) => v.method !== "GET")).toBe(false);
   expect(errors).toEqual([]);
 });

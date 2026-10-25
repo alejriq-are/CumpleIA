@@ -19,6 +19,7 @@ export function ConnectedApplicability({
   onSaved,
   onDirty,
   onLoadState,
+  onOpen,
   token = sessionToken,
   refreshVersion = 0,
 }: {
@@ -29,6 +30,7 @@ export function ConnectedApplicability({
   onSaved: (v: Applicability) => void;
   onDirty: (v: boolean) => void;
   onLoadState?: (v: ApplicabilityLoadState) => void;
+  onOpen: (section: "eipd" | "infancia" | "revisar") => void;
   token?: () => Promise<string>;
   refreshVersion?: number;
 }) {
@@ -257,6 +259,69 @@ export function ConnectedApplicability({
         <p role="status" className="rounded bg-teal-50 p-3">
           {notice}
         </p>
+      )}
+      {saved && !loading && (
+        <section
+          aria-label="Disponibilidad de formularios"
+          aria-live="polite"
+          className="space-y-3 rounded border border-blue-200 bg-blue-50 p-4"
+        >
+          <h3 className="font-bold">
+            {saved.revision === 0
+              ? "Sin determinación guardada"
+              : "Accesos según la determinación guardada"}
+          </h3>
+          <ul className="space-y-4">
+            {(
+              [
+                ["eipd", "EIPD"],
+                ["infancia", "Infancia y adolescencia"],
+              ] as const
+            ).map(([topic, label]) => {
+              const available = saved.current && saved[topic].state === "corresponde";
+              const needsReview = !saved.current && saved.revision > 0;
+              const action = readOnly || !saved.editable ? "Consultar" : "Completar";
+              return (
+                <li key={topic}>
+                  <p className="font-semibold">
+                    {label}: {determinationLabels[saved[topic].state]}
+                  </p>
+                  {available ? (
+                    <button
+                      type="button"
+                      className="mt-2 rounded border border-blue-800 bg-white px-3 py-2 font-semibold text-blue-900"
+                      onClick={() => onOpen(topic)}
+                    >
+                      {action} {topic === "eipd" ? "EIPD" : "infancia y adolescencia"}
+                    </button>
+                  ) : (
+                    <p className="text-sm">
+                      El formulario no está habilitado.{" "}
+                      {needsReview
+                        ? "La determinación guardada requiere revisión para el alcance asociado; revísala y guárdala nuevamente antes de continuar."
+                        : saved[topic].state === "no_corresponde"
+                          ? "La determinación guardada indica que no corresponde completarlo."
+                          : saved[topic].state === "informacion_insuficiente"
+                            ? "Falta información para determinar si corresponde completarlo."
+                            : "La decisión está pendiente. Solo se habilita si guardas «Corresponde» con su fundamento."}
+                    </p>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+          <p className="text-sm">
+            Los documentos anteriores, si existen, se conservan y pueden consultarse en Revisar y
+            decidir.
+          </p>
+          <button
+            type="button"
+            className="rounded border border-blue-800 bg-white px-3 py-2 text-blue-900"
+            onClick={() => onOpen("revisar")}
+          >
+            Ir a Revisar y decidir
+          </button>
+        </section>
       )}
       {!editingHelp && (
         <p id={saveHelpId} aria-live="polite" className="text-sm text-slate-700">

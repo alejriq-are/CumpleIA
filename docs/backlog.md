@@ -1,5 +1,20 @@
 # Backlog — CumpleIA
 
+## Aceptación asistida del lote 4 C3/C8 — 25/10/2026
+
+- [x] **Lote 4 — Orientar según aplicabilidad guardada y explicar reubicación.** Resumen positivo/acceso directo, guardado ficticio No corresponde y aviso al volver desde EIPD comprobados con usuario; captura 227db7c3 confirma restauración del acceso y nota sin guardar conservada. Aceptación acotada registrada en [continuidad](project/navegacion-servidor.md), sin commit/push del lote 4. Otros estados/infancia/preparación tienen prueba controlada, no se declaran nuevos ensayos manuales. Pendiente lote 5 y mejora de proximidad del aviso de guardado; NAV-UX-004 no se cierra globalmente.
+
+## Confirmación de guardado próxima a su acción — 25/10/2026
+
+- [ ] **C9/C7 / LIC-UX-005 — Reubicar «Determinación guardada en el servidor» junto a Guardar determinación.** Observación asistida del usuario (captura da0d584a): el aviso está antes del panel Accesos según la determinación guardada, y este bloque lo separa del botón. Mostrar confirmación de escritura inmediatamente antes de Guardar, junto a la ayuda de requisitos y sin duplicarla. Mantener el panel de disponibilidad diferenciado del resultado de escritura; una consulta/reintento no debe emitir éxito de guardado ni borrar borradores. Probar éxito, error posterior, ediciones nuevas y ubicación móvil/teclado. Registrado para lote 5 (estado guardado) / coordinación con lote 8 (simplificación); pendiente implementación, no se cambia interfaz dentro de esta anotación.
+
+## Lote 4 C3/C8 — orientación de aplicabilidad, 25/10/2026
+
+- [ ] **C3/C8 / NAV-UX-004 — Aceptar resultados guardados y reubicación explicada.** Implementación local en fix/navegacion-orientacion-aplicabilidad: accesos directos basados solo en estado guardado/asociado, razones para formularios no habilitados, consulta de antecedentes y aviso al volver a aplicabilidad; borradores conservados. 35 escenarios distintos ejecutados en batería completa de 34 más diez dirigidos finales, tipos/lint/formato y capturas correctos. Validación asistida pendiente; sin commit/push del lote 4. [Alcance y prueba](project/navegacion-servidor.md). Sin cambios de permisos/estado jurídico ni sincronización de ventanas.
+
+Lote 3 publicado en 0340b0a tras autorización. Otros lotes y seguimiento de sesión
+mantienen sus pendientes; no se cierran NAV-UX-003/004 globalmente.
+
 ## Aceptación asistida del lote 3 C4 — 25/10/2026
 
 - [x] **Lote 3 — Explicar permisos y requisitos.** Usuario valida ayuda de Guardar (declaración ficticia) y Aplicar contexto (evaluación faltante), cambio de habilitación y Cancelar. Veinticinco pruebas conectadas aprobadas; roles/estado no editable cubiertos con fixtures sin cambiar permisos reales. Aceptación acotada registrada en [continuidad](project/navegacion-servidor.md); sin commit/push del lote 3. No cierra globalmente NAV-UX-003 ni seguimiento de autenticación.

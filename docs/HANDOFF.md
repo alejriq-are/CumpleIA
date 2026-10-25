@@ -1,5 +1,33 @@
 # Handoff vigente de CumpleIA
 
+## Cierre autorizado del lote 4 — 25/10/2026
+
+Usuario autoriza commit y push del lote 4 validado en
+fix/navegacion-orientacion-aplicabilidad. El presente bloque reúne implementación,
+pruebas y aceptación asistida C3/C8. Lote 5 y mejora de ubicación del aviso de guardado
+siguen pendientes, sin iniciar. Verificar HEAD/CI remoto exactos al retomar; no se
+infiere CI funcional aprobada de una publicación. Sin merge ni despliegue.
+El archivo frontend/next-env.d.ts regenerado por Next.js queda fuera de este commit.
+
+## Último resultado — lote 4 validado, 25/10/2026
+
+Captura 227db7c3 confirma retorno a EIPD tras restaurar Corresponde, con nota pendiente
+conservada. Resumen/acceso directo, No corresponde y reubicación explicada ya comprobados
+asistidamente. Lote 4 C3/C8 aceptado con ese alcance, local en
+fix/navegacion-orientacion-aplicabilidad sobre 0340b0a, sin commit/push nuevo.
+Siguiente propuesto: lote 5 C9, incluido acercar la confirmación de guardado al botón.
+Pruebas de infancia y demás estados automatizadas; no atribuir ensayos manuales no realizados.
+
+## Bloque activo — lote 4 C3/C8, 25/10/2026
+
+Lote 3 publicado en 0340b0a (remoto verificado). Lote 4 implementado localmente en
+fix/navegacion-orientacion-aplicabilidad: resultado de accesos según determinación
+guardada, guía para estados no habilitados/consulta previa y aviso de reubicación
+con conservación de borradores. Sin cambios de reglas/API/DB/permisos. 34 pruebas
+conectadas y 10 dirigidas finales aprobadas (35 escenarios únicos), tipos/lint/formato
+y capturas escritorio/390/320 correctos. Aceptación asistida y publicación lote 4
+pendientes. [Guion vigente](project/navegacion-servidor.md). No iniciar otros lotes.
+
 ## Último resultado — lote 3 validado, 25/10/2026
 
 Usuario confirma OK ayuda dinámica de Guardar y selector de contexto (motivo de

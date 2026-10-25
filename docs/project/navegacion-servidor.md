@@ -373,3 +373,92 @@ pruebas controladas automatizadas, no un ensayo manual con cuentas de otros role
 Lote 3 validado con ese alcance; sin commit/push nuevo. Próximo lote propuesto: 4,
 orientación después de guardar aplicabilidad y explicación de reubicación (C3/C8),
 pendiente de instrucción para iniciar. Otros pendientes de backlog no se cierran.
+
+## Correcciones de revisión externa — lote 4 (C3/C8), 25/10/2026
+
+Usuario autoriza commit/push del lote 3 y continuar lote 4. Lote 3 publicado como
+0340b0a7c33c88e2b5132daad713f03831c0bc64 en origin/fix/navegacion-permisos-requisitos,
+HEAD remoto verificado. Rama local lote 4: fix/navegacion-orientacion-aplicabilidad.
+La interrupción por cuota ocurrió antes de escribir cambios de este lote; al reanudar
+se comprobó estado y se continuó desde el commit publicado.
+
+- [x] Panel Disponibilidad de formularios junto al resultado de guardado: separa EIPD
+  e infancia y presenta su estado guardado, no el selector pendiente. Accesos directos
+  Completar cuando corresponde y está asociado; Consultar si el rol/estado es de lectura.
+- [x] Pendiente, No corresponde e Información insuficiente explican que el formulario
+  no está habilitado y la causa. Sin determinación se distingue de determinación que
+  requiere revisión por alcance. No se induce una conclusión positiva obligatoria.
+- [x] Acceso a Revisar y decidir para antecedentes previos, si existen, sin retirarlos
+  al cambiar aplicabilidad. No se reintroducen entradas deshabilitadas en los menús.
+- [x] Al reubicar desde EIPD/infancia/preparación aparece aviso con causa, conservación
+  de borradores y consulta de documentos. Indica cambios pendientes si existen en la
+  evaluación, sin atribuirlos a un formulario concreto no identificado. Aviso cerrable;
+  no persiste al consultar una revisión/estado distinto ni al navegar a otro destino.
+- [x] No cambios en habilitación, permisos, API, DB, historial ni sincronización entre
+  ventanas: solo una consulta explícita o guardado actualiza el estado de la visita.
+  Los borradores permanecen montados y la navegación no crea registros.
+- [x] Prueba previa reproduce falta de acceso directo. Batería conectada de 34 aprobada;
+  tras añadir el caso sin determinación y aclarar textos, 10 casos dirigidos finales
+  aprobados (35 escenarios distintos en total; no sumar repeticiones como cobertura).
+  Tipos/ESLint/Prettier aprobados; capturas de resultado y reubicación escritorio,
+  390/320 revisadas sin desborde en outputs/navegacion-lote4.
+- [x] Casos controlados: cuatro estados para ambos temas, independencia EIPD/infancia,
+  valor sin guardar no altera accesos, consulta previa accesible, reubicación desde
+  tres destinos, borrador EIPD conservado al restaurar aplicabilidad, alcance
+  desasociado y ausencia de determinación. Fixtures, sin escrituras en base operativa.
+- [ ] Validación asistida del lote 4 pendiente; no se declara aceptado por usuario.
+- [ ] Commit/push lote 4 no realizado. Lotes siguientes siguen pendientes.
+
+Guion asistido inicial sin nuevas revisiones: en /dashboard/trabajo, evaluación ficticia
+existente con EIPD Corresponde guardada e infancia Pendiente, abrir Determinar
+aplicabilidad y localizar Accesos según la determinación guardada. Debe ofrecer
+Completar EIPD, explicar infancia no habilitada e indicar conservación/consulta de
+antecedentes. Completar EIPD abre el paso correspondiente en el mismo contexto.
+Para variantes negativas/reubicación, acordar prueba ficticia deliberada o usar evidencia
+controlada; no cambiar conclusiones guardadas solo para imitar un error ni recargar
+borradores pendientes. No declarar nuevos guardados por el simple hecho de consultar.
+
+### Validación asistida parcial lote 4 — resumen y acceso directo
+
+Usuario confirma y aporta capturas a5afe215/572a770b: en pestaña nueva del espacio
+conectado aparece Accesos según la determinación guardada, EIPD Corresponde con acceso
+directo, infancia Pendiente con explicación, consulta de documentos anteriores.
+Completar EIPD abre Tratamiento y alcance en el mismo contexto Gestión de clientes /
+Coordinar citas / versión 1 borrador. No guardó otra determinación para esta comprobación.
+La pestaña anterior mostraba versión previa sin el bloque; se mantuvo abierta para
+conservar sus notas pendientes. Esta prueba no acredita sincronización de borradores.
+C3 positivo comprobado asistidamente; aviso/reubicación C8 todavía pendiente de ensayo
+manual. El lote 4 no queda globalmente aceptado por esta comprobación parcial.
+
+### Ensayo asistido lote 4 — No corresponde y reubicación confirmados
+
+Usuario confirma prueba OK con capturas da0d584a/3e5eebd3: revisión ficticia 2,
+EIPD No corresponde, menú Completar EIPD retirado y panel explica no habilitación;
+Atrás desde el intento de volver a EIPD muestra aviso «Volviste a Determinar
+aplicabilidad… No corresponde», con cambios pendientes/borradores y consulta de
+antecedentes preservados. No se declara aún comprobada la recuperación de la nota:
+pendiente restaurar Corresponde y abrir EIPD en esta misma pestaña sin recargar.
+
+Usuario solicita anotar confirmación de guardado alejada del botón por el panel de
+accesos intermedio. Registrado en backlog para lote 5/C9 y coordinación lote 8;
+solo registro, no reubicación implementada en lote 4.
+
+### Aceptación asistida del lote 4 — restauración y nota conservada
+
+Captura 227db7c3: tras restaurar EIPD Corresponde y abrir Tratamiento y alcance en
+la misma pestaña, Notas del borrador conserva «[FICTICIA] Conservar durante prueba
+de aplicabilidad» y el aviso de cambios sin guardar. Se recupera el formulario sin
+persistir esa nota por navegar/restaurar aplicabilidad. Junto con resumen positivo,
+No corresponde y reubicación explicada, completa el guion asistido C3/C8 acordado.
+Lote 4 validado con ese alcance; infancia/preparación y otros estados cubiertos por
+pruebas controladas, no se atribuyen ensayos manuales adicionales. Sin commit/push.
+Pendiente lote 5: estado guardado frente a borrador y proximidad del mensaje de éxito
+al botón Guardar, según observación registrada. No iniciar siguiente lote sin indicación.
+
+### Publicación autorizada del lote 4
+
+Usuario solicita commit y autoriza push del lote 4 validado. Se publica la rama
+fix/navegacion-orientacion-aplicabilidad con código, pruebas y aceptación registrada;
+los estados anteriores «sin commit/push» describen el momento previo a esta autorización.
+No se inicia lote 5 ni se ejecuta merge/despliegue. Archivo generado next-env.d.ts
+excluido. La CI remota debe comprobarse por el commit resultante; no se declara aprobada.
