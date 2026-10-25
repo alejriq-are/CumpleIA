@@ -1,5 +1,7 @@
 # Navegación conectada al servidor
 
+Referencia funcional: [ciclo documental de la EIPD](ciclo-documental-eipd.md). Explica borrador, versión de evaluación, revisiones de aplicabilidad, resoluciones, revisión y decisión; distingue lo implementado del circuito previsto sin habilitar confirmación ni activación.
+
 Fecha: 25/10/2026. Base: 6612076. Rama: feature/navegacion-servidor.
 
 Solicitud: adoptar la navegación de la maqueta aceptada en los módulos conectados.

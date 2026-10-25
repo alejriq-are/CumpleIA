@@ -1,5 +1,9 @@
 # Handoff vigente de CumpleIA
 
+## Guía del ciclo documental — 25/10/2026
+
+Se agrega la [guía de borradores, versiones, revisión y decisión EIPD](project/ciclo-documental-eipd.md), contrastada con e587da6, en la rama feature/documentacion-ciclo-documental. Incluye funcionamiento actual, límites de revisión del EIPD general, sucesores de infancia y circuito conceptual pendiente. Cambio exclusivamente documental; no modifica estados, permisos, datos ni la interfaz. El usuario autoriza commit y push de esta guía. Lote 5 y los demás pendientes del backlog conservan su estado.
+
 ## Cierre autorizado del lote 4 — 25/10/2026
 
 Usuario autoriza commit y push del lote 4 validado en
