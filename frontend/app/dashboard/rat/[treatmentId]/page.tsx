@@ -1,6 +1,5 @@
-import Link from "next/link";
+import { encodeWork } from "@/components/navigation/connected-navigation";
 import { redirect } from "next/navigation";
-import { TreatmentGeneralForm } from "@/components/rat/TreatmentGeneralForm";
 import { api } from "@/lib/api/client";
 import { createClient } from "@/lib/supabase/server";
 
@@ -32,24 +31,15 @@ export default async function TratamientoPage({
   const initialOrganizationId =
     organizaciones.find((org) => org.id === requested)?.id ?? organizaciones[0].id;
 
-  return (
-    <div className="space-y-6">
-      <Link href="/dashboard/rat" className="text-sm text-blue-700 hover:underline">
-        ← Volver al inventario
-      </Link>
-
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Actividad de tratamiento</h1>
-        <p className="mt-1 text-sm text-gray-500">
-          Edita la información general de esta actividad.
-        </p>
-      </div>
-
-      <TreatmentGeneralForm
-        organizaciones={organizaciones}
-        initialOrganizationId={initialOrganizationId}
-        treatmentId={treatmentId}
-      />
-    </div>
+  redirect(
+    "/dashboard/trabajo" +
+      encodeWork({
+        organizationId: initialOrganizationId,
+        treatmentId,
+        assessmentId: "",
+        module: "rat",
+        section: "general",
+        step: 0,
+      })
   );
 }

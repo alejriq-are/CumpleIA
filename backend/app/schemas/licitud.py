@@ -1335,6 +1335,7 @@ class LegalAssessmentSummaryOut(BaseModel):
     organization_id: uuid.UUID
     version: int
     status: LegalAssessmentStatus
+    series_id: uuid.UUID
     purpose_snapshot: str
     legal_basis: LegalBasis | None
 

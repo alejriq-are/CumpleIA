@@ -1,0 +1,800 @@
+"use client";
+import { useCallback, useEffect, useRef, useState, type MouseEvent } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { SignOutButton } from "@/components/auth/SignOutButton";
+import { api, type OrganizationMembershipOut } from "@/lib/api/client";
+import { licitudApi } from "@/lib/api/licitud";
+import type { Applicability } from "@/lib/api/navigation";
+import { AutodiagnosticoWorkspace } from "@/components/autodiagnostico/AutodiagnosticoWorkspace";
+import { RatWorkspace } from "@/components/rat/RatWorkspace";
+import { TreatmentGeneralForm } from "@/components/rat/TreatmentGeneralForm";
+import { LicitudWorkspace, sessionToken } from "@/components/licitud/LicitudWorkspace";
+import { OrganizacionForm } from "@/components/organizacion/OrganizacionForm";
+import { MainModules } from "./PrototypeMenus";
+import { PrototypeDrawer } from "./PrototypeDrawer";
+import { ConnectedAssessment } from "./ConnectedAssessment";
+import { ConnectedContext, type WorkContext } from "./ConnectedContext";
+import {
+  encodeWork,
+  parseWork,
+  paneKey,
+  ratSections,
+  eipdSections,
+  type WorkLocation,
+} from "./connected-navigation";
+import { modules, type ModuleId } from "./prototype-data";
+import "./navigation-prototype.css";
+import "./connected-navigation.css";
+
+type Item = { id: string; label: string; step?: number };
+type Group = { label: string; items: Item[] };
+function contextKey(v: WorkContext) {
+  return `${v.organizationId}:${v.treatmentId}:${v.assessmentId}`;
+}
+function ConnectedDiagnostic({
+  organization,
+  location,
+  go,
+  onSections,
+  onPending,
+}: {
+  organization: OrganizationMembershipOut;
+  location: WorkLocation;
+  go: (v: WorkLocation) => void;
+  onSections: (org: string, items: Item[]) => void;
+  onPending: (key: string, dirty: boolean) => void;
+}) {
+  const sections = useCallback(
+    (items: Item[]) => onSections(organization.id, items),
+    [organization.id, onSections]
+  );
+  const pending = useCallback(
+    (v: boolean) => onPending(`diagnostico:${organization.id}`, v),
+    [organization.id, onPending]
+  );
+  return (
+    <AutodiagnosticoWorkspace
+      organizaciones={[organization]}
+      onPending={pending}
+      navigation={{
+        section: location.section,
+        go: (id) => go({ ...location, section: id }),
+        onSections: sections,
+      }}
+    />
+  );
+}
+function memoryKey(v: WorkLocation) {
+  return `${v.organizationId}:${v.module}:${v.module === "licitud" ? v.assessmentId : v.module === "rat" ? v.treatmentId : ""}`;
+}
+export function ConnectedWorkspace({
+  organizations,
+}: {
+  organizations: OrganizationMembershipOut[];
+}) {
+  const first: WorkLocation = {
+    organizationId: organizations[0]?.id ?? "",
+    treatmentId: "",
+    assessmentId: "",
+    module: "panel",
+    section: "resumen",
+    step: 0,
+  };
+  const [location, setLocation] = useState(first);
+  const [panes, setPanes] = useState<Record<string, WorkLocation>>({});
+  const router = useRouter();
+  const [exitOpen, setExitOpen] = useState(false);
+  const exitTrigger = useRef<HTMLElement | null>(null);
+  const exitResolve = useRef<((v: boolean) => void) | null>(null);
+  const [menu, setMenu] = useState(false);
+  const [sections, setSections] = useState(false);
+  const [context, setContext] = useState(false);
+  const [validating, setValidating] = useState(false);
+  const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
+  const [pending, setPending] = useState<Record<string, boolean>>({});
+  const [scope, setScope] = useState<Record<string, Applicability>>({});
+  const [diagnosticSections, setDiagnosticSections] = useState<Record<string, Item[]>>({});
+  const [names, setNames] = useState<Record<string, string>>({});
+  const [purposes, setPurposes] = useState<Record<string, string>>({});
+  const [last, setLast] = useState<WorkLocation | null>(null);
+  const content = useRef<HTMLElement>(null);
+  const current = useRef(location);
+  current.current = location;
+  const sequence = useRef(0);
+  const rememberedLocations = useRef<Record<string, WorkLocation>>({});
+
+  const updatePending = useCallback(
+    (key: string, value: boolean) =>
+      setPending((prev) => (prev[key] === value ? prev : { ...prev, [key]: value })),
+    []
+  );
+  const updateScope = useCallback(
+    (key: string, value: Applicability) => setScope((prev) => ({ ...prev, [key]: value })),
+    []
+  );
+  const updateDiagnostic = useCallback(
+    (orgId: string, items: Item[]) =>
+      setDiagnosticSections((prev) => ({ ...prev, [orgId]: items })),
+    []
+  );
+  const go = useCallback(
+    (next: WorkLocation, replace = false) => {
+      if (!organizations.some((v) => v.id === next.organizationId)) return;
+      sequence.current += 1;
+      setValidating(false);
+      rememberedLocations.current[memoryKey(next)] = next;
+      setLocation(next);
+      setMenu(false);
+      setSections(false);
+      setError("");
+      setNotice("");
+      if (next.module !== "panel") setLast(next);
+      setPanes((prev) => ({ ...prev, [paneKey(next)]: next }));
+      window.history[
+        replace || window.location.hash === encodeWork(next) ? "replaceState" : "pushState"
+      ](null, "", encodeWork(next));
+      document
+        .querySelectorAll<HTMLDetailsElement>(".connected-desktop-sections details[open]")
+        .forEach((item) => (item.open = false));
+      requestAnimationFrame(() => {
+        if (!content.current) return;
+        const header = content.current.closest(".min-w-0")?.querySelector("header");
+        content.current.style.scrollMarginTop = `${(header?.getBoundingClientRect().height ?? 140) + 8}px`;
+        content.current.focus({ preventScroll: true });
+        content.current.scrollIntoView({ block: "start" });
+      });
+    },
+    [organizations]
+  );
+  const validate = useCallback(
+    async (next: WorkLocation, replace = true) => {
+      const version = ++sequence.current;
+      setValidating(true);
+      setError("");
+      if (!organizations.some((v) => v.id === next.organizationId)) {
+        setError("No tienes acceso a la organización solicitada.");
+        setValidating(false);
+        return false;
+      }
+      try {
+        if (next.treatmentId) {
+          const token = await sessionToken();
+          const t = await api.rat.getTreatment(token, next.organizationId, next.treatmentId);
+          if (version !== sequence.current) return;
+          setNames((p) => ({ ...p, [next.treatmentId]: t.name }));
+          if (next.assessmentId) {
+            const a = await licitudApi.get(
+              { token, organizationId: next.organizationId, treatmentId: next.treatmentId },
+              next.assessmentId
+            );
+            if (version !== sequence.current) return;
+            setPurposes((p) => ({
+              ...p,
+              [next.assessmentId]: `${a.purpose_snapshot} · versión ${a.version} · ${a.status}`,
+            }));
+          }
+        }
+        if (version === sequence.current) {
+          go(next, replace);
+          return true;
+        }
+        return false;
+      } catch (e) {
+        if (version === sequence.current)
+          setError(e instanceof Error ? e.message : "No se pudo abrir el contexto autorizado.");
+        return false;
+      } finally {
+        if (version === sequence.current) setValidating(false);
+      }
+    },
+    [go, organizations]
+  );
+  useEffect(() => {
+    const restore = () => {
+      const parsed = parseWork(window.location.hash);
+      if (parsed) void validate(parsed);
+      else if (window.location.hash) setError("El enlace de navegación no es válido.");
+    };
+    restore();
+    window.addEventListener("popstate", restore);
+    window.addEventListener("hashchange", restore);
+    return () => {
+      window.removeEventListener("popstate", restore);
+      window.removeEventListener("hashchange", restore);
+    };
+  }, [validate]);
+  useEffect(() => {
+    const close = (event: PointerEvent | KeyboardEvent) => {
+      const target = event.target as HTMLElement;
+      document
+        .querySelectorAll<HTMLDetailsElement>(".connected-desktop-sections details[open]")
+        .forEach((item) => {
+          if (event instanceof KeyboardEvent) {
+            if (event.key !== "Escape") return;
+            item.open = false;
+            item.querySelector("summary")?.focus();
+          } else if (!item.contains(target)) item.open = false;
+        });
+    };
+    document.addEventListener("pointerdown", close);
+    document.addEventListener("keydown", close);
+    return () => {
+      document.removeEventListener("pointerdown", close);
+      document.removeEventListener("keydown", close);
+    };
+  }, []);
+  const anyPending = Object.values(pending).some(Boolean);
+  function confirmExit() {
+    exitTrigger.current = document.activeElement as HTMLElement;
+    if (!anyPending) return Promise.resolve(true);
+    return new Promise<boolean>((resolve) => {
+      exitResolve.current = resolve;
+      setExitOpen(true);
+    });
+  }
+  const cancelExit = useCallback(() => {
+    setExitOpen(false);
+    exitResolve.current?.(false);
+    exitResolve.current = null;
+    requestAnimationFrame(() => exitTrigger.current?.focus());
+  }, []);
+  function acceptExit() {
+    setExitOpen(false);
+    exitResolve.current?.(true);
+    exitResolve.current = null;
+  }
+  useEffect(() => {
+    const warn = (e: BeforeUnloadEvent) => {
+      if (anyPending) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [anyPending]);
+  const org = organizations.find((v) => v.id === location.organizationId)!;
+  const selected = scope[contextKey(location)];
+  const eipd = !!selected?.current && selected.eipd.state === "corresponde";
+  const infancia = !!selected?.current && selected.infancia.state === "corresponde";
+  const diagnosticItems = diagnosticSections[location.organizationId] ?? [];
+  const groups: Group[] =
+    location.module === "rat"
+      ? [
+          {
+            label: "Inventario",
+            items: [
+              { id: "catalogo", label: "Catálogo de tratamientos" },
+              { id: "nuevo", label: "Nueva actividad" },
+            ],
+          },
+          ...(location.treatmentId
+            ? [
+                {
+                  label: "Actividad de tratamiento",
+                  items: ratSections.map(([id, label]) => ({ id, label })),
+                },
+              ]
+            : []),
+        ]
+      : location.module === "diagnostico"
+        ? [
+            {
+              label: "Cuestionario",
+              items: diagnosticItems.length
+                ? diagnosticItems
+                : [{ id: "cuestionario", label: "Abrir cuestionario" }],
+            },
+            {
+              label: "Resultados e informe",
+              items: [{ id: "resultados", label: "Resultados e informe guardados" }],
+            },
+          ]
+        : location.module === "licitud"
+          ? [
+              {
+                label: "Preparar",
+                items: [
+                  { id: "catalogo", label: "Evaluaciones y creación de borrador" },
+                  ...(location.assessmentId
+                    ? [
+                        { id: "aplicabilidad", label: "Determinar aplicabilidad" },
+                        { id: "alcance", label: "Alcance del RAT" },
+                        { id: "base", label: "Base y fundamento" },
+                        { id: "anexos", label: "Anexos de respaldo" },
+                      ]
+                    : []),
+                ],
+              },
+              ...(eipd
+                ? [
+                    {
+                      label: "Completar EIPD",
+                      items: eipdSections.map((label, step) => ({ id: "eipd", label, step })),
+                    },
+                  ]
+                : []),
+              ...(infancia
+                ? [
+                    {
+                      label: "Infancia y adolescencia",
+                      items: [
+                        { id: "infancia", label: "Completar infancia y adolescencia" },
+                        { id: "preparar", label: "Preparar resolución documental" },
+                      ],
+                    },
+                  ]
+                : []),
+              ...(location.assessmentId
+                ? [
+                    {
+                      label: "Revisar y decidir",
+                      items: [{ id: "revisar", label: "Documentos, resoluciones y revisiones" }],
+                    },
+                    {
+                      label: "Historial y descargas",
+                      items: [{ id: "historial", label: "Historial y descargas" }],
+                    },
+                  ]
+                : []),
+            ]
+          : [];
+  function changeModule(module: ModuleId) {
+    const remembered = rememberedLocations.current[memoryKey({ ...location, module })];
+    go(
+      remembered ?? {
+        ...location,
+        module,
+        section:
+          module === "licitud"
+            ? location.assessmentId
+              ? "aplicabilidad"
+              : "catalogo"
+            : module === "rat"
+              ? "catalogo"
+              : module === "diagnostico"
+                ? "cuestionario"
+                : "resumen",
+        step: 0,
+      }
+    );
+  }
+  function section(item: Item) {
+    go({ ...location, section: item.id, step: item.step ?? 0 });
+  }
+  async function apply(value: WorkContext) {
+    const applied = await validate(
+      {
+        ...location,
+        ...value,
+        section:
+          location.module === "licitud"
+            ? value.assessmentId
+              ? "aplicabilidad"
+              : "catalogo"
+            : location.module === "rat"
+              ? "catalogo"
+              : location.module === "diagnostico"
+                ? "cuestionario"
+                : "resumen",
+        step: 0,
+      },
+      false
+    );
+    if (applied) setContext(false);
+  }
+  async function intercept(e: MouseEvent) {
+    const a = (e.target as HTMLElement).closest("a");
+    if (
+      !a ||
+      e.ctrlKey ||
+      e.metaKey ||
+      e.shiftKey ||
+      e.altKey ||
+      a.target === "_blank" ||
+      a.hasAttribute("download")
+    )
+      return;
+    const u = new URL(a.href, window.location.href);
+    if (u.origin !== window.location.origin) return;
+    const match = u.pathname.match(/^\/dashboard\/(rat|licitud)(?:\/([^/]+))?(?:\/([^/]+))?$/);
+    if (!match) {
+      if (anyPending) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (await confirmExit()) router.push(u.pathname + u.search + u.hash);
+      }
+      return;
+    }
+    e.preventDefault();
+    const organizationId = u.searchParams.get("organizationId") ?? location.organizationId;
+    const targetModule = match[1] as ModuleId;
+    const tid = match[2];
+    const aid = match[3];
+    if (!tid) {
+      go({ ...location, module: targetModule, section: "catalogo", step: 0 });
+      return;
+    }
+    if (tid === "nuevo") {
+      go({ ...location, module: "rat", section: "nuevo", step: 0 });
+      return;
+    }
+    const next = {
+      organizationId,
+      treatmentId: tid,
+      assessmentId:
+        aid ??
+        (targetModule === "rat" &&
+        tid === location.treatmentId &&
+        organizationId === location.organizationId
+          ? location.assessmentId
+          : ""),
+      module: targetModule,
+      section: targetModule === "rat" ? "general" : "aplicabilidad",
+      step: 0,
+    };
+    await validate(next, false);
+  }
+  const activeKey = paneKey(location);
+  const displayTitle =
+    groups
+      .flatMap((g) => g.items)
+      .find((v) => v.id === location.section && (v.step ?? 0) === location.step)?.label ??
+    modules.find((v) => v.id === location.module)?.title ??
+    "Panel principal";
+  function locationLabel(v: WorkLocation) {
+    if (v.module === "diagnostico")
+      return (
+        diagnosticSections[v.organizationId]?.find((item) => item.id === v.section)?.label ??
+        "Autodiagnóstico"
+      );
+    if (v.module === "rat")
+      return (
+        ratSections.find(([id]) => id === v.section)?.[1] ??
+        (v.section === "nuevo" ? "Nueva actividad" : "Catálogo de tratamientos")
+      );
+    if (v.module === "licitud")
+      return v.section === "eipd"
+        ? eipdSections[v.step]
+        : ({
+            aplicabilidad: "Determinar aplicabilidad",
+            base: "Base y fundamento",
+            infancia: "Infancia y adolescencia",
+            preparar: "Preparar resolución",
+            anexos: "Anexos de respaldo",
+            alcance: "Alcance del RAT",
+            revisar: "Revisar documentos",
+            historial: "Historial y descargas",
+            catalogo: "Evaluaciones",
+            resumen: "Resumen",
+          }[v.section] ?? "Bases de licitud");
+    return modules.find((item) => item.id === v.module)?.title ?? "Panel principal";
+  }
+  const list = (
+    <nav aria-label="Secciones del espacio conectado" className="connected-sections">
+      {groups.map((group) => (
+        <div key={group.label}>
+          <h3>{group.label}</h3>
+          {group.items.map((item) => (
+            <button
+              key={`${item.id}:${item.step ?? 0}`}
+              aria-current={
+                item.id === location.section && (item.step ?? 0) === location.step
+                  ? "page"
+                  : undefined
+              }
+              onClick={() => section(item)}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+      ))}
+    </nav>
+  );
+  const closeSections = useCallback(() => {
+    setSections(false);
+    requestAnimationFrame(() => document.getElementById("connected-sections-trigger")?.focus());
+  }, []);
+  const closeContext = useCallback(() => {
+    sequence.current += 1;
+    setValidating(false);
+    setContext(false);
+    requestAnimationFrame(() => document.getElementById("connected-context-trigger")?.focus());
+  }, []);
+  return (
+    <div className="prototype-app connected-app">
+      <p className="prototype-demo">
+        Espacio conectado al servidor · Pruebas con datos ficticios · Confirmación y activación EIPD
+        bloqueadas. <SignOutButton beforeSignOut={confirmExit} />
+      </p>
+      <div className="prototype-layout">
+        <MainModules
+          module={location.module}
+          go={changeModule}
+          expanded={menu}
+          setExpanded={setMenu}
+          notify={setNotice}
+        />
+        <div className="min-w-0">
+          <header className="prototype-top">
+            <div className="connected-toolbar">
+              <button
+                id="prototype-menu-trigger"
+                aria-label="Abrir menú"
+                aria-haspopup="dialog"
+                aria-expanded={menu}
+                className="connected-menu-trigger"
+                onClick={() => {
+                  setSections(false);
+                  setMenu(true);
+                }}
+              >
+                ☰ Menú
+              </button>
+              {groups.length > 0 && (
+                <button
+                  id="connected-sections-trigger"
+                  aria-haspopup="dialog"
+                  aria-expanded={sections}
+                  onClick={() => {
+                    setMenu(false);
+                    setSections(true);
+                  }}
+                >
+                  Secciones
+                </button>
+              )}
+              <span className="min-w-0 flex-1 truncate">
+                {modules.find((v) => v.id === location.module)?.title} › {displayTitle}
+              </span>
+              <button
+                id="connected-context-trigger"
+                aria-haspopup="dialog"
+                onClick={() => setContext(true)}
+              >
+                Cambiar contexto
+              </button>
+            </div>
+            <div className="px-4 pb-3 text-sm">
+              <strong>{org?.name}</strong>
+              {location.treatmentId && (
+                <> · {names[location.treatmentId] ?? "Tratamiento seleccionado"}</>
+              )}
+              {location.assessmentId && (
+                <> · {purposes[location.assessmentId] ?? "Evaluación seleccionada"}</>
+              )}
+              {anyPending && (
+                <p className="font-semibold text-amber-800">
+                  Hay formularios editados durante esta visita. Guarda cada formulario antes de
+                  recargar.
+                </p>
+              )}
+            </div>
+            <div className="connected-desktop-sections">
+              {groups.map((g) => (
+                <details
+                  key={g.label}
+                  onToggle={(event) => {
+                    if (!event.currentTarget.open) return;
+                    const pop = event.currentTarget.querySelector<HTMLElement>(":scope > div");
+                    if (pop) {
+                      pop.style.left = "0px";
+                      const rect = pop.getBoundingClientRect();
+                      pop.style.left = `${Math.max(8 - rect.left, Math.min(0, window.innerWidth - 8 - rect.right))}px`;
+                    }
+                  }}
+                >
+                  <summary>{g.label}</summary>
+                  <div>
+                    {g.items.map((item) => (
+                      <button
+                        key={`${item.id}:${item.step ?? 0}`}
+                        onClick={(e) => {
+                          e.currentTarget.closest("details")?.removeAttribute("open");
+                          section(item);
+                        }}
+                      >
+                        {item.label}
+                      </button>
+                    ))}
+                  </div>
+                </details>
+              ))}
+            </div>
+          </header>
+          {error && (
+            <p role="alert" className="m-4 rounded bg-red-50 p-4 text-red-800">
+              {error}
+            </p>
+          )}
+          {notice && (
+            <p role="status" className="m-4 rounded bg-blue-50 p-4">
+              {notice}
+            </p>
+          )}
+          {location.module === "diagnostico" && (
+            <p className="px-4 py-2 text-sm">
+              El Autodiagnóstico se guarda por organización; no pertenece a una evaluación de
+              licitud.
+            </p>
+          )}
+          <main ref={content} tabIndex={-1} className="prototype-work" onClickCapture={intercept}>
+            {location.module === "panel" && (
+              <div className="space-y-6">
+                <h1 className="text-2xl font-bold">Panel principal</h1>
+                <p>
+                  Trabaja con la información de tu organización guardada en el servidor. La
+                  selección de contexto es independiente en cada ventana.
+                </p>
+                {last && (
+                  <button className="rounded bg-blue-800 p-3 text-white" onClick={() => go(last)}>
+                    Continuar en {locationLabel(last)}
+                  </button>
+                )}
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {modules
+                    .filter((v) => v.id !== "panel")
+                    .map((v) => (
+                      <button
+                        key={v.id}
+                        aria-disabled={v.upcoming || undefined}
+                        className="rounded-xl border bg-white p-5 text-left"
+                        onClick={() =>
+                          v.upcoming ? setNotice(`${v.title}: próximamente.`) : changeModule(v.id)
+                        }
+                      >
+                        <strong>{v.title}</strong>
+                        <p>{v.upcoming ? "Próximamente" : "Abrir módulo →"}</p>
+                      </button>
+                    ))}
+                </div>
+                <Link href="/dashboard/maqueta" className="text-blue-800 underline">
+                  Consultar maqueta de referencia
+                </Link>
+              </div>
+            )}
+            {Object.entries(panes).map(([key, entry]) => {
+              const here = key === activeKey;
+              const v = here ? location : entry;
+              const organization = organizations.find((o) => o.id === v.organizationId);
+              if (!organization) return null;
+              const readOnly = !["owner", "admin", "editor"].includes(organization.role);
+              return (
+                <div key={key} hidden={!here} data-work-pane={key}>
+                  {v.module === "diagnostico" && (
+                    <ConnectedDiagnostic
+                      organization={organization}
+                      location={v}
+                      go={go}
+                      onSections={updateDiagnostic}
+                      onPending={updatePending}
+                    />
+                  )}
+                  {v.module === "rat" && (
+                    <fieldset disabled={readOnly}>
+                      <div hidden={!["catalogo", "resumen"].includes(v.section)}>
+                        <RatWorkspace organizaciones={[organization]} />
+                      </div>
+                      {v.section === "nuevo" && (
+                        <TreatmentGeneralForm
+                          organizaciones={[organization]}
+                          initialOrganizationId={organization.id}
+                          onPending={(value) => updatePending(`rat-new:${v.organizationId}`, value)}
+                          onCreated={(id) =>
+                            void validate({
+                              ...v,
+                              treatmentId: id,
+                              section: "general",
+                              assessmentId: "",
+                            })
+                          }
+                        />
+                      )}{" "}
+                      {v.treatmentId && v.section !== "nuevo" && (
+                        <div hidden={["catalogo", "nuevo", "resumen"].includes(v.section)}>
+                          <TreatmentGeneralForm
+                            organizaciones={[organization]}
+                            initialOrganizationId={organization.id}
+                            treatmentId={v.treatmentId}
+                            activeSection={v.section}
+                            onPending={(value) =>
+                              updatePending(`rat:${v.organizationId}:${v.treatmentId}`, value)
+                            }
+                          />
+                        </div>
+                      )}
+                    </fieldset>
+                  )}
+                  {v.module === "licitud" && (
+                    <>
+                      <div
+                        hidden={!!v.assessmentId && !["catalogo", "resumen"].includes(v.section)}
+                      >
+                        <LicitudWorkspace
+                          organizaciones={[organization]}
+                          onPending={(value) => updatePending(`create:${key}`, value)}
+                        />
+                      </div>
+                      {v.assessmentId && (
+                        <div hidden={["catalogo"].includes(v.section)}>
+                          <ConnectedAssessment
+                            active={here}
+                            location={v}
+                            name={organization.name}
+                            readOnly={readOnly}
+                            go={go}
+                            onScope={updateScope}
+                            onPending={updatePending}
+                          />
+                        </div>
+                      )}
+                    </>
+                  )}
+                  {v.module === "organizacion" && (
+                    <fieldset disabled={!["owner", "admin"].includes(organization.role)}>
+                      <legend className="mb-4 text-xl font-bold">Mi organización</legend>
+                      <OrganizacionForm
+                        organizacion={organization}
+                        onPending={(value) => updatePending(`org:${organization.id}`, value)}
+                      />
+                    </fieldset>
+                  )}
+                </div>
+              );
+            })}
+          </main>
+        </div>
+      </div>
+      <PrototypeDrawer
+        open={exitOpen}
+        label="Salir del espacio de trabajo"
+        className="prototype-sections-drawer"
+        close={cancelExit}
+      >
+        <h2 className="text-xl font-bold">Hay cambios sin guardar</h2>
+        <p className="my-4">
+          Si sales, se perderán los borradores de esta visita que no hayas guardado en el servidor.
+        </p>
+        <button className="mr-3 rounded border p-3" onClick={cancelExit}>
+          Continuar editando
+        </button>
+        <button className="rounded bg-blue-800 p-3 text-white" onClick={acceptExit}>
+          Salir sin guardar
+        </button>
+      </PrototypeDrawer>
+      <PrototypeDrawer
+        open={sections}
+        label="Secciones del módulo"
+        className="prototype-sections-drawer"
+        close={closeSections}
+      >
+        <h2 className="text-xl font-bold">Secciones del módulo</h2>
+        <button className="prototype-drawer-close" onClick={closeSections}>
+          Cerrar secciones
+        </button>
+        {list}
+      </PrototypeDrawer>
+      <PrototypeDrawer
+        open={context}
+        label="Contexto de trabajo"
+        className="prototype-sections-drawer"
+        close={closeContext}
+      >
+        <h2 className="mb-4 text-xl font-bold">Contexto de trabajo</h2>
+        {context && (
+          <ConnectedContext
+            organizations={organizations}
+            current={location}
+            applying={validating}
+            applyError={error}
+            apply={(value) => void apply(value)}
+            cancel={closeContext}
+          />
+        )}
+      </PrototypeDrawer>
+    </div>
+  );
+}

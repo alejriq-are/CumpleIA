@@ -23,6 +23,7 @@ export const legalBasisHelp: Record<string, string> = {
     "Defensa de derechos: describe el derecho y la actuación que motivan la propuesta, su alcance y los datos necesarios. Requiere revisión del caso concreto.",
 };
 export type AssessmentSummary = {
+  series_id?: string;
   id: string;
   organization_id: string;
   treatment_id: string;

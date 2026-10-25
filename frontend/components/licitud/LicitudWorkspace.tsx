@@ -20,9 +20,11 @@ export async function sessionToken() {
 export function LicitudWorkspace({
   organizaciones,
   token = sessionToken,
+  onPending,
 }: {
   organizaciones: OrganizationMembershipOut[];
   token?: () => Promise<string>;
+  onPending?: (dirty: boolean) => void;
 }) {
   const [org, setOrg] = useState(organizaciones[0]?.id ?? "");
   const [treatments, setTreatments] = useState<TreatmentSummaryOut[]>([]);
@@ -43,6 +45,12 @@ export function LicitudWorkspace({
   const [createError, setCreateError] = useState("");
   const [existing, setExisting] = useState<AssessmentSummary[]>([]);
   const [creating, setCreating] = useState(false);
+  const draftFingerprint = JSON.stringify([purpose, categories, subjects, basis, justification]);
+  const [submitted, setSubmitted] = useState("");
+  const draftPending =
+    !!(purpose || categories.length || subjects.length || basis || justification) &&
+    draftFingerprint !== submitted;
+  useEffect(() => onPending?.(draftPending), [draftPending, onPending]);
   const writable = ["owner", "admin", "editor"].includes(
     organizaciones.find((o) => o.id === org)?.role ?? ""
   );
@@ -144,6 +152,7 @@ export function LicitudWorkspace({
       setRows([row]);
       setOffset(0);
       setMessage("Borrador creado. Abre la evaluación para continuar.");
+      setSubmitted(draftFingerprint);
       setFiction(false);
       try {
         setRows(await licitudApi.list(scope));

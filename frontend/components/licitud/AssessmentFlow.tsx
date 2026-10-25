@@ -17,6 +17,11 @@ const tabs: [FlowTab, string][] = [
   ["revisar", "Revisar documentos"],
   ["historial", "Historial y descargas"],
 ];
+export type AssessmentLocation = {
+  tab: FlowTab;
+  section: "alcance" | "base" | "infancia" | "preparar" | "eipd" | "anexos";
+  step: number;
+};
 export function AssessmentFlow({
   organizationId,
   organizationName,
@@ -24,6 +29,9 @@ export function AssessmentFlow({
   assessmentId,
   readOnly,
   token = sessionToken,
+  navigation,
+  onPending,
+  onAssessmentSaved,
 }: {
   organizationId: string;
   organizationName: string;
@@ -31,12 +39,32 @@ export function AssessmentFlow({
   assessmentId: string;
   readOnly: boolean;
   token?: () => Promise<string>;
+  navigation?: {
+    location: AssessmentLocation;
+    go: (v: AssessmentLocation) => void;
+    scope: { eipd: boolean; infancia: boolean };
+  };
+  onPending?: (dirty: boolean) => void;
+  onAssessmentSaved?: () => void;
 }) {
-  const [tab, setTab] = useState<FlowTab>("resumen");
-  const [section, setSection] = useState<
-    "alcance" | "base" | "infancia" | "preparar" | "eipd" | "anexos"
-  >("alcance");
-  const [eipdStep, setEipdStep] = useState(0);
+  const [localTab, localSetTab] = useState<FlowTab>("resumen");
+  const [localSection, localSetSection] = useState<AssessmentLocation["section"]>("alcance");
+  const [localStep, localSetStep] = useState(0);
+  const tab = navigation?.location.tab ?? localTab;
+  const section = navigation?.location.section ?? localSection;
+  const eipdStep = navigation?.location.step ?? localStep;
+  function setTab(value: FlowTab) {
+    if (navigation) navigation.go({ ...navigation.location, tab: value });
+    else localSetTab(value);
+  }
+  function setSection(value: AssessmentLocation["section"]) {
+    if (navigation) navigation.go({ ...navigation.location, section: value });
+    else localSetSection(value);
+  }
+  function setEipdStep(value: number) {
+    if (navigation) navigation.go({ ...navigation.location, step: value });
+    else localSetStep(value);
+  }
   const [row, setRow] = useState<Assessment | null>(null);
   const [refreshVersion, setRefreshVersion] = useState(0);
   const [legalDirty, setLegalDirty] = useState(false);
@@ -48,27 +76,37 @@ export function AssessmentFlow({
   const [support, setSupport] = useState<Support | null>(null);
   const dirty = legalDirty || childDirty || eipdDirty;
   const hasUnsaved = dirty || documentDirty || supportDirty;
-  const childRelevant = Boolean(
-    row?.rat_context_snapshot?.special_regimes?.includes_children ||
-    row?.rat_context_snapshot?.special_regimes?.includes_adolescents ||
-    row?.child_adolescent_assessment
-  );
+  const childRelevant = navigation
+    ? navigation.scope.infancia
+    : Boolean(
+        row?.rat_context_snapshot?.special_regimes?.includes_children ||
+        row?.rat_context_snapshot?.special_regimes?.includes_adolescents ||
+        row?.child_adolescent_assessment
+      );
   const childReviewVisible = childRelevant || resolutionHistory !== false;
   const loaded = useCallback((value: Assessment) => setRow(value), []);
-  const saved = useCallback((value?: Assessment) => {
-    if (value) setRow(value);
-    setRefreshVersion((n) => n + 1);
-  }, []);
+  const saved = useCallback(
+    (value?: Assessment) => {
+      if (value) setRow(value);
+      setRefreshVersion((n) => n + 1);
+      onAssessmentSaved?.();
+    },
+    [onAssessmentSaved]
+  );
   const childSaved = useCallback(() => saved(), [saved]);
   useEffect(() => {
+    if (navigation) return;
     const change = () => {
       const value = window.location.hash.slice(1);
-      if (tabs.some(([key]) => key === value)) setTab(value as FlowTab);
+      if (tabs.some(([key]) => key === value)) localSetTab(value as FlowTab);
     };
     change();
     window.addEventListener("hashchange", change);
     return () => window.removeEventListener("hashchange", change);
-  }, []);
+  }, [navigation]);
+  useEffect(() => {
+    onPending?.(hasUnsaved);
+  }, [hasUnsaved, onPending]);
   useEffect(() => {
     if (!hasUnsaved) return;
     const warn = (event: BeforeUnloadEvent) => {
@@ -80,7 +118,7 @@ export function AssessmentFlow({
   }, [hasUnsaved]);
   function go(next: FlowTab) {
     setTab(next);
-    window.history.replaceState(null, "", `#${next}`);
+    if (!navigation) window.history.replaceState(null, "", `#${next}`);
   }
   return (
     <div className="licitud-ui space-y-5 [&_button]:rounded [&_button]:border [&_button]:px-3 [&_button]:py-2 [&_button:disabled]:opacity-50">
@@ -101,6 +139,7 @@ export function AssessmentFlow({
         </p>
       </aside>
       <div
+        hidden={!!navigation}
         role="tablist"
         aria-label="Recorrido de Bases de licitud"
         className="grid grid-cols-2 gap-2 md:grid-cols-4"
@@ -184,7 +223,11 @@ export function AssessmentFlow({
         hidden={tab !== "completar"}
         className="space-y-5"
       >
-        <nav aria-label="Secciones para completar" className="flex flex-wrap gap-2">
+        <nav
+          hidden={!!navigation}
+          aria-label="Secciones para completar"
+          className="flex flex-wrap gap-2"
+        >
           {(
             [
               ["alcance", "1. Alcance del RAT"],
@@ -282,7 +325,7 @@ export function AssessmentFlow({
             {childRelevant && " Los análisis de infancia se completan en su sección específica."}
           </p>
         </div>
-        <div hidden={section !== "eipd"}>
+        <div hidden={section !== "eipd" || (navigation && !navigation.scope.eipd)}>
           <EipdDraftEditor
             organizationId={organizationId}
             treatmentId={treatmentId}
@@ -468,8 +511,16 @@ export function AssessmentFlow({
         reviewVisible={childReviewVisible}
         onResolutionHistory={setResolutionHistory}
         onView={(next) => {
-          if (next === "completar") setSection(childRelevant ? "preparar" : "alcance");
-          go(next);
+          if (navigation)
+            navigation.go({
+              ...navigation.location,
+              tab: next,
+              section: next === "completar" ? (childRelevant ? "preparar" : "alcance") : section,
+            });
+          else {
+            if (next === "completar") setSection(childRelevant ? "preparar" : "alcance");
+            go(next);
+          }
         }}
         refreshVersion={refreshVersion}
         onSaved={childSaved}

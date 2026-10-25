@@ -1,5 +1,21 @@
 # Maqueta integral de navegación de CumpleIA
 
+## Punto de continuidad — pausa del 25/10/2026
+
+- [x] Usuario confirma terminado satisfactoriamente el recorrido asistido de navegación
+  de la maqueta, incluidos menús móviles, cierres, contexto y conservación de textos.
+  Resultados publicados en `6612076`.
+- [x] Patrón trasladado a formularios/API reales en `feature/navegacion-servidor`,
+  con validación automática local. Ver [implementación conectada](navegacion-servidor.md).
+- [ ] Aceptación asistida de la nueva integración: usar el checklist conectado de ese
+  documento, no repetir como simulación los ensayos de persistencia real.
+- [ ] Recorridos diferidos hasta conexión: documentos, anexos, resoluciones,
+  revisiones/decisiones/facultades, historial y descargas.
+
+Usuario autoriza commit/push y pausa por unas horas. No implica aceptación conectada,
+merge, despliegue ni habilitación EIPD. Las descripciones y pendientes previos de este
+archivo son antecedentes de versiones de maqueta; este punto prevalece al reanudar.
+
 ## Objetivo y estado
 
 NAV-UX-001 / LIC-UX-015. Usuario solicita incorporar el Panel principal al rediseño

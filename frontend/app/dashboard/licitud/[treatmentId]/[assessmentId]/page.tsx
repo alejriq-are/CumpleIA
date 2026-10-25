@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { encodeWork } from "@/components/navigation/connected-navigation";
 import { notFound, redirect } from "next/navigation";
 import { AssessmentFlow } from "@/components/licitud/AssessmentFlow";
 import { childEditorAccess } from "@/lib/licitud/editor-access";
@@ -23,6 +24,18 @@ export default async function Page({
   ]);
   const organization = childEditorAccess(organizationId, organizations, profile.is_superadmin);
   if (!organization) notFound();
+  if (organizations.some((v) => v.id === organization.id))
+    redirect(
+      "/dashboard/trabajo" +
+        encodeWork({
+          organizationId: organization.id,
+          treatmentId,
+          assessmentId,
+          module: "licitud",
+          section: "aplicabilidad",
+          step: 0,
+        })
+    );
   return (
     <div className="space-y-6">
       <Link href="/dashboard/licitud" className="text-blue-700">

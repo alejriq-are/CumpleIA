@@ -4,11 +4,12 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-export function SignOutButton() {
+export function SignOutButton({ beforeSignOut }: { beforeSignOut?: () => Promise<boolean> } = {}) {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   async function handleSignOut() {
+    if (beforeSignOut && !(await beforeSignOut())) return;
     setLoading(true);
     const supabase = createClient();
     await supabase.auth.signOut();

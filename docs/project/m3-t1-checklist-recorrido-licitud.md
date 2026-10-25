@@ -1,5 +1,20 @@
 # Bases de Licitud — checklist operativo
 
+## Continuidad vigente — 25/10/2026
+
+La navegación de maqueta fue aceptada por el usuario; la integración conectada está
+implementada y validada automáticamente en `feature/navegacion-servidor`.
+Usuario pide pausa y autoriza commit/push. Retomar desde `/dashboard/trabajo` y el
+[checklist conectado](navegacion-servidor.md#checklist-para-reanudar).
+No asumir que el expediente histórico Trabajadores indicado abajo sea la evaluación
+actual: seleccionar y comprobar explícitamente el contexto existente con el usuario.
+Las comprobaciones históricas no acreditan aceptación de la nueva navegación conectada.
+
+Pendientes asistidos: guardar/reabrir en contexto correcto; documentos guardados;
+anexos válidos/rechazados y versiones; resolución/sucesor/vista previa; revisión,
+decisión y facultad; historial y descarga exacta; aislamiento y móvil/teclado.
+Conservar datos históricos y borradores. NAV-UX-005 y LIC-FORM-001 siguen abiertos.
+
 Estado: **ajustes LIC-UX-005 a LIC-UX-012 implementados y validados localmente**.
 Recorrido asistido y bloque de ajustes: 21–22/10/2026. Pendiente revisar las pantallas
 actualizadas con el usuario. EIPD permanece bloqueada; solo datos ficticios.

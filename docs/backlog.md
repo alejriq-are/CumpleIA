@@ -1,6 +1,22 @@
 # Backlog — CumpleIA
 
+## Pausa y próximo bloque — 25/10/2026
+
+Commit/push de navegación conectada autorizado por el usuario al pausar. Integración
+local y pruebas automáticas completas; aceptación asistida conectada y CI remota
+por comprobar. Referencia operativa: [checklist para reanudar](project/navegacion-servidor.md#checklist-para-reanudar).
+NAV-UX-002/003/004 permanecen abiertos hasta validar sus criterios conectados;
+NAV-UX-001 tiene aceptación asistida de la maqueta registrada en `6612076`.
+Prioridad siguiente: documentos/anexos/resoluciones/revisiones/decisiones/facultades,
+historial/descargas, preservando aislamiento y guardados. No iniciar ahora nuevas
+mejoras: NAV-UX-005 (alcance mixto), LIC-FORM-001 (consentimiento/LIA completos),
+LIC-UX-013/014/015 y LIC-DATA-001 mantienen el alcance pendiente de sus entradas.
+La publicación de la rama no cierra esos pendientes ni autoriza merge/despliegue.
+
 ## Visibilidad de accesos que abren formularios o información
+
+**Actualización 25/10 — navegación conectada implementada localmente.** NAV-UX-002/003/004 tienen integración sobre API y formularios existentes, selección autorizada, conservación de borradores y aplicabilidad append-only. Migración y pruebas aisladas/recorrido real completados; aceptación asistida de documentos/anexos/resoluciones/historial/descargas y CI remota pendientes; publicación de la rama autorizada al pausar. No se cierran automáticamente todos los criterios de producto por la aceptación de la maqueta. NAV-UX-005 mantiene pendiente la actualización guiada de alcance mixto y LIC-FORM-001 los formularios completos. [Estado y guion](project/navegacion-servidor.md).
+
 
 - [ ] **NAV-UX-005 — Actualizar el alcance del RAT para incorporar menores vinculados a clientes adultos y revisar aplicabilidad.** Detectado por el usuario en prueba asistida del 24/10/2026: después de guardar EIPD Corresponde en Gestión de clientes → Citas, registra infancia Corresponde porque se tratan datos de hijos de los clientes; la maqueta bloquea el guardado porque su ejemplo declara solo adultos. Pendiente de desarrollo; relacionado con NAV-UX-002 y NAV-UX-004.
   - Permitir actualizar las categorías de personas, edades cuando corresponda, datos y finalidades del alcance autorizado del RAT. No usar el nombre del tratamiento ni un escenario fijo adultos/infancia como sustituto del alcance real; incluir tratamientos con adultos y menores, sin exigir cambiar a un tratamiento ficticio ajeno al caso.

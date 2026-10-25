@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 
 export function PrototypeDrawer({
@@ -16,6 +16,8 @@ export function PrototypeDrawer({
   children: ReactNode;
 }) {
   const panel = useRef<HTMLDivElement>(null);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
   useEffect(() => {
     if (!open) return;
     const background = document.querySelector<HTMLElement>(".prototype-app");
@@ -66,6 +68,7 @@ export function PrototypeDrawer({
       document.body.style.overflow = overflow;
     };
   }, [open, close]);
+  if (!mounted) return null;
   return createPortal(
     <div
       hidden={!open}

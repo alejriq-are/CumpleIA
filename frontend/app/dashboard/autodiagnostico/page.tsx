@@ -1,38 +1,29 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { api } from "@/lib/api/client";
-import { AutodiagnosticoWorkspace } from "@/components/autodiagnostico/AutodiagnosticoWorkspace";
-
-export default async function AutodiagnosticoPage() {
-  const supabase = await createClient();
+import { encodeWork } from "@/components/navigation/connected-navigation";
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<{ organizationId?: string }>;
+}) {
   const {
     data: { session },
-  } = await supabase.auth.getSession();
-
-  if (!session) {
-    redirect("/login");
-  }
-
-  const organizaciones = await api.me.organizations(session.access_token);
-
-  return (
-    <div className="space-y-6">
-      <Link href="/dashboard" className="text-sm text-blue-700 hover:underline">
-        ← Volver al panel
-      </Link>
-
-      {organizaciones.length === 0 ? (
-        <div className="rounded-xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-800">
-          Todavía no tienes una organización.{" "}
-          <Link href="/dashboard/organizacion" className="font-medium underline">
-            Crea una
-          </Link>{" "}
-          antes de comenzar el autodiagnóstico.
-        </div>
-      ) : (
-        <AutodiagnosticoWorkspace organizaciones={organizaciones} />
-      )}
-    </div>
+  } = await (await createClient()).auth.getSession();
+  if (!session) redirect("/login");
+  const organizations = await api.me.organizations(session.access_token);
+  if (!organizations.length) redirect("/dashboard/organizacion");
+  const requested = (await searchParams).organizationId;
+  const org = organizations.find((v) => v.id === requested) ?? organizations[0];
+  redirect(
+    "/dashboard/trabajo" +
+      encodeWork({
+        organizationId: org.id,
+        treatmentId: "",
+        assessmentId: "",
+        module: "diagnostico",
+        section: "cuestionario",
+        step: 0,
+      })
   );
 }

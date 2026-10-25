@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { encodeWork } from "@/components/navigation/connected-navigation";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { api } from "@/lib/api/client";
@@ -15,6 +16,18 @@ export default async function OrganizacionPage() {
   }
 
   const organizaciones = await api.me.organizations(session.access_token);
+  if (organizaciones.length)
+    redirect(
+      "/dashboard/trabajo" +
+        encodeWork({
+          organizationId: organizaciones[0].id,
+          treatmentId: "",
+          assessmentId: "",
+          module: "organizacion",
+          section: "resumen",
+          step: 0,
+        })
+    );
 
   return (
     <div className="space-y-6">

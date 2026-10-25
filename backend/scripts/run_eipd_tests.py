@@ -11,8 +11,9 @@ from sqlalchemy.engine import make_url
 from sqlalchemy.ext.asyncio import create_async_engine
 
 TEST_DATABASE = "cumpleia_eipd_tests_20261009"
-EXPECTED_HEAD = "e67a4b829c10"
+EXPECTED_HEAD = "f6a24c8e9102"
 TARGETS = (
+    "tests/test_navigation_applicability.py",
     "tests/test_organization_acceptance.py",
     "tests/test_eipd_child_successors.py",
     "tests/test_eipd_test_runner.py",

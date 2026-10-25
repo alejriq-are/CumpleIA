@@ -28,6 +28,7 @@ def main():
             "-q",
             "tests/test_eipd_browser_integration.py",
             "tests/test_licitud_browser_integration.py",
+            "tests/test_connected_navigation_browser.py",
         ],
         env=env,
     ).returncode

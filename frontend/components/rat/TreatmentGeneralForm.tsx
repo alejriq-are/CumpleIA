@@ -25,6 +25,9 @@ type Props = {
   organizaciones: OrganizationMembershipOut[];
   initialOrganizationId: string;
   treatmentId?: string;
+  activeSection?: string;
+  onCreated?: (id: string) => void;
+  onPending?: (dirty: boolean) => void;
 };
 
 type FormState = {
@@ -80,6 +83,9 @@ export function TreatmentGeneralForm({
   organizaciones,
   initialOrganizationId,
   treatmentId,
+  activeSection,
+  onCreated,
+  onPending,
 }: Props) {
   const router = useRouter();
 
@@ -92,6 +98,14 @@ export function TreatmentGeneralForm({
   const [error, setError] = useState<string | null>(null);
   const [errorStatus, setErrorStatus] = useState<number | null>(null);
 
+  const [dirtySections, setDirtySections] = useState<Record<string, boolean>>({});
+  const generalDirty =
+    JSON.stringify(form) !== JSON.stringify(detail ? detailToForm(detail) : EMPTY_FORM);
+  const pending = generalDirty || Object.values(dirtySections).some(Boolean);
+  useEffect(() => onPending?.(pending), [pending, onPending]);
+  function cleanSection(key: string) {
+    setDirtySections((prev) => ({ ...prev, [key]: false }));
+  }
   const editing = Boolean(treatmentId);
 
   useEffect(() => {
@@ -206,8 +220,13 @@ export function TreatmentGeneralForm({
       } else {
         const created = await api.rat.createTreatment(session.access_token, orgId, body);
 
-        router.push(`/dashboard/rat/${created.id}?organizationId=${encodeURIComponent(orgId)}`);
-        router.refresh();
+        if (onCreated) {
+          setForm(EMPTY_FORM);
+          onCreated(created.id);
+        } else {
+          router.push(`/dashboard/rat/${created.id}?organizationId=${encodeURIComponent(orgId)}`);
+          router.refresh();
+        }
       }
     } catch (e) {
       if (e instanceof ApiError) {
@@ -246,7 +265,14 @@ export function TreatmentGeneralForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form
+      onSubmit={handleSubmit}
+      onChangeCapture={() => {
+        if (activeSection && activeSection !== "general")
+          setDirtySections((prev) => ({ ...prev, [activeSection]: true }));
+      }}
+      className="space-y-6"
+    >
       {editing && detail && <TreatmentProgress treatment={detail} />}
       {organizaciones.length > 1 && !editing && (
         <label className="block text-sm text-gray-700">
@@ -273,7 +299,10 @@ export function TreatmentGeneralForm({
         </div>
       )}
 
-      <section className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+      <section
+        hidden={!!activeSection && activeSection !== "general"}
+        className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm"
+      >
         <div className="mb-6">
           <h2 className="text-lg font-semibold text-gray-900">Información general</h2>
           <p className="mt-1 text-sm text-gray-500">
@@ -414,88 +443,126 @@ export function TreatmentGeneralForm({
       </section>
 
       {editing && detail && treatmentId && (
-        <TreatmentPurposesSection
-          organizationId={orgId}
-          treatmentId={treatmentId}
-          purposes={detail.purposes}
-          onSaved={(purposes) =>
-            setDetail((current) => (current ? { ...current, purposes } : current))
-          }
-        />
+        <div hidden={!!activeSection && activeSection !== "finalidades"}>
+          {" "}
+          <TreatmentPurposesSection
+            organizationId={orgId}
+            treatmentId={treatmentId}
+            purposes={detail.purposes}
+            onSaved={(purposes) => {
+              cleanSection("finalidades");
+              setDetail((current) => (current ? { ...current, purposes } : current));
+            }}
+          />
+        </div>
       )}
       {editing && detail && treatmentId && (
-        <TreatmentDataCategoriesSection
-          organizationId={orgId}
-          treatmentId={treatmentId}
-          categories={detail.data_categories}
-          onSaved={(data_categories) =>
-            setDetail((current) => (current ? { ...current, data_categories } : current))
-          }
-        />
+        <div hidden={!!activeSection && activeSection !== "categorias"}>
+          {" "}
+          <TreatmentDataCategoriesSection
+            organizationId={orgId}
+            treatmentId={treatmentId}
+            categories={detail.data_categories}
+            onSaved={(data_categories) => {
+              cleanSection("categorias");
+              setDetail((current) => (current ? { ...current, data_categories } : current));
+            }}
+          />
+        </div>
       )}
 
       {editing && detail && treatmentId && (
-        <TreatmentDataSubjectsSection
-          organizationId={orgId}
-          treatmentId={treatmentId}
-          subjects={detail.data_subjects}
-          onSaved={(data_subjects) =>
-            setDetail((current) => (current ? { ...current, data_subjects } : current))
-          }
-        />
+        <div hidden={!!activeSection && activeSection !== "titulares"}>
+          {" "}
+          <TreatmentDataSubjectsSection
+            organizationId={orgId}
+            treatmentId={treatmentId}
+            subjects={detail.data_subjects}
+            onSaved={(data_subjects) => {
+              cleanSection("titulares");
+              setDetail((current) => (current ? { ...current, data_subjects } : current));
+            }}
+          />
+        </div>
       )}
 
       {editing && detail && treatmentId && (
-        <TreatmentDataSourcesSection
-          organizationId={orgId}
-          treatmentId={treatmentId}
-          sources={detail.data_sources}
-          onSaved={(data_sources) =>
-            setDetail((current) => (current ? { ...current, data_sources } : current))
-          }
-        />
+        <div hidden={!!activeSection && activeSection !== "fuentes"}>
+          {" "}
+          <TreatmentDataSourcesSection
+            organizationId={orgId}
+            treatmentId={treatmentId}
+            sources={detail.data_sources}
+            onSaved={(data_sources) => {
+              cleanSection("fuentes");
+              setDetail((current) => (current ? { ...current, data_sources } : current));
+            }}
+          />
+        </div>
       )}
 
       {editing && detail && treatmentId && (
-        <TreatmentSystemsSection
-          organizationId={orgId}
-          treatmentId={treatmentId}
-          treatment={detail}
-          onSaved={(updated) => setDetail(updated)}
-        />
+        <div hidden={!!activeSection && activeSection !== "sistemas"}>
+          {" "}
+          <TreatmentSystemsSection
+            organizationId={orgId}
+            treatmentId={treatmentId}
+            treatment={detail}
+            onSaved={(updated) => {
+              cleanSection("sistemas");
+              setDetail(updated);
+            }}
+          />
+        </div>
       )}
 
       {editing && detail && treatmentId && (
-        <TreatmentVendorsSection
-          organizationId={orgId}
-          treatmentId={treatmentId}
-          treatment={detail}
-          onSaved={(updated) => setDetail(updated)}
-        />
+        <div hidden={!!activeSection && activeSection !== "proveedores"}>
+          {" "}
+          <TreatmentVendorsSection
+            organizationId={orgId}
+            treatmentId={treatmentId}
+            treatment={detail}
+            onSaved={(updated) => {
+              cleanSection("proveedores");
+              setDetail(updated);
+            }}
+          />
+        </div>
       )}
 
       {editing && detail && treatmentId && (
-        <TreatmentInternationalTransfersSection
-          organizationId={orgId}
-          treatmentId={treatmentId}
-          treatment={detail}
-          onSaved={(updated) => setDetail(updated)}
-        />
+        <div hidden={!!activeSection && activeSection !== "transferencias"}>
+          {" "}
+          <TreatmentInternationalTransfersSection
+            organizationId={orgId}
+            treatmentId={treatmentId}
+            treatment={detail}
+            onSaved={(updated) => {
+              cleanSection("transferencias");
+              setDetail(updated);
+            }}
+          />
+        </div>
       )}
 
       {editing && detail && treatmentId && (
-        <TreatmentReviewActivationSection
-          organizationId={orgId}
-          treatmentId={treatmentId}
-          treatment={detail}
-          onSaved={(updated) => {
-            setDetail(updated);
-            setForm(detailToForm(updated));
-          }}
-        />
+        <div hidden={!!activeSection && activeSection !== "revision"}>
+          {" "}
+          <TreatmentReviewActivationSection
+            organizationId={orgId}
+            treatmentId={treatmentId}
+            treatment={detail}
+            onSaved={(updated) => {
+              cleanSection("revision");
+              setDetail(updated);
+              setForm(detailToForm(updated));
+            }}
+          />
+        </div>
       )}
 
-      <div className="flex justify-end">
+      <div hidden={!!activeSection && activeSection !== "general"} className="flex justify-end">
         <button
           type="submit"
           disabled={saving}

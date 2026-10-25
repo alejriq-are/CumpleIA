@@ -1,5 +1,28 @@
 # Handoff vigente de CumpleIA
 
+## Pausa solicitada y reanudación — 25/10/2026
+
+Usuario solicita detener el trabajo por unas horas, registrar avance y próximos pasos,
+y autoriza commit/push de la integración y este registro. Rama de continuidad:
+`feature/navegacion-servidor`, base publicada de maqueta `6612076`.
+Publicación del presente bloque autorizada; comprobar HEAD remoto y CI al retomar.
+No confundir push con merge o despliegue: ninguno está autorizado en este cierre.
+
+Leer primero [estado y guion conectado](project/navegacion-servidor.md), después
+[checklist de maqueta](project/maqueta-navegacion-integral.md),
+[checklist de licitud](project/m3-t1-checklist-recorrido-licitud.md) y
+[backlog](backlog.md). Los bloques fechados anteriores conservan evidencia histórica;
+este punto de continuidad prevalece sobre sus menciones de aceptación/publicación pendientes.
+
+Retomar con sesión habitual en `/dashboard/trabajo`, comprobar servicios locales y
+seleccionar organización/RAT/finalidad/evaluación existentes. No asumir el contexto
+de otra ventana, no crear duplicados y no recargar ediciones pendientes para probar.
+Seguir el checklist conectado: persistencia/aplicabilidad y luego documentos, anexos,
+resoluciones, revisiones/decisiones/facultades, historial y descargas. Registrar cada
+resultado asistido y hallazgo antes de cerrar NAV-UX-002/003/004. NAV-UX-005,
+LIC-FORM-001 y demás pendientes no quedan resueltos por la integración.
+Trabajo funcional detenido tras publicación; sin tareas programadas ni cambios adicionales.
+
 ## Entrada y limites
 
 Participan usuario, ChatGPT/Codex y Deepseek. El usuario incorporó a Claude como
@@ -19,6 +42,19 @@ Antes de transferir, generar scripts/handoff.py state --remote: ese resultado
 identifica el HEAD exacto de la tarea. Una CI anterior no prueba un commit nuevo.
 
 ## Bloque funcional vigente — producto
+
+25/10, integración local de navegación en rama feature/navegacion-servidor, base
+6612076 (ya publicado con aceptación de maqueta). /dashboard y /dashboard/trabajo
+usan módulos/API reales y contexto autorizado por organización/RAT/serie/evaluación;
+50 preguntas, borradores por contexto, paneles móviles, historial y salida protegida.
+Aplicabilidad independiente persistida append-only; migración f6a24c8e9102 aplicada
+primero aislada y después en desarrollo local, sin pérdida/inserción de expedientes.
+1.145 runner EIPD + 194 API aprobadas; 55 UI con una captura opcional omitida,
+batería conectada ampliada de 10, recorrido Chromium/API/PostgreSQL real y build
+aprobados; tipos/ESLint correctos. [Contrato, límites y prueba](project/navegacion-servidor.md).
+Aceptación asistida conectada y CI remota pendientes. Publicación de la integración
+autorizada por el usuario en el cierre de pausa del 25/10. No hay sincronización automática entre ventanas ni cambio de snapshot
+RAT implícito; NAV-UX-005 y LIC-FORM-001 siguen abiertos. EIPD/datos reales bloqueados.
 
 24/10, aceptación asistida: usuario confirma OK navegación de la maqueta y cierres
 móviles; aclara que Escape vuelve al formulario y clic exterior es fondo sombreado.

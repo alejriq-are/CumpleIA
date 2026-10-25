@@ -1030,8 +1030,14 @@ async def list_legal_assessments_v1(
             LegalAssessment.status,
             LegalAssessment.purpose_snapshot,
             LegalAssessment.legal_basis,
+            LegalAssessment.series_id,
+        )
+        .join(
+            LegalAssessmentSeries, LegalAssessment.series_id == LegalAssessmentSeries.id
         )
         .where(
+            LegalAssessmentSeries.organization_id == organization_id,
+            LegalAssessmentSeries.treatment_id == treatment_id,
             LegalAssessment.organization_id == organization_id,
             LegalAssessment.treatment_id == treatment_id,
         )

@@ -1,0 +1,104 @@
+.connected-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border-bottom: 1px solid #e2e8f0;
+}
+.connected-toolbar button {
+  padding: 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.connected-menu-trigger {
+  display: none;
+}
+.connected-desktop-sections {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 0 16px 8px;
+}
+.connected-desktop-sections details {
+  position: relative;
+}
+.connected-desktop-sections summary {
+  cursor: pointer;
+  padding: 10px;
+  font-weight: 600;
+}
+.connected-desktop-sections details > div {
+  position: absolute;
+  z-index: 30;
+  top: 100%;
+  left: 0;
+  background: white;
+  box-shadow: 0 6px 20px #0f172a30;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  min-width: 240px;
+  max-width: min(360px, 80vw);
+  max-height: 60vh;
+  overflow-y: auto;
+}
+.connected-desktop-sections button,
+.connected-sections button {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  text-align: left;
+}
+.connected-desktop-sections button:hover,
+.connected-sections button:hover {
+  background: #eff6ff;
+}
+.connected-sections h3 {
+  font-weight: 700;
+  padding: 16px 8px 4px;
+}
+.connected-sections button[aria-current="page"] {
+  background: #dbeafe;
+  font-weight: 700;
+}
+.connected-app [hidden] {
+  display: none !important;
+}
+.connected-app .prototype-work {
+  scroll-margin-top: 150px;
+}
+.connected-app .prototype-work > div {
+  min-width: 0;
+}
+.prototype-sections-drawer {
+  width: min(92vw, 440px);
+  padding: 16px;
+  overflow-y: auto;
+  background: white;
+  color: #0f172a;
+}
+@media (max-width: 767px) {
+  .connected-menu-trigger {
+    display: block;
+  }
+  .connected-desktop-sections {
+    display: none;
+  }
+  .connected-toolbar {
+    flex-wrap: wrap;
+    padding: 8px;
+  }
+  .connected-toolbar > span {
+    order: 2;
+    flex-basis: 100%;
+    font-size: 13px;
+  }
+  .connected-toolbar button {
+    font-size: 13px;
+    padding: 8px;
+  }
+  .connected-toolbar button:last-child {
+    margin-left: auto;
+  }
+}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import {
   api,
@@ -19,11 +19,15 @@ export function Cuestionario({
   respuestasIniciales,
   organizationId,
   onCompletado,
+  navigation,
+  onPending,
 }: {
   cuestionario: CuestionarioOut;
   respuestasIniciales: DiagnosticoActualOut["respuestas"];
   organizationId: string;
   onCompletado: (actual: DiagnosticoActualOut) => void;
+  navigation?: { section: string; go: (id: string) => void };
+  onPending?: (dirty: boolean) => void;
 }) {
   const secciones = useMemo(
     () => [...cuestionario.secciones].sort((a, b) => a.orden - b.orden),
@@ -48,7 +52,27 @@ export function Cuestionario({
         .map((r) => [r.pregunta_id, { answer: r.answer as OpcionRespuesta, notes: r.notes ?? "" }])
     )
   );
-  const [paso, setPaso] = useState(0);
+  const [baseline, setBaseline] = useState(respuestas);
+  const canonical = (value: Record<string, RespuestaState>) =>
+    JSON.stringify(
+      Object.keys(value)
+        .sort()
+        .map((key) => [key, value[key]])
+    );
+  const hasPending = canonical(respuestas) !== canonical(baseline);
+  useEffect(() => onPending?.(hasPending), [hasPending, onPending]);
+  const [localPaso, setLocalPaso] = useState(0);
+  const paso = navigation
+    ? Math.max(
+        0,
+        secciones.findIndex((v) => v.id === navigation.section)
+      )
+    : localPaso;
+  function setPaso(update: (value: number) => number) {
+    const next = update(paso);
+    if (navigation) navigation.go(secciones[next].id);
+    else setLocalPaso(next);
+  }
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -81,7 +105,16 @@ export function Cuestionario({
       notes: respuestas[p.id].notes.trim() || undefined,
     }));
 
-    return api.diagnostico.guardarRespuestas(session.access_token, organizationId, payload);
+    const saved = await api.diagnostico.guardarRespuestas(
+      session.access_token,
+      organizationId,
+      payload
+    );
+    setBaseline((prev) => ({
+      ...prev,
+      ...Object.fromEntries(preguntasSeccion.map((p) => [p.id, respuestas[p.id]])),
+    }));
+    return saved;
   }
 
   async function handleSiguiente() {
