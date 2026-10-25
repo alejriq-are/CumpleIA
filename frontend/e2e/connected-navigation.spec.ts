@@ -3,6 +3,8 @@ import { rm, mkdir } from "node:fs/promises";
 import path from "node:path";
 import { buildConnectedHarness } from "./helpers/connected-harness";
 let directory: string, script: string, css: string;
+let viewerHarness: Awaited<ReturnType<typeof buildConnectedHarness>>;
+let editorHarness: Awaited<ReturnType<typeof buildConnectedHarness>>;
 const org = "a0000000-0000-0000-0000-000000000001";
 const tid = "a0000000-0000-0000-0000-000000000002";
 const aid = "a0000000-0000-0000-0000-000000000003";
@@ -106,9 +108,20 @@ function applicability(id: string) {
 test.setTimeout(30000);
 test.beforeAll(async () => {
   ({ directory, script, css } = await buildConnectedHarness([organization], "http://test.invalid"));
+  viewerHarness = await buildConnectedHarness(
+    [{ ...organization, role: "viewer" }],
+    "http://test.invalid"
+  );
+  editorHarness = await buildConnectedHarness(
+    [{ ...organization, role: "editor" }],
+    "http://test.invalid"
+  );
 });
 test.afterAll(async () => {
   if (directory) await rm(directory, { recursive: true, force: true });
+  for (const harness of [viewerHarness, editorHarness]) {
+    if (harness) await rm(harness.directory, { recursive: true, force: true });
+  }
 });
 async function capture(page: Page, name: string) {
   const dir = process.env.CONNECTED_SCREENSHOTS;
@@ -117,10 +130,10 @@ async function capture(page: Page, name: string) {
     await page.screenshot({ path: path.join(dir, name), fullPage: false });
   }
 }
-async function visit(page: Page, hash = "") {
+async function visit(page: Page, hash = "", bundle = script) {
   await page.goto("http://localhost:3999/" + hash);
   await page.addStyleTag({ content: css });
-  await page.addScriptTag({ content: script });
+  await page.addScriptTag({ content: bundle });
   await expect(page.getByRole("heading", { name: "Panel principal", exact: true })).toBeVisible();
 }
 test.beforeEach(async ({ page }) => {
@@ -185,6 +198,8 @@ test.beforeEach(async ({ page }) => {
     const match = pathname.match(/\/assessments\/([^/]+)/);
     const id = match?.[1] ?? aid;
     if (pathname.endsWith("/applicability")) {
+      if (method === "GET" && mode === "app-readonly")
+        return result({ ...applicability(id), editable: false });
       if (method === "GET" && mode === "app-offline") return route.abort("internetdisconnected");
       if (method === "GET" && mode === "app-hold-fail") {
         await new Promise<void>((resolve) => {
@@ -768,6 +783,152 @@ test("Continuar al Autodiagnóstico identifica organización y conserva su ámbi
   await expect(page.getByTestId("connected-context-summary")).toHaveText(
     "Organización: [FICTICIA] Organización conectada"
   );
+  expect(calls.some((v) => v.method !== "GET")).toBe(false);
+  expect(errors).toEqual([]);
+});
+
+test("Guardar determinación explica requisitos faltantes y los actualiza sin escribir", async ({
+  page,
+}) => {
+  await legal(page);
+  const save = main(page).getByRole("button", { name: "Guardar determinación", exact: true });
+  await expect(save).toBeDisabled();
+  await expect(save).toHaveAccessibleDescription(/declaración de datos ficticios/);
+  await main(page)
+    .getByLabel("¿Corresponde documentar EIPD?", { exact: true })
+    .selectOption("corresponde");
+  await expect(save).toHaveAccessibleDescription(/fundamento sobre EIPD/);
+  await save.scrollIntoViewIfNeeded();
+  await expect(save).toHaveText("Guardar determinación");
+  await page.evaluate(
+    () =>
+      new Promise<void>((resolve) =>
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+      )
+  );
+  await capture(page, "lote3-requisitos-faltantes.png");
+  await main(page)
+    .getByLabel("Fundamento sobre EIPD", { exact: true })
+    .fill("[FICTICIA] Análisis de prueba");
+  await expect(save).not.toHaveAccessibleDescription(/fundamento sobre EIPD/);
+  await main(page)
+    .getByLabel("Declaro que esta prueba utiliza únicamente datos ficticios.")
+    .check();
+  await expect(save).toBeEnabled();
+  await expect(save).toHaveAccessibleDescription(/Requisitos completos/);
+  await main(page)
+    .getByLabel("¿Corresponde documentar infancia y adolescencia?", { exact: true })
+    .selectOption("informacion_insuficiente");
+  await expect(save).toBeDisabled();
+  await expect(save).toHaveAccessibleDescription(/fundamento sobre infancia y adolescencia/);
+  await main(page)
+    .getByLabel("Fundamento sobre infancia y adolescencia", { exact: true })
+    .fill("[FICTICIA] Información pendiente de contraste");
+  await expect(save).toBeEnabled();
+  await capture(page, "lote3-requisitos-completos.png");
+  expect(calls.some((v) => v.method !== "GET")).toBe(false);
+  expect(errors).toEqual([]);
+});
+
+test("evaluación de solo consulta explica el bloqueo indicado por servidor", async ({ page }) => {
+  mode = "app-readonly";
+  await legal(page);
+  await expect(main(page).getByLabel("Fundamento sobre EIPD", { exact: true })).toBeDisabled();
+  await expect(
+    main(page).getByRole("button", { name: "Guardar determinación", exact: true })
+  ).toHaveAccessibleDescription(/evaluación.*solo consulta/);
+  await expect(
+    main(page).getByText(/El servidor indica que esta evaluación es de solo consulta/)
+  ).toBeVisible();
+  expect(calls.some((v) => v.method !== "GET")).toBe(false);
+  expect(errors).toEqual([]);
+});
+
+test("rol de consulta ve motivos en aplicabilidad, RAT y organización sin escrituras", async ({
+  page,
+}) => {
+  await visit(page, "", viewerHarness.script);
+  await legal(page);
+  await expect(main(page).getByLabel("Fundamento sobre EIPD", { exact: true })).toBeDisabled();
+  await expect(
+    main(page).getByRole("button", { name: "Guardar determinación", exact: true })
+  ).toHaveAccessibleDescription(/Tu rol permite solo consulta/);
+  await mod(page, "Inventario de tratamientos");
+  await section(page, "Información general");
+  await expect(
+    main(page).getByText(
+      "Tu rol permite solo consulta del RAT; no puedes crear ni modificar actividades de tratamiento.",
+      { exact: true }
+    )
+  ).toBeVisible();
+  await expect(
+    main(page).getByRole("textbox", { name: "Nombre de la actividad *", exact: true })
+  ).toBeDisabled();
+  await mod(page, "Mi organización");
+  await expect(
+    main(page).getByText(
+      "Tu rol permite consultar los datos de la organización, pero no modificarlos.",
+      { exact: true }
+    )
+  ).toBeVisible();
+  await expect(main(page).getByLabel("Nombre de la organización", { exact: true })).toBeDisabled();
+  await page.setViewportSize({ width: 320, height: 844 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await capture(page, "lote3-organizacion-consulta-320.png");
+  expect(calls.some((v) => v.method !== "GET")).toBe(false);
+  expect(errors).toEqual([]);
+});
+
+test("editor puede editar RAT pero recibe explicación de solo consulta en organización", async ({
+  page,
+}) => {
+  await visit(page, "", editorHarness.script);
+  await choose(page);
+  await mod(page, "Inventario de tratamientos");
+  await section(page, "Información general");
+  await expect(
+    main(page).getByRole("textbox", { name: "Nombre de la actividad *", exact: true })
+  ).toBeEnabled();
+  await mod(page, "Mi organización");
+  await expect(main(page).getByLabel("Nombre de la organización", { exact: true })).toBeDisabled();
+  await expect(
+    main(page).getByText(
+      "Tu rol permite consultar los datos de la organización, pero no modificarlos.",
+      { exact: true }
+    )
+  ).toBeVisible();
+  expect(calls.some((v) => v.method !== "GET")).toBe(false);
+  expect(errors).toEqual([]);
+});
+
+test("contexto explica dependencia y evaluación faltante conservando selección opcional", async ({
+  page,
+}) => {
+  await page.getByRole("button", { name: "Cambiar contexto", exact: true }).click();
+  const dialog = page.getByRole("dialog", { name: "Contexto de trabajo", exact: true });
+  await expect(
+    dialog.getByLabel("Finalidad de la evaluación", { exact: true })
+  ).toHaveAccessibleDescription(/Selecciona primero un tratamiento/);
+  await expect(dialog.getByLabel("Evaluación", { exact: true })).toHaveAccessibleDescription(
+    /después una finalidad/
+  );
+  const apply = dialog.getByRole("button", { name: "Aplicar contexto", exact: true });
+  await expect(apply).toBeEnabled();
+  await expect(apply).toHaveAccessibleDescription(/Puedes aplicar solo la organización/);
+  await dialog.getByLabel("Tratamiento del RAT", { exact: true }).selectOption(tid);
+  await expect(dialog.getByLabel("Finalidad de la evaluación", { exact: true })).toBeEnabled();
+  await expect(apply).toHaveAccessibleDescription(/Puedes aplicar organización y tratamiento/);
+  await dialog.getByLabel("Finalidad de la evaluación", { exact: true }).selectOption(series);
+  await expect(apply).toBeDisabled();
+  await expect(apply).toHaveAccessibleDescription(
+    /Selecciona una evaluación para la finalidad elegida/
+  );
+  await capture(page, "lote3-evaluacion-faltante.png");
+  await dialog.getByLabel("Evaluación", { exact: true }).selectOption(aid);
+  await expect(apply).toBeEnabled();
+  await expect(apply).toHaveAccessibleDescription(/El contexto está listo/);
+  await capture(page, "lote3-contexto-requisitos.png");
+  await dialog.getByRole("button", { name: "Cancelar", exact: true }).click();
   expect(calls.some((v) => v.method !== "GET")).toBe(false);
   expect(errors).toEqual([]);
 });

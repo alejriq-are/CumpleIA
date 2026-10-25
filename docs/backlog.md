@@ -1,5 +1,15 @@
 # Backlog — CumpleIA
 
+## Aceptación asistida del lote 3 C4 — 25/10/2026
+
+- [x] **Lote 3 — Explicar permisos y requisitos.** Usuario valida ayuda de Guardar (declaración ficticia) y Aplicar contexto (evaluación faltante), cambio de habilitación y Cancelar. Veinticinco pruebas conectadas aprobadas; roles/estado no editable cubiertos con fixtures sin cambiar permisos reales. Aceptación acotada registrada en [continuidad](project/navegacion-servidor.md); sin commit/push del lote 3. No cierra globalmente NAV-UX-003 ni seguimiento de autenticación.
+
+## Lote 3 C4 — motivos de bloqueo, 25/10/2026
+
+- [ ] **C4 / NAV-UX-003 — Aceptar motivos de solo consulta y requisitos de guardado/contexto.** Implementado localmente en fix/navegacion-permisos-requisitos: mensajes de rol/estado del servidor, ayuda dinámica de fundamentos/declaración ficticia y dependencias de selección, con asociaciones accesibles. Mismas restricciones previas. Veinticinco pruebas conectadas aprobadas, cinco nuevas sin escrituras; viewer/editor simulados, no cuentas reales. Tipos/lint/formato y capturas revisados; validación asistida pendiente. [Alcance y guion](project/navegacion-servidor.md). No cierra globalmente NAV-UX-003 ni el seguimiento de sesión.
+
+Lote 2 publicado en 9c8632f tras autorización; lote 3 sin publicación nueva.
+
 ## Aceptación asistida C2/C14 — 25/10/2026
 
 - [x] **Lote 2 — Contexto por módulo y Continuar explícito.** Usuario confirma Todo OK y aporta capturas de Panel/Continuar, RAT y retorno a EIPD con notas pendientes conservadas. Aceptación acotada registrada en [continuidad](project/navegacion-servidor.md); sin commit/push del lote 2 todavía. Los estados anteriores de validación pendiente se conservan como antecedentes; NAV-UX-002/003 permanecen abiertos para sus otros criterios.

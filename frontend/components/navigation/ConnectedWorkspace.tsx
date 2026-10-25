@@ -694,6 +694,8 @@ export function ConnectedWorkspace({
               const organization = organizations.find((o) => o.id === v.organizationId);
               if (!organization) return null;
               const readOnly = !["owner", "admin", "editor"].includes(organization.role);
+              const permissionHelpId = `connected-permissions-${key.replaceAll(":", "-")}`;
+              const organizationReadOnly = !["owner", "admin"].includes(organization.role);
               return (
                 <div key={key} hidden={!here} data-work-pane={key}>
                   {v.module === "diagnostico" && (
@@ -706,39 +708,55 @@ export function ConnectedWorkspace({
                     />
                   )}
                   {v.module === "rat" && (
-                    <fieldset disabled={readOnly}>
-                      <div hidden={!["catalogo", "resumen"].includes(v.section)}>
-                        <RatWorkspace organizaciones={[organization]} />
-                      </div>
-                      {v.section === "nuevo" && (
-                        <TreatmentGeneralForm
-                          organizaciones={[organization]}
-                          initialOrganizationId={organization.id}
-                          onPending={(value) => updatePending(`rat-new:${v.organizationId}`, value)}
-                          onCreated={(id) =>
-                            void validate({
-                              ...v,
-                              treatmentId: id,
-                              section: "general",
-                              assessmentId: "",
-                            })
-                          }
-                        />
-                      )}{" "}
-                      {v.treatmentId && v.section !== "nuevo" && (
-                        <div hidden={["catalogo", "nuevo", "resumen"].includes(v.section)}>
+                    <>
+                      {readOnly && (
+                        <p
+                          id={permissionHelpId}
+                          className="mb-4 rounded border border-blue-200 bg-blue-50 p-3"
+                        >
+                          Tu rol permite solo consulta del RAT; no puedes crear ni modificar
+                          actividades de tratamiento.
+                        </p>
+                      )}
+                      <fieldset
+                        disabled={readOnly}
+                        aria-describedby={readOnly ? permissionHelpId : undefined}
+                      >
+                        <div hidden={!["catalogo", "resumen"].includes(v.section)}>
+                          <RatWorkspace organizaciones={[organization]} />
+                        </div>
+                        {v.section === "nuevo" && (
                           <TreatmentGeneralForm
                             organizaciones={[organization]}
                             initialOrganizationId={organization.id}
-                            treatmentId={v.treatmentId}
-                            activeSection={v.section}
                             onPending={(value) =>
-                              updatePending(`rat:${v.organizationId}:${v.treatmentId}`, value)
+                              updatePending(`rat-new:${v.organizationId}`, value)
+                            }
+                            onCreated={(id) =>
+                              void validate({
+                                ...v,
+                                treatmentId: id,
+                                section: "general",
+                                assessmentId: "",
+                              })
                             }
                           />
-                        </div>
-                      )}
-                    </fieldset>
+                        )}{" "}
+                        {v.treatmentId && v.section !== "nuevo" && (
+                          <div hidden={["catalogo", "nuevo", "resumen"].includes(v.section)}>
+                            <TreatmentGeneralForm
+                              organizaciones={[organization]}
+                              initialOrganizationId={organization.id}
+                              treatmentId={v.treatmentId}
+                              activeSection={v.section}
+                              onPending={(value) =>
+                                updatePending(`rat:${v.organizationId}:${v.treatmentId}`, value)
+                              }
+                            />
+                          </div>
+                        )}
+                      </fieldset>
+                    </>
                   )}
                   {v.module === "licitud" && (
                     <>
@@ -766,13 +784,27 @@ export function ConnectedWorkspace({
                     </>
                   )}
                   {v.module === "organizacion" && (
-                    <fieldset disabled={!["owner", "admin"].includes(organization.role)}>
-                      <legend className="mb-4 text-xl font-bold">Mi organización</legend>
-                      <OrganizacionForm
-                        organizacion={organization}
-                        onPending={(value) => updatePending(`org:${organization.id}`, value)}
-                      />
-                    </fieldset>
+                    <>
+                      {organizationReadOnly && (
+                        <p
+                          id={permissionHelpId}
+                          className="mb-4 rounded border border-blue-200 bg-blue-50 p-3"
+                        >
+                          Tu rol permite consultar los datos de la organización, pero no
+                          modificarlos.
+                        </p>
+                      )}
+                      <fieldset
+                        disabled={organizationReadOnly}
+                        aria-describedby={organizationReadOnly ? permissionHelpId : undefined}
+                      >
+                        <legend className="mb-4 text-xl font-bold">Mi organización</legend>
+                        <OrganizacionForm
+                          organizacion={organization}
+                          onPending={(value) => updatePending(`org:${organization.id}`, value)}
+                        />
+                      </fieldset>
+                    </>
                   )}
                 </div>
               );

@@ -314,3 +314,62 @@ individual aportada en este mensaje. Aceptación acotada C2/C14 completada; no a
 guardado de las notas ni cierre global de NAV-UX-002/003. Lote 2 sigue local, sin commit/push.
 Siguiente lote propuesto: 3 (C4), explicación de permisos y requisitos de guardado,
 pendiente de indicación para iniciar. Mantener abiertos seguimiento de sesión y otros lotes.
+
+## Correcciones de revisión externa — lote 3 (C4), 25/10/2026
+
+Usuario autoriza commit/push del lote 2 y continuar lote 3. Lote 2 publicado como
+9c8632f en origin/fix/navegacion-contexto-modulo; rama de implementación lote 3:
+fix/navegacion-permisos-requisitos. Solo explicación de estados de bloqueo; no se
+modifican permisos, contratos, sesiones, datos guardados ni requisitos jurídicos.
+
+- [x] Aplicabilidad: motivo visible de solo consulta por rol o editable=false del
+  servidor; estados de consulta, guardado y ausencia de determinación explicados.
+  Ayuda junto a Guardar enumera fundamentos faltantes y declaración ficticia, se
+  actualiza al completar y muestra requisitos completos cuando corresponde.
+- [x] Descripciones accesibles asociadas a controles y grupos mediante IDs únicos;
+  motivo de edición/solo consulta se muestra una vez, sin repetirlo en el pie.
+- [x] RAT y Mi organización: aviso externo al fieldset deshabilitado explica solo
+  consulta. Se mantienen roles owner/admin/editor para RAT y owner/admin para organización.
+- [x] Contexto: dependencias tratamiento/finalidad/evaluación explicadas; Aplicar
+  indica carga, error o evaluación faltante. Conserva selección opcional de solo
+  organización o tratamiento; no cambia la condición de habilitación anterior.
+- [x] Fallo reproducido antes del parche: Guardar no tenía descripción del requisito
+  faltante. Veinticinco Chromium conectadas aprobadas (20 previas + 5 nuevas),
+  tipos/ESLint/formato aprobados. Cinco dirigidas repetidas con capturas; ayuda de
+  Guardar revisada tras estabilizar repintado de scroll; escritorio y solo consulta
+  a 320 px sin desborde. No se suman repeticiones como cobertura única.
+- [x] Roles viewer/editor y editable=false comprobados con fixtures del navegador,
+  sin crear cuentas, cambiar roles reales ni realizar escrituras en los cinco casos
+  nuevos. No se atribuye a estas pruebas un ensayo nuevo de autorización/RLS del backend.
+- [ ] Validación asistida del lote 3 pendiente. Sin commit/push del lote 3.
+
+Guion asistido sin guardar: abrir Determinar aplicabilidad en evaluación ficticia
+existente con fundamento guardado, dejar declaración desmarcada y comprobar que la
+ayuda pide completarla; marcarla para ver requisitos completos y volver a desmarcar.
+En Cambiar contexto, conservar tratamiento/finalidad y elegir opción vacía de evaluación:
+Aplicar queda bloqueado con explicación; seleccionar versión válida habilita y luego
+Cancelar conserva contexto/borradores. No recargar notas pendientes ni crear revisiones
+solo para probar presentación. Casos de solo consulta disponibles en capturas de
+fixtures; no cambiar permisos reales para la prueba asistida.
+Lotes 4–9, clasificación de sesión, botón de consulta y duplicación de pasos siguen
+pendientes. Sin ampliación de API/DB ni habilitación de confirmación/activación EIPD.
+
+### Validación asistida parcial del lote 3 — ayuda de Guardar
+
+Usuario confirma «cambia correctamente, OK»: al desmarcar/marcar la declaración de
+datos ficticios, la ayuda indica el requisito faltante/completo y el botón cambia
+su habilitación con fundamentos completos. No se solicita ni se acredita un guardado
+nuevo por esta prueba. Pendiente comprobar explicación de evaluación faltante en
+Cambiar contexto; lote 3 aún sin cierre asistido completo ni publicación.
+
+### Aceptación asistida del lote 3 — 25/10/2026
+
+Usuario confirma «todo OK» en el selector: al retirar evaluación manteniendo finalidad,
+Aplicar contexto se deshabilita y explica el requisito; seleccionar versión válida lo
+habilita y Cancelar mantiene el contexto. Sumado al OK previo de ayuda de Guardar,
+completa el guion asistido acordado del lote 3 C4. No se guardaron revisiones como
+parte de estas instrucciones. Roles viewer/editor y editable=false cuentan con
+pruebas controladas automatizadas, no un ensayo manual con cuentas de otros roles.
+Lote 3 validado con ese alcance; sin commit/push nuevo. Próximo lote propuesto: 4,
+orientación después de guardar aplicabilidad y explicación de reubicación (C3/C8),
+pendiente de instrucción para iniciar. Otros pendientes de backlog no se cierran.

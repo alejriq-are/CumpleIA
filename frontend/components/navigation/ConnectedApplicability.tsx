@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { navigationApi, type Applicability, type Determination } from "@/lib/api/navigation";
 import { sessionToken } from "@/components/licitud/LicitudWorkspace";
 import { navigationReadError } from "./connected-navigation";
@@ -32,6 +32,9 @@ export function ConnectedApplicability({
   token?: () => Promise<string>;
   refreshVersion?: number;
 }) {
+  const id = useId();
+  const editingHelpId = `${id}-editing-help`;
+  const saveHelpId = `${id}-save-help`;
   const [manualVersion, setManualVersion] = useState(0);
   const [loading, setLoading] = useState(true);
   const [saved, setSaved] = useState<Applicability | null>(null);
@@ -122,6 +125,28 @@ export function ConnectedApplicability({
     }
   }
   const valid = [eipd, infancia].every((v) => v.state === "pendiente" || v.reason.trim());
+  const editingHelp = readOnly
+    ? "Tu rol permite solo consulta: puedes ver la determinación, pero no modificarla ni guardarla."
+    : saved?.editable === false
+      ? "El servidor indica que esta evaluación es de solo consulta. La determinación solo puede editarse mientras la evaluación está en borrador."
+      : busy
+        ? "Guardando la determinación. Espera a que termine la operación."
+        : loading
+          ? "Consultando la determinación. Espera a que termine la consulta antes de editar o guardar."
+          : !saved
+            ? "No hay una determinación disponible. Reintenta la consulta antes de editar o guardar."
+            : "";
+  const missing = [
+    eipd.state !== "pendiente" && !eipd.reason.trim() ? "fundamento sobre EIPD" : "",
+    infancia.state !== "pendiente" && !infancia.reason.trim()
+      ? "fundamento sobre infancia y adolescencia"
+      : "",
+    !fiction ? "declaración de datos ficticios" : "",
+  ].filter(Boolean);
+  const saveHelp = missing.length
+    ? `Para guardar, completa: ${missing.join("; ")}.`
+    : "Requisitos completos. Puedes guardar la determinación.";
+  const saveDescriptionId = editingHelp ? editingHelpId : saveHelpId;
   return (
     <div className="space-y-5">
       <h2 className="text-xl font-bold">Determinar aplicabilidad</h2>
@@ -133,6 +158,15 @@ export function ConnectedApplicability({
         Esta determinación corresponde al alcance guardado en la evaluación. Editar el RAT no
         sustituye automáticamente ese alcance; revisa su asociación antes de continuar.
       </p>
+      {editingHelp && (
+        <p
+          id={editingHelpId}
+          role={loading || busy ? "status" : undefined}
+          className="rounded border border-blue-200 bg-blue-50 p-3"
+        >
+          {editingHelp}
+        </p>
+      )}
       {saved && !saved.current && saved.revision > 0 && (
         <p role="status" className="rounded border border-amber-400 bg-amber-50 p-3">
           El alcance asociado cambió. Revisa y guarda nuevamente la determinación; los antecedentes
@@ -147,6 +181,7 @@ export function ConnectedApplicability({
       ).map(([label, value, set]) => (
         <fieldset
           key={label}
+          aria-describedby={editingHelp ? editingHelpId : undefined}
           disabled={readOnly || saved?.editable === false || busy || loading || !saved}
           className="space-y-3 rounded-lg border p-4"
         >
@@ -155,6 +190,7 @@ export function ConnectedApplicability({
             ¿Corresponde documentar {label}?
             <select
               aria-label={`¿Corresponde documentar ${label}?`}
+              aria-describedby={editingHelp ? editingHelpId : undefined}
               className="mt-2 block w-full rounded border p-3"
               value={value.state}
               onChange={(e) => {
@@ -173,6 +209,7 @@ export function ConnectedApplicability({
             Fundamento sobre {label}
             <textarea
               aria-label={`Fundamento sobre ${label}`}
+              aria-describedby={editingHelp ? editingHelpId : undefined}
               className="mt-2 block w-full rounded border p-3"
               rows={4}
               value={value.reason}
@@ -196,7 +233,6 @@ export function ConnectedApplicability({
           {error}
         </p>
       )}
-      {loading && <p role="status">Cargando determinación…</p>}
       <p>
         Contrasta infancia con el alcance del RAT. La presencia de menores no determina por sí sola
         la necesidad de una EIPD. Cambiar esta determinación conserva documentos y revisiones
@@ -210,6 +246,7 @@ export function ConnectedApplicability({
       <label className="flex gap-3">
         <input
           type="checkbox"
+          aria-describedby={saveDescriptionId}
           checked={fiction}
           onChange={(e) => setFiction(e.target.checked)}
           disabled={readOnly || busy}
@@ -221,7 +258,13 @@ export function ConnectedApplicability({
           {notice}
         </p>
       )}
+      {!editingHelp && (
+        <p id={saveHelpId} aria-live="polite" className="text-sm text-slate-700">
+          {saveHelp}
+        </p>
+      )}
       <button
+        aria-describedby={saveDescriptionId}
         disabled={
           readOnly || saved?.editable === false || busy || loading || !saved || !valid || !fiction
         }

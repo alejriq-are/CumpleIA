@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { api, type OrganizationMembershipOut, type TreatmentSummaryOut } from "@/lib/api/client";
 import { licitudApi, type AssessmentSummary } from "@/lib/api/licitud";
 import { sessionToken } from "@/components/licitud/LicitudWorkspace";
@@ -21,6 +21,9 @@ export function ConnectedContext({
   applying?: boolean;
   applyError?: string;
 }) {
+  const id = useId();
+  const dependencyHelpId = `${id}-dependencies`;
+  const applyHelpId = `${id}-apply-help`;
   const [org, setOrg] = useState(current.organizationId);
   const [tid, setTid] = useState(current.treatmentId);
   const [aid, setAid] = useState(current.assessmentId);
@@ -92,11 +95,35 @@ export function ConnectedContext({
   const purposes = Array.from(
     new Map(rows.map((v) => [v.series_id ?? v.id, v.purpose_snapshot])).entries()
   );
+  const applyBlocked = applying
+    ? "Espera a que termine la validación del contexto."
+    : loading
+      ? "Espera a que termine la consulta de los contextos autorizados."
+      : error
+        ? "No se puede aplicar el contexto mientras no se complete la consulta. Revisa el error indicado."
+        : !organizations.some((value) => value.id === org)
+          ? "Selecciona una organización a la que tengas acceso."
+          : tid && !treatments.some((value) => value.id === tid)
+            ? "Selecciona un tratamiento disponible para esta organización."
+            : series && !rows.some((value) => value.id === aid)
+              ? "Selecciona una evaluación para la finalidad elegida."
+              : "";
+  const applyHelp =
+    applyBlocked ||
+    (!tid
+      ? "Puedes aplicar solo la organización. El tratamiento y la evaluación son opcionales."
+      : !series
+        ? "Puedes aplicar organización y tratamiento. Para trabajar con una evaluación, elige también su finalidad y versión."
+        : "El contexto está listo para aplicar.");
   return (
     <div className="space-y-4">
       <p>
         Selecciona el contexto guardado en el servidor. Los borradores abiertos se conservan durante
         esta visita; no se copian a otra evaluación.
+      </p>
+      <p id={dependencyHelpId} className="text-sm text-slate-600">
+        Selecciona primero un tratamiento para habilitar Finalidad y después una finalidad para
+        habilitar Evaluación.
       </p>
       <label className="block">
         Organización
@@ -122,6 +149,7 @@ export function ConnectedContext({
         Tratamiento del RAT
         <select
           aria-label="Tratamiento del RAT"
+          aria-describedby={dependencyHelpId}
           className="mt-2 block w-full rounded border p-3"
           value={tid}
           onChange={(e) => {
@@ -143,6 +171,7 @@ export function ConnectedContext({
         Finalidad de la evaluación
         <select
           aria-label="Finalidad de la evaluación"
+          aria-describedby={dependencyHelpId}
           className="mt-2 block w-full rounded border p-3"
           disabled={loading || !tid}
           value={series}
@@ -163,6 +192,7 @@ export function ConnectedContext({
         Evaluación
         <select
           aria-label="Evaluación"
+          aria-describedby={dependencyHelpId}
           className="mt-2 block w-full rounded border p-3"
           disabled={loading || !series}
           value={aid}
@@ -186,17 +216,14 @@ export function ConnectedContext({
           licitud.
         </p>
       )}
+      <p id={applyHelpId} aria-live="polite" className="text-sm text-slate-700">
+        {applyHelp}
+      </p>
       <div className="flex gap-3">
         <button
+          aria-describedby={applyHelpId}
           className="rounded bg-blue-800 p-3 text-white disabled:opacity-50"
-          disabled={
-            applying ||
-            loading ||
-            !!error ||
-            !organizations.some((v) => v.id === org) ||
-            (!!tid && !treatments.some((v) => v.id === tid)) ||
-            (!!series && !rows.some((v) => v.id === aid))
-          }
+          disabled={!!applyBlocked}
           onClick={() => apply({ organizationId: org, treatmentId: tid, assessmentId: aid })}
         >
           Aplicar contexto

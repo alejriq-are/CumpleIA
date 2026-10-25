@@ -1,5 +1,23 @@
 # Handoff vigente de CumpleIA
 
+## Último resultado — lote 3 validado, 25/10/2026
+
+Usuario confirma OK ayuda dinámica de Guardar y selector de contexto (motivo de
+bloqueo, habilitación al seleccionar evaluación y Cancelar). Lote 3 C4 aceptado con
+ese alcance; roles/solo consulta verificados automáticamente con fixtures, no otras
+cuentas personales. Cambios locales en fix/navegacion-permisos-requisitos sobre
+9c8632f; sin commit/push nuevo. Próximo propuesto: lote 4 C3/C8, aún no iniciado.
+
+## Bloque activo — lote 3 C4, 25/10/2026
+
+Lote 2 validado y publicado en 9c8632f, rama fix/navegacion-contexto-modulo.
+Usuario autoriza continuar lote 3: implementado localmente en
+fix/navegacion-permisos-requisitos, explicaciones de permisos/solo consulta y
+requisitos para Guardar/Aplicar contexto, con descripciones accesibles. Veinticinco
+Chromium, tipos/lint/formato y capturas aprobados; aceptación asistida pendiente.
+Sin commit/push del lote 3 ni cambios de permisos/cuentas/datos/API/DB.
+[Guion y límites](project/navegacion-servidor.md). Otros lotes permanecen pendientes.
+
 ## Último resultado — lote 2 aceptado, 25/10/2026
 
 Usuario confirma Todo OK; capturas verifican Continuar contextual, cabecera RAT y
