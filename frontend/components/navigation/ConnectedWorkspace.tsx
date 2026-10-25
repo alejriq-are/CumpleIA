@@ -259,7 +259,6 @@ export function ConnectedWorkspace({
     window.addEventListener("beforeunload", warn);
     return () => window.removeEventListener("beforeunload", warn);
   }, [anyPending]);
-  const org = organizations.find((v) => v.id === location.organizationId)!;
   const selected = scope[contextKey(location)];
   const eipd = !!selected?.current && selected.eipd.state === "corresponde";
   const infancia = !!selected?.current && selected.infancia.state === "corresponde";
@@ -476,6 +475,19 @@ export function ConnectedWorkspace({
           }[v.section] ?? "Bases de licitud");
     return modules.find((item) => item.id === v.module)?.title ?? "Panel principal";
   }
+  function contextLabel(value: WorkLocation) {
+    const organization = organizations.find((item) => item.id === value.organizationId);
+    const parts = [`Organización: ${organization?.name ?? "Organización seleccionada"}`];
+    if (["rat", "licitud"].includes(value.module) && value.treatmentId) {
+      parts.push(`Tratamiento: ${names[value.treatmentId] ?? "Tratamiento seleccionado"}`);
+    }
+    if (value.module === "licitud" && value.assessmentId) {
+      parts.push(
+        `Finalidad y evaluación: ${purposes[value.assessmentId] ?? "Evaluación seleccionada"}`
+      );
+    }
+    return parts.join(" · ");
+  }
   const list = (
     <nav aria-label="Secciones del espacio conectado" className="connected-sections">
       {groups.map((group) => (
@@ -563,13 +575,9 @@ export function ConnectedWorkspace({
               </button>
             </div>
             <div className="px-4 pb-3 text-sm">
-              <strong>{org?.name}</strong>
-              {location.treatmentId && (
-                <> · {names[location.treatmentId] ?? "Tratamiento seleccionado"}</>
-              )}
-              {location.assessmentId && (
-                <> · {purposes[location.assessmentId] ?? "Evaluación seleccionada"}</>
-              )}
+              <p data-testid="connected-context-summary" className="font-medium">
+                {contextLabel(location)}
+              </p>
               {anyPending && (
                 <p className="font-semibold text-amber-800">
                   Hay formularios editados durante esta visita. Guarda cada formulario antes de
@@ -650,8 +658,12 @@ export function ConnectedWorkspace({
                   selección de contexto es independiente en cada ventana.
                 </p>
                 {last && (
-                  <button className="rounded bg-blue-800 p-3 text-white" onClick={() => go(last)}>
-                    Continuar en {locationLabel(last)}
+                  <button
+                    className="max-w-full rounded bg-blue-800 p-3 text-left text-white"
+                    onClick={() => go(last)}
+                  >
+                    <span className="block font-semibold">Continuar en {locationLabel(last)}</span>
+                    <span className="mt-1 block text-sm">{contextLabel(last)}</span>
                   </button>
                 )}
                 <div className="grid gap-4 sm:grid-cols-2">

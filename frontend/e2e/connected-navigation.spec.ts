@@ -673,3 +673,101 @@ test("desconexión muestra ayuda en español y se recupera sin descartar el borr
   expect(calls.some((v) => v.method !== "GET")).toBe(false);
   expect(errors).toEqual([]);
 });
+
+for (const width of [1280, 390]) {
+  test(`contexto visible según módulo y retorno con borrador a ${width}px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 844 });
+    await legal(page);
+    await section(page, "Base y fundamento");
+    await main(page)
+      .getByRole("textbox", { name: "Fundamento", exact: true })
+      .fill("[FICTICIA] Lote 2 conservar");
+    const context = page.getByTestId("connected-context-summary");
+    await expect(context).toContainText("Organización: [FICTICIA] Organización conectada");
+    await expect(context).toContainText("Tratamiento: [FICTICIA] Actividad mixta");
+    await expect(context).toContainText(
+      "Finalidad y evaluación: [FICTICIA] Finalidad de prueba · versión 1 · borrador"
+    );
+    for (const moduleName of ["Autodiagnóstico", "Mi organización", "Panel principal"]) {
+      await mod(page, moduleName);
+      await expect(context).toHaveText("Organización: [FICTICIA] Organización conectada");
+    }
+    await mod(page, "Inventario de tratamientos");
+    await expect(context).toContainText("Tratamiento: [FICTICIA] Actividad mixta");
+    await expect(context).not.toContainText("Finalidad");
+    await expect(context).not.toContainText("versión");
+    await mod(page, "Bases de licitud");
+    await expect(context).toContainText("versión 1 · borrador");
+    await expect(main(page).getByRole("textbox", { name: "Fundamento", exact: true })).toHaveValue(
+      "[FICTICIA] Lote 2 conservar"
+    );
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+      true
+    );
+    await capture(page, `lote2-contexto-licitud-${width}.png`);
+    expect(calls.some((v) => v.method !== "GET")).toBe(false);
+    expect(errors).toEqual([]);
+  });
+}
+
+test("Continuar identifica evaluación y versión recordadas sin cambiar el destino", async ({
+  page,
+}) => {
+  await legal(page);
+  await section(page, "Base y fundamento");
+  await main(page)
+    .getByRole("textbox", { name: "Fundamento", exact: true })
+    .fill("[FICTICIA] Continuar versión uno");
+  await choose(page, aid2);
+  await section(page, "Base y fundamento");
+  await main(page)
+    .getByRole("textbox", { name: "Fundamento", exact: true })
+    .fill("[FICTICIA] Continuar versión dos");
+  await mod(page, "Panel principal");
+  const resume = main(page).getByRole("button", { name: /^Continuar en Base y fundamento/ });
+  await expect(resume).toContainText("Organización: [FICTICIA] Organización conectada");
+  await expect(resume).toContainText("Tratamiento: [FICTICIA] Actividad mixta");
+  await expect(resume).toContainText(
+    "Finalidad y evaluación: [FICTICIA] Finalidad de prueba · versión 2 · borrador"
+  );
+  await expect(page.getByTestId("connected-context-summary")).not.toContainText("versión");
+  await page.setViewportSize({ width: 320, height: 844 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await capture(page, "lote2-continuar-320.png");
+  await resume.click();
+  await expect(main(page).getByRole("textbox", { name: "Fundamento", exact: true })).toHaveValue(
+    "[FICTICIA] Continuar versión dos"
+  );
+  await choose(page, aid);
+  await section(page, "Base y fundamento");
+  await expect(main(page).getByRole("textbox", { name: "Fundamento", exact: true })).toHaveValue(
+    "[FICTICIA] Continuar versión uno"
+  );
+  expect(calls.some((v) => v.method !== "GET")).toBe(false);
+  expect(errors).toEqual([]);
+});
+
+test("Continuar al Autodiagnóstico identifica organización y conserva su ámbito", async ({
+  page,
+}) => {
+  await legal(page);
+  await mod(page, "Autodiagnóstico");
+  await main(page)
+    .getByPlaceholder("Notas u observaciones (opcional)")
+    .first()
+    .fill("[FICTICIA] Diagnóstico organizacional");
+  await mod(page, "Panel principal");
+  const resume = main(page).getByRole("button", { name: /^Continuar en/ });
+  await expect(resume).toContainText("Organización: [FICTICIA] Organización conectada");
+  await expect(resume).not.toContainText("Actividad mixta");
+  await expect(resume).not.toContainText("versión");
+  await resume.click();
+  await expect(main(page).getByPlaceholder("Notas u observaciones (opcional)").first()).toHaveValue(
+    "[FICTICIA] Diagnóstico organizacional"
+  );
+  await expect(page.getByTestId("connected-context-summary")).toHaveText(
+    "Organización: [FICTICIA] Organización conectada"
+  );
+  expect(calls.some((v) => v.method !== "GET")).toBe(false);
+  expect(errors).toEqual([]);
+});

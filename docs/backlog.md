@@ -1,5 +1,16 @@
 # Backlog — CumpleIA
 
+## Aceptación asistida C2/C14 — 25/10/2026
+
+- [x] **Lote 2 — Contexto por módulo y Continuar explícito.** Usuario confirma Todo OK y aporta capturas de Panel/Continuar, RAT y retorno a EIPD con notas pendientes conservadas. Aceptación acotada registrada en [continuidad](project/navegacion-servidor.md); sin commit/push del lote 2 todavía. Los estados anteriores de validación pendiente se conservan como antecedentes; NAV-UX-002/003 permanecen abiertos para sus otros criterios.
+
+## Lote 2 C2/C14 — contexto por módulo, 25/10/2026
+
+- [ ] **C2/C14 / NAV-UX-002/003 — Aceptar cabecera por ámbito y Continuar con destino explícito.** Implementados localmente en fix/navegacion-contexto-modulo: módulos organizacionales no presentan evaluación como propia, RAT muestra tratamiento y licitud contexto completo; Continuar identifica sección/contexto/versión aplicables. Veinte pruebas conectadas aprobadas, tipos/lint/formato y capturas revisados; pendiente recorrido asistido del usuario. No altera memoria de selección ni cierra otros lotes.
+
+Lote 1 publicado en commit 465a94c tras autorización expresa. Su seguimiento de
+clasificación de sesión continúa abierto; no se incorpora al lote 2.
+
 ## Resultado asistido C1 y seguimiento de sesión — 25/10/2026
 
 - [x] **Lote 1 C1 — Carga/error visibles y recuperación sin perder borrador.** Usuario confirma Reintentar consulta exitoso en pestaña original EIPD, conservando Notas del borrador sin guardar, después de iniciar sesión en otra pestaña. Dieciséis pruebas conectadas aprobadas; detalle en [continuidad](project/navegacion-servidor.md). Implementación local sin publicación nueva; no cierra globalmente NAV-UX-003/004 ni otros lotes.

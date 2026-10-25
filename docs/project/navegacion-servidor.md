@@ -270,3 +270,47 @@ en pruebas controladas, ni a dar por implementados los lotes restantes.
 Seguimiento separado: sessionToken usa el mismo aviso para error de lectura de sesión
 y sesión ausente. La recuperación autenticada funcionó; no se atribuye a una falla del
 botón ni se declara resuelta la distinción de causas/mensaje de autenticación.
+
+## Correcciones de revisión externa — lote 2 (C2/C14), 25/10/2026
+
+Usuario autoriza commit/push del lote 1 y continuar con lote 2. Lote 1 publicado
+como 465a94c515db4245b5a7b9d89534fc76c6dee0ef en origin/fix/navegacion-carga-recuperacion,
+HEAD remoto verificado. Se excluyó frontend/next-env.d.ts generado por Next.js.
+Lote 2 en fix/navegacion-contexto-modulo, basado en ese commit; sin commit/push nuevo.
+
+- [x] Cabecera según ámbito: Panel, Autodiagnóstico y Mi organización muestran solo
+  organización; RAT añade tratamiento; Bases de licitud añade finalidad/evaluación,
+  versión y estado. Etiquetas explícitas; no se borra contexto de navegación recordado.
+- [x] Continuar identifica sección y contexto propio del destino recordado. En licitud
+  incluye organización, tratamiento, finalidad/evaluación y versión/estado; diagnóstico
+  muestra organización sin atribuir respuestas a una evaluación de licitud.
+- [x] Sin cambios en rutas, permisos, formularios, persistencia ni memoria de retorno;
+  el selector de contexto permanece igual (su simplificación corresponde a otro lote).
+- [x] Prueba previa reprodujo Continuar sin contexto. Veinte Chromium conectadas
+  aprobadas (16 existentes + 4 nuevas): retorno entre módulos con borrador, encabezado
+  por ámbito, dos versiones y Continuar, diagnóstico por organización y ausencia de
+  escrituras en los cuatro casos nuevos. Tipos, ESLint y formato aprobados.
+- [x] Cuatro casos repetidos con capturas en escritorio/390/320, sin desborde;
+  imágenes ficticias revisadas en outputs/navegacion-lote2 del espacio de conversación.
+- [ ] Validación asistida del lote 2 pendiente; no cerrar todavía C2/C14 como aceptados.
+
+Guion: desde la evaluación ficticia existente con texto pendiente, ir a Autodiagnóstico
+y Mi organización; comprobar que cabecera solo presenta organización. Ir a RAT:
+organización/tratamiento, sin finalidad/version de licitud. Volver a Bases de licitud:
+contexto completo y mismo borrador. Ir a Panel desde esa sección: Continuar debe nombrar
+sección, tratamiento/finalidad y versión; pulsarlo debe recuperar el mismo formulario.
+No guardar marcas de prueba ni recargar borradores solo para comprobar estos cambios.
+Lotes 3–9, seguimiento de sesión, botón de consulta y duplicación EIPD continúan pendientes.
+
+### Aceptación asistida del lote 2 — 25/10/2026
+
+Usuario confirma «Todo OK» al ejecutar el guion del lote 2. Capturas ff b193e2
+(ffb193e2), 32dafffb y 5ac1eed9: Panel muestra solo organización y Continuar identifica
+Tratamiento y alcance EIPD, organización/tratamiento/finalidad y versión 1 borrador;
+RAT muestra organización/tratamiento sin finalidad/evaluación; regreso a EIPD conserva
+[FICTICIA] Texto pendiente de prueba en Notas del borrador EIPD, con aviso sin guardar.
+Autodiagnóstico y Mi organización aceptados por confirmación del usuario, sin captura
+individual aportada en este mensaje. Aceptación acotada C2/C14 completada; no acredita
+guardado de las notas ni cierre global de NAV-UX-002/003. Lote 2 sigue local, sin commit/push.
+Siguiente lote propuesto: 3 (C4), explicación de permisos y requisitos de guardado,
+pendiente de indicación para iniciar. Mantener abiertos seguimiento de sesión y otros lotes.

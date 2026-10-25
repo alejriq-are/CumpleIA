@@ -1,5 +1,22 @@
 # Handoff vigente de CumpleIA
 
+## Último resultado — lote 2 aceptado, 25/10/2026
+
+Usuario confirma Todo OK; capturas verifican Continuar contextual, cabecera RAT y
+retorno a EIPD con notas sin guardar conservadas. Lote 2 C2/C14 validado, local en
+fix/navegacion-contexto-modulo sobre lote 1 publicado 465a94c; sin commit/push nuevo.
+Siguiente bloque propuesto: lote 3 C4 (permisos/requisitos), aún no iniciado.
+No descartar notas pendientes ni cerrar otros criterios de backlog por esta aceptación.
+
+## Bloque activo — lote 2 C2/C14, 25/10/2026
+
+Lote 1 validado y publicado como 465a94c en fix/navegacion-carga-recuperacion,
+confirmado contra remoto. Usuario autoriza continuar lote 2: implementación local
+en fix/navegacion-contexto-modulo, cabecera por ámbito y Continuar con contexto del
+destino; rutas/memoria/borradores intactos. Veinte Chromium, tipos/lint/formato y
+capturas escritorio/390/320 aprobados. Aceptación asistida pendiente; sin publicación
+nueva del lote 2. Ver [guion vigente](project/navegacion-servidor.md).
+
 ## Último resultado asistido — C1, 25/10/2026
 
 Usuario confirma recuperación con Reintentar consulta y notas EIPD pendientes
