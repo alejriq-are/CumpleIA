@@ -152,3 +152,121 @@ Referencias: [maqueta aceptada](maqueta-navegacion-integral.md),
 [recorrido histórico de licitud](m3-t1-checklist-recorrido-licitud.md),
 [backlog](../backlog.md). NAV-UX-005 y LIC-FORM-001 siguen pendientes; no abordar
 nuevas funciones por el solo hecho de reanudar estas pruebas.
+
+## Reanudación asistida — 25/10/2026
+
+Usuario confirma frontend/backend iniciados y solicita retomar este checklist.
+HEAD local/remoto comprobado: db6f0d38e4e12bdffe5007ecb321787f831e2186,
+rama feature/navegacion-servidor. Único cambio local observado al inicio:
+frontend/next-env.d.ts regenerado por Next.js; no se revierte ni publica como ajuste funcional.
+GitHub Handoff protocol 40194470401 completado success para este HEAD.
+No aparece ejecución de CI funcional para este commit en la consulta: no se declara
+CI funcional remota aprobada. Se mantienen las validaciones locales documentadas.
+Recorrido asistido conectado pendiente de resultados: comenzar por selección y
+confirmación de contexto existente (paso 2), sin crear evaluaciones duplicadas.
+
+## Correcciones de revisión externa — lote 1 (C1), 25/10/2026
+
+Usuario autoriza únicamente comenzar el lote 1 del checklist propuesto tras contrastar
+el informe de Claude con el repositorio. Claude aporta hipótesis como revisor externo;
+no participa en el circuito de ejecución. Rama fix/navegacion-carga-recuperacion,
+base db6f0d3. Los lotes posteriores no se implementan en este bloque.
+
+- [x] Fallo reproducido antes del parche: enlace directo a EIPD con consulta retenida
+  no muestra estado de carga en el área de trabajo.
+- [x] Carga y error de aplicabilidad visibles fuera del formulario oculto en EIPD,
+  infancia y preparación. Reintentar consulta o ir a Determinar aplicabilidad.
+- [x] Carga del contexto visible fuera del selector al restaurar enlace/historial;
+  error de apertura permite reintentar la validación autorizada.
+- [x] Formularios conservados montados; reintento solo consulta, sin guardar,
+  descartar borradores ni relajar permisos/habilitación por determinación guardada.
+- [x] 15 pruebas Chromium conectadas aprobadas (10 previas + 5 nuevas). Tres casos
+  de enlaces condicionales repetidos en escritorio/390/320 px, sin desborde.
+  Tipos, ESLint y formato aprobados. Capturas de carga/error ficticios revisadas
+  en outputs/navegacion-lote1 del espacio de trabajo de esta conversación.
+- [ ] Validación asistida con el usuario en su navegador, antes de cerrar el lote.
+- [ ] Commit/push de esta corrección: no realizado ni inferido de la autorización
+  anterior de publicación de la integración.
+
+Guion asistido: usar evaluación ficticia existente con EIPD habilitada por guardado;
+abrir un paso de EIPD, escribir una marca sin guardar, cambiar a Base y volver para
+confirmar conservación. Para el error se puede bloquear temporalmente únicamente
+la solicitud GET de aplicabilidad mediante las herramientas del navegador y abrir
+el mismo enlace en otra pestaña sin borradores; debe aparecer mensaje y ambas acciones.
+Retirar el bloqueo y pulsar Reintentar consulta: se abre el destino habilitado.
+No cortar ni modificar el backend/base, no guardar revisiones solo para probar UI,
+y no recargar la pestaña con el borrador pendiente. La demora y el error ya están
+cubiertos automáticamente con respuestas ficticias controladas; el ensayo manual
+se guía paso a paso según las herramientas disponibles del usuario.
+
+Límites: solo presentación/recuperación de lecturas del hallazgo C1. Reubicaciones
+explicadas (C8), cabecera contextual (C2), permisos explicados (C4), estado guardado
+(C9), navegación/teclado y demás lotes siguen pendientes. Sin cambios de API, DB,
+migraciones, autorización, confirmación/activación EIPD, merge o despliegue.
+
+### Validación asistida del lote 1 — conservación confirmada
+
+Usuario confirma que escribió texto de prueba sin guardar en EIPD, cambió a Base y
+fundamento y volvió al mismo campo: el texto se conserva (OK). La marca corresponde
+al texto, no al indicador de estado del menú. No se afirma guardado en servidor.
+Pendiente comprobar juntos error visible y reintento; el lote no se cierra todavía.
+
+### Ensayo asistido de desconexión y recuperación — versión conectada
+
+Capturas fdbc984f y f4a2e8d6: /dashboard/trabajo, CumpleIA Demo / Gestión de clientes /
+Coordinar citas / versión 1 borrador; determinaciones pendientes, historial vacío.
+Offline + Actualizar estado produce error visible; No throttling + nueva consulta
+retira el error y GET applicability responde 200. No acredita guardado ni ensayo de
+error dentro de EIPD/infancia condicional; esos casos tienen cobertura automática.
+La prueba anterior comunicada como conservación OK precedió a la identificación de
+/dashboard/maqueta en capturas: no se da por aceptada su equivalente conectado hasta
+repetirlo allí. Se mantiene la evidencia histórica y se aclara su alcance.
+Hallazgo asistido: mensaje técnico Failed to fetch. Se sustituye en lecturas de
+aplicabilidad/apertura por ayuda de conexión en español, preservando mensajes de
+permisos/conflictos del servidor. Prueba controlada adicional de desconexión real de
+la solicitud verifica traducción, recuperación y borrador sin escrituras.
+
+### Hallazgo asistido adicional — acción de consulta poco visible
+
+Usuario solicita anotar que «Actualizar estado guardado sin descartar el borrador»
+no se distingue del contenido y no explica su efecto (captura c70d9387).
+Registrado en backlog bajo C9/LIC-UX-015, relacionado con lote 5. Propuesta:
+«Consultar última determinación guardada», con ayuda y diferenciación de Guardar.
+Solo registro: no se cambia la interfaz ni se da por cerrado ese hallazgo en lote 1.
+
+### Duplicación de pasos confirmada en prueba asistida
+
+Captura 84302033 muestra menú Completar EIPD y los siete botones EipdSteps centrales
+con destinos equivalentes. Registrado en backlog para lote 8: conservar navegación
+superior/Secciones y ocultar lista central solo cuando exista navegación externa.
+No implementado en lote 1; no acredita todavía resultado de error/reintento dentro de EIPD.
+
+### Recuperación condicional con sesión no disponible — pendiente
+
+Capturas 8ab64936/ec1912a9/5f207204: usuario observa error visible y ambas acciones en
+EIPD, pero Reintentar no recupera el formulario; mensaje «Tu sesión expiró» persiste
+también con No throttling. Ir a Determinar aplicabilidad muestra el formulario ya
+montado, no acredita consulta exitosa. El lote 1 no se acepta todavía.
+Inspección: sessionToken agrupa error de getSession y sesión ausente bajo el mismo
+texto; no permite concluir desde la captura si es desconexión del proveedor o sesión
+inválida. No se leen cookies/tokens ni se alteran permisos. Próximo paso asistido:
+iniciar sesión en otra pestaña del mismo navegador/perfil y reintentar en la pestaña
+original sin recargar para conservar borradores; comprobar resultado y texto pendiente.
+
+### Cierre asistido del recorrido C1 — recuperación y borrador confirmados
+
+Usuario confirma finalmente: tras iniciar sesión en otra pestaña del mismo navegador,
+volver a la pestaña original /dashboard/trabajo y pulsar Reintentar consulta, reaparece
+el formulario EIPD y se conserva el texto pendiente en Notas del borrador EIPD (opcional).
+La pestaña nueva no contenía ese borrador: conservación por pestaña, no sincronización.
+Quedan comprobados con el usuario error visible y acciones en sección EIPD, retorno
+a Determinar aplicabilidad y recuperación de EIPD conservando notas tras restablecer
+sesión. El guardado ficticio previo habilitó el menú; recuperar no guardó las notas.
+Lote 1 C1: implementación y recorrido asistido completados con este alcance; pruebas
+automáticas del último bloque: 16 Chromium, tipos y ESLint aprobados. Sin commit/push.
+No equivale a validar manualmente todos los casos de infancia/preparación, cubiertos
+en pruebas controladas, ni a dar por implementados los lotes restantes.
+
+Seguimiento separado: sessionToken usa el mismo aviso para error de lectura de sesión
+y sesión ausente. La recuperación autenticada funcionó; no se atribuye a una falla del
+botón ni se declara resuelta la distinción de causas/mensaje de autenticación.

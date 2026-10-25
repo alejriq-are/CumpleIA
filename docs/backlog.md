@@ -1,5 +1,38 @@
 # Backlog — CumpleIA
 
+## Resultado asistido C1 y seguimiento de sesión — 25/10/2026
+
+- [x] **Lote 1 C1 — Carga/error visibles y recuperación sin perder borrador.** Usuario confirma Reintentar consulta exitoso en pestaña original EIPD, conservando Notas del borrador sin guardar, después de iniciar sesión en otra pestaña. Dieciséis pruebas conectadas aprobadas; detalle en [continuidad](project/navegacion-servidor.md). Implementación local sin publicación nueva; no cierra globalmente NAV-UX-003/004 ni otros lotes.
+- [ ] **Distinguir fallo temporal de autenticación y sesión no disponible en el aviso de recuperación.** Durante la prueba, sessionToken presentó «Tu sesión expiró» tanto ante error como ante ausencia de sesión; no se confirmó desde capturas la causa original. Revisar la clasificación usando errores del proveedor, ofrecer orientación para reautenticar conservando el borrador de la pestaña original y no ocultar permisos ni reutilizar tokens inválidos. Validar desconexión temporal frente a sesión realmente ausente; no leer ni registrar credenciales. Relacionado con C1/C4; seguimiento pendiente, no corrección ya implementada.
+
+
+## Navegación de pasos EIPD duplicada — revisión conectada, 25/10/2026
+
+- [ ] **C7/C5 — Evitar repetir los siete accesos EIPD en el área de trabajo.** Captura asistida 84302033: /dashboard/trabajo, Completar EIPD presenta los mismos siete destinos en desplegable superior y botones centrales de EipdSteps. Hallazgo observado, no solo inferido. Vincular al lote 8 de simplificación visual y NAV-UX-003/LIC-UX-015; el lote 1 de carga/error sigue activo.
+  - En navegación conectada conservar menú superior y panel Secciones; retirar la lista central duplicada, manteniendo título del paso/ubicación, foco y acciones propias del formulario (guardar, anterior/siguiente cuando corresponda).
+  - Conservar EipdSteps en usos del editor que no dispongan de navegación externa. No retirar globalmente el componente compartido ni campos.
+  - Aceptación: siete destinos accesibles en escritorio/móvil y con teclado, sin segunda lista central en modo conectado; paso actual reconocible y borradores conservados; comportamiento independiente anterior sin regresiones. Implementación pendiente.
+
+
+## Aclarar y destacar la consulta de determinación guardada — 25/10/2026
+
+- [ ] **Revisión conectada C9 / LIC-UX-015 — Visibilidad y significado de «Actualizar estado guardado sin descartar el borrador».** Hallazgo observado por el usuario en /dashboard/trabajo, Determinar aplicabilidad (captura c70d9387): el botón se confunde con el contenido y su efecto no se entiende. Relacionado con lote 5 (estado guardado) del checklist de revisión, sin ampliar el lote 1 activo.
+  - Presentarlo como acción secundaria reconocible, con contraste, borde/espaciado y foco visible; evitar confundirlo con Guardar determinación.
+  - Propuesta de nombre para validar: «Consultar última determinación guardada». Ayuda propuesta: «Vuelve a consultar lo guardado en el servidor para esta evaluación. Conserva tus cambios pendientes y no guarda el formulario».
+  - Explicar que lee EIPD/infancia, fundamentos, revisión e historial guardados de la evaluación seleccionada y actualiza los accesos según ese estado. Si no hay ediciones pendientes, carga esos valores en el formulario; si hay borrador editado, lo conserva. No recarga el RAT, no cambia su snapshot ni sincroniza automáticamente ventanas.
+  - Mostrar de forma comprensible qué estado/revisión se recuperó y diferenciarlo del borrador, especialmente ante conflicto. Utilizar solo autoría/fechas disponibles en el contrato, sin inventar nombres.
+  - Aceptación: el usuario identifica la acción y explica su efecto antes de pulsarla; la consulta no envía escrituras ni crea revisiones; conserva textos pendientes; con formulario limpio refleja la determinación leída; falla con mensaje claro y se recupera al reintentar; teclado/móvil legibles. Nombre y presentación pendientes de validación e implementación.
+
+
+## Revisión conectada — lote 1 C1, 25/10/2026
+
+Usuario autoriza corrección acotada del hallazgo C1 contrastado con código. Vinculada
+a NAV-UX-003/004: estados de carga/error visibles, recuperación de lectura y conservación
+de borradores implementados localmente en fix/navegacion-carga-recuperacion.
+15 pruebas conectadas y tipos/lint/formato aprobados; verificación visual escritorio,
+390 y 320 px. Pendiente aceptación asistida; no cierra NAV-UX-003/004 ni otros lotes.
+[Detalle y próximo recorrido](project/navegacion-servidor.md).
+
 ## Pausa y próximo bloque — 25/10/2026
 
 Commit/push de navegación conectada autorizado por el usuario al pausar. Integración

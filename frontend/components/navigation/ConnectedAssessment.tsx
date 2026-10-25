@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { AssessmentFlow, type AssessmentLocation } from "@/components/licitud/AssessmentFlow";
 import type { Applicability } from "@/lib/api/navigation";
-import { ConnectedApplicability } from "./ConnectedApplicability";
+import { ConnectedApplicability, type ApplicabilityLoadState } from "./ConnectedApplicability";
 import type { WorkLocation } from "./connected-navigation";
 export function ConnectedAssessment({
   location,
@@ -23,6 +23,7 @@ export function ConnectedAssessment({
 }) {
   const [refreshVersion, setRefreshVersion] = useState(0);
   const refresh = useCallback(() => setRefreshVersion((n) => n + 1), []);
+  const [loadState, setLoadState] = useState<ApplicabilityLoadState>({ loading: true, error: "" });
   const [saved, setSaved] = useState<Applicability | null>(null);
   const [appDirty, setAppDirty] = useState(false);
   const [flowDirty, setFlowDirty] = useState(false);
@@ -42,14 +43,15 @@ export function ConnectedAssessment({
     onPending(key, appDirty || flowDirty);
   }, [key, appDirty, flowDirty, onPending]);
   useEffect(() => {
-    if (!saved || !active) return;
+    if (!saved || !active || loadState.loading || loadState.error) return;
     if (
       (location.section === "eipd" && !scope.eipd) ||
       (["infancia", "preparar"].includes(location.section) && !scope.infancia)
     )
       go({ ...location, section: "aplicabilidad", step: 0 }, true);
-  }, [active, saved, scope.eipd, scope.infancia, location, go]);
+  }, [active, saved, loadState, scope.eipd, scope.infancia, location, go]);
   const section = location.section;
+  const conditional = ["eipd", "infancia", "preparar"].includes(section);
   const flow: AssessmentLocation = {
     tab:
       section === "revisar"
@@ -66,6 +68,28 @@ export function ConnectedAssessment({
   };
   return (
     <div className="space-y-5">
+      {section !== "aplicabilidad" && loadState.loading && (
+        <p role="status" className="rounded border bg-blue-50 p-4">
+          Cargando evaluación y aplicabilidad… Los borradores de esta visita se conservan.
+        </p>
+      )}
+      {section !== "aplicabilidad" && loadState.error && (
+        <section className="space-y-3 rounded border border-red-200 bg-red-50 p-4">
+          <p role="alert">No se pudo consultar la aplicabilidad. {loadState.error}</p>
+          <p>
+            Los borradores de esta visita se conservan. Reintentar no guarda ni descarta cambios.
+          </p>
+          <button className="rounded border p-3" onClick={refresh}>
+            Reintentar consulta
+          </button>
+          <button
+            className="rounded border p-3"
+            onClick={() => go({ ...location, section: "aplicabilidad", step: 0 })}
+          >
+            Ir a Determinar aplicabilidad
+          </button>
+        </section>
+      )}
       <div hidden={section !== "aplicabilidad"}>
         <ConnectedApplicability
           organizationId={location.organizationId}
@@ -75,11 +99,13 @@ export function ConnectedAssessment({
           refreshVersion={refreshVersion}
           onSaved={loaded}
           onDirty={setAppDirty}
+          onLoadState={setLoadState}
         />
       </div>
       <div
         hidden={
           section === "aplicabilidad" ||
+          (conditional && (loadState.loading || !!loadState.error)) ||
           (section === "eipd" && !scope.eipd) ||
           (["infancia", "preparar"].includes(section) && !scope.infancia)
         }

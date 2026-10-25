@@ -1,5 +1,24 @@
 # Handoff vigente de CumpleIA
 
+## Último resultado asistido — C1, 25/10/2026
+
+Usuario confirma recuperación con Reintentar consulta y notas EIPD pendientes
+conservadas en pestaña original tras reautenticar en otra. Lote 1 acotado completado
+localmente; 16 Chromium/tipos/lint aprobados, sin commit/push nuevo. Seguimiento de
+clasificación de error/sesión y mejoras de botón/duplicación registrados en backlog.
+No iniciar lotes siguientes sin indicación; NAV-UX-003/004 no cerrados globalmente.
+Los estados anteriores «recuperación pendiente» son antecedentes de este ensayo.
+
+## Bloque activo — lote 1 C1, 25/10/2026
+
+Retomado por usuario. Corrección local en fix/navegacion-carga-recuperacion sobre
+db6f0d3: carga/error de aplicabilidad visibles en secciones condicionales, reintento
+y retorno al formulario sin desmontar borradores; indicador/reintento de validación
+de enlace fuera del selector. 15 Chromium, tipos/ESLint/formato y tres casos visuales
+a 390/320/escritorio aprobados. Validación asistida pendiente, sin commit/push nuevo.
+[Alcance y guion](project/navegacion-servidor.md#correcciones-de-revisión-externa--lote-1-c1-25102026).
+Claude solo revisor externo; restantes lotes pendientes, EIPD bloqueada.
+
 ## Pausa solicitada y reanudación — 25/10/2026
 
 Usuario solicita detener el trabajo por unas horas, registrar avance y próximos pasos,

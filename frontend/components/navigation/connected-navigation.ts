@@ -88,3 +88,13 @@ export const eipdSections = [
   "Fuentes y evidencias",
   "Riesgo residual y seguimiento",
 ];
+
+export function navigationReadError(error: unknown, fallback: string): string {
+  if (
+    error instanceof TypeError &&
+    /failed to fetch|networkerror|load failed|network request failed/i.test(error.message)
+  ) {
+    return "No se pudo conectar con el servidor. Revisa la conexión y vuelve a intentar. Los borradores de esta visita se conservan.";
+  }
+  return error instanceof Error ? error.message : fallback;
+}

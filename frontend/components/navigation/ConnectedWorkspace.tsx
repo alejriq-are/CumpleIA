@@ -17,6 +17,7 @@ import { ConnectedAssessment } from "./ConnectedAssessment";
 import { ConnectedContext, type WorkContext } from "./ConnectedContext";
 import {
   encodeWork,
+  navigationReadError,
   parseWork,
   paneKey,
   ratSections,
@@ -103,6 +104,7 @@ export function ConnectedWorkspace({
   const current = useRef(location);
   current.current = location;
   const sequence = useRef(0);
+  const validationTarget = useRef<WorkLocation | null>(null);
   const rememberedLocations = useRef<Record<string, WorkLocation>>({});
 
   const updatePending = useCallback(
@@ -129,6 +131,7 @@ export function ConnectedWorkspace({
       setMenu(false);
       setSections(false);
       setError("");
+      validationTarget.current = null;
       setNotice("");
       if (next.module !== "panel") setLast(next);
       setPanes((prev) => ({ ...prev, [paneKey(next)]: next }));
@@ -151,6 +154,7 @@ export function ConnectedWorkspace({
   const validate = useCallback(
     async (next: WorkLocation, replace = true) => {
       const version = ++sequence.current;
+      validationTarget.current = next;
       setValidating(true);
       setError("");
       if (!organizations.some((v) => v.id === next.organizationId)) {
@@ -183,7 +187,7 @@ export function ConnectedWorkspace({
         return false;
       } catch (e) {
         if (version === sequence.current)
-          setError(e instanceof Error ? e.message : "No se pudo abrir el contexto autorizado.");
+          setError(navigationReadError(e, "No se pudo abrir el contexto autorizado."));
         return false;
       } finally {
         if (version === sequence.current) setValidating(false);
@@ -605,10 +609,26 @@ export function ConnectedWorkspace({
               ))}
             </div>
           </header>
-          {error && (
-            <p role="alert" className="m-4 rounded bg-red-50 p-4 text-red-800">
-              {error}
+          {validating && !context && (
+            <p role="status" className="m-4 rounded bg-blue-50 p-4">
+              Consultando evaluación y contexto autorizado…
             </p>
+          )}
+          {error && !context && (
+            <div className="m-4 space-y-3 rounded bg-red-50 p-4 text-red-800">
+              <p role="alert">{error}</p>
+              {validationTarget.current && (
+                <button
+                  className="rounded border p-3"
+                  disabled={validating}
+                  onClick={() => {
+                    if (validationTarget.current) void validate(validationTarget.current);
+                  }}
+                >
+                  Reintentar apertura
+                </button>
+              )}
+            </div>
           )}
           {notice && (
             <p role="status" className="m-4 rounded bg-blue-50 p-4">

@@ -17,6 +17,7 @@ const organization = {
   industry: null,
 };
 let releaseValidation: (() => void) | undefined;
+let releaseApplicability: (() => void) | undefined;
 let records: Record<string, any>,
   determinations: Record<string, any>,
   calls: { path: string; method: string; org: string | null; body: any }[],
@@ -129,6 +130,7 @@ test.beforeEach(async ({ page }) => {
   errors = [];
   mode = "ok";
   releaseValidation = undefined;
+  releaseApplicability = undefined;
   page.on("pageerror", (e) => errors.push(e.message));
   page.on("dialog", async (d) => (d.type() === "beforeunload" ? d.accept() : d.dismiss()));
   await page.route("**/*", async (route) => {
@@ -183,6 +185,15 @@ test.beforeEach(async ({ page }) => {
     const match = pathname.match(/\/assessments\/([^/]+)/);
     const id = match?.[1] ?? aid;
     if (pathname.endsWith("/applicability")) {
+      if (method === "GET" && mode === "app-offline") return route.abort("internetdisconnected");
+      if (method === "GET" && mode === "app-hold-fail") {
+        await new Promise<void>((resolve) => {
+          releaseApplicability = resolve;
+        });
+        return result({ detail: "PRUEBA determinación no disponible" }, 503);
+      }
+      if (method === "GET" && mode === "app-fail")
+        return result({ detail: "PRUEBA determinación no disponible" }, 503);
       if (method === "POST") {
         const prev = applicability(id);
         if (mode === "conflict" || body.expected_revision !== prev.revision)
@@ -507,6 +518,158 @@ test("respuesta de otra evaluación no habilita formularios ni permite guardar",
   await expect(
     main(page).getByRole("button", { name: "Guardar determinación", exact: true })
   ).toBeDisabled();
+  expect(calls.some((v) => v.method !== "GET")).toBe(false);
+  expect(errors).toEqual([]);
+});
+
+for (const target of ["eipd", "infancia", "preparar"]) {
+  test(`enlace directo a ${target}: carga, error visible y reintento`, async ({ page }) => {
+    if (target !== "eipd")
+      await page.setViewportSize({ width: target === "infancia" ? 390 : 320, height: 844 });
+    determinations[aid] = {
+      ...applicability(aid),
+      current: true,
+      revision: 1,
+      eipd: { state: "corresponde", reason: "[FICTICIA] EIPD" },
+      infancia: { state: "corresponde", reason: "[FICTICIA] Infancia" },
+    };
+    mode = "app-hold-fail";
+    await page.evaluate((hash) => {
+      window.location.hash = hash;
+    }, `#/licitud/${target}?organizationId=${org}&treatmentId=${tid}&assessmentId=${aid}`);
+    await expect(main(page).getByRole("status")).toContainText(
+      "Cargando evaluación y aplicabilidad"
+    );
+    await expect.poll(() => !!releaseApplicability).toBe(true);
+    await capture(page, `lote1-${target}-cargando.png`);
+    releaseApplicability!();
+    await expect(main(page).getByRole("alert")).toContainText("PRUEBA determinación no disponible");
+    await expect(
+      main(page).getByRole("button", { name: "Ir a Determinar aplicabilidad", exact: true })
+    ).toBeVisible();
+    await capture(page, `lote1-${target}-error.png`);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+      true
+    );
+    mode = "ok";
+    await main(page).getByRole("button", { name: "Reintentar consulta", exact: true }).click();
+    await expect(
+      main(page).getByRole("alert").filter({ hasText: "No se pudo consultar la aplicabilidad" })
+    ).not.toBeVisible();
+    await expect(
+      main(page).getByText(
+        "Recorrido conectado al servidor · Solo datos ficticios. Guardar y revisar no confirman ni activan EIPD.",
+        { exact: true }
+      )
+    ).toBeVisible();
+    await expect(page).toHaveURL(new RegExp(`/licitud/${target}\\?`));
+    expect(calls.some((v) => v.method !== "GET")).toBe(false);
+    expect(errors).toEqual([]);
+  });
+}
+
+test("recuperar aplicabilidad conserva borradores de determinación y base", async ({ page }) => {
+  await legal(page);
+  await enable(page);
+  await section(page, "Base y fundamento");
+  await main(page)
+    .getByRole("textbox", { name: "Fundamento", exact: true })
+    .fill("[FICTICIA] Base pendiente conservada");
+  await section(page, "Determinar aplicabilidad");
+  await main(page)
+    .getByLabel("Fundamento sobre EIPD", { exact: true })
+    .fill("[FICTICIA] Determinación pendiente conservada");
+  mode = "app-fail";
+  await main(page)
+    .getByRole("button", {
+      name: "Actualizar estado guardado sin descartar el borrador",
+      exact: true,
+    })
+    .click();
+  await expect(main(page).getByRole("alert")).toContainText("PRUEBA determinación no disponible");
+  await section(page, "Tratamiento y alcance de la EIPD");
+  await expect(main(page).getByRole("alert")).toContainText("PRUEBA determinación no disponible");
+  await main(page)
+    .getByRole("button", { name: "Ir a Determinar aplicabilidad", exact: true })
+    .click();
+  await expect(main(page).getByLabel("Fundamento sobre EIPD", { exact: true })).toHaveValue(
+    "[FICTICIA] Determinación pendiente conservada"
+  );
+  mode = "ok";
+  await main(page)
+    .getByRole("button", {
+      name: "Actualizar estado guardado sin descartar el borrador",
+      exact: true,
+    })
+    .click();
+  await expect(main(page).getByRole("alert")).not.toBeVisible();
+  await expect(main(page).getByLabel("Fundamento sobre EIPD", { exact: true })).toHaveValue(
+    "[FICTICIA] Determinación pendiente conservada"
+  );
+  await section(page, "Base y fundamento");
+  await expect(main(page).getByRole("textbox", { name: "Fundamento", exact: true })).toHaveValue(
+    "[FICTICIA] Base pendiente conservada"
+  );
+  expect(calls.filter((v) => v.method === "POST")).toHaveLength(1);
+  expect(errors).toEqual([]);
+});
+
+test("validación de enlace muestra carga fuera del diálogo y permite reintentar", async ({
+  page,
+}) => {
+  mode = "hold";
+  await page.evaluate((hash) => {
+    window.location.hash = hash;
+  }, `#/licitud/base?organizationId=${org}&treatmentId=${tid}&assessmentId=${aid}`);
+  await expect(page.getByRole("status")).toContainText(
+    "Consultando evaluación y contexto autorizado"
+  );
+  await expect.poll(() => !!releaseValidation).toBe(true);
+  mode = "deny";
+  releaseValidation!();
+  // The held treatment response is accepted; retry is exercised after a fresh denied link.
+  await expect(main(page).getByRole("textbox", { name: "Fundamento", exact: true })).toBeVisible();
+  await page.evaluate((hash) => {
+    window.location.hash = hash;
+  }, `#/licitud/base?organizationId=${org}&treatmentId=${tid}&assessmentId=${aid2}`);
+  await expect(page.getByRole("alert")).toContainText("PRUEBA sin acceso");
+  mode = "ok";
+  await page.getByRole("button", { name: "Reintentar apertura", exact: true }).click();
+  await expect(page.getByRole("alert")).not.toBeVisible();
+  await expect(page).toHaveURL(new RegExp(`assessmentId=${aid2}`));
+  expect(calls.some((v) => v.method !== "GET")).toBe(false);
+  expect(errors).toEqual([]);
+});
+
+test("desconexión muestra ayuda en español y se recupera sin descartar el borrador", async ({
+  page,
+}) => {
+  await legal(page);
+  await main(page)
+    .getByLabel("Fundamento sobre EIPD", { exact: true })
+    .fill("[FICTICIA] Texto pendiente durante desconexión");
+  mode = "app-offline";
+  await main(page)
+    .getByRole("button", {
+      name: "Actualizar estado guardado sin descartar el borrador",
+      exact: true,
+    })
+    .click();
+  await expect(main(page).getByRole("alert")).toContainText(
+    "No se pudo conectar con el servidor. Revisa la conexión y vuelve a intentar."
+  );
+  await expect(main(page).getByRole("alert")).not.toContainText("Failed to fetch");
+  mode = "ok";
+  await main(page)
+    .getByRole("button", {
+      name: "Actualizar estado guardado sin descartar el borrador",
+      exact: true,
+    })
+    .click();
+  await expect(main(page).getByRole("alert")).not.toBeVisible();
+  await expect(main(page).getByLabel("Fundamento sobre EIPD", { exact: true })).toHaveValue(
+    "[FICTICIA] Texto pendiente durante desconexión"
+  );
   expect(calls.some((v) => v.method !== "GET")).toBe(false);
   expect(errors).toEqual([]);
 });

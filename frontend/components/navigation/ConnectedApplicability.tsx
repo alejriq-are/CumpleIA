@@ -2,6 +2,8 @@
 import { useEffect, useRef, useState } from "react";
 import { navigationApi, type Applicability, type Determination } from "@/lib/api/navigation";
 import { sessionToken } from "@/components/licitud/LicitudWorkspace";
+import { navigationReadError } from "./connected-navigation";
+export type ApplicabilityLoadState = { loading: boolean; error: string };
 const pending: Determination = { state: "pendiente", reason: "" };
 export const determinationLabels = {
   pendiente: "Pendiente de analizar",
@@ -16,6 +18,7 @@ export function ConnectedApplicability({
   readOnly,
   onSaved,
   onDirty,
+  onLoadState,
   token = sessionToken,
   refreshVersion = 0,
 }: {
@@ -25,6 +28,7 @@ export function ConnectedApplicability({
   readOnly: boolean;
   onSaved: (v: Applicability) => void;
   onDirty: (v: boolean) => void;
+  onLoadState?: (v: ApplicabilityLoadState) => void;
   token?: () => Promise<string>;
   refreshVersion?: number;
 }) {
@@ -50,6 +54,7 @@ export function ConnectedApplicability({
     let active = true;
     setLoading(true);
     setError("");
+    onLoadState?.({ loading: true, error: "" });
     (async () => {
       try {
         const v = await navigationApi.get(
@@ -63,10 +68,14 @@ export function ConnectedApplicability({
             setInfancia(v.infancia);
           }
           onSaved(v);
+          onLoadState?.({ loading: false, error: "" });
         }
       } catch (e) {
-        if (active)
-          setError(e instanceof Error ? e.message : "No se pudo consultar la determinación.");
+        if (active) {
+          const message = navigationReadError(e, "No se pudo consultar la determinación.");
+          setError(message);
+          onLoadState?.({ loading: false, error: message });
+        }
       } finally {
         if (active) setLoading(false);
       }
@@ -74,7 +83,16 @@ export function ConnectedApplicability({
     return () => {
       active = false;
     };
-  }, [organizationId, treatmentId, assessmentId, token, onSaved, refreshVersion, manualVersion]);
+  }, [
+    organizationId,
+    treatmentId,
+    assessmentId,
+    token,
+    onSaved,
+    onLoadState,
+    refreshVersion,
+    manualVersion,
+  ]);
   async function save() {
     if (!saved) return;
     setBusy(true);
@@ -178,7 +196,7 @@ export function ConnectedApplicability({
           {error}
         </p>
       )}
-      {!saved && !error && <p>Cargando determinación…</p>}
+      {loading && <p role="status">Cargando determinación…</p>}
       <p>
         Contrasta infancia con el alcance del RAT. La presencia de menores no determina por sí sola
         la necesidad de una EIPD. Cambiar esta determinación conserva documentos y revisiones
