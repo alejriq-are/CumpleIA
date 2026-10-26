@@ -464,3 +464,146 @@ fix/navegacion-orientacion-aplicabilidad con código, pruebas y aceptación regi
 los estados anteriores «sin commit/push» describen el momento previo a esta autorización.
 No se inicia lote 5 ni se ejecuta merge/despliegue. Archivo generado next-env.d.ts
 excluido. La CI remota debe comprobarse por el commit resultante; no se declara aprobada.
+
+
+## Lote 5 C9 — estado guardado y borrador
+
+Implementación local sobre 84ad96a en `fix/navegacion-estado-guardado`, autorizada
+por usuario el 25/10/2026. Sin commit/push nuevo ni merge/despliegue.
+
+### Cambios y límites
+
+- Última determinación consultada: revisión de aplicabilidad, fecha en español y hora
+  de Chile continental (America/Santiago), identificación de quien registró y asociación
+  del alcance. Ausencia de registro/metadata se explica; no se inventa fecha ni autor.
+- El contrato actual solo entrega `created_by` como identificador. Se presenta como tal,
+  sin atribuir el registro al usuario conectado ni inventar un nombre. La resolución de
+  nombres legibles requeriría otro alcance y controles; no se amplía la API en este lote.
+- Al haber cambios, comparación de estado y fundamento guardados frente al borrador,
+  diferenciada por EIPD e infancia. En formulario limpio no se repiten fundamentos.
+- «Consultar última determinación guardada» sustituye el rótulo anterior. Botón secundario
+  reconocible, foco y ayuda: consulta servidor, actualiza accesos, conserva ediciones,
+  no guarda, no recarga RAT y no sincroniza automáticamente otras ventanas.
+- Rechazo 409 conserva formulario, abre historial y orienta a consultar antes de guardar.
+  Tras consultar se identifica la revisión recuperada y se comparan las diferencias.
+  La consulta no repite el POST. Un guardado posterior sigue usando revisión/hash esperados.
+- Historial rotulado «Revisión de aplicabilidad», no versión de evaluación; actor y fecha
+  disponibles se muestran. No se heredan decisiones ni se modifica historia del servidor.
+- «Determinación guardada en el servidor» inmediatamente antes de Guardar, después del
+  panel de accesos y la ayuda de requisitos. Solo aparece por respuesta de escritura
+  exitosa; nuevas ediciones, otra consulta o un intento posterior retiran ese aviso.
+
+### Evidencia local
+
+46 escenarios Chromium aprobados en la batería `connected-navigation.spec.ts`, 11 nuevos
+sobre ausencia/autoría/fecha, lectura limpia y con ediciones, conflicto y posterior guardado
+explícito, error/recuperación, fecha no disponible, consulta lenta sin duplicados, teclado,
+comparación y proximidad del resultado a 1280/390/320 px. La ejecución dirigida de los 11
+nuevos también pasó; no se suma como cobertura distinta. TypeScript, ESLint de los archivos
+modificados y Prettier correctos. Capturas ficticias en `outputs/navegacion-lote5/` revisadas.
+
+Fixtures con API interceptada y token sintético; no se inspeccionó sesión personal ni se
+modificaron datos de desarrollo. No equivale a una nueva prueba de integración real de API,
+concurrencia del servidor o RLS. Validación asistida del usuario aún pendiente.
+
+### Guion de aceptación
+
+1. Abrir `/dashboard/trabajo`, seleccionar el contexto de prueba existente y entrar en
+   Bases de licitud → Preparar → Determinar aplicabilidad. Conservar en su pestaña original
+   cualquier nota pendiente; una nueva ventana consulta lo guardado, no copia borradores.
+2. Comprobar «Última determinación consultada en el servidor», revisión/fecha e identificador
+   del autor cuando exista un guardado. Distinguirlo de los valores editables del formulario.
+3. Escribir un fundamento ficticio sin guardar. Ver la comparación con el dato guardado.
+   Pulsar «Consultar última determinación guardada»: el texto permanece y no se anuncia guardado.
+4. Marcar declaración ficticia y guardar de forma explícita. La confirmación debe aparecer
+   inmediatamente antes de Guardar; el formulario coincide con lo guardado y el historial
+   agrega su revisión. Volver a editar retira la confirmación de escritura anterior.
+5. Para concurrencia, usar dos ventanas del mismo contexto: guardar un cambio ficticio en una
+   y mantener una edición distinta en la otra. Guardar desde la edición antigua debe rechazar
+   el intento y conservarla. Consultar permite comparar con el registro reciente y decidir si
+   se realiza un nuevo guardado explícito. No reemplazar ni copiar contextos ajenos.
+6. En ventana estrecha, comprobar lectura, consulta por teclado, foco visible y confirmación
+   junto a Guardar. La confirmación no significa aprobación ni activa EIPD.
+
+No marcar C9 ni las observaciones de proximidad/consulta como aceptadas manualmente hasta
+recibir el resultado del usuario. No iniciar lote 6 en este bloque.
+
+
+### Validación asistida del lote 5 — consulta y comparación correctas
+
+Capturas ead7a637 y fad26d34 aportadas por el usuario: en el espacio conectado,
+Determinar aplicabilidad muestra revisión guardada 3 y, separadamente, el borrador
+con la línea «[FICTICIA] Prueba lote 5». Tras Consultar última determinación guardada,
+la línea permanece, se mantiene el aviso de cambios sin guardar y aparece el resultado
+«Consulta completada. Tus cambios pendientes se conservaron». La comparación identifica
+la diferencia; infancia sigue pendiente y sin diferencias. Fecha y autoría por identificador
+visibles, sin copiar identificadores personales en esta documentación.
+
+Primera comprobación asistida de lectura/comparación aceptada con ese alcance. Las
+capturas no acreditan un nuevo guardado. Pendiente marcar declaración ficticia, guardar
+explícitamente y comprobar confirmación inmediatamente antes de Guardar, revisión
+incrementada y retirada del aviso de cambios. Concurrencia y móvil siguen cubiertos por
+pruebas controladas, sin atribuir nueva aceptación manual. Sin commit/push del lote 5.
+
+
+### Validación asistida del lote 5 — guardado y coincidencia confirmados
+
+Captura dfa6d431: después de la instrucción de guardado explícito, la pantalla conectada
+muestra revisión de aplicabilidad 4 y «El formulario coincide con esta determinación
+consultada». La comparación de cambios pendientes ya no aparece en el panel. EIPD
+permanece Corresponde e infancia Pendiente de analizar. Confirma el incremento respecto
+de la revisión 3 observada antes; no cambia la versión 1 en borrador de la evaluación.
+
+La captura solo cubre la parte superior. La ubicación de «Determinación guardada en el
+servidor» respecto de Guardar determinación sigue pendiente de comprobación asistida;
+no pedir otro guardado para verla. Bajar en la misma pestaña sin editar, consultar ni
+recargar. No se declara aceptado el lote completo ni se ejecuta commit/push nuevo.
+
+
+### Lote 5 — proximidad aceptada y conceptos en la comparación, 26/10/2026
+
+El usuario confirma expresamente que «Determinación guardada en el servidor» aparece
+encima de Guardar determinación: OK. Este criterio de proximidad queda aceptado
+asistidamente, además de la consulta/conservación y el guardado observados previamente.
+
+Captura cbc29124: solicita identificar los conceptos de cada valor comparado. Se agregan
+«¿Corresponde documentar EIPD?:» y «Fundamento sobre EIPD:» tanto en Guardado en el servidor
+como en Tu borrador en el formulario; mismo tratamiento para infancia y adolescencia.
+Se conservan contenidos, saltos de línea, contraste guardado/borrador, reglas y estado
+pendiente. No se modifica ni guarda el texto de la captura y no se eliminan líneas repetidas.
+
+Validación local del ajuste: 11 escenarios dirigidos del lote 5 aprobados; las pruebas
+existentes de comparación verifican ahora las etiquetas de ambos temas en ambas columnas
+a 1280/390/320 px. Tipos, ESLint y Prettier correctos; capturas escritorio/320 revisadas.
+La batería completa previa de 46 pertenece al estado anterior a este ajuste de etiquetas;
+no se afirma una nueva ejecución completa. Pendiente comprobar las etiquetas con usuario;
+concurrencia y móvil conservan su evidencia controlada, sin nuevos ensayos manuales.
+Sin commit/push nuevo ni inicio de otro lote.
+
+
+### Aceptación asistida del lote 5 — etiquetas confirmadas, 26/10/2026
+
+El usuario confirma «OK las etiquetas». Junto con las capturas de consulta conservando
+el borrador, revisión guardada 4/formulario coincidente y aceptación expresa del aviso
+encima de Guardar, completa la validación asistida del recorrido acordado del lote 5.
+Conceptos de decisión y fundamento aceptados en la comparación. Se conserva el límite
+de autoría por identificador; no se inventan nombres ni se extiende el contrato.
+
+Lote 5 C9 aceptado con este alcance. Concurrencia/conflicto, errores y móvil cuentan con
+pruebas controladas; no se atribuyen nuevos ensayos manuales de esos casos. Evidencia:
+batería completa previa de 46 escenarios y once dirigidos tras el ajuste de etiquetas,
+tipos/lint/formato y capturas revisadas. No sumar ejecuciones como escenarios distintos.
+Sin commit/push del lote 5 ni merge/despliegue. Próximo bloque propuesto: lote 6, pendiente
+de indicación; no se inicia. NAV-UX-004 conserva sus demás pendientes.
+
+
+### Publicación autorizada del lote 5
+
+El 26/10/2026, tras confirmar etiquetas y los criterios asistidos anteriores, el usuario
+solicita commit y autoriza push del lote 5 en fix/navegacion-estado-guardado. Se incluye
+implementación, pruebas y documentación de aceptación. Las menciones anteriores de
+«sin commit/push» describen el estado previo a esta autorización. Evidencia: 46 escenarios
+completos antes del ajuste final de rótulos y once dirigidos después, tipos/lint/formato
+y capturas revisadas. Sin cambios de API/DB/permisos ni habilitación EIPD. Archivos generados
+y capturas fuera del commit. La publicación no acredita CI remota, merge ni despliegue.
+Siguiente propuesto: lote 6, pendiente de indicación; no se inicia en este cierre.

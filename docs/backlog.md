@@ -1,5 +1,53 @@
 # Backlog — CumpleIA
 
+## Aceptación asistida del lote 5 C9 — 26/10/2026
+
+- [x] **Lote 5 — Distinguir estado guardado y borrador, aclarar consulta y acercar confirmación.**
+  Usuario confirma etiquetas; consulta/conservación, guardado con revisión incrementada y
+  proximidad del aviso de éxito ya aceptados. Validación asistida acotada registrada en
+  [continuidad](project/navegacion-servidor.md#aceptación-asistida-del-lote-5--etiquetas-confirmadas-26102026).
+  Concurrencia/errores/móvil cubiertos con fixtures, sin nuevos ensayos manuales atribuidos.
+  Sin commit/push del lote 5. No cierra NAV-UX-004 globalmente ni inicia otros lotes.
+
+Este bloque sustituye las menciones anteriores de aceptación del lote 5 pendiente.
+
+## Lote 5 — aceptación del aviso y rótulos comparativos, 26/10/2026
+
+Proximidad de «Determinación guardada en el servidor» aceptada por usuario: OK encima
+de Guardar determinación. Solicitud adicional cbc29124 implementada localmente: conceptos
+«¿Corresponde documentar…?:» y «Fundamento sobre…:» en ambas columnas y para ambos temas.
+Once escenarios dirigidos/tipos/lint/formato y revisión visual correctos. Pendiente aceptación
+asistida de los rótulos; no cerrar globalmente C9/NAV-UX-004 ni otros lotes.
+Este resultado sustituye la mención anterior de proximidad aún pendiente de aceptación.
+
+## Lote 5 — consulta validada asistidamente, 25/10/2026
+
+Usuario aporta capturas ead7a637/fad26d34: consulta conserva el texto de prueba y
+permite distinguir revisión guardada 3 frente al borrador. Comprobación parcial C9
+correcta; pendiente guardado explícito y confirmación junto a Guardar. No se cierran
+los criterios del lote completo ni se atribuyen ensayos manuales de concurrencia/móvil.
+[Continuidad](project/navegacion-servidor.md#validación-asistida-del-lote-5--consulta-y-comparación-correctas).
+
+## Lote 5 C9 implementado localmente — 25/10/2026
+
+- [ ] **C9 / NAV-UX-004 — Validar estado guardado frente al borrador.** Implementado localmente
+  en fix/navegacion-estado-guardado sobre 84ad96a: revisión/fecha Chile/autoría por identificador,
+  comparación de fundamentos y estados, historial tras conflicto y conservación del borrador.
+  46 pruebas conectadas (11 nuevas), tipos/lint/formato y capturas escritorio/390/320 aprobados.
+  Pendiente aceptación asistida según [guion](project/navegacion-servidor.md#lote-5-c9--estado-guardado-y-borrador).
+  Sin commit/push nuevo; no se cierran NAV-UX-004 ni otros lotes globalmente.
+- [ ] **C9 / LIC-UX-015 — Validar consulta reconocible y comprensible.** Botón implementado como
+  «Consultar última determinación guardada», con foco/ayuda y resultado de lectura separado del
+  guardado. No escribe ni sustituye borradores editados. Pendiente validar con usuario nombre y efecto.
+- [x] **C9/C7 / LIC-UX-005 — Validar proximidad del resultado de escritura.** Implementado el aviso
+  de éxito inmediatamente antes de Guardar determinación; se retira al editar, consultar o reintentar
+  guardar. Probados éxito, rechazo, error posterior, recuperación y móvil. Aceptación asistida pendiente.
+- **Límite de autoría:** la consulta entrega identificador, no nombre de persona. Mostrar nombres
+  legibles requeriría definir su obtención autorizada; no se inventan ni se amplía la API en este lote.
+
+Este bloque prevalece sobre las anotaciones anteriores que aún describen estas tres mejoras como
+pendientes de implementación. Los demás pendientes conservan su alcance.
+
 ## Aceptación asistida del lote 4 C3/C8 — 25/10/2026
 
 - [x] **Lote 4 — Orientar según aplicabilidad guardada y explicar reubicación.** Resumen positivo/acceso directo, guardado ficticio No corresponde y aviso al volver desde EIPD comprobados con usuario; captura 227db7c3 confirma restauración del acceso y nota sin guardar conservada. Aceptación acotada registrada en [continuidad](project/navegacion-servidor.md), sin commit/push del lote 4. Otros estados/infancia/preparación tienen prueba controlada, no se declaran nuevos ensayos manuales. Pendiente lote 5 y mejora de proximidad del aviso de guardado; NAV-UX-004 no se cierra globalmente.

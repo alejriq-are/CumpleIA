@@ -1,5 +1,63 @@
 # Handoff vigente de CumpleIA
 
+## Cierre autorizado del lote 5 — 26/10/2026
+
+Usuario solicita commit y autoriza push del lote 5 aceptado en fix/navegacion-estado-guardado.
+Este cierre reúne implementación, pruebas y aceptación asistida C9, incluidos rótulos y
+proximidad del resultado de guardado. Las menciones anteriores de publicación pendiente
+son antecedentes previos a esta autorización. Excluir frontend/next-env.d.ts y outputs/.
+No iniciar lote 6 ni ejecutar merge/despliegue. Comprobar HEAD remoto exacto tras publicar;
+no inferir aprobación de CI remota del push. Otros pendientes del backlog conservan su alcance.
+
+## Último resultado — lote 5 aceptado, 26/10/2026
+
+Usuario confirma «OK las etiquetas». Lote 5 C9 aceptado con alcance de consulta que
+conserva borrador, comparación rotulada, guardado/revisión coincidente y aviso próximo
+a Guardar. Concurrencia, errores y móvil verificados con fixtures, no nuevos ensayos
+manuales. Evidencia y límites en [continuidad](project/navegacion-servidor.md#aceptación-asistida-del-lote-5--etiquetas-confirmadas-26102026).
+Cambios locales en fix/navegacion-estado-guardado sobre 84ad96a, sin commit/push nuevo.
+Archivo generado frontend/next-env.d.ts y capturas de outputs/ ajenos al commit funcional.
+Siguiente propuesto: lote 6, pendiente de indicación. No se inicia otro lote.
+
+## Último resultado — lote 5, 26/10/2026
+
+Usuario acepta proximidad del aviso de guardado (OK). Solicita conceptos en cada valor
+comparado: etiquetas de decisión y fundamento agregadas en ambas columnas, para EIPD e
+infancia. Once pruebas dirigidas, tipos/lint/formato y capturas correctos tras el ajuste;
+46 pruebas completas anteriores no repetidas. Pendiente revisión asistida de etiquetas.
+Conservar la pestaña original con sus cambios pendientes; no guardar ni recargar para
+probar los rótulos. Sin commit/push nuevo. Lote 6 y demás pendientes no iniciados.
+
+## Último resultado asistido — guardado del lote 5
+
+Captura dfa6d431 confirma revisión de aplicabilidad 4 y formulario coincidente,
+sin comparación pendiente en el panel. Falta comprobar visualmente el aviso de éxito
+inmediatamente antes de Guardar: bajar en la misma pestaña, sin repetir guardado,
+editar, consultar o recargar. Sin commit/push del lote 5; aceptación parcial.
+
+## Último resultado asistido — lote 5, 25/10/2026
+
+Capturas ead7a637/fad26d34 confirman consulta y comparación: revisión guardada 3,
+línea de prueba conservada en borrador, resultado de consulta y cambios sin guardar.
+Aceptación parcial de C9; pendiente guardar explícitamente y validar proximidad del
+aviso de éxito/revisión incrementada. No recargar el borrador para esta prueba.
+[Detalle y próximo paso](project/navegacion-servidor.md#validación-asistida-del-lote-5--consulta-y-comparación-correctas).
+Sin commit/push nuevo ni inicio de otro lote.
+
+## Bloque activo — lote 5 C9, 25/10/2026
+
+Usuario autoriza continuar lote 5 tras documentación publicada en 84ad96a. Implementado
+localmente en fix/navegacion-estado-guardado: última determinación consultada con revisión,
+fecha/hora Chile y autoría por identificador del contrato; comparación con borrador pendiente;
+consulta explícita sin escrituras; historial abierto tras rechazo 409; confirmación de guardado
+inmediatamente antes de Guardar. No se inventan nombres de personas ni se modifican permisos,
+API, DB o activación EIPD. 46 pruebas Chromium aprobadas (11 nuevas), tipos/lint/formato
+correctos; capturas escritorio/390/320 revisadas. Validación asistida pendiente, sin commit/push
+del lote 5. Archivo generado frontend/next-env.d.ts ajeno al bloque; capturas ficticias
+en outputs/navegacion-lote5/ son evidencia local no destinada al commit. Próximo paso: seguir el
+[guion de aceptación del lote 5](project/navegacion-servidor.md#lote-5-c9--estado-guardado-y-borrador).
+Los lotes siguientes y demás pendientes del backlog no se inician ni se cierran por este cambio.
+
 ## Guía del ciclo documental — 25/10/2026
 
 Se agrega la [guía de borradores, versiones, revisión y decisión EIPD](project/ciclo-documental-eipd.md), contrastada con e587da6, en la rama feature/documentacion-ciclo-documental. Incluye funcionamiento actual, límites de revisión del EIPD general, sucesores de infancia y circuito conceptual pendiente. Cambio exclusivamente documental; no modifica estados, permisos, datos ni la interfaz. El usuario autoriza commit y push de esta guía. Lote 5 y los demás pendientes del backlog conservan su estado.

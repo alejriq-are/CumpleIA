@@ -36,13 +36,15 @@ flowchart TD
     C -- No o pendiente --> G[Editor no habilitado y antecedentes conservados]
 ```
 
-| Acción                                               | Efecto actual                                                                                                                                                                       |
-| ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Escribir en el formulario                            | Cambia el borrador abierto; todavía no registra esos cambios en el servidor.                                                                                                        |
-| Guardar borrador EIPD                                | Actualiza el contenido documental de la evaluación en borrador seleccionada. No crea automáticamente otra versión de evaluación.                                                    |
-| Ver vista previa                                     | Permite leer el contenido presentado por el editor. No guarda ni registra una revisión formal.                                                                                      |
-| Consultar el documento guardado                      | Lee el contenido registrado en el servidor. Las ediciones pendientes no se incluyen.                                                                                                |
-| Actualizar estado guardado sin descartar el borrador | Vuelve a consultar la determinación de aplicabilidad. No guarda el formulario ni crea una revisión. Conserva las ediciones pendientes; con formulario limpio puede cargar lo leído. |
+| Acción                                  | Efecto actual                                                                                                                                                                       |
+| --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Escribir en el formulario               | Cambia el borrador abierto; todavía no registra esos cambios en el servidor.                                                                                                        |
+| Guardar borrador EIPD                   | Actualiza el contenido documental de la evaluación en borrador seleccionada. No crea automáticamente otra versión de evaluación.                                                    |
+| Ver vista previa                        | Permite leer el contenido presentado por el editor. No guarda ni registra una revisión formal.                                                                                      |
+| Consultar el documento guardado         | Lee el contenido registrado en el servidor. Las ediciones pendientes no se incluyen.                                                                                                |
+| Consultar última determinación guardada | Vuelve a consultar la determinación de aplicabilidad. No guarda el formulario ni crea una revisión. Conserva las ediciones pendientes; con formulario limpio puede cargar lo leído. |
+
+El lote 5 de navegación presenta esta consulta como «Consultar última determinación guardada»; el rótulo anterior era «Actualizar estado guardado sin descartar el borrador». El cambio de presentación no modifica su efecto de lectura.
 
 «Pendiente de analizar», «Corresponde», «No corresponde» e «Información insuficiente» son resultados de aplicabilidad, no estados de aprobación del documento. EIPD e infancia se determinan por separado. Cambiar su aplicabilidad conserva los antecedentes; no transforma una revisión anterior en una aprobación para otro contexto.
 

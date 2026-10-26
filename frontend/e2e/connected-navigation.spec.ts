@@ -223,8 +223,8 @@ test.beforeEach(async ({ page }) => {
             ...prev.history,
             {
               revision: prev.revision + 1,
-              created_at: "2026-10-25",
-              created_by: "PRUEBA",
+              created_at: "2026-10-25T19:45:00+00:00",
+              created_by: "a0000000-0000-0000-0000-000000000099",
               eipd: body.eipd,
               infancia: body.infancia,
             },
@@ -598,7 +598,7 @@ test("recuperar aplicabilidad conserva borradores de determinación y base", asy
   mode = "app-fail";
   await main(page)
     .getByRole("button", {
-      name: "Actualizar estado guardado sin descartar el borrador",
+      name: "Consultar última determinación guardada",
       exact: true,
     })
     .click();
@@ -614,7 +614,7 @@ test("recuperar aplicabilidad conserva borradores de determinación y base", asy
   mode = "ok";
   await main(page)
     .getByRole("button", {
-      name: "Actualizar estado guardado sin descartar el borrador",
+      name: "Consultar última determinación guardada",
       exact: true,
     })
     .click();
@@ -667,7 +667,7 @@ test("desconexión muestra ayuda en español y se recupera sin descartar el borr
   mode = "app-offline";
   await main(page)
     .getByRole("button", {
-      name: "Actualizar estado guardado sin descartar el borrador",
+      name: "Consultar última determinación guardada",
       exact: true,
     })
     .click();
@@ -678,7 +678,7 @@ test("desconexión muestra ayuda en español y se recupera sin descartar el borr
   mode = "ok";
   await main(page)
     .getByRole("button", {
-      name: "Actualizar estado guardado sin descartar el borrador",
+      name: "Consultar última determinación guardada",
       exact: true,
     })
     .click();
@@ -1031,7 +1031,7 @@ for (const target of ["eipd", "infancia", "preparar"]) {
     mode = "app-hold";
     await main(page)
       .getByRole("button", {
-        name: "Actualizar estado guardado sin descartar el borrador",
+        name: "Consultar última determinación guardada",
         exact: true,
       })
       .click();
@@ -1071,7 +1071,7 @@ for (const target of ["eipd", "infancia", "preparar"]) {
       };
       await main(page)
         .getByRole("button", {
-          name: "Actualizar estado guardado sin descartar el borrador",
+          name: "Consultar última determinación guardada",
           exact: true,
         })
         .click();
@@ -1122,6 +1122,283 @@ test("enlace sin determinación explica ausencia de guardado y permite cerrar el
   await relocation(page).getByRole("button", { name: "Cerrar aviso", exact: true }).click();
   await expect(relocation(page)).not.toBeVisible();
   await expect(availability(page)).toBeVisible();
+  expect(calls.some((v) => v.method !== "GET")).toBe(false);
+  expect(errors).toEqual([]);
+});
+
+const storedDraft = (page: Page) =>
+  main(page).getByRole("region", {
+    name: "Estado guardado y borrador de aplicabilidad",
+    exact: true,
+  });
+const querySaved = (page: Page) =>
+  main(page).getByRole("button", { name: "Consultar última determinación guardada", exact: true });
+function serverDetermination(revision: number, reason = "[FICTICIA] Fundamento del servidor") {
+  const value = {
+    ...applicability(aid),
+    current: true,
+    revision,
+    eipd: { state: "corresponde", reason },
+    infancia: { state: "pendiente", reason: "" },
+  };
+  return {
+    ...value,
+    history: [
+      ...value.history.filter((v: any) => v.revision !== revision),
+      {
+        revision,
+        created_at: "2026-10-25T19:45:00+00:00",
+        created_by: "a0000000-0000-0000-0000-000000000099",
+        eipd: value.eipd,
+        infancia: value.infancia,
+      },
+    ],
+  };
+}
+test("lote 5: distingue ausencia de registro y consulta sin escrituras", async ({ page }) => {
+  await legal(page);
+  await expect(storedDraft(page)).toContainText("Todavía no hay una determinación guardada");
+  await expect(storedDraft(page)).not.toContainText("Registrada por");
+  await expect(querySaved(page)).toHaveAccessibleDescription(
+    /Conserva tus cambios pendientes y no guarda el formulario/
+  );
+  await querySaved(page).focus();
+  await page.keyboard.press("Enter");
+  await expect(main(page).getByRole("status")).toContainText("Consulta completada");
+  await expect(
+    main(page).getByText("Determinación guardada en el servidor.", { exact: true })
+  ).not.toBeVisible();
+  expect(calls.some((v) => v.method !== "GET")).toBe(false);
+  expect(errors).toEqual([]);
+});
+test("lote 5: presenta revisión fecha y autor real disponible sin inventar nombre", async ({
+  page,
+}) => {
+  determinations[aid] = serverDetermination(1);
+  await legal(page);
+  await expect(storedDraft(page)).toContainText("Revisión de aplicabilidad 1");
+  await expect(storedDraft(page)).toContainText("a0000000-0000-0000-0000-000000000099");
+  await expect(storedDraft(page)).toContainText(/25.*oct.*2026/);
+  await expect(storedDraft(page)).toContainText("16:45");
+  await expect(storedDraft(page)).toContainText("no entrega su nombre");
+  await expect(storedDraft(page)).toContainText("El formulario coincide");
+  await main(page).getByText("Historial de determinaciones (1)", { exact: true }).click();
+  const history = main(page)
+    .locator("details")
+    .filter({ has: page.locator("summary", { hasText: "Historial de determinaciones" }) });
+  await expect(history).toContainText("Revisión de aplicabilidad 1");
+  await expect(history).toContainText("Registrada por (identificador)");
+  await expect(history).not.toContainText("Versión 1");
+  expect(errors).toEqual([]);
+});
+test("lote 5: consulta limpia carga lo guardado y retira éxito de escritura anterior", async ({
+  page,
+}) => {
+  await legal(page);
+  await enable(page);
+  determinations[aid] = serverDetermination(2, "[FICTICIA] Nueva determinación externa");
+  const posts = calls.filter((v) => v.method === "POST").length;
+  await querySaved(page).click();
+  await expect(storedDraft(page)).toContainText("Revisión de aplicabilidad 2");
+  await expect(main(page).getByLabel("Fundamento sobre EIPD", { exact: true })).toHaveValue(
+    "[FICTICIA] Nueva determinación externa"
+  );
+  await expect(
+    main(page).getByText("Determinación guardada en el servidor.", { exact: true })
+  ).not.toBeVisible();
+  await expect(main(page).getByRole("status")).toContainText(
+    "El formulario muestra la determinación consultada"
+  );
+  expect(calls.filter((v) => v.method === "POST")).toHaveLength(posts);
+  expect(errors).toEqual([]);
+});
+test("lote 5: conflicto abre historial y consulta compara sin reemplazar borrador", async ({
+  page,
+}) => {
+  determinations[aid] = serverDetermination(1);
+  await legal(page);
+  await main(page)
+    .getByLabel("Fundamento sobre EIPD", { exact: true })
+    .fill("[FICTICIA] Mi borrador local");
+  determinations[aid] = serverDetermination(2, "[FICTICIA] Guardado por otra ventana");
+  await main(page)
+    .getByLabel("Declaro que esta prueba utiliza únicamente datos ficticios.")
+    .check();
+  await main(page).getByRole("button", { name: "Guardar determinación", exact: true }).click();
+  await expect(main(page).getByRole("alert")).toContainText("cambio concurrente");
+  const history = main(page)
+    .locator("details")
+    .filter({ has: page.locator("summary", { hasText: "Historial de determinaciones" }) });
+  await expect(history).toHaveAttribute("open", "");
+  await expect(storedDraft(page)).toContainText("Revisión de aplicabilidad 1");
+  await querySaved(page).click();
+  await expect(storedDraft(page)).toContainText("Revisión de aplicabilidad 2");
+  await expect(storedDraft(page)).toContainText("[FICTICIA] Guardado por otra ventana");
+  await expect(storedDraft(page)).toContainText("[FICTICIA] Mi borrador local");
+  await expect(storedDraft(page)).toContainText("Difiere de lo consultado");
+  await expect(main(page).getByLabel("Fundamento sobre EIPD", { exact: true })).toHaveValue(
+    "[FICTICIA] Mi borrador local"
+  );
+  await expect(main(page).getByRole("alert")).not.toBeVisible();
+  expect(calls.filter((v) => v.method === "POST")).toHaveLength(1);
+  expect(determinations[aid].eipd.reason).toBe("[FICTICIA] Guardado por otra ventana");
+  await main(page).getByRole("button", { name: "Guardar determinación", exact: true }).click();
+  await expect(storedDraft(page)).toContainText("Revisión de aplicabilidad 3");
+  const writes = calls.filter((v) => v.method === "POST");
+  expect(writes[1].body.expected_revision).toBe(2);
+  expect(writes[1].body.eipd.reason).toBe("[FICTICIA] Mi borrador local");
+  expect(errors).toEqual([]);
+});
+test("lote 5: confirmación adyacente a Guardar se retira al editar y ante error de consulta", async ({
+  page,
+}) => {
+  await legal(page);
+  await enable(page);
+  const savedNotice = main(page).getByText("Determinación guardada en el servidor.", {
+    exact: true,
+  });
+  expect(await savedNotice.evaluate((e) => e.nextElementSibling?.textContent)).toBe(
+    "Guardar determinación"
+  );
+  await main(page)
+    .getByLabel("Fundamento sobre EIPD", { exact: true })
+    .fill("[FICTICIA] Edición posterior");
+  await expect(savedNotice).not.toBeVisible();
+  await main(page)
+    .getByLabel("Declaro que esta prueba utiliza únicamente datos ficticios.")
+    .check();
+  await main(page).getByRole("button", { name: "Guardar determinación", exact: true }).click();
+  await expect(savedNotice).toBeVisible();
+  mode = "app-fail";
+  await querySaved(page).click();
+  await expect(main(page).getByRole("alert")).toContainText("determinación no disponible");
+  await expect(savedNotice).not.toBeVisible();
+  mode = "ok";
+  await querySaved(page).click();
+  await expect(main(page).getByRole("alert")).not.toBeVisible();
+  await expect(savedNotice).not.toBeVisible();
+  expect(calls.filter((v) => v.method === "POST")).toHaveLength(2);
+  expect(errors).toEqual([]);
+});
+test("lote 5: fallo de guardado conserva ambos temas sin confirmación falsa", async ({ page }) => {
+  await legal(page);
+  await enable(page);
+  for (const topic of ["EIPD", "infancia y adolescencia"]) {
+    await main(page)
+      .getByLabel(`¿Corresponde documentar ${topic}?`, { exact: true })
+      .selectOption("informacion_insuficiente");
+    await main(page)
+      .getByLabel(`Fundamento sobre ${topic}`, { exact: true })
+      .fill(`[FICTICIA] Pendiente ${topic}`);
+  }
+  await main(page)
+    .getByLabel("Declaro que esta prueba utiliza únicamente datos ficticios.")
+    .check();
+  mode = "conflict";
+  await main(page).getByRole("button", { name: "Guardar determinación", exact: true }).click();
+  await expect(main(page).getByRole("alert")).toBeVisible();
+  await expect(
+    main(page).getByText("Determinación guardada en el servidor.", { exact: true })
+  ).not.toBeVisible();
+  for (const topic of ["EIPD", "infancia y adolescencia"]) {
+    await expect(main(page).getByLabel(`Fundamento sobre ${topic}`, { exact: true })).toHaveValue(
+      `[FICTICIA] Pendiente ${topic}`
+    );
+  }
+  await expect(availability(page)).toContainText("EIPD: Corresponde");
+  expect(determinations[aid].revision).toBe(1);
+  expect(errors).toEqual([]);
+});
+test("lote 5: metadatos ausentes o fecha inválida no inventan fecha ni autor", async ({ page }) => {
+  determinations[aid] = { ...serverDetermination(1), history: [] };
+  await legal(page);
+  await expect(storedDraft(page)).toContainText("Fecha no disponible");
+  await expect(storedDraft(page)).toContainText("Registrada por (identificador): No disponible");
+  determinations[aid] = serverDetermination(2);
+  determinations[aid].history[0].created_at = "fecha inválida";
+  await querySaved(page).click();
+  await expect(storedDraft(page)).toContainText("Fecha no disponible");
+  await expect(storedDraft(page)).not.toContainText("Invalid Date");
+  expect(calls.some((v) => v.method !== "GET")).toBe(false);
+  expect(errors).toEqual([]);
+});
+for (const width of [1280, 390, 320]) {
+  test(`lote 5: comparación consulta y guardado legibles a ${width}px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 900 });
+    determinations[aid] = serverDetermination(1);
+    await legal(page);
+    await main(page)
+      .getByLabel("Fundamento sobre EIPD", { exact: true })
+      .fill("[FICTICIA] Conservar mi análisis antes de guardar");
+    await querySaved(page).focus();
+    await expect(querySaved(page)).toBeFocused();
+    await page.keyboard.press("Enter");
+    await expect(storedDraft(page)).toContainText("Tu borrador tiene cambios sin guardar");
+    for (const topic of ["EIPD", "infancia y adolescencia"]) {
+      await expect(
+        storedDraft(page).getByText(`¿Corresponde documentar ${topic}?:`, { exact: true })
+      ).toHaveCount(2);
+      await expect(
+        storedDraft(page).getByText(`Fundamento sobre ${topic}:`, { exact: true })
+      ).toHaveCount(2);
+    }
+    await storedDraft(page).scrollIntoViewIfNeeded();
+    await capture(page, `lote5-comparacion-${width}.png`);
+    await querySaved(page).scrollIntoViewIfNeeded();
+    await capture(page, `lote5-consulta-${width}.png`);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+      true
+    );
+    await main(page)
+      .getByLabel("Declaro que esta prueba utiliza únicamente datos ficticios.")
+      .check();
+    await main(page).getByRole("button", { name: "Guardar determinación", exact: true }).click();
+    const notice = main(page).getByText("Determinación guardada en el servidor.", { exact: true });
+    await expect(notice).toBeVisible();
+    expect(await notice.evaluate((e) => e.nextElementSibling?.textContent)).toBe(
+      "Guardar determinación"
+    );
+    await capture(page, `lote5-guardado-${width}.png`);
+    expect(errors).toEqual([]);
+  });
+}
+
+test("lote 5: consulta lenta bloquea duplicados y conserva el borrador tras terminar", async ({
+  page,
+}) => {
+  determinations[aid] = serverDetermination(1);
+  await legal(page);
+  await main(page)
+    .getByLabel("Fundamento sobre EIPD", { exact: true })
+    .fill("[FICTICIA] Análisis durante consulta");
+  const before = calls.filter(
+    (v) => v.path.endsWith("/applicability") && v.method === "GET"
+  ).length;
+  mode = "app-hold";
+  await querySaved(page).click();
+  await expect.poll(() => !!releaseApplicability).toBe(true);
+  await expect(
+    main(page).getByRole("button", { name: "Consultando determinación…", exact: true })
+  ).toBeDisabled();
+  await expect(
+    main(page).getByRole("button", { name: "Guardar determinación", exact: true })
+  ).toBeDisabled();
+  mode = "ok";
+  releaseApplicability!();
+  await expect(querySaved(page)).toBeEnabled();
+  await expect(main(page).getByLabel("Fundamento sobre EIPD", { exact: true })).toHaveValue(
+    "[FICTICIA] Análisis durante consulta"
+  );
+  await expect(main(page).getByRole("status")).toContainText(
+    "Tus cambios pendientes se conservaron"
+  );
+  await main(page)
+    .getByLabel("Fundamento sobre EIPD", { exact: true })
+    .fill("[FICTICIA] Nuevo cambio después de consultar");
+  await expect(main(page).getByText(/Consulta completada/)).not.toBeVisible();
+  expect(calls.filter((v) => v.path.endsWith("/applicability") && v.method === "GET")).toHaveLength(
+    before + 1
+  );
   expect(calls.some((v) => v.method !== "GET")).toBe(false);
   expect(errors).toEqual([]);
 });

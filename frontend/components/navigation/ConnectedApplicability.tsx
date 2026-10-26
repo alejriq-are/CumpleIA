@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useId, useRef, useState } from "react";
 import { navigationApi, type Applicability, type Determination } from "@/lib/api/navigation";
+import { ApiError } from "@/lib/api/client";
 import { sessionToken } from "@/components/licitud/LicitudWorkspace";
 import { navigationReadError } from "./connected-navigation";
 export type ApplicabilityLoadState = { loading: boolean; error: string };
@@ -11,6 +12,16 @@ export const determinationLabels = {
   no_corresponde: "No corresponde",
   informacion_insuficiente: "Información insuficiente",
 };
+function registrationDate(value: string) {
+  const date = new Date(value);
+  if (!value || Number.isNaN(date.getTime())) return "Fecha no disponible";
+  return new Intl.DateTimeFormat("es-CL", {
+    dateStyle: "long",
+    hourCycle: "h23",
+    ...(value.includes("T") ? { timeStyle: "short" as const } : {}),
+    timeZone: value.includes("T") ? "America/Santiago" : "UTC",
+  }).format(date);
+}
 export function ConnectedApplicability({
   organizationId,
   treatmentId,
@@ -37,6 +48,7 @@ export function ConnectedApplicability({
   const id = useId();
   const editingHelpId = `${id}-editing-help`;
   const saveHelpId = `${id}-save-help`;
+  const queryHelpId = `${id}-query-help`;
   const [manualVersion, setManualVersion] = useState(0);
   const [loading, setLoading] = useState(true);
   const [saved, setSaved] = useState<Applicability | null>(null);
@@ -44,6 +56,9 @@ export function ConnectedApplicability({
   const [infancia, setInfancia] = useState(pending);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+  const [queryNotice, setQueryNotice] = useState("");
+  const [conflict, setConflict] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [fiction, setFiction] = useState(false);
   const dirty =
@@ -59,6 +74,8 @@ export function ConnectedApplicability({
     let active = true;
     setLoading(true);
     setError("");
+    setNotice("");
+    setQueryNotice("");
     onLoadState?.({ loading: true, error: "" });
     (async () => {
       try {
@@ -67,8 +84,17 @@ export function ConnectedApplicability({
           assessmentId
         );
         if (active) {
+          const keepDraft = dirtyRef.current;
           setSaved(v);
-          if (!dirtyRef.current) {
+          setConflict(false);
+          if (manualVersion > 0) {
+            setQueryNotice(
+              keepDraft
+                ? "Consulta completada. Tus cambios pendientes se conservaron; compara el estado guardado con tu borrador antes de guardar."
+                : "Consulta completada. El formulario muestra la determinación consultada en el servidor."
+            );
+          }
+          if (!keepDraft) {
             setEipd(v.eipd);
             setInfancia(v.infancia);
           }
@@ -103,6 +129,8 @@ export function ConnectedApplicability({
     setBusy(true);
     setError("");
     setNotice("");
+    setQueryNotice("");
+    setConflict(false);
     try {
       const v = await navigationApi.save(
         { token: await token(), organizationId, treatmentId },
@@ -121,11 +149,16 @@ export function ConnectedApplicability({
       setNotice("Determinación guardada en el servidor.");
       setFiction(false);
     } catch (e) {
+      if (e instanceof ApiError && e.status === 409) {
+        setConflict(true);
+        setHistoryOpen(true);
+      }
       setError(e instanceof Error ? e.message : "No se pudo guardar.");
     } finally {
       setBusy(false);
     }
   }
+  const registration = saved?.history.find((entry) => entry.revision === saved.revision);
   const valid = [eipd, infancia].every((v) => v.state === "pendiente" || v.reason.trim());
   const editingHelp = readOnly
     ? "Tu rol permite solo consulta: puedes ver la determinación, pero no modificarla ni guardarla."
@@ -175,6 +208,103 @@ export function ConnectedApplicability({
           anteriores se conservan.
         </p>
       )}
+      {saved && (
+        <section
+          aria-label="Estado guardado y borrador de aplicabilidad"
+          className="space-y-3 rounded-lg border border-slate-300 bg-white p-4"
+        >
+          <h3 className="font-bold">Última determinación consultada en el servidor</h3>
+          {saved.revision > 0 ? (
+            <div className="space-y-1 text-sm">
+              <p>
+                Revisión de aplicabilidad {saved.revision} ·{" "}
+                {saved.current ? "Asociada al alcance actual" : "Requiere revisión del alcance"}
+              </p>
+              <p>
+                Fecha de registro (Chile continental):{" "}
+                {registration
+                  ? registrationDate(registration.created_at)
+                  : "Fecha no disponible"}{" "}
+              </p>
+              <p className="break-all">
+                Registrada por (identificador): {registration?.created_by || "No disponible"}
+              </p>
+              <p>
+                El servidor informa el identificador de la persona; no entrega su nombre en esta
+                consulta.
+              </p>
+            </div>
+          ) : (
+            <p>Todavía no hay una determinación guardada para esta evaluación.</p>
+          )}
+          <p className={dirty ? "font-semibold text-amber-900" : "text-slate-700"}>
+            {dirty
+              ? "Tu borrador tiene cambios sin guardar. Los accesos dependen de la determinación guardada, no de estas ediciones."
+              : saved.revision > 0
+                ? "El formulario coincide con esta determinación consultada."
+                : "Los valores del formulario son iniciales; aún no se han guardado."}
+          </p>
+          {(
+            [
+              ["eipd", "EIPD", eipd],
+              ["infancia", "Infancia y adolescencia", infancia],
+            ] as const
+          ).map(([topic, label, draft]) => (
+            <div key={topic} className="space-y-2 border-t border-slate-200 pt-3">
+              <h4 className="font-semibold">{label}</h4>
+              <div className={dirty ? "grid gap-3 md:grid-cols-2" : ""}>
+                <div className="min-w-0 space-y-1 break-words">
+                  <p className="font-semibold">
+                    {saved.revision > 0 ? "Guardado en el servidor" : "Sin guardar en el servidor"}
+                  </p>
+                  <p>
+                    <span className="font-semibold">
+                      ¿Corresponde documentar{" "}
+                      {topic === "eipd" ? "EIPD" : "infancia y adolescencia"}?:{" "}
+                    </span>
+                    {determinationLabels[saved[topic].state]}
+                  </p>
+                  {dirty && (
+                    <div>
+                      <p className="font-semibold">
+                        Fundamento sobre {topic === "eipd" ? "EIPD" : "infancia y adolescencia"}:
+                      </p>
+                      <p className="whitespace-pre-wrap break-words">
+                        {saved[topic].reason || "Sin fundamento registrado."}
+                      </p>
+                    </div>
+                  )}
+                </div>
+                {dirty && (
+                  <div className="min-w-0 space-y-1 rounded border border-amber-300 bg-amber-50 p-3 break-words">
+                    <p className="font-semibold">Tu borrador en el formulario</p>
+                    <p>
+                      <span className="font-semibold">
+                        ¿Corresponde documentar{" "}
+                        {topic === "eipd" ? "EIPD" : "infancia y adolescencia"}?:{" "}
+                      </span>
+                      {determinationLabels[draft.state]}
+                    </p>
+                    <div>
+                      <p className="font-semibold">
+                        Fundamento sobre {topic === "eipd" ? "EIPD" : "infancia y adolescencia"}:
+                      </p>
+                      <p className="whitespace-pre-wrap break-words">
+                        {draft.reason || "Sin fundamento escrito."}
+                      </p>
+                    </div>
+                    <p className="text-sm">
+                      {JSON.stringify(draft) === JSON.stringify(saved[topic])
+                        ? "Sin diferencias en este tema."
+                        : "Difiere de lo consultado en el servidor."}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </section>
+      )}
       {(
         [
           ["EIPD", eipd, setEipd],
@@ -198,6 +328,7 @@ export function ConnectedApplicability({
               onChange={(e) => {
                 set({ ...value, state: e.target.value as Determination["state"] });
                 setNotice("");
+                setQueryNotice("");
               }}
             >
               {Object.entries(determinationLabels).map(([key, text]) => (
@@ -218,23 +349,47 @@ export function ConnectedApplicability({
               onChange={(e) => {
                 set({ ...value, reason: e.target.value });
                 setNotice("");
+                setQueryNotice("");
               }}
             />
           </label>
         </fieldset>
       ))}
-      <button
-        className="rounded border p-3"
-        disabled={busy || loading}
-        onClick={() => setManualVersion((v) => v + 1)}
+      <section
+        aria-label="Consultar determinación guardada"
+        className="space-y-3 rounded-lg border border-slate-300 bg-slate-50 p-4"
       >
-        Actualizar estado guardado sin descartar el borrador
-      </button>
-      {error && (
-        <p role="alert" className="rounded bg-red-50 p-3 text-red-800">
-          {error}
+        <button
+          type="button"
+          className="rounded border-2 border-blue-800 bg-white px-4 py-3 font-semibold text-blue-900 hover:bg-blue-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 disabled:opacity-50"
+          aria-describedby={queryHelpId}
+          disabled={busy || loading}
+          onClick={() => setManualVersion((v) => v + 1)}
+        >
+          {loading ? "Consultando determinación…" : "Consultar última determinación guardada"}
+        </button>
+        <p id={queryHelpId} className="text-sm text-slate-700">
+          Consulta lo guardado en el servidor para esta evaluación y actualiza los accesos según ese
+          estado. Conserva tus cambios pendientes y no guarda el formulario. No recarga el RAT ni
+          sincroniza otras ventanas.
         </p>
-      )}
+        {queryNotice && (
+          <p role="status" className="rounded border border-blue-200 bg-blue-50 p-3">
+            {queryNotice}
+          </p>
+        )}
+        {conflict && (
+          <p className="font-semibold text-amber-900">
+            El guardado fue rechazado. Conservamos tu borrador. Consulta la última determinación
+            para comparar antes de volver a guardar.
+          </p>
+        )}
+        {error && (
+          <p role="alert" className="rounded bg-red-50 p-3 text-red-800">
+            {error}
+          </p>
+        )}
+      </section>
       <p>
         Contrasta infancia con el alcance del RAT. La presencia de menores no determina por sí sola
         la necesidad de una EIPD. Cambiar esta determinación conserva documentos y revisiones
@@ -255,11 +410,6 @@ export function ConnectedApplicability({
         />
         Declaro que esta prueba utiliza únicamente datos ficticios.
       </label>
-      {notice && (
-        <p role="status" className="rounded bg-teal-50 p-3">
-          {notice}
-        </p>
-      )}
       {saved && !loading && (
         <section
           aria-label="Disponibilidad de formularios"
@@ -328,6 +478,11 @@ export function ConnectedApplicability({
           {saveHelp}
         </p>
       )}
+      {notice && (
+        <p role="status" className="rounded border border-teal-300 bg-teal-50 p-3">
+          {notice}
+        </p>
+      )}
       <button
         aria-describedby={saveDescriptionId}
         disabled={
@@ -339,15 +494,25 @@ export function ConnectedApplicability({
         {busy ? "Guardando…" : "Guardar determinación"}
       </button>
       {saved && (
-        <details>
+        <details open={historyOpen} onToggle={(e) => setHistoryOpen(e.currentTarget.open)}>
           <summary>Historial de determinaciones ({saved.history.length})</summary>
           <ul className="space-y-2">
             {saved.history.map((v) => (
-              <li key={v.revision}>
-                Versión {v.revision} · {v.created_at} · EIPD: {determinationLabels[v.eipd.state]} ·
-                Infancia: {determinationLabels[v.infancia.state]}
-                <p>{v.eipd.reason}</p>
-                <p>{v.infancia.reason}</p>
+              <li key={v.revision} className="space-y-1 rounded border p-3 break-words">
+                <p className="font-semibold">
+                  Revisión de aplicabilidad {v.revision} · {registrationDate(v.created_at)}
+                </p>
+                <p className="break-all">
+                  Registrada por (identificador): {v.created_by || "No disponible"}
+                </p>
+                <p>EIPD: {determinationLabels[v.eipd.state]}</p>
+                <p className="whitespace-pre-wrap">
+                  {v.eipd.reason || "Sin fundamento registrado."}
+                </p>
+                <p>Infancia y adolescencia: {determinationLabels[v.infancia.state]}</p>
+                <p className="whitespace-pre-wrap">
+                  {v.infancia.reason || "Sin fundamento registrado."}
+                </p>
               </li>
             ))}
           </ul>
