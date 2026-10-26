@@ -4,6 +4,7 @@ import { navigationApi, type Applicability, type Determination } from "@/lib/api
 import { ApiError } from "@/lib/api/client";
 import { sessionToken } from "@/components/licitud/LicitudWorkspace";
 import { navigationReadError } from "./connected-navigation";
+import { connectedDestinations } from "./connected-destinations";
 export type ApplicabilityLoadState = { loading: boolean; error: string };
 const pending: Determination = { state: "pendiente", reason: "" };
 export const determinationLabels = {
@@ -469,7 +470,7 @@ export function ConnectedApplicability({
             className="rounded border border-blue-800 bg-white px-3 py-2 text-blue-900"
             onClick={() => onOpen("revisar")}
           >
-            Ir a Revisar y decidir
+            Ir a {connectedDestinations.licitud.revisar}
           </button>
         </section>
       )}

@@ -19,6 +19,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+  align-items: flex-end;
   padding: 0 16px 8px;
 }
 .connected-desktop-sections details {
@@ -101,4 +102,40 @@
   .connected-toolbar button:last-child {
     margin-left: auto;
   }
+}
+
+.connected-direct-group {
+  display: flex;
+  flex-direction: column;
+}
+.connected-group-label {
+  padding: 4px 10px 0;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.4;
+  color: #0f172a;
+}
+.connected-direct-group > a {
+  display: block;
+  padding: 10px;
+  border-bottom: 3px solid transparent;
+  font-weight: 600;
+}
+.connected-direct-group > a:hover {
+  background: #eff6ff;
+}
+.connected-direct-group > a[aria-current="page"],
+.connected-desktop-sections details[data-current-group] > summary {
+  border-bottom: 3px solid #1d4ed8;
+  background: #eff6ff;
+  font-weight: 700;
+}
+.connected-desktop-sections summary {
+  border-bottom: 3px solid transparent;
+}
+.connected-desktop-sections button[aria-current="page"],
+.connected-sections button[aria-current="page"] {
+  border-left: 4px solid #1d4ed8;
+  background: #dbeafe;
+  font-weight: 700;
 }

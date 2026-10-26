@@ -643,3 +643,106 @@ commit/push. Se publican evaluación integral y plan 6–13, con referencias en 
 HANDOFF. Las menciones inmediatamente anteriores de publicación no autorizada describen
 el momento de elaboración. No se inicia 6A, no se modifican funciones ni datos y no hay
 merge/despliegue. Archivos generados y outputs locales quedan excluidos del commit.
+
+
+## Bloque 6A — destinos coherentes y accesos directos
+
+26/10/2026. Usuario solicita continuar 6A del plan publicado en d42b2e9. Rama local
+feature/navegacion-6a-destinos. Sin commit/push nuevo ni inicio de 6B.
+
+Cambios acotados:
+
+- Diccionario de destinos conectados para menú, miga y Continuar, con claves de URL intactas.
+- Documentos guardados unificado en su título conectado y sus accesos. El grupo de trabajo
+  conserva la descripción Revisar y decidir; no es otra pantalla.
+- Inventario de tratamientos coincide con su pantalla; el enlace de resultados utiliza
+  Resultado del autodiagnóstico, igual que su pantalla existente.
+- Los grupos de un solo destino son enlaces directos con su URL y activación por teclado.
+  Los de múltiples destinos conservan desplegables y todos sus destinos.
+- Destino actual con aria-current y borde/subrayado/negrita; grupo activo indicado sin
+  confundirlo con éxito de guardado. Secciones conserva el mismo destino seleccionado.
+- AssessmentFlow recibe rótulos conectados opcionales; los títulos de uso independiente
+  permanecen sin cambios. Sin API, migraciones, permisos o reglas de aplicabilidad nuevos.
+
+Evidencia controlada:
+
+- 51 pruebas Chromium de connected-navigation: 46 anteriores y 5 nuevas del bloque 6A.
+- 20 pruebas del flujo real AssessmentFlow en su harness independiente licitud-workspace.
+- 18 pruebas de maqueta de referencia licitud-prototype. Total: 89 escenarios distintos.
+- Tras aclarar tipos del diccionario y activar el enlace con Enter en la prueba, tipos,
+  las 20 independientes y las cinco dirigidas de 6A pasaron; no sumar estas repeticiones.
+- ESLint, Prettier y comprobación de tipos correctos. Capturas locales ficticias de
+  escritorio, Secciones 390 y 320 revisadas, sin recorte ni desbordamiento horizontal.
+- Enlace previo a revisar conserva IDs; menú, miga y título coherentes; siete destinos
+  EIPD disponibles; nota pendiente conservada al consultar, continuar y usar Atrás/Adelante.
+  No escrituras de dominio por navegar; el escenario EIPD usa una determinación ficticia
+  explícita para habilitar su editor y verifica que navegar no añade escrituras.
+
+Límites: pruebas con servicios simulados, no ensayo integrado nuevo sobre datos reales
+ni aceptación asistida. Código generado next-env.d.ts y outputs/ fuera del cambio funcional.
+Las cabeceras repetidas y la segunda lista de pasos EIPD siguen en lote 8; no se elimina
+contenido ni se rediseña el formulario en 6A. Accesibilidad ampliada permanece en lote 7.
+
+### Validación asistida pendiente de 6A
+
+Usar /dashboard/trabajo, no /dashboard/maqueta. Conservar la pestaña original si contiene
+borradores sin guardar; no recargarla para obtener los cambios. Una pestaña nueva permite
+ver el código actualizado, pero no recupera las notas sin guardar de la original.
+
+1. En Bases de licitud y la evaluación seleccionada, pulsar Documentos guardados en la
+   barra superior: debe abrir directamente, sin desplegar otra opción. Revisar y decidir
+   permanece como descripción del grupo. Comprobar Documentos guardados en miga y título.
+2. Abrir Historial y descargas con una activación. Usar Atrás/Adelante para volver a
+   Documentos guardados; contexto y destino resaltado deben corresponder.
+3. Si hay una EIPD habilitada en esa pestaña, abrir Completar EIPD: siguen sus siete destinos.
+   Escribir una nota ficticia sin guardar, ir a Documentos guardados y regresar; comprobar
+   el mismo texto. No guardar ni volver a determinar aplicabilidad para esta comprobación.
+4. En ventana estrecha, abrir Secciones y comprobar los mismos nombres y el destino actual.
+5. Inventario de tratamientos: abrir el listado y una ficha; comparar el nombre del acceso,
+   la miga y el título. Si se vuelve a Panel, Continuar debe nombrar el destino recordado.
+
+Registrar OK/Fallo/No probado por paso. No cerrar 6A ni iniciar 6B hasta recibir el resultado.
+
+
+### Validación parcial asistida 6A y ajuste del rótulo de grupo
+
+26/10/2026: captura b4ef3d27 confirma nombre Documentos guardados en acceso, miga y título;
+usuario confirma «3 OK» para Historial/Atrás/Adelante y «Todo OK» para conservar nota EIPD.
+Después confirma funcionamiento de Continuar y observa falta de legibilidad de Revisar y
+decidir en escritorio (94767b1b). El rótulo estaba definido a 12px y peso normal; se ajusta
+a 1rem/negrita/color principal y espaciado, conservando la jerarquía y el acceso directo.
+No se modifica navegación, formularios, datos ni reglas.
+
+La captura estrecha 5d8db1f4 aún presenta Continuar en Revisar documentos, propio del nombre
+anterior; se registra confirmación de funcionamiento, pero no uniformidad de nombres del
+código nuevo en esa ventana. Pendiente comprobar el rótulo de escritorio ajustado y usar
+la misma pestaña actualizada al reducir ancho. No recargar una pestaña con borrador pendiente.
+6A conserva aceptación parcial; 6B no iniciado y sin commit/push nuevo.
+
+
+### Aceptación asistida del rótulo y cierre acotado 6A
+
+26/10/2026: usuario confirma «esta OK la glosa» tras el ajuste de tamaño/peso/contraste de
+Revisar y decidir. Se registra aceptación visual. Las confirmaciones previas acreditan los
+recorridos informados: acceso y nombres Documentos guardados, Historial/Atrás/Adelante,
+conservación de nota EIPD y funcionamiento de Continuar. No se atribuye verificación de los
+nombres nuevos a la captura estrecha antigua ni pruebas manuales adicionales de permisos.
+
+6A aceptado con ese alcance. Evidencia técnica previa: 89 escenarios distintos, tipos,
+lint/formato y capturas; tras ajuste visual: cinco dirigidos aprobados y captura de escritorio
+revisada, sin sumar ejecuciones como escenarios diferentes. Móvil conserva evidencia
+controlada 320/390; no se declara una nueva prueba integrada contra servidor en este cierre.
+
+Cambios locales en feature/navegacion-6a-destinos sobre d42b2e9. Sin commit/push nuevo,
+merge/despliegue ni inicio de 6B. Próximo propuesto: 6B conforme al plan, pendiente de
+indicación. NAV-UX-006 y demás lotes conservan sus alcances pendientes.
+
+
+### Publicación autorizada del bloque 6A
+
+26/10/2026: usuario solicita commit y autoriza push tras aceptar la glosa. Se publica
+el bloque acotado en feature/navegacion-6a-destinos sobre d42b2e9, con implementación,
+pruebas y aceptación documentadas. Evidencia: 89 escenarios distintos anteriores al
+ajuste visual; cinco dirigidos y captura después del ajuste. No atribuir nuevos ensayos
+manuales ni CI remota sin verificarlos. Generado next-env.d.ts y outputs locales excluidos.
+Las menciones previas de sin commit/push son antecedentes. Sin inicio de 6B, merge/despliegue.

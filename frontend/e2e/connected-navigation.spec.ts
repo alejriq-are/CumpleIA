@@ -458,7 +458,7 @@ test("RAT conserva campos entre secciones y nueva actividad al volver del catál
   await section(page, "Nueva actividad");
   const fresh = main(page).getByRole("textbox", { name: "Nombre de la actividad *", exact: true });
   await fresh.fill("[FICTICIA] Nueva actividad pendiente");
-  await section(page, "Catálogo de tratamientos");
+  await section(page, "Inventario de tratamientos");
   await section(page, "Nueva actividad");
   await expect(
     main(page).getByRole("textbox", { name: "Nombre de la actividad *", exact: true })
@@ -979,7 +979,7 @@ for (const state of ["pendiente", "corresponde", "no_corresponde", "informacion_
     } else {
       await expect(availability(page)).toContainText("El formulario no está habilitado");
       await availability(page)
-        .getByRole("button", { name: "Ir a Revisar y decidir", exact: true })
+        .getByRole("button", { name: "Ir a Documentos guardados", exact: true })
         .click();
       await expect(page).toHaveURL(/\/licitud\/revisar\?/);
     }
@@ -1055,7 +1055,7 @@ for (const target of ["eipd", "infancia", "preparar"]) {
     await expect(relocation(page)).toContainText("No corresponde");
     await expect(relocation(page)).toContainText("se conservan durante esta visita");
     await expect(
-      relocation(page).getByRole("button", { name: "Ir a Revisar y decidir", exact: true })
+      relocation(page).getByRole("button", { name: "Ir a Documentos guardados", exact: true })
     ).toBeVisible();
     await expect(page).toHaveURL(/\/licitud\/aplicabilidad\?/);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
@@ -1104,7 +1104,7 @@ test("determinación desasociada explica revisión y conserva acceso a consulta"
     availability(page).getByRole("button", { name: "Completar EIPD", exact: true })
   ).not.toBeVisible();
   await expect(
-    availability(page).getByRole("button", { name: "Ir a Revisar y decidir", exact: true })
+    availability(page).getByRole("button", { name: "Ir a Documentos guardados", exact: true })
   ).toBeVisible();
   expect(calls.some((v) => v.method !== "GET")).toBe(false);
   expect(errors).toEqual([]);
@@ -1400,5 +1400,141 @@ test("lote 5: consulta lenta bloquea duplicados y conserva el borrador tras term
     before + 1
   );
   expect(calls.some((v) => v.method !== "GET")).toBe(false);
+  expect(errors).toEqual([]);
+});
+
+test("6A destinos únicos directos con nombre común y sin escrituras", async ({ page }) => {
+  await legal(page);
+  const header = page.locator("header");
+  const documents = header.getByRole("link", { name: "Documentos guardados", exact: true });
+  await expect(documents).toHaveAttribute("href", new RegExp(`assessmentId=${aid}`));
+  await expect(header.locator("summary").filter({ hasText: "Revisar y decidir" })).toHaveCount(0);
+  await documents.focus();
+  await documents.press("Enter");
+  await expect(page).toHaveURL(/#\/licitud\/revisar\?/);
+  await expect(
+    main(page).getByRole("heading", { name: "Documentos guardados", exact: true })
+  ).toBeVisible();
+  await expect(page.getByTestId("connected-destination")).toHaveText(
+    "Bases de licitud › Documentos guardados"
+  );
+  await expect(documents).toHaveAttribute("aria-current", "page");
+  await capture(page, "6a-documentos-escritorio.png");
+  const history = header.getByRole("link", { name: "Historial y descargas", exact: true });
+  await history.click();
+  await expect(
+    main(page).getByRole("heading", { name: "Historial y descargas", exact: true })
+  ).toBeVisible();
+  await expect(history).toHaveAttribute("aria-current", "page");
+  await expect(documents).not.toHaveAttribute("aria-current");
+  await page.goBack();
+  await expect(documents).toHaveAttribute("aria-current", "page");
+  await page.goForward();
+  await expect(history).toHaveAttribute("aria-current", "page");
+  expect(calls.filter((call) => call.method !== "GET")).toEqual([]);
+  expect(errors).toEqual([]);
+});
+
+test("6A grupos múltiples y nota EIPD conservada al consultar y continuar", async ({ page }) => {
+  await legal(page);
+  await enable(page);
+  const writes = calls.filter((call) => call.method !== "GET").length;
+  const header = page.locator("header");
+  const group = header
+    .locator("details")
+    .filter({ has: page.locator("summary", { hasText: "Completar EIPD" }) });
+  await group.locator("summary").click();
+  await expect(group.getByRole("button")).toHaveCount(7);
+  await group
+    .getByRole("button", { name: "Tratamiento y alcance de la EIPD", exact: true })
+    .click();
+  const note = main(page).getByRole("textbox", {
+    name: "Notas del borrador EIPD (opcional)",
+    exact: true,
+  });
+  await note.fill("[FICTICIA] Nota del bloque 6A sin guardar");
+  await expect(group).toHaveAttribute("data-current-group", "true");
+  await group.locator("summary").click();
+  await expect(
+    group.getByRole("button", { name: "Tratamiento y alcance de la EIPD", exact: true })
+  ).toHaveAttribute("aria-current", "page");
+  await group.getByRole("button", { name: "Riesgos", exact: true }).click();
+  await expect(page).toHaveURL(/step=2/);
+  await group.locator("summary").click();
+  await expect(group.getByRole("button", { name: "Riesgos", exact: true })).toHaveAttribute(
+    "aria-current",
+    "page"
+  );
+  await group
+    .getByRole("button", { name: "Tratamiento y alcance de la EIPD", exact: true })
+    .click();
+  await header.getByRole("link", { name: "Documentos guardados", exact: true }).click();
+  await mod(page, "Panel principal");
+  await main(page)
+    .getByRole("button", { name: /^Continuar en Documentos guardados/ })
+    .click();
+  await expect(
+    main(page).getByRole("heading", { name: "Documentos guardados", exact: true })
+  ).toBeVisible();
+  await page.goBack();
+  await expect(
+    main(page).getByRole("heading", { name: "Panel principal", exact: true })
+  ).toBeVisible();
+  await page.goBack();
+  await expect(
+    main(page).getByRole("heading", { name: "Documentos guardados", exact: true })
+  ).toBeVisible();
+  await page.goBack();
+  await expect(note).toHaveValue("[FICTICIA] Nota del bloque 6A sin guardar");
+  await expect(page).toHaveURL(new RegExp(`assessmentId=${aid}`));
+  expect(calls.filter((call) => call.method !== "GET")).toHaveLength(writes);
+  expect(errors).toEqual([]);
+});
+
+for (const width of [390, 320]) {
+  test(`6A Secciones conserva destino activo y nombre en ${width}px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 844 });
+    await legal(page);
+    await section(page, "Documentos guardados");
+    await expect(
+      main(page).getByRole("heading", { name: "Documentos guardados", exact: true })
+    ).toBeVisible();
+    await expect(page.getByTestId("connected-destination")).toContainText("Documentos guardados");
+    await page.getByRole("button", { name: "Secciones", exact: true }).click();
+    const drawer = page.getByRole("dialog", { name: "Secciones del módulo", exact: true });
+    await expect(
+      drawer.getByRole("button", { name: "Documentos guardados", exact: true })
+    ).toHaveAttribute("aria-current", "page");
+    await capture(page, `6a-secciones-${width}.png`);
+    await page.keyboard.press("Escape");
+    await expect(drawer).not.toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+      true
+    );
+    expect(calls.filter((call) => call.method !== "GET")).toEqual([]);
+    expect(errors).toEqual([]);
+  });
+}
+
+test("6A enlace anterior conserva IDs y nombre único del inventario", async ({ page }) => {
+  const hash = `#/licitud/revisar?organizationId=${org}&treatmentId=${tid}&assessmentId=${aid}`;
+  await visit(page, hash);
+  await expect(
+    main(page).getByRole("heading", { name: "Documentos guardados", exact: true })
+  ).toBeVisible();
+  await expect(page).toHaveURL(new RegExp(`assessmentId=${aid}$`));
+  await mod(page, "Inventario de tratamientos");
+  await section(page, "Inventario de tratamientos");
+  await expect(
+    main(page).getByRole("heading", { name: "Inventario de tratamientos", exact: true })
+  ).toBeVisible();
+  await expect(page.getByTestId("connected-destination")).toHaveText(
+    "Inventario de tratamientos › Inventario de tratamientos"
+  );
+  await section(page, "Información general");
+  await expect(
+    main(page).getByRole("heading", { name: "Información general", exact: true })
+  ).toBeVisible();
+  expect(calls.filter((call) => call.method !== "GET")).toEqual([]);
   expect(errors).toEqual([]);
 });

@@ -8,6 +8,7 @@ import {
   type ApplicabilityLoadState,
 } from "./ConnectedApplicability";
 import type { WorkLocation } from "./connected-navigation";
+import { connectedDestinations } from "./connected-destinations";
 export function ConnectedAssessment({
   location,
   name,
@@ -104,7 +105,7 @@ export function ConnectedAssessment({
             className="rounded border p-3"
             onClick={() => go({ ...location, section: "revisar", step: 0 })}
           >
-            Ir a Revisar y decidir
+            Ir a {connectedDestinations.licitud.revisar}
           </button>
           <button type="button" className="rounded border p-3" onClick={() => setRelocation(null)}>
             Cerrar aviso
@@ -165,6 +166,7 @@ export function ConnectedAssessment({
           navigation={{
             scope,
             location: flow,
+            labels: connectedDestinations.licitud,
             go: (v) =>
               go({ ...location, section: v.tab === "completar" ? v.section : v.tab, step: v.step }),
           }}

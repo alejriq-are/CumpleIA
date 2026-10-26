@@ -1,5 +1,43 @@
 # Backlog — CumpleIA
 
+## Publicación autorizada de 6A — 26/10/2026
+
+Usuario autoriza commit/push del bloque 6A aceptado: nombres de destinos, accesos directos,
+estado activo y glosa legible. Se conservan los límites de evidencia asistida y controlada.
+Las anotaciones anteriores de publicación pendiente describen el momento previo al cierre.
+No se cierra NAV-UX-006 globalmente ni se inicia 6B. Excluir generados y capturas locales.
+
+## Aceptación acotada 6A — 26/10/2026
+
+- [x] **6A — Aceptar rótulo Revisar y decidir y recorridos informados.** Usuario confirma
+  «esta OK la glosa» después del ajuste. Acceso/nombres Documentos guardados, Historial y
+  retorno, nota EIPD conservada y funcionamiento de Continuar ya confirmados en conversación.
+  La captura estrecha antigua no acredita nombres nuevos; móvil mantiene evidencia controlada.
+  [Detalle y límites](project/navegacion-servidor.md#aceptación-asistida-del-rótulo-y-cierre-acotado-6a).
+  Sustituye el pendiente de aceptación visual del rótulo, sin cerrar NAV-UX-006 globalmente.
+  Sin commit/push nuevo ni inicio de 6B.
+
+## Observación asistida de legibilidad 6A — 26/10/2026
+
+- [ ] **NAV-UX-006 / 6A — Validar rótulo Revisar y decidir legible en escritorio.**
+  Usuario confirma recorridos de documentos, retorno, nota EIPD y Continuar; detecta rótulo
+  pequeño en escritorio. Ajustado de 12px/peso normal a 1rem/negrita/color principal.
+  Mantiene Documentos guardados como acceso directo. Pendiente comprobar visualmente ajuste;
+  captura móvil de Continuar con nombre anterior no acredita uniformidad del código nuevo.
+  No iniciar 6B ni cerrar globalmente NAV-UX-006. Sin commit/push nuevo.
+
+## Bloque 6A — nombres y accesos, 26/10/2026
+
+- [ ] **NAV-UX-006 / lote 6A — Aceptar nombres coherentes y accesos de un destino.**
+  Implementación local sobre d42b2e9: diccionario acotado de destinos, Documentos guardados
+  en menú/miga/título/Continuar y enlaces relacionados; accesos directos en grupos de un
+  destino, desplegables para varios, destino activo visible y accesible. URLs/IDs, contexto,
+  borradores y reglas preservados; títulos del editor independiente sin cambio.
+  51 escenarios conectados, 20 del flujo independiente y 18 de maqueta aprobados; tipos,
+  lint/formato y capturas revisados. [Guion y límites](project/navegacion-servidor.md#bloque-6a--destinos-coherentes-y-accesos-directos).
+  Pendiente aceptación asistida. No cierra NAV-UX-006 globalmente ni inicia 6B/7/8.
+  Sin commit/push nuevo; no se incluye archivo next-env.d.ts generado ni outputs/.
+
 ## Replanificación integral de navegación y terminología — 26/10/2026
 
 - [ ] **NAV-UX-006 — Coherencia de nombres y comprensión de operaciones documentales.**

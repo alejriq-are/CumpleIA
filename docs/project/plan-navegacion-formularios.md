@@ -2,7 +2,7 @@
 
 Fecha: 26 de octubre de 2026. Base funcional: `2e3f5460190185413f6e85243ad59958ba148463`.
 
-Estado: **plan propuesto tras evaluación; sublotes no iniciados**. La tarea actual produce documentación y no implementa cambios de producto. [Análisis, decisiones P1–P13 y glosario G01–G30](evaluacion-propuestas-claude.md).
+Estado al 26/10/2026: **6A aceptado con el alcance asistido documentado; commit/push autorizado el 26/10/2026**. Los demás sublotes no se han iniciado. La autorización del usuario para continuar 6A sucede a la publicación documental del plan en d42b2e9. [Análisis, decisiones P1–P13 y glosario G01–G30](evaluacion-propuestas-claude.md).
 
 ## 1. Alcance y secuencia
 
@@ -69,6 +69,13 @@ La prioridad no obliga a iniciar simultáneamente. Si un fallo de recuperación 
 - [ ] Enlaces previos y Atrás/Adelante llegan al mismo destino lógico.
 
 **Guion con usuario:** desde Panel → Inventario → ficha seleccionada; abrir Documentos guardados desde Bases de licitud y regresar. Comparar nombres y cantidad de pasos; no guardar datos.
+
+**Ejecución 26/10/2026:** implementación local en feature/navegacion-6a-destinos sobre d42b2e9.
+51 escenarios conectados (5 nuevos), 20 del flujo independiente y 18 de maqueta de referencia
+aprobados; tipos/lint/formato y revisión visual correctos. Aceptación asistida acotada registrada el 26/10/2026, incluida la glosa ajustada.
+La captura estrecha antigua no prueba nombres nuevos; las pruebas controladas no se atribuyen al usuario.
+[Evidencia y recorrido](navegacion-servidor.md#bloque-6a--destinos-coherentes-y-accesos-directos).
+Sin commit/push nuevo; no se inicia 6B.
 
 ### 6B. Operaciones documentales y disponibilidad
 
@@ -329,6 +336,6 @@ Los códigos C se conservan como referencias históricas del checklist de revisi
 
 ## 12. Primer bloque para ejecutar
 
-**Siguiente propuesto: 6A, exclusivamente.** Revisar estado/HEAD y permisos del checkout, establecer nombres de destinos y convertir accesos de un solo destino en enlaces directos; comprobar rutas/contexto y nota EIPD pendiente; validar juntos antes del siguiente sublote. No implementar aún la lista de pendientes, nuevos estados documentales, cambios de servidor o rediseño de todos los formularios.
+**Estado: 6A aceptado con alcance asistido acotado; publicación autorizada el 26/10/2026.** Próximo bloque propuesto: 6B, pendiente de indicación; no se inicia en este cierre. No implementar aún la lista de pendientes, nuevos estados documentales, cambios de servidor o rediseño de todos los formularios.
 
 Este plan se puede ajustar tras la aceptación del usuario. La estimación depende de la evidencia que surja en cada componente; no se prometen plazos ni mejoras porcentuales sin medición.

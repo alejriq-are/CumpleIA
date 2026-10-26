@@ -25,6 +25,7 @@ import {
   type WorkLocation,
 } from "./connected-navigation";
 import { modules, type ModuleId } from "./prototype-data";
+import { connectedDestinations, connectedDestinationLabel } from "./connected-destinations";
 import "./navigation-prototype.css";
 import "./connected-navigation.css";
 
@@ -269,8 +270,8 @@ export function ConnectedWorkspace({
           {
             label: "Inventario",
             items: [
-              { id: "catalogo", label: "Catálogo de tratamientos" },
-              { id: "nuevo", label: "Nueva actividad" },
+              { id: "catalogo", label: connectedDestinations.rat.catalogo },
+              { id: "nuevo", label: connectedDestinations.rat.nuevo },
             ],
           },
           ...(location.treatmentId
@@ -288,11 +289,11 @@ export function ConnectedWorkspace({
               label: "Cuestionario",
               items: diagnosticItems.length
                 ? diagnosticItems
-                : [{ id: "cuestionario", label: "Abrir cuestionario" }],
+                : [{ id: "cuestionario", label: connectedDestinations.diagnostico.cuestionario }],
             },
             {
               label: "Resultados e informe",
-              items: [{ id: "resultados", label: "Resultados e informe guardados" }],
+              items: [{ id: "resultados", label: connectedDestinations.diagnostico.resultados }],
             },
           ]
         : location.module === "licitud"
@@ -300,13 +301,13 @@ export function ConnectedWorkspace({
               {
                 label: "Preparar",
                 items: [
-                  { id: "catalogo", label: "Evaluaciones y creación de borrador" },
+                  { id: "catalogo", label: connectedDestinations.licitud.catalogo },
                   ...(location.assessmentId
                     ? [
-                        { id: "aplicabilidad", label: "Determinar aplicabilidad" },
-                        { id: "alcance", label: "Alcance del RAT" },
-                        { id: "base", label: "Base y fundamento" },
-                        { id: "anexos", label: "Anexos de respaldo" },
+                        { id: "aplicabilidad", label: connectedDestinations.licitud.aplicabilidad },
+                        { id: "alcance", label: connectedDestinations.licitud.alcance },
+                        { id: "base", label: connectedDestinations.licitud.base },
+                        { id: "anexos", label: connectedDestinations.licitud.anexos },
                       ]
                     : []),
                 ],
@@ -324,8 +325,8 @@ export function ConnectedWorkspace({
                     {
                       label: "Infancia y adolescencia",
                       items: [
-                        { id: "infancia", label: "Completar infancia y adolescencia" },
-                        { id: "preparar", label: "Preparar resolución documental" },
+                        { id: "infancia", label: connectedDestinations.licitud.infancia },
+                        { id: "preparar", label: connectedDestinations.licitud.preparar },
                       ],
                     },
                   ]
@@ -334,11 +335,11 @@ export function ConnectedWorkspace({
                 ? [
                     {
                       label: "Revisar y decidir",
-                      items: [{ id: "revisar", label: "Documentos, resoluciones y revisiones" }],
+                      items: [{ id: "revisar", label: connectedDestinations.licitud.revisar }],
                     },
                     {
                       label: "Historial y descargas",
-                      items: [{ id: "historial", label: "Historial y descargas" }],
+                      items: [{ id: "historial", label: connectedDestinations.licitud.historial }],
                     },
                   ]
                 : []),
@@ -441,40 +442,12 @@ export function ConnectedWorkspace({
     await validate(next, false);
   }
   const activeKey = paneKey(location);
-  const displayTitle =
-    groups
-      .flatMap((g) => g.items)
-      .find((v) => v.id === location.section && (v.step ?? 0) === location.step)?.label ??
-    modules.find((v) => v.id === location.module)?.title ??
-    "Panel principal";
   function locationLabel(v: WorkLocation) {
-    if (v.module === "diagnostico")
-      return (
-        diagnosticSections[v.organizationId]?.find((item) => item.id === v.section)?.label ??
-        "Autodiagnóstico"
-      );
-    if (v.module === "rat")
-      return (
-        ratSections.find(([id]) => id === v.section)?.[1] ??
-        (v.section === "nuevo" ? "Nueva actividad" : "Catálogo de tratamientos")
-      );
-    if (v.module === "licitud")
-      return v.section === "eipd"
-        ? eipdSections[v.step]
-        : ({
-            aplicabilidad: "Determinar aplicabilidad",
-            base: "Base y fundamento",
-            infancia: "Infancia y adolescencia",
-            preparar: "Preparar resolución",
-            anexos: "Anexos de respaldo",
-            alcance: "Alcance del RAT",
-            revisar: "Revisar documentos",
-            historial: "Historial y descargas",
-            catalogo: "Evaluaciones",
-            resumen: "Resumen",
-          }[v.section] ?? "Bases de licitud");
-    return modules.find((item) => item.id === v.module)?.title ?? "Panel principal";
+    return connectedDestinationLabel(v, diagnosticSections[v.organizationId]);
   }
+  const displayTitle = locationLabel(location);
+  const isCurrent = (item: Item) =>
+    item.id === location.section && (item.step ?? 0) === location.step;
   function contextLabel(value: WorkLocation) {
     const organization = organizations.find((item) => item.id === value.organizationId);
     const parts = [`Organización: ${organization?.name ?? "Organización seleccionada"}`];
@@ -496,11 +469,7 @@ export function ConnectedWorkspace({
           {group.items.map((item) => (
             <button
               key={`${item.id}:${item.step ?? 0}`}
-              aria-current={
-                item.id === location.section && (item.step ?? 0) === location.step
-                  ? "page"
-                  : undefined
-              }
+              aria-current={isCurrent(item) ? "page" : undefined}
               onClick={() => section(item)}
             >
               {item.label}
@@ -563,7 +532,7 @@ export function ConnectedWorkspace({
                   Secciones
                 </button>
               )}
-              <span className="min-w-0 flex-1 truncate">
+              <span data-testid="connected-destination" className="min-w-0 flex-1 truncate">
                 {modules.find((v) => v.id === location.module)?.title} › {displayTitle}
               </span>
               <button
@@ -586,35 +555,67 @@ export function ConnectedWorkspace({
               )}
             </div>
             <div className="connected-desktop-sections">
-              {groups.map((g) => (
-                <details
-                  key={g.label}
-                  onToggle={(event) => {
-                    if (!event.currentTarget.open) return;
-                    const pop = event.currentTarget.querySelector<HTMLElement>(":scope > div");
-                    if (pop) {
-                      pop.style.left = "0px";
-                      const rect = pop.getBoundingClientRect();
-                      pop.style.left = `${Math.max(8 - rect.left, Math.min(0, window.innerWidth - 8 - rect.right))}px`;
-                    }
-                  }}
-                >
-                  <summary>{g.label}</summary>
-                  <div>
-                    {g.items.map((item) => (
-                      <button
-                        key={`${item.id}:${item.step ?? 0}`}
-                        onClick={(e) => {
-                          e.currentTarget.closest("details")?.removeAttribute("open");
-                          section(item);
-                        }}
-                      >
-                        {item.label}
-                      </button>
-                    ))}
+              {groups.map((g) =>
+                g.items.length === 1 ? (
+                  <div key={g.label} className="connected-direct-group">
+                    {g.label !== g.items[0].label && (
+                      <span className="connected-group-label">{g.label}</span>
+                    )}
+                    <a
+                      href={encodeWork({
+                        ...location,
+                        section: g.items[0].id,
+                        step: g.items[0].step ?? 0,
+                      })}
+                      aria-current={isCurrent(g.items[0]) ? "page" : undefined}
+                      onClick={(event) => {
+                        if (
+                          event.button !== 0 ||
+                          event.metaKey ||
+                          event.ctrlKey ||
+                          event.shiftKey ||
+                          event.altKey
+                        )
+                          return;
+                        event.preventDefault();
+                        section(g.items[0]);
+                      }}
+                    >
+                      {g.items[0].label}
+                    </a>
                   </div>
-                </details>
-              ))}
+                ) : (
+                  <details
+                    key={g.label}
+                    data-current-group={g.items.some(isCurrent) || undefined}
+                    onToggle={(event) => {
+                      if (!event.currentTarget.open) return;
+                      const pop = event.currentTarget.querySelector<HTMLElement>(":scope > div");
+                      if (pop) {
+                        pop.style.left = "0px";
+                        const rect = pop.getBoundingClientRect();
+                        pop.style.left = `${Math.max(8 - rect.left, Math.min(0, window.innerWidth - 8 - rect.right))}px`;
+                      }
+                    }}
+                  >
+                    <summary>{g.label}</summary>
+                    <div>
+                      {g.items.map((item) => (
+                        <button
+                          key={`${item.id}:${item.step ?? 0}`}
+                          aria-current={isCurrent(item) ? "page" : undefined}
+                          onClick={(e) => {
+                            e.currentTarget.closest("details")?.removeAttribute("open");
+                            section(item);
+                          }}
+                        >
+                          {item.label}
+                        </button>
+                      ))}
+                    </div>
+                  </details>
+                )
+              )}
             </div>
           </header>
           {validating && !context && (

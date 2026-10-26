@@ -1,5 +1,53 @@
 # Handoff vigente de CumpleIA
 
+## Publicación autorizada del bloque 6A — 26/10/2026
+
+Usuario solicita commit y autoriza push del bloque 6A aceptado, en
+feature/navegacion-6a-destinos sobre d42b2e9. Se reúnen implementación, regresiones,
+legibilidad ajustada y aceptación asistida acotada. Las menciones inferiores de
+publicación pendiente son antecedentes anteriores a esta autorización.
+Excluir next-env.d.ts generado y outputs/ locales. Verificar HEAD remoto tras publicar;
+no atribuir CI remota por el push. No iniciar 6B ni ejecutar merge/despliegue.
+
+## Cierre asistido acotado 6A — 26/10/2026
+
+Usuario confirma «esta OK la glosa» tras aumentar legibilidad de Revisar y decidir.
+Aceptados los recorridos informados de acceso Documentos guardados/nombres, Historial con
+Atrás/Adelante, conservación de nota EIPD y funcionamiento de Continuar, más este ajuste
+visual. No atribuir a la captura estrecha antigua la comprobación de nombres nuevos;
+320/390 conservan evidencia controlada, no nuevo ensayo asistido documentado.
+6A aceptado con este alcance; no cierra NAV-UX-006 globalmente. [Detalle](project/navegacion-servidor.md#aceptación-asistida-del-rótulo-y-cierre-acotado-6a).
+Cambios locales sobre d42b2e9, sin commit/push nuevo ni inicio de 6B. Próximo bloque
+propuesto: 6B, pendiente de indicación. Los estados inferiores son antecedentes anteriores.
+
+## Validación parcial 6A y legibilidad del grupo — 26/10/2026
+
+Usuario confirma acceso/nombres Documentos guardados, Atrás/Adelante (3 OK), conservación
+de nota EIPD y funcionamiento de Continuar. Observa que Revisar y decidir se lee demasiado
+pequeño en escritorio. Ajuste acotado del rótulo: tamaño 1rem, negrita, color de texto
+principal y espaciado; Documentos guardados conserva acceso directo y misma URL.
+Captura estrecha aportada de Continuar aún muestra el nombre anterior Revisar documentos;
+no acredita por sí sola nomenclatura nueva en móvil. Pendiente aceptación visual del
+rótulo ajustado y comprobar móvil en la pestaña actualizada. Sin inicio de 6B ni commit/push.
+
+## Bloque 6A implementado localmente — 26/10/2026
+
+Usuario autoriza continuar exclusivamente 6A del plan. Rama feature/navegacion-6a-destinos,
+base d42b2e9. Nombres de destino compartidos en navegación conectada; pantalla Documentos
+guardados unificada en menú/miga/título/Continuar y enlaces de orientación. Grupos de un
+solo destino son enlaces directos; grupos múltiples conservan desplegable. Activo señalado
+por subrayado/borde/negrita y aria-current en el destino; no implica guardado o completitud.
+Rutas, IDs, contexto, persistencia y reglas no cambian; componente documental independiente
+conserva sus títulos anteriores. Sin cambios backend ni habilitación EIPD.
+
+Validación: 51 escenarios conectados (5 nuevos), 20 del flujo documental independiente y
+18 de maqueta de referencia aprobados; 89 distintos, sin sumar repeticiones. Tipos, ESLint,
+formato y capturas escritorio/390/320 revisados. Pruebas con fixtures ficticios, no una
+nueva prueba integrada contra el servidor del usuario. [Evidencia y guion](project/navegacion-servidor.md#bloque-6a--destinos-coherentes-y-accesos-directos).
+Pendiente aceptación asistida del usuario. No iniciar 6B ni otros lotes. Sin commit/push
+nuevo ni merge/despliegue; autorización previa cerró solamente la documentación del plan.
+next-env.d.ts generado y outputs/ locales ajenos al bloque funcional.
+
 ## Plan integral de navegación y terminología — 26/10/2026
 
 Usuario solicita analizar dos informes Word de Claude antes del siguiente lote y

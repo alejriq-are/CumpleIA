@@ -41,6 +41,7 @@ export function AssessmentFlow({
   token?: () => Promise<string>;
   navigation?: {
     location: AssessmentLocation;
+    labels?: Partial<Record<FlowTab, string>>;
     go: (v: AssessmentLocation) => void;
     scope: { eipd: boolean; infancia: boolean };
   };
@@ -351,7 +352,9 @@ export function AssessmentFlow({
         hidden={tab !== "revisar"}
         className="space-y-3"
       >
-        <h2 className="text-xl font-semibold">Revisar documentos guardados</h2>
+        <h2 className="text-xl font-semibold">
+          {navigation?.labels?.revisar ?? "Revisar documentos guardados"}
+        </h2>
         <p>
           Consulta lo guardado; las ediciones pendientes no se incluyen. Consultar contenido no
           emite una revisión formal.
@@ -467,7 +470,9 @@ export function AssessmentFlow({
         aria-labelledby="licitud-tab-historial"
         hidden={tab !== "historial"}
       >
-        <h2 className="text-xl font-semibold">Historial y descargas del servidor</h2>
+        <h2 className="text-xl font-semibold">
+          {navigation?.labels?.historial ?? "Historial y descargas del servidor"}
+        </h2>
         <p>
           El expediente reúne lo guardado. Los cambios pendientes del formulario no se incluyen.
         </p>
