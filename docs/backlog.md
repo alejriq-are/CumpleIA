@@ -1,5 +1,23 @@
 # Backlog — CumpleIA
 
+## Replanificación integral de navegación y terminología — 26/10/2026
+
+- [ ] **NAV-UX-006 — Coherencia de nombres y comprensión de operaciones documentales.**
+  Evaluación de los dos Word de Claude contra 2e3f546, sin implementación nueva.
+  Adoptar nombres por objeto y destino; distinguir preparar copia temporal, guardar borrador,
+  registrar versión, resultado de revisión y decisión de organización. Conservar términos
+  validados del lote 5; no sustituir globalmente Consultar, Revisión, Fundamento ni estados/API.
+  [Decisiones y evidencia](project/evaluacion-propuestas-claude.md).
+  Ejecutar por sublotes del [plan 6–13](project/plan-navegacion-formularios.md), conservando
+  alcance de los lotes 6 (menús), 7 (accesibilidad) y 8 (simplificación), pendientes.
+  Cada sublote exige criterios propios y validación asistida; no cierra NAV-UX-002/003/004
+  globalmente ni los trabajos funcionales NAV-UX-005/LIC-FORM-001/LIC-UX-013/014/015.
+
+Lotes 1–5 conservan sus aceptaciones. Lote 5 publicado en 2e3f546; menciones históricas
+inferiores de publicación pendiente no describen el estado actual. Esta anotación y el
+plan no implementan correcciones ni habilitan EIPD. Siguiente propuesto: solo 6A.
+Usuario autoriza commit y push de esta documentación el 26/10/2026; no se inicia implementación.
+
 ## Aceptación asistida del lote 5 C9 — 26/10/2026
 
 - [x] **Lote 5 — Distinguir estado guardado y borrador, aclarar consulta y acercar confirmación.**

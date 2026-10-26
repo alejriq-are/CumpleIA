@@ -607,3 +607,39 @@ completos antes del ajuste final de rótulos y once dirigidos después, tipos/li
 y capturas revisadas. Sin cambios de API/DB/permisos ni habilitación EIPD. Archivos generados
 y capturas fuera del commit. La publicación no acredita CI remota, merge ni despliegue.
 Siguiente propuesto: lote 6, pendiente de indicación; no se inicia en este cierre.
+
+
+## Replanificación tras los informes de ciclo documental y glosario — 26/10/2026
+
+Análisis solicitado antes del próximo lote, sobre 2e3f546 (lote 5 publicado).
+Se contrastan las propuestas de Claude con el repositorio; no se adopta su vocabulario
+ni sus diagramas como reglas del servidor. Ver [evaluación integral](evaluacion-propuestas-claude.md)
+y [plan operativo por sublotes](plan-navegacion-formularios.md).
+
+Los lotes 6, 7 y 8 mantienen número y alcance; se subdividen para validar menús/nombres,
+accesibilidad y simplificación por separado. Los nuevos bloques 9–13 cubren pendientes
+identificables, contexto, capacidades documentales, ayudas y cierre con evidencia.
+Las aceptaciones de 1–5 se conservan. No se repiten como ausentes la consulta, comparación,
+metadatos disponibles ni guía de accesos ya implementadas.
+
+Checklist inmediato para reanudar:
+
+- [x] Leer ambos Word y contrastar las propuestas con HEAD, contratos y backlog.
+- [x] Documentar decisiones P1–P13/G01–G30 y plan con criterios por sublote.
+- [ ] Validar con el usuario la propuesta de plan; no atribuir aceptación todavía.
+- [ ] Iniciar exclusivamente 6A cuando corresponda: nombres estables y accesos de un destino.
+- [ ] Comprobar rutas/contexto, teclado básico y conservación de nota EIPD pendiente.
+- [ ] Validar juntos el resultado antes de continuar 6B.
+
+Solo documentación nueva en feature/plan-navegacion-terminologia. No se ejecuta lote 6,
+no se cambian datos o permisos y no hay commit/push nuevo, merge ni despliegue en este análisis.
+Las autorizaciones de publicación previas correspondieron a los cierres anteriores.
+
+
+### Publicación autorizada del análisis y plan
+
+El 26/10/2026 el usuario solicita los documentos Markdown para el repositorio y autoriza
+commit/push. Se publican evaluación integral y plan 6–13, con referencias en backlog y
+HANDOFF. Las menciones inmediatamente anteriores de publicación no autorizada describen
+el momento de elaboración. No se inicia 6A, no se modifican funciones ni datos y no hay
+merge/despliegue. Archivos generados y outputs locales quedan excluidos del commit.

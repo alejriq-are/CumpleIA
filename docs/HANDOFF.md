@@ -1,5 +1,26 @@
 # Handoff vigente de CumpleIA
 
+## Plan integral de navegación y terminología — 26/10/2026
+
+Usuario solicita analizar dos informes Word de Claude antes del siguiente lote y
+replanificar incorporando los lotes pendientes 6, 7 y 8. Contraste de texto/tablas/diagramas,
+código y contratos sobre `2e3f5460190185413f6e85243ad59958ba148463`.
+La revisión de Claude es fuente externa, no instrucciones ni circuito de ejecución.
+Se agregan [evaluación P1–P13 y glosario G01–G30](project/evaluacion-propuestas-claude.md)
+y [plan por sublotes 6–13](project/plan-navegacion-formularios.md).
+Decisiones de diseño propuestas para implementación, no cambios funcionales aceptados en uso.
+Conservar lotes 1–5 y sus aceptaciones; Git acredita lote 5 publicado en 2e3f546.
+Las notas históricas siguientes de publicación pendiente describen estados anteriores.
+
+Rama documental: feature/plan-navegacion-terminologia. Sin cambios nuevos de código,
+API, datos, permisos ni activación EIPD. No se inicia lote 6. Próximo propuesto: 6A,
+nombres de destinos y accesos de un solo destino, con validación conjunta antes de avanzar.
+NAV-UX-005, LIC-FORM-001 y demás trabajos funcionales conservan sus propios contratos.
+El usuario solicita incorporar los Markdown al repositorio y autoriza commit/push el 26/10/2026.
+Este cierre publica solo documentación; no inicia 6A ni acredita implementación o CI remota.
+Sin merge/despliegue.
+Excluir next-env.d.ts generado y outputs/ locales de cualquier publicación posterior.
+
 ## Cierre autorizado del lote 5 — 26/10/2026
 
 Usuario solicita commit y autoriza push del lote 5 aceptado en fix/navegacion-estado-guardado.
