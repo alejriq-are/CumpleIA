@@ -1,5 +1,73 @@
 # Handoff vigente de CumpleIA
 
+## Publicación autorizada de 8A — 27/10/2026
+
+Usuario solicita commit y autoriza push en `feature/navegacion-8a-contexto`, base `15aa273`.
+Se publica el contexto compacto y su detalle accesible, conservación de la cabecera
+independiente, pruebas y resultados asistidos de 8A. 104 Chromium aprobados y checks
+estáticos previos aprobados; no atribuir CI remota al push. Lector manual de 7B pendiente.
+Las entradas inferiores de autorización pendiente describen estados anteriores.
+Excluir `frontend/next-env.d.ts` generado y `outputs/` locales. 8B no iniciado;
+sin merge ni despliegue. Verificar identidad del commit remoto tras publicar.
+
+## 8A — recorridos asistidos completados, 27/10/2026
+
+Usuario confirma ámbito organizacional en Mi organización/Autodiagnóstico y retorno a
+Bases de licitud con su selección recuperada. Sumado a los recorridos anteriores y captura
+histórica, 8A queda aceptado en ese alcance. Ganancia de espacio respaldada por mediciones
+locales; 104 Chromium y comprobaciones estáticas previas aprobados.
+[Resultado y límites](project/navegacion-servidor.md#8a--recorridos-asistidos-completados-27102026).
+Listo para cierre Git cuando sea autorizado; sin commit/push de 8A ni inicio de 8B.
+Lector manual de 7B pendiente. Las entradas inferiores describen estados anteriores.
+
+## 8A — identidad histórica comprobada en captura, 27/10/2026
+
+Cabecera de evaluación versión 1/borrador separada de resolución 1, referencia
+SIMULADA-PILOTO-INFANCIA-RES-001 y edición PRUEBA-1 en Documentos guardados.
+Evidencia visual añadida al [registro de 8A](project/navegacion-servidor.md#8a--evidencia-de-identidad-histórica-27102026).
+No se registraron actuaciones. Conserva los límites de validación documentados;
+sin nueva autorización de commit/push ni inicio de 8B.
+
+## 8A — contexto por módulo confirmado, 27/10/2026
+
+El usuario confirma «recorrido OK» al comprobar Ver contexto completo en Inventario
+(organización/tratamiento), Panel principal (solo organización) y retorno a Bases de
+licitud (finalidad/evaluación y texto pendiente conservados), sin recargar ni guardar.
+Este resultado se suma a las comprobaciones asistidas previas del detalle y ventana estrecha.
+Queda por comprobar la distinción entre evaluación activa y documento histórico consultado;
+Mi organización/Autodiagnóstico conservan cobertura automatizada, sin atribuirles ahora una
+prueba asistida adicional. Lector manual de 7B pendiente. Sin nueva autorización de
+commit/push ni inicio de 8B.
+
+## 8A — ventana estrecha confirmada, 27/10/2026
+
+Usuario confirma «recorrido OK» tras reducir el ancho sin recargar, abrir Ver contexto
+completo, leer sus datos con desplazamiento si es necesario y cerrar sobre el fondo gris
+exterior al panel, con foco de retorno y texto del formulario conservado.
+Se acepta este recorrido acotado; siguen pendientes ámbito por módulo e identidad histórica.
+No atribuir prueba manual con lector de pantalla ni cierre completo de 8A.
+Sin autorización nueva de commit/push; 8B no iniciado.
+
+## 8A — primera comprobación asistida OK, 27/10/2026
+
+El usuario confirma «prueba OK» tras el guion de abrir Ver contexto completo en Bases de
+licitud, comprobar la selección y cerrar con Escape con retorno del foco y conservación del
+formulario. Se registra aceptación de este recorrido, no del conjunto completo de 8A.
+Pendientes: detalle en ventana estrecha/nombres largos y cierre exterior, ámbitos por módulo
+y distinción frente al documento histórico. [Guion y evidencia](project/navegacion-servidor.md#bloque-8a--contexto-compacto-implementado-27102026).
+Sin nueva autorización de commit/push; 8B no iniciado. Lector manual de 7B sigue pendiente.
+
+## Bloque 8A implementado localmente — 27/10/2026
+
+Rama `feature/navegacion-8a-contexto` sobre 7B publicado `15aa273`.
+Cabecera compacta con detalle completo accesible; contexto por módulo; retirada del resumen
+repetido solo en recorrido conectado. Formularios independientes y documento histórico conservados.
+104 Chromium aprobados (84 conectados + 20 independientes), tipos/lint/formato y capturas
+comparables; evidencia y [guion asistido 8A](project/navegacion-servidor.md#bloque-8a--contexto-compacto-implementado-27102026).
+Pendiente validación del usuario; sin commit/push ni inicio de 8B. Lector de pantalla de 7B
+sigue pendiente. Excluir `frontend/next-env.d.ts` generado y `outputs/` locales.
+Las entradas inferiores de «sin inicio de 8A» describen estados anteriores.
+
 ## Publicación autorizada de 7B — 27/10/2026
 
 Usuario solicita commit y autoriza push de 7B en feature/navegacion-7b-accesibilidad,

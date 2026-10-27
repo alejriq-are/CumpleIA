@@ -13,6 +13,7 @@ import { LicitudWorkspace, sessionToken } from "@/components/licitud/LicitudWork
 import { OrganizacionForm } from "@/components/organizacion/OrganizacionForm";
 import { MainModules } from "./PrototypeMenus";
 import { PrototypeDrawer } from "./PrototypeDrawer";
+import { ConnectedContextSummary, type SelectedEvaluation } from "./ConnectedContextSummary";
 import { ConnectedAssessment } from "./ConnectedAssessment";
 import { ConnectedContext, type WorkContext } from "./ConnectedContext";
 import {
@@ -110,7 +111,7 @@ export function ConnectedWorkspace({
   const [scope, setScope] = useState<Record<string, Applicability>>({});
   const [diagnosticSections, setDiagnosticSections] = useState<Record<string, Item[]>>({});
   const [names, setNames] = useState<Record<string, string>>({});
-  const [purposes, setPurposes] = useState<Record<string, string>>({});
+  const [evaluations, setEvaluations] = useState<Record<string, SelectedEvaluation>>({});
   const [last, setLast] = useState<WorkLocation | null>(null);
   const content = useRef<HTMLElement>(null);
   const current = useRef(location);
@@ -191,9 +192,13 @@ export function ConnectedWorkspace({
               next.assessmentId
             );
             if (version !== sequence.current) return;
-            setPurposes((p) => ({
+            setEvaluations((p) => ({
               ...p,
-              [next.assessmentId]: `${a.purpose_snapshot} · versión ${a.version} · ${a.status}`,
+              [next.assessmentId]: {
+                purpose: a.purpose_snapshot,
+                version: a.version,
+                status: a.status,
+              },
             }));
           }
         }
@@ -492,7 +497,7 @@ export function ConnectedWorkspace({
     }
     if (value.module === "licitud" && value.assessmentId) {
       parts.push(
-        `Finalidad y evaluación: ${purposes[value.assessmentId] ?? "Evaluación seleccionada"}`
+        `Finalidad y evaluación: ${evaluations[value.assessmentId] ? `${evaluations[value.assessmentId].purpose} · versión ${evaluations[value.assessmentId].version} · ${evaluations[value.assessmentId].status}` : "Evaluación seleccionada"}`
       );
     }
     return parts.join(" · ");
@@ -610,9 +615,20 @@ export function ConnectedWorkspace({
               </button>
             </div>
             <div className="px-4 pb-3 text-sm">
-              <p data-testid="connected-context-summary" className="font-medium">
-                {contextLabel(location)}
-              </p>
+              <ConnectedContextSummary
+                key={`${location.module}:${contextKey(location)}`}
+                organization={
+                  organizations.find((item) => item.id === location.organizationId)?.name ??
+                  "Organización seleccionada"
+                }
+                treatment={
+                  ["rat", "licitud"].includes(location.module) && location.treatmentId
+                    ? (names[location.treatmentId] ?? "Tratamiento seleccionado")
+                    : undefined
+                }
+                assessmentSelected={location.module === "licitud" && !!location.assessmentId}
+                evaluation={evaluations[location.assessmentId]}
+              />
               {anyPending && (
                 <p className="font-semibold text-amber-800">
                   Hay formularios editados durante esta visita. Guarda cada formulario antes de

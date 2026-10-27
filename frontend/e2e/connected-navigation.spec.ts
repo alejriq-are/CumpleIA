@@ -1,5 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
-import { rm, mkdir } from "node:fs/promises";
+import { rm, mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { buildConnectedHarness } from "./helpers/connected-harness";
 let directory: string, script: string, css: string;
@@ -586,12 +586,7 @@ for (const target of ["eipd", "infancia", "preparar"]) {
     await expect(
       main(page).getByRole("alert").filter({ hasText: "No se pudo consultar la aplicabilidad" })
     ).not.toBeVisible();
-    await expect(
-      main(page).getByText(
-        "Recorrido conectado al servidor · Solo datos ficticios. Guardar y revisar no confirman ni activan EIPD.",
-        { exact: true }
-      )
-    ).toBeVisible();
+    await expect(page.locator(".prototype-demo")).toBeVisible();
     await expect(page).toHaveURL(new RegExp(`/licitud/${target}\\?`));
     expect(calls.some((v) => v.method !== "GET")).toBe(false);
     expect(errors).toEqual([]);
@@ -715,9 +710,14 @@ for (const width of [1280, 390]) {
     const context = page.getByTestId("connected-context-summary");
     await expect(context).toContainText("Organización: [FICTICIA] Organización conectada");
     await expect(context).toContainText("Tratamiento: [FICTICIA] Actividad mixta");
-    await expect(context).toContainText(
-      "Finalidad y evaluación: [FICTICIA] Finalidad de prueba · versión 1 · borrador"
-    );
+    await expect(context).toContainText("versión 1 · borrador");
+    await page.getByRole("button", { name: "Ver contexto completo", exact: true }).click();
+    const detailPanel = page.getByRole("dialog", { name: "Contexto seleccionado", exact: true });
+    await expect(
+      detailPanel.getByText("[FICTICIA] Finalidad de prueba", { exact: true })
+    ).toBeVisible();
+    await expect(detailPanel.getByText("versión 1 · borrador", { exact: true })).toBeVisible();
+    await page.keyboard.press("Escape");
     for (const moduleName of ["Autodiagnóstico", "Mi organización", "Panel principal"]) {
       await mod(page, moduleName);
       await expect(context).toHaveText("Organización: [FICTICIA] Organización conectada");
@@ -2126,5 +2126,232 @@ test.describe("7B interacción táctil", () => {
     await expect(summary.locator("..")).not.toHaveAttribute("open", "");
     await expect(summary).toBeFocused();
     expect(calls.filter((v) => v.method !== "GET")).toHaveLength(writes);
+  });
+});
+
+for (const width of [1280, 390, 320]) {
+  for (const longNames of [false, true]) {
+    test(`8A cabecera y primer campo a ${width}px nombres ${longNames ? "largos" : "normales"}`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 900 });
+      const original = detail.name;
+      try {
+        if (longNames) {
+          detail.name =
+            "[FICTICIA] Actividad de atención y seguimiento de solicitudes de participantes con un nombre extendido para comprobar el contexto seleccionado";
+          records[aid].purpose_snapshot =
+            "[FICTICIA] Finalidad extensa para comprobar la lectura completa del contexto y la identificación de la evaluación elegida sin perder acceso al formulario ni a las acciones de navegación durante esta prueba controlada.";
+        }
+        await legal(page);
+        await enable(page);
+        await section(page, "Tratamiento y alcance de la EIPD");
+        await page.evaluate(() => window.scrollTo(0, 0));
+        const field = main(page).getByRole("textbox", {
+          name: "Referencia del documento EIPD",
+          exact: true,
+        });
+        const metrics = {
+          header: (await page.locator("header").boundingBox())!.height,
+          fieldY: (await field.boundingBox())!.y,
+        };
+        const key = `${width}-${longNames ? "largos" : "normales"}`;
+        const dir = process.env.CONTEXT_EVIDENCE;
+        if (dir) {
+          await mkdir(dir, { recursive: true });
+          if (process.env.CONTEXT_BEFORE === "1") {
+            await writeFile(path.join(dir, `antes-${key}.json`), JSON.stringify(metrics));
+            await page.screenshot({ path: path.join(dir, `antes-${key}.png`) });
+            return;
+          }
+          const before = JSON.parse(await readFile(path.join(dir, `antes-${key}.json`), "utf8"));
+          expect(metrics.header).toBeLessThanOrEqual(before.header);
+          expect(metrics.fieldY).toBeLessThan(before.fieldY);
+          await writeFile(
+            path.join(dir, `despues-${key}.json`),
+            JSON.stringify({ before, after: metrics })
+          );
+          await page.screenshot({ path: path.join(dir, `despues-${key}.png`) });
+        }
+        await expect(
+          main(page).getByRole("complementary", { name: "Alcance de la evaluación", exact: true })
+        ).toHaveCount(0);
+        await expect(field).toBeVisible();
+        await page.getByRole("button", { name: "Ver contexto completo", exact: true }).click();
+        const contextDetail = page.getByRole("dialog", {
+          name: "Contexto seleccionado",
+          exact: true,
+        });
+        await expect(contextDetail.getByText(detail.name, { exact: true })).toBeVisible();
+        await expect(
+          contextDetail.getByText(records[aid].purpose_snapshot, { exact: true })
+        ).toBeVisible();
+        await expect(
+          contextDetail.getByText("versión 1 · borrador", { exact: true })
+        ).toBeVisible();
+        await expectAccessibleReferences(page);
+        if (dir && longNames) await page.screenshot({ path: path.join(dir, `detalle-${key}.png`) });
+        await page.keyboard.press("Escape");
+
+        expect(
+          await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)
+        ).toBeTruthy();
+      } finally {
+        detail.name = original;
+      }
+    });
+  }
+}
+
+for (const width of [1280, 390]) {
+  test(`8A detalle de contexto conserva borrador y foco a ${width}px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 900 });
+    await legal(page);
+    await enable(page);
+    await section(page, "Tratamiento y alcance de la EIPD");
+    const note = main(page).getByRole("textbox", {
+      name: "Notas del borrador EIPD (opcional)",
+      exact: true,
+    });
+    await note.fill("[FICTICIA] Conservar al consultar contexto 8A");
+    const writes = calls.filter((v) => v.method !== "GET").length;
+    const url = page.url();
+    const trigger = page.getByRole("button", { name: "Ver contexto completo", exact: true });
+    await trigger.focus();
+    await page.keyboard.press("Enter");
+    const panel = page.getByRole("dialog", { name: "Contexto seleccionado", exact: true });
+    await expect(panel).toBeVisible();
+    const close = panel.getByRole("button", { name: "Cerrar detalle", exact: true });
+    await expect(close).toBeFocused();
+    await page.keyboard.press("Tab");
+    await expect(close).toBeFocused();
+    await expectAccessibleReferences(page);
+    await page.keyboard.press("Escape");
+    await expect(panel).toBeHidden();
+    await expect(trigger).toBeFocused();
+    await expect(note).toHaveValue("[FICTICIA] Conservar al consultar contexto 8A");
+    await trigger.click();
+    await page
+      .locator(".prototype-drawer-backdrop:visible")
+      .click({ position: { x: width - 4, y: 450 } });
+    await expect(panel).toBeHidden();
+    await expect(trigger).toBeFocused();
+    expect(page.url()).toBe(url);
+    expect(calls.filter((v) => v.method !== "GET")).toHaveLength(writes);
+  });
+}
+
+test("8A distingue evaluación activa de versión documental histórica", async ({ page }) => {
+  const historic = {
+    id: "b0000000-0000-0000-0000-000000000001",
+    organization_id: org,
+    treatment_id: tid,
+    assessment_id: aid2,
+    version: 1,
+    resolution_binding_version: 4,
+    stored_coverage: "contexto_v4",
+    data_kind: "ficticios",
+    document: {
+      schema_version: 1,
+      document_reference: "SIMULADA-8A-HISTORICA-001",
+      document_version: "[FICTICIA] Edición histórica",
+      notes: "[FICTICIA] Documento conservado",
+    },
+    context_snapshot: {
+      context_schema_version: 4,
+      organization_id: org,
+      treatment_id: tid,
+      assessment_id: aid2,
+      child_adolescent_assessment: { assessment: { schema_version: 1 } },
+    },
+    document_hash: "a".repeat(64),
+    context_hash: "b".repeat(64),
+    child_material_hash: "c".repeat(64),
+    created_by: org,
+    created_at: "2026-10-16T10:00:00Z",
+    authorizes_action: false,
+    can_confirm: false,
+  };
+  await page.route("**/eipd-child/v4/resolutions", async (route) => {
+    if (route.request().method() === "OPTIONS") return route.fallback();
+    return route.fulfill({
+      contentType: "application/json",
+      headers: { "access-control-allow-origin": "*" },
+      body: JSON.stringify([historic]),
+    });
+  });
+  await page.route("**/eipd-child/v4/resolutions/*/reviews", async (route) => {
+    if (route.request().method() === "OPTIONS") return route.fallback();
+    return route.fulfill({
+      contentType: "application/json",
+      headers: { "access-control-allow-origin": "*" },
+      body: "[]",
+    });
+  });
+  await page.route("**/eipd-child/v4/policy", async (route) => {
+    if (route.request().method() === "OPTIONS") return route.fallback();
+    return route.fulfill({
+      contentType: "application/json",
+      headers: { "access-control-allow-origin": "*" },
+      body: JSON.stringify({
+        policy: {
+          policy_schema_version: 1,
+          policy_reference: "m3-t1-infancia-pruebas-negativas-v1",
+          sources_status: "pendiente",
+          acceptance_status: "pendiente",
+          activation: "deshabilitada",
+          allowed_decisions: ["requiere_cambios", "no_continuar"],
+          global_policy_identity: {
+            policy_version: 1,
+            policy_reference: "PRUEBA",
+            policy_hash: "d".repeat(64),
+          },
+        },
+        policy_hash: "e".repeat(64),
+        authorizes_action: false,
+        can_confirm: false,
+      }),
+    });
+  });
+  await choose(page, aid2);
+  await mod(page, "Bases de licitud");
+  await section(page, "Documentos guardados");
+
+  await main(page)
+    .getByRole("button", { name: "Consultar versión documental 1", exact: true })
+    .click();
+  await expect(
+    main(page).getByRole("heading", {
+      name: "Versión documental de infancia 1 consultada",
+      exact: true,
+    })
+  ).toBeVisible();
+  await expect(main(page).getByText("SIMULADA-8A-HISTORICA-001", { exact: true })).toBeVisible();
+  await expect(page.getByTestId("connected-context-summary")).toContainText("versión 2 · borrador");
+  await page.getByRole("button", { name: "Ver contexto completo", exact: true }).click();
+  await expect(
+    page
+      .getByRole("dialog", { name: "Contexto seleccionado", exact: true })
+      .getByText("versión 2 · borrador", { exact: true })
+  ).toBeVisible();
+  await page.keyboard.press("Escape");
+  expect(calls.filter((v) => v.method !== "GET")).toHaveLength(0);
+  expect(errors).toEqual([]);
+});
+
+test.describe("8A consulta táctil", () => {
+  test.use({ hasTouch: true, viewport: { width: 390, height: 844 } });
+  test("detalle completo se consulta y cierra mediante toque sin cambiar selección", async ({
+    page,
+  }) => {
+    await legal(page);
+    const url = page.url();
+    await page.getByRole("button", { name: "Ver contexto completo", exact: true }).tap();
+    const panel = page.getByRole("dialog", { name: "Contexto seleccionado", exact: true });
+    await expect(panel.getByText("[FICTICIA] Finalidad de prueba", { exact: true })).toBeVisible();
+    await panel.getByRole("button", { name: "Cerrar detalle", exact: true }).tap();
+    await expect(panel).toBeHidden();
+    expect(page.url()).toBe(url);
+    expect(calls.filter((v) => v.method !== "GET")).toHaveLength(0);
   });
 });

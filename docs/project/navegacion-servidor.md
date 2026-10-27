@@ -1076,3 +1076,163 @@ usuario; publicar no cierra ese criterio ni acredita accesibilidad integral cert
 no atribuir CI remota nueva al push. Los pendientes inferiores de autorización describen
 estados anteriores. Excluir next-env.d.ts generado y outputs/ locales; verificar HEAD
 remoto tras publicar. No iniciar 8A ni ejecutar merge/despliegue en este cierre.
+
+## Bloque 8A — contexto compacto implementado, 27/10/2026
+
+Rama `feature/navegacion-8a-contexto`, base publicada `15aa2736fd9cf190e9e1004b1d3445ed8f75efae`.
+Implementación local solicitada por el usuario; validación asistida pendiente. Sin commit/push
+ni inicio de 8B. Esta entrada actualiza los estados anteriores de «sin inicio de 8A».
+
+### Cambio acotado
+
+- Cabecera única con organización y tratamiento en espacios propios, versión/estado de la
+  evaluación y botón **Ver contexto completo**. Los nombres pueden abreviarse visualmente;
+  el panel de lectura muestra sus textos íntegros, finalidad y evaluación con conceptos separados.
+- Ámbito conservado: Panel/Mi organización/Autodiagnóstico solo organización; Inventario
+  organización/tratamiento; Bases de licitud también finalidad/evaluación. El enlace Continuar
+  mantiene el destino y contexto recordados. No se inventan nombres de evaluación.
+- El detalle es de consulta: no cambia contexto, no guarda, no recarga RAT ni sincroniza
+  ventanas. Enter/toque abre; Cerrar detalle, Escape o fondo exterior cierran y devuelven el foco.
+  El borrador y la ruta se conservan. El panel admite desplazamiento para nombres largos.
+- AssessmentFlow retira su resumen de contexto y aviso piloto repetidos únicamente cuando
+  recibe navegación externa. En uso independiente conserva ambos. El rol de solo consulta
+  permanece explícito también en conectado; restricciones de cada acción y aviso global siguen.
+- La evaluación activa se distingue del documento histórico consultado, que mantiene número,
+  referencia, nombre de edición y antecedentes propios. Prueba: evaluación versión 2 frente a
+  versión documental histórica 1, sin escritura.
+- No se retira aún la lista central de siete pasos EIPD: corresponde a **8B**. No se modifican
+  contratos/API, permisos, criterios de riesgo, guardado ni confirmación/activación.
+
+### Evidencia comparable
+
+Capturas y métricas locales en `outputs/navegacion-8a/` (no versionadas). Chromium, viewport
+con altura 900 px, mismo ancho, zoom predeterminado, posición inicial 0, datos ficticios y paso
+Tratamiento y alcance de la EIPD. «Primer campo» es Referencia del documento EIPD; Y se mide
+respecto del viewport y puede superar su altura. La comparación incluye el espacio retirado
+dentro del formulario, no solo la reducción de la cabecera.
+
+| Ancho | Nombres | Altura cabecera antes → después (px) | Y primer campo antes → después (px) |
+| --- | --- | --- | --- |
+| 1280 | normales | 256,4 → 250,4 | 930,9 → 639,3 |
+| 1280 | largos | 296,4 → 250,4 | 996,5 → 639,3 |
+| 390 | normales | 177 → 157 | 1387 → 979,1 |
+| 390 | largos | 297 → 157 | 1660,6 → 979,1 |
+| 320 | normales | 244,5 → 236,5 | 1710,4 → 1186,5 |
+| 320 | largos | 404,5 → 236,5 | 2049,6 → 1186,5 |
+
+Capturas de escritorio/móvil y detalle largo revisadas visualmente. No se promete que el primer
+campo siempre quede visible: la segunda lista EIPD permanece hasta evaluar 8B.
+
+Pruebas finales: **104 escenarios Chromium** (84 de navegación conectada y 20 de recorrido
+independiente), con APIs simuladas y datos ficticios. Incluyen consulta de nombres completos a
+1280/390/320, sin desbordamiento horizontal; ámbito por módulo; borrador/foco al cerrar;
+consulta táctil emulada; identidad de evaluación frente a documento histórico; errores,
+permisos y conservación de teclado/relaciones accesibles. Tipos, ESLint de componentes,
+Prettier y `git diff --check` aprobados. No equivale a integración real con el servidor ni a CI remota.
+La comprobación manual con lector de pantalla de 7B permanece pendiente.
+
+### Guion asistido 8A
+
+1. Abrir una pestaña de prueba actualizada en `/dashboard/trabajo`. Conservar la antigua si
+   contiene preparación temporal o notas sin guardar; una pestaña nueva no copia ese contenido.
+2. En Bases de licitud comprobar organización/tratamiento y versión seleccionados. Abrir
+   **Ver contexto completo**: leer Organización, Tratamiento, Finalidad y Evaluación separados.
+   Cerrar con Escape y comprobar retorno del foco; volver al campo y comprobar su texto.
+3. Repetir en ventana estrecha y leer un nombre largo íntegro mediante el detalle; también
+   probar Cerrar detalle y clic sobre el fondo gris exterior, sin guardar.
+4. Ir a Inventario y luego Panel/Mi organización/Autodiagnóstico; comprobar sus ámbitos.
+   En Documentos guardados distinguir la versión histórica de la evaluación de la cabecera.
+5. Comparar espacio con igual ventana/zoom/datos, sin exigir primer campo visible en móvil.
+
+Registrar OK/fallo por recorrido antes de solicitar cierre/publicación. No ejecutar 8B ni
+registrar nuevos documentos o decisiones como parte de estas comprobaciones de lectura.
+
+## 8A — primera comprobación asistida confirmada, 27/10/2026
+
+Usuario responde «prueba OK» al guion: pestaña actualizada en /dashboard/trabajo,
+Bases de licitud → Ver contexto completo, comprobación de datos seleccionados y cierre
+con Escape con foco de retorno y texto conservado. Se acepta este recorrido acotado.
+No atribuir todavía validación de móvil/nombres largos, cierre exterior, ámbito de otros
+módulos o identidad histórica; tampoco lectura por lector de pantalla.
+
+Siguiente prueba: reducir el ancho de esa misma pestaña sin recargar, abrir Ver contexto
+completo, leer los datos mediante desplazamiento si hace falta y cerrar pulsando el fondo
+gris exterior al panel. Comprobar foco de retorno y contenido conservado, sin guardar.
+Después comprobar ámbito por módulo e identidad histórica según guion 8A.
+Sin cambios de producto en este registro; sin commit/push autorizado ni inicio de 8B.
+
+## 8A — ventana estrecha confirmada, 27/10/2026
+
+Usuario confirma «recorrido OK» tras reducir el ancho sin recargar, abrir Ver contexto
+completo, leer sus datos con desplazamiento si es necesario y cerrar sobre el fondo gris
+exterior al panel, con foco de retorno y texto del formulario conservado.
+Se acepta este recorrido acotado; siguen pendientes ámbito por módulo e identidad histórica.
+No atribuir prueba manual con lector de pantalla ni cierre completo de 8A.
+Sin autorización nueva de commit/push; 8B no iniciado.
+
+Siguiente comprobación asistida: navegar sin guardar a Inventario de tratamientos,
+abrir Ver contexto completo y comprobar organización/tratamiento. Después ir a Panel
+principal y comprobar que el detalle muestra solo organización, sin presentar la evaluación
+como contexto propio del panel. Volver a Bases de licitud y comprobar finalidad/evaluación
+y conservación del texto pendiente. La identidad del documento histórico se valida después.
+
+## 8A — contexto por módulo confirmado, 27/10/2026
+
+El usuario confirma «recorrido OK» al comprobar Ver contexto completo en Inventario
+(organización/tratamiento), Panel principal (solo organización) y retorno a Bases de
+licitud (finalidad/evaluación y texto pendiente conservados), sin recargar ni guardar.
+Este resultado se suma a las comprobaciones asistidas previas del detalle y ventana estrecha.
+Queda por comprobar la distinción entre evaluación activa y documento histórico consultado;
+Mi organización/Autodiagnóstico conservan cobertura automatizada, sin atribuirles ahora una
+prueba asistida adicional. Lector manual de 7B pendiente. Sin nueva autorización de
+commit/push ni inicio de 8B.
+
+Siguiente comprobación de lectura: en Documentos guardados, consultar una versión documental
+existente de infancia, si está disponible. Distinguir la evaluación de la cabecera/detalle de
+la versión, referencia y nombre de edición del documento histórico. Sus números pueden
+coincidir; no tienen que hacerlo. No crear documentos, revisiones o decisiones para probarlo.
+Si no existe una versión en el contexto actual, registrar esa limitación y usar un contexto
+con historial conocido mediante Cambiar contexto, conservando la pestaña con pendientes.
+
+## 8A — evidencia de identidad histórica, 27/10/2026
+
+La captura aportada por el usuario en Documentos guardados muestra la evaluación activa
+«versión 1 · borrador» en la cabecera y, separadamente, referencia documental
+SIMULADA-PILOTO-INFANCIA-RES-001, nombre de edición PRUEBA-1, notas y fecha del registro.
+El aviso local identifica «resolución 1». La captura anterior del detalle identifica la
+organización CumpleIA Demo, tratamiento ficticio con menores, finalidad y evaluación.
+Se verifica visualmente separación de evaluación y documento conservado; que ambos números
+sean 1 no implica que compartan identidad. No se registra una revisión ni decisión.
+Esta evidencia complementa los tres recorridos 8A confirmados por el usuario. No atribuir
+validación asistida de Mi organización/Autodiagnóstico, medición comparativa manual o lector
+de pantalla; estos límites siguen registrados. Sin nueva autorización de commit/push ni 8B.
+
+## 8A — recorridos asistidos completados, 27/10/2026
+
+Usuario confirma «recorrido OK» al consultar el contexto en Mi organización y
+Autodiagnóstico (solo organización), y volver a Bases de licitud recuperando tratamiento,
+finalidad y evaluación seleccionados, sin recargar ni guardar.
+
+Con las confirmaciones anteriores quedan aceptados los recorridos asistidos acotados de
+8A: detalle completo y Escape/foco/texto conservado; ventana estrecha y cierre exterior;
+ámbito por módulo y retorno; separación del documento histórico observada en capturas.
+La ganancia de espacio se respalda en las seis mediciones automatizadas y capturas
+comparables registradas, no en una medición manual adicional atribuida al usuario.
+104 Chromium aprobados (84 conectados y 20 independientes), tipos/lint/formato según la
+verificación previa. Este cierre documental no modifica el producto ni requiere repetirlos.
+No equivale a certificación de accesibilidad ni a integración real/CI remota; el lector
+manual pendiente de 7B sigue abierto. La prueba táctil registrada es emulada.
+
+8A listo para commit/push cuando el usuario lo autorice. No se ejecutaron commit/push,
+merge/despliegue ni se inició 8B. Próximo bloque del plan: 8B, navegación principal EIPD
+y ubicación del paso. Preservar las pestañas con preparación temporal o notas pendientes.
+
+## Publicación autorizada de 8A — 27/10/2026
+
+Usuario solicita commit y autoriza push en `feature/navegacion-8a-contexto`, base `15aa273`.
+Se publica el contexto compacto y su detalle accesible, conservación de la cabecera
+independiente, pruebas y resultados asistidos de 8A. 104 Chromium aprobados y checks
+estáticos previos aprobados; no atribuir CI remota al push. Lector manual de 7B pendiente.
+Las entradas inferiores de autorización pendiente describen estados anteriores.
+Excluir `frontend/next-env.d.ts` generado y `outputs/` locales. 8B no iniciado;
+sin merge ni despliegue. Verificar identidad del commit remoto tras publicar.

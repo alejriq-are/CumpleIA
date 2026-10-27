@@ -155,3 +155,79 @@
   text-decoration: underline;
   font-weight: 600;
 }
+
+/* 8A: one compact context, with full names available by keyboard and touch. */
+.connected-context-strip {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0;
+}
+.connected-context-brief {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.connected-context-names {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+.connected-context-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 500;
+}
+.connected-evaluation-badge {
+  flex-shrink: 0;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: #eff6ff;
+  color: #1e3a8a;
+}
+.connected-context-strip > button {
+  flex-shrink: 0;
+  border: 1px solid #94a3b8;
+  border-radius: 6px;
+  padding: 6px 8px;
+  color: #1e40af;
+  background: white;
+  font-weight: 600;
+}
+.connected-context-detail {
+  overflow-wrap: anywhere;
+}
+.connected-context-detail h2 {
+  margin: 16px 0;
+  font-weight: 700;
+  font-size: 1.125rem;
+}
+.connected-context-detail p {
+  margin: 12px 0;
+}
+.connected-context-detail dt {
+  font-weight: 700;
+  margin-top: 16px;
+}
+.connected-context-detail dd {
+  margin-top: 4px;
+}
+@media (max-width: 767px) {
+  .connected-context-strip {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .connected-context-brief {
+    display: contents;
+  }
+  .connected-context-names {
+    flex-basis: 100%;
+  }
+}

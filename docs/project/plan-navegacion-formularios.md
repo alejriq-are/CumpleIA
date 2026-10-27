@@ -2,7 +2,7 @@
 
 Fecha: 26 de octubre de 2026. Base funcional: `2e3f5460190185413f6e85243ad59958ba148463`.
 
-Estado al 27/10/2026: **7B con recorridos visuales y de teclado confirmados; commit/push autorizado. Lector de pantalla pendiente**. El usuario no dispone de lector para esa prueba. [Alcance y límites](navegacion-servidor.md#7b--recorridos-visuales-y-de-teclado-confirmados-27102026). Publicación autorizada el 27/10/2026; sin inicio de 8A. [Análisis y decisiones](evaluacion-propuestas-claude.md).
+Estado al 27/10/2026: **8A con recorridos asistidos completados**, sobre 7B publicado `15aa273`. Cabecera compacta y detalle de contexto; 104 pruebas aprobadas, seis mediciones comparables y comprobaciones del usuario registradas. [Resultado y límites](navegacion-servidor.md#8a--recorridos-asistidos-completados-27102026). Commit/push de 8A autorizado por el usuario el 27/10/2026; 8B no iniciado. Lector manual de 7B pendiente. [Análisis y decisiones](evaluacion-propuestas-claude.md).
 
 ## 1. Alcance y secuencia
 
@@ -160,13 +160,17 @@ disponibilidad del usuario. No certifica accesibilidad integral.
 
 Conservar una advertencia de piloto/bloqueo visible y las restricciones relevantes junto a acciones; retirar solo reiteraciones equivalentes. Separar finalidad de identificación de evaluación cuando los datos permitan hacerlo, sin inventar nombres o contenidos.
 
+**Estado:** implementación comprobada automáticamente y recorridos asistidos aceptados.
+Ganancia de espacio verificada en capturas/mediciones automatizadas; no se atribuye medición
+manual al usuario. Evidencia y límites en el registro de 8A. Lector de 7B sigue pendiente.
+
 **Aceptación:**
 
-- [ ] Panel/Organización/Autodiagnóstico muestran ámbito organizacional; RAT tratamiento; licitud su evaluación.
-- [ ] Se identifica la evaluación elegida y el documento histórico, si difiere, sin mezclarlos.
-- [ ] Más área útil medida contra captura previa equivalente; ningún campo o requisito desaparece.
-- [ ] Nombres largos legibles completos con teclado/táctil y sin desbordamiento.
-- [ ] Sin regresión de cabecera independiente o mensajes de error/permiso.
+- [x] Panel/Organización/Autodiagnóstico muestran ámbito organizacional; RAT tratamiento; licitud su evaluación.
+- [x] Se identifica la evaluación elegida y el documento histórico, si difiere, sin mezclarlos.
+- [x] Más área útil medida contra captura previa equivalente; ningún campo o requisito desaparece.
+- [x] Nombres largos legibles completos con teclado/táctil y sin desbordamiento.
+- [x] Sin regresión de cabecera independiente o mensajes de error/permiso.
 
 **Guion:** usuario identifica contexto, abre su detalle y vuelve al mismo campo. Comparar capturas a igual tamaño, zoom, posición y datos; no exigir que todo primer campo siempre quepa sin desplazarse.
 

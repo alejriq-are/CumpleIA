@@ -127,22 +127,27 @@ export function AssessmentFlow({
   }
   return (
     <div className="licitud-ui space-y-5 [&_button]:rounded [&_button]:border [&_button]:px-3 [&_button]:py-2 [&_button:disabled]:opacity-50">
-      <p className="rounded border border-blue-200 bg-blue-50 p-4">
-        Recorrido conectado al servidor · Solo datos ficticios. Guardar y revisar no confirman ni
-        activan EIPD.
-      </p>
-      <aside aria-label="Alcance de la evaluación" className="space-y-2 rounded border p-4">
-        <p className="font-semibold">{organizationName}</p>
-        <p>Finalidad: {row?.purpose_snapshot ?? "Cargando evaluación…"}</p>
-        <p>
-          Evaluación: {row ? `versión ${row.version} · ${row.status}` : "pendiente de carga"}.{" "}
-          {readOnly && "Tu rol permite solo consulta."}
-        </p>
-        <p className="text-sm">
-          Estás trabajando en la evaluación guardada. Cada resolución documental conserva su propia
-          versión y las revisiones que le corresponden.
-        </p>
-      </aside>
+      {!navigation && (
+        <>
+          <p className="rounded border border-blue-200 bg-blue-50 p-4">
+            Recorrido conectado al servidor · Solo datos ficticios. Guardar y revisar no confirman
+            ni activan EIPD.
+          </p>
+          <aside aria-label="Alcance de la evaluación" className="space-y-2 rounded border p-4">
+            <p className="font-semibold">{organizationName}</p>
+            <p>Finalidad: {row?.purpose_snapshot ?? "Cargando evaluación…"}</p>
+            <p>
+              Evaluación: {row ? `versión ${row.version} · ${row.status}` : "pendiente de carga"}.{" "}
+              {readOnly && "Tu rol permite solo consulta."}
+            </p>
+            <p className="text-sm">
+              Estás trabajando en la evaluación guardada. Cada resolución documental conserva su
+              propia versión y las revisiones que le corresponden.
+            </p>
+          </aside>
+        </>
+      )}
+      {navigation && readOnly && <p>Tu rol permite solo consulta.</p>}
       <div
         hidden={!!navigation}
         role="tablist"
