@@ -30,6 +30,15 @@ import { connectedDestinations, connectedDestinationLabel } from "./connected-de
 import "./navigation-prototype.css";
 import "./connected-navigation.css";
 
+// Closing a disclosure must not move focus away from the user's next control.
+function closeDesktopGroups(except?: HTMLDetailsElement) {
+  document
+    .querySelectorAll<HTMLDetailsElement>(".connected-desktop-sections details[open]")
+    .forEach((item) => {
+      if (item !== except) item.open = false;
+    });
+}
+
 type Item = { id: string; label: string; step?: number };
 type Group = { label: string; items: Item[]; reason?: string | null; availabilityLabel?: string };
 function contextKey(v: WorkContext) {
@@ -148,9 +157,7 @@ export function ConnectedWorkspace({
       window.history[
         replace || window.location.hash === encodeWork(next) ? "replaceState" : "pushState"
       ](null, "", encodeWork(next));
-      document
-        .querySelectorAll<HTMLDetailsElement>(".connected-desktop-sections details[open]")
-        .forEach((item) => (item.open = false));
+      closeDesktopGroups();
       requestAnimationFrame(() => {
         if (!content.current) return;
         const header = content.current.closest(".min-w-0")?.querySelector("header");
@@ -226,15 +233,25 @@ export function ConnectedWorkspace({
         .querySelectorAll<HTMLDetailsElement>(".connected-desktop-sections details[open]")
         .forEach((item) => {
           if (event instanceof KeyboardEvent) {
-            if (event.key !== "Escape") return;
+            if (event.key !== "Escape" || !item.contains(target)) return;
+            event.preventDefault();
             item.open = false;
             item.querySelector("summary")?.focus();
           } else if (!item.contains(target)) item.open = false;
         });
     };
+    const mobile = window.matchMedia("(max-width: 767px)");
+    const resize = () => {
+      const focusedGroup = document.activeElement?.closest(".connected-desktop-sections");
+      closeDesktopGroups();
+      if (mobile.matches && focusedGroup)
+        document.getElementById("connected-sections-trigger")?.focus();
+    };
+    mobile.addEventListener("change", resize);
     document.addEventListener("pointerdown", close);
     document.addEventListener("keydown", close);
     return () => {
+      mobile.removeEventListener("change", resize);
       document.removeEventListener("pointerdown", close);
       document.removeEventListener("keydown", close);
     };
@@ -542,7 +559,9 @@ export function ConnectedWorkspace({
                 aria-expanded={menu}
                 className="connected-menu-trigger"
                 onClick={() => {
+                  closeDesktopGroups();
                   setSections(false);
+                  setContext(false);
                   setMenu(true);
                 }}
               >
@@ -554,7 +573,9 @@ export function ConnectedWorkspace({
                   aria-haspopup="dialog"
                   aria-expanded={sections}
                   onClick={() => {
+                    closeDesktopGroups();
                     setMenu(false);
+                    setContext(false);
                     setSections(true);
                   }}
                 >
@@ -567,7 +588,12 @@ export function ConnectedWorkspace({
               <button
                 id="connected-context-trigger"
                 aria-haspopup="dialog"
-                onClick={() => setContext(true)}
+                onClick={() => {
+                  closeDesktopGroups();
+                  setMenu(false);
+                  setSections(false);
+                  setContext(true);
+                }}
               >
                 Cambiar contexto
               </button>
@@ -617,8 +643,13 @@ export function ConnectedWorkspace({
                   <details
                     key={g.label}
                     data-current-group={g.items.some(isCurrent) || undefined}
+                    onBlur={(event) => {
+                      if (!event.currentTarget.contains(event.relatedTarget))
+                        event.currentTarget.open = false;
+                    }}
                     onToggle={(event) => {
                       if (!event.currentTarget.open) return;
+                      closeDesktopGroups(event.currentTarget);
                       const pop = event.currentTarget.querySelector<HTMLElement>(":scope > div");
                       if (pop) {
                         pop.style.left = "0px";
@@ -627,7 +658,24 @@ export function ConnectedWorkspace({
                       }
                     }}
                   >
-                    <summary>{g.reason ? g.availabilityLabel : g.label}</summary>
+                    <summary
+                      onKeyDown={(event) => {
+                        if (event.code !== "Space" && event.key !== " " && event.key !== "Spacebar")
+                          return;
+                        // Handle Space explicitly; cancel the native action to avoid a second toggle.
+                        event.preventDefault();
+                        if (event.repeat) return;
+                        const group = event.currentTarget.parentElement as HTMLDetailsElement;
+                        if (!group.open) closeDesktopGroups(group);
+                        group.open = !group.open;
+                      }}
+                      onKeyUp={(event) => {
+                        if (event.code === "Space" || event.key === " " || event.key === "Spacebar")
+                          event.preventDefault();
+                      }}
+                    >
+                      {g.reason ? g.availabilityLabel : g.label}
+                    </summary>
                     <div>
                       {g.reason && (
                         <div className="connected-availability-reason">

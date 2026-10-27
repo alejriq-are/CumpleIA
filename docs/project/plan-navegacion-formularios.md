@@ -2,7 +2,7 @@
 
 Fecha: 26 de octubre de 2026. Base funcional: `2e3f5460190185413f6e85243ad59958ba148463`.
 
-Estado al 27/10/2026: **6A publicado; 6B aceptado con alcance asistido acotado y commit/push autorizado**. [Cierre y límites](navegacion-servidor.md#cierre-asistido-y-publicación-autorizada-de-6b--27102026). Próximo propuesto: 7A, pendiente de indicación; no se inicia en este cierre. [Análisis, decisiones P1–P13 y glosario G01–G30](evaluacion-propuestas-claude.md).
+Estado al 27/10/2026: **7A aceptado con alcance asistido acotado; commit/push autorizado el 27/10/2026**. Base publicada 6B: 8fec3df. [Aceptación y límites](navegacion-servidor.md#aceptación-asistida-acotada-de-7a--27102026). No se inicia 7B. [Análisis y decisiones](evaluacion-propuestas-claude.md).
 
 ## 1. Alcance y secuencia
 
@@ -108,6 +108,12 @@ Sin commit/push nuevo; no se inicia 6B.
 ## 4. Lote 7 — Teclado, foco y estructura accesible
 
 ### 7A. Navegación con apertura y cierre previsibles
+
+**Estado:** implementación local en feature/navegacion-7a-teclado, base 8fec3df.
+67 pruebas conectadas (6 nuevas) aprobadas inicialmente. Usuario confirma Enter/Tab/Escape,
+pero detecta Espacio sin respuesta: manejo explícito corregido y 7 escenarios dirigidos
+aprobados después. Espacio y guion asistido aceptados con alcance acotado el 27/10/2026. La semántica
+nativa y los comportamientos de panel se conservan, sin rediseño.
 
 **Resuelve:** P7/P12, parte de P13 y accesibilidad pendiente del lote 7.
 
@@ -340,6 +346,6 @@ Los códigos C se conservan como referencias históricas del checklist de revisi
 
 ## 12. Primer bloque para ejecutar
 
-**Estado: 6B aceptado con alcance asistido acotado; publicación autorizada.** Siguiente propuesto: 7A, pendiente de indicación. No iniciar otros bloques, cambiar reglas del servidor ni rediseñar formularios en este cierre.
+**Estado: 7A aceptado con alcance asistido acotado; commit/push autorizado el 27/10/2026.** Próximo propuesto: 7B, estructura y ayudas accesibles. No se inicia en este cierre.
 
 Este plan se puede ajustar tras la aceptación del usuario. La estimación depende de la evidencia que surja en cada componente; no se prometen plazos ni mejoras porcentuales sin medición.

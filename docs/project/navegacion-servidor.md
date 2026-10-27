@@ -851,3 +851,117 @@ Este cierre sustituye los pendientes de aceptación asistida anteriores solo con
 alcance. Commit/push autorizado para estos cambios y documentación; excluir next-env.d.ts
 generado y outputs/ locales. No hacer merge/despliegue ni iniciar 7A en este cierre.
 Siguiente bloque propuesto: 7A, teclado y foco, pendiente de indicación del usuario.
+
+## Bloque 7A — teclado y foco en navegación conectada
+
+27/10/2026. Usuario solicita continuar 7A. Rama `feature/navegacion-7a-teclado`,
+base publicada `8fec3dffe641562c9e6ab84b070fcaabb08b1c12`. Implementación local;
+pendiente aceptación asistida. Sin commit/push de 7A ni inicio de 7B.
+
+### Hallazgos y cambio acotado
+
+Dos regresiones nuevas reprodujeron el problema antes de corregirlo: con Tab un grupo
+abierto permanecía visible al entrar al siguiente y con apertura por teclado podían
+coexistir dos desplegables de escritorio. Corregido en ConnectedWorkspace: cerrar al
+salir del grupo sin redirigir el foco; al abrir un desplegable cerrar los demás;
+Escape solo cierra el desplegable que contiene el foco y vuelve a su summary. Los
+controles conservan semántica nativa details/summary, Enter/Espacio y Tab/Shift+Tab.
+No se añade role=menu ni se interceptan flechas/Inicio/Fin de campos del formulario.
+
+Abrir Menú, Secciones o Cambiar contexto cierra otros paneles y desplegables conectados.
+Al cruzar hacia ventana estrecha, si el foco estaba en la navegación de escritorio
+que se oculta, pasa a Secciones visible. No se mueve si estaba en el formulario.
+Se conserva el foco/scroll existente al área de trabajo tras seleccionar un destino,
+y el cierre por Escape/fondo exterior y retención de Tab de los paneles compartidos:
+las pruebas acreditaron esos comportamientos sin cambiar PrototypeDrawer/MainModules.
+Escape cierra un panel; no cambia al menú principal ni navega atrás. Un clic dentro de
+la superficie del panel no lo cierra salvo selección o cierre explícito.
+
+### Verificación y límites
+
+67 escenarios distintos de navegación conectada aprobados, incluidos seis nuevos 7A.
+Los seis dirigidos pasaron primero y luego en la pasada completa; no sumar repeticiones.
+Se comprueban entrada/salida Tab/Shift+Tab, apertura Enter/Espacio, un solo desplegable,
+Escape/foco de retorno, controles de formulario sin foco robado, ambos paneles con
+clic interior y fondo exterior, foco visible, selección sin quedar bajo la cabecera,
+retorno entre módulos con nota EIPD pendiente y cero escrituras adicionales después
+de preparar el fixture. Cobertura de paneles en 390/320, escritorio y cruce de tamaño.
+Tipos, ESLint, Prettier y git diff --check correctos. Capturas locales revisadas en
+outputs/navegacion-7a, excluidas de publicación. Las pruebas usan Chromium y respuestas
+ficticias controladas; no acreditan un nuevo ensayo integrado sobre el servidor del
+usuario, lector de pantalla ni accesibilidad integral. La estructura semántica y nombres
+pendientes pertenecen a 7B; cabeceras y listas duplicadas siguen en 8A/8B.
+Sin cambios API/backend, permisos, datos, guardado ni habilitación EIPD.
+
+### Guion asistido 7A
+
+1. En /dashboard/trabajo, poner foco en Preparar con Tab (Shift+Tab retrocede). Pulsar
+   Enter; Tab entra en sus opciones y Shift+Tab regresa. Escape cierra y deja foco en
+   Preparar. El contorno de foco debe verse; no cambia el formulario ni guarda.
+2. Abrir Preparar con Espacio y avanzar con Tab hasta el siguiente grupo. El anterior
+   debe cerrarse. Abrir Completar EIPD si está habilitado; Tab a un destino y Enter.
+   El panel se cierra y el área de trabajo recibe el foco bajo la cabecera. Si EIPD no
+   está habilitada, usar otro grupo disponible; no guardar otra determinación solo para probar.
+3. En ventana estrecha, Tab hasta Menú y Enter; Escape debe cerrar y devolver foco a
+   Menú. Repetir con Secciones. Clic dentro del panel lo mantiene; clic sobre el fondo
+   sombreado lo cierra. No confundir cerrar con cambiar de módulo.
+4. Con una nota pendiente existente, cambiar de sección/módulo y volver, sin guardar
+   ni recargar. Confirmar que permanece. No escribir datos nuevos salvo texto ficticio
+   de prueba acordado. Al reducir la ventana con foco en un desplegable de escritorio,
+   comprobar que Secciones queda disponible y recibe el foco.
+
+No recargar pestañas con borradores pendientes. Si se necesita cargar la implementación
+actualizada, usar una pestaña de prueba independiente y su propio contexto; no esperar
+que el contenido sin guardar de otra pestaña se copie automáticamente.
+
+## 7A — observación asistida de Espacio y corrección explícita, 27/10/2026
+
+Usuario confirma la primera secuencia Enter/Tab/Escape («toda la secuencia OK»),
+pero informa que presionar y soltar Espacio no abre/cierra Preparar. La prueba
+Chromium controlada anterior sí activaba el summary nativo; no se atribuye una
+reproducción exacta del navegador del usuario. Se reemplaza solo para Espacio la
+activación implícita por manejo explícito en el summary conectado: cancelar acción
+nativa, alternar una vez por pulsación e ignorar repetición al mantener la tecla.
+Enter mantiene su acción nativa; Tab, Escape y foco conservan sus comportamientos.
+
+Siete escenarios dirigidos 7A aprobados tras el ajuste: los seis existentes y uno
+nuevo que despacha eventos sin activación nativa y comprueba pulsación mantenida,
+liberación, apertura/cierre real sin doble activación, mismo foco/URL y cero escrituras.
+Tipos/lint/formato y diff --check correctos. La pasada completa de 67 escenarios
+corresponde a antes de este ajuste; no se declara una nueva pasada completa de 68.
+Pendiente repetir Espacio con el usuario y continuar aceptación de 7A. Sin commit/push.
+No recargar su pestaña con borradores pendientes; para cargar código actualizado si
+fuera necesario usar pestaña independiente con contexto propio.
+
+## Aceptación asistida acotada de 7A — 27/10/2026
+
+Usuario confirma «Todo funciona OPK» tras comprender que el clic exterior se hace sobre
+el fondo gris y no dentro del panel azul. Aceptados los recorridos informados: primera
+secuencia Enter/Tab/Escape; apertura/cierre con Espacio en pestaña nueva con código
+actualizado; avance al siguiente grupo y selección de destino («Todo el recorrido OK»);
+y prueba estrecha de Menú/Secciones, Escape y clic interior/exterior tras aclaración.
+El usuario también comprobó que la pestaña antigua conserva su preparación de infancia;
+la nueva empieza vacía por ser temporal por pestaña, sin registro ni sincronización.
+Esto no acredita copia de borradores entre ventanas ni guardado de una nueva versión.
+
+7A aceptado con este alcance asistido. Retención completa de Tab/Shift+Tab, cambio de
+tamaño con foco y ausencia de escrituras siguen respaldados por escenarios controlados,
+sin atribuir pruebas manuales adicionales. No equivale a certificación de accesibilidad
+ni cierra 7B o NAV-UX-006 globalmente. Evidencia automatizada: pasada completa inicial
+de 67; tras ajuste explícito de Espacio pasaron 7 escenarios dirigidos, tipos y lint.
+No se declara una pasada completa posterior de 68 escenarios.
+
+Rama feature/navegacion-7a-teclado sobre 8fec3df. Sin commit/push de 7A; requiere
+indicación del usuario para publicar. Próximo propuesto: 7B, estructura y ayudas
+accesibles, sin iniciar. Excluir next-env.d.ts generado y outputs/ locales.
+Esta aceptación sustituye los pendientes asistidos anteriores solo con el alcance indicado.
+
+## Publicación autorizada de 7A — 27/10/2026
+
+Usuario solicita commit y autoriza push de 7A aceptado, en feature/navegacion-7a-teclado
+sobre 8fec3df. Se reúne navegación de teclado, manejo explícito de Espacio, regresiones
+y aceptación asistida acotada. Los pendientes de publicación inferiores son antecedentes
+anteriores a esta autorización. Mantener los límites de evidencia: pasada completa de 67
+antes del último ajuste y siete escenarios dirigidos después, sin atribuir CI remota.
+Excluir next-env.d.ts generado y outputs/ locales. Comprobar HEAD remoto tras el push.
+No iniciar 7B ni ejecutar merge/despliegue en este cierre.

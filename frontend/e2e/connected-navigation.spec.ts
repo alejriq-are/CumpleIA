@@ -1709,3 +1709,237 @@ for (const width of [1280, 390, 320]) {
     expect(calls.filter((call) => call.method !== "GET")).toEqual([]);
   });
 }
+
+test("7A escritorio cierra el grupo al salir con Tab y abre solo el siguiente", async ({
+  page,
+}) => {
+  await legal(page);
+  await enable(page);
+  const writes = calls.filter((v) => v.method !== "GET").length;
+  const nav = page.locator(".connected-desktop-sections");
+  const prepare = nav.locator("summary").filter({ hasText: /^Preparar$/ });
+  const eipd = nav.locator("summary").filter({ hasText: /^Completar EIPD$/ });
+  await prepare.focus();
+  await page.keyboard.press("Enter");
+  await expect(prepare.locator("..")).toHaveAttribute("open", "");
+  await page.keyboard.press("Tab");
+  await expect(
+    nav.getByRole("button", { name: "Evaluaciones y creación de borrador", exact: true })
+  ).toBeFocused();
+  await page.keyboard.press("Shift+Tab");
+  await expect(prepare).toBeFocused();
+  await page.keyboard.press("Escape");
+  await expect(prepare.locator("..")).not.toHaveAttribute("open", "");
+  await expect(prepare).toBeFocused();
+  await page.keyboard.press("Space");
+  for (let i = 0; i < 6; i++) await page.keyboard.press("Tab");
+  await expect(eipd).toBeFocused();
+  await expect(prepare.locator("..")).not.toHaveAttribute("open", "");
+  await page.keyboard.press("Enter");
+  await expect(nav.locator("details[open]")).toHaveCount(1);
+  await page.keyboard.press("Tab");
+  await expect(
+    nav.getByRole("button", { name: "Tratamiento y alcance de la EIPD", exact: true })
+  ).toBeFocused();
+  await page.keyboard.press("Escape");
+  await expect(eipd).toBeFocused();
+  expect(calls.filter((v) => v.method !== "GET")).toHaveLength(writes);
+});
+
+test("7A abrir otro desplegable no deja dos abiertos y salir de navegación conserva foco", async ({
+  page,
+}) => {
+  await legal(page);
+  await enable(page);
+  const nav = page.locator(".connected-desktop-sections");
+  const prepare = nav.locator("summary").filter({ hasText: /^Preparar$/ });
+  const eipd = nav.locator("summary").filter({ hasText: /^Completar EIPD$/ });
+  await prepare.focus();
+  await page.keyboard.press("Enter");
+  await eipd.focus();
+  await page.keyboard.press("Space");
+  await expect(nav.locator("details[open]")).toHaveCount(1);
+  const help = main(page).getByLabel("Fundamento sobre EIPD", { exact: true });
+  await help.focus();
+  await expect(nav.locator("details[open]")).toHaveCount(0);
+  await expect(help).toBeFocused();
+  await page.keyboard.press("Escape");
+  await expect(help).toBeFocused();
+});
+
+async function tabTo(page: Page, target: import("@playwright/test").Locator) {
+  for (let i = 0; i < 50; i++) {
+    if (await target.evaluate((element) => element === document.activeElement)) return;
+    await page.keyboard.press("Tab");
+  }
+  await expect(target).toBeFocused();
+}
+for (const width of [390, 320]) {
+  test(`7A paneles con teclado, fondo, foco y borrador conservado a ${width}px`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width, height: 844 });
+    await legal(page);
+    await enable(page);
+    await section(page, "Tratamiento y alcance de la EIPD");
+    const note = main(page).getByLabel("Notas del borrador EIPD (opcional)", { exact: true });
+    await note.fill("[FICTICIA] Conservar en recorrido 7A");
+    const writes = calls.filter((v) => v.method !== "GET").length;
+    const menu = page.getByRole("button", { name: "Abrir menú", exact: true });
+    const sections = page.locator("header").getByRole("button", { name: "Secciones", exact: true });
+    for (const [trigger, name, closeName] of [
+      [menu, "Menú principal", "Cerrar menú"],
+      [sections, "Secciones del módulo", "Cerrar secciones"],
+    ] as const) {
+      await trigger.focus();
+      await page.keyboard.press("Enter");
+      const drawer = page.getByRole("dialog", { name, exact: true });
+      const close = drawer.getByRole("button", { name: closeName, exact: true });
+      await expect(close).toBeFocused();
+      await expect(close).toHaveCSS("outline-style", "solid");
+      await page.keyboard.press("Shift+Tab");
+      await expect(drawer.getByRole("button").last()).toBeFocused();
+      await page.keyboard.press("Tab");
+      await expect(close).toBeFocused();
+      await drawer
+        .getByText(name === "Menú principal" ? "CumpleIA" : name, { exact: true })
+        .click();
+      await expect(drawer).toBeVisible();
+      await page.keyboard.press("Escape");
+      await expect(drawer).toBeHidden();
+      await expect(trigger).toBeFocused();
+      await page.keyboard.press("Space");
+      await expect(drawer).toBeVisible();
+      const box = (await drawer.boundingBox())!;
+      await page.mouse.click((box.x + box.width + width) / 2, 400);
+      await expect(drawer).toBeHidden();
+      await expect(trigger).toBeFocused();
+    }
+    await sections.press("Enter");
+    const drawer = page.getByRole("dialog", { name: "Secciones del módulo", exact: true });
+    const target = drawer.getByRole("button", {
+      name: "Necesidad y proporcionalidad",
+      exact: true,
+    });
+    await tabTo(page, target);
+    await page.keyboard.press("Enter");
+    await expect(drawer).toBeHidden();
+    await expect(main(page)).toBeFocused();
+    const header = (await page.locator("header").boundingBox())!;
+    const work = (await main(page).boundingBox())!;
+    expect(work.y).toBeGreaterThanOrEqual(header.y + header.height - 1);
+    await menu.press("Enter");
+    await tabTo(
+      page,
+      page
+        .getByRole("dialog", { name: "Menú principal", exact: true })
+        .getByRole("button", { name: "Panel principal", exact: true })
+    );
+    await page.keyboard.press("Space");
+    await expect(main(page)).toBeFocused();
+    await menu.press("Enter");
+    await tabTo(
+      page,
+      page
+        .getByRole("dialog", { name: "Menú principal", exact: true })
+        .getByRole("button", { name: "Bases de licitud", exact: true })
+    );
+    await page.keyboard.press("Enter");
+    await sections.press("Enter");
+    await tabTo(
+      page,
+      drawer.getByRole("button", { name: "Tratamiento y alcance de la EIPD", exact: true })
+    );
+    await page.keyboard.press("Enter");
+    await expect(note).toHaveValue("[FICTICIA] Conservar en recorrido 7A");
+    expect(calls.filter((v) => v.method !== "GET")).toHaveLength(writes);
+    expect(errors).toEqual([]);
+    await capture(page, `7a-retorno-${width}.png`);
+  });
+}
+
+test("7A selección de escritorio coloca el foco bajo la cabecera y Escape no roba foco al formulario", async ({
+  page,
+}) => {
+  await legal(page);
+  await enable(page);
+  const nav = page.locator(".connected-desktop-sections");
+  const summary = nav.locator("summary").filter({ hasText: /^Completar EIPD$/ });
+  await summary.focus();
+  await page.keyboard.press("Enter");
+  await page.keyboard.press("Tab");
+  await page.keyboard.press("Space");
+  await expect(main(page)).toBeFocused();
+  await expect(nav.locator("details[open]")).toHaveCount(0);
+  const header = (await page.locator("header").boundingBox())!;
+  expect((await main(page).boundingBox())!.y).toBeGreaterThanOrEqual(header.y + header.height - 1);
+  const note = main(page).getByLabel("Notas del borrador EIPD (opcional)", { exact: true });
+  await note.fill("[FICTICIA] Foco de edición 7A");
+  const writes = calls.filter((v) => v.method !== "GET").length;
+  await page.keyboard.press("Escape");
+  await expect(note).toBeFocused();
+  await page.keyboard.press("End");
+  await page.keyboard.press("ArrowLeft");
+  await expect(note).toHaveValue("[FICTICIA] Foco de edición 7A");
+  const context = page.getByRole("button", { name: "Cambiar contexto", exact: true });
+  await summary.focus();
+  await page.keyboard.press("Enter");
+  await context.focus();
+  await page.keyboard.press("Enter");
+  await expect(nav.locator("details[open]")).toHaveCount(0);
+  await page.keyboard.press("Escape");
+  await expect(context).toBeFocused();
+  await expect(note).toHaveValue("[FICTICIA] Foco de edición 7A");
+  expect(calls.filter((v) => v.method !== "GET")).toHaveLength(writes);
+  await capture(page, "7a-escritorio.png");
+});
+
+test("7A al pasar a estrecho el foco de un desplegable vuelve a Secciones visible", async ({
+  page,
+}) => {
+  await legal(page);
+  const summary = page
+    .locator(".connected-desktop-sections summary")
+    .filter({ hasText: /^Preparar$/ });
+  await summary.focus();
+  await page.keyboard.press("Enter");
+  await page.keyboard.press("Tab");
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(
+    page.locator("header").getByRole("button", { name: "Secciones", exact: true })
+  ).toBeFocused();
+  await expect(page.locator(".connected-desktop-sections details[open]")).toHaveCount(0);
+});
+
+test("7A Espacio explícito abre y cierra una vez sin depender de la activación nativa", async ({
+  page,
+}) => {
+  await legal(page);
+  const summary = page
+    .locator(".connected-desktop-sections summary")
+    .filter({ hasText: /^Preparar$/ });
+  const group = summary.locator("..");
+  const beforeUrl = page.url();
+  const writes = calls.filter((v) => v.method !== "GET").length;
+  await summary.focus();
+  // Synthetic events have no native activation: the control must handle Space itself.
+  await summary.dispatchEvent("keydown", { key: " ", code: "Space", repeat: false });
+  await expect(group).toHaveAttribute("open", "");
+  await summary.dispatchEvent("keydown", { key: " ", code: "Space", repeat: true });
+  await expect(group).toHaveAttribute("open", "");
+  await summary.dispatchEvent("keyup", { key: " ", code: "Space" });
+  await expect(group).toHaveAttribute("open", "");
+  await expect(summary).toBeFocused();
+  await summary.dispatchEvent("keydown", { key: " ", code: "Space", repeat: false });
+  await summary.dispatchEvent("keyup", { key: " ", code: "Space" });
+  await expect(group).not.toHaveAttribute("open", "");
+  // Real key down/up must not trigger both our handler and the native toggle.
+  await page.keyboard.press("Space");
+  await expect(group).toHaveAttribute("open", "");
+  await page.keyboard.press("Space");
+  await expect(group).not.toHaveAttribute("open", "");
+  await expect(summary).toBeFocused();
+  expect(page.url()).toBe(beforeUrl);
+  expect(calls.filter((v) => v.method !== "GET")).toHaveLength(writes);
+  expect(errors).toEqual([]);
+});

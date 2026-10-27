@@ -1,5 +1,67 @@
 # Backlog — CumpleIA
 
+## Publicación autorizada de 7A — 27/10/2026
+
+Usuario solicita commit y autoriza push de 7A aceptado, en feature/navegacion-7a-teclado
+sobre 8fec3df. Se reúne navegación de teclado, manejo explícito de Espacio, regresiones
+y aceptación asistida acotada. Los pendientes de publicación inferiores son antecedentes
+anteriores a esta autorización. Mantener los límites de evidencia: pasada completa de 67
+antes del último ajuste y siete escenarios dirigidos después, sin atribuir CI remota.
+Excluir next-env.d.ts generado y outputs/ locales. Comprobar HEAD remoto tras el push.
+No iniciar 7B ni ejecutar merge/despliegue en este cierre.
+
+## Aceptación asistida acotada de 7A — 27/10/2026
+
+Usuario confirma «Todo funciona OPK» tras comprender que el clic exterior se hace sobre
+el fondo gris y no dentro del panel azul. Aceptados los recorridos informados: primera
+secuencia Enter/Tab/Escape; apertura/cierre con Espacio en pestaña nueva con código
+actualizado; avance al siguiente grupo y selección de destino («Todo el recorrido OK»);
+y prueba estrecha de Menú/Secciones, Escape y clic interior/exterior tras aclaración.
+El usuario también comprobó que la pestaña antigua conserva su preparación de infancia;
+la nueva empieza vacía por ser temporal por pestaña, sin registro ni sincronización.
+Esto no acredita copia de borradores entre ventanas ni guardado de una nueva versión.
+
+7A aceptado con este alcance asistido. Retención completa de Tab/Shift+Tab, cambio de
+tamaño con foco y ausencia de escrituras siguen respaldados por escenarios controlados,
+sin atribuir pruebas manuales adicionales. No equivale a certificación de accesibilidad
+ni cierra 7B o NAV-UX-006 globalmente. Evidencia automatizada: pasada completa inicial
+de 67; tras ajuste explícito de Espacio pasaron 7 escenarios dirigidos, tipos y lint.
+No se declara una pasada completa posterior de 68 escenarios.
+
+Rama feature/navegacion-7a-teclado sobre 8fec3df. Sin commit/push de 7A; requiere
+indicación del usuario para publicar. Próximo propuesto: 7B, estructura y ayudas
+accesibles, sin iniciar. Excluir next-env.d.ts generado y outputs/ locales.
+Esta aceptación sustituye los pendientes asistidos anteriores solo con el alcance indicado.
+
+## 7A — observación asistida de Espacio y corrección explícita, 27/10/2026
+
+Usuario confirma la primera secuencia Enter/Tab/Escape («toda la secuencia OK»),
+pero informa que presionar y soltar Espacio no abre/cierra Preparar. La prueba
+Chromium controlada anterior sí activaba el summary nativo; no se atribuye una
+reproducción exacta del navegador del usuario. Se reemplaza solo para Espacio la
+activación implícita por manejo explícito en el summary conectado: cancelar acción
+nativa, alternar una vez por pulsación e ignorar repetición al mantener la tecla.
+Enter mantiene su acción nativa; Tab, Escape y foco conservan sus comportamientos.
+
+Siete escenarios dirigidos 7A aprobados tras el ajuste: los seis existentes y uno
+nuevo que despacha eventos sin activación nativa y comprueba pulsación mantenida,
+liberación, apertura/cierre real sin doble activación, mismo foco/URL y cero escrituras.
+Tipos/lint/formato y diff --check correctos. La pasada completa de 67 escenarios
+corresponde a antes de este ajuste; no se declara una nueva pasada completa de 68.
+Pendiente repetir Espacio con el usuario y continuar aceptación de 7A. Sin commit/push.
+No recargar su pestaña con borradores pendientes; para cargar código actualizado si
+fuera necesario usar pestaña independiente con contexto propio.
+
+## Bloque 7A — pendiente aceptación asistida, 27/10/2026
+
+- [ ] **NAV-UX-006 / 7A — Validar teclado y foco en navegación conectada.**
+  Implementación local sobre 8fec3df: un desplegable abierto, cierre al salir con Tab,
+  Escape localizado con retorno al control, paneles excluyentes y foco visible al pasar
+  a ventana estrecha. Paneles compartidos y foco al área de trabajo conservados.
+  67 pruebas conectadas (6 nuevas), tipos/lint/formato y capturas correctos.
+  [Guion y límites](project/navegacion-servidor.md#bloque-7a--teclado-y-foco-en-navegación-conectada).
+  Sin commit/push ni inicio de 7B; no cierra accesibilidad o NAV-UX-006 globalmente.
+
 ## Cierre asistido y publicación autorizada de 6B — 27/10/2026
 
 Usuario solicita commit y autoriza push al terminar las comprobaciones asistidas.
