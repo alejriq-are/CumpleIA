@@ -1,3 +1,4 @@
+import { documentLabels } from "@/lib/licitud/document-labels";
 import { modules, type ModuleId } from "./prototype-data";
 import { eipdSections, ratSections, type WorkLocation } from "./connected-navigation";
 
@@ -21,7 +22,7 @@ export const connectedDestinations = {
     base: "Base y fundamento",
     anexos: "Anexos de respaldo",
     infancia: "Completar infancia y adolescencia",
-    preparar: "Preparar resolución documental",
+    preparar: documentLabels.prepareChild,
     revisar: "Documentos guardados",
     historial: "Historial y descargas",
   },

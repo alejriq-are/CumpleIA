@@ -1,5 +1,50 @@
 # Backlog — CumpleIA
 
+## Cierre asistido y publicación autorizada de 6B — 27/10/2026
+
+Usuario solicita commit y autoriza push al terminar las comprobaciones asistidas.
+Rama `feature/navegacion-6b-operaciones`, base d9f859f. Se acepta con el alcance
+observado y confirmado: nombres de edición y pasos EIPD, disponibilidad independiente
+por tema, matriz alineada/coloreada, aviso ante reemplazo de preparación, cambio entre
+revisión documental y decisión de organización («resultado OK»), conservación al volver
+a preparación y regreso desde vista previa con referencia, PRUEBA-1 y notas intactas.
+El usuario guardó expresamente una determinación ficticia de infancia Corresponde en
+el programa con menores, manteniendo EIPD pendiente; capturas confirman su acceso.
+Se encontraron dos versiones históricas; durante el guion no se solicitó registrar
+otra ni emitir revisión/decisión. La vista previa mostró registro deshabilitado sin
+revisión de contenido; volver mantuvo los campos. La preparación conservada no acredita
+una copia nueva ni persistencia después de recargar. No atribuir esos ensayos al usuario.
+
+171 escenarios automatizados distintos aprobados: 157 del bloque y 14 del formulario de
+valoración (3 nuevos de matriz). Tipos/lint/formato correctos; capturas controladas de
+1280/390/320 revisadas. Ausencia de registro, negativas, información insuficiente,
+asociación por revisar y errores/carga conservan evidencia controlada, no nueva aceptación
+manual. La prueba integrada API aislada no se ejecutó. Sin cambios backend ni reglas de
+activación EIPD. NAV-UX-006 permanece abierto para los demás sublotes.
+
+Este cierre sustituye los pendientes de aceptación asistida anteriores solo con ese
+alcance. Commit/push autorizado para estos cambios y documentación; excluir next-env.d.ts
+generado y outputs/ locales. No hacer merge/despliegue ni iniciar 7A en este cierre.
+Siguiente bloque propuesto: 7A, teclado y foco, pendiente de indicación del usuario.
+
+## Observación visual en prueba 6B — 26/10/2026
+
+- [ ] **6B — Validar lectura de matriz Probabilidad / Impacto.** Cabeceras y valores
+  centrados; fondos suaves verde/amarillo/naranja/rojo con texto oscuro y nivel explícito.
+  Cálculo y valores preservados. 14 pruebas dirigidas, tipos/lint y capturas correctos.
+  Pendiente aceptación visual del usuario; sin commit/push nuevo.
+
+## Bloque 6B — pendiente aceptación asistida, 26/10/2026
+
+- [ ] **NAV-UX-006 / 6B — Validar operaciones documentales y disponibilidad.**
+  Implementación local sobre d9f859f: revisión documental frente a decisión de organización;
+  preparación temporal frente a registro de versión de infancia; nombre libre de edición;
+  pasos EIPD coherentes; razones por tema sin editor habilitado ante carga/error/ausencia,
+  pendiente, negativa, información insuficiente o asociación por revisar. Contratos sin cambio.
+  157 escenarios distintos con fixtures, tipos/lint/formato y capturas correctos.
+  [Guion, evidencia y límites](project/navegacion-servidor.md#bloque-6b--operaciones-documentales-y-disponibilidad).
+  No cierra NAV-UX-006 globalmente. Sin commit/push de 6B ni inicio de 7A.
+
 ## Publicación autorizada de 6A — 26/10/2026
 
 Usuario autoriza commit/push del bloque 6A aceptado: nombres de destinos, accesos directos,

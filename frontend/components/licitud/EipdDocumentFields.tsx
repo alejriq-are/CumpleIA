@@ -2,6 +2,7 @@
 import type { RiskEvaluation, Annex } from "@/lib/api/assessment-support";
 import { EipdRiskTable } from "./EipdRiskTable";
 import { useEffect, useId, useRef, useState } from "react";
+import { eipdStepLabels } from "@/lib/licitud/eipd-steps";
 import { documentFields, type Fields } from "@/lib/licitud/eipd-document";
 type Value = Record<string, unknown>;
 function choiceHelp(value: unknown): string {
@@ -287,7 +288,7 @@ function Controls({
 }
 export const eipdGroups: { title: string; description: string; keys: string[] }[] = [
   {
-    title: "1. Tratamiento y alcance",
+    title: `1. ${eipdStepLabels[0]}`,
     description:
       "Describe la finalidad, operaciones, tecnologías y datos incluidos. Usa el alcance de la evaluación guardada como referencia.",
     keys: [
@@ -303,7 +304,7 @@ export const eipdGroups: { title: string; description: string; keys: string[] }[
     ],
   },
   {
-    title: "2. Necesidad y proporcionalidad",
+    title: `2. ${eipdStepLabels[1]}`,
     description:
       "Explica por qué se necesitan los datos, las alternativas y los límites. Las respuestas requieren fundamento; no completan automáticamente la evaluación.",
     keys: [
@@ -318,31 +319,31 @@ export const eipdGroups: { title: string; description: string; keys: string[] }[
     ],
   },
   {
-    title: "3. Riesgos",
+    title: `3. ${eipdStepLabels[2]}`,
     description:
       "Añade cada riesgo con un identificador, su impacto y el análisis inicial y residual. El sistema conserva tu análisis; no calcula una puntuación de riesgo.",
     keys: ["risks"],
   },
   {
-    title: "4. Valorar riesgos",
+    title: `4. ${eipdStepLabels[3]}`,
     description:
       "Valora el riesgo para las personas y compara el riesgo inherente con el residual previsto y actual verificado.",
     keys: [],
   },
   {
-    title: "5. Medidas",
+    title: `5. ${eipdStepLabels[4]}`,
     description:
       "Asocia cada medida a los identificadores de riesgos que aborda. Documenta implementación, eficacia y evidencias; una medida declarada no se considera implementada automáticamente.",
     keys: ["measures"],
   },
   {
-    title: "6. Fuentes y evidencias",
+    title: `6. ${eipdStepLabels[5]}`,
     description:
       "Conserva referencias, revisión de aplicabilidad y evidencias. Documenta una consulta a la autoridad solo si corresponde a los antecedentes del caso.",
     keys: ["official_sources", "agency_consultation", "evidence"],
   },
   {
-    title: "7. Riesgo residual y seguimiento",
+    title: `7. ${eipdStepLabels[6]}`,
     description:
       "Explica qué riesgo permanece después de las medidas, las limitaciones y el plan de seguimiento. Esta conclusión no aprueba ni activa EIPD.",
     keys: [

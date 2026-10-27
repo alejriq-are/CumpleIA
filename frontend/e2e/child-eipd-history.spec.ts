@@ -113,8 +113,10 @@ async function enable(page: import("@playwright/test").Page) {
     .check();
 }
 async function select(page: import("@playwright/test").Page) {
-  await page.getByRole("button", { name: "Consultar resolución 1", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "Resolución 1 consultada" })).toBeVisible();
+  await page.getByRole("button", { name: "Consultar versión documental 1", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Versión documental de infancia 1 consultada" })
+  ).toBeVisible();
 }
 async function fillReview(page: import("@playwright/test").Page) {
   await page
@@ -133,16 +135,20 @@ test("crea sucesor parcial y registra ambas decisiones negativas con identidad d
   await mount(page);
   await enable(page);
   await page
-    .getByLabel("Referencia de la resolución *", { exact: true })
+    .getByLabel("Referencia del documento de infancia *", { exact: true })
     .fill("  PRUEBA: sucesor 2  ");
   await page
-    .getByLabel("Notas de la resolución", { exact: true })
+    .getByLabel("Notas del documento de infancia", { exact: true })
     .fill("PRUEBA: documento parcial");
-  await page.getByRole("button", { name: "Registrar resolución ficticia", exact: true }).click();
-  await expect(page.getByRole("status")).toContainText("Resolución documental 2 registrada");
+  await page
+    .getByRole("button", { name: "Registrar nueva versión documental ficticia", exact: true })
+    .click();
+  await expect(page.getByRole("status")).toContainText(
+    "Versión documental de infancia 2 registrada"
+  );
   for (const decision of ["requiere_cambios", "no_continuar"]) {
     await fillReview(page);
-    await page.getByLabel("Decisión de la revisión").selectOption(decision);
+    await page.getByLabel("Resultado de la revisión documental").selectOption(decision);
     await page.getByRole("button", { name: "Registrar revisión ficticia", exact: true }).click();
     await expect(page.getByLabel("Fundamento de la revisión *", { exact: true })).toHaveValue("");
   }
@@ -170,7 +176,7 @@ test("crea sucesor parcial y registra ambas decisiones negativas con identidad d
     );
   }
   await page.getByRole("button", { name: "Actualizar historial de infancia" }).click();
-  await page.getByRole("button", { name: "Consultar resolución 2", exact: true }).click();
+  await page.getByRole("button", { name: "Consultar versión documental 2", exact: true }).click();
   await expect(page.getByText("PRUEBA-REV-2", { exact: true })).toHaveCount(2);
   await expect(
     page.getByText(
@@ -178,7 +184,7 @@ test("crea sucesor parcial y registra ambas decisiones negativas con identidad d
     )
   ).toBeVisible();
   const values = await page
-    .getByLabel("Decisión de la revisión")
+    .getByLabel("Resultado de la revisión documental")
     .locator("option")
     .evaluateAll((options) => options.map((o) => (o as HTMLOptionElement).value));
   expect(values).toEqual(["requiere_cambios", "no_continuar"]);
@@ -197,17 +203,25 @@ test("requiere declaración ficticia y referencia, conserva borrador al actualiz
   page,
 }) => {
   await mount(page);
-  await expect(page.getByLabel("Referencia de la resolución *", { exact: true })).toBeDisabled();
+  await expect(
+    page.getByLabel("Referencia del documento de infancia *", { exact: true })
+  ).toBeDisabled();
   await enable(page);
-  await page.getByRole("button", { name: "Registrar resolución ficticia", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Registrar nueva versión documental ficticia", exact: true })
+    .click();
   expect(await posts(page)).toHaveLength(0);
-  await page.getByLabel("Referencia de la resolución *", { exact: true }).fill("PRUEBA: conservar");
+  await page
+    .getByLabel("Referencia del documento de infancia *", { exact: true })
+    .fill("PRUEBA: conservar");
   await select(page);
   await page.getByRole("button", { name: "Actualizar historial de infancia" }).click();
-  await expect(page.getByRole("heading", { name: "Resolución 1 consultada" })).toHaveCount(0);
-  await expect(page.getByLabel("Referencia de la resolución *", { exact: true })).toHaveValue(
-    "PRUEBA: conservar"
-  );
+  await expect(
+    page.getByRole("heading", { name: "Versión documental de infancia 1 consultada" })
+  ).toHaveCount(0);
+  await expect(
+    page.getByLabel("Referencia del documento de infancia *", { exact: true })
+  ).toHaveValue("PRUEBA: conservar");
 });
 for (const mode of ["denied", "conflict", "disabled"])
   test(`rechazo ${mode} conserva revisión y no reintenta`, async ({ page }) => {
@@ -230,13 +244,15 @@ for (const mode of ["unknown", "invalid-post"])
     await mount(page);
     await enable(page);
     await page
-      .getByLabel("Referencia de la resolución *", { exact: true })
+      .getByLabel("Referencia del documento de infancia *", { exact: true })
       .fill("PRUEBA: incierto");
     await page.evaluate((mode) => ((window as any).demo.mode = mode), mode);
-    await page.getByRole("button", { name: "Registrar resolución ficticia", exact: true }).click();
+    await page
+      .getByRole("button", { name: "Registrar nueva versión documental ficticia", exact: true })
+      .click();
     await expect(page.getByRole("alert")).toContainText("Resultado incierto");
     await expect(
-      page.getByRole("button", { name: "Registrar resolución ficticia", exact: true })
+      page.getByRole("button", { name: "Registrar nueva versión documental ficticia", exact: true })
     ).toBeDisabled();
     await page.evaluate(() => {
       (window as any).demo.mode = "ok";
@@ -244,7 +260,7 @@ for (const mode of ["unknown", "invalid-post"])
     });
     await page.getByRole("button", { name: "Actualizar historial de infancia" }).click();
     await expect(
-      page.getByRole("button", { name: "Registrar resolución ficticia", exact: true })
+      page.getByRole("button", { name: "Registrar nueva versión documental ficticia", exact: true })
     ).toBeDisabled();
     expect(await posts(page)).toHaveLength(1);
   });
@@ -256,7 +272,7 @@ test("bloquea doble registro y cambio de selección mientras persiste", async ({
   await page.evaluate(() => ((window as any).demo.mode = "wait"));
   await page.getByRole("button", { name: "Registrar revisión ficticia", exact: true }).dblclick();
   await expect(
-    page.getByRole("button", { name: "Consultar resolución 1", exact: true })
+    page.getByRole("button", { name: "Consultar versión documental 1", exact: true })
   ).toBeDisabled();
   await expect.poll(async () => (await posts(page)).length).toBe(1);
   await page.evaluate(() => (window as any).demo.release());
@@ -269,7 +285,7 @@ test("carga incompatible impide editar y no expone historial ajeno", async ({ pa
   await page.evaluate(() => (window as any).mount());
   await expect(page.getByRole("alert")).toBeVisible();
   await expect(
-    page.getByRole("button", { name: "Consultar resolución 1", exact: true })
+    page.getByRole("button", { name: "Consultar versión documental 1", exact: true })
   ).toHaveCount(0);
   expect(await posts(page)).toHaveLength(0);
 });
@@ -290,9 +306,11 @@ test("historial de revisiones incompatibles se rechaza sin seleccionar resoluci�
     (window as any).demo.events = [{ ...r, resolution_id: r.id, decision: "continuar" }];
   });
   await mount(page);
-  await page.getByRole("button", { name: "Consultar resolución 1", exact: true }).click();
+  await page.getByRole("button", { name: "Consultar versión documental 1", exact: true }).click();
   await expect(page.getByRole("alert")).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Resolución 1 consultada" })).toHaveCount(0);
+  await expect(
+    page.getByRole("heading", { name: "Versión documental de infancia 1 consultada" })
+  ).toHaveCount(0);
 });
 test("contratos rechazan identidad, cobertura, decisión y hashes cruzados", async ({ page }) => {
   const results = await page.evaluate(() => {
@@ -349,7 +367,7 @@ test("lista duplicada se rechaza sin mostrar dos versiones del mismo registro", 
   });
   await expect(page.getByRole("alert")).toBeVisible();
   await expect(
-    page.getByRole("button", { name: "Consultar resolución 1", exact: true })
+    page.getByRole("button", { name: "Consultar versión documental 1", exact: true })
   ).toHaveCount(0);
 });
 test("fallo de actualización retira selección y deshabilita registro conservando borrador", async ({
@@ -357,18 +375,22 @@ test("fallo de actualización retira selección y deshabilita registro conservan
 }) => {
   await mount(page);
   await enable(page);
-  await page.getByLabel("Referencia de la resolución *", { exact: true }).fill("PRUEBA: preservar");
+  await page
+    .getByLabel("Referencia del documento de infancia *", { exact: true })
+    .fill("PRUEBA: preservar");
   await select(page);
   await page.evaluate(() => ((window as any).demo.mode = "load-error"));
   await page.getByRole("button", { name: "Actualizar historial de infancia" }).click();
   await expect(page.getByRole("alert")).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Resolución 1 consultada" })).toHaveCount(0);
+  await expect(
+    page.getByRole("heading", { name: "Versión documental de infancia 1 consultada" })
+  ).toHaveCount(0);
   expect(await posts(page)).toHaveLength(0);
   await page.evaluate(() => ((window as any).demo.mode = "ok"));
   await page.getByRole("button", { name: "Actualizar historial de infancia" }).click();
-  await expect(page.getByLabel("Referencia de la resolución *", { exact: true })).toHaveValue(
-    "PRUEBA: preservar"
-  );
+  await expect(
+    page.getByLabel("Referencia del documento de infancia *", { exact: true })
+  ).toHaveValue("PRUEBA: preservar");
 });
 test("revisión ajena a resolución o metadata antigua se rechaza", async ({ page }) => {
   const results = await page.evaluate(() => {
@@ -425,7 +447,7 @@ test("documento completo persiste análisis, relaciones, fuentes, consulta y evi
   await enable(page);
   await openDocument(page);
   await page
-    .getByLabel("Referencia de la resolución *", { exact: true })
+    .getByLabel("Referencia del documento de infancia *", { exact: true })
     .fill("PRUEBA-DOC-COMPLETO");
   for (const [key, label] of Object.entries(analyses))
     await page.getByLabel(label, { exact: true }).fill("PRUEBA: " + key);
@@ -518,8 +540,12 @@ test("documento completo persiste análisis, relaciones, fuentes, consulta y evi
       .getByLabel(prefix + " 1 — Notas", { exact: true })
       .fill("PRUEBA: evidencia ficticia");
   }
-  await page.getByRole("button", { name: "Registrar resolución ficticia", exact: true }).click();
-  await expect(page.getByRole("status")).toContainText("Resolución documental 2 registrada");
+  await page
+    .getByRole("button", { name: "Registrar nueva versión documental ficticia", exact: true })
+    .click();
+  await expect(page.getByRole("status")).toContainText(
+    "Versión documental de infancia 2 registrada"
+  );
   const body = JSON.parse((await posts(page))[0].options.body);
   const d = body.document;
   expect(body.data_kind).toBe("ficticios");
@@ -594,15 +620,19 @@ test("copia para editar y guardar sucesor preserva documento e identidad histór
   await enable(page);
   await select(page);
   await page
-    .getByRole("button", { name: "Preparar sucesor desde esta resolución", exact: true })
+    .getByRole("button", { name: "Preparar nueva versión a partir de esta", exact: true })
     .click();
   await openDocument(page);
   await expect(page.getByLabel("Análisis de necesidad", { exact: true })).toHaveValue(
     "PRUEBA: necesidad antigua"
   );
   await page.getByLabel("Análisis de necesidad", { exact: true }).fill("PRUEBA: necesidad nueva");
-  await page.getByRole("button", { name: "Registrar resolución ficticia", exact: true }).click();
-  await expect(page.getByRole("status")).toContainText("Resolución documental 2 registrada");
+  await page
+    .getByRole("button", { name: "Registrar nueva versión documental ficticia", exact: true })
+    .click();
+  await expect(page.getByRole("status")).toContainText(
+    "Versión documental de infancia 2 registrada"
+  );
   const rows = await page.evaluate(() => (window as any).demo.rows);
   expect(rows[0].document.necessity_analysis).toBe("PRUEBA: necesidad antigua");
   expect(rows[1].document.necessity_analysis).toBe("PRUEBA: necesidad nueva");
@@ -613,7 +643,9 @@ test("añade y quita filas y limpia secciones sin arrastrar campos eliminados", 
   await mount(page);
   await enable(page);
   await openDocument(page);
-  await page.getByLabel("Referencia de la resolución *", { exact: true }).fill("PRUEBA: quitar");
+  await page
+    .getByLabel("Referencia del documento de infancia *", { exact: true })
+    .fill("PRUEBA: quitar");
   await page.getByRole("button", { name: "Añadir riesgos", exact: true }).click();
   await page.getByLabel("Riesgos 1 — Descripción", { exact: true }).fill("PRUEBA: quitar");
   await page.getByRole("button", { name: "Quitar riesgos 1", exact: true }).click();
@@ -621,7 +653,9 @@ test("añade y quita filas y limpia secciones sin arrastrar campos eliminados", 
     .getByLabel("Fuentes del documento — Análisis de aplicabilidad", { exact: true })
     .fill("PRUEBA: quitar");
   await page.getByRole("button", { name: "Limpiar fuentes del documento", exact: true }).click();
-  await page.getByRole("button", { name: "Registrar resolución ficticia", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Registrar nueva versión documental ficticia", exact: true })
+    .click();
   await expect(page.getByRole("status")).toContainText("registrada");
   expect(JSON.parse((await posts(page))[0].options.body).document).toMatchObject({
     risks: [],
@@ -633,12 +667,16 @@ for (const mode of ["denied", "unknown"])
     await mount(page);
     await enable(page);
     await openDocument(page);
-    await page.getByLabel("Referencia de la resolución *", { exact: true }).fill("PRUEBA: error");
+    await page
+      .getByLabel("Referencia del documento de infancia *", { exact: true })
+      .fill("PRUEBA: error");
     await page
       .getByLabel("Análisis de necesidad", { exact: true })
       .fill("PRUEBA: conservar análisis");
     await page.evaluate((mode) => ((window as any).demo.mode = mode), mode);
-    await page.getByRole("button", { name: "Registrar resolución ficticia", exact: true }).click();
+    await page
+      .getByRole("button", { name: "Registrar nueva versión documental ficticia", exact: true })
+      .click();
     await expect(page.getByRole("alert")).toBeVisible();
     await expect(page.getByLabel("Análisis de necesidad", { exact: true })).toHaveValue(
       "PRUEBA: conservar análisis"
@@ -681,13 +719,17 @@ test("respuesta que pierde un análisis no afirma éxito ni permite repetir", as
   await mount(page);
   await enable(page);
   await openDocument(page);
-  await page.getByLabel("Referencia de la resolución *", { exact: true }).fill("PRUEBA: perdida");
+  await page
+    .getByLabel("Referencia del documento de infancia *", { exact: true })
+    .fill("PRUEBA: perdida");
   await page.getByLabel("Análisis de necesidad", { exact: true }).fill("PRUEBA: preservar");
   await page.evaluate(() => ((window as any).demo.mode = "lost-analysis"));
-  await page.getByRole("button", { name: "Registrar resolución ficticia", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Registrar nueva versión documental ficticia", exact: true })
+    .click();
   await expect(page.getByRole("alert")).toContainText("Resultado incierto");
   await expect(
-    page.getByRole("button", { name: "Registrar resolución ficticia", exact: true })
+    page.getByRole("button", { name: "Registrar nueva versión documental ficticia", exact: true })
   ).toBeDisabled();
 });
 
@@ -695,7 +737,9 @@ test("códigos escritos en líneas sucesivas conservan el salto y el alcance", a
   await mount(page);
   await enable(page);
   await openDocument(page);
-  await page.getByLabel("Referencia de la resolución *", { exact: true }).fill("PRUEBA: códigos");
+  await page
+    .getByLabel("Referencia del documento de infancia *", { exact: true })
+    .fill("PRUEBA: códigos");
   const codes = page.getByLabel("Alcance del documento — Códigos de categorías de datos", {
     exact: true,
   });
@@ -704,7 +748,9 @@ test("códigos escritos en líneas sucesivas conservan el salto y el alcance", a
   await codes.press("Enter");
   await codes.pressSequentially("salud");
   await expect(codes).toHaveValue("id\nsalud");
-  await page.getByRole("button", { name: "Registrar resolución ficticia", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Registrar nueva versión documental ficticia", exact: true })
+    .click();
   await expect(page.getByRole("status")).toContainText("registrada");
   expect(
     JSON.parse((await posts(page))[0].options.body).document.scope.data_category_codes
@@ -719,7 +765,7 @@ test("campos completos y copia del sucesor bloqueados para consulta sin edición
   await expect(page.getByLabel("Análisis de necesidad", { exact: true })).toBeDisabled();
   await expect(page.getByRole("button", { name: "Añadir riesgos", exact: true })).toBeDisabled();
   await expect(
-    page.getByRole("button", { name: "Preparar sucesor desde esta resolución", exact: true })
+    page.getByRole("button", { name: "Preparar nueva versión a partir de esta", exact: true })
   ).toBeDisabled();
   expect(await posts(page)).toHaveLength(0);
 });
@@ -731,27 +777,33 @@ test("respuesta fundamentada se conserva y volver a sin declarar retira ambos ca
   await enable(page);
   await openDocument(page);
   await page
-    .getByLabel("Referencia de la resolución *", { exact: true })
+    .getByLabel("Referencia del documento de infancia *", { exact: true })
     .fill("PRUEBA: declaración");
   await page.getByLabel("Necesario para la finalidad", { exact: true }).selectOption("si");
   await page
     .getByLabel("Necesario para la finalidad — Fundamento", { exact: true })
     .fill("PRUEBA: fundamento");
-  await page.getByRole("button", { name: "Registrar resolución ficticia", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Registrar nueva versión documental ficticia", exact: true })
+    .click();
   await expect(page.getByRole("status")).toContainText("registrada");
   expect(JSON.parse((await posts(page))[0].options.body).document.necessary_for_purpose).toEqual({
     answer: "si",
     rationale: "PRUEBA: fundamento",
   });
   await page
-    .getByRole("button", { name: "Preparar sucesor desde esta resolución", exact: true })
+    .getByRole("button", { name: "Preparar nueva versión a partir de esta", exact: true })
     .click();
   await page.getByLabel("Necesario para la finalidad", { exact: true }).selectOption("");
   await expect(
     page.getByLabel("Necesario para la finalidad — Fundamento", { exact: true })
   ).toBeDisabled();
-  await page.getByRole("button", { name: "Registrar resolución ficticia", exact: true }).click();
-  await expect(page.getByRole("status")).toContainText("Resolución documental 3 registrada");
+  await page
+    .getByRole("button", { name: "Registrar nueva versión documental ficticia", exact: true })
+    .click();
+  await expect(page.getByRole("status")).toContainText(
+    "Versión documental de infancia 3 registrada"
+  );
   expect(JSON.parse((await posts(page))[1].options.body).document.necessary_for_purpose).toBeNull();
 });
 
@@ -762,12 +814,14 @@ test("error de alcance repetido explica revisión y conserva campos sin registra
   await enable(page);
   await openDocument(page);
   await page
-    .getByLabel("Referencia de la resolución *", { exact: true })
+    .getByLabel("Referencia del documento de infancia *", { exact: true })
     .fill("PRUEBA: alcance duplicado");
   await page
     .getByLabel("Alcance del documento — Códigos de categorías de datos", { exact: true })
     .fill("id\nid");
-  await page.getByRole("button", { name: "Registrar resolución ficticia", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Registrar nueva versión documental ficticia", exact: true })
+    .click();
   await expect(page.getByRole("alert")).toContainText("Documento no válido");
   await expect(
     page.getByLabel("Alcance del documento — Códigos de categorías de datos", { exact: true })
@@ -782,20 +836,24 @@ test("recorrido conserva observaciones por resolucion y confirma reemplazo de pr
   await mount(page);
   await enable(page);
   await select(page);
-  await page.getByLabel("Decisión de la revisión", { exact: true }).selectOption("no_continuar");
+  await page
+    .getByLabel("Resultado de la revisión documental", { exact: true })
+    .selectOption("no_continuar");
   await fillReview(page);
-  await page.getByRole("button", { name: "Consultar resolución 2", exact: true }).click();
+  await page.getByRole("button", { name: "Consultar versión documental 2", exact: true }).click();
   await expect(page.getByLabel("Fundamento de la revisión *", { exact: true })).toHaveValue("");
-  await page.getByRole("button", { name: "Consultar resolución 1", exact: true }).click();
-  await expect(page.getByLabel("Decisión de la revisión", { exact: true })).toHaveValue(
+  await page.getByRole("button", { name: "Consultar versión documental 1", exact: true }).click();
+  await expect(page.getByLabel("Resultado de la revisión documental", { exact: true })).toHaveValue(
     "no_continuar"
   );
   await expect(page.getByLabel("Fundamento de la revisión *", { exact: true })).toHaveValue(
     "PRUEBA: falta evidencia"
   );
-  await page.getByLabel("Referencia de la resolución *", { exact: true }).fill("PRUEBA: pendiente");
   await page
-    .getByRole("button", { name: "Preparar sucesor desde esta resolución", exact: true })
+    .getByLabel("Referencia del documento de infancia *", { exact: true })
+    .fill("PRUEBA: pendiente");
+  await page
+    .getByRole("button", { name: "Preparar nueva versión a partir de esta", exact: true })
     .click();
   await expect(
     page.getByRole("alertdialog", { name: "Reemplazar documento en preparación" })
@@ -803,18 +861,21 @@ test("recorrido conserva observaciones por resolucion y confirma reemplazo de pr
   await page
     .getByRole("button", { name: "Conservar documento en preparación", exact: true })
     .click();
-  await expect(page.getByLabel("Referencia de la resolución *", { exact: true })).toHaveValue(
-    "PRUEBA: pendiente"
-  );
+  await expect(
+    page.getByLabel("Referencia del documento de infancia *", { exact: true })
+  ).toHaveValue("PRUEBA: pendiente");
   await page
-    .getByRole("button", { name: "Preparar sucesor desde esta resolución", exact: true })
+    .getByRole("button", { name: "Preparar nueva versión a partir de esta", exact: true })
     .click();
   await page
-    .getByRole("button", { name: "Reemplazar y copiar resolución seleccionada", exact: true })
+    .getByRole("button", {
+      name: "Reemplazar preparación con una copia de esta versión",
+      exact: true,
+    })
     .click();
-  await expect(page.getByLabel("Referencia de la resolución *", { exact: true })).toHaveValue(
-    "PRUEBA: resolucion 1"
-  );
+  await expect(
+    page.getByLabel("Referencia del documento de infancia *", { exact: true })
+  ).toHaveValue("PRUEBA: resolucion 1");
   expect((await posts(page)).length).toBe(0);
 });
 
@@ -825,18 +886,48 @@ test("vista integrada separa revision de decision y no preselecciona resultado",
   await enable(page);
   await select(page);
   await expect(page.getByLabel("Tipo de actuación", { exact: true })).toHaveValue("revision");
-  await expect(page.getByLabel("Decisión de la revisión", { exact: true })).toHaveValue("");
+  await expect(page.getByLabel("Resultado de la revisión documental", { exact: true })).toHaveValue(
+    ""
+  );
   await page.getByLabel("Tipo de actuación", { exact: true }).selectOption("decision");
-  await expect(page.getByLabel("Decisión de la revisión", { exact: true })).toBeHidden();
+  await expect(
+    page.getByLabel("Resultado de la revisión documental", { exact: true })
+  ).toBeHidden();
   await expect(
     page.getByText("Decisión de organización: requiere una facultad vigente", { exact: false })
   ).toBeVisible();
   await page.getByLabel("Tipo de actuación", { exact: true }).selectOption("revision");
   await page
-    .getByLabel("Decisión de la revisión", { exact: true })
+    .getByLabel("Resultado de la revisión documental", { exact: true })
     .selectOption("requiere_cambios");
   await expect(
     page.getByText("Requiere cambios: identifica faltantes", { exact: false })
   ).toBeVisible();
+  expect(await posts(page)).toHaveLength(0);
+});
+
+test("6B preparar y nombrar edición no registra una versión ni emite revisión", async ({
+  page,
+}) => {
+  await mount(page, { view: "prepare" });
+  await enable(page);
+  await page
+    .getByLabel("Referencia del documento de infancia *", { exact: true })
+    .fill("SIMULADA-6B-PREPARACION");
+  const edition = page.getByLabel("Nombre de la edición (texto libre)", { exact: true });
+  await edition.fill("Edición de ensayo libre");
+  await expect(edition).toHaveAccessibleDescription(
+    /No es el identificador ni el número de versión/
+  );
+  await expect(page.getByText(/Esta preparación es temporal en esta pestaña/)).toBeVisible();
+  await page
+    .getByRole("button", { name: "Ver vista previa de la versión por registrar", exact: true })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "Vista previa · todavía no registrada", exact: true })
+  ).toBeVisible();
+  await expect(page.getByText("Edición de ensayo libre", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Volver a completar documento", exact: true }).click();
+  await expect(edition).toHaveValue("Edición de ensayo libre");
   expect(await posts(page)).toHaveLength(0);
 });

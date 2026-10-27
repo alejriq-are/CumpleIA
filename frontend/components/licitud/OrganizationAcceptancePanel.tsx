@@ -1,4 +1,5 @@
 "use client";
+import { documentLabels } from "@/lib/licitud/document-labels";
 import { useState, useEffect, useRef } from "react";
 import { ApiError } from "@/lib/api/client";
 import type {
@@ -293,9 +294,9 @@ export function OrganizationAcceptancePanel({
             <fieldset disabled={disabled || own?.action !== "otorgar"} className="space-y-3">
               <legend>Decisión sobre el documento consultado</legend>
               <label className="block">
-                Decisión documental
+                {documentLabels.organizationDecision}
                 <select
-                  aria-label="Decisión documental"
+                  aria-label={documentLabels.organizationDecision}
                   value={choice}
                   required
                   aria-describedby="organization-choice-help"
@@ -347,7 +348,7 @@ export function OrganizationAcceptancePanel({
           <ul>
             {snapshot.events.map((v) => (
               <li key={v.id} className="space-y-1 rounded border p-3">
-                <p>{labels[v.decision]}</p>
+                <p>Decisión de la organización: {labels[v.decision]}</p>
                 <p>{v.rationale}</p>
                 <p>{v.evidence_reference}</p>
                 <p>

@@ -1,6 +1,7 @@
 "use client";
 import type { RiskEvaluation, Annex } from "@/lib/api/assessment-support";
-import { useEffect, useRef, useState } from "react";
+import { documentLabels } from "@/lib/licitud/document-labels";
+import { useEffect, useId, useRef, useState } from "react";
 import { documentFields } from "@/lib/licitud/eipd-document";
 import { ApiError } from "@/lib/api/client";
 import {
@@ -42,6 +43,7 @@ export function EipdDraftEditor({
   step?: number;
   onStepChange?: (step: number) => void;
 }) {
+  const editionHelpId = useId();
   const [localStep, setLocalStep] = useState(0);
   const activeStep = onStepChange ? step : localStep;
   const changeStep = onStepChange ?? setLocalStep;
@@ -215,9 +217,10 @@ export function EipdDraftEditor({
               />
             </label>
             <label className="block">
-              Etiqueta del documento EIPD
+              {documentLabels.edition}
               <input
-                aria-label="Etiqueta del documento EIPD"
+                aria-label={documentLabels.edition}
+                aria-describedby={editionHelpId}
                 className="block w-full rounded border p-2"
                 value={String(doc.document_version ?? "")}
                 onChange={(e) =>
@@ -225,6 +228,13 @@ export function EipdDraftEditor({
                 }
               />
             </label>
+            <p id={editionHelpId} className="text-sm">
+              {documentLabels.editionHelp}
+            </p>
+            <p className="text-sm">
+              Guardar borrador EIPD actualiza este documento de la evaluación seleccionada; no
+              registra otra versión ni una revisión documental.
+            </p>
             <EipdDocumentFields
               value={doc}
               onChange={(value) => {

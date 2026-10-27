@@ -1,5 +1,61 @@
 # Handoff vigente de CumpleIA
 
+## Cierre asistido y publicación autorizada de 6B — 27/10/2026
+
+Usuario solicita commit y autoriza push al terminar las comprobaciones asistidas.
+Rama `feature/navegacion-6b-operaciones`, base d9f859f. Se acepta con el alcance
+observado y confirmado: nombres de edición y pasos EIPD, disponibilidad independiente
+por tema, matriz alineada/coloreada, aviso ante reemplazo de preparación, cambio entre
+revisión documental y decisión de organización («resultado OK»), conservación al volver
+a preparación y regreso desde vista previa con referencia, PRUEBA-1 y notas intactas.
+El usuario guardó expresamente una determinación ficticia de infancia Corresponde en
+el programa con menores, manteniendo EIPD pendiente; capturas confirman su acceso.
+Se encontraron dos versiones históricas; durante el guion no se solicitó registrar
+otra ni emitir revisión/decisión. La vista previa mostró registro deshabilitado sin
+revisión de contenido; volver mantuvo los campos. La preparación conservada no acredita
+una copia nueva ni persistencia después de recargar. No atribuir esos ensayos al usuario.
+
+171 escenarios automatizados distintos aprobados: 157 del bloque y 14 del formulario de
+valoración (3 nuevos de matriz). Tipos/lint/formato correctos; capturas controladas de
+1280/390/320 revisadas. Ausencia de registro, negativas, información insuficiente,
+asociación por revisar y errores/carga conservan evidencia controlada, no nueva aceptación
+manual. La prueba integrada API aislada no se ejecutó. Sin cambios backend ni reglas de
+activación EIPD. NAV-UX-006 permanece abierto para los demás sublotes.
+
+Este cierre sustituye los pendientes de aceptación asistida anteriores solo con ese
+alcance. Commit/push autorizado para estos cambios y documentación; excluir next-env.d.ts
+generado y outputs/ locales. No hacer merge/despliegue ni iniciar 7A en este cierre.
+Siguiente bloque propuesto: 7A, teclado y foco, pendiente de indicación del usuario.
+
+## Ajuste visual solicitado durante 6B — matriz Probabilidad / Impacto
+
+26/10/2026. Usuario solicita alinear cabeceras y distinguir niveles por color.
+Implementado en AssessmentSupportPanel: tabla de columnas fijas, títulos y valores
+centrados, bordes visibles y cabeceras con scope de fila/columna. Bajo verde suave
+(#dcfce7), Medio amarillo suave (#fef9c3), Alto naranja suave (#fed7aa), Muy alto rojo
+suave (#fecaca), con texto oscuro (#0f172a), nombres explícitos y cabeceras neutras.
+Contraste calculado texto/fondo: 16,26; 16,62; 13,19 y 12,34 a 1 respectivamente.
+No se modifican valores de la matriz, metodología ni cálculo; el color es apoyo visual.
+En ventana estrecha se conserva desplazamiento horizontal local con acceso por teclado.
+
+14 escenarios del formulario aprobados, incluidos 3 de alineación/colores y dimensiones
+1280/390/320; tipos y ESLint correctos. Capturas revisadas en outputs/matriz-6b (locales,
+no publicar). Respuestas ficticias controladas; pendiente revisión visual por usuario en
+Valorar riesgos → Metodología CUMPLEIA-CUALITATIVA-1 y criterios. Sin commit/push nuevo.
+
+## Bloque 6B implementado localmente — 26/10/2026
+
+Usuario solicita continuar 6B. Rama `feature/navegacion-6b-operaciones`, base publicada
+`d9f859f9742cd013479e002536f366ad6573ca5a`. Operaciones documentales diferenciadas,
+nombre libre de edición con ayuda, siete pasos EIPD alineados y razones de disponibilidad
+por tema, sin acceso al editor bloqueado. Conservados contratos, históricos y borradores;
+sin cambios backend ni activación EIPD. 157 escenarios distintos aprobados con fixtures,
+tipos/lint/formato correctos y capturas escritorio/390/320 revisadas. No atribuir ensayo
+integrado contra el servidor del usuario. Pendiente aceptación asistida según
+[guion y evidencia](project/navegacion-servidor.md#bloque-6b--operaciones-documentales-y-disponibilidad).
+Sin commit/push nuevo ni inicio de 7A. Excluir `frontend/next-env.d.ts` generado y `outputs/`.
+Las entradas inferiores conservan antecedentes del cierre anterior.
+
 ## Publicación autorizada del bloque 6A — 26/10/2026
 
 Usuario solicita commit y autoriza push del bloque 6A aceptado, en

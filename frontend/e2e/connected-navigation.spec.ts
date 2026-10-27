@@ -296,6 +296,18 @@ async function section(page: Page, name: string) {
     .getByRole("button", { name, exact: true })
     .click();
 }
+// A previously copied URL may still be opened while the menu explains a read failure.
+async function openSavedRoute(page: Page, target: string, step = 0) {
+  await page.evaluate(
+    ({ target, step }) => {
+      const params = new URLSearchParams(window.location.hash.split("?")[1]);
+      params.delete("step");
+      if (step) params.set("step", String(step));
+      window.location.hash = `/licitud/${target}?${params}`;
+    },
+    { target, step }
+  );
+}
 async function choose(page: Page, id = aid) {
   await page.getByRole("button", { name: "Cambiar contexto", exact: true }).click();
   const dialog = page.getByRole("dialog", { name: "Contexto de trabajo", exact: true });
@@ -357,8 +369,10 @@ test("aplicabilidad guardada, aislamiento, enlaces y reapertura desde servidor",
   await legal(page);
   await page.locator("header").getByRole("button", { name: "Secciones", exact: true }).click();
   await expect(
-    page.getByRole("dialog").getByText("Completar EIPD", { exact: true })
-  ).not.toBeVisible();
+    page
+      .getByRole("dialog")
+      .getByRole("button", { name: "Tratamiento y alcance de la EIPD", exact: true })
+  ).toHaveCount(0);
   await page.keyboard.press("Escape");
   await enable(page);
   await capture(page, "conectada-aplicabilidad-escritorio.png");
@@ -603,7 +617,7 @@ test("recuperar aplicabilidad conserva borradores de determinación y base", asy
     })
     .click();
   await expect(main(page).getByRole("alert")).toContainText("PRUEBA determinación no disponible");
-  await section(page, "Tratamiento y alcance de la EIPD");
+  await openSavedRoute(page, "eipd");
   await expect(main(page).getByRole("alert")).toContainText("PRUEBA determinación no disponible");
   await main(page)
     .getByRole("button", { name: "Ir a Determinar aplicabilidad", exact: true })
@@ -1036,14 +1050,7 @@ for (const target of ["eipd", "infancia", "preparar"]) {
       })
       .click();
     await expect.poll(() => !!releaseApplicability).toBe(true);
-    await section(
-      page,
-      target === "eipd"
-        ? "Tratamiento y alcance de la EIPD"
-        : target === "infancia"
-          ? "Completar infancia y adolescencia"
-          : "Preparar resolución documental"
-    );
+    await openSavedRoute(page, target);
     const topic = target === "eipd" ? "eipd" : "infancia";
     determinations[aid] = {
       ...determinations[aid],
@@ -1458,13 +1465,12 @@ test("6A grupos múltiples y nota EIPD conservada al consultar y continuar", asy
   await expect(
     group.getByRole("button", { name: "Tratamiento y alcance de la EIPD", exact: true })
   ).toHaveAttribute("aria-current", "page");
-  await group.getByRole("button", { name: "Riesgos", exact: true }).click();
+  await group.getByRole("button", { name: "Describir riesgos", exact: true }).click();
   await expect(page).toHaveURL(/step=2/);
   await group.locator("summary").click();
-  await expect(group.getByRole("button", { name: "Riesgos", exact: true })).toHaveAttribute(
-    "aria-current",
-    "page"
-  );
+  await expect(
+    group.getByRole("button", { name: "Describir riesgos", exact: true })
+  ).toHaveAttribute("aria-current", "page");
   await group
     .getByRole("button", { name: "Tratamiento y alcance de la EIPD", exact: true })
     .click();
@@ -1538,3 +1544,168 @@ test("6A enlace anterior conserva IDs y nombre único del inventario", async ({ 
   expect(calls.filter((call) => call.method !== "GET")).toEqual([]);
   expect(errors).toEqual([]);
 });
+
+for (const scenario of [
+  {
+    name: "sin registro",
+    revision: 0,
+    current: false,
+    state: "pendiente",
+    reason: "Todavía no hay una determinación guardada",
+  },
+  {
+    name: "pendiente",
+    revision: 1,
+    current: true,
+    state: "pendiente",
+    reason: "Pendiente de analizar",
+  },
+  {
+    name: "no corresponde",
+    revision: 1,
+    current: true,
+    state: "no_corresponde",
+    reason: "No corresponde",
+  },
+  {
+    name: "información insuficiente",
+    revision: 1,
+    current: true,
+    state: "informacion_insuficiente",
+    reason: "Información insuficiente",
+  },
+  {
+    name: "asociación por revisar",
+    revision: 1,
+    current: false,
+    state: "corresponde",
+    reason: "revisar su asociación",
+  },
+]) {
+  test(`6B disponibilidad explica ${scenario.name} sin ofrecer editor`, async ({ page }) => {
+    determinations[aid] = {
+      ...applicability(aid),
+      revision: scenario.revision,
+      current: scenario.current,
+      eipd: { state: scenario.state, reason: "[FICTICIA]" },
+      infancia: { state: scenario.state, reason: "[FICTICIA]" },
+    };
+    await legal(page);
+    const group = page
+      .locator("header details")
+      .filter({ has: page.locator("summary", { hasText: "EIPD: disponibilidad" }) });
+    await group.locator("summary").click();
+    await expect(group).toContainText(scenario.reason);
+    await expect(
+      group.getByRole("button", { name: "Tratamiento y alcance de la EIPD", exact: true })
+    ).toHaveCount(0);
+    await group.getByRole("button", { name: "Ir a Determinar aplicabilidad", exact: true }).click();
+    await expect(
+      main(page).getByRole("heading", { name: "Determinar aplicabilidad", exact: true })
+    ).toBeVisible();
+    await expect(
+      main(page).getByRole("button", {
+        name: "Consultar última determinación guardada",
+        exact: true,
+      })
+    ).toBeVisible();
+    expect(calls.filter((call) => call.method !== "GET")).toEqual([]);
+    expect(errors).toEqual([]);
+  });
+}
+
+test("6B disponibilidad de cada tema depende de lo guardado y no del borrador", async ({
+  page,
+}) => {
+  determinations[aid] = serverDetermination(1);
+  await legal(page);
+  const header = page.locator("header");
+  const eipdGroup = header
+    .locator("details")
+    .filter({ has: page.locator("summary", { hasText: "Completar EIPD" }) });
+  await main(page)
+    .getByLabel("¿Corresponde documentar infancia y adolescencia?", { exact: true })
+    .selectOption("corresponde");
+  await main(page)
+    .getByLabel("Fundamento sobre infancia y adolescencia", { exact: true })
+    .fill("[FICTICIA] Sin guardar");
+  const childGroup = header.locator("details").filter({
+    has: page.locator("summary", { hasText: "Infancia y adolescencia: disponibilidad" }),
+  });
+  await childGroup.locator("summary").click();
+  await expect(childGroup).toContainText("Pendiente de analizar");
+  await expect(
+    childGroup.getByRole("button", { name: "Completar infancia y adolescencia", exact: true })
+  ).toHaveCount(0);
+  await eipdGroup.locator("summary").click();
+  await expect(eipdGroup.getByRole("button")).toHaveCount(7);
+  await eipdGroup.getByRole("button", { name: "Describir riesgos", exact: true }).click();
+  await expect(page).toHaveURL(/step=2/);
+  await expect(
+    main(page).getByRole("button", { name: "3. Describir riesgos", exact: true })
+  ).toBeVisible();
+  await section(page, "Tratamiento y alcance de la EIPD");
+  await main(page)
+    .getByRole("textbox", { name: "Nombre de la edición (texto libre)", exact: true })
+    .fill("[FICTICIA] Edición libre");
+  await expect(main(page)).toContainText("no registra otra versión ni una revisión documental");
+  await section(page, "Determinar aplicabilidad");
+  await expect(
+    main(page).getByLabel("Fundamento sobre infancia y adolescencia", { exact: true })
+  ).toHaveValue("[FICTICIA] Sin guardar");
+  expect(determinations[aid].revision).toBe(1);
+  expect(calls.filter((call) => call.method !== "GET")).toEqual([]);
+});
+
+test("6B cargar y fallar la consulta no se presentan como No corresponde", async ({ page }) => {
+  determinations[aid] = serverDetermination(1);
+  await legal(page);
+  mode = "app-hold-fail";
+  await querySaved(page).click();
+  await expect.poll(() => !!releaseApplicability).toBe(true);
+  const group = page
+    .locator("header details")
+    .filter({ has: page.locator("summary", { hasText: "EIPD: disponibilidad" }) });
+  await group.locator("summary").click();
+  await expect(group).toContainText("Consultando la determinación guardada");
+  await expect(
+    group.getByRole("button", { name: "Tratamiento y alcance de la EIPD", exact: true })
+  ).toHaveCount(0);
+  releaseApplicability!();
+  await expect(group).toContainText("No se pudo consultar la disponibilidad");
+  await expect(group).not.toContainText("indica «No corresponde»");
+  mode = "ok";
+  await group.getByRole("button", { name: "Ir a Determinar aplicabilidad", exact: true }).click();
+  await querySaved(page).click();
+  await expect(page.locator("header summary").filter({ hasText: "Completar EIPD" })).toBeVisible();
+  expect(calls.filter((call) => call.method !== "GET")).toEqual([]);
+});
+
+for (const width of [1280, 390, 320]) {
+  test(`6B disponibilidad visible y legible en ${width}px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 900 });
+    determinations[aid] = serverDetermination(1);
+    await legal(page);
+    if (width < 768) {
+      await page.getByRole("button", { name: "Secciones", exact: true }).click();
+      const drawer = page.getByRole("dialog", { name: "Secciones del módulo", exact: true });
+      await expect(drawer).toContainText("Infancia y adolescencia: disponibilidad");
+      await expect(drawer).toContainText("Pendiente de analizar");
+      await drawer.getByText(/La determinación guardada está/).scrollIntoViewIfNeeded();
+      await expect(
+        drawer.getByRole("button", { name: "Completar infancia y adolescencia", exact: true })
+      ).toHaveCount(0);
+    } else {
+      const group = page.locator("header details").filter({
+        has: page.locator("summary", { hasText: "Infancia y adolescencia: disponibilidad" }),
+      });
+      await group.locator("summary").click();
+      await expect(group).toContainText("Pendiente de analizar");
+    }
+    await capture(page, `6b-disponibilidad-${width}.png`);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+      true
+    );
+    expect(calls.filter((call) => call.method !== "GET")).toEqual([]);
+  });
+}

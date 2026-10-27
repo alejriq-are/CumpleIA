@@ -1,7 +1,8 @@
 "use client";
+import { documentLabels } from "@/lib/licitud/document-labels";
 import { type ReactNode } from "react";
 import { EipdDocumentFields, EipdDocumentView } from "./EipdDocumentFields";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { legalBases, type Assessment } from "@/lib/api/licitud";
 import type { ChildAssessment } from "@/lib/api/child-adolescent";
 import { liaFields } from "@/lib/licitud/lia-fields";
@@ -70,6 +71,7 @@ export function ChildEipdHistory({
   preparationBlocked = false,
   onPending,
 }: Props) {
+  const editionHelpId = useId();
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
   const [selected, setSelected] = useState<ChildResolution | null>(null);
   const [events, setEvents] = useState<ChildReview[]>([]);
@@ -220,7 +222,7 @@ export function ChildEipdHistory({
           setReviewed("");
           onRecorded?.();
           setMessage(
-            `Resolución documental ${saved.version} registrada. EIPD permanece bloqueada.`
+            `Versión documental de infancia ${saved.version} registrada. El original se conserva y EIPD permanece bloqueada.`
           );
         }
       } else if (selected && decision) {
@@ -270,7 +272,7 @@ export function ChildEipdHistory({
     setReviewed("");
     onPrepare?.();
     setMessage(
-      "Copia editable preparada. El registro original no cambia; al guardar se crea otra versión."
+      "Copia temporal preparada. Todavía no está registrada en el servidor; Registrar nueva versión documental crea el nuevo registro y conserva el original."
     );
   }
   return (
@@ -280,12 +282,16 @@ export function ChildEipdHistory({
     >
       <h2 className="text-xl font-semibold">
         {view === "prepare"
-          ? "Preparar resolución documental de infancia"
-          : "Resoluciones y revisiones de infancia"}
+          ? documentLabels.prepareChild
+          : "Versiones registradas y revisiones de infancia"}
       </h2>
       <p>
         Pruebas de desarrollo: utiliza solo datos ficticios. Los registros son inmutables. La
         confirmación y la activación EIPD permanecen bloqueadas.
+      </p>
+      <p className="text-sm">
+        En los antecedentes anteriores, cada versión registrada se denomina «resolución documental».
+        Sus números, referencias y documentos conservados no cambian.
       </p>
       <p>
         Esta consulta es histórica: no acredita vigencia del material actual ni concede
@@ -336,14 +342,20 @@ export function ChildEipdHistory({
                 disabled={!editable || busy || !fictitious || preparationBlocked}
                 className="space-y-3"
               >
-                <legend>Preparar documento sucesor EIPD</legend>
+                <legend>{documentLabels.prepareChild}</legend>
+                <p className="rounded border border-blue-200 bg-blue-50 p-3">
+                  Esta preparación es temporal en esta pestaña: copiar o ver la vista previa no
+                  guarda una nueva versión en el servidor. Solo Registrar nueva versión documental
+                  crea el registro. Las versiones anteriores se conservan. No recargues si deseas
+                  conservar esta preparación temporal.
+                </p>
                 <p>
                   Completa el documento y sus análisis. Puedes registrar faltantes sin declarar una
                   EIPD completa ni conceder autorización. Se vincula al último documento de infancia
                   guardado; guarda primero sus cambios en el editor de infancia.
                 </p>
                 <label className="block">
-                  Referencia de la resolución *
+                  Referencia del documento de infancia *
                   <input
                     className="block w-full rounded border p-2"
                     required
@@ -352,25 +364,29 @@ export function ChildEipdHistory({
                   />
                 </label>
                 <label className="block">
-                  Versión del documento
+                  {documentLabels.edition}
                   <input
                     className="block w-full rounded border p-2"
+                    aria-describedby={editionHelpId}
                     value={draft.version}
                     onChange={(e) => setDraft((d) => ({ ...d, version: e.target.value }))}
                   />
                 </label>
                 <label className="block">
-                  Notas de la resolución
+                  Notas del documento de infancia
                   <textarea
                     className="block w-full rounded border p-2"
-                    aria-label="Notas de la resolución"
+                    aria-label="Notas del documento de infancia"
                     value={draft.notes}
                     onChange={(e) => setDraft((d) => ({ ...d, notes: e.target.value }))}
                   />
                 </label>
+                <p id={editionHelpId} className="text-sm">
+                  {documentLabels.editionHelp}
+                </p>
                 <EipdDocumentFields value={document} onChange={setDocument} />
                 {view === "all" ? (
-                  <button type="submit">Registrar resolución ficticia</button>
+                  <button type="submit">{documentLabels.registerChild}</button>
                 ) : (
                   <>
                     <button
@@ -381,11 +397,11 @@ export function ChildEipdHistory({
                         setReviewed("");
                       }}
                     >
-                      Preparar documento para revisión
+                      Ver vista previa de la versión por registrar
                     </button>
                     {preparing && (
                       <aside
-                        aria-label="Vista previa de resolución"
+                        aria-label="Vista previa de la versión documental"
                         className="space-y-3 rounded border border-blue-300 bg-blue-50 p-4"
                       >
                         <h3 className="font-semibold">Vista previa · todavía no registrada</h3>
@@ -401,10 +417,10 @@ export function ChildEipdHistory({
                             {draft.reference || "Pendiente de completar"}
                           </dd>
                           <dt className="rounded-t border border-blue-200 bg-blue-100 px-3 py-2 font-semibold text-blue-950">
-                            Etiqueta de versión
+                            {documentLabels.edition}
                           </dt>
                           <dd className="rounded-b border border-t-0 border-blue-200 bg-white px-3 py-3 whitespace-pre-wrap break-words text-slate-950">
-                            {draft.version || "Sin etiqueta (opcional)"}
+                            {draft.version || "Sin nombre de edición (opcional)"}
                           </dd>
                           <dt className="rounded-t border border-blue-200 bg-blue-100 px-3 py-2 font-semibold text-blue-950">
                             Notas específicas
@@ -534,7 +550,7 @@ export function ChildEipdHistory({
                           className="rounded bg-blue-800 px-4 py-2 text-white disabled:opacity-50"
                           disabled={reviewed !== fingerprint || !draft.reference.trim()}
                         >
-                          Registrar resolución ficticia
+                          {documentLabels.registerChild}
                         </button>
                       </aside>
                     )}
@@ -544,22 +560,24 @@ export function ChildEipdHistory({
             </form>
           </div>
           <div hidden={view === "prepare"}>
-            <h3 className="font-semibold">Resoluciones guardadas</h3>
+            <h3 className="font-semibold">{documentLabels.registeredChild}</h3>
             {snapshot.resolutions.length === 0 && (
-              <p>No hay resoluciones de infancia registradas.</p>
+              <p>No hay versiones del documento de infancia registradas.</p>
             )}
             <ul>
               {snapshot.resolutions.map((row) => (
                 <li key={row.id}>
                   <button type="button" disabled={busy} onClick={() => void choose(row)}>
-                    Consultar resolución {row.version}
+                    Consultar versión documental {row.version}
                   </button>
                 </li>
               ))}
             </ul>
             {selected && (
               <>
-                <h3 className="font-semibold">Resolución {selected.version} consultada</h3>
+                <h3 className="font-semibold">
+                  Versión documental de infancia {selected.version} consultada
+                </h3>
                 <EipdDocumentView value={selected.document} />
                 {view !== "all" && (
                   <label className="block font-medium">
@@ -572,7 +590,7 @@ export function ChildEipdHistory({
                       onChange={(e) => setActuation(e.target.value as "revision" | "decision")}
                     >
                       <option value="revision">Revisión del documento</option>
-                      <option value="decision">Decisión documental de organización</option>
+                      <option value="decision">Decisión de la organización</option>
                     </select>
                   </label>
                 )}
@@ -591,7 +609,7 @@ export function ChildEipdHistory({
                   disabled={!editable || busy}
                   onClick={() => (pending ? setConfirmCopy(true) : copySelected())}
                 >
-                  Preparar sucesor desde esta resolución
+                  {documentLabels.copyChild}
                 </button>
                 {confirmCopy && (
                   <aside
@@ -604,7 +622,7 @@ export function ChildEipdHistory({
                       original y las versiones registradas no cambian.
                     </p>
                     <button type="button" disabled={busy} onClick={copySelected}>
-                      Reemplazar y copiar resolución seleccionada
+                      Reemplazar preparación con una copia de esta versión
                     </button>
                     <button type="button" onClick={() => setConfirmCopy(false)}>
                       Conservar documento en preparación
@@ -619,7 +637,7 @@ export function ChildEipdHistory({
                     {String(selected.document.document_reference ?? "Sin referencia")}
                   </dd>
                   <dt className="rounded-t border border-blue-200 bg-blue-100 px-3 py-2 font-semibold text-blue-950">
-                    Versión documental
+                    {documentLabels.edition}
                   </dt>
                   <dd className="rounded-b border border-t-0 border-blue-200 bg-white px-3 py-3 whitespace-pre-wrap break-words text-slate-950">
                     {String(selected.document.document_version ?? "Sin declarar")}
@@ -681,12 +699,12 @@ export function ChildEipdHistory({
                     <fieldset disabled={!editable || busy || !fictitious} className="space-y-3">
                       <legend>Registrar revisión negativa</legend>
                       <label className="block">
-                        Decisión de la revisión
+                        {documentLabels.reviewResult}
                         <select
                           className="block w-full rounded border p-2"
                           value={decision}
                           required
-                          aria-label="Decisión de la revisión"
+                          aria-label={documentLabels.reviewResult}
                           aria-describedby="persisted-review-help"
                           onChange={(e) => setDecision(e.target.value as NegativeDecision)}
                         >
@@ -725,12 +743,15 @@ export function ChildEipdHistory({
                     </fieldset>
                   </form>
                 </div>
-                <h3 className="font-semibold">Revisiones de esta resolución</h3>
-                {events.length === 0 && <p>No hay revisiones registradas para esta resolución.</p>}
+                <h3 className="font-semibold">Revisiones de esta versión documental</h3>
+                {events.length === 0 && (
+                  <p>No hay revisiones registradas para esta versión documental.</p>
+                )}
                 <ul>
                   {events.map((event) => (
                     <li key={event.id} className="rounded border p-3">
                       <p>
+                        Resultado de la revisión documental:{" "}
                         {event.decision === "requiere_cambios"
                           ? "Requiere cambios"
                           : "No continuar"}

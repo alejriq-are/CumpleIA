@@ -165,10 +165,10 @@ test("formulario y cliente reales registran una negativa en API aislada", async 
       .getByRole("checkbox", { name: "Declaro que este registro usa datos ficticios" })
       .check();
     await page
-      .getByLabel("Referencia de la resolución *", { exact: true })
+      .getByLabel("Referencia del documento de infancia *", { exact: true })
       .fill("PRUEBA-RES-CHROMIUM-INFANCIA");
     await page
-      .getByLabel("Notas de la resolución", { exact: true })
+      .getByLabel("Notas del documento de infancia", { exact: true })
       .fill("PRUEBA: sucesor Chromium aislado");
     await page
       .getByText("Análisis, riesgos, medidas, fuentes y evidencias", { exact: true })
@@ -196,8 +196,12 @@ test("formulario y cliente reales registran una negativa en API aislada", async 
     await page
       .getByLabel("Fuentes del documento — Fuentes 1 — Referencia de la fuente", { exact: true })
       .fill("PRUEBA: fuente ficticia integrada");
-    await page.getByRole("button", { name: "Registrar resolución ficticia", exact: true }).click();
-    await expect(page.getByRole("status")).toContainText("Resolución documental 1 registrada");
+    await page
+      .getByRole("button", { name: "Registrar nueva versión documental ficticia", exact: true })
+      .click();
+    await expect(page.getByRole("status")).toContainText(
+      "Versión documental de infancia 1 registrada"
+    );
     await page
       .getByLabel("Fundamento de la revisión *", { exact: true })
       .fill("PRUEBA: faltan evidencias ficticias");
@@ -207,7 +211,7 @@ test("formulario y cliente reales registran una negativa en API aislada", async 
     await page.getByRole("button", { name: "Registrar revisión ficticia", exact: true }).click();
     await expect(page.getByRole("status")).toContainText("Revisión negativa registrada");
     await page.getByRole("button", { name: "Actualizar historial de infancia" }).click();
-    await page.getByRole("button", { name: "Consultar resolución 1", exact: true }).click();
+    await page.getByRole("button", { name: "Consultar versión documental 1", exact: true }).click();
     await expect(page.getByText("PRUEBA-CHROMIUM-INFANCIA-V4", { exact: true })).toBeVisible();
     // El servidor tambien debe rechazar la decision positiva fuera del formulario.
     const successor = await page.evaluate(

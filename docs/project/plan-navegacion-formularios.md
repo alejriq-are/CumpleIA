@@ -2,7 +2,7 @@
 
 Fecha: 26 de octubre de 2026. Base funcional: `2e3f5460190185413f6e85243ad59958ba148463`.
 
-Estado al 26/10/2026: **6A aceptado con el alcance asistido documentado; commit/push autorizado el 26/10/2026**. Los demás sublotes no se han iniciado. La autorización del usuario para continuar 6A sucede a la publicación documental del plan en d42b2e9. [Análisis, decisiones P1–P13 y glosario G01–G30](evaluacion-propuestas-claude.md).
+Estado al 27/10/2026: **6A publicado; 6B aceptado con alcance asistido acotado y commit/push autorizado**. [Cierre y límites](navegacion-servidor.md#cierre-asistido-y-publicación-autorizada-de-6b--27102026). Próximo propuesto: 7A, pendiente de indicación; no se inicia en este cierre. [Análisis, decisiones P1–P13 y glosario G01–G30](evaluacion-propuestas-claude.md).
 
 ## 1. Alcance y secuencia
 
@@ -78,6 +78,10 @@ La captura estrecha antigua no prueba nombres nuevos; las pruebas controladas no
 Sin commit/push nuevo; no se inicia 6B.
 
 ### 6B. Operaciones documentales y disponibilidad
+
+**Estado:** aceptado con el alcance asistido documentado el 27/10/2026; commit/push autorizado.
+171 escenarios distintos aprobados incluyendo el ajuste de matriz; casos excepcionales con evidencia controlada.
+[Guion y límites de evidencia](navegacion-servidor.md#bloque-6b--operaciones-documentales-y-disponibilidad).
 
 **Resuelve:** P10/P11 y parte de P2; G04–G08, G10/G16/G18/G20/G24. Conserva mejoras de lotes 3–5.
 
@@ -336,6 +340,6 @@ Los códigos C se conservan como referencias históricas del checklist de revisi
 
 ## 12. Primer bloque para ejecutar
 
-**Estado: 6A aceptado con alcance asistido acotado; publicación autorizada el 26/10/2026.** Próximo bloque propuesto: 6B, pendiente de indicación; no se inicia en este cierre. No implementar aún la lista de pendientes, nuevos estados documentales, cambios de servidor o rediseño de todos los formularios.
+**Estado: 6B aceptado con alcance asistido acotado; publicación autorizada.** Siguiente propuesto: 7A, pendiente de indicación. No iniciar otros bloques, cambiar reglas del servidor ni rediseñar formularios en este cierre.
 
 Este plan se puede ajustar tras la aceptación del usuario. La estimación depende de la evidencia que surja en cada componente; no se prometen plazos ni mejoras porcentuales sin medición.

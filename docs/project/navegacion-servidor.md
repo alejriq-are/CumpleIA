@@ -746,3 +746,108 @@ pruebas y aceptación documentadas. Evidencia: 89 escenarios distintos anteriore
 ajuste visual; cinco dirigidos y captura después del ajuste. No atribuir nuevos ensayos
 manuales ni CI remota sin verificarlos. Generado next-env.d.ts y outputs locales excluidos.
 Las menciones previas de sin commit/push son antecedentes. Sin inicio de 6B, merge/despliegue.
+
+## Bloque 6B — operaciones documentales y disponibilidad
+
+Fecha: 26/10/2026. Implementación local en `feature/navegacion-6b-operaciones`,
+base publicada `d9f859f9742cd013479e002536f366ad6573ca5a`. Usuario solicita continuar
+exclusivamente 6B. Pendiente aceptación asistida; sin commit/push de este bloque.
+
+### Cambios y límites
+
+- Revisión formal: «Resultado de la revisión documental»; actuación independiente:
+  «Decisión de la organización». Se conservan valores y restricciones del servidor.
+- Infancia: «Versiones registradas del documento de infancia», «Preparar nueva versión
+  a partir de esta» y «Registrar nueva versión documental ficticia». Copiar y consultar
+  la vista previa preparan contenido temporal; solo el registro explícito crea una versión.
+  Las referencias históricas y la correspondencia con resolución documental se conservan.
+- `document_version` se presenta como «Nombre de la edición (texto libre)», separado de
+  Referencia, con ayuda: no asigna ID ni número de versión. Guardar el documento EIPD de
+  la misma evaluación no registra otra versión ni emite una revisión formal.
+- Siete pasos compartidos: Tratamiento y alcance de la EIPD; Necesidad y proporcionalidad;
+  Describir riesgos; Valorar riesgos; Medidas de mitigación; Fuentes y evidencias;
+  Riesgo residual y seguimiento. El tercer paso contiene descripción; la valoración
+  permanece en el cuarto. No se fusionan formularios ni se cambia cálculo alguno.
+- Navegación condicional: disponibilidad de cada tema informada por separado cuando no
+  tiene editor habilitado. Distingue sin registro, pendiente, No corresponde, información
+  insuficiente, asociación por revisar, consulta en curso y error. Solo ofrece orientación
+  a Determinar aplicabilidad; un borrador no guardado no habilita el editor.
+- No cambia backend, API, permisos, confirmación/activación EIPD ni persistencia.
+  No se introduce sincronización entre ventanas. Los rótulos validados del lote 5 siguen vigentes.
+
+### Evidencia controlada
+
+157 escenarios distintos aprobados: 33 infancia, 61 navegación conectada, 18 consulta EIPD,
+20 flujo documental, 12 decisión de organización y 13 expediente. Incluyen 11 escenarios
+nuevos 6B: razones de disponibilidad, independencia entre temas, borrador frente a guardado,
+carga/error, 1280/390/320 px y preparación/nombre libre sin registro ni revisión.
+Los selectores que aún esperaban nombres antiguos se actualizaron conservando sus
+aserciones de contenido, conservación y ausencia de escrituras prematuras; la pasada
+final aprobó 144 escenarios y los 13 de expediente por separado, sin sumar repeticiones.
+Tipos, ESLint, formato y revisión visual de capturas correctos. No hay desbordamiento
+horizontal en 320/390. Capturas locales: `outputs/navegacion-6b/`, fuera del commit.
+Son pruebas Chromium con respuestas ficticias controladas, no una aceptación integrada
+nueva sobre el servidor del usuario. `eipd-integrated.spec.ts` adapta los selectores, pero
+su recorrido con fixture API aislado no se ejecutó en este bloque.
+
+### Guion de aceptación asistida
+
+1. En `/dashboard/trabajo`, usar una evaluación con EIPD Corresponde guardada e infancia
+   Pendiente de analizar. Sin recargar una pestaña con cambios pendientes, comprobar que
+   Completar EIPD abre sus pasos y «Infancia y adolescencia: disponibilidad» explica el
+   pendiente y ofrece Ir a Determinar aplicabilidad. En estrecho usar Secciones.
+2. En Tratamiento y alcance de la EIPD, comprobar el campo «Nombre de la edición (texto
+   libre)» y su ayuda. Distinguirlo de Referencia y del número de evaluación. No guardar
+   por el solo hecho de probar el rótulo. Confirmar Describir riesgos frente a Valorar riesgos.
+3. En un contexto ficticio con infancia habilitada y una versión registrada, leer
+   Preparar nueva versión a partir de esta y la explicación de preparación temporal.
+   No registrar una versión durante esta comprobación de nombres. Si no hay versión,
+   dejar este caso pendiente; no crearla implícitamente para completar la prueba.
+4. Comprobar «Resultado de la revisión documental» frente a «Decisión de la organización»
+   donde el contexto permita consultar esos controles, sin emitir una decisión de prueba.
+
+Los casos no disponibles en los datos actuales mantienen evidencia controlada y aceptación
+asistida pendiente. No cerrar NAV-UX-006 globalmente ni iniciar 7A antes de este cierre.
+
+## Ajuste visual solicitado durante 6B — matriz Probabilidad / Impacto
+
+26/10/2026. Usuario solicita alinear cabeceras y distinguir niveles por color.
+Implementado en AssessmentSupportPanel: tabla de columnas fijas, títulos y valores
+centrados, bordes visibles y cabeceras con scope de fila/columna. Bajo verde suave
+(#dcfce7), Medio amarillo suave (#fef9c3), Alto naranja suave (#fed7aa), Muy alto rojo
+suave (#fecaca), con texto oscuro (#0f172a), nombres explícitos y cabeceras neutras.
+Contraste calculado texto/fondo: 16,26; 16,62; 13,19 y 12,34 a 1 respectivamente.
+No se modifican valores de la matriz, metodología ni cálculo; el color es apoyo visual.
+En ventana estrecha se conserva desplazamiento horizontal local con acceso por teclado.
+
+14 escenarios del formulario aprobados, incluidos 3 de alineación/colores y dimensiones
+1280/390/320; tipos y ESLint correctos. Capturas revisadas en outputs/matriz-6b (locales,
+no publicar). Respuestas ficticias controladas; pendiente revisión visual por usuario en
+Valorar riesgos → Metodología CUMPLEIA-CUALITATIVA-1 y criterios. Sin commit/push nuevo.
+
+## Cierre asistido y publicación autorizada de 6B — 27/10/2026
+
+Usuario solicita commit y autoriza push al terminar las comprobaciones asistidas.
+Rama `feature/navegacion-6b-operaciones`, base d9f859f. Se acepta con el alcance
+observado y confirmado: nombres de edición y pasos EIPD, disponibilidad independiente
+por tema, matriz alineada/coloreada, aviso ante reemplazo de preparación, cambio entre
+revisión documental y decisión de organización («resultado OK»), conservación al volver
+a preparación y regreso desde vista previa con referencia, PRUEBA-1 y notas intactas.
+El usuario guardó expresamente una determinación ficticia de infancia Corresponde en
+el programa con menores, manteniendo EIPD pendiente; capturas confirman su acceso.
+Se encontraron dos versiones históricas; durante el guion no se solicitó registrar
+otra ni emitir revisión/decisión. La vista previa mostró registro deshabilitado sin
+revisión de contenido; volver mantuvo los campos. La preparación conservada no acredita
+una copia nueva ni persistencia después de recargar. No atribuir esos ensayos al usuario.
+
+171 escenarios automatizados distintos aprobados: 157 del bloque y 14 del formulario de
+valoración (3 nuevos de matriz). Tipos/lint/formato correctos; capturas controladas de
+1280/390/320 revisadas. Ausencia de registro, negativas, información insuficiente,
+asociación por revisar y errores/carga conservan evidencia controlada, no nueva aceptación
+manual. La prueba integrada API aislada no se ejecutó. Sin cambios backend ni reglas de
+activación EIPD. NAV-UX-006 permanece abierto para los demás sublotes.
+
+Este cierre sustituye los pendientes de aceptación asistida anteriores solo con ese
+alcance. Commit/push autorizado para estos cambios y documentación; excluir next-env.d.ts
+generado y outputs/ locales. No hacer merge/despliegue ni iniciar 7A en este cierre.
+Siguiente bloque propuesto: 7A, teclado y foco, pendiente de indicación del usuario.

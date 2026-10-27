@@ -278,3 +278,58 @@ test("resumen pendiente no inventa un mayor residual evaluado", async ({ page })
   ).toBeVisible();
   await expect(page.getByText(/Mayor residual actual registrado/)).toHaveCount(0);
 });
+
+for (const width of [1280, 390, 320]) {
+  test(`matriz legible con cabeceras alineadas a ${width}px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 900 });
+    const { writes } = await setup(page);
+    await page.getByText("Metodología CUMPLEIA-CUALITATIVA-1 y criterios", { exact: true }).click();
+    const table = page.getByRole("table");
+    await expect(table).toBeVisible();
+    await expect(table.getByRole("columnheader")).toHaveCount(5);
+    await expect(table.getByRole("rowheader")).toHaveCount(4);
+    await expect(table.getByRole("cell")).toHaveText([
+      "Bajo",
+      "Bajo",
+      "Medio",
+      "Alto",
+      "Bajo",
+      "Medio",
+      "Alto",
+      "Alto",
+      "Medio",
+      "Alto",
+      "Alto",
+      "Muy alto",
+      "Alto",
+      "Alto",
+      "Muy alto",
+      "Muy alto",
+    ]);
+    if (process.env.CUMPLEIA_PREVIEW_CSS) {
+      const cells = table.locator("tbody tr").first().locator("td");
+      const headers = table.getByRole("columnheader");
+      for (let col = 0; col < 4; col++) {
+        const header = await headers.nth(col + 1).boundingBox();
+        const cell = await cells.nth(col).boundingBox();
+        expect(Math.abs(header!.x + header!.width / 2 - cell!.x - cell!.width / 2)).toBeLessThan(1);
+        await expect(cells.nth(col)).toHaveCSS("text-align", "center");
+      }
+      await expect(cells.nth(0)).toHaveCSS("background-color", "rgb(220, 252, 231)");
+      await expect(cells.nth(2)).toHaveCSS("background-color", "rgb(254, 249, 195)");
+      await expect(cells.nth(3)).toHaveCSS("background-color", "rgb(254, 215, 170)");
+      await expect(table.getByRole("cell", { name: "Muy alto", exact: true }).first()).toHaveCSS(
+        "background-color",
+        "rgb(254, 202, 202)"
+      );
+      expect(
+        await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)
+      ).toBeTruthy();
+    }
+    expect(writes).toHaveLength(0);
+    if (process.env.MATRIX_SCREENSHOTS) {
+      await table.getByRole("rowheader", { name: "Baja", exact: true }).scrollIntoViewIfNeeded();
+      await page.screenshot({ path: `${process.env.MATRIX_SCREENSHOTS}/matriz-${width}.png` });
+    }
+  });
+}

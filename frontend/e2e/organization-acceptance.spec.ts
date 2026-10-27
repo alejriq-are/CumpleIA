@@ -71,7 +71,7 @@ test("owner necesita facultad, registra tres decisiones y revoca", async ({ page
   await grant(page);
   for (const d of ["acepta", "rechaza", "requiere_cambios"]) {
     await fillDecision(page);
-    await page.getByLabel("Decisión documental", { exact: true }).selectOption(d);
+    await page.getByLabel("Decisión de la organización", { exact: true }).selectOption(d);
     await page
       .getByRole("button", { name: "Registrar decisión documental ficticia", exact: true })
       .click();
@@ -207,7 +207,7 @@ test("vista guiada separa facultades y exige seleccionar una decision", async ({
   await mount(page, { guided: true });
   await enable(page);
   await expect(page.getByLabel("Referencia de la facultad", { exact: true })).toBeHidden();
-  await expect(page.getByLabel("Decisión documental", { exact: true })).toHaveValue("");
+  await expect(page.getByLabel("Decisión de la organización", { exact: true })).toHaveValue("");
   await page
     .getByRole("button", { name: "Gestionar facultades de la organización", exact: true })
     .click();
@@ -217,7 +217,9 @@ test("vista guiada separa facultades y exige seleccionar una decision", async ({
     .getByRole("button", { name: "Registrar decisión documental ficticia", exact: true })
     .click();
   expect(await posts(page)).toHaveLength(1);
-  await page.getByLabel("Decisión documental", { exact: true }).selectOption("requiere_cambios");
+  await page
+    .getByLabel("Decisión de la organización", { exact: true })
+    .selectOption("requiere_cambios");
   await expect(
     page.getByText("Requiere cambios: la organización solicita ajustes", { exact: false })
   ).toBeVisible();

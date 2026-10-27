@@ -8,6 +8,7 @@ import {
   type ApplicabilityLoadState,
 } from "./ConnectedApplicability";
 import type { WorkLocation } from "./connected-navigation";
+import type { AvailabilityReadState } from "./connected-availability";
 import { connectedDestinations } from "./connected-destinations";
 export function ConnectedAssessment({
   location,
@@ -15,6 +16,7 @@ export function ConnectedAssessment({
   readOnly,
   go,
   onScope,
+  onAvailability,
   onPending,
   active,
 }: {
@@ -24,6 +26,7 @@ export function ConnectedAssessment({
   readOnly: boolean;
   go: (v: WorkLocation, replace?: boolean) => void;
   onScope: (key: string, v: Applicability) => void;
+  onAvailability: (key: string, v: AvailabilityReadState) => void;
   onPending: (key: string, dirty: boolean) => void;
 }) {
   const [refreshVersion, setRefreshVersion] = useState(0);
@@ -46,6 +49,9 @@ export function ConnectedAssessment({
     },
     [key, onScope]
   );
+  useEffect(() => {
+    onAvailability(key, loadState);
+  }, [key, loadState, onAvailability]);
   useEffect(() => {
     onPending(key, appDirty || flowDirty);
   }, [key, appDirty, flowDirty, onPending]);

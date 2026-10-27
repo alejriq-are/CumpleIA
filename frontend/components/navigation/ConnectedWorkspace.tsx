@@ -25,12 +25,13 @@ import {
   type WorkLocation,
 } from "./connected-navigation";
 import { modules, type ModuleId } from "./prototype-data";
+import { availabilityReason, type AvailabilityReadState } from "./connected-availability";
 import { connectedDestinations, connectedDestinationLabel } from "./connected-destinations";
 import "./navigation-prototype.css";
 import "./connected-navigation.css";
 
 type Item = { id: string; label: string; step?: number };
-type Group = { label: string; items: Item[] };
+type Group = { label: string; items: Item[]; reason?: string | null; availabilityLabel?: string };
 function contextKey(v: WorkContext) {
   return `${v.organizationId}:${v.treatmentId}:${v.assessmentId}`;
 }
@@ -96,6 +97,7 @@ export function ConnectedWorkspace({
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [pending, setPending] = useState<Record<string, boolean>>({});
+  const [availability, setAvailability] = useState<Record<string, AvailabilityReadState>>({});
   const [scope, setScope] = useState<Record<string, Applicability>>({});
   const [diagnosticSections, setDiagnosticSections] = useState<Record<string, Item[]>>({});
   const [names, setNames] = useState<Record<string, string>>({});
@@ -117,6 +119,13 @@ export function ConnectedWorkspace({
     (key: string, value: Applicability) => setScope((prev) => ({ ...prev, [key]: value })),
     []
   );
+  const updateAvailability = useCallback((key: string, value: AvailabilityReadState) => {
+    setAvailability((prev) =>
+      prev[key]?.loading === value.loading && prev[key]?.error === value.error
+        ? prev
+        : { ...prev, [key]: value }
+    );
+  }, []);
   const updateDiagnostic = useCallback(
     (orgId: string, items: Item[]) =>
       setDiagnosticSections((prev) => ({ ...prev, [orgId]: items })),
@@ -261,8 +270,9 @@ export function ConnectedWorkspace({
     return () => window.removeEventListener("beforeunload", warn);
   }, [anyPending]);
   const selected = scope[contextKey(location)];
-  const eipd = !!selected?.current && selected.eipd.state === "corresponde";
-  const infancia = !!selected?.current && selected.infancia.state === "corresponde";
+  const readState = availability[contextKey(location)];
+  const eipdReason = availabilityReason(selected, readState, "eipd");
+  const infanciaReason = availabilityReason(selected, readState, "infancia");
   const diagnosticItems = diagnosticSections[location.organizationId] ?? [];
   const groups: Group[] =
     location.module === "rat"
@@ -312,22 +322,26 @@ export function ConnectedWorkspace({
                     : []),
                 ],
               },
-              ...(eipd
+              ...(location.assessmentId
                 ? [
                     {
                       label: "Completar EIPD",
-                      items: eipdSections.map((label, step) => ({ id: "eipd", label, step })),
+                      availabilityLabel: "EIPD: disponibilidad",
+                      reason: eipdReason,
+                      items: eipdReason
+                        ? []
+                        : eipdSections.map((label, step) => ({ id: "eipd", label, step })),
                     },
-                  ]
-                : []),
-              ...(infancia
-                ? [
                     {
                       label: "Infancia y adolescencia",
-                      items: [
-                        { id: "infancia", label: connectedDestinations.licitud.infancia },
-                        { id: "preparar", label: connectedDestinations.licitud.preparar },
-                      ],
+                      availabilityLabel: "Infancia y adolescencia: disponibilidad",
+                      reason: infanciaReason,
+                      items: infanciaReason
+                        ? []
+                        : [
+                            { id: "infancia", label: connectedDestinations.licitud.infancia },
+                            { id: "preparar", label: connectedDestinations.licitud.preparar },
+                          ],
                     },
                   ]
                 : []),
@@ -465,7 +479,22 @@ export function ConnectedWorkspace({
     <nav aria-label="Secciones del espacio conectado" className="connected-sections">
       {groups.map((group) => (
         <div key={group.label}>
-          <h3>{group.label}</h3>
+          <h3>{group.reason ? group.availabilityLabel : group.label}</h3>
+          {group.reason && (
+            <div className="connected-availability-reason">
+              <p>{group.reason}</p>
+              <button
+                onClick={() =>
+                  section({
+                    id: "aplicabilidad",
+                    label: connectedDestinations.licitud.aplicabilidad,
+                  })
+                }
+              >
+                Ir a Determinar aplicabilidad
+              </button>
+            </div>
+          )}
           {group.items.map((item) => (
             <button
               key={`${item.id}:${item.step ?? 0}`}
@@ -598,8 +627,24 @@ export function ConnectedWorkspace({
                       }
                     }}
                   >
-                    <summary>{g.label}</summary>
+                    <summary>{g.reason ? g.availabilityLabel : g.label}</summary>
                     <div>
+                      {g.reason && (
+                        <div className="connected-availability-reason">
+                          <p>{g.reason}</p>
+                          <button
+                            onClick={(event) => {
+                              event.currentTarget.closest("details")?.removeAttribute("open");
+                              section({
+                                id: "aplicabilidad",
+                                label: connectedDestinations.licitud.aplicabilidad,
+                              });
+                            }}
+                          >
+                            Ir a Determinar aplicabilidad
+                          </button>
+                        </div>
+                      )}
                       {g.items.map((item) => (
                         <button
                           key={`${item.id}:${item.step ?? 0}`}
@@ -778,6 +823,7 @@ export function ConnectedWorkspace({
                             readOnly={readOnly}
                             go={go}
                             onScope={updateScope}
+                            onAvailability={updateAvailability}
                             onPending={updatePending}
                           />
                         </div>

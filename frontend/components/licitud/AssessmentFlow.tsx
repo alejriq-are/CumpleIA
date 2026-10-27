@@ -1,4 +1,5 @@
 "use client";
+import { documentLabels } from "@/lib/licitud/document-labels";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import type { Assessment } from "@/lib/api/licitud";
@@ -266,7 +267,7 @@ export function AssessmentFlow({
               className={section === "preparar" ? "bg-blue-800 text-white" : "bg-white"}
               onClick={() => setSection("preparar")}
             >
-              Preparar resolución documental de infancia
+              {documentLabels.prepareChild}
             </button>
           )}
         </nav>
@@ -430,9 +431,13 @@ export function AssessmentFlow({
                 </dd>
               </div>
               <div>
-                <dt className="bg-blue-100 p-2 font-semibold text-blue-950">Etiqueta documental</dt>
+                <dt className="bg-blue-100 p-2 font-semibold text-blue-950">
+                  {documentLabels.edition}
+                </dt>
                 <dd className="bg-white p-3">
-                  {String(row.eipd_resolution_assessment.document_version ?? "Sin etiqueta")}
+                  {String(
+                    row.eipd_resolution_assessment.document_version ?? "Sin nombre de edición"
+                  )}
                 </dd>
               </div>
             </dl>

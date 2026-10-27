@@ -1,4 +1,5 @@
 "use client";
+import { documentLabels } from "@/lib/licitud/document-labels";
 import type { Support } from "@/lib/api/assessment-support";
 import type { Dossier } from "@/lib/api/mvp-dossier";
 import { legalBases } from "@/lib/api/licitud";
@@ -125,7 +126,7 @@ export function DossierDocumentView({
             value={value.document_reference ?? document.document_reference}
           />
           <Field
-            label="Etiqueta del documento EIPD"
+            label={documentLabels.edition}
             value={value.document_version ?? document.document_version}
           />
         </dl>

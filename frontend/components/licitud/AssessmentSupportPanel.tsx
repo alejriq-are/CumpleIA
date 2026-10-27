@@ -43,6 +43,12 @@ const annexSections: Record<string, string> = {
   fuentes: "Fuentes y evidencias",
   seguimiento: "Seguimiento",
 };
+const matrixLevelClasses: Record<string, string> = {
+  bajo: "bg-green-100 text-slate-900",
+  medio: "bg-yellow-100 text-slate-900",
+  alto: "bg-orange-200 text-slate-900",
+  muy_alto: "bg-red-200 text-slate-900",
+};
 const textClass = "block w-full rounded border p-2";
 function TextField({
   label,
@@ -391,22 +397,49 @@ export function AssessmentSupportPanel(props: Props) {
               aria-label="Matriz de valoración; desplazamiento horizontal"
               tabIndex={0}
             >
-              <table className="w-full min-w-[480px] border">
-                <caption>Matriz: filas de probabilidad, columnas de impacto</caption>
+              <table className="w-full min-w-[480px] table-fixed border-collapse border border-slate-300 text-center">
+                <colgroup>
+                  <col className="w-[32%]" />
+                  <col span={4} className="w-[17%]" />
+                </colgroup>
+                <caption className="pb-2 text-left">
+                  Matriz: filas de probabilidad, columnas de impacto
+                </caption>
                 <thead>
                   <tr>
-                    <th>Probabilidad / impacto</th>
+                    <th
+                      scope="col"
+                      className="border border-slate-300 bg-slate-100 p-3 text-center align-middle"
+                    >
+                      Probabilidad / impacto
+                    </th>
                     {["Bajo", "Moderado", "Grave", "Muy grave"].map((t) => (
-                      <th key={t}>{t}</th>
+                      <th
+                        key={t}
+                        scope="col"
+                        className="border border-slate-300 bg-slate-100 p-3 text-center align-middle"
+                      >
+                        {t}
+                      </th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {matrix.map((row, i) => (
                     <tr key={i}>
-                      <th>{["Baja", "Media", "Alta", "Muy alta"][i]}</th>
+                      <th
+                        scope="row"
+                        className="border border-slate-300 bg-slate-100 p-3 text-center align-middle"
+                      >
+                        {["Baja", "Media", "Alta", "Muy alta"][i]}
+                      </th>
                       {row.map((level, j) => (
-                        <td key={j}>{levelLabels[level]}</td>
+                        <td
+                          key={j}
+                          className={`border border-slate-300 p-3 text-center align-middle font-semibold ${matrixLevelClasses[level]}`}
+                        >
+                          {levelLabels[level]}
+                        </td>
                       ))}
                     </tr>
                   ))}

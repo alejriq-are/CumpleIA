@@ -1,3 +1,4 @@
+import { eipdStepLabels } from "@/lib/licitud/eipd-steps";
 import type { ModuleId } from "./prototype-data";
 import type { WorkContext } from "./ConnectedContext";
 export type WorkLocation = WorkContext & { module: ModuleId; section: string; step: number };
@@ -79,15 +80,7 @@ export const ratSections = [
   ["transferencias", "Transferencias internacionales"],
   ["revision", "Revisión del tratamiento"],
 ];
-export const eipdSections = [
-  "Tratamiento y alcance de la EIPD",
-  "Necesidad y proporcionalidad",
-  "Riesgos",
-  "Valorar riesgos",
-  "Medidas de mitigación",
-  "Fuentes y evidencias",
-  "Riesgo residual y seguimiento",
-];
+export const eipdSections = eipdStepLabels;
 
 export function navigationReadError(error: unknown, fallback: string): string {
   if (
