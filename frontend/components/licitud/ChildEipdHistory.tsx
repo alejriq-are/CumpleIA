@@ -72,6 +72,8 @@ export function ChildEipdHistory({
   onPending,
 }: Props) {
   const editionHelpId = useId();
+  const actuationHelpId = useId();
+  const reviewHelpId = useId();
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
   const [selected, setSelected] = useState<ChildResolution | null>(null);
   const [events, setEvents] = useState<ChildReview[]>([]);
@@ -584,7 +586,7 @@ export function ChildEipdHistory({
                     Tipo de actuación
                     <select
                       aria-label="Tipo de actuación"
-                      aria-describedby="persisted-actuation-help"
+                      aria-describedby={actuationHelpId}
                       className="block w-full rounded border p-2"
                       value={actuation}
                       onChange={(e) => setActuation(e.target.value as "revision" | "decision")}
@@ -595,7 +597,7 @@ export function ChildEipdHistory({
                   </label>
                 )}
                 {view !== "all" && (
-                  <p id="persisted-actuation-help" aria-live="polite" className="text-sm">
+                  <p id={actuationHelpId} aria-live="polite" className="text-sm">
                     {actuation === "revision"
                       ? "Revisión del documento: registra observaciones sobre la resolución seleccionada. No expresa una decisión de la organización ni modifica el original."
                       : "Decisión de organización: requiere una facultad vigente y se refiere a esta resolución exacta. Es distinta de revisar y no confirma ni activa EIPD."}
@@ -705,7 +707,7 @@ export function ChildEipdHistory({
                           value={decision}
                           required
                           aria-label={documentLabels.reviewResult}
-                          aria-describedby="persisted-review-help"
+                          aria-describedby={reviewHelpId}
                           onChange={(e) => setDecision(e.target.value as NegativeDecision)}
                         >
                           {view !== "all" && <option value="">Selecciona un resultado</option>}
@@ -713,7 +715,7 @@ export function ChildEipdHistory({
                           <option value="no_continuar">No continuar</option>
                         </select>
                       </label>
-                      <p id="persisted-review-help" className="text-sm" aria-live="polite">
+                      <p id={reviewHelpId} className="text-sm" aria-live="polite">
                         {!decision
                           ? "Selecciona el resultado que describa tu observación y explica los motivos en el fundamento."
                           : decision === "requiere_cambios"

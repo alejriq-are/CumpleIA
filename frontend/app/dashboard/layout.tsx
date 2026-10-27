@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { DashboardContent } from "@/components/navigation/DashboardContent";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { SignOutButton } from "@/components/auth/SignOutButton";
@@ -30,7 +31,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           </div>
         </div>
       </nav>
-      <main className="mx-auto max-w-6xl px-6 py-8">{children}</main>
+      <DashboardContent>{children}</DashboardContent>
     </div>
   );
 }

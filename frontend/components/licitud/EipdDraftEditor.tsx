@@ -15,6 +15,7 @@ import { SaveFeedback } from "./SaveFeedback";
 import { EipdDocumentFields, EipdDocumentView, EipdSteps } from "./EipdDocumentFields";
 import { sessionToken } from "./LicitudWorkspace";
 export function EipdDraftEditor({
+  supportPanelId,
   organizationId,
   treatmentId,
   assessmentId,
@@ -29,6 +30,7 @@ export function EipdDraftEditor({
   step = 0,
   onStepChange,
 }: {
+  supportPanelId?: string;
   organizationId: string;
   treatmentId: string;
   assessmentId: string;
@@ -44,6 +46,7 @@ export function EipdDraftEditor({
   onStepChange?: (step: number) => void;
 }) {
   const editionHelpId = useId();
+  const editingHelpId = useId();
   const [localStep, setLocalStep] = useState(0);
   const activeStep = onStepChange ? step : localStep;
   const changeStep = onStepChange ?? setLocalStep;
@@ -167,10 +170,19 @@ export function EipdDraftEditor({
     }
   }
   const disabled = readOnly || row?.status !== "borrador" || busy || uncertain;
+  const editingHelp = readOnly
+    ? "Tu rol permite consultar este documento, pero no editarlo ni guardarlo."
+    : row?.status !== "borrador"
+      ? "Este documento solo puede editarse mientras la evaluación está en borrador."
+      : busy
+        ? "Guardando el documento. Espera antes de continuar editando."
+        : uncertain
+          ? "El resultado del guardado es incierto. Conservamos tus campos; consulta el estado antes de volver a guardar."
+          : "";
   return (
     <section
       aria-label="Documento EIPD en borrador"
-      aria-owns={ratingStep ? "licitud-support-panel" : undefined}
+      aria-owns={ratingStep ? supportPanelId : undefined}
       className="space-y-4 rounded border p-4"
     >
       <h2 className="text-xl font-semibold">Documentar EIPD</h2>
@@ -185,7 +197,7 @@ export function EipdDraftEditor({
             : "Cargando documento EIPD…"}
         </p>
       )}
-      <EipdSteps step={activeStep} onChange={changeStep} />
+      <EipdSteps step={activeStep} onChange={changeStep} supportPanelId={supportPanelId} />
       {!row && error && <SaveFeedback error={error} />}
       {ratingStep && dirty && (
         <p className="rounded border border-amber-400 bg-amber-50 p-3">
@@ -203,8 +215,22 @@ export function EipdDraftEditor({
             void save();
           }}
         >
-          <fieldset disabled={disabled} className="space-y-3">
-            <legend>Documento editable · evaluación versión {row.version}</legend>
+          {editingHelp && (
+            <p id={editingHelpId} className="rounded border bg-blue-50 p-3">
+              {editingHelp}
+            </p>
+          )}
+          <fieldset
+            disabled={disabled}
+            aria-describedby={editingHelp ? editingHelpId : undefined}
+            className="space-y-3"
+          >
+            <legend>
+              {readOnly || row.status !== "borrador"
+                ? "Documento de consulta"
+                : "Documento editable"}{" "}
+              · evaluación versión {row.version}
+            </legend>
             <label className="block">
               Referencia del documento EIPD
               <input

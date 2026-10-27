@@ -1,6 +1,6 @@
 "use client";
 import { documentLabels } from "@/lib/licitud/document-labels";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useId, useRef } from "react";
 import { ApiError } from "@/lib/api/client";
 import type {
   Acceptance,
@@ -36,6 +36,7 @@ export function OrganizationAcceptancePanel({
   record,
   guided = false,
 }: Props) {
+  const choiceHelpId = useId();
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null),
     [target, setTarget] = useState("");
   const [action, setAction] = useState<Designation["action"]>("otorgar"),
@@ -299,7 +300,7 @@ export function OrganizationAcceptancePanel({
                   aria-label={documentLabels.organizationDecision}
                   value={choice}
                   required
-                  aria-describedby="organization-choice-help"
+                  aria-describedby={choiceHelpId}
                   onChange={(e) => setChoice(e.target.value as Acceptance["decision"])}
                 >
                   {guided && <option value="">Selecciona una decisión</option>}
@@ -310,7 +311,7 @@ export function OrganizationAcceptancePanel({
                   ))}
                 </select>
               </label>
-              <p id="organization-choice-help" aria-live="polite" className="text-sm">
+              <p id={choiceHelpId} aria-live="polite" className="text-sm">
                 {!choice
                   ? "Selecciona la posición que quieres registrar sobre este documento. Explica sus motivos y aporta la referencia del acta ficticia."
                   : choice === "requiere_cambios"

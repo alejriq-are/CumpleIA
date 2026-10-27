@@ -477,6 +477,11 @@ export function ConnectedWorkspace({
     return connectedDestinationLabel(v, diagnosticSections[v.organizationId]);
   }
   const displayTitle = locationLabel(location);
+  const moduleTitle =
+    modules.find((item) => item.id === location.module)?.title ?? "Espacio de trabajo";
+  useEffect(() => {
+    document.title = `${displayTitle} · ${moduleTitle} | CumpleIA`;
+  }, [displayTitle, moduleTitle]);
   const isCurrent = (item: Item) =>
     item.id === location.section && (item.step ?? 0) === location.step;
   function contextLabel(value: WorkLocation) {
@@ -544,6 +549,8 @@ export function ConnectedWorkspace({
       <div className="prototype-layout">
         <MainModules
           module={location.module}
+          navigationLabel="Módulos del espacio de trabajo"
+          drawerId="connected-menu-panel"
           go={changeModule}
           expanded={menu}
           setExpanded={setMenu}
@@ -557,6 +564,7 @@ export function ConnectedWorkspace({
                 aria-label="Abrir menú"
                 aria-haspopup="dialog"
                 aria-expanded={menu}
+                aria-controls="connected-menu-panel"
                 className="connected-menu-trigger"
                 onClick={() => {
                   closeDesktopGroups();
@@ -572,6 +580,7 @@ export function ConnectedWorkspace({
                   id="connected-sections-trigger"
                   aria-haspopup="dialog"
                   aria-expanded={sections}
+                  aria-controls="connected-sections-panel"
                   onClick={() => {
                     closeDesktopGroups();
                     setMenu(false);
@@ -588,6 +597,8 @@ export function ConnectedWorkspace({
               <button
                 id="connected-context-trigger"
                 aria-haspopup="dialog"
+                aria-expanded={context}
+                aria-controls="connected-context-panel"
                 onClick={() => {
                   closeDesktopGroups();
                   setMenu(false);
@@ -743,10 +754,23 @@ export function ConnectedWorkspace({
               licitud.
             </p>
           )}
-          <main ref={content} tabIndex={-1} className="prototype-work" onClickCapture={intercept}>
+          <main
+            ref={content}
+            tabIndex={-1}
+            aria-labelledby="connected-work-title"
+            className="prototype-work"
+            onClickCapture={intercept}
+          >
+            {location.module !== "panel" && (
+              <h1 id="connected-work-title" className="sr-only">
+                Área de trabajo: {displayTitle}
+              </h1>
+            )}
             {location.module === "panel" && (
               <div className="space-y-6">
-                <h1 className="text-2xl font-bold">Panel principal</h1>
+                <h1 id="connected-work-title" className="text-2xl font-bold">
+                  Panel principal
+                </h1>
                 <p>
                   Trabaja con la información de tu organización guardada en el servidor. La
                   selección de contexto es independiente en cada ventana.
@@ -926,6 +950,7 @@ export function ConnectedWorkspace({
       </PrototypeDrawer>
       <PrototypeDrawer
         open={sections}
+        id="connected-sections-panel"
         label="Secciones del módulo"
         className="prototype-sections-drawer"
         close={closeSections}
@@ -938,6 +963,7 @@ export function ConnectedWorkspace({
       </PrototypeDrawer>
       <PrototypeDrawer
         open={context}
+        id="connected-context-panel"
         label="Contexto de trabajo"
         className="prototype-sections-drawer"
         close={closeContext}

@@ -356,7 +356,15 @@ export const eipdGroups: { title: string; description: string; keys: string[] }[
   },
 ];
 
-export function EipdSteps({ step, onChange }: { step: number; onChange: (step: number) => void }) {
+export function EipdSteps({
+  step,
+  onChange,
+  supportPanelId,
+}: {
+  step: number;
+  onChange: (step: number) => void;
+  supportPanelId?: string;
+}) {
   return (
     <nav aria-label="Pasos documentales EIPD" className="flex flex-wrap gap-2">
       {eipdGroups.map((group, index) => (
@@ -369,7 +377,7 @@ export function EipdSteps({ step, onChange }: { step: number; onChange: (step: n
               : "rounded border bg-white p-2"
           }
           aria-current={step === index ? "step" : undefined}
-          aria-controls={index === 3 ? "licitud-support-panel" : undefined}
+          aria-controls={index === 3 ? supportPanelId : undefined}
           onClick={() => onChange(index)}
         >
           {group.title}

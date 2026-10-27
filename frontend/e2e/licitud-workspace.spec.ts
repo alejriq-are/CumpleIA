@@ -644,7 +644,7 @@ for (const mode of ["adultos", "infancia", "error"] as const) {
     } else {
       await expect(history).toBeVisible();
       if (mode === "error")
-        await expect(page.locator("#licitud-child-history").getByRole("alert")).toBeVisible();
+        await expect(page.locator('[id$="-child-history"]').getByRole("alert")).toBeVisible();
       else
         await expect(
           page.getByText("No hay versiones del documento de infancia registradas.", { exact: true })

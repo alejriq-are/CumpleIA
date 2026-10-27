@@ -1,5 +1,51 @@
 # Handoff vigente de CumpleIA
 
+## Publicación autorizada de 7B — 27/10/2026
+
+Usuario solicita commit y autoriza push de 7B en feature/navegacion-7b-accesibilidad,
+base 39bca0b. Publicar estructura/nombres/ayudas, pruebas y validación asistida acotada.
+La prueba manual con lector de pantalla permanece pendiente por no disponibilidad del
+usuario; publicar no cierra ese criterio ni acredita accesibilidad integral certificada.
+168 escenarios aprobados y 1 captura opcional omitida según ejecución registrada;
+no atribuir CI remota nueva al push. Los pendientes inferiores de autorización describen
+estados anteriores. Excluir next-env.d.ts generado y outputs/ locales; verificar HEAD
+remoto tras publicar. No iniciar 8A ni ejecutar merge/despliegue en este cierre.
+
+## 7B — recorridos visuales y de teclado confirmados, 27/10/2026
+
+Usuario aporta secuencia de Determinar aplicabilidad a Documentos guardados con título
+de pestaña actualizado; confirma «recorrido OK» al abrir/cerrar Secciones y Contexto
+con retorno del foco; confirma contorno de foco en Consultar última determinación guardada.
+Capturas muestran ayuda de consulta y explicación de Nombre de la edición en preparación
+de infancia. Confirma «recorrido OK» al abrir y cerrar Análisis, riesgos, medidas, fuentes
+y evidencias con Enter, manteniendo foco. Es aceptación de esos recorridos, sin registrar
+nuevos documentos ni actuaciones durante el guion.
+
+Usuario informa que no dispone de Narrador/NVDA. La prueba manual con lector de pantalla
+no se ejecutó y permanece pendiente, junto con cualquier comprobación asistida no cubierta.
+La verificación estructural de main único, nombres, relaciones e IDs sigue respaldada por
+fixtures automatizados; una captura visual no acredita su anuncio por lector. Tampoco se
+atribuye al usuario prueba táctil real, comprobada solo mediante emulación.
+
+168 pruebas aprobadas y 1 captura opcional omitida, según evidencia previa. 7B validado
+parcialmente con este alcance; no dar por completado su criterio de lector ni declarar
+accesibilidad certificada. Sin commit/push de 7B ni inicio de 8A. Rama
+feature/navegacion-7b-accesibilidad sobre 39bca0b. Excluir generados y capturas locales.
+Las menciones inferiores de aceptación asistida totalmente pendiente son antecedentes;
+queda pendiente específicamente la parte no comprobada indicada aquí.
+
+## Bloque 7B implementado localmente — 27/10/2026
+
+Usuario solicita continuar 7B; rama feature/navegacion-7b-accesibilidad sobre 39bca0b.
+Main conectado único/nominado, menú conectado con nombre correcto, título por destino,
+relaciones de diálogos, regiones documentales sin pestañas ocultas e IDs por evaluación.
+Ayudas asociadas y bloqueo EIPD por causa real, preservando usos independientes y 7A.
+168 pruebas aprobadas (6 nuevas 7B); 1 captura opcional omitida, tipos/lint/formato correctos.
+Capturas 1280/390 revisadas. Pruebas controladas; no certificación ni prueba con lector.
+[Guion y límites](project/navegacion-servidor.md#bloque-7b--nombres-regiones-y-ayudas-accesibles).
+Pendientes validación asistida y lector de pantalla; sin commit/push ni inicio de 8A.
+Excluir next-env.d.ts generado y outputs/ locales. Entradas inferiores son antecedentes.
+
 ## Publicación autorizada de 7A — 27/10/2026
 
 Usuario solicita commit y autoriza push de 7A aceptado, en feature/navegacion-7a-teclado

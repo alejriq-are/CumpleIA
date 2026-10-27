@@ -285,7 +285,7 @@ async function mod(page: Page, name: string) {
   const mobile = page.getByRole("button", { name: "Abrir menú", exact: true });
   if (await mobile.isVisible()) await mobile.click();
   await page
-    .getByRole("navigation", { name: "Módulos de la maqueta" })
+    .getByRole("navigation", { name: "Módulos del espacio de trabajo" })
     .getByRole("button", { name, exact: true })
     .click();
 }
@@ -1942,4 +1942,189 @@ test("7A Espacio explícito abre y cierra una vez sin depender de la activación
   expect(page.url()).toBe(beforeUrl);
   expect(calls.filter((v) => v.method !== "GET")).toHaveLength(writes);
   expect(errors).toEqual([]);
+});
+
+async function expectAccessibleReferences(page: Page) {
+  const invalid = await page.evaluate(() => {
+    const attributes = ["aria-labelledby", "aria-describedby", "aria-controls", "aria-owns"];
+    return Array.from(
+      document.querySelectorAll<HTMLElement>(attributes.map((a) => `[${a}]`).join(","))
+    )
+      .filter((element) => element.getClientRects().length > 0)
+      .flatMap((element) =>
+        attributes.flatMap((attribute) =>
+          (element.getAttribute(attribute) ?? "")
+            .split(/\s+/)
+            .filter(Boolean)
+            .flatMap((id) => {
+              const targets = Array.from(document.querySelectorAll<HTMLElement>("[id]")).filter(
+                (node) => node.id === id
+              );
+              return targets.length !== 1 ||
+                (attribute === "aria-labelledby" && targets[0].getClientRects().length === 0)
+                ? [`${attribute}: ${id} (${targets.length} destinos)`]
+                : [];
+            })
+        )
+      );
+  });
+  expect(invalid).toEqual([]);
+}
+
+test("7B un main real con nombre y título por destino dentro de la envoltura del dashboard", async ({
+  page,
+}) => {
+  await expect(page.locator("main")).toHaveCount(1);
+  await expect(page.getByRole("main", { name: "Panel principal", exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("navigation", { name: "Módulos del espacio de trabajo", exact: true })
+  ).toBeVisible();
+  await expect(
+    page.getByRole("navigation", { name: "Módulos de la maqueta", exact: true })
+  ).toHaveCount(0);
+  await legal(page);
+  await expect(page.locator("main")).toHaveCount(1);
+  await expect(
+    page.getByRole("main", { name: "Área de trabajo: Determinar aplicabilidad", exact: true })
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", {
+      level: 1,
+      name: "Área de trabajo: Determinar aplicabilidad",
+      exact: true,
+    })
+  ).toHaveCount(1);
+  await expect(page).toHaveTitle("Determinar aplicabilidad · Bases de licitud | CumpleIA");
+  await expectAccessibleReferences(page);
+  await section(page, "Documentos guardados");
+  await expect(main(page).getByRole("tabpanel")).toHaveCount(0);
+  await expect(
+    main(page).getByRole("region", { name: "Documentos guardados de la evaluación", exact: true })
+  ).toBeVisible();
+  await expectAccessibleReferences(page);
+  expect(calls.filter((v) => v.method !== "GET")).toHaveLength(0);
+});
+
+for (const width of [1280, 390]) {
+  test(`7B paneles relacionados, título, foco y ayuda consultable a ${width}px`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width, height: 844 });
+    await legal(page);
+    const trigger = page.locator("header").getByRole("button", { name: "Secciones", exact: true });
+    await trigger.focus();
+    await page.keyboard.press("Enter");
+    await expect(trigger).toHaveAttribute("aria-expanded", "true");
+    const id = await trigger.getAttribute("aria-controls");
+    await expect(
+      page.getByRole("dialog", { name: "Secciones del módulo", exact: true })
+    ).toHaveAttribute("id", id!);
+    await expectAccessibleReferences(page);
+    await page.keyboard.press("Escape");
+    await expect(trigger).toBeFocused();
+    await expect(trigger).toHaveAttribute("aria-expanded", "false");
+    const query = main(page).getByRole("button", {
+      name: "Consultar última determinación guardada",
+      exact: true,
+    });
+    await query.focus();
+    await expect(query).toHaveAccessibleDescription(
+      /Conserva tus cambios pendientes y no guarda el formulario/
+    );
+    await expect(
+      main(page).getByRole("button", { name: "Guardar determinación", exact: true })
+    ).toHaveAccessibleDescription(/declaración de datos ficticios/);
+    await capture(page, `7b-ayuda-${width}.png`);
+    expect(calls.filter((v) => v.method !== "GET")).toHaveLength(0);
+  });
+}
+
+test("7B evaluaciones montadas mantienen identificadores únicos y ayudas en su contexto", async ({
+  page,
+}) => {
+  await legal(page);
+  await enable(page);
+  await section(page, "Tratamiento y alcance de la EIPD");
+  const note = main(page).getByRole("textbox", {
+    name: "Notas del borrador EIPD (opcional)",
+    exact: true,
+  });
+  await note.fill("[FICTICIA] Conservar contexto accesible 7B");
+  await expect(
+    main(page).getByLabel("Nombre de la edición (texto libre)", { exact: true })
+  ).toHaveAccessibleDescription(/No es el identificador ni el número de versión/);
+  const writes = calls.filter((v) => v.method !== "GET").length;
+  await choose(page, aid2);
+  await expect(
+    main(page).getByRole("heading", { name: "Determinar aplicabilidad", exact: true })
+  ).toBeVisible();
+  await section(page, "Documentos guardados");
+  await expectAccessibleReferences(page);
+  await choose(page, aid);
+  await section(page, "Necesidad y proporcionalidad");
+  const response = main(page).getByLabel("Necesario para la finalidad", { exact: true });
+  await expect(response).toHaveAccessibleDescription(/Sin declarar/);
+  await response.selectOption("pendiente");
+  await expect(response).toHaveAccessibleDescription(/Pendiente: usa esta opción/);
+  await expectAccessibleReferences(page);
+  await section(page, "Tratamiento y alcance de la EIPD");
+  await expect(note).toHaveValue("[FICTICIA] Conservar contexto accesible 7B");
+  expect(calls.filter((v) => v.method !== "GET")).toHaveLength(writes);
+  expect(errors).toEqual([]);
+});
+
+test("7B estado confirmado explica consulta sin atribuirla falsamente al rol", async ({ page }) => {
+  records[aid].status = "confirmado";
+  determinations[aid] = {
+    ...applicability(aid),
+    revision: 1,
+    current: true,
+    editable: false,
+    eipd: { state: "corresponde", reason: "[FICTICIA] Prueba de consulta" },
+  };
+  await legal(page);
+  await section(page, "Tratamiento y alcance de la EIPD");
+  const field = main(page).getByLabel("Referencia del documento EIPD", { exact: true });
+  await expect(field).toBeDisabled();
+  await expect(
+    main(page).getByRole("group", {
+      name: "Documento de consulta · evaluación versión 1",
+      exact: true,
+    })
+  ).toHaveAccessibleDescription(/solo puede editarse mientras la evaluación está en borrador/);
+  await expect(
+    main(page).getByText(
+      "Tu rol permite consultar este documento, pero no editarlo ni guardarlo.",
+      { exact: true }
+    )
+  ).toHaveCount(0);
+  await expectAccessibleReferences(page);
+  expect(calls.filter((v) => v.method !== "GET")).toHaveLength(0);
+});
+
+test.describe("7B interacción táctil", () => {
+  test.use({ hasTouch: true, viewport: { width: 390, height: 844 } });
+  test("metodología se puede abrir y cerrar tocando su encabezado sin guardar", async ({
+    page,
+  }) => {
+    await legal(page);
+    await enable(page);
+    await section(page, "Valorar riesgos");
+    const writes = calls.filter((v) => v.method !== "GET").length;
+    const summary = main(page).getByText("Metodología CUMPLEIA-CUALITATIVA-1 y criterios", {
+      exact: true,
+    });
+    await summary.tap();
+    await expect(summary.locator("..")).toHaveAttribute("open", "");
+    await expect(main(page).getByRole("table")).toBeVisible();
+    await summary.tap();
+    await expect(summary.locator("..")).not.toHaveAttribute("open", "");
+    await summary.focus();
+    await page.keyboard.press("Enter");
+    await expect(main(page).getByRole("table")).toBeVisible();
+    await page.keyboard.press("Enter");
+    await expect(summary.locator("..")).not.toHaveAttribute("open", "");
+    await expect(summary).toBeFocused();
+    expect(calls.filter((v) => v.method !== "GET")).toHaveLength(writes);
+  });
 });

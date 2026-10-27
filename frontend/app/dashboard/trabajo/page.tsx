@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { api } from "@/lib/api/client";
 import { ConnectedWorkspace } from "@/components/navigation/ConnectedWorkspace";
+export const metadata = { title: "Espacio de trabajo | CumpleIA" };
+
 export default async function ConnectedPage() {
   const {
     data: { session },
@@ -11,13 +13,15 @@ export default async function ConnectedPage() {
   const organizations = await api.me.organizations(session.access_token);
   if (!organizations.length)
     return (
-      <div className="space-y-4">
-        <h1 className="text-2xl font-bold">Espacio de trabajo</h1>
+      <main className="space-y-4" aria-labelledby="connected-empty-title">
+        <h1 id="connected-empty-title" className="text-2xl font-bold">
+          Espacio de trabajo
+        </h1>
         <p>Necesitas una organización para comenzar.</p>
         <Link href="/dashboard/organizacion" className="text-blue-800 underline">
           Crear organización
         </Link>
-      </div>
+      </main>
     );
   return <ConnectedWorkspace organizations={organizations} />;
 }

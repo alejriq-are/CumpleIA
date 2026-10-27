@@ -1,7 +1,7 @@
 "use client";
 import { documentLabels } from "@/lib/licitud/document-labels";
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useId, useState } from "react";
 import type { Assessment } from "@/lib/api/licitud";
 import { LegalAssessmentEditor } from "./LegalAssessmentEditor";
 import { sessionToken } from "./LicitudWorkspace";
@@ -52,6 +52,9 @@ export function AssessmentFlow({
   const [localTab, localSetTab] = useState<FlowTab>("resumen");
   const [localSection, localSetSection] = useState<AssessmentLocation["section"]>("alcance");
   const [localStep, localSetStep] = useState(0);
+  const flowId = useId();
+  const childPrefix = `${flowId}-child`;
+  const supportPanelId = `${flowId}-support`;
   const tab = navigation?.location.tab ?? localTab;
   const section = navigation?.location.section ?? localSection;
   const eipdStep = navigation?.location.step ?? localStep;
@@ -150,10 +153,10 @@ export function AssessmentFlow({
           <button
             type="button"
             key={key}
-            id={`licitud-tab-${key}`}
+            id={`${flowId}-tab-${key}`}
             role="tab"
             aria-selected={tab === key}
-            aria-controls={`licitud-panel-${key}`}
+            aria-controls={`${flowId}-panel-${key}`}
             tabIndex={tab === key ? 0 : -1}
             className={`rounded border p-3 text-left ${tab === key ? "bg-blue-800 font-semibold text-white" : "border-slate-300 bg-white"}`}
             onClick={() => go(key)}
@@ -171,7 +174,7 @@ export function AssessmentFlow({
               if (target !== null) {
                 event.preventDefault();
                 go(tabs[target][0]);
-                document.getElementById(`licitud-tab-${tabs[target][0]}`)?.focus();
+                document.getElementById(`${flowId}-tab-${tabs[target][0]}`)?.focus();
               }
             }}
           >
@@ -186,9 +189,10 @@ export function AssessmentFlow({
         </p>
       )}
       <section
-        role="tabpanel"
-        id="licitud-panel-resumen"
-        aria-labelledby="licitud-tab-resumen"
+        role={navigation ? "region" : "tabpanel"}
+        id={`${flowId}-panel-resumen`}
+        aria-labelledby={navigation ? undefined : `${flowId}-tab-resumen`}
+        aria-label={navigation ? "Resumen de la evaluación" : undefined}
         hidden={tab !== "resumen"}
         className="space-y-4 rounded border p-5"
       >
@@ -218,10 +222,15 @@ export function AssessmentFlow({
         </p>
       </section>
       <section
-        role="tabpanel"
-        aria-owns={tab === "completar" ? "licitud-child-editor licitud-child-history" : undefined}
-        id="licitud-panel-completar"
-        aria-labelledby="licitud-tab-completar"
+        role={navigation ? "region" : "tabpanel"}
+        aria-owns={
+          !navigation && tab === "completar"
+            ? `${childPrefix}-editor ${childPrefix}-history`
+            : undefined
+        }
+        id={`${flowId}-panel-completar`}
+        aria-labelledby={navigation ? undefined : `${flowId}-tab-completar`}
+        aria-label={navigation ? "Completar datos de la evaluación" : undefined}
         hidden={tab !== "completar"}
         className="space-y-5"
       >
@@ -329,6 +338,7 @@ export function AssessmentFlow({
         </div>
         <div hidden={section !== "eipd" || (navigation && !navigation.scope.eipd)}>
           <EipdDraftEditor
+            supportPanelId={supportPanelId}
             organizationId={organizationId}
             treatmentId={treatmentId}
             assessmentId={assessmentId}
@@ -346,10 +356,11 @@ export function AssessmentFlow({
         </div>
       </section>
       <section
-        role="tabpanel"
-        aria-owns={tab === "revisar" ? "licitud-child-history" : undefined}
-        id="licitud-panel-revisar"
-        aria-labelledby="licitud-tab-revisar"
+        role={navigation ? "region" : "tabpanel"}
+        aria-owns={!navigation && tab === "revisar" ? `${childPrefix}-history` : undefined}
+        id={`${flowId}-panel-revisar`}
+        aria-labelledby={navigation ? undefined : `${flowId}-tab-revisar`}
+        aria-label={navigation ? "Documentos guardados de la evaluación" : undefined}
         hidden={tab !== "revisar"}
         className="space-y-3"
       >
@@ -469,10 +480,11 @@ export function AssessmentFlow({
         )}
       </section>
       <section
-        role="tabpanel"
-        aria-owns="licitud-child-downloads"
-        id="licitud-panel-historial"
-        aria-labelledby="licitud-tab-historial"
+        role={navigation ? "region" : "tabpanel"}
+        aria-owns={!navigation ? `${childPrefix}-downloads` : undefined}
+        id={`${flowId}-panel-historial`}
+        aria-labelledby={navigation ? undefined : `${flowId}-tab-historial`}
+        aria-label={navigation ? "Historial y descargas de la evaluación" : undefined}
         hidden={tab !== "historial"}
       >
         <h2 className="text-xl font-semibold">
@@ -483,6 +495,7 @@ export function AssessmentFlow({
         </p>
       </section>
       <AssessmentSupportPanel
+        panelId={supportPanelId}
         organizationId={organizationId}
         treatmentId={treatmentId}
         assessmentId={assessmentId}
@@ -510,6 +523,7 @@ export function AssessmentFlow({
         onDirty={setSupportDirty}
       />
       <ChildAdolescentPage
+        regionPrefix={childPrefix}
         organizationId={organizationId}
         treatmentId={treatmentId}
         assessmentId={assessmentId}

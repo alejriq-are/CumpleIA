@@ -40,7 +40,11 @@ export function MainModules({
   expanded,
   setExpanded,
   notify,
+  navigationLabel = "Módulos de la maqueta",
+  drawerId,
 }: {
+  navigationLabel?: string;
+  drawerId?: string;
   module: ModuleId;
   go: (module: ModuleId) => void;
   expanded: boolean;
@@ -74,7 +78,7 @@ export function MainModules({
           </button>
         )}
       </div>
-      <nav id="prototype-global-menu" aria-label="Módulos de la maqueta">
+      <nav id="prototype-global-menu" aria-label={navigationLabel}>
         {[
           { title: "Trabajo", ids: ["panel", "diagnostico", "rat", "licitud"] },
           { title: "Próximas funciones", ids: ["documentos", "evidencia"] },
@@ -122,6 +126,7 @@ export function MainModules({
   return mobile ? (
     <PrototypeDrawer
       open={expanded}
+      id={drawerId}
       label="Menú principal"
       className="prototype-rail"
       close={close}

@@ -4,12 +4,14 @@ import { createPortal } from "react-dom";
 
 export function PrototypeDrawer({
   open,
+  id,
   label,
   className,
   close,
   children,
 }: {
   open: boolean;
+  id?: string;
   label: string;
   className: string;
   close: () => void;
@@ -81,6 +83,7 @@ export function PrototypeDrawer({
       }}
     >
       <div
+        id={id}
         ref={panel}
         role="dialog"
         aria-modal="true"

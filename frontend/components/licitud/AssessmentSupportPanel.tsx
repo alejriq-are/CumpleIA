@@ -20,6 +20,7 @@ import {
 } from "@/lib/api/assessment-support";
 
 type Props = {
+  panelId?: string;
   organizationId: string;
   treatmentId: string;
   assessmentId: string;
@@ -337,7 +338,7 @@ export function AssessmentSupportPanel(props: Props) {
   const valuation = valid ? support?.risk_evaluation : null;
   return (
     <section
-      id="licitud-support-panel"
+      id={props.panelId ?? "licitud-support-panel"}
       hidden={props.hidden}
       className="min-w-0 space-y-4 break-words rounded border p-4"
       aria-label="Valoración y anexos de la evaluación"

@@ -18,6 +18,7 @@ import { childApi, type ChildDocument } from "@/lib/api/child-adolescent";
 import { sessionToken } from "./LicitudWorkspace";
 import type { FlowTab } from "./AssessmentFlow";
 export function ChildAdolescentPage({
+  regionPrefix = "licitud-child",
   organizationId,
   treatmentId,
   assessmentId,
@@ -35,6 +36,7 @@ export function ChildAdolescentPage({
   onDocumentPending,
   token = sessionToken,
 }: {
+  regionPrefix?: string;
   organizationId: string;
   treatmentId: string;
   assessmentId: string;
@@ -113,11 +115,11 @@ export function ChildAdolescentPage({
   );
   return (
     <div key={`${organizationId}:${treatmentId}:${assessmentId}`} className="space-y-6">
-      <div id="licitud-child-downloads" hidden={view !== undefined && view !== "historial"}>
+      <div id={`${regionPrefix}-downloads`} hidden={view !== undefined && view !== "historial"}>
         <MvpDossierPanel load={dossier} prepare={pilot} />
       </div>
       <div
-        id="licitud-child-editor"
+        id={`${regionPrefix}-editor`}
         hidden={view !== undefined && (view !== "completar" || !editorVisible)}
       >
         <h2 className="text-xl font-semibold">Infancia y adolescencia · cuando corresponda</h2>
@@ -133,7 +135,7 @@ export function ChildAdolescentPage({
         />
       </div>
       <div
-        id="licitud-child-history"
+        id={`${regionPrefix}-history`}
         hidden={
           view !== undefined &&
           (view === "revisar" ? !reviewVisible : view !== "completar" || !preparationVisible)

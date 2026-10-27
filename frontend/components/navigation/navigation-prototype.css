@@ -2,7 +2,7 @@
 .dashboard-shell:has(.prototype-app) > nav {
   display: none;
 }
-.dashboard-shell:has(.prototype-app) > main {
+.dashboard-shell:has(.prototype-app) > .dashboard-content {
   max-width: none;
   padding: 0;
 }

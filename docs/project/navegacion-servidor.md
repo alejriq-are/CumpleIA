@@ -965,3 +965,114 @@ anteriores a esta autorización. Mantener los límites de evidencia: pasada comp
 antes del último ajuste y siete escenarios dirigidos después, sin atribuir CI remota.
 Excluir next-env.d.ts generado y outputs/ locales. Comprobar HEAD remoto tras el push.
 No iniciar 7B ni ejecutar merge/despliegue en este cierre.
+
+## Bloque 7B — nombres, regiones y ayudas accesibles
+
+27/10/2026. Usuario solicita continuar 7B. Rama `feature/navegacion-7b-accesibilidad`,
+base publicada `39bca0b1d722c18c9f5a10e304847cbe2b631013`. Implementación local;
+pendientes validación asistida y lector de pantalla. Sin commit/push ni inicio de 8A.
+
+### Contraste y cambios
+
+- El layout autenticado usaba un main que envolvía al main conectado. DashboardContent
+  conserva main para las demás rutas y usa div para /dashboard/trabajo, cuyo espacio
+  ya aporta un main. La rama sin organización incluye su propio main con encabezado.
+  Autenticación permanece en el layout de servidor, sin cambiar acceso o datos.
+- Menú conectado: «Módulos del espacio de trabajo»; MainModules mantiene por defecto
+  «Módulos de la maqueta» para la referencia. Sin sustitución global de sus nombres.
+- Área de trabajo nombrada por su h1: Panel principal o «Área de trabajo: [destino]».
+  El título de la pestaña usa destino, módulo y CumpleIA; no añade identidades personales.
+  En destinos con formulario el h1 es accesible sin introducir otra cabecera visible.
+- Menú/Secciones/Contexto se relacionan con su diálogo mediante aria-controls; Contexto
+  informa también aria-expanded. Cierre, foco y teclado de 7A permanecen.
+- AssessmentFlow conectado usa regiones con nombres propios y no tabpanel referidos a
+  pestañas locales ocultas. El uso independiente conserva sus pestañas y relación con
+  paneles. IDs de pestañas, paneles y regiones de infancia son propios por instancia;
+  las referencias de valoración usan su panel correspondiente. El paso sin panel de
+  valoración asociado no anuncia un aria-controls a un destino inexistente.
+- Ayudas de revisión y decisión tienen identificadores propios por componente. El nombre
+  libre de edición, la consulta de determinación y los requisitos de guardado conservan
+  su ayuda asociada. EIPD explica deshabilitación por rol, estado, guardado en curso o
+  resultado incierto; el estado confirmado no se presenta falsamente como rol de consulta.
+- No hay rediseño visual, retiro de listas/cabeceras, nuevas reglas, escritura automática
+  ni cambios backend/API. Simplificación de cabecera/listas permanece en 8A/8B.
+
+### Verificación y límites
+
+168 escenarios distintos aprobados: 74 conectados (6 nuevos 7B), 20 flujo documental,
+33 historial de infancia, 12 decisiones de organización y 29 maqueta. Una prueba opcional
+adicional de capturas de maqueta quedó omitida por su condición; no contarla como aprobada.
+Tipos, ESLint, Prettier y git diff --check correctos. Capturas 1280/390 revisadas en
+outputs/navegacion-7b, locales y excluidas de publicación. Continúa vigente la cobertura
+320 del teclado 7A; las capturas nuevas de ayudas de 7B son 1280/390.
+
+El harness conectado ahora monta el DashboardContent real con pathname simulado de trabajo,
+para comprobar el defecto del main anidado y no solo el componente aislado. Comprueba main
+único/nombre/título, regiones sin depender de pestañas ocultas, relaciones de paneles,
+referencias accesibles con destinos únicos, dos evaluaciones montadas conservando nota,
+descripciones de edición/requisitos, bloqueo por estado sin atribución al rol y apertura/
+cierre de metodología con teclado y pulsaciones táctiles emuladas sin guardar.
+Una primera comprobación de conservación seleccionaba dos textareas por etiqueta, incluida
+la evaluación oculta; se acotó al textbox expuesto en el árbol accesible y pasó sin alterar
+el aislamiento ni el montaje de borradores. No se ocultó un error funcional.
+
+Son pruebas Chromium con respuestas ficticias controladas, no ensayo integrado nuevo contra
+el servidor del usuario ni sesión con lector de pantalla. La consulta con NVDA/Narrador y
+las rutas autenticadas fuera de trabajo requieren comprobación manual correspondiente;
+no declarar accesibilidad integral certificada. No usar lectura en voz alta del navegador
+como sustituto de recorrer regiones y nombres con un lector de pantalla.
+
+### Guion asistido
+
+1. Usar pestaña de prueba actualizada en /dashboard/trabajo y conservar abierta la antigua
+   si contiene borradores pendientes. Abrir Determinar aplicabilidad y Documentos guardados;
+   el título de la pestaña debe identificar el destino actual y CumpleIA. No guardar.
+2. Con Tab llegar a Secciones, abrir con Enter, cerrar con Escape y confirmar retorno del
+   foco. Repetir Contexto y cancelar. Confirmar ayuda visible de Consultar última determinación
+   guardada y que informa conservación del borrador, sin guardado o sincronización.
+3. En EIPD habilitada, consultar Nombre de la edición y su ayuda; en Necesidad y
+   proporcionalidad comprobar la explicación de una respuesta (sin registrar otra versión).
+   En Valorar riesgos abrir/cerrar metodología con Enter y, si se dispone, toque táctil.
+4. Con NVDA o Narrador disponible, recorrer regiones y encabezados: un único contenido
+   principal por vista conectada; nombre del área de trabajo y menú conectado; Secciones/
+   Contexto anunciados expandido/contraído y foco de retorno. Comprobar descripción de
+   consulta/requisitos y nombre de regiones documentales sin pestañas ocultas. Registrar
+   lector, navegador y resultado observado. Si no se ejecuta, mantener este criterio pendiente.
+
+No recargar ni cerrar pestañas con preparación temporal que se desee conservar. Cambiar
+la pestaña no copia sus borradores. No crear decisiones, determinaciones o versiones solo
+para completar esta prueba de estructura.
+
+## 7B — recorridos visuales y de teclado confirmados, 27/10/2026
+
+Usuario aporta secuencia de Determinar aplicabilidad a Documentos guardados con título
+de pestaña actualizado; confirma «recorrido OK» al abrir/cerrar Secciones y Contexto
+con retorno del foco; confirma contorno de foco en Consultar última determinación guardada.
+Capturas muestran ayuda de consulta y explicación de Nombre de la edición en preparación
+de infancia. Confirma «recorrido OK» al abrir y cerrar Análisis, riesgos, medidas, fuentes
+y evidencias con Enter, manteniendo foco. Es aceptación de esos recorridos, sin registrar
+nuevos documentos ni actuaciones durante el guion.
+
+Usuario informa que no dispone de Narrador/NVDA. La prueba manual con lector de pantalla
+no se ejecutó y permanece pendiente, junto con cualquier comprobación asistida no cubierta.
+La verificación estructural de main único, nombres, relaciones e IDs sigue respaldada por
+fixtures automatizados; una captura visual no acredita su anuncio por lector. Tampoco se
+atribuye al usuario prueba táctil real, comprobada solo mediante emulación.
+
+168 pruebas aprobadas y 1 captura opcional omitida, según evidencia previa. 7B validado
+parcialmente con este alcance; no dar por completado su criterio de lector ni declarar
+accesibilidad certificada. Sin commit/push de 7B ni inicio de 8A. Rama
+feature/navegacion-7b-accesibilidad sobre 39bca0b. Excluir generados y capturas locales.
+Las menciones inferiores de aceptación asistida totalmente pendiente son antecedentes;
+queda pendiente específicamente la parte no comprobada indicada aquí.
+
+## Publicación autorizada de 7B — 27/10/2026
+
+Usuario solicita commit y autoriza push de 7B en feature/navegacion-7b-accesibilidad,
+base 39bca0b. Publicar estructura/nombres/ayudas, pruebas y validación asistida acotada.
+La prueba manual con lector de pantalla permanece pendiente por no disponibilidad del
+usuario; publicar no cierra ese criterio ni acredita accesibilidad integral certificada.
+168 escenarios aprobados y 1 captura opcional omitida según ejecución registrada;
+no atribuir CI remota nueva al push. Los pendientes inferiores de autorización describen
+estados anteriores. Excluir next-env.d.ts generado y outputs/ locales; verificar HEAD
+remoto tras publicar. No iniciar 8A ni ejecutar merge/despliegue en este cierre.

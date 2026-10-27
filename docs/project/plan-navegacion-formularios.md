@@ -2,7 +2,7 @@
 
 Fecha: 26 de octubre de 2026. Base funcional: `2e3f5460190185413f6e85243ad59958ba148463`.
 
-Estado al 27/10/2026: **7A aceptado con alcance asistido acotado; commit/push autorizado el 27/10/2026**. Base publicada 6B: 8fec3df. [Aceptación y límites](navegacion-servidor.md#aceptación-asistida-acotada-de-7a--27102026). No se inicia 7B. [Análisis y decisiones](evaluacion-propuestas-claude.md).
+Estado al 27/10/2026: **7B con recorridos visuales y de teclado confirmados; commit/push autorizado. Lector de pantalla pendiente**. El usuario no dispone de lector para esa prueba. [Alcance y límites](navegacion-servidor.md#7b--recorridos-visuales-y-de-teclado-confirmados-27102026). Publicación autorizada el 27/10/2026; sin inicio de 8A. [Análisis y decisiones](evaluacion-propuestas-claude.md).
 
 ## 1. Alcance y secuencia
 
@@ -132,6 +132,11 @@ No imponer `role=menu` a enlaces desplegables si el patrón es disclosure. Flech
 **Guion:** abrir Menú, cerrar con Escape; abrir Secciones, elegir un paso EIPD; volver a abrir y cerrar por fondo exterior. Repetir con Tab y sin tocar el contenido del formulario.
 
 ### 7B. Nombres, regiones y ayuda
+
+**Estado:** implementado localmente en feature/navegacion-7b-accesibilidad, base 39bca0b.
+168 pruebas aprobadas (6 nuevas 7B), 1 captura opcional omitida. Recorridos visuales y
+de teclado confirmados con alcance documentado; lector de pantalla pendiente por no
+disponibilidad del usuario. No certifica accesibilidad integral.
 
 **Resuelve:** E12, G22/G28 y reglas de ayuda accesible.
 
@@ -346,6 +351,6 @@ Los códigos C se conservan como referencias históricas del checklist de revisi
 
 ## 12. Primer bloque para ejecutar
 
-**Estado: 7A aceptado con alcance asistido acotado; commit/push autorizado el 27/10/2026.** Próximo propuesto: 7B, estructura y ayudas accesibles. No se inicia en este cierre.
+**Estado: 7B parcialmente validado; lector de pantalla pendiente.** Recorridos visuales y de teclado confirmados, commit/push autorizado el 27/10/2026; sin inicio de 8A. Registrar esta limitación en cualquier publicación; no cerrar el criterio de lector por éxito automatizado.
 
 Este plan se puede ajustar tras la aceptación del usuario. La estimación depende de la evidencia que surja en cada componente; no se prometen plazos ni mejoras porcentuales sin medición.
