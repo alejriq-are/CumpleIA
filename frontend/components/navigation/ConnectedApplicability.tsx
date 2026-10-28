@@ -1,4 +1,5 @@
 "use client";
+import { useWorkState, type WorkReporter } from "@/components/navigation/work-unit-state";
 import { useEffect, useId, useRef, useState } from "react";
 import { navigationApi, type Applicability, type Determination } from "@/lib/api/navigation";
 import { ApiError } from "@/lib/api/client";
@@ -30,6 +31,7 @@ export function ConnectedApplicability({
   readOnly,
   onSaved,
   onDirty,
+  onWorkState,
   onLoadState,
   onOpen,
   token = sessionToken,
@@ -41,6 +43,7 @@ export function ConnectedApplicability({
   readOnly: boolean;
   onSaved: (v: Applicability) => void;
   onDirty: (v: boolean) => void;
+  onWorkState?: WorkReporter;
   onLoadState?: (v: ApplicabilityLoadState) => void;
   onOpen: (section: "eipd" | "infancia" | "revisar") => void;
   token?: () => Promise<string>;
@@ -66,6 +69,14 @@ export function ConnectedApplicability({
     !!saved &&
     (JSON.stringify(eipd) !== JSON.stringify(saved.eipd) ||
       JSON.stringify(infancia) !== JSON.stringify(saved.infancia));
+  useWorkState(onWorkState, {
+    loaded: !!saved,
+    loading,
+    saving: busy,
+    dirty,
+    saved: !!notice,
+    error: !!error,
+  });
   const dirtyRef = useRef(dirty);
   dirtyRef.current = dirty;
   useEffect(() => {

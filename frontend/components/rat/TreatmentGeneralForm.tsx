@@ -28,6 +28,7 @@ type Props = {
   activeSection?: string;
   onCreated?: (id: string) => void;
   onPending?: (dirty: boolean) => void;
+  onPendingSections?: (sections: Record<string, boolean>) => void;
 };
 
 type FormState = {
@@ -86,6 +87,7 @@ export function TreatmentGeneralForm({
   activeSection,
   onCreated,
   onPending,
+  onPendingSections,
 }: Props) {
   const router = useRouter();
 
@@ -101,6 +103,9 @@ export function TreatmentGeneralForm({
   const [dirtySections, setDirtySections] = useState<Record<string, boolean>>({});
   const generalDirty =
     JSON.stringify(form) !== JSON.stringify(detail ? detailToForm(detail) : EMPTY_FORM);
+  useEffect(() => {
+    onPendingSections?.({ ...dirtySections, general: generalDirty });
+  }, [dirtySections, generalDirty, onPendingSections]);
   const pending = generalDirty || Object.values(dirtySections).some(Boolean);
   useEffect(() => onPending?.(pending), [pending, onPending]);
   function cleanSection(key: string) {

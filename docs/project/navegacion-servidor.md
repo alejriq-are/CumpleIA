@@ -1433,3 +1433,165 @@ repetición aprobados en ejecuciones separadas; tipos/lint/formato y capturas ap
 Lector manual de 7B pendiente. No atribuir CI remota nueva al push.
 Las menciones inferiores de autorización pendiente son antecedentes. Excluir next-env.d.ts
 generado y outputs/ locales. Lote 9 no iniciado; sin merge/despliegue. Verificar HEAD remoto.
+
+## Bloque 9A — pendientes identificables, 28/10/2026
+
+Implementación local en `feature/navegacion-9a-pendientes`, base publicada
+`a1c93c173045035c27c4ff8b3bbf4ce7d0e62868` (8B). Usuario solicita continuar 9A;
+no hay autorización nueva de commit/push. Pendiente aceptación asistida.
+
+### Unidad guardable y alcance implementado
+
+Una unidad representa una acción independiente de guardado o registro, no cada pantalla:
+
+| Unidad | Identidad y efecto |
+| --- | --- |
+| Determinación | EIPD e infancia forman un único formulario por evaluación. |
+| Base de licitud y fundamento | Un formulario por evaluación. |
+| Borrador EIPD | Los siete pasos comparten una unidad por evaluación. |
+| Antecedentes de infancia | Guardado separado por evaluación. |
+| Preparación de nueva versión de infancia | Temporal en la pestaña; requiere registrar explícitamente una versión. |
+| Valoración de riesgos | Independiente del documento EIPD y del anexo. |
+| Anexo en preparación | Formulario independiente, incluido archivo seleccionado; sin copiar contenido a la lista. |
+| RAT | Información general y cada sección con guardado separado se informan por separado. Nueva actividad es otra unidad. |
+| Autodiagnóstico | Un cuestionario por organización; sus secciones no multiplican el conteo. |
+| Mi organización | Un formulario por organización. |
+| Creación de evaluación | Preparación distinta de la evaluación existente; informa el tratamiento elegido en ese formulario. |
+
+La cabecera ofrece **Ver pendientes (N)**. Su panel muestra nombre, contexto disponible,
+estado y origen de cada unidad pendiente, con cierre explícito, Escape, fondo exterior y
+retorno de foco. El resumen vacío dice que no hay pendientes *informados*; no afirma que
+los formularios estén completos o guardados. No lista contenido de campos, archivos ni
+credenciales. Los enlaces de retorno y confirmación al cambiar contexto siguen en 9B.
+
+Se amplía el contrato mediante descriptores con identidad estable, contexto, destino
+canónico y origen formulario/temporal. En los editores de evaluación se reportan sin consulta,
+consultando, consultado sin cambios, editado, guardando, guardado confirmado y error según
+la operación real. Una lectura exitosa nunca se transforma en confirmación de escritura.
+Los callbacks antiguos de otros formularios aportan solo edición pendiente; su `false`
+no se convierte en «guardado». El conteo no utiliza el booleano agregado por evaluación.
+No altera estados de dominio, contratos API, autorizaciones ni contenido de documentos.
+
+Los avisos locales junto al guardado permanecen. Consultar/reintentar no retira unidades
+editadas ni guarda el formulario. Guardar una unidad no limpia las demás. La lista y los
+borradores siguen en memoria de la pestaña: sin autosave ni almacenamiento nuevo en
+localStorage/sessionStorage. No sincroniza otras pestañas. Confirmación/activación EIPD
+permanecen bloqueadas; no implica aprobación jurídica ni auditoría de eventos históricos.
+
+### Evidencia ejecutada localmente
+
+- **190 escenarios Chromium aprobados en una ejecución final** de navegación conectada,
+  espacio de licitud, editor de infancia, historial de infancia y valoración/anexos.
+  Incluye nueve escenarios nuevos 9A: vacío sin guardado falso, dos unidades frente a
+  varios pasos EIPD, guardado parcial, error/reintento, aislamiento por evaluación,
+  panel a 320/1280 px, valoración/anexo separados, preparación temporal/infancia separados
+  y ámbito de RAT/autodiagnóstico al cambiar de módulo.
+- TypeScript, ESLint dirigido, Prettier y `git diff --check` aprobados.
+- Capturas de panel a 320/1280 px inspeccionadas visualmente. Registro local:
+  `outputs/9a/regression.log`; capturas `outputs/9a/9a-pendientes-*.png`, no versionadas.
+- Los primeros intentos de pruebas se ajustaron a rótulos/selección visible reales y a
+  los requisitos existentes: no se desbloqueó valoración con borrador EIPD sucio ni
+  preparación con infancia sin guardar. La fixture válida de política de infancia
+  respeta el contrato y solo se usa en su escenario 9A.
+- Son pruebas con API simulada, no integración real del servidor, CI remota, prueba
+  manual de lector de pantalla ni certificación de accesibilidad. Se conserva el
+  pendiente de lector manual de 7B.
+
+### Checklist de aceptación asistida 9A
+
+Usar `/dashboard/trabajo`, una pestaña actualizada y datos ficticios. Si la pestaña antigua
+no muestra Ver pendientes, abrir su dirección en una pestaña nueva y dejar la original
+abierta; los cambios no guardados de la original no se trasladan automáticamente.
+
+- [ ] Inicio: Ver pendientes (0) abre un panel vacío que no anuncia «todo guardado».
+- [ ] En una evaluación con EIPD habilitada, escribir una nota ficticia en el borrador:
+  aparece una unidad; cambiar por varios pasos no la multiplica.
+- [ ] Volver a Determinar aplicabilidad y añadir una línea al fundamento sin cambiar la
+  determinación guardada: aparecen dos unidades con nombres y contexto correctos.
+- [ ] Guardar solo la determinación mediante su declaración ficticia: queda pendiente
+  únicamente EIPD; volver a su formulario conserva la nota.
+- [ ] En ventana estrecha, abrir/cerrar Ver pendientes con Escape y fondo gris exterior;
+  el foco vuelve al botón y el texto es legible.
+- [ ] Error de consulta y reintento conservan la unidad y el contenido sin anunciar
+  guardado; si se usa simulación de desconexión, restaurar conexión antes de continuar.
+
+No iniciar 9B ni publicar hasta la siguiente instrucción/autorización correspondiente.
+Excluir `frontend/next-env.d.ts` generado y `outputs/` al preparar una publicación.
+
+## 9A — conteo e identificación confirmados, 28/10/2026
+
+Usuario confirma «recorrido OK» en el primer recorrido asistido. La captura muestra
+Unidades de trabajo pendientes (2): Determinación de aplicabilidad y Borrador EIPD ·
+siete pasos, ambos para CumpleIA Demo / Gestión de clientes / finalidad de citas /
+evaluación versión 1, borrador. El recorrido comunicado incluye cambiar de paso EIPD
+sin multiplicar su unidad. Se valida este alcance; no se atribuye aún aceptación de
+guardado parcial, recuperación de errores o cierres en ventana estrecha.
+
+Siguiente comprobación: cerrar el panel, guardar solo la determinación con su declaración
+ficticia, comprobar Ver pendientes (1) con únicamente el borrador EIPD y volver a sus
+notas para verificar conservación. Sin guardar EIPD ni recargar durante esta prueba.
+Sin commit/push de 9A; 9B no iniciado. Lector manual de 7B pendiente.
+
+## 9A — guardado parcial y nota conservada confirmados, 28/10/2026
+
+Usuario confirma «recorrido OK» tras cerrar Pendientes, guardar únicamente la
+determinación con la declaración ficticia, comprobar Ver pendientes (1) con solo
+Borrador EIPD y volver a la EIPD con la nota conservada, sin guardar EIPD ni recargar.
+Se valida el retiro individual del pendiente guardado y la conservación del otro.
+No implica aceptación todavía del cierre en ventana estrecha ni recuperación de errores.
+
+Siguiente comprobación: reducir la misma ventana, abrir Ver pendientes (1), revisar
+lectura/contexto y cerrar mediante Escape con foco de retorno al botón. Reabrir y cerrar
+mediante clic en el fondo gris exterior al panel, comprobando el mismo retorno de foco.
+No guardar ni recargar. Sin commit/push de 9A ni inicio de 9B; lector manual de 7B pendiente.
+
+## 9A — panel estrecho y cierre confirmados, 28/10/2026
+
+Usuario confirma «recorrido OK» al reducir la misma ventana, abrir Ver pendientes (1),
+leer el contenido completo, cerrar mediante Escape con retorno de foco al disparador,
+reabrir y cerrar mediante clic en el fondo gris exterior al panel con el mismo retorno.
+La secuencia se realizó sin guardar ni recargar. Se valida este alcance del panel;
+no implica prueba con lector de pantalla ni aceptación de recuperación de errores.
+
+Siguiente comprobación: mantener el borrador EIPD pendiente, editar el fundamento de
+la determinación sin guardar, simular desconexión y consultar la última determinación.
+El error debe conservar las dos unidades y sus datos. Restaurar conexión y repetir
+la consulta en la misma pestaña: el borrador de determinación y el EIPD siguen pendientes,
+sin confirmación falsa de guardado. No recargar ni guardar para esta comprobación.
+Sin commit/push de 9A ni inicio de 9B; lector manual de 7B pendiente.
+
+## 9A — recuperación confirmada y recorridos acordados completados, 28/10/2026
+
+Usuario confirma «recorrido OK» al mantener el borrador EIPD, añadir la línea ficticia
+de recuperación al fundamento de determinación sin guardar, simular Offline y consultar.
+La primera captura muestra error de conexión en español y Ver pendientes (2). Tras
+restaurar No throttling y repetir en la misma pestaña, la segunda muestra Consulta
+completada, aviso de conservación de cambios y Ver pendientes (2), sin éxito de guardado.
+La confirmación del recorrido cubre la conservación de la línea añadida y de ambos
+pendientes, sin guardar ni recargar. Las capturas por sí solas no muestran todo el texto
+de los borradores; esa conservación se registra como confirmación del usuario.
+
+Quedan completados los recorridos asistidos acordados de 9A: identificación/contexto y
+conteo sin multiplicar pasos EIPD; guardado de una sola unidad y conservación de la otra;
+lectura/cierre/foco en ventana estrecha; desconexión y consulta recuperada conservando
+pendientes y sin simular escritura. Los escenarios adicionales de formularios, contextos
+y preparación temporal mantienen la cobertura automatizada documentada: 190 escenarios
+Chromium aprobados en la ejecución final, incluidos nueve específicos 9A. No se atribuye
+al usuario ejecución asistida adicional de todos esos escenarios.
+
+9A listo para commit/push cuando el usuario lo autorice. No se publica, no se inicia 9B,
+no hay merge/despliegue ni habilitación EIPD. Lector manual de 7B pendiente; sin nueva
+prueba manual de lector, certificación de accesibilidad ni CI remota atribuida.
+La casilla de inicio vacío del guion detallado tiene cobertura automatizada; no se marca
+como ejecución asistida explícita si no fue confirmada separadamente.
+
+## Publicación autorizada de 9A — 28/10/2026
+
+Usuario solicita commit y autoriza push de `feature/navegacion-9a-pendientes`, base
+`a1c93c1`. Incluye unidades pendientes, estados UI, panel consultable, pruebas y
+validación asistida acordada. 190 escenarios Chromium y checks estáticos previamente
+aprobados; los últimos cambios solo registran los resultados asistidos y esta autorización.
+No atribuir CI remota ni integración real a las pruebas con fixtures. Sin merge/despliegue,
+9B no iniciado y lector manual de 7B pendiente. Excluir next-env.d.ts generado y outputs/.
+Las entradas inferiores de autorización pendiente son antecedentes. Verificar identidad
+remota después del push.

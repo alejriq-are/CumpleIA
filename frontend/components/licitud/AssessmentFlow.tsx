@@ -1,4 +1,5 @@
 "use client";
+import type { WorkState } from "@/components/navigation/work-unit-state";
 import { eipdStepLabels } from "@/lib/licitud/eipd-steps";
 import { documentLabels } from "@/lib/licitud/document-labels";
 import Link from "next/link";
@@ -33,6 +34,7 @@ export function AssessmentFlow({
   token = sessionToken,
   navigation,
   onPending,
+  onWorkUnit,
   onAssessmentSaved,
 }: {
   organizationId: string;
@@ -48,8 +50,24 @@ export function AssessmentFlow({
     scope: { eipd: boolean; infancia: boolean };
   };
   onPending?: (dirty: boolean) => void;
+  onWorkUnit?: (kind: string, state: WorkState) => void;
   onAssessmentSaved?: () => void;
 }) {
+  const legalState = useCallback((state: WorkState) => onWorkUnit?.("base", state), [onWorkUnit]);
+  const eipdState = useCallback((state: WorkState) => onWorkUnit?.("eipd", state), [onWorkUnit]);
+  const childState = useCallback(
+    (state: WorkState) => onWorkUnit?.("infancia", state),
+    [onWorkUnit]
+  );
+  const preparationState = useCallback(
+    (state: WorkState) => onWorkUnit?.("preparar", state),
+    [onWorkUnit]
+  );
+  const riskState = useCallback(
+    (state: WorkState) => onWorkUnit?.("valoracion", state),
+    [onWorkUnit]
+  );
+  const annexState = useCallback((state: WorkState) => onWorkUnit?.("anexos", state), [onWorkUnit]);
   const [localTab, localSetTab] = useState<FlowTab>("resumen");
   const [localSection, localSetSection] = useState<AssessmentLocation["section"]>("alcance");
   const [localStep, localSetStep] = useState(0);
@@ -336,6 +354,7 @@ export function AssessmentFlow({
             onLoaded={loaded}
             onSaved={saved}
             onDirty={setLegalDirty}
+            onWorkState={legalState}
           />
           <p className="text-sm">
             Guarda el borrador para que tus cambios aparezcan en Revisar documentos.
@@ -353,6 +372,7 @@ export function AssessmentFlow({
             token={token}
             refreshVersion={refreshVersion}
             onDirty={setEipdDirty}
+            onWorkState={eipdState}
             onSaved={saved}
             onLoaded={loaded}
             valuation={support?.risk_evaluation}
@@ -528,6 +548,8 @@ export function AssessmentFlow({
         onSaved={childSaved}
         onLoaded={setSupport}
         onDirty={setSupportDirty}
+        onRiskState={riskState}
+        onAnnexState={annexState}
       />
       {navigation && navigation.scope.eipd && tab === "completar" && section === "eipd" && (
         <nav aria-label="Cambiar paso EIPD" className="flex flex-wrap gap-3">
@@ -570,6 +592,8 @@ export function AssessmentFlow({
         refreshVersion={refreshVersion}
         onSaved={childSaved}
         onDirty={setChildDirty}
+        onWorkState={childState}
+        onPreparationState={preparationState}
         preparationBlocked={dirty || supportDirty || !row || !childRelevant}
         onDocumentPending={setDocumentDirty}
       />

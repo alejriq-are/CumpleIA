@@ -257,7 +257,7 @@ test.beforeEach(async ({ page }) => {
       return result({
         policy: {
           policy_schema_version: 1,
-          policy_reference: "PRUEBA",
+          policy_reference: mode === "9a-child" ? "m3-t1-infancia-pruebas-negativas-v1" : "PRUEBA",
           sources_status: "pendiente",
           acceptance_status: "pendiente",
           activation: "deshabilitada",
@@ -2489,3 +2489,279 @@ for (const width of [320, 390, 865, 1100, 1199]) {
     expect(errors).toEqual([]);
   });
 }
+
+const pendingButton = (page: Page, count: number) =>
+  page.getByRole("button", { name: `Ver pendientes (${count})`, exact: true });
+const pendingDialog = (page: Page) =>
+  page.getByRole("dialog", { name: "Unidades de trabajo pendientes", exact: true });
+
+test("9A consulta inicial no implica guardado ni crea pendientes", async ({ page }) => {
+  await legal(page);
+  await expect(pendingButton(page, 0)).toBeVisible();
+  await pendingButton(page, 0).click();
+  await expect(
+    pendingDialog(page).getByText("No hay cambios pendientes informados.", { exact: false })
+  ).toBeVisible();
+  await expect(pendingDialog(page).getByText("Guardado confirmado", { exact: true })).toHaveCount(
+    0
+  );
+  await expect(pendingDialog(page).locator("li")).toHaveCount(0);
+  await page.keyboard.press("Escape");
+  await expect(pendingButton(page, 0)).toBeFocused();
+  expect(calls.filter((v) => v.method !== "GET")).toEqual([]);
+  expect(errors).toEqual([]);
+});
+
+test("9A determinación y siete pasos EIPD cuentan dos unidades; guardar limpia solo una", async ({
+  page,
+}) => {
+  await legal(page);
+  await enable(page);
+  await section(page, "Tratamiento y alcance de la EIPD");
+  await main(page)
+    .getByLabel("Notas del borrador EIPD (opcional)", { exact: true })
+    .fill("[FICTICIA] Pendiente EIPD 9A");
+  await expect(pendingButton(page, 1)).toBeVisible();
+  await section(page, "Necesidad y proporcionalidad");
+  await expect(pendingButton(page, 1)).toBeVisible();
+  await section(page, "Describir riesgos");
+  await expect(pendingButton(page, 1)).toBeVisible();
+  await section(page, "Determinar aplicabilidad");
+  await main(page)
+    .getByLabel("Fundamento sobre EIPD", { exact: true })
+    .fill("[FICTICIA] Determinación pendiente 9A");
+  await expect(pendingButton(page, 2)).toBeVisible();
+  await pendingButton(page, 2).click();
+  await expect(pendingDialog(page).locator("li")).toHaveCount(2);
+  await expect(
+    pendingDialog(page).getByRole("heading", { name: "Borrador EIPD · siete pasos" })
+  ).toBeVisible();
+  await expect(
+    pendingDialog(page).getByRole("heading", { name: "Determinación de aplicabilidad" })
+  ).toBeVisible();
+  await expect(pendingDialog(page).locator("li").first()).toContainText(
+    "[FICTICIA] Finalidad de prueba"
+  );
+  await expect(
+    pendingDialog(page).getByText("[FICTICIA] Pendiente EIPD 9A", { exact: true })
+  ).toHaveCount(0);
+  await page.keyboard.press("Escape");
+  await main(page)
+    .getByLabel("Declaro que esta prueba utiliza únicamente datos ficticios.")
+    .check();
+  await main(page).getByRole("button", { name: "Guardar determinación", exact: true }).click();
+  await expect(pendingButton(page, 1)).toBeVisible();
+  await section(page, "Tratamiento y alcance de la EIPD");
+  await expect(
+    main(page).getByLabel("Notas del borrador EIPD (opcional)", { exact: true })
+  ).toHaveValue("[FICTICIA] Pendiente EIPD 9A");
+  expect(errors).toEqual([]);
+});
+
+test("9A error y reintento de consulta conservan pendiente y no anuncian guardado", async ({
+  page,
+}) => {
+  await legal(page);
+  await enable(page);
+  await main(page)
+    .getByLabel("Fundamento sobre EIPD", { exact: true })
+    .fill("[FICTICIA] Mantener 9A");
+  mode = "app-offline";
+  await main(page)
+    .getByRole("button", { name: "Consultar última determinación guardada", exact: true })
+    .click();
+  await expect(main(page).getByRole("alert")).toBeVisible();
+  await expect(pendingButton(page, 1)).toBeVisible();
+  await pendingButton(page, 1).click();
+  await expect(pendingDialog(page)).toContainText("Error; revisa el formulario");
+  await page.keyboard.press("Escape");
+  mode = "ok";
+  await main(page)
+    .getByRole("button", { name: "Consultar última determinación guardada", exact: true })
+    .click();
+  await expect(main(page).getByLabel("Fundamento sobre EIPD", { exact: true })).toHaveValue(
+    "[FICTICIA] Mantener 9A"
+  );
+  await expect(pendingButton(page, 1)).toBeVisible();
+  await pendingButton(page, 1).click();
+  await expect(pendingDialog(page)).toContainText("Cambios sin guardar");
+  await expect(pendingDialog(page).getByText("Guardado confirmado", { exact: true })).toHaveCount(
+    0
+  );
+  expect(calls.filter((v) => v.method === "POST")).toHaveLength(1);
+  expect(errors).toEqual([]);
+});
+
+test("9A dos evaluaciones mantienen dos borradores EIPD con identidad separada", async ({
+  page,
+}) => {
+  await legal(page);
+  await enable(page);
+  await section(page, "Tratamiento y alcance de la EIPD");
+  await main(page)
+    .getByLabel("Notas del borrador EIPD (opcional)", { exact: true })
+    .fill("[FICTICIA] Primera evaluación");
+  await choose(page, aid2);
+  await section(page, "Determinar aplicabilidad");
+  const active = page.locator("[data-work-pane]:visible");
+  await active
+    .getByLabel("¿Corresponde documentar EIPD?", { exact: true })
+    .selectOption("corresponde");
+  await active
+    .getByLabel("Fundamento sobre EIPD", { exact: true })
+    .fill("[FICTICIA] Segunda determinación");
+  await active.getByLabel("Declaro que esta prueba utiliza únicamente datos ficticios.").check();
+  await active.getByRole("button", { name: "Guardar determinación", exact: true }).click();
+  await expect(
+    active.getByText("Determinación guardada en el servidor.", { exact: true })
+  ).toBeVisible();
+  await section(page, "Tratamiento y alcance de la EIPD");
+  await active
+    .getByLabel("Notas del borrador EIPD (opcional)", { exact: true })
+    .fill("[FICTICIA] Segunda evaluación");
+  await pendingButton(page, 2).click();
+  await expect(pendingDialog(page).locator("li")).toHaveCount(2);
+  await expect(pendingDialog(page)).toContainText("Evaluación: versión 1");
+  await expect(pendingDialog(page)).toContainText("Evaluación: versión 2");
+  expect(errors).toEqual([]);
+});
+
+for (const width of [320, 1280]) {
+  test(`9A pendientes legibles, cierre y foco a ${width}px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 844 });
+    await legal(page);
+    await enable(page);
+    await main(page)
+      .getByLabel("Fundamento sobre EIPD", { exact: true })
+      .fill("[FICTICIA] Pendiente visible");
+    const writes = calls.filter((v) => v.method !== "GET").length;
+    await pendingButton(page, 1).click();
+    await expect(
+      pendingDialog(page).getByRole("button", { name: "Cerrar pendientes" })
+    ).toBeFocused();
+    expect(await pendingDialog(page).evaluate((el) => el.scrollWidth <= el.clientWidth + 1)).toBe(
+      true
+    );
+    await capture(page, `9a-pendientes-${width}.png`);
+    await page.keyboard.press("Escape");
+    await expect(pendingButton(page, 1)).toBeFocused();
+    await pendingButton(page, 1).click();
+    const panel = await pendingDialog(page).boundingBox();
+    await page.mouse.click(panel!.x + panel!.width + 5, panel!.y + 30);
+    await expect(pendingDialog(page)).not.toBeVisible();
+    await expect(pendingButton(page, 1)).toBeFocused();
+    expect(calls.filter((v) => v.method !== "GET")).toHaveLength(writes);
+    expect(errors).toEqual([]);
+  });
+}
+
+test("9A valoración y anexo son unidades separadas del borrador EIPD", async ({ page }) => {
+  await legal(page);
+  await enable(page);
+  await section(page, "Valorar riesgos");
+  await main(page)
+    .getByLabel("Horizonte temporal de la valoración", { exact: true })
+    .fill("[FICTICIA] 24 meses");
+  await expect(pendingButton(page, 1)).toBeVisible();
+  await section(page, "Anexos de respaldo");
+  await main(page)
+    .getByLabel("Descripción del anexo", { exact: true })
+    .fill("[FICTICIA] Anexo pendiente");
+  await expect(pendingButton(page, 2)).toBeVisible();
+  await section(page, "Tratamiento y alcance de la EIPD");
+  await main(page)
+    .getByLabel("Notas del borrador EIPD (opcional)", { exact: true })
+    .fill("[FICTICIA] EIPD sin guardar");
+  await expect(pendingButton(page, 3)).toBeVisible();
+  await pendingButton(page, 3).click();
+  await expect(
+    pendingDialog(page).getByRole("heading", { name: "Valoración de riesgos", exact: true })
+  ).toBeVisible();
+  await expect(
+    pendingDialog(page).getByRole("heading", {
+      name: "Anexo de respaldo en preparación",
+      exact: true,
+    })
+  ).toBeVisible();
+  await expect(
+    pendingDialog(page).getByRole("heading", { name: "Borrador EIPD · siete pasos", exact: true })
+  ).toBeVisible();
+  expect(errors).toEqual([]);
+});
+
+test("9A preparación temporal e infancia se cuentan separadas sin registrar versiones", async ({
+  page,
+}) => {
+  mode = "9a-child";
+  await legal(page);
+  await main(page)
+    .getByLabel("¿Corresponde documentar infancia y adolescencia?", { exact: true })
+    .selectOption("corresponde");
+  await main(page)
+    .getByLabel("Fundamento sobre infancia y adolescencia", { exact: true })
+    .fill("[FICTICIA] Alcance mixto de prueba");
+  await main(page)
+    .getByLabel("Declaro que esta prueba utiliza únicamente datos ficticios.")
+    .check();
+  await main(page).getByRole("button", { name: "Guardar determinación", exact: true }).click();
+  await expect(pendingButton(page, 0)).toBeVisible();
+  await section(page, "Preparar nueva versión documental de infancia");
+  await main(page)
+    .getByLabel("Declaro que este registro usa datos ficticios", { exact: true })
+    .check();
+  await main(page)
+    .getByLabel("Nombre de la edición (texto libre)", { exact: true })
+    .filter({ visible: true })
+    .fill("[FICTICIA] Preparación 9A");
+  await section(page, "Completar infancia y adolescencia");
+  await main(page)
+    .getByLabel("Análisis de edad y alcance", { exact: true })
+    .fill("[FICTICIA] Edad por revisar");
+  await expect(pendingButton(page, 2)).toBeVisible();
+  await pendingButton(page, 2).click();
+  await expect(pendingDialog(page)).toContainText(
+    "Preparación temporal: se registra mediante una nueva versión documental."
+  );
+  await expect(
+    pendingDialog(page).getByRole("heading", {
+      name: "Antecedentes de infancia y adolescencia",
+      exact: true,
+    })
+  ).toBeVisible();
+  expect(calls.filter((v) => v.method !== "GET")).toHaveLength(1);
+  expect(errors).toEqual([]);
+});
+
+test("9A RAT y autodiagnóstico mantienen unidades y ámbito al cambiar de módulo", async ({
+  page,
+}) => {
+  await choose(page);
+  await mod(page, "Inventario de tratamientos");
+  await section(page, "Información general");
+  await main(page)
+    .getByRole("textbox", { name: "Nombre de la actividad *", exact: true })
+    .fill("[FICTICIA] RAT pendiente");
+  await expect(pendingButton(page, 1)).toBeVisible();
+  await mod(page, "Autodiagnóstico");
+  await main(page)
+    .getByPlaceholder("Notas u observaciones (opcional)")
+    .first()
+    .fill("[FICTICIA] Diagnóstico pendiente");
+  await expect(pendingButton(page, 2)).toBeVisible();
+  await mod(page, "Panel principal");
+  await pendingButton(page, 2).click();
+  const rat = pendingDialog(page)
+    .locator("li")
+    .filter({ has: page.getByRole("heading", { name: "RAT · Información general", exact: true }) });
+  const diagnostic = pendingDialog(page)
+    .locator("li")
+    .filter({
+      has: page.getByRole("heading", { name: "Cuestionario de autodiagnóstico", exact: true }),
+    });
+  await expect(rat).toContainText("Tratamiento:");
+  await expect(diagnostic).toContainText("Organización:");
+  await expect(diagnostic).not.toContainText("Tratamiento:");
+  await expect(diagnostic).not.toContainText("Evaluación:");
+  expect(calls.filter((v) => v.method !== "GET")).toEqual([]);
+  expect(errors).toEqual([]);
+});

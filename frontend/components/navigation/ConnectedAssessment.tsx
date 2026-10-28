@@ -1,4 +1,6 @@
 "use client";
+import { assessmentUnits, type WorkUnit } from "./work-units";
+import type { WorkState } from "./work-unit-state";
 import { useCallback, useEffect, useState } from "react";
 import { AssessmentFlow, type AssessmentLocation } from "@/components/licitud/AssessmentFlow";
 import type { Applicability } from "@/lib/api/navigation";
@@ -18,6 +20,7 @@ export function ConnectedAssessment({
   onScope,
   onAvailability,
   onPending,
+  onWorkUnit,
   active,
 }: {
   active: boolean;
@@ -28,6 +31,7 @@ export function ConnectedAssessment({
   onScope: (key: string, v: Applicability) => void;
   onAvailability: (key: string, v: AvailabilityReadState) => void;
   onPending: (key: string, dirty: boolean) => void;
+  onWorkUnit: (unit: WorkUnit) => void;
 }) {
   const [refreshVersion, setRefreshVersion] = useState(0);
   const refresh = useCallback(() => setRefreshVersion((n) => n + 1), []);
@@ -38,6 +42,24 @@ export function ConnectedAssessment({
   const [appDirty, setAppDirty] = useState(false);
   const [flowDirty, setFlowDirty] = useState(false);
   const key = `${location.organizationId}:${location.treatmentId}:${location.assessmentId}`;
+  const reportUnit = useCallback(
+    (kind: string, state: WorkState) => {
+      const unit = assessmentUnits[kind];
+      if (!unit) return;
+      onWorkUnit({
+        id: `${key}:${kind}`,
+        label: unit.label,
+        location: { ...location, module: "licitud", section: unit.section, step: unit.step ?? 0 },
+        origin: unit.temporary ? "temporary" : "form",
+        state,
+      });
+    },
+    [key, location, onWorkUnit]
+  );
+  const applicabilityState = useCallback(
+    (state: WorkState) => reportUnit("aplicabilidad", state),
+    [reportUnit]
+  );
   const scope = {
     eipd: !!saved?.current && saved.eipd.state === "corresponde",
     infancia: !!saved?.current && saved.infancia.state === "corresponde",
@@ -149,6 +171,7 @@ export function ConnectedAssessment({
           refreshVersion={refreshVersion}
           onSaved={loaded}
           onDirty={setAppDirty}
+          onWorkState={applicabilityState}
           onLoadState={setLoadState}
           onOpen={(section) => go({ ...location, section, step: 0 })}
         />
@@ -168,6 +191,7 @@ export function ConnectedAssessment({
           assessmentId={location.assessmentId}
           readOnly={readOnly}
           onPending={setFlowDirty}
+          onWorkUnit={reportUnit}
           onAssessmentSaved={refresh}
           navigation={{
             scope,

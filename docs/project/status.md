@@ -1,3 +1,27 @@
+
+## 9A — recorridos asistidos acordados completados, 28/10/2026
+
+Usuario confirma recuperación tras Offline con dos pendientes conservados y sin falso
+guardado; capturas distinguen error de conexión de consulta completada. Se suma al
+conteo/contexto, guardado parcial y panel estrecho ya confirmados.
+[Resultado y límites](navegacion-servidor.md#9a--recuperación-confirmada-y-recorridos-acordados-completados-28102026).
+190 escenarios automatizados aprobados en el alcance documentado. Listo para commit/push
+cuando se autorice; sin publicación de 9A ni inicio de 9B. Lector manual de 7B pendiente.
+Las entradas inferiores de aceptación pendiente son antecedentes.
+
+
+## 9A implementado localmente — 28/10/2026
+
+Rama `feature/navegacion-9a-pendientes`, base 8B `a1c93c1`. Ver pendientes (N)
+identifica formularios y preparación temporal con contexto; siete pasos EIPD cuentan
+una sola unidad. Estados UI distinguen lectura y escritura; guardado parcial y error
+conservan los demás pendientes. Sin autosave/almacenamiento nuevo, navegación de 9B,
+cambios API ni habilitación EIPD. 190 Chromium con fixtures y checks estáticos aprobados.
+[Alcance, evidencia y checklist asistido](navegacion-servidor.md#bloque-9a--pendientes-identificables-28102026).
+Pendiente aceptación asistida; sin commit/push autorizado de 9A, merge o despliegue.
+Lector manual de 7B pendiente. Excluir next-env.d.ts generado y outputs/.
+Las entradas inferiores describen antecedentes; lote 9 ahora sí está iniciado.
+
 ## Bloque vigente — valoración de riesgos y anexos
 
 Método interno CUMPLEIA-CUALITATIVA-1: daño a titulares, probabilidad/gravedad,

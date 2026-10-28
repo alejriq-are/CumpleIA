@@ -1,4 +1,5 @@
 "use client";
+import { useWorkState, type WorkReporter } from "@/components/navigation/work-unit-state";
 import { useEffect, useRef, useState } from "react";
 import { licitudApi, legalBases, legalBasisHelp, type Assessment } from "@/lib/api/licitud";
 import { SaveFeedback } from "./SaveFeedback";
@@ -19,6 +20,7 @@ export function LegalAssessmentEditor({
   onLoaded,
   onSaved,
   onDirty,
+  onWorkState,
 }: {
   organizationId: string;
   treatmentId: string;
@@ -28,6 +30,7 @@ export function LegalAssessmentEditor({
   onLoaded?: (row: Assessment) => void;
   onSaved?: (row: Assessment) => void;
   onDirty?: (dirty: boolean) => void;
+  onWorkState?: WorkReporter;
 }) {
   const [row, setRow] = useState<Assessment | null>(null),
     [basis, setBasis] = useState(""),
@@ -40,6 +43,14 @@ export function LegalAssessmentEditor({
   const [baseline, setBaseline] = useState("");
   const fingerprint = JSON.stringify([basis, justification, values]);
   const dirty = Boolean(row && baseline && fingerprint !== baseline);
+  useWorkState(onWorkState, {
+    loaded: !!row,
+    loading: !row && !error,
+    saving: busy,
+    dirty,
+    saved: !!message,
+    error: !!error,
+  });
   useEffect(() => {
     onDirty?.(dirty || busy);
   }, [dirty, busy, onDirty]);

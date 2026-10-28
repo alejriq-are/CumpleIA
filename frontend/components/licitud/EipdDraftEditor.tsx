@@ -1,4 +1,5 @@
 "use client";
+import { useWorkState, type WorkReporter } from "@/components/navigation/work-unit-state";
 import type { RiskEvaluation, Annex } from "@/lib/api/assessment-support";
 import { eipdStepLabels } from "@/lib/licitud/eipd-steps";
 import { documentLabels } from "@/lib/licitud/document-labels";
@@ -25,6 +26,7 @@ export function EipdDraftEditor({
   token = sessionToken,
   refreshVersion = 0,
   onDirty,
+  onWorkState,
   onSaved,
   onLoaded,
   valuation,
@@ -41,6 +43,7 @@ export function EipdDraftEditor({
   token?: () => Promise<string>;
   refreshVersion?: number;
   onDirty?: (dirty: boolean) => void;
+  onWorkState?: WorkReporter;
   onSaved?: (row: EipdDraftRow) => void;
   onLoaded?: (row: EipdDraftRow) => void;
   valuation?: RiskEvaluation | null;
@@ -67,6 +70,15 @@ export function EipdDraftEditor({
     alive = useRef(false),
     generation = useRef(0);
   const dirty = Boolean(row && JSON.stringify(doc) !== baseline);
+  useWorkState(onWorkState, {
+    loaded: !!row,
+    loading: !row && busy,
+    saving: !!row && busy,
+    dirty,
+    saved: !!message,
+    error: !!error,
+    uncertain,
+  });
   useEffect(() => {
     onDirty?.(dirty || busy || uncertain);
   }, [dirty, busy, uncertain, onDirty]);

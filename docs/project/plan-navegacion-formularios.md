@@ -198,6 +198,8 @@ registrados en la evidencia enlazada. No cierra la prueba manual de lector de 7B
 
 ### 9A. Unidades de trabajo identificables
 
+**Estado al 28/10/2026:** implementación local, 190 escenarios automatizados aprobados y recorridos asistidos acordados completados (conteo/contexto, guardado parcial, panel estrecho, error/recuperación). Inicio vacío sin falso guardado validado automáticamente; lector manual pendiente. Listo para publicación cuando se autorice. Ver [registro y checklist](navegacion-servidor.md#bloque-9a--pendientes-identificables-28102026). Sin publicación de 9A ni inicio de 9B.
+
 **Resuelve:** P9, G03 y alcance previo C6. Es cambio de estado de UI, no solo un aviso.
 
 **Antes de implementar:** definir qué constituye una unidad guardable: determinación conjunta, borrador EIPD, antecedentes de infancia, preparación temporal y otros formularios reales. Siete pasos EIPD no son siete documentos. El booleano por evaluación existente no permite contar formularios exactos; ampliar el contrato de callbacks con descriptor, contexto, destino y origen real.

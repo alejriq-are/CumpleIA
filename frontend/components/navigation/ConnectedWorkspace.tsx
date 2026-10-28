@@ -12,6 +12,8 @@ import { TreatmentGeneralForm } from "@/components/rat/TreatmentGeneralForm";
 import { LicitudWorkspace, sessionToken } from "@/components/licitud/LicitudWorkspace";
 import { OrganizacionForm } from "@/components/organizacion/OrganizacionForm";
 import { MainModules } from "./PrototypeMenus";
+import { ConnectedPendingSummary } from "./ConnectedPendingSummary";
+import type { WorkUnit } from "./work-units";
 import { PrototypeDrawer } from "./PrototypeDrawer";
 import { ConnectedContextSummary, type SelectedEvaluation } from "./ConnectedContextSummary";
 import { ConnectedAssessment } from "./ConnectedAssessment";
@@ -106,6 +108,20 @@ export function ConnectedWorkspace({
   const [validating, setValidating] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+  const [workUnits, setWorkUnits] = useState<Record<string, WorkUnit>>({});
+  const updateWorkUnit = useCallback(
+    (unit: WorkUnit) =>
+      setWorkUnits((prev) => {
+        const old = prev[unit.id];
+        return old?.state.status === unit.state.status &&
+          old?.state.pending === unit.state.pending &&
+          JSON.stringify(old.location) === JSON.stringify(unit.location)
+          ? prev
+          : { ...prev, [unit.id]: unit };
+      }),
+    []
+  );
+  const [ratPending, setRatPending] = useState<Record<string, Record<string, boolean>>>({});
   const [pending, setPending] = useState<Record<string, boolean>>({});
   const [availability, setAvailability] = useState<Record<string, AvailabilityReadState>>({});
   const [scope, setScope] = useState<Record<string, Applicability>>({});
@@ -275,7 +291,70 @@ export function ConnectedWorkspace({
       document.removeEventListener("keydown", close);
     };
   }, []);
-  const anyPending = Object.values(pending).some(Boolean);
+  const legacyUnits: WorkUnit[] = [];
+  for (const [id, dirty] of Object.entries(pending)) {
+    if (!dirty) continue;
+    const entry = Object.values(panes).find(
+      (v) =>
+        (v.module === "diagnostico" && id === `diagnostico:${v.organizationId}`) ||
+        (v.module === "organizacion" && id === `org:${v.organizationId}`) ||
+        (v.module === "rat" && v.section === "nuevo" && id === `rat-new:${v.organizationId}`) ||
+        (v.module === "licitud" && id === `create:${paneKey(v)}`)
+    );
+    if (!entry || id.startsWith("rat:")) continue;
+    const label = id.startsWith("diagnostico:")
+      ? "Cuestionario de autodiagnóstico"
+      : id.startsWith("org:")
+        ? "Datos de la organización"
+        : id.startsWith("rat-new:")
+          ? "Nueva actividad de tratamiento"
+          : "Creación de evaluación";
+    legacyUnits.push({
+      id,
+      label,
+      location: entry,
+      origin: "form",
+      state: { pending: true, status: "edited" },
+    });
+  }
+  for (const [key, sections] of Object.entries(ratPending)) {
+    const entry = panes[key];
+    if (!entry) continue;
+    for (const [section, dirty] of Object.entries(sections)) {
+      if (dirty)
+        legacyUnits.push({
+          id: `${key}:${section}`,
+          label: `RAT · ${ratSections.find(([id]) => id === section)?.[1] ?? section}`,
+          location: { ...entry, section },
+          origin: "form",
+          state: { pending: true, status: "edited" },
+        });
+    }
+  }
+  const pendingUnits = [
+    ...Object.values(workUnits).filter((unit) => unit.state.pending),
+    ...legacyUnits,
+  ];
+  const anyPending = pendingUnits.length > 0;
+  function describePending(unit: WorkUnit) {
+    const v = unit.location;
+    const organization =
+      organizations.find((item) => item.id === v.organizationId)?.name ??
+      "Organización seleccionada";
+    const scoped = ["rat", "licitud"].includes(v.module);
+    const evaluation = v.module === "licitud" ? evaluations[v.assessmentId] : undefined;
+    return [
+      `Organización: ${organization}`,
+      scoped && v.treatmentId ? `Tratamiento: ${names[v.treatmentId] ?? v.treatmentId}` : "",
+      evaluation
+        ? `Finalidad: ${evaluation.purpose} · Evaluación: versión ${evaluation.version} · ${evaluation.status}`
+        : v.module === "licitud" && v.assessmentId
+          ? `Evaluación: ${v.assessmentId} (detalle sin consultar)`
+          : "",
+    ]
+      .filter(Boolean)
+      .join(" · ");
+  }
   function confirmExit() {
     exitTrigger.current = document.activeElement as HTMLElement;
     if (!anyPending) return Promise.resolve(true);
@@ -643,12 +722,7 @@ export function ConnectedWorkspace({
                 assessmentSelected={location.module === "licitud" && !!location.assessmentId}
                 evaluation={evaluations[location.assessmentId]}
               />
-              {anyPending && (
-                <p className="font-semibold text-amber-800">
-                  Hay formularios editados durante esta visita. Guarda cada formulario antes de
-                  recargar.
-                </p>
-              )}
+              <ConnectedPendingSummary units={pendingUnits} describe={describePending} />
             </div>
             <div className="connected-desktop-sections">
               {groups.map((g) =>
@@ -897,6 +971,13 @@ export function ConnectedWorkspace({
                               initialOrganizationId={organization.id}
                               treatmentId={v.treatmentId}
                               activeSection={v.section}
+                              onPendingSections={(value) =>
+                                setRatPending((prev) =>
+                                  JSON.stringify(prev[key]) === JSON.stringify(value)
+                                    ? prev
+                                    : { ...prev, [key]: value }
+                                )
+                              }
                               onPending={(value) =>
                                 updatePending(`rat:${v.organizationId}:${v.treatmentId}`, value)
                               }
@@ -913,7 +994,24 @@ export function ConnectedWorkspace({
                       >
                         <LicitudWorkspace
                           organizaciones={[organization]}
-                          onPending={(value) => updatePending(`create:${key}`, value)}
+                          onCreationPending={(value) =>
+                            updateWorkUnit({
+                              id: `create:${key}`,
+                              label: "Creación de evaluación (sin registrar)",
+                              location: {
+                                ...v,
+                                treatmentId: value.treatmentId,
+                                assessmentId: "",
+                                section: "catalogo",
+                                step: 0,
+                              },
+                              origin: "form",
+                              state: {
+                                pending: value.pending,
+                                status: value.pending ? "edited" : "not_loaded",
+                              },
+                            })
+                          }
                         />
                       </div>
                       {v.assessmentId && (
@@ -926,6 +1024,7 @@ export function ConnectedWorkspace({
                             go={go}
                             onScope={updateScope}
                             onAvailability={updateAvailability}
+                            onWorkUnit={updateWorkUnit}
                             onPending={updatePending}
                           />
                         </div>

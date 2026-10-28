@@ -1,5 +1,62 @@
 # Backlog — CumpleIA
 
+## Publicación autorizada de 9A — 28/10/2026
+
+Usuario solicita commit y autoriza push de `feature/navegacion-9a-pendientes`, base
+`a1c93c1`. Incluye unidades pendientes, estados UI, panel consultable, pruebas y
+validación asistida acordada. 190 escenarios Chromium y checks estáticos previamente
+aprobados; los últimos cambios solo registran los resultados asistidos y esta autorización.
+No atribuir CI remota ni integración real a las pruebas con fixtures. Sin merge/despliegue,
+9B no iniciado y lector manual de 7B pendiente. Excluir next-env.d.ts generado y outputs/.
+Las entradas inferiores de autorización pendiente son antecedentes. Verificar identidad
+remota después del push.
+
+## 9A — recorridos asistidos acordados completados, 28/10/2026
+
+Usuario confirma recuperación tras Offline con dos pendientes conservados y sin falso
+guardado; capturas distinguen error de conexión de consulta completada. Se suma al
+conteo/contexto, guardado parcial y panel estrecho ya confirmados.
+[Resultado y límites](project/navegacion-servidor.md#9a--recuperación-confirmada-y-recorridos-acordados-completados-28102026).
+190 escenarios automatizados aprobados en el alcance documentado. Listo para commit/push
+cuando se autorice; sin publicación de 9A ni inicio de 9B. Lector manual de 7B pendiente.
+Las entradas inferiores de aceptación pendiente son antecedentes.
+
+## 9A — panel estrecho confirmado OK, 28/10/2026
+
+Usuario confirma lectura completa, Escape y cierre exterior con retorno del foco a
+Ver pendientes (1), sin guardar ni recargar.
+[Registro y siguiente comprobación](project/navegacion-servidor.md#9a--panel-estrecho-y-cierre-confirmados-28102026).
+Pendiente recuperación de consulta con ambos borradores conservados. Sin commit/push
+de 9A ni inicio de 9B; lector manual de 7B pendiente.
+
+## 9A — guardado parcial confirmado OK, 28/10/2026
+
+Usuario confirma que guardar solo la determinación deja un pendiente EIPD y conserva
+su nota, sin guardar ese borrador ni recargar.
+[Registro y siguiente comprobación](project/navegacion-servidor.md#9a--guardado-parcial-y-nota-conservada-confirmados-28102026).
+Pendientes cierre/foco en ventana estrecha y recuperación de consulta. Sin commit/push
+de 9A ni inicio de 9B; lector manual de 7B pendiente.
+
+## 9A — primer recorrido asistido OK, 28/10/2026
+
+Usuario confirma conteo de dos unidades identificadas: determinación y un solo borrador
+EIPD para sus siete pasos, con contexto correcto en la captura.
+[Registro y siguiente comprobación](project/navegacion-servidor.md#9a--conteo-e-identificación-confirmados-28102026).
+Pendiente guardar solo la determinación y comprobar conservación de EIPD; restantes
+recorridos de 9A siguen abiertos. Sin publicación de 9A ni inicio de 9B.
+
+## 9A implementado localmente — 28/10/2026
+
+Rama `feature/navegacion-9a-pendientes`, base 8B `a1c93c1`. Ver pendientes (N)
+identifica formularios y preparación temporal con contexto; siete pasos EIPD cuentan
+una sola unidad. Estados UI distinguen lectura y escritura; guardado parcial y error
+conservan los demás pendientes. Sin autosave/almacenamiento nuevo, navegación de 9B,
+cambios API ni habilitación EIPD. 190 Chromium con fixtures y checks estáticos aprobados.
+[Alcance, evidencia y checklist asistido](project/navegacion-servidor.md#bloque-9a--pendientes-identificables-28102026).
+Pendiente aceptación asistida; sin commit/push autorizado de 9A, merge o despliegue.
+Lector manual de 7B pendiente. Excluir next-env.d.ts generado y outputs/.
+Las entradas inferiores describen antecedentes; lote 9 ahora sí está iniciado.
+
 ## Publicación autorizada de 8B — 27/10/2026
 
 Usuario solicita commit y autoriza push de `feature/navegacion-8b-pasos`, base `e04d8d8`.

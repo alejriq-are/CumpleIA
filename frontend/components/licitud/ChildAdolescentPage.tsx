@@ -1,4 +1,5 @@
 "use client";
+import type { WorkReporter } from "@/components/navigation/work-unit-state";
 import { preparePilot, type PilotForm } from "@/lib/api/pilot-preparation";
 import type { Dossier } from "@/lib/api/mvp-dossier";
 import { MvpDossierPanel } from "./MvpDossierPanel";
@@ -32,6 +33,8 @@ export function ChildAdolescentPage({
   refreshVersion = 0,
   onSaved,
   onDirty,
+  onWorkState,
+  onPreparationState,
   preparationBlocked = false,
   onDocumentPending,
   token = sessionToken,
@@ -50,6 +53,8 @@ export function ChildAdolescentPage({
   refreshVersion?: number;
   onSaved?: () => void;
   onDirty?: (dirty: boolean) => void;
+  onWorkState?: WorkReporter;
+  onPreparationState?: WorkReporter;
   preparationBlocked?: boolean;
   onDocumentPending?: (pending: boolean) => void;
   token?: () => Promise<string>;
@@ -132,6 +137,7 @@ export function ChildAdolescentPage({
           refreshVersion={refreshVersion}
           onSaved={onSaved}
           onDirty={onDirty}
+          onWorkState={onWorkState}
         />
       </div>
       <div
@@ -158,6 +164,7 @@ export function ChildAdolescentPage({
           }}
           preparationBlocked={preparationBlocked}
           onPending={onDocumentPending}
+          onWorkState={onPreparationState}
         />
       </div>
     </div>

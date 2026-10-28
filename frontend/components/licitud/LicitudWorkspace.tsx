@@ -21,10 +21,12 @@ export function LicitudWorkspace({
   organizaciones,
   token = sessionToken,
   onPending,
+  onCreationPending,
 }: {
   organizaciones: OrganizationMembershipOut[];
   token?: () => Promise<string>;
   onPending?: (dirty: boolean) => void;
+  onCreationPending?: (value: { pending: boolean; treatmentId: string }) => void;
 }) {
   const [org, setOrg] = useState(organizaciones[0]?.id ?? "");
   const [treatments, setTreatments] = useState<TreatmentSummaryOut[]>([]);
@@ -51,6 +53,10 @@ export function LicitudWorkspace({
     !!(purpose || categories.length || subjects.length || basis || justification) &&
     draftFingerprint !== submitted;
   useEffect(() => onPending?.(draftPending), [draftPending, onPending]);
+  useEffect(
+    () => onCreationPending?.({ pending: draftPending, treatmentId: tid }),
+    [draftPending, tid, onCreationPending]
+  );
   const writable = ["owner", "admin", "editor"].includes(
     organizaciones.find((o) => o.id === org)?.role ?? ""
   );

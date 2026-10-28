@@ -1,4 +1,5 @@
 "use client";
+import { useWorkState, type WorkReporter } from "@/components/navigation/work-unit-state";
 import { useEffect, useRef, useState } from "react";
 import { ApiError } from "@/lib/api/client";
 import type { ChildAssessment, ChildDocument, ChildReadiness } from "@/lib/api/child-adolescent";
@@ -10,6 +11,7 @@ type Props = {
   refreshVersion?: number;
   onSaved?: () => void;
   onDirty?: (dirty: boolean) => void;
+  onWorkState?: WorkReporter;
 };
 const textFields = [
   ["age_scope_analysis", "Análisis de edad y alcance"],
@@ -32,6 +34,7 @@ export function ChildAdolescentEditor({
   refreshVersion = 0,
   onSaved,
   onDirty,
+  onWorkState,
 }: Props) {
   const [row, setRow] = useState<ChildAssessment | null>(null),
     [doc, setDoc] = useState<ChildDocument>({}),
@@ -43,6 +46,15 @@ export function ChildAdolescentEditor({
   const running = useRef(false);
   const [baseline, setBaseline] = useState("{}");
   const dirty = Boolean(row && JSON.stringify(doc) !== baseline);
+  useWorkState(onWorkState, {
+    loaded: !!row,
+    loading: !row && busy,
+    saving: !!row && busy,
+    dirty,
+    saved: !!message,
+    error: !!error,
+    uncertain,
+  });
   useEffect(() => {
     onDirty?.(dirty || busy || uncertain);
   }, [dirty, busy, uncertain, onDirty]);

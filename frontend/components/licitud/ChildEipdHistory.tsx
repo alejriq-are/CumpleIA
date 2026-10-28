@@ -1,4 +1,5 @@
 "use client";
+import { useWorkState, type WorkReporter } from "@/components/navigation/work-unit-state";
 import { documentLabels } from "@/lib/licitud/document-labels";
 import { type ReactNode } from "react";
 import { EipdDocumentFields, EipdDocumentView } from "./EipdDocumentFields";
@@ -37,6 +38,7 @@ type Props = {
   onRecorded?: () => void;
   preparationBlocked?: boolean;
   onPending?: (pending: boolean) => void;
+  onWorkState?: WorkReporter;
 };
 const empty = { reference: "", version: "", notes: "" };
 function problem(error: unknown) {
@@ -70,6 +72,7 @@ export function ChildEipdHistory({
   onRecorded,
   preparationBlocked = false,
   onPending,
+  onWorkState,
 }: Props) {
   const editionHelpId = useId();
   const actuationHelpId = useId();
@@ -106,6 +109,13 @@ export function ChildEipdHistory({
     [uncertain, setUncertain] = useState(false);
   const [error, setError] = useState(""),
     [message, setMessage] = useState("");
+  useWorkState(onWorkState, {
+    loaded: !!snapshot,
+    loading: !snapshot && busy,
+    dirty: pending,
+    error: !!error,
+    uncertain: pending && uncertain,
+  });
   const running = useRef(false),
     generation = useRef(0),
     mounted = useRef(false);

@@ -1,4 +1,5 @@
 "use client";
+import { useWorkState, type WorkReporter } from "@/components/navigation/work-unit-state";
 import { useEffect, useRef, useState } from "react";
 import type { Assessment } from "@/lib/api/licitud";
 import { SaveFeedback } from "./SaveFeedback";
@@ -34,6 +35,8 @@ type Props = {
   onSaved: () => void;
   onLoaded: (value: Support | null) => void;
   onDirty: (dirty: boolean) => void;
+  onRiskState?: WorkReporter;
+  onAnnexState?: WorkReporter;
 };
 const annexSections: Record<string, string> = {
   alcance: "Alcance",
@@ -164,6 +167,25 @@ export function AssessmentSupportPanel(props: Props) {
     [fictitious, setFictitious] = useState(false);
   const analysisDirty = Boolean(baseline && JSON.stringify(analysis) !== baseline),
     annexDirty = Boolean(file || Object.entries(annex).some(([key, v]) => key !== "section" && v));
+  const [operation, setOperation] = useState<"risk" | "annex" | null>(null);
+  useWorkState(props.onRiskState, {
+    loaded: valid,
+    loading: !support && !error,
+    dirty: analysisDirty,
+    saving: busy && operation === "risk",
+    uncertain: uncertain && operation === "risk",
+    saved: !!message && operation === "risk",
+    error: !!error,
+  });
+  useWorkState(props.onAnnexState, {
+    loaded: valid,
+    loading: !support && !error,
+    dirty: annexDirty,
+    saving: busy && operation === "annex",
+    uncertain: uncertain && operation === "annex",
+    saved: !!message && operation === "annex",
+    error: !!error,
+  });
   const dirty = analysisDirty || annexDirty;
   const dirtyRef = useRef(false),
     running = useRef(false),
@@ -262,6 +284,7 @@ export function AssessmentSupportPanel(props: Props) {
     )
       return;
     running.current = true;
+    setOperation(kind);
     setBusy(true);
     setError("");
     setMessage("");
