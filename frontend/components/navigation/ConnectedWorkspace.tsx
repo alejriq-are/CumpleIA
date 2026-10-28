@@ -20,6 +20,8 @@ import { ConnectedAssessment } from "./ConnectedAssessment";
 import { ConnectedContext, type WorkContext } from "./ConnectedContext";
 import {
   encodeWork,
+  appliedContextLocation,
+  changesWorkContext,
   navigationReadError,
   parseWork,
   paneKey,
@@ -115,7 +117,8 @@ export function ConnectedWorkspace({
         const old = prev[unit.id];
         return old?.state.status === unit.state.status &&
           old?.state.pending === unit.state.pending &&
-          JSON.stringify(old.location) === JSON.stringify(unit.location)
+          JSON.stringify(old.location) === JSON.stringify(unit.location) &&
+          JSON.stringify(old.destination) === JSON.stringify(unit.destination)
           ? prev
           : { ...prev, [unit.id]: unit };
       }),
@@ -123,6 +126,7 @@ export function ConnectedWorkspace({
   );
   const [ratPending, setRatPending] = useState<Record<string, Record<string, boolean>>>({});
   const [pending, setPending] = useState<Record<string, boolean>>({});
+  const [availabilityRefresh, setAvailabilityRefresh] = useState<Record<string, number>>({});
   const [availability, setAvailability] = useState<Record<string, AvailabilityReadState>>({});
   const [scope, setScope] = useState<Record<string, Applicability>>({});
   const [diagnosticSections, setDiagnosticSections] = useState<Record<string, Item[]>>({});
@@ -186,12 +190,15 @@ export function ConnectedWorkspace({
     [organizations]
   );
   const validate = useCallback(
-    async (next: WorkLocation, replace = true) => {
+    async (next: WorkLocation, replace = true, refreshConditional = false) => {
       const version = ++sequence.current;
       validationTarget.current = next;
       setValidating(true);
       setError("");
-      if (!organizations.some((v) => v.id === next.organizationId)) {
+      if (
+        !parseWork(encodeWork(next)) ||
+        !organizations.some((v) => v.id === next.organizationId)
+      ) {
         setError("No tienes acceso a la organización solicitada.");
         setValidating(false);
         return false;
@@ -201,6 +208,8 @@ export function ConnectedWorkspace({
           const token = await sessionToken();
           const t = await api.rat.getTreatment(token, next.organizationId, next.treatmentId);
           if (version !== sequence.current) return;
+          if (t.id !== next.treatmentId)
+            throw new Error("La respuesta del tratamiento no corresponde al contexto solicitado.");
           setNames((p) => ({ ...p, [next.treatmentId]: t.name }));
           if (next.assessmentId) {
             const a = await licitudApi.get(
@@ -208,6 +217,14 @@ export function ConnectedWorkspace({
               next.assessmentId
             );
             if (version !== sequence.current) return;
+            if (
+              a.id !== next.assessmentId ||
+              a.organization_id !== next.organizationId ||
+              a.treatment_id !== next.treatmentId
+            )
+              throw new Error(
+                "La respuesta de la evaluación no corresponde al contexto solicitado."
+              );
             setEvaluations((p) => ({
               ...p,
               [next.assessmentId]: {
@@ -219,6 +236,10 @@ export function ConnectedWorkspace({
           }
         }
         if (version === sequence.current) {
+          if (refreshConditional && next.module === "licitud" && next.assessmentId) {
+            const key = contextKey(next);
+            setAvailabilityRefresh((prev) => ({ ...prev, [key]: (prev[key] ?? 0) + 1 }));
+          }
           go(next, replace);
           return true;
         }
@@ -312,7 +333,18 @@ export function ConnectedWorkspace({
     legacyUnits.push({
       id,
       label,
-      location: entry,
+      location:
+        entry.module === "diagnostico"
+          ? {
+              ...entry,
+              section: (diagnosticSections[entry.organizationId] ?? []).some(
+                (item) => item.id === entry.section
+              )
+                ? entry.section
+                : (diagnosticSections[entry.organizationId]?.[0]?.id ?? "cuestionario"),
+              step: 0,
+            }
+          : entry,
       origin: "form",
       state: { pending: true, status: "edited" },
     });
@@ -498,25 +530,18 @@ export function ConnectedWorkspace({
     go({ ...location, section: item.id, step: item.step ?? 0 });
   }
   async function apply(value: WorkContext) {
-    const applied = await validate(
-      {
-        ...location,
-        ...value,
-        section:
-          location.module === "licitud"
-            ? value.assessmentId
-              ? "aplicabilidad"
-              : "catalogo"
-            : location.module === "rat"
-              ? "catalogo"
-              : location.module === "diagnostico"
-                ? "cuestionario"
-                : "resumen",
-        step: 0,
-      },
-      false
-    );
+    const applied = await validate(appliedContextLocation(location, value), false);
     if (applied) setContext(false);
+  }
+  const cancelPendingOpen = useCallback(() => {
+    sequence.current += 1;
+    validationTarget.current = null;
+    setValidating(false);
+    setError("");
+  }, []);
+  async function openPending(unit: WorkUnit) {
+    const target = unit.destination ?? unit.location;
+    return (await validate(target, false, true)) === true;
   }
   async function intercept(e: MouseEvent) {
     const a = (e.target as HTMLElement).closest("a");
@@ -722,7 +747,20 @@ export function ConnectedWorkspace({
                 assessmentSelected={location.module === "licitud" && !!location.assessmentId}
                 evaluation={evaluations[location.assessmentId]}
               />
-              <ConnectedPendingSummary units={pendingUnits} describe={describePending} />
+              <ConnectedPendingSummary
+                units={pendingUnits}
+                describe={describePending}
+                currentDescription={contextLabel(location)}
+                destinationLabel={(unit) => locationLabel(unit.destination ?? unit.location)}
+                destinationContext={(unit) => contextLabel(unit.destination ?? unit.location)}
+                changesContext={(unit) =>
+                  changesWorkContext(location, unit.destination ?? unit.location)
+                }
+                openUnit={openPending}
+                busy={validating}
+                error={error}
+                cancelOpen={cancelPendingOpen}
+              />
             </div>
             <div className="connected-desktop-sections">
               {groups.map((g) =>
@@ -998,6 +1036,7 @@ export function ConnectedWorkspace({
                             updateWorkUnit({
                               id: `create:${key}`,
                               label: "Creación de evaluación (sin registrar)",
+                              destination: { ...v, section: "catalogo", step: 0 },
                               location: {
                                 ...v,
                                 treatmentId: value.treatmentId,
@@ -1018,6 +1057,7 @@ export function ConnectedWorkspace({
                         <div hidden={["catalogo"].includes(v.section)}>
                           <ConnectedAssessment
                             active={here}
+                            availabilityRefresh={availabilityRefresh[contextKey(v)] ?? 0}
                             location={v}
                             name={organization.name}
                             readOnly={readOnly}
@@ -1102,6 +1142,9 @@ export function ConnectedWorkspace({
           <ConnectedContext
             organizations={organizations}
             current={location}
+            pendingCount={pendingUnits.length}
+            currentDescription={contextLabel(location)}
+            describeDestination={(value) => locationLabel(appliedContextLocation(location, value))}
             applying={validating}
             applyError={error}
             apply={(value) => void apply(value)}

@@ -91,3 +91,28 @@ export function navigationReadError(error: unknown, fallback: string): string {
   }
   return error instanceof Error ? error.message : fallback;
 }
+
+export function appliedContextLocation(current: WorkLocation, context: WorkContext): WorkLocation {
+  return {
+    ...current,
+    ...context,
+    section:
+      current.module === "licitud"
+        ? context.assessmentId
+          ? "aplicabilidad"
+          : "catalogo"
+        : current.module === "rat"
+          ? "catalogo"
+          : current.module === "diagnostico"
+            ? "cuestionario"
+            : "resumen",
+    step: 0,
+  };
+}
+export function changesWorkContext(a: WorkContext, b: WorkContext) {
+  return (
+    a.organizationId !== b.organizationId ||
+    a.treatmentId !== b.treatmentId ||
+    a.assessmentId !== b.assessmentId
+  );
+}

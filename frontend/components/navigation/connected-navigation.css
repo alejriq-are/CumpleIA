@@ -253,3 +253,13 @@
   background: white;
   color: #1e40af;
 }
+
+/* Keep the pending row's message present at zero and above; allow natural wrapping. */
+.connected-pending-trigger {
+  min-inline-size: 11rem;
+  max-inline-size: 100%;
+  font-variant-numeric: tabular-nums;
+}
+.connected-pending-summary {
+  overflow-wrap: anywhere;
+}

@@ -1,5 +1,54 @@
 # Backlog — CumpleIA
 
+## Publicación autorizada de 9B — 28/10/2026
+
+Usuario solicita commit y autoriza push de `feature/navegacion-9b-destinos`, base
+`650c766`. Incluye destinos validados desde Pendientes, confirmación del cambio de
+contexto, consulta de disponibilidad y conservación de borradores, pruebas y aceptación
+asistida acordada. 200 escenarios Chromium con fixtures y checks estáticos aprobados;
+los últimos cambios documentan los recorridos y esta autorización. No atribuir nueva
+CI remota ni integración backend real. Sin merge/despliegue, lote 10 no iniciado y lector
+manual de 7B pendiente. Excluir `frontend/next-env.d.ts` generado y `outputs/`.
+Las menciones anteriores de autorización pendiente son antecedentes. Verificar identidad
+remota después del push.
+
+## 9B — recorridos asistidos acordados completados, 28/10/2026
+
+Usuario confirma «recorrido OK» al solicitar recarga con cambios pendientes y cancelarla:
+se conservan las dos unidades y la nota EIPD. Se completa el guion asistido acordado,
+sumado al retorno a formularios, cambio de contexto con cancelación/confirmación y
+panel estrecho con cierre y foco ya confirmados. Los casos adicionales de acceso
+condicionado, preparación temporal y errores mantienen cobertura automatizada;
+no se atribuyen como ejecución asistida del usuario. 200 escenarios Chromium con
+fixtures y comprobaciones estáticas previamente aprobados. Sin nueva ejecución de
+pruebas por este registro documental, CI remota ni certificación de accesibilidad.
+9B listo para commit/push cuando el usuario lo autorice; todavía sin publicación.
+Lote 10 no iniciado; lector manual de 7B pendiente. Las entradas anteriores de
+validación pendiente son antecedentes.
+
+## 9B — tres recorridos asistidos confirmados, 28/10/2026
+
+Usuario confirma retorno desde Pendientes a cada formulario con texto conservado,
+cancelación/confirmación entre trabajadores y clientes, y lectura/cierre/foco del panel
+estrecho mediante Escape y fondo exterior. Ver el registro en navegacion-servidor.md.
+Pendiente comprobar advertencia de salida/recarga y cancelarla conservando borradores.
+200 escenarios automatizados previamente aprobados. Sin commit/push nuevo autorizado
+ni inicio de lote 10. Lector manual de 7B pendiente. Entradas inferiores son antecedentes.
+
+## Bloque 9B — destinos de pendientes, 28/10/2026
+
+Implementado localmente en `feature/navegacion-9b-destinos`, sobre 9A publicado
+`650c766a28912f37120a22d7c2c47913e21cdd58`. Ver pendientes permite ir al formulario
+con su contexto validado; anticipa y permite cancelar el cambio de contexto.
+La disponibilidad condicionada se vuelve a consultar antes de mostrar el editor;
+una reubicación conserva el borrador y la preparación temporal. Cambiar contexto
+explica el destino y conserva pendientes de la visita, sin guardar ni sincronizar pestañas.
+[Alcance y checklist asistido](project/navegacion-servidor.md#bloque-9b--destinos-de-pendientes-28102026).
+200 escenarios Chromium con fixtures y tipos/lint aprobados; confirmación visual inspeccionada.
+Pendiente validación conjunta de 9B; sin commit/push autorizado, merge ni despliegue.
+Lote 10 no iniciado. Lector manual de 7B pendiente. Las entradas inferiores son antecedentes.
+Excluir `frontend/next-env.d.ts` generado y `outputs/`.
+
 ## Publicación autorizada de 9A — 28/10/2026
 
 Usuario solicita commit y autoriza push de `feature/navegacion-9a-pendientes`, base

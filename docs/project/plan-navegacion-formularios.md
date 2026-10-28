@@ -216,6 +216,8 @@ registrados en la evidencia enlazada. No cierra la prueba manual de lector de 7B
 
 ### 9B. Encontrar el pendiente y anticipar el destino
 
+**Estado 28/10/2026:** implementado localmente en `feature/navegacion-9b-destinos`, base publicada `650c766`. Recorridos asistidos acordados completados: retorno, cancelación/confirmación de contexto, panel estrecho y advertencia de recarga cancelada. Acceso condicionado y preparación temporal tienen cobertura automatizada; no se atribuyen como prueba asistida. Ver [evidencia y guion](navegacion-servidor.md#bloque-9b--destinos-de-pendientes-28102026). Sin publicación de 9B ni inicio de 10A.
+
 **Resuelve:** P9, G19 y C10. No cambia selección global de otras ventanas.
 
 **Cambios:** abrir la unidad pendiente con su contexto y destino validados; si su editor está condicionado/no disponible, explicar la reubicación conservando contenido. Mostrar qué cambiará antes de Aplicar contexto cuando haya trabajo pendiente y cuál será la pantalla de destino. Permitir cancelar sin cambiar datos. Evitar cabeceras que salten de altura al alternar el aviso, sin fijar una altura que recorte texto largo.

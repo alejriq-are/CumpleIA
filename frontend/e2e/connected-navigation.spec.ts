@@ -2765,3 +2765,348 @@ test("9A RAT y autodiagnóstico mantienen unidades y ámbito al cambiar de módu
   expect(calls.filter((v) => v.method !== "GET")).toEqual([]);
   expect(errors).toEqual([]);
 });
+
+const pendingTrigger = (page: Page) => page.getByRole("button", { name: /^Ver pendientes \(/ });
+async function pendingLink(page: Page, label: string) {
+  await pendingTrigger(page).click();
+  await pendingDialog(page)
+    .getByRole("button", { name: `Ir a ${label}`, exact: true })
+    .click();
+}
+
+test("9B Panel vuelve al formulario EIPD y a determinación con sus notas intactas", async ({
+  page,
+}) => {
+  await legal(page);
+  await enable(page);
+  await section(page, "Tratamiento y alcance de la EIPD");
+  await main(page)
+    .getByLabel("Notas del borrador EIPD (opcional)", { exact: true })
+    .fill("[FICTICIA] EIPD destino 9B");
+  await section(page, "Determinar aplicabilidad");
+  await main(page)
+    .getByLabel("Fundamento sobre EIPD", { exact: true })
+    .fill("[FICTICIA] Determinación destino 9B");
+  const writes = calls.filter((v) => v.method !== "GET").length;
+  await mod(page, "Panel principal");
+  await pendingLink(page, "Borrador EIPD · siete pasos");
+  await expect(pendingDialog(page)).not.toBeVisible();
+  await expect(
+    main(page).getByLabel("Notas del borrador EIPD (opcional)", { exact: true })
+  ).toHaveValue("[FICTICIA] EIPD destino 9B");
+  await expect(main(page)).toBeFocused();
+  await pendingLink(page, "Determinación de aplicabilidad");
+  await expect(main(page).getByLabel("Fundamento sobre EIPD", { exact: true })).toHaveValue(
+    "[FICTICIA] Determinación destino 9B"
+  );
+  await expect(pendingButton(page, 2)).toBeVisible();
+  expect(calls.filter((v) => v.method !== "GET")).toHaveLength(writes);
+  expect(errors).toEqual([]);
+});
+
+async function twoEipdDrafts(page: Page) {
+  await legal(page);
+  await enable(page);
+  await section(page, "Tratamiento y alcance de la EIPD");
+  await main(page)
+    .getByLabel("Notas del borrador EIPD (opcional)", { exact: true })
+    .fill("[FICTICIA] Evaluación uno 9B");
+  await choose(page, aid2);
+  await section(page, "Determinar aplicabilidad");
+  const active = page.locator("[data-work-pane]:visible");
+  await active
+    .getByLabel("¿Corresponde documentar EIPD?", { exact: true })
+    .selectOption("corresponde");
+  await active
+    .getByLabel("Fundamento sobre EIPD", { exact: true })
+    .fill("[FICTICIA] Segunda determinación");
+  await active.getByLabel("Declaro que esta prueba utiliza únicamente datos ficticios.").check();
+  await active.getByRole("button", { name: "Guardar determinación", exact: true }).click();
+  await expect(
+    active.getByText("Determinación guardada en el servidor.", { exact: true })
+  ).toBeVisible();
+  await section(page, "Tratamiento y alcance de la EIPD");
+  await active
+    .getByLabel("Notas del borrador EIPD (opcional)", { exact: true })
+    .fill("[FICTICIA] Evaluación dos 9B");
+}
+
+test("9B pendiente de otra evaluación anticipa destino, cancela y confirma sin mezclar notas", async ({
+  page,
+}) => {
+  await twoEipdDrafts(page);
+  const before = page.url(),
+    writes = calls.filter((v) => v.method !== "GET").length;
+  await pendingButton(page, 2).click();
+  const first = pendingDialog(page).locator("li").filter({ hasText: "Evaluación: versión 1" });
+  await first
+    .getByRole("button", { name: "Ir a Borrador EIPD · siete pasos", exact: true })
+    .click();
+  const confirmation = pendingDialog(page).getByRole("region", {
+    name: "Confirmar destino pendiente",
+  });
+  await expect(confirmation).toContainText("Antes de cambiar de contexto");
+  await expect(confirmation).toContainText("Destino: Tratamiento y alcance de la EIPD");
+  await expect(confirmation).toContainText("versión 1");
+  await expect(confirmation).toContainText("versión 2");
+  await confirmation.getByRole("button", { name: "Cancelar cambio", exact: true }).click();
+  expect(page.url()).toBe(before);
+  await expect(
+    first.getByRole("button", { name: "Ir a Borrador EIPD · siete pasos", exact: true })
+  ).toBeFocused();
+  await first
+    .getByRole("button", { name: "Ir a Borrador EIPD · siete pasos", exact: true })
+    .click();
+  await capture(page, "9b-confirmar-pendiente.png");
+  await confirmation
+    .getByRole("button", { name: "Abrir pendiente en este contexto", exact: true })
+    .click();
+  await expect(page).toHaveURL(new RegExp(`assessmentId=${aid}(?:&|$)`));
+  await expect(
+    page
+      .locator("[data-work-pane]:visible")
+      .getByLabel("Notas del borrador EIPD (opcional)", { exact: true })
+  ).toHaveValue("[FICTICIA] Evaluación uno 9B");
+  await expect(pendingButton(page, 2)).toBeVisible();
+  await pendingButton(page, 2).click();
+  await pendingDialog(page)
+    .locator("li")
+    .filter({ hasText: "Evaluación: versión 2" })
+    .getByRole("button", { name: "Ir a Borrador EIPD · siete pasos", exact: true })
+    .click();
+  await confirmation
+    .getByRole("button", { name: "Abrir pendiente en este contexto", exact: true })
+    .click();
+  await expect(
+    page
+      .locator("[data-work-pane]:visible")
+      .getByLabel("Notas del borrador EIPD (opcional)", { exact: true })
+  ).toHaveValue("[FICTICIA] Evaluación dos 9B");
+  expect(calls.filter((v) => v.method !== "GET")).toHaveLength(writes);
+  expect(errors).toEqual([]);
+});
+
+test("9B Cambiar contexto explica destino antes de Aplicar y cancelar preserva pantalla y texto", async ({
+  page,
+}) => {
+  await legal(page);
+  await enable(page);
+  await section(page, "Tratamiento y alcance de la EIPD");
+  await main(page)
+    .getByLabel("Notas del borrador EIPD (opcional)", { exact: true })
+    .fill("[FICTICIA] Cancelar contexto 9B");
+  const before = page.url(),
+    writes = calls.filter((v) => v.method !== "GET").length;
+  await page.getByRole("button", { name: "Cambiar contexto", exact: true }).click();
+  const dialog = page.getByRole("dialog", { name: "Contexto de trabajo", exact: true });
+  await dialog.getByLabel("Evaluación", { exact: true }).selectOption(aid2);
+  const preview = dialog.getByRole("region", { name: "Antes de aplicar contexto" });
+  await expect(preview).toContainText("Destino al aplicar: Determinar aplicabilidad");
+  await expect(preview).toContainText("versión 2");
+  await expect(preview).toContainText("Aplicar no los guarda ni copia sus datos");
+  await dialog.getByRole("button", { name: "Cancelar", exact: true }).click();
+  expect(page.url()).toBe(before);
+  await expect(
+    main(page).getByLabel("Notas del borrador EIPD (opcional)", { exact: true })
+  ).toHaveValue("[FICTICIA] Cancelar contexto 9B");
+  await choose(page, aid2);
+  await expect(page).toHaveURL(new RegExp(`aplicabilidad.*assessmentId=${aid2}`));
+  await expect(pendingButton(page, 1)).toBeVisible();
+  await pendingLink(page, "Borrador EIPD · siete pasos");
+  await pendingDialog(page)
+    .getByRole("button", { name: "Abrir pendiente en este contexto", exact: true })
+    .click();
+  await expect(
+    page
+      .locator("[data-work-pane]:visible")
+      .getByLabel("Notas del borrador EIPD (opcional)", { exact: true })
+  ).toHaveValue("[FICTICIA] Cancelar contexto 9B");
+  expect(calls.filter((v) => v.method !== "GET")).toHaveLength(writes);
+  expect(errors).toEqual([]);
+});
+
+test("9B consulta fresca reubica EIPD bloqueada y recupera el pendiente al habilitarse", async ({
+  page,
+}) => {
+  await legal(page);
+  await enable(page);
+  await section(page, "Tratamiento y alcance de la EIPD");
+  await main(page)
+    .getByLabel("Notas del borrador EIPD (opcional)", { exact: true })
+    .fill("[FICTICIA] Conservar al bloquear 9B");
+  await mod(page, "Panel principal");
+  determinations[aid] = {
+    ...determinations[aid],
+    revision: 2,
+    eipd: { state: "no_corresponde", reason: "[FICTICIA] Cambio externo" },
+  };
+  await pendingLink(page, "Borrador EIPD · siete pasos");
+  await expect(main(page).getByRole("region", { name: "Cambio de sección" })).toContainText(
+    "No corresponde"
+  );
+  await expect(
+    main(page).getByLabel("Notas del borrador EIPD (opcional)", { exact: true })
+  ).not.toBeVisible();
+  await expect(pendingButton(page, 1)).toBeVisible();
+  determinations[aid] = {
+    ...determinations[aid],
+    revision: 3,
+    eipd: { state: "corresponde", reason: "[FICTICIA] Rehabilitada" },
+  };
+  await pendingLink(page, "Borrador EIPD · siete pasos");
+  await expect(
+    main(page).getByLabel("Notas del borrador EIPD (opcional)", { exact: true })
+  ).toHaveValue("[FICTICIA] Conservar al bloquear 9B");
+  await expect(
+    main(page).getByLabel("Notas del borrador EIPD (opcional)", { exact: true })
+  ).toBeVisible();
+  expect(calls.filter((v) => v.method !== "GET")).toHaveLength(1);
+  expect(errors).toEqual([]);
+});
+
+test("9B error y cancelación de validación lenta no cambian destino ni eliminan el borrador", async ({
+  page,
+}) => {
+  await legal(page);
+  await enable(page);
+  await main(page)
+    .getByLabel("Fundamento sobre EIPD", { exact: true })
+    .fill("[FICTICIA] Validación pendiente 9B");
+  await mod(page, "Panel principal");
+  const before = page.url();
+  mode = "deny";
+  await pendingLink(page, "Determinación de aplicabilidad");
+  await expect(pendingDialog(page).getByRole("alert")).toContainText("Los borradores se conservan");
+  expect(page.url()).toBe(before);
+  mode = "hold";
+  await pendingDialog(page)
+    .getByRole("button", { name: "Ir a Determinación de aplicabilidad", exact: true })
+    .click();
+  await expect.poll(() => !!releaseValidation).toBe(true);
+  await pendingDialog(page).getByRole("button", { name: "Cerrar pendientes", exact: true }).click();
+  mode = "ok";
+  releaseValidation?.();
+  await expect(pendingDialog(page)).not.toBeVisible();
+  expect(page.url()).toBe(before);
+  await pendingLink(page, "Determinación de aplicabilidad");
+  await expect(main(page).getByLabel("Fundamento sobre EIPD", { exact: true })).toHaveValue(
+    "[FICTICIA] Validación pendiente 9B"
+  );
+  expect(errors).toEqual([]);
+});
+
+test("9B autodiagnóstico pendiente desde resultados vuelve al cuestionario", async ({ page }) => {
+  await choose(page);
+  await mod(page, "Autodiagnóstico");
+  await main(page)
+    .getByPlaceholder("Notas u observaciones (opcional)")
+    .first()
+    .fill("[FICTICIA] Cuestionario 9B");
+  await section(page, "Resultado del autodiagnóstico");
+  await mod(page, "Panel principal");
+  await pendingLink(page, "Cuestionario de autodiagnóstico");
+  await expect(main(page).getByPlaceholder("Notas u observaciones (opcional)").first()).toHaveValue(
+    "[FICTICIA] Cuestionario 9B"
+  );
+  expect(calls.filter((v) => v.method !== "GET")).toEqual([]);
+  expect(errors).toEqual([]);
+});
+
+test("9B recupera la creación de evaluación en su panel original sin crear otra", async ({
+  page,
+}) => {
+  await legal(page);
+  await section(page, "Evaluaciones y creación de borrador");
+  await page
+    .locator("[data-work-pane]:visible")
+    .getByLabel("Tratamiento del RAT", { exact: true })
+    .selectOption(tid);
+  await page
+    .locator('[data-work-pane]:visible textarea[aria-label="Fundamento"]:visible')
+    .fill("[FICTICIA] Creación temporal 9B");
+  await choose(page, aid2);
+  await pendingLink(page, "Creación de evaluación (sin registrar)");
+  await pendingDialog(page)
+    .getByRole("button", { name: "Abrir pendiente en este contexto", exact: true })
+    .click();
+  await expect(
+    page.locator('[data-work-pane]:visible textarea[aria-label="Fundamento"]:visible')
+  ).toHaveValue("[FICTICIA] Creación temporal 9B");
+  await expect(page).toHaveURL(new RegExp(`catalogo.*assessmentId=${aid}`));
+  expect(calls.filter((v) => v.method !== "GET")).toEqual([]);
+  expect(errors).toEqual([]);
+});
+
+for (const width of [320, 1280]) {
+  test(`9B cabecera estable al alternar aviso y abrir pendiente con teclado a ${width}px`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width, height: 844 });
+    await legal(page);
+    await enable(page);
+    const header = page.locator("header.prototype-top");
+    const height = await header.evaluate((el) => el.getBoundingClientRect().height);
+    const reason = main(page).getByLabel("Fundamento sobre EIPD", { exact: true });
+    const original = await reason.inputValue();
+    await reason.fill("[FICTICIA] Cabecera 9B");
+    expect(await header.evaluate((el) => el.getBoundingClientRect().height)).toBe(height);
+    await pendingTrigger(page).focus();
+    await page.keyboard.press("Enter");
+    await pendingDialog(page)
+      .getByRole("button", { name: "Ir a Determinación de aplicabilidad", exact: true })
+      .focus();
+    await page.keyboard.press("Enter");
+    await expect(pendingDialog(page)).not.toBeVisible();
+    await expect(main(page)).toBeFocused();
+    await reason.fill(original);
+    await expect(pendingButton(page, 0)).toBeVisible();
+    expect(await header.evaluate((el) => el.getBoundingClientRect().height)).toBe(height);
+    expect(errors).toEqual([]);
+  });
+}
+
+test("9B preparación temporal bloqueada se conserva y se recupera al habilitar infancia", async ({
+  page,
+}) => {
+  mode = "9a-child";
+  await legal(page);
+  await main(page)
+    .getByLabel("¿Corresponde documentar infancia y adolescencia?", { exact: true })
+    .selectOption("corresponde");
+  await main(page)
+    .getByLabel("Fundamento sobre infancia y adolescencia", { exact: true })
+    .fill("[FICTICIA] Infancia 9B");
+  await main(page)
+    .getByLabel("Declaro que esta prueba utiliza únicamente datos ficticios.")
+    .check();
+  await main(page).getByRole("button", { name: "Guardar determinación", exact: true }).click();
+  await section(page, "Preparar nueva versión documental de infancia");
+  await main(page)
+    .getByLabel("Declaro que este registro usa datos ficticios", { exact: true })
+    .check();
+  await main(page)
+    .getByLabel("Nombre de la edición (texto libre)", { exact: true })
+    .filter({ visible: true })
+    .fill("[FICTICIA] Temporal 9B");
+  await mod(page, "Panel principal");
+  const enabled = structuredClone(determinations[aid]);
+  determinations[aid] = {
+    ...enabled,
+    revision: 2,
+    infancia: { state: "no_corresponde", reason: "[FICTICIA] Cambio externo" },
+  };
+  await pendingLink(page, "Preparación de nueva versión de infancia");
+  await expect(main(page).getByRole("region", { name: "Cambio de sección" })).toContainText(
+    "No corresponde"
+  );
+  await expect(pendingButton(page, 1)).toBeVisible();
+  determinations[aid] = { ...enabled, revision: 3 };
+  await pendingLink(page, "Preparación de nueva versión de infancia");
+  await expect(
+    main(page)
+      .getByLabel("Nombre de la edición (texto libre)", { exact: true })
+      .filter({ visible: true })
+  ).toHaveValue("[FICTICIA] Temporal 9B");
+  expect(calls.filter((v) => v.method !== "GET")).toHaveLength(1);
+  expect(errors).toEqual([]);
+});

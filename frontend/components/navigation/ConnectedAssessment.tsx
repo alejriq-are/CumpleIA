@@ -22,8 +22,10 @@ export function ConnectedAssessment({
   onPending,
   onWorkUnit,
   active,
+  availabilityRefresh = 0,
 }: {
   active: boolean;
+  availabilityRefresh?: number;
   location: WorkLocation;
   name: string;
   readOnly: boolean;
@@ -37,6 +39,8 @@ export function ConnectedAssessment({
   const refresh = useCallback(() => setRefreshVersion((n) => n + 1), []);
   const [loadState, setLoadState] = useState<ApplicabilityLoadState>({ loading: true, error: "" });
   const [relocation, setRelocation] = useState<{ signature: string; text: string } | null>(null);
+  const [loadedAvailability, setLoadedAvailability] = useState(-1);
+  const awaitingAvailability = loadedAvailability !== availabilityRefresh;
   const [saved, setSaved] = useState<Applicability | null>(null);
   const signature = saved ? `${saved.context_hash}:${saved.revision}:${saved.current}` : "";
   const [appDirty, setAppDirty] = useState(false);
@@ -66,10 +70,11 @@ export function ConnectedAssessment({
   };
   const loaded = useCallback(
     (v: Applicability) => {
+      setLoadedAvailability(availabilityRefresh);
       setSaved(v);
       onScope(key, v);
     },
-    [key, onScope]
+    [key, onScope, availabilityRefresh]
   );
   useEffect(() => {
     onAvailability(key, loadState);
@@ -78,7 +83,7 @@ export function ConnectedAssessment({
     onPending(key, appDirty || flowDirty);
   }, [key, appDirty, flowDirty, onPending]);
   useEffect(() => {
-    if (!saved || !active || loadState.loading || loadState.error) return;
+    if (!saved || !active || awaitingAvailability || loadState.loading || loadState.error) return;
     if (
       (location.section === "eipd" && !scope.eipd) ||
       (["infancia", "preparar"].includes(location.section) && !scope.infancia)
@@ -98,7 +103,17 @@ export function ConnectedAssessment({
     } else if (location.section !== "aplicabilidad") {
       setRelocation(null);
     }
-  }, [active, saved, signature, loadState, scope.eipd, scope.infancia, location, go]);
+  }, [
+    active,
+    saved,
+    signature,
+    loadState,
+    scope.eipd,
+    scope.infancia,
+    location,
+    go,
+    awaitingAvailability,
+  ]);
   const section = location.section;
   const conditional = ["eipd", "infancia", "preparar"].includes(section);
   const flow: AssessmentLocation = {
@@ -140,11 +155,12 @@ export function ConnectedAssessment({
           </button>
         </section>
       )}
-      {section !== "aplicabilidad" && loadState.loading && (
-        <p role="status" className="rounded border bg-blue-50 p-4">
-          Cargando evaluación y aplicabilidad… Los borradores de esta visita se conservan.
-        </p>
-      )}
+      {section !== "aplicabilidad" &&
+        (loadState.loading || (awaitingAvailability && !loadState.error)) && (
+          <p role="status" className="rounded border bg-blue-50 p-4">
+            Cargando evaluación y aplicabilidad… Los borradores de esta visita se conservan.
+          </p>
+        )}
       {section !== "aplicabilidad" && loadState.error && (
         <section className="space-y-3 rounded border border-red-200 bg-red-50 p-4">
           <p role="alert">No se pudo consultar la aplicabilidad. {loadState.error}</p>
@@ -168,7 +184,7 @@ export function ConnectedAssessment({
           treatmentId={location.treatmentId}
           assessmentId={location.assessmentId}
           readOnly={readOnly}
-          refreshVersion={refreshVersion}
+          refreshVersion={refreshVersion + availabilityRefresh}
           onSaved={loaded}
           onDirty={setAppDirty}
           onWorkState={applicabilityState}
@@ -179,7 +195,7 @@ export function ConnectedAssessment({
       <div
         hidden={
           section === "aplicabilidad" ||
-          (conditional && (loadState.loading || !!loadState.error)) ||
+          (conditional && (awaitingAvailability || loadState.loading || !!loadState.error)) ||
           (section === "eipd" && !scope.eipd) ||
           (["infancia", "preparar"].includes(section) && !scope.infancia)
         }

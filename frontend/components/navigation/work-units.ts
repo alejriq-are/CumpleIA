@@ -4,6 +4,7 @@ export type WorkUnit = {
   id: string;
   label: string;
   location: WorkLocation;
+  destination?: WorkLocation;
   origin: "form" | "temporary";
   state: WorkState;
 };

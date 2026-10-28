@@ -7,6 +7,9 @@ export type WorkContext = { organizationId: string; treatmentId: string; assessm
 export function ConnectedContext({
   organizations,
   current,
+  pendingCount = 0,
+  currentDescription,
+  describeDestination,
   apply,
   cancel,
   token = sessionToken,
@@ -15,6 +18,9 @@ export function ConnectedContext({
 }: {
   organizations: OrganizationMembershipOut[];
   current: WorkContext;
+  pendingCount?: number;
+  currentDescription?: string;
+  describeDestination?: (context: WorkContext) => string;
   apply: (v: WorkContext) => void;
   cancel: () => void;
   token?: () => Promise<string>;
@@ -219,6 +225,34 @@ export function ConnectedContext({
       <p id={applyHelpId} aria-live="polite" className="text-sm text-slate-700">
         {applyHelp}
       </p>
+      {pendingCount > 0 && describeDestination && (
+        <section
+          aria-label="Antes de aplicar contexto"
+          className="space-y-2 break-words rounded border border-blue-200 bg-blue-50 p-3"
+        >
+          <h3 className="font-bold">Antes de aplicar contexto</h3>
+          <p>Ahora: {currentDescription}</p>
+          <p>
+            Selección propuesta:{" "}
+            {organizations.find((v) => v.id === org)?.name ?? "Organización sin seleccionar"} ·{" "}
+            {treatments.find((v) => v.id === tid)?.name ?? "Sin tratamiento seleccionado"} ·{" "}
+            {rows.find((v) => v.id === aid)
+              ? `${rows.find((v) => v.id === aid)!.purpose_snapshot} · versión ${rows.find((v) => v.id === aid)!.version} · ${rows.find((v) => v.id === aid)!.status}`
+              : "Sin evaluación seleccionada"}
+          </p>
+          <p>
+            Destino al aplicar:{" "}
+            <strong>
+              {describeDestination({ organizationId: org, treatmentId: tid, assessmentId: aid })}
+            </strong>
+          </p>
+          <p>
+            Los {pendingCount} pendientes se conservan en sus formularios durante esta visita.
+            Aplicar no los guarda ni copia sus datos a la nueva selección. Otras pestañas no
+            cambian. Cancelar mantiene la selección y la pantalla actuales.
+          </p>
+        </section>
+      )}
       <div className="flex gap-3">
         <button
           aria-describedby={applyHelpId}

@@ -1595,3 +1595,118 @@ No atribuir CI remota ni integración real a las pruebas con fixtures. Sin merge
 9B no iniciado y lector manual de 7B pendiente. Excluir next-env.d.ts generado y outputs/.
 Las entradas inferiores de autorización pendiente son antecedentes. Verificar identidad
 remota después del push.
+
+## Bloque 9B — destinos de pendientes, 28/10/2026
+
+Rama `feature/navegacion-9b-destinos`; base 9A publicada `650c766a28912f37120a22d7c2c47913e21cdd58`.
+Se consultó origin antes de iniciar. Los registros anteriores de «9B no iniciado» describen antecedentes.
+
+### Implementación
+
+- Cada unidad muestra su destino y la acción «Ir a …». Se validan ruta, pertenencia
+  organizacional y respuesta del tratamiento/evaluación antes de navegar; cancelar
+  invalida una consulta en curso para impedir un cambio tardío.
+- Si cambia organización, tratamiento o evaluación, Pendientes muestra contexto actual,
+  contexto de destino y pantalla antes de confirmar. Cancelar mantiene ruta y datos,
+  y devuelve el foco al acceso del pendiente. Abrir no guarda ni copia borradores.
+- Cambiar contexto muestra selección propuesta, pantalla de destino y efecto sobre los
+  pendientes antes de Aplicar. El destino mostrado usa la misma función que la navegación.
+- Retorno de autodiagnóstico desde resultados lleva al cuestionario. La creación de una
+  evaluación vuelve al formulario ya iniciado en su panel propietario; no crea otra evaluación.
+- Antes de abrir desde Pendientes se renueva la consulta de aplicabilidad. Mientras se
+  consulta no se expone el editor condicionado con permisos almacenados. Si ya no está
+  disponible, se explica el retorno a Determinar aplicabilidad. Los editores permanecen
+  montados y conservan sus campos; se puede recuperar el pendiente al habilitarse nuevamente.
+- El aviso junto al contador permanece en la cabecera también con cero pendientes, con
+  ancho mínimo del contador y texto adaptable. No se impone una altura que recorte contenido.
+
+Conservar en memoria no equivale a guardar en servidor: borradores solo durante esta
+visita y pestaña. Sin autosave, nuevo almacenamiento, cambios API/backend/migraciones,
+permisos o reglas de riesgo. Confirmación y activación EIPD permanecen bloqueadas.
+
+### Checklist asistido 9B — pendiente
+
+Usar `/dashboard/trabajo` y datos ficticios. No recargar una pestaña con cambios.
+Si la pestaña antigua no muestra «Ir a …», abrir la misma dirección en otra pestaña
+actualizada y realizar allí un escenario nuevo; los cambios de la original no se trasladan.
+
+- [ ] En evaluación con EIPD habilitada, escribir una nota ficticia sin guardar; añadir
+  una línea ficticia al fundamento de determinación sin modificar el estado guardado.
+  Ir a Panel, abrir Ver pendientes (2), usar «Ir a Borrador EIPD · siete pasos» y comprobar
+  la nota. Repetir desde Panel con Determinación y comprobar la línea.
+- [ ] Cambiar contexto con esos pendientes: leer pantalla de destino antes de Aplicar.
+  Cancelar conserva selección, pantalla y texto. Aplicar conserva las unidades previas.
+- [ ] Desde otra evaluación, ir al pendiente anterior: leer «Antes de cambiar de contexto»,
+  cancelar y comprobar permanencia; volver a abrir y confirmar el destino correcto.
+  Notas ficticias distintas por evaluación no deben mezclarse.
+- [ ] Con un acceso condicionado ya no disponible, el retorno explica la causa y mantiene
+  el pendiente. Al restaurar la determinación mediante el flujo explícito, se recupera el
+  texto anterior. No registrar versiones para comprobar únicamente navegación.
+- [ ] En ventana estrecha abrir/cerrar panel con teclado, Escape y fondo exterior; comprobar
+  foco y lectura completa. Al quitar/agregar un pendiente la cabecera no salta por el aviso.
+- [ ] Advertencia de salida/recarga sigue disponible con cambios. No aceptar una recarga
+  para conservarlos; consultar o navegar no debe anunciar guardado.
+
+### Evidencia automatizada
+
+200 escenarios Chromium aprobados en la ejecución final de cinco archivos:
+`connected-navigation`, `licitud-workspace`, `child-adolescent-editor`, `child-eipd-history`
+y `assessment-support`. Incluye diez casos nuevos 9B: retorno EIPD/determinación,
+cancelación y confirmación entre evaluaciones con notas distintas, anticipación en Cambiar
+contexto, consulta fresca y reubicación, error y cancelación de consulta lenta,
+cuestionario desde resultados, creación en panel original, cabecera/teclado a 320 y
+1280 px y preparación temporal bloqueada/recuperada. Se comprueba ausencia de escrituras
+adicionales por abrir o cancelar. Regresiones previas cubren aviso de salida, cierres,
+foco y nombres largos. Tipos, ESLint y formato de archivos afectados aprobados.
+Captura local de confirmación de contexto inspeccionada: texto y acciones legibles,
+panel desplazable sin recorte horizontal. Evidencias locales en `outputs/9b/`, excluidas
+del repositorio. No se modifica `frontend/next-env.d.ts` generado por la ejecución.
+
+No atribuir aceptación asistida, prueba de lector de pantalla, integración backend real
+ni CI remota a las pruebas con fixtures. Sin commit/push de 9B ni inicio del lote 10.
+
+## 9B — retorno, cambio de contexto y panel estrecho confirmados, 28/10/2026
+
+Usuario confirma «recorrido OK» en tres secuencias asistidas:
+
+- Desde Panel, localizar las unidades de determinación y EIPD y volver a cada formulario
+  con sus textos conservados.
+- Cambiar contexto y conservar los dos pendientes de clientes al seleccionar trabajadores.
+  La captura muestra trabajadores como contexto actual y ambas unidades de clientes con
+  sus destinos. Usuario confirma después cancelar la apertura del pendiente sin cambiar
+  contexto y confirmar el retorno a clientes con la nota EIPD conservada.
+- Reducir la misma ventana, leer nombres y botones completos, cerrar con Escape y con
+  fondo gris exterior al panel, con retorno de foco a Ver pendientes, sin guardar ni recargar.
+
+Esta aceptación no atribuye comprobación asistida adicional de acceso condicionado,
+preparación temporal o advertencia de recarga. Esos casos conservan la cobertura automatizada
+previamente documentada. Siguiente recorrido: comprobar la advertencia de salida/recarga
+con dos pendientes y cancelar la salida, verificando contexto y nota conservados.
+No aceptar la recarga ni abandonar la pestaña durante la comprobación. Sin commit/push
+nuevo autorizado de 9B; lote 10 y lector manual de 7B siguen pendientes.
+
+## 9B — recorridos asistidos acordados completados, 28/10/2026
+
+Usuario confirma «recorrido OK» al solicitar recarga con cambios pendientes y cancelarla:
+se conservan las dos unidades y la nota EIPD. Se completa el guion asistido acordado,
+sumado al retorno a formularios, cambio de contexto con cancelación/confirmación y
+panel estrecho con cierre y foco ya confirmados. Los casos adicionales de acceso
+condicionado, preparación temporal y errores mantienen cobertura automatizada;
+no se atribuyen como ejecución asistida del usuario. 200 escenarios Chromium con
+fixtures y comprobaciones estáticas previamente aprobados. Sin nueva ejecución de
+pruebas por este registro documental, CI remota ni certificación de accesibilidad.
+9B listo para commit/push cuando el usuario lo autorice; todavía sin publicación.
+Lote 10 no iniciado; lector manual de 7B pendiente. Las entradas anteriores de
+validación pendiente son antecedentes.
+
+## Publicación autorizada de 9B — 28/10/2026
+
+Usuario solicita commit y autoriza push de `feature/navegacion-9b-destinos`, base
+`650c766`. Incluye destinos validados desde Pendientes, confirmación del cambio de
+contexto, consulta de disponibilidad y conservación de borradores, pruebas y aceptación
+asistida acordada. 200 escenarios Chromium con fixtures y checks estáticos aprobados;
+los últimos cambios documentan los recorridos y esta autorización. No atribuir nueva
+CI remota ni integración backend real. Sin merge/despliegue, lote 10 no iniciado y lector
+manual de 7B pendiente. Excluir `frontend/next-env.d.ts` generado y `outputs/`.
+Las menciones anteriores de autorización pendiente son antecedentes. Verificar identidad
+remota después del push.
