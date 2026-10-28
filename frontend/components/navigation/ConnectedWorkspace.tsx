@@ -245,12 +245,26 @@ export function ConnectedWorkspace({
           } else if (!item.contains(target)) item.open = false;
         });
     };
-    const mobile = window.matchMedia("(max-width: 767px)");
+    const mobile = window.matchMedia("(max-width: 1199px)");
     const resize = () => {
       const focusedGroup = document.activeElement?.closest(".connected-desktop-sections");
       closeDesktopGroups();
       if (mobile.matches && focusedGroup)
         document.getElementById("connected-sections-trigger")?.focus();
+      if (
+        !mobile.matches &&
+        document.getElementById("connected-sections-panel")?.getClientRects().length
+      ) {
+        setSections(false);
+        requestAnimationFrame(() => {
+          const bar = document.querySelector(".connected-desktop-sections");
+          (
+            bar?.querySelector<HTMLElement>(
+              'a[aria-current="page"], details[data-current-group] > summary'
+            ) ?? bar?.querySelector<HTMLElement>("summary, a")
+          )?.focus();
+        });
+      }
     };
     mobile.addEventListener("change", resize);
     document.addEventListener("pointerdown", close);

@@ -1236,3 +1236,200 @@ estáticos previos aprobados; no atribuir CI remota al push. Lector manual de 7B
 Las entradas inferiores de autorización pendiente describen estados anteriores.
 Excluir `frontend/next-env.d.ts` generado y `outputs/` locales. 8B no iniciado;
 sin merge ni despliegue. Verificar identidad del commit remoto tras publicar.
+
+## Bloque 8B — navegación principal y paso actual, 27/10/2026
+
+Rama `feature/navegacion-8b-pasos`, base `e04d8d82f552bf6c82625dcd7db5f6e310736526`
+(8A publicado y comprobado contra HEAD remoto). Implementación local solicitada por el
+usuario; validación asistida y autorización de publicación pendientes. Sin inicio del lote 9.
+
+### Cambios
+
+- El editor EIPD conectado deja de mostrar su lista central de siete botones. Conserva los
+  mismos siete destinos, orden y nombres compartidos mediante la barra o el panel Secciones.
+- Encabezado del formulario con nombre del paso y «Paso N de 7 · Completar EIPD». Es ubicación,
+  no porcentaje, guardado ni completitud. No se marcan pasos como terminados por visitarlos.
+- Anterior/Siguiente identifica el destino y cambia de paso sin guardar. Se ubica después
+  del formulario y, en el paso 4, después del panel de valoración, conservando su contenido.
+  Los extremos no ofrecen un paso anterior/siguiente inexistente.
+- A partir de 1200 px se usa la barra de secciones y se oculta el disparador redundante de
+  Secciones; por debajo se usa ese panel y se oculta la barra. Menú principal conserva su
+  comportamiento anterior. La barra puede distribuir sus grupos en más de una fila.
+- El corte se comprobó en seis anchos (320/390/865/1100/1280/1920), con nombres completos
+  de los siete destinos: sin opciones recortadas ni desbordamiento horizontal de página.
+  Al estrechar con foco en la barra, pasa a Secciones; al ampliar con el panel abierto,
+  se cierra y el foco pasa al grupo/destino visible de la barra.
+- El uso independiente conserva EipdSteps y su navegación previa. No se alteran campos,
+  requisitos, API, permisos, decisiones, guardado ni los bloqueos de confirmación/activación.
+
+### Verificación
+
+**111 pruebas Chromium aprobadas:** 91 conectadas (incluidas siete nuevas de 8B) y 20 del
+recorrido independiente, con API simulada y datos ficticios. Se recorren los siete destinos
+por la vía visible a cada ancho; título/posición, Anterior/Siguiente, Atrás/Adelante, borrador,
+relaciones accesibles, cierre/foco y disponibilidad condicionada. Las pruebas previas de
+teclado, errores, permisos y contexto permanecen aprobadas. En independiente se conservan
+los botones de pasos y el recorrido de valoración.
+
+Tipos, ESLint de componentes afectados, Prettier y `git diff --check` aprobados. Capturas
+locales `outputs/navegacion-8b/` (no versionadas), revisadas a 320/865/1920 px. No se declara
+integración real con servidor ni CI remota nueva. La prueba manual de zoom del navegador
+al 200 % y el recorrido asistido de 8B quedan pendientes; las pruebas de anchos no se
+presentan como equivalentes a haber probado ese control del navegador. Sigue pendiente
+lector manual de 7B; no se declara certificación de accesibilidad.
+
+### Guion asistido de 8B
+
+1. Abrir una pestaña actualizada en /dashboard/trabajo, conservando la antigua si contiene
+   notas o preparación temporal. Elegir una evaluación con EIPD «Corresponde» ya guardada.
+   En ventana amplia, Completar EIPD → Describir riesgos: debe verse su título y Paso 3 de 7,
+   sin la lista central de siete botones.
+2. Sin guardar, usar Siguiente al final del formulario → Valorar riesgos (Paso 4 de 7),
+   luego Siguiente → Medidas de mitigación (Paso 5 de 7). Volver mediante la navegación y
+   comprobar que las notas pendientes continúan. No registrar otra determinación o versión.
+3. Reducir el ancho de la misma ventana sin recargar: Secciones sustituye la barra. Abrir
+   Completar EIPD y repetir los tres destinos; comprobar nombres completos, cierre con Escape
+   y fondo exterior, foco y acceso al bajar por formularios.
+4. En escritorio cambiar el zoom del navegador a 200 %, comprobar reflujo, vía de navegación
+   visible y acciones legibles sin desplazamiento horizontal de página. Restituir 100 %.
+5. Ampliar con el panel Secciones abierto: debe cerrar y dejar el foco en la barra disponible.
+   Confirmar que volver con Atrás/Adelante conserva ubicación y contenido, sin guardar.
+
+Registrar resultados por recorrido antes de cerrar el checklist/publicar. No recargar una
+pestaña con cambios pendientes ni atribuir sus notas a una pestaña nueva.
+
+## 8B — primera comprobación asistida confirmada, 27/10/2026
+
+El usuario confirma «recorrido OK» al abrir Completar EIPD → Describir riesgos en una
+pestaña actualizada y ventana amplia, con evaluación EIPD habilitada: título del paso,
+«Paso 3 de 7» y ausencia de la lista central repetida. No se solicitó guardar.
+Aceptación acotada a esta primera comprobación. Pendientes: Anterior/Siguiente con
+conservación del texto, ventana estrecha/cierres/foco, zoom real 200 % y Atrás/Adelante.
+111 pruebas automatizadas y checks previos mantienen su alcance; este registro documental
+no modifica producto ni añade ejecuciones. Sin commit/push de 8B ni inicio de lote 9.
+
+## 8B — secuencia y borrador confirmados, 27/10/2026
+
+El usuario confirma «recorrido OK» tras escribir la nota ficticia de navegación 8B en
+Describir riesgos, usar Siguiente hacia Valorar riesgos (Paso 4 de 7), continuar a
+Medidas de mitigación (Paso 5 de 7) y volver a Describir riesgos mediante Completar EIPD,
+con la nota conservada, sin guardar ni recargar. Se acepta este recorrido acotado.
+Pendientes: ventana estrecha/cierre/foco, zoom real 200 %, ampliación con Secciones
+abierto y Atrás/Adelante. No equivale a guardado en servidor ni sincronización entre
+pestañas. Sin commit/push de 8B ni inicio del lote 9.
+
+## 8B — incidencia asistida de Escape repetido, en investigación, 27/10/2026
+
+Usuario informa que Escape cierra Secciones la primera vez, pero no funciona como espera
+en aperturas siguientes. No se considera aceptado todavía el recorrido móvil de 8B.
+Se añaden cinco escenarios automatizados, a 320/390/865/1100/1199 px: cada uno abre y cierra
+Secciones cinco veces con Escape, verifica foco de retorno, vuelve al campo de notas y
+comprueba que Escape con panel cerrado mantiene ese foco y su contenido. Los cinco pasan
+con el código de producto actual (25 ciclos), sin guardar. Son pruebas con Chromium y API
+simulada; no descartan el fallo reportado en la sesión del usuario.
+
+Pendiente precisar si en el fallo el panel lateral permanece visible o ya se eligió una
+opción y se regresó al formulario. No se aplica un cambio preventivo sin reproducción ni
+se declara corregida la incidencia. Continúan pendientes el guion móvil y zoom real 200 %.
+
+## 8B — aclaración de Escape mediante captura, 27/10/2026
+
+La nueva captura del usuario muestra Describir riesgos con el formulario visible y sin
+panel lateral Secciones abierto. En ese estado, Escape no debe mover el foco al disparador:
+no es un atajo global de retorno. Elegir un destino cierra Secciones y lleva al área de
+trabajo; solo Escape mientras el panel permanece abierto lo cierra con foco de retorno.
+La afirmación conversacional de posible fallo de reapertura fue prematura. La evidencia
+aportada no reproduce un panel abierto que rechace Escape; no se aplica corrección de
+producto por este caso. Se mantienen las cinco pruebas de repetición aprobadas como regresión.
+
+Siguiente comprobación asistida precisa: pulsar Secciones y, sin seleccionar destino,
+verificar que aparece el panel lateral con Cerrar secciones; pulsar Escape y comprobar
+cierre/foco. Repetir la misma apertura y Escape sin elegir una opción. No se da todavía
+por aceptado este recorrido hasta confirmación del usuario. Zoom real 200 % pendiente.
+
+## 8B — cierre repetido de Secciones confirmado, 27/10/2026
+
+El usuario confirma «recorrido OK» al abrir Secciones, mantener visible el panel lateral
+sin seleccionar destino, pulsar Escape y comprobar cierre/foco en el disparador, repitiendo
+la secuencia. La incidencia reportada queda aclarada en este alcance: Escape con el panel
+cerrado no es un atajo global de retorno desde el formulario. No fue necesaria una
+corrección adicional de producto por este caso; permanecen las cinco pruebas de repetición
+aprobadas. No atribuir a esta confirmación otros recorridos no ejecutados.
+
+Pendientes del guion 8B: zoom real del navegador al 200 %, ampliar con Secciones abierto
+y comprobar foco en la barra; Atrás/Adelante con contenido conservado. La secuencia móvil
+entre los tres pasos y el cierre sobre fondo exterior no se dan por aceptados únicamente
+por este OK de Escape. Sin commit/push de 8B ni inicio del lote 9.
+
+## 8B — zoom real 200 % confirmado, 27/10/2026
+
+Usuario confirma «recorrido OK» al ampliar la ventana, ajustar el zoom real del navegador
+al 200 %, abrir Secciones, leer y seleccionar pasos EIPD sin contenido cortado ni
+desplazamiento horizontal de toda la página, y restituir 100 %, sin recargar ni guardar.
+Esta confirmación cubre el control real del navegador, que antes permanecía pendiente;
+no equivale a certificación de accesibilidad ni a prueba manual con lector de pantalla.
+
+Pendientes: ampliación con Secciones abierto y foco en la barra visible; Atrás/Adelante
+con nota conservada. No atribuir todavía cierre exterior o secuencia móvil de tres pasos
+por este OK de zoom. Sin commit/push de 8B ni inicio del lote 9.
+
+## 8B — ampliación y foco en barra confirmados, 27/10/2026
+
+Tras precisar usar la pestaña actualizada donde aparece Paso 3 de 7, abrir Secciones y
+maximizar la ventana hasta mostrar la barra superior, el usuario confirma «recorrido OK»:
+el panel se cierra y el foco pasa a una opción de la barra. Las capturas anteriores de
+ventanas todavía estrechas no se interpretan como fallo de ese cambio de ancho.
+Se suma al zoom real 200 % y Escape repetido ya confirmados. No implica validación de
+contenido pendiente de una pestaña antigua ni sincronización entre pestañas.
+
+Siguiente comprobación: en la misma pestaña actualizada, Describir riesgos → Valorar riesgos
+→ Medidas de mitigación; Atrás del navegador debe volver al Paso 4, Adelante al Paso 5.
+Volver a Describir riesgos y comprobar la nota ficticia pendiente sin guardar ni recargar.
+El recorrido móvil de esos tres destinos y cierre exterior conserva cobertura automatizada;
+no atribuir aceptación manual adicional sin confirmación específica. Sin publicación de 8B.
+
+## 8B — Atrás/Adelante y conservación confirmados, 27/10/2026
+
+Usuario confirma «recorrido OK» tras Describir riesgos → Valorar riesgos → Medidas de
+mitigación; Atrás del navegador vuelve al Paso 4 y Adelante al Paso 5. Al volver a
+Describir riesgos se conserva la nota ficticia de navegación 8B, sin guardar ni recargar.
+Este resultado completa la comprobación asistida de navegación histórica del guion.
+
+Queda para completar la aceptación acotada de 8B: repetir los tres destinos desde
+Secciones en ventana estrecha, comprobar la nota y cerrar el panel mediante clic en el
+fondo gris exterior. No confundir con Escape repetido y zoom 200 %, ya confirmados.
+La parte pendiente dispone de cobertura automatizada, pero aún no se atribuye al usuario.
+Sin commit/push de 8B ni inicio del lote 9. Lector manual de 7B sigue pendiente.
+
+## 8B — recorridos asistidos completados, 27/10/2026
+
+Usuario confirma «recorrido OK» al reducir la ventana, recorrer desde Secciones Describir
+riesgos → Valorar riesgos → Medidas de mitigación, volver a Describir riesgos y comprobar
+la nota conservada; abrir Secciones y cerrar mediante clic en el fondo gris exterior con
+foco de retorno al disparador, sin guardar ni recargar.
+
+Con esta confirmación se completan los recorridos asistidos acordados de 8B: título/Paso N
+de 7 y lista central retirada; secuencia Anterior/Siguiente con conservación; panel móvil,
+Escape repetido y cierre exterior; zoom real del navegador 200 %; ampliación y foco en barra;
+Atrás/Adelante y nota conservada. El caso de Escape con panel cerrado quedó aclarado como
+expectativa de un atajo global inexistente, sin corrección adicional de producto.
+
+Evidencia automatizada: 111 escenarios aprobados en la ejecución de regresión (91 conectados
++ 20 independientes), más cinco escenarios nuevos de aperturas repetidas ejecutados y
+aprobados separadamente (25 ciclos). Total: 116 escenarios distintos aprobados en esas dos
+ejecuciones; no presentar una única ejecución conjunta de 116 ni sumar reejecuciones como
+escenarios nuevos. Tipos/lint/formato y capturas previas conservan su alcance.
+
+Listo para commit/push de 8B cuando el usuario lo autorice. Sin publicación, merge o
+despliegue; lote 9 no iniciado. No declara certificación de accesibilidad, integración real
+por estas pruebas automatizadas o CI remota nueva; lector manual de 7B pendiente.
+
+## Publicación autorizada de 8B — 27/10/2026
+
+Usuario solicita commit y autoriza push de `feature/navegacion-8b-pasos`, base `e04d8d8`.
+Incluye navegación principal EIPD, título/Paso N de 7, Anterior/Siguiente, foco al cambiar
+ancho, pruebas y aceptación asistida. Evidencia: 111 escenarios de regresión más cinco de
+repetición aprobados en ejecuciones separadas; tipos/lint/formato y capturas aprobados.
+Lector manual de 7B pendiente. No atribuir CI remota nueva al push.
+Las menciones inferiores de autorización pendiente son antecedentes. Excluir next-env.d.ts
+generado y outputs/ locales. Lote 9 no iniciado; sin merge/despliegue. Verificar HEAD remoto.

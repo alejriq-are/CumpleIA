@@ -1,5 +1,86 @@
 # Backlog — CumpleIA
 
+## Publicación autorizada de 8B — 27/10/2026
+
+Usuario solicita commit y autoriza push de `feature/navegacion-8b-pasos`, base `e04d8d8`.
+Incluye navegación principal EIPD, título/Paso N de 7, Anterior/Siguiente, foco al cambiar
+ancho, pruebas y aceptación asistida. Evidencia: 111 escenarios de regresión más cinco de
+repetición aprobados en ejecuciones separadas; tipos/lint/formato y capturas aprobados.
+Lector manual de 7B pendiente. No atribuir CI remota nueva al push.
+Las menciones inferiores de autorización pendiente son antecedentes. Excluir next-env.d.ts
+generado y outputs/ locales. Lote 9 no iniciado; sin merge/despliegue. Verificar HEAD remoto.
+
+## 8B — recorridos asistidos completados, 27/10/2026
+
+Usuario confirma el último recorrido móvil, nota conservada y cierre exterior/foco.
+8B aceptado en el alcance acordado, incluidos zoom 200 %, Escape repetido, ampliación y
+Atrás/Adelante. [Evidencia y límites](project/navegacion-servidor.md#8b--recorridos-asistidos-completados-27102026).
+111 escenarios de regresión + cinco nuevos de repetición aprobados en ejecuciones separadas.
+Listo para commit/push cuando se autorice; lote 9 no iniciado. Lector manual de 7B pendiente.
+Las entradas inferiores de validación pendiente son antecedentes del proceso.
+
+## 8B — Atrás/Adelante y nota conservada OK, 27/10/2026
+
+Usuario confirma regreso al Paso 4 con Atrás, retorno al Paso 5 con Adelante y nota
+conservada en Describir riesgos, sin guardar ni recargar.
+[Resultado y remanente asistido](project/navegacion-servidor.md#8b--atrásadelante-y-conservación-confirmados-27102026).
+Pendiente secuencia móvil de tres destinos y cierre exterior; sin publicación de 8B.
+
+## 8B — ampliación y foco confirmados OK, 27/10/2026
+
+Usuario confirma cierre de Secciones al maximizar la pestaña actualizada y foco en la
+barra visible. Zoom 200 % y Escape repetido previamente confirmados.
+[Registro y siguiente prueba](project/navegacion-servidor.md#8b--ampliación-y-foco-en-barra-confirmados-27102026).
+Pendiente Atrás/Adelante con conservación de nota; sin commit/push de 8B ni lote 9.
+
+## 8B — zoom del navegador 200 % OK, 27/10/2026
+
+Usuario confirma lectura/selección de pasos mediante Secciones con zoom real 200 %, sin
+recortes ni desplazamiento horizontal de página, y retorno a 100 %.
+[Registro y límites](project/navegacion-servidor.md#8b--zoom-real-200--confirmado-27102026).
+Pendientes ampliación/foco y Atrás/Adelante; sin commit/push de 8B ni inicio de lote 9.
+
+## 8B — Escape repetido confirmado OK, 27/10/2026
+
+Usuario confirma apertura/cierre repetidos de Secciones sin elegir destino, con Escape
+y foco de retorno. Caso anterior aclarado: el panel cerrado no consume Escape como
+atajo global. [Registro y pendientes](project/navegacion-servidor.md#8b--cierre-repetido-de-secciones-confirmado-27102026).
+Continúan pendientes zoom real 200 %, ampliación/foco y navegación histórica; sin publicación de 8B.
+
+## 8B — Escape con panel cerrado aclarado, 27/10/2026
+
+Captura muestra el formulario sin Secciones abierto: Escape no es un atajo global al
+botón. No se reproduce fallo de cierre de un panel abierto. Pendiente repetir apertura
+→ Escape sin elegir destino y confirmar; zoom real 200 % también pendiente.
+[Detalle](project/navegacion-servidor.md#8b--aclaración-de-escape-mediante-captura-27102026).
+Sin cambios adicionales de producto ni publicación de 8B.
+
+## 8B — secuencia y conservación de nota OK, 27/10/2026
+
+Usuario confirma Describir riesgos → Valorar riesgos → Medidas de mitigación,
+Pasos 3/4/5 y nota conservada al volver sin guardar ni recargar.
+[Registro y pendientes](project/navegacion-servidor.md#8b--secuencia-y-borrador-confirmados-27102026).
+Continúan pendientes las comprobaciones de ventana estrecha, zoom y navegación histórica.
+Sin commit/push de 8B ni inicio de lote 9.
+
+## 8B — primer recorrido asistido OK, 27/10/2026
+
+Usuario confirma Describir riesgos, Paso 3 de 7 y ausencia de lista central repetida
+en ventana amplia. Continúan pendientes los siguientes recorridos del guion 8B;
+[registro y límites](project/navegacion-servidor.md#8b--primera-comprobación-asistida-confirmada-27102026).
+Sin commit/push de 8B ni inicio de lote 9.
+
+## Bloque 8B implementado localmente — 27/10/2026
+
+Rama `feature/navegacion-8b-pasos` sobre 8A publicado `e04d8d8`. Navegación EIPD conectada
+sin lista central repetida; título/Paso N de 7 y Anterior/Siguiente después del formulario.
+Barra desde 1200 px, panel Secciones por debajo; foco conservado al cambiar de ancho.
+Editor independiente conserva su navegación. 111 Chromium (91 conectados + 20 independientes),
+tipos/lint/formato y capturas aprobados. [Alcance y guion](project/navegacion-servidor.md#bloque-8b--navegación-principal-y-paso-actual-27102026).
+Pendiente validación asistida, incluido zoom real 200 %. Lector manual de 7B pendiente.
+Sin commit/push de 8B ni inicio de lote 9. Excluir next-env.d.ts generado y outputs/ locales.
+Esta entrada actualiza las menciones anteriores de 8B no iniciado.
+
 ## Publicación autorizada de 8A — 27/10/2026
 
 Usuario solicita commit y autoriza push en `feature/navegacion-8a-contexto`, base `15aa273`.

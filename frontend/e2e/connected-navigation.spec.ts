@@ -290,11 +290,25 @@ async function mod(page: Page, name: string) {
     .click();
 }
 async function section(page: Page, name: string) {
-  await page.locator("header").getByRole("button", { name: "Secciones", exact: true }).click();
-  await page
-    .getByRole("dialog", { name: "Secciones del módulo", exact: true })
-    .getByRole("button", { name, exact: true })
-    .click();
+  const trigger = page.locator("header").getByRole("button", { name: "Secciones", exact: true });
+  if (await trigger.isVisible()) {
+    await trigger.click();
+    await page
+      .getByRole("dialog", { name: "Secciones del módulo", exact: true })
+      .getByRole("button", { name, exact: true })
+      .click();
+  } else {
+    const bar = page.locator(".connected-desktop-sections");
+    const direct = bar.getByRole("link", { name, exact: true });
+    if (await direct.count()) await direct.click();
+    else {
+      const group = bar
+        .locator("details")
+        .filter({ has: page.getByRole("button", { name, exact: true, includeHidden: true }) });
+      await group.locator("summary").click();
+      await group.getByRole("button", { name, exact: true }).click();
+    }
+  }
 }
 // A previously copied URL may still be opened while the menu explains a read failure.
 async function openSavedRoute(page: Page, target: string, step = 0) {
@@ -366,6 +380,7 @@ test("catálogo de 50 preguntas, borrador entre módulos y contexto cancelado", 
 test("aplicabilidad guardada, aislamiento, enlaces y reapertura desde servidor", async ({
   page,
 }) => {
+  await page.setViewportSize({ width: 1100, height: 900 });
   await legal(page);
   await page.locator("header").getByRole("button", { name: "Secciones", exact: true }).click();
   await expect(
@@ -1642,7 +1657,7 @@ test("6B disponibilidad de cada tema depende de lo guardado y no del borrador", 
   await eipdGroup.getByRole("button", { name: "Describir riesgos", exact: true }).click();
   await expect(page).toHaveURL(/step=2/);
   await expect(
-    main(page).getByRole("button", { name: "3. Describir riesgos", exact: true })
+    main(page).getByRole("heading", { name: "Describir riesgos", exact: true })
   ).toBeVisible();
   await section(page, "Tratamiento y alcance de la EIPD");
   await main(page)
@@ -2005,7 +2020,7 @@ test("7B un main real con nombre y título por destino dentro de la envoltura de
   expect(calls.filter((v) => v.method !== "GET")).toHaveLength(0);
 });
 
-for (const width of [1280, 390]) {
+for (const width of [1100, 390]) {
   test(`7B paneles relacionados, título, foco y ayuda consultable a ${width}px`, async ({
     page,
   }) => {
@@ -2355,3 +2370,122 @@ test.describe("8A consulta táctil", () => {
     expect(calls.filter((v) => v.method !== "GET")).toHaveLength(0);
   });
 });
+
+for (const width of [320, 390, 865, 1100, 1280, 1920]) {
+  test(`8B siete pasos con una vía principal a ${width}px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 900 });
+    await legal(page);
+    await enable(page);
+    const writes = calls.filter((v) => v.method !== "GET").length;
+    const labels = [
+      "Tratamiento y alcance de la EIPD",
+      "Necesidad y proporcionalidad",
+      "Describir riesgos",
+      "Valorar riesgos",
+      "Medidas de mitigación",
+      "Fuentes y evidencias",
+      "Riesgo residual y seguimiento",
+    ];
+    await expect(
+      page.locator("header").getByRole("button", { name: "Secciones", exact: true })
+    ).toBeVisible({ visible: width < 1200 });
+    for (const [index, label] of labels.entries()) {
+      await section(page, label);
+      await expect(main(page).getByRole("heading", { name: label, exact: true })).toBeVisible();
+      await expect(
+        main(page).getByText(`Paso ${index + 1} de 7 · Completar EIPD`, { exact: true })
+      ).toBeVisible();
+      await expect(
+        main(page).getByRole("navigation", { name: "Pasos documentales EIPD" })
+      ).toHaveCount(0);
+      expect(
+        await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)
+      ).toBeTruthy();
+    }
+    await section(page, labels[2]);
+    const note = main(page).getByRole("textbox", {
+      name: "Notas del borrador EIPD (opcional)",
+      exact: true,
+    });
+    await note.fill("[FICTICIA] Conservar recorrido 8B");
+    await main(page)
+      .getByRole("button", { name: "Siguiente: Valorar riesgos →", exact: true })
+      .click();
+    await expect(
+      main(page).getByText("Paso 4 de 7 · Completar EIPD", { exact: true })
+    ).toBeVisible();
+    await main(page)
+      .getByRole("button", { name: "Siguiente: Medidas de mitigación →", exact: true })
+      .click();
+    await expect(
+      main(page).getByText("Paso 5 de 7 · Completar EIPD", { exact: true })
+    ).toBeVisible();
+    await page.goBack();
+    await expect(
+      main(page).getByText("Paso 4 de 7 · Completar EIPD", { exact: true })
+    ).toBeVisible();
+    await page.goForward();
+    await expect(
+      main(page).getByText("Paso 5 de 7 · Completar EIPD", { exact: true })
+    ).toBeVisible();
+    await section(page, labels[2]);
+    await expect(note).toHaveValue("[FICTICIA] Conservar recorrido 8B");
+    await expectAccessibleReferences(page);
+    await capture(page, `8b-${width}.png`);
+    expect(calls.filter((v) => v.method !== "GET")).toHaveLength(writes);
+  });
+}
+
+test("8B al ampliar ventana el panel cierra y devuelve foco a la barra visible", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1100, height: 900 });
+  await legal(page);
+  await enable(page);
+  await section(page, "Describir riesgos");
+  await page.getByRole("button", { name: "Secciones", exact: true }).click();
+  await expect(
+    page.getByRole("dialog", { name: "Secciones del módulo", exact: true })
+  ).toBeVisible();
+  await page.setViewportSize({ width: 1600, height: 900 });
+  await expect(
+    page.getByRole("dialog", { name: "Secciones del módulo", exact: true })
+  ).toBeHidden();
+  await expect(
+    page.locator(".connected-desktop-sections details[data-current-group] > summary")
+  ).toBeFocused();
+  await expect(main(page).getByText("Paso 3 de 7 · Completar EIPD", { exact: true })).toBeVisible();
+});
+
+for (const width of [320, 390, 865, 1100, 1199]) {
+  test(`8B Escape cierra Secciones en aperturas repetidas a ${width}px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 900 });
+    await legal(page);
+    await enable(page);
+    await section(page, "Describir riesgos");
+    const note = main(page).getByRole("textbox", {
+      name: "Notas del borrador EIPD (opcional)",
+      exact: true,
+    });
+    await note.fill("[FICTICIA] Repetir Escape 8B");
+    const writes = calls.filter((v) => v.method !== "GET").length;
+    const trigger = page.getByRole("button", { name: "Secciones", exact: true });
+    const panel = page.getByRole("dialog", { name: "Secciones del módulo", exact: true });
+    for (let cycle = 0; cycle < 5; cycle++) {
+      await trigger.click();
+      await expect(panel).toBeVisible();
+      await expect(
+        panel.getByRole("button", { name: "Cerrar secciones", exact: true })
+      ).toBeFocused();
+      await page.keyboard.press("Escape");
+      await expect(panel).toBeHidden();
+      await expect(trigger).toBeFocused();
+      await note.click();
+      await page.keyboard.press("Escape");
+      await expect(note).toBeFocused();
+      await expect(note).toHaveValue("[FICTICIA] Repetir Escape 8B");
+    }
+    expect(calls.filter((v) => v.method !== "GET")).toHaveLength(writes);
+    expect(errors).toEqual([]);
+  });
+}

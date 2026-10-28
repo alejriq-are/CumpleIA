@@ -231,3 +231,25 @@
     flex-basis: 100%;
   }
 }
+
+/* 8B: the toolbar is the desktop pathway; use the sections drawer on smaller viewports. */
+@media (min-width: 1200px) {
+  #connected-sections-trigger {
+    display: none;
+  }
+}
+@media (min-width: 768px) and (max-width: 1199px) {
+  .connected-desktop-sections {
+    display: none;
+  }
+}
+.connected-app nav[aria-label="Cambiar paso EIPD"] button {
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  border: 1px solid #94a3b8;
+  border-radius: 6px;
+  padding: 10px 12px;
+  background: white;
+  color: #1e40af;
+}

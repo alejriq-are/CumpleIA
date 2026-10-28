@@ -2,7 +2,7 @@
 
 Fecha: 26 de octubre de 2026. Base funcional: `2e3f5460190185413f6e85243ad59958ba148463`.
 
-Estado al 27/10/2026: **8A con recorridos asistidos completados**, sobre 7B publicado `15aa273`. Cabecera compacta y detalle de contexto; 104 pruebas aprobadas, seis mediciones comparables y comprobaciones del usuario registradas. [Resultado y límites](navegacion-servidor.md#8a--recorridos-asistidos-completados-27102026). Commit/push de 8A autorizado por el usuario el 27/10/2026; 8B no iniciado. Lector manual de 7B pendiente. [Análisis y decisiones](evaluacion-propuestas-claude.md).
+Estado al 27/10/2026: **8B con recorridos asistidos completados**, sobre 8A publicado `e04d8d8`. 111 escenarios de regresión y cinco de apertura repetida aprobados en ejecuciones separadas. Usuario confirma secuencia, conservación, panel móvil/cierres/foco, zoom real 200 %, ampliación y Atrás/Adelante. [Evidencia y límites](navegacion-servidor.md#8b--recorridos-asistidos-completados-27102026). Commit/push de 8B autorizado por el usuario el 27/10/2026; lote 9 no iniciado. Lector manual de 7B pendiente. [Análisis y decisiones](evaluacion-propuestas-claude.md).
 
 ## 1. Alcance y secuencia
 
@@ -180,13 +180,17 @@ manual al usuario. Evidencia y límites en el registro de 8A. Lector de 7B sigue
 
 **Cambios:** retirar la segunda lista central EipdSteps únicamente en modo conectado con navegación externa; mantenerla en editor independiente. Mostrar título y «Paso N de 7» sin marcar completitud. Mantener acciones propias del formulario. En ventanas estrechas usar panel Secciones como vía principal; en ancho suficiente usar la barra. Mantener equivalencia antes de ocultar el acceso redundante de escritorio. Determinar ajuste por espacio disponible, nombres largos y zoom, no por una captura aislada.
 
+**Estado:** implementación, comprobaciones automatizadas y recorridos asistidos acordados
+completados. Zoom real 200 % confirmado por el usuario; límites y ejecuciones separados
+registrados en la evidencia enlazada. No cierra la prueba manual de lector de 7B.
+
 **Aceptación:**
 
-- [ ] Siete destinos accesibles sin segunda lista central en conectado; independiente conserva navegación.
-- [ ] Paso actual y siguiente acción se entienden sin confundir paso visitado con completado.
-- [ ] Menú/Secciones accesibles al desplazarse y en 320/390 px, ancho intermedio y escritorio.
-- [ ] Sin desplazamiento horizontal de página ni opciones cortadas; comprobar zoom 200 % y reflujo.
-- [ ] Mismos destinos condicionados, orden y cierres del lote 7; borradores y Atrás/Adelante conservados.
+- [x] Siete destinos accesibles sin segunda lista central en conectado; independiente conserva navegación.
+- [x] Paso actual y siguiente acción se entienden sin confundir paso visitado con completado.
+- [x] Menú/Secciones accesibles al desplazarse y en 320/390 px, ancho intermedio y escritorio.
+- [x] Sin desplazamiento horizontal de página ni opciones cortadas; comprobar zoom 200 % y reflujo.
+- [x] Mismos destinos condicionados, orden y cierres del lote 7; borradores y Atrás/Adelante conservados.
 
 **Guion:** describir riesgo → valorar riesgo → medidas; volver al primero; reducir ventana, abrir Secciones y repetir. No recargar ni volver a registrar datos para esta prueba.
 

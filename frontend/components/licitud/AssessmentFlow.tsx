@@ -1,4 +1,5 @@
 "use client";
+import { eipdStepLabels } from "@/lib/licitud/eipd-steps";
 import { documentLabels } from "@/lib/licitud/document-labels";
 import Link from "next/link";
 import { useCallback, useEffect, useId, useState } from "react";
@@ -343,6 +344,7 @@ export function AssessmentFlow({
         </div>
         <div hidden={section !== "eipd" || (navigation && !navigation.scope.eipd)}>
           <EipdDraftEditor
+            externalNavigation={!!navigation}
             supportPanelId={supportPanelId}
             organizationId={organizationId}
             treatmentId={treatmentId}
@@ -527,6 +529,20 @@ export function AssessmentFlow({
         onLoaded={setSupport}
         onDirty={setSupportDirty}
       />
+      {navigation && navigation.scope.eipd && tab === "completar" && section === "eipd" && (
+        <nav aria-label="Cambiar paso EIPD" className="flex flex-wrap gap-3">
+          {eipdStep > 0 && (
+            <button type="button" onClick={() => setEipdStep(eipdStep - 1)}>
+              ← Anterior: {eipdStepLabels[eipdStep - 1]}
+            </button>
+          )}
+          {eipdStep < eipdStepLabels.length - 1 && (
+            <button type="button" onClick={() => setEipdStep(eipdStep + 1)}>
+              Siguiente: {eipdStepLabels[eipdStep + 1]} →
+            </button>
+          )}
+        </nav>
+      )}
       <ChildAdolescentPage
         regionPrefix={childPrefix}
         organizationId={organizationId}

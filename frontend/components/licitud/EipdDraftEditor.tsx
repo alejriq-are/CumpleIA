@@ -1,5 +1,6 @@
 "use client";
 import type { RiskEvaluation, Annex } from "@/lib/api/assessment-support";
+import { eipdStepLabels } from "@/lib/licitud/eipd-steps";
 import { documentLabels } from "@/lib/licitud/document-labels";
 import { useEffect, useId, useRef, useState } from "react";
 import { documentFields } from "@/lib/licitud/eipd-document";
@@ -15,6 +16,7 @@ import { SaveFeedback } from "./SaveFeedback";
 import { EipdDocumentFields, EipdDocumentView, EipdSteps } from "./EipdDocumentFields";
 import { sessionToken } from "./LicitudWorkspace";
 export function EipdDraftEditor({
+  externalNavigation = false,
   supportPanelId,
   organizationId,
   treatmentId,
@@ -30,6 +32,7 @@ export function EipdDraftEditor({
   step = 0,
   onStepChange,
 }: {
+  externalNavigation?: boolean;
   supportPanelId?: string;
   organizationId: string;
   treatmentId: string;
@@ -185,7 +188,14 @@ export function EipdDraftEditor({
       aria-owns={ratingStep ? supportPanelId : undefined}
       className="space-y-4 rounded border p-4"
     >
-      <h2 className="text-xl font-semibold">Documentar EIPD</h2>
+      <h2 className="text-xl font-semibold">
+        {externalNavigation ? eipdStepLabels[activeStep] : "Documentar EIPD"}
+      </h2>
+      {externalNavigation && (
+        <p className="font-medium text-blue-900">
+          Paso {activeStep + 1} de {eipdStepLabels.length} · Completar EIPD
+        </p>
+      )}
       <p>
         Este formulario documenta análisis y evidencias de prueba. Abrirlo no determina que una EIPD
         sea obligatoria. La confirmación y la activación permanecen bloqueadas.
@@ -197,7 +207,9 @@ export function EipdDraftEditor({
             : "Cargando documento EIPD…"}
         </p>
       )}
-      <EipdSteps step={activeStep} onChange={changeStep} supportPanelId={supportPanelId} />
+      {!externalNavigation && (
+        <EipdSteps step={activeStep} onChange={changeStep} supportPanelId={supportPanelId} />
+      )}
       {!row && error && <SaveFeedback error={error} />}
       {ratingStep && dirty && (
         <p className="rounded border border-amber-400 bg-amber-50 p-3">
