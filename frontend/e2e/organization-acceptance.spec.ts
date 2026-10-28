@@ -30,7 +30,7 @@ test.beforeAll(async () => {
  };
  const load=()=>api.load(scope,resolution),designate=(actor,p)=>api.designate(scope,actor,p),record=(actor,p)=>api.record(scope,resolution,actor,p);
  const root=createRoot(document.getElementById("root"));
- window.mount=(options={})=>root.render(React.createElement(OrganizationAcceptancePanel,{load,designate,record,readOnly:options.readOnly??false,guided:options.guided??false}));
+ window.mount=(options={})=>root.render(React.createElement(OrganizationAcceptancePanel,{load,designate,record,readOnly:options.readOnly??false,guided:options.guided??false,documentIdentity:options.documentIdentity}));
  window.acceptanceApi={api,scope,resolution,id};
  `);
 });
@@ -314,5 +314,34 @@ test("10A consulta en curso no deduce permiso de administración", async ({ page
   });
   await expect(capabilities(page)).toContainText("Registrar facultad: Por comprobar.");
   await expect(capabilities(page)).not.toContainText("Registrar facultad: Disponible.");
+  expect(await posts(page)).toHaveLength(0);
+});
+
+test("10B permite localizar decisiones y volver sin registros", async ({ page }) => {
+  await mount(page, {
+    guided: true,
+    documentIdentity: "Versión documental de infancia 2 · PRUEBA-002",
+  });
+  const historyButton = page.getByRole("button", {
+    name: "Ver decisiones registradas de esta versión",
+    exact: true,
+  });
+  await historyButton.focus();
+  await page.keyboard.press("Enter");
+  await expect(
+    page.getByRole("heading", { name: "Historial documental de esta versión", exact: true })
+  ).toBeFocused();
+  await expect(page.getByText("No hay decisiones de organización registradas.")).toBeVisible();
+  await page
+    .getByRole("button", { name: "Volver a Decisión de la organización", exact: true })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "Aceptación documental por organización", exact: true })
+  ).toBeFocused();
+  await expect(
+    page.getByText("Documento de estas decisiones: Versión documental de infancia 2 · PRUEBA-002", {
+      exact: true,
+    })
+  ).toBeVisible();
   expect(await posts(page)).toHaveLength(0);
 });

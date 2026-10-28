@@ -1,4 +1,5 @@
 "use client";
+import { documentDisclosureClass, documentNavigationButtonClass } from "./document-focus";
 import type { WorkState } from "@/components/navigation/work-unit-state";
 import { eipdStepLabels } from "@/lib/licitud/eipd-steps";
 import { DocumentCapabilities } from "./DocumentCapabilities";
@@ -404,7 +405,7 @@ export function AssessmentFlow({
             <section aria-label="Alcance RAT guardado" className="space-y-3 rounded border p-4">
               <h3 className="font-semibold">Alcance RAT asociado guardado</h3>
               <details>
-                <summary>Consultar alcance RAT</summary>
+                <summary className={documentDisclosureClass}>Consultar alcance RAT</summary>
                 <DossierDocumentView
                   document={{
                     kind: "rat",
@@ -429,7 +430,7 @@ export function AssessmentFlow({
                 {row.version}
               </h3>
               <details>
-                <summary>
+                <summary className={documentDisclosureClass}>
                   Consultar evaluación de licitud
                   {row.legal_basis === "interes_legitimo_art13d" ? " y LIA" : ""}
                 </summary>
@@ -582,12 +583,20 @@ export function AssessmentFlow({
       {navigation && navigation.scope.eipd && tab === "completar" && section === "eipd" && (
         <nav aria-label="Cambiar paso EIPD" className="flex flex-wrap gap-3">
           {eipdStep > 0 && (
-            <button type="button" onClick={() => setEipdStep(eipdStep - 1)}>
+            <button
+              type="button"
+              className={documentNavigationButtonClass}
+              onClick={() => setEipdStep(eipdStep - 1)}
+            >
               ← Anterior: {eipdStepLabels[eipdStep - 1]}
             </button>
           )}
           {eipdStep < eipdStepLabels.length - 1 && (
-            <button type="button" onClick={() => setEipdStep(eipdStep + 1)}>
+            <button
+              type="button"
+              className={documentNavigationButtonClass}
+              onClick={() => setEipdStep(eipdStep + 1)}
+            >
               Siguiente: {eipdStepLabels[eipdStep + 1]} →
             </button>
           )}

@@ -992,3 +992,74 @@ test("10A error de carga conserva capacidades sin comprobar", async ({ page }) =
   await expect(panel).toContainText("La consulta falló");
   expect(await posts(page)).toHaveLength(0);
 });
+
+test("10B accesos internos conservan identidad y revisiones por versión sin escrituras", async ({
+  page,
+}) => {
+  await page.evaluate(() => {
+    const w = window as any;
+    w.demo.rows.push(w.api.resolution(2));
+  });
+  await mount(page, { view: "review" });
+  await select(page);
+  await page.getByRole("button", { name: "Ir a Revisión del documento", exact: true }).click();
+  await expect(
+    page.getByRole("heading", {
+      name: "Revisión del documento · versión de infancia 1",
+      exact: true,
+    })
+  ).toBeFocused();
+  await page.getByRole("button", { name: "Ver revisiones registradas", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Revisiones de esta versión documental", exact: true })
+  ).toBeFocused();
+  await expect(
+    page.getByText("No hay revisiones registradas para esta versión documental.")
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Volver al documento consultado", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Versión documental de infancia 1 consultada", exact: true })
+  ).toBeFocused();
+  await enable(page);
+  await fillReview(page);
+  await page.getByLabel("Resultado de la revisión documental").selectOption("requiere_cambios");
+  await page.getByRole("button", { name: "Registrar revisión ficticia", exact: true }).click();
+  await expect(
+    page.getByText("Resultado de la revisión documental: Requiere cambios", { exact: true })
+  ).toBeVisible();
+  await expect(page.getByText("Registrada por (identificador):", { exact: false })).toBeVisible();
+  await expect(
+    page.getByText("Versión revisada: infancia 1 · PRUEBA: resolucion 1", { exact: true })
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Consultar versión documental 2", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Versión documental de infancia 2 consultada" })
+  ).toBeVisible();
+  await expect(
+    page.getByText("Resultado de la revisión documental: Requiere cambios", { exact: true })
+  ).toHaveCount(0);
+  await expect(
+    page.getByText("No hay revisiones registradas para esta versión documental.")
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Consultar versión documental 1", exact: true }).click();
+  await expect(
+    page.getByText("Versión revisada: infancia 1 · PRUEBA: resolucion 1", { exact: true })
+  ).toBeVisible();
+  expect(await posts(page)).toHaveLength(1);
+});
+
+test("10B copia explica origen temporal y requiere nueva vista previa", async ({ page }) => {
+  await mount(page);
+  await select(page);
+  await enable(page);
+  await page
+    .getByRole("button", { name: "Preparar nueva versión a partir de esta", exact: true })
+    .click();
+  await expect(
+    page.getByText(/Origen de la copia temporal: versión documental de infancia 1/)
+  ).toBeVisible();
+  await expect(
+    page.getByText(/Revisa nuevamente la vista previa antes de registrar otra versión/)
+  ).toBeVisible();
+  expect(await posts(page)).toHaveLength(0);
+});

@@ -1,4 +1,5 @@
 "use client";
+import { documentDisclosureClass } from "./document-focus";
 import type { RiskEvaluation, Annex } from "@/lib/api/assessment-support";
 import { EipdRiskTable } from "./EipdRiskTable";
 import { useEffect, useId, useRef, useState } from "react";
@@ -467,7 +468,9 @@ export function EipdDocumentView({
   }
   return (
     <details open={expanded || undefined}>
-      <summary>{expanded ? "Contenido preparado" : "Contenido del documento guardado"}</summary>
+      <summary className={documentDisclosureClass}>
+        {expanded ? "Contenido preparado" : "Contenido del documento guardado"}
+      </summary>
       <EipdRiskTable value={value} valuation={valuation} annexes={annexes} />
       <div className="mt-4 space-y-4">
         {show(

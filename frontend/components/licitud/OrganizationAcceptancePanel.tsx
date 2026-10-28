@@ -1,4 +1,9 @@
 "use client";
+import {
+  documentDisclosureClass,
+  documentNavigationButtonClass,
+  focusDocumentSection,
+} from "./document-focus";
 import { DocumentCapabilities } from "./DocumentCapabilities";
 import { documentLabels } from "@/lib/licitud/document-labels";
 import { useState, useEffect, useId, useRef } from "react";
@@ -11,6 +16,7 @@ import type {
 } from "@/lib/api/organization-acceptance";
 type Snapshot = { state: AuthorityState; events: Acceptance[] };
 type Props = {
+  documentIdentity?: string;
   readOnly: boolean;
   guided?: boolean;
   load: () => Promise<Snapshot>;
@@ -32,11 +38,14 @@ const labels = {
 };
 export function OrganizationAcceptancePanel({
   readOnly,
+  documentIdentity,
   load,
   designate,
   record,
   guided = false,
 }: Props) {
+  const historyHeading = useRef<HTMLHeadingElement>(null);
+  const decisionHeading = useRef<HTMLHeadingElement>(null);
   const choiceHelpId = useId();
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null),
     [target, setTarget] = useState("");
@@ -194,7 +203,16 @@ export function OrganizationAcceptancePanel({
       aria-label="Aceptación documental por organización"
       className="space-y-4 rounded border p-4"
     >
-      <h3>Aceptación documental por organización</h3>
+      <h3 ref={decisionHeading} tabIndex={-1} className="scroll-mt-80">
+        Aceptación documental por organización
+      </h3>
+      <button
+        type="button"
+        className={documentNavigationButtonClass}
+        onClick={() => focusDocumentSection(historyHeading.current)}
+      >
+        Ver decisiones registradas de esta versión
+      </button>
       <p>
         Solo pruebas con datos ficticios. La organización decide mediante una persona facultada.
         Esta decisión no publica política global, no confirma ni activa EIPD.
@@ -204,7 +222,12 @@ export function OrganizationAcceptancePanel({
       {uncertain && (
         <p>Registro bloqueado tras resultado incierto; la consulta sigue disponible.</p>
       )}
-      <button type="button" disabled={busy} onClick={() => void refresh()}>
+      <button
+        type="button"
+        className={documentNavigationButtonClass}
+        disabled={busy}
+        onClick={() => void refresh()}
+      >
         Actualizar aceptación de organización
       </button>
       <DocumentCapabilities
@@ -278,7 +301,7 @@ export function OrganizationAcceptancePanel({
           {guided && (
             <button
               type="button"
-              className="rounded border px-3 py-2"
+              className={documentNavigationButtonClass}
               aria-expanded={facultyOpen}
               onClick={() => setFacultyOpen(!facultyOpen)}
             >
@@ -421,15 +444,33 @@ export function OrganizationAcceptancePanel({
               <button type="submit">Registrar decisión documental ficticia</button>
             </fieldset>
           </form>
-          <h4>Historial documental de esta versión</h4>
+          <h4 ref={historyHeading} tabIndex={-1} className="scroll-mt-80">
+            Historial documental de esta versión
+          </h4>
+          {documentIdentity && (
+            <p className="break-words">Documento de estas decisiones: {documentIdentity}</p>
+          )}
+          <p>
+            Decisiones de la organización sobre el documento consultado. Son distintas de las
+            revisiones documentales; esta lista no es una auditoría completa.
+          </p>
+          <button
+            type="button"
+            className={documentNavigationButtonClass}
+            onClick={() => focusDocumentSection(decisionHeading.current)}
+          >
+            Volver a Decisión de la organización
+          </button>
           <p>La coincidencia de material es orientativa y no es autorización jurídica.</p>
           {snapshot.events.length === 0 && <p>No hay decisiones de organización registradas.</p>}
           <ul>
             {snapshot.events.map((v) => (
               <li key={v.id} className="space-y-1 rounded border p-3">
                 <p>Decisión de la organización: {labels[v.decision]}</p>
-                <p>{v.rationale}</p>
-                <p>{v.evidence_reference}</p>
+                <p>Fundamento de la decisión: {v.rationale}</p>
+                <p>
+                  Referencia del acta: <span>{v.evidence_reference}</span>
+                </p>
                 <p>
                   Material:{" "}
                   {v.material_status === "coincide"
@@ -454,7 +495,9 @@ export function OrganizationAcceptancePanel({
             ))}
           </ul>
           <details>
-            <summary>Historial de facultades del expediente</summary>
+            <summary className={documentDisclosureClass}>
+              Historial de facultades del expediente
+            </summary>
             <ul>
               {snapshot.state.authorities.map((v) => (
                 <li key={v.id} className="break-all">

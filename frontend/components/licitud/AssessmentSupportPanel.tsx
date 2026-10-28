@@ -1,4 +1,5 @@
 "use client";
+import { documentNavigationButtonClass } from "./document-focus";
 import { useWorkState, type WorkReporter } from "@/components/navigation/work-unit-state";
 import { useEffect, useRef, useState } from "react";
 import type { Assessment } from "@/lib/api/licitud";
@@ -378,7 +379,12 @@ export function AssessmentSupportPanel(props: Props) {
         resoluciones anteriores ni habilitan EIPD.
       </p>
       {props.mode === "review" && <SaveFeedback error={error} />}
-      <button type="button" disabled={busy} onClick={() => void loadRef.current()}>
+      <button
+        type="button"
+        className={documentNavigationButtonClass}
+        disabled={busy}
+        onClick={() => void loadRef.current()}
+      >
         Consultar valoración y anexos
       </button>
       {props.blocked && (
@@ -713,6 +719,7 @@ export function AssessmentSupportPanel(props: Props) {
               </dl>
               <button
                 type="button"
+                className={documentNavigationButtonClass}
                 disabled={busy}
                 onClick={() =>
                   void scope()

@@ -2352,6 +2352,50 @@ test("8A distingue evaluación activa de versión documental histórica", async 
   await page.keyboard.press("Escape");
   expect(calls.filter((v) => v.method !== "GET")).toHaveLength(0);
   expect(errors).toEqual([]);
+  // 10B: internal targets retain the exact historical object and clear the sticky header.
+  for (const width of [1280, 390, 320]) {
+    await page.setViewportSize({ width, height: 844 });
+    const targets = [
+      ["Ir a Revisión del documento", "Revisión del documento · versión de infancia 1"],
+      ["Ver revisiones registradas", "Revisiones de esta versión documental"],
+      ["Ir a Decisión de la organización", "Decisión de la organización · versión de infancia 1"],
+    ];
+    for (const [button, title] of targets) {
+      await main(page).getByRole("button", { name: button, exact: true }).click();
+      const heading = main(page).getByRole("heading", { name: title, exact: true });
+      await expect(heading).toBeFocused();
+      const layout = await heading.evaluate((node) => ({
+        top: node.getBoundingClientRect().top,
+        bottom: node.getBoundingClientRect().bottom,
+        headerBottom: node
+          .closest(".connected-app")!
+          .querySelector("header")!
+          .getBoundingClientRect().bottom,
+        viewport: innerHeight,
+      }));
+      expect(layout.top).toBeGreaterThanOrEqual(layout.headerBottom);
+      expect(layout.bottom).toBeLessThan(layout.viewport);
+    }
+    await main(page)
+      .getByRole("button", { name: "Ver revisiones registradas", exact: true })
+      .click();
+    await capture(page, `10b-revisiones-${width}.png`);
+    await main(page)
+      .getByRole("button", { name: "Volver al documento consultado", exact: true })
+      .click();
+    await expect(
+      main(page).getByRole("heading", {
+        name: "Versión documental de infancia 1 consultada",
+        exact: true,
+      })
+    ).toBeFocused();
+    await capture(page, `10b-accesos-${width}.png`);
+    await main(page)
+      .getByRole("button", { name: "Consultar versión documental 1", exact: true })
+      .evaluate((node) => node.scrollIntoView({ block: "center" }));
+    await capture(page, `10b-consultar-version-${width}.png`);
+  }
+  expect(calls.filter((v) => v.method !== "GET")).toHaveLength(0);
 });
 
 test.describe("8A consulta táctil", () => {

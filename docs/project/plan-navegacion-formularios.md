@@ -253,6 +253,15 @@ registrados en la evidencia enlazada. No cierra la prueba manual de lector de 7B
 
 ### 10B. Localizar revisión e historial sin perder el documento
 
+**Estado 28/10/2026:** implementado localmente en `feature/navegacion-10b-historial`,
+base 10A publicada `e3dd155`. Accesos internos y encabezados conservan las rutas.
+174 escenarios Chromium aprobados; ajuste final de identidad con 18 dirigidos y un
+integrado de tres anchos, checks estáticos y capturas aprobados. Guion asistido
+acordado completado, incluidos estilos de consulta y teclado/ventana estrecha.
+La protección de preparación existente es el caso manual de copia; origen nuevo y
+escenarios excepcionales conservan evidencia automatizada. Ver límites y pruebas
+posteriores al ajuste visual en navegacion-servidor.md. Sin commit/push ni inicio de 11A.
+
 **Resuelve:** P6, parte de P2/P5; C13; G13/G14.
 
 **Cambios:** enlaces o anclas claras a revisión, decisión e historial del documento seleccionado; identidad/número/fecha y resultado con concepto. Mantener referencia al objeto histórico y sus asociaciones al volver. Antes de separar pantallas, validar si anclas y encabezados resuelven la tarea; no reorganizar todas las rutas sin evidencia. Los eventos disponibles no se presentan como auditoría completa.

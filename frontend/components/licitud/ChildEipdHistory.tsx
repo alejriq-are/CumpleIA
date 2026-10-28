@@ -1,5 +1,10 @@
 "use client";
 import { useWorkState, type WorkReporter } from "@/components/navigation/work-unit-state";
+import {
+  documentDisclosureClass,
+  documentNavigationButtonClass,
+  focusDocumentSection,
+} from "./document-focus";
 import { DocumentCapabilities } from "./DocumentCapabilities";
 import { documentLabels } from "@/lib/licitud/document-labels";
 import { type ReactNode } from "react";
@@ -75,6 +80,23 @@ export function ChildEipdHistory({
   onPending,
   onWorkState,
 }: Props) {
+  const selectedHeading = useRef<HTMLHeadingElement>(null);
+  const reviewHeading = useRef<HTMLHeadingElement>(null);
+  const reviewHistoryHeading = useRef<HTMLHeadingElement>(null);
+  const decisionHeading = useRef<HTMLHeadingElement>(null);
+  const [jump, setJump] = useState<"review" | "history" | "decision" | null>(null);
+  const [copyOrigin, setCopyOrigin] = useState<{ version: number; reference: string } | null>(null);
+  useEffect(() => {
+    if (!jump) return;
+    const target =
+      jump === "review"
+        ? reviewHeading.current
+        : jump === "history"
+          ? reviewHistoryHeading.current
+          : decisionHeading.current;
+    focusDocumentSection(target);
+    setJump(null);
+  }, [jump]);
   const editionHelpId = useId();
   const actuationHelpId = useId();
   const reviewHelpId = useId();
@@ -243,6 +265,7 @@ export function ChildEipdHistory({
           setSelected(saved);
           setEvents([]);
           setDraft(empty);
+          setCopyOrigin(null);
           setDocument({});
           setPreparing(false);
           setReviewed("");
@@ -281,6 +304,10 @@ export function ChildEipdHistory({
   function copySelected() {
     if (!selected || !editable || busy) return;
     setConfirmCopy(false);
+    setCopyOrigin({
+      version: selected.version,
+      reference: String(selected.document.document_reference ?? "Sin referencia"),
+    });
     const {
       schema_version: _,
       document_reference,
@@ -331,7 +358,12 @@ export function ChildEipdHistory({
       )}
       {error && <p role="alert">{error}</p>}
       {message && <p role="status">{message}</p>}
-      <button type="button" disabled={busy} onClick={() => void refresh()}>
+      <button
+        type="button"
+        className={documentNavigationButtonClass}
+        disabled={busy}
+        onClick={() => void refresh()}
+      >
         Actualizar historial de infancia
       </button>
       {busy && <p>Cargando operación de historial…</p>}
@@ -433,6 +465,13 @@ export function ChildEipdHistory({
                 className="space-y-3"
               >
                 <legend>{documentLabels.prepareChild}</legend>
+                {copyOrigin && (
+                  <p className="rounded border border-blue-200 bg-blue-50 p-3">
+                    Origen de la copia temporal: versión documental de infancia {copyOrigin.version}{" "}
+                    · {copyOrigin.reference}. El original se conserva. Revisa nuevamente la vista
+                    previa antes de registrar otra versión.
+                  </p>
+                )}
                 <p className="rounded border border-blue-200 bg-blue-50 p-3">
                   Esta preparación es temporal en esta pestaña: copiar o ver la vista previa no
                   guarda una nueva versión en el servidor. Solo Registrar nueva versión documental
@@ -630,7 +669,7 @@ export function ChildEipdHistory({
                         </p>
                         <button
                           type="button"
-                          className="rounded border px-4 py-2"
+                          className={documentNavigationButtonClass}
                           onClick={() => setPreparing(false)}
                         >
                           Volver a completar documento
@@ -654,10 +693,15 @@ export function ChildEipdHistory({
             {snapshot.resolutions.length === 0 && (
               <p>No hay versiones del documento de infancia registradas.</p>
             )}
-            <ul>
+            <ul className="flex flex-wrap gap-2">
               {snapshot.resolutions.map((row) => (
                 <li key={row.id}>
-                  <button type="button" disabled={busy} onClick={() => void choose(row)}>
+                  <button
+                    type="button"
+                    className={documentNavigationButtonClass}
+                    disabled={busy}
+                    onClick={() => void choose(row)}
+                  >
                     Consultar versión documental {row.version}
                   </button>
                 </li>
@@ -665,9 +709,48 @@ export function ChildEipdHistory({
             </ul>
             {selected && (
               <>
-                <h3 className="font-semibold">
+                <h3 ref={selectedHeading} tabIndex={-1} className="scroll-mt-80 font-semibold">
                   Versión documental de infancia {selected.version} consultada
                 </h3>
+                <p className="break-words text-sm">
+                  Documento consultado: versión de infancia {selected.version} ·{" "}
+                  {String(selected.document.document_reference ?? "Sin referencia")}. Fecha de
+                  registro (UTC): {selected.created_at}.
+                </p>
+                <nav
+                  aria-label="Accesos al documento de infancia consultado"
+                  className="flex flex-wrap gap-2"
+                >
+                  <button
+                    type="button"
+                    className={documentNavigationButtonClass}
+                    onClick={() => {
+                      setActuation("revision");
+                      setJump("review");
+                    }}
+                  >
+                    Ir a Revisión del documento
+                  </button>
+                  <button
+                    type="button"
+                    className={documentNavigationButtonClass}
+                    onClick={() => setJump("history")}
+                  >
+                    Ver revisiones registradas
+                  </button>
+                  {organizationAcceptance && (
+                    <button
+                      type="button"
+                      className={documentNavigationButtonClass}
+                      onClick={() => {
+                        setActuation("decision");
+                        setJump("decision");
+                      }}
+                    >
+                      Ir a Decisión de la organización
+                    </button>
+                  )}
+                </nav>
                 <DocumentCapabilities
                   object={`Versión documental de infancia ${selected.version} · ${String(selected.document.document_reference ?? "Sin referencia")}`}
                   actions={[
@@ -742,10 +825,16 @@ export function ChildEipdHistory({
                   </p>
                 )}
                 <div hidden={view !== "all" && actuation !== "decision"}>
+                  {organizationAcceptance && (
+                    <h3 ref={decisionHeading} tabIndex={-1} className="scroll-mt-80 font-semibold">
+                      Decisión de la organización · versión de infancia {selected.version}
+                    </h3>
+                  )}
                   {organizationAcceptance?.(selected, !editable || readOnly)}
                 </div>
                 <button
                   type="button"
+                  className={documentNavigationButtonClass}
                   disabled={!editable || busy}
                   onClick={() => (pending ? setConfirmCopy(true) : copySelected())}
                 >
@@ -796,7 +885,7 @@ export function ChildEipdHistory({
                   </dd>
                 </dl>
                 <details>
-                  <summary>Identidad del registro</summary>
+                  <summary className={documentDisclosureClass}>Identidad del registro</summary>
                   <dl className="break-all">
                     <dt className="rounded-t border border-blue-200 bg-blue-100 px-3 py-2 font-semibold text-blue-950">
                       Resolución
@@ -830,6 +919,9 @@ export function ChildEipdHistory({
                   no modifica el original ni justifica los cambios de otra versión.
                 </p>
                 <div hidden={view !== "all" && actuation !== "revision"}>
+                  <h3 ref={reviewHeading} tabIndex={-1} className="scroll-mt-80 font-semibold">
+                    Revisión del documento · versión de infancia {selected.version}
+                  </h3>
                   <form
                     onSubmit={(e) => {
                       e.preventDefault();
@@ -883,7 +975,21 @@ export function ChildEipdHistory({
                     </fieldset>
                   </form>
                 </div>
-                <h3 className="font-semibold">Revisiones de esta versión documental</h3>
+                <h3 ref={reviewHistoryHeading} tabIndex={-1} className="scroll-mt-80 font-semibold">
+                  Revisiones de esta versión documental
+                </h3>
+                <p>
+                  Antecedentes de la versión de infancia {selected.version} ·{" "}
+                  {String(selected.document.document_reference ?? "Sin referencia")}. Esta lista no
+                  es una auditoría completa del expediente.
+                </p>
+                <button
+                  type="button"
+                  className={documentNavigationButtonClass}
+                  onClick={() => focusDocumentSection(selectedHeading.current)}
+                >
+                  Volver al documento consultado
+                </button>
                 {events.length === 0 && (
                   <p>No hay revisiones registradas para esta versión documental.</p>
                 )}
@@ -896,9 +1002,20 @@ export function ChildEipdHistory({
                           ? "Requiere cambios"
                           : "No continuar"}
                       </p>
-                      <p className="whitespace-pre-wrap">{event.rationale}</p>
-                      <p>{event.review_reference}</p>
+                      <p>
+                        Versión revisada: infancia {selected.version} ·{" "}
+                        {String(selected.document.document_reference ?? "Sin referencia")}
+                      </p>
+                      <p className="whitespace-pre-wrap">
+                        Fundamento de la revisión: {event.rationale}
+                      </p>
+                      <p>
+                        Referencia de la revisión: <span>{event.review_reference}</span>
+                      </p>
                       <p>Fecha registrada (UTC): {event.created_at}</p>
+                      <p className="break-all">
+                        Registrada por (identificador): {event.created_by}
+                      </p>
                       <p>Política registrada: {event.policy_snapshot.policy_reference}</p>
                     </li>
                   ))}

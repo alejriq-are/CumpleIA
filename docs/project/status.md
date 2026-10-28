@@ -1,3 +1,87 @@
+## Publicación autorizada de 10B — 28/10/2026
+
+Usuario solicita commit y autoriza push de feature/navegacion-10b-historial,
+base 10A publicada e3dd155c4a454801efc2c36245afe4cd0b225d43. Incluye accesos internos,
+identidad e historial por versión, origen de copia temporal, estilos de consultas y
+preparación solicitados por el usuario, pruebas y guion asistido con límites documentados.
+174 escenarios Chromium previos y ejecuciones dirigidas posteriores aprobadas según el
+registro detallado; checks estáticos y capturas revisados. La última actualización es
+documental: no se repite batería ni se atribuye CI remota. Excluir next-env.d.ts generado
+y outputs/. Verificar identidad remota tras push. Sin merge, despliegue ni inicio de 11A.
+Lector manual de 7B pendiente. Menciones anteriores a autorización pendiente son antecedentes.
+
+## 10B — guion asistido completado, 28/10/2026
+
+Usuario confirma recorrido final con teclado/ventana estrecha, sumado a revisión,
+versiones, decisiones y estilos aceptados. Copia manual observada con protección de
+preparación existente; origen de copia nueva y escenarios excepcionales mantienen
+cobertura automatizada, sin atribuir prueba manual. Ver límites y evidencia en
+navegacion-servidor.md. 10B listo para commit/push cuando se autorice; sin publicación
+ni inicio de 11A. Lector manual de 7B pendiente. Entradas inferiores son antecedentes.
+
+## 10B — preparar copia destacado, 28/10/2026
+
+Usuario confirma recorrido y muestra confirmación para conservar/reemplazar preparación
+existente. No se atribuye copia nueva ni aviso de origen visto en esa captura.
+Preparar nueva versión a partir de esta recibe estilo azul suave aprobado; cuatro
+pruebas dirigidas y checks estáticos correctos. Pendiente validación visual y recorrido
+estrecho/teclado. Sin commit/push de 10B ni inicio de 11A; lector manual de 7B pendiente.
+Ver navegacion-servidor.md. Entradas inferiores son antecedentes.
+
+## 10B — decisiones e historial confirmados, 28/10/2026
+
+Usuario confirma recorrido de decisión, historial y retorno. Capturas identifican versión
+1 SIMULADA-PILOTO-INFANCIA-RES-001, sin decisiones registradas y facultad otorgada/revocada
+en historial. Eventos de facultades no se presentan como decisiones del documento.
+Pendiente copia temporal/origen y teclado/ventana estrecha. Sin commit/push de 10B
+ni inicio de 11A; lector manual de 7B pendiente. Ver navegacion-servidor.md.
+Entradas inferiores son antecedentes.
+
+## 10B — diseño ampliado aceptado, 28/10/2026
+
+Usuario confirma «OK nuevo diseño» de los accesos de consulta y actualización.
+Recorrido de revisión y alternancia de versiones ya confirmados. Pendiente decisiones,
+origen de preparación y teclado/ventana estrecha. Sin commit/push de 10B ni inicio de 11A.
+Lector manual de 7B pendiente. Ver navegacion-servidor.md; entradas inferiores son antecedentes.
+
+## 10B — versiones confirmadas y estilo de consultas ampliado, 28/10/2026
+
+Usuario confirma alternancia de versiones y retorno. Solicita destacar consulta de
+versiones, actualización de historial, valoración/anexos y equivalentes. Aplicado estilo
+azul suave con borde, foco y estados deshabilitados; desplegables conservan marcador.
+Cuatro pruebas dirigidas más 52 de componentes afectados aprobadas en ejecuciones
+separadas; checks estáticos y capturas 320/1280 correctos. Pendiente validación visual
+ampliada y restantes recorridos de 10B. Sin commit/push ni inicio de 11A.
+Lector manual de 7B pendiente. Ver navegacion-servidor.md; entradas inferiores son antecedentes.
+
+## 10B — diseño de accesos aceptado, 28/10/2026
+
+Usuario confirma «Ok el nuevo diseño». Ajuste visual aceptado; primer recorrido de
+revisión/historial y retorno ya confirmado. Pendiente alternar versiones y restantes
+recorridos asistidos. Sin commit/push de 10B ni inicio de 11A. Lector manual de 7B pendiente.
+Ver evidencia en navegacion-servidor.md. Entradas inferiores son antecedentes.
+
+## 10B — primer recorrido OK y mejora visual aplicada, 28/10/2026
+
+Usuario confirma acceso a revisión/historial y retorno; pide distinguir los botones.
+Se destacan seis accesos internos con fondo azul suave, texto oscuro, borde y foco.
+Cuatro pruebas dirigidas posteriores y checks estáticos aprobados; capturas 320/1280
+inspeccionadas. Pendiente confirmación visual y restantes recorridos asistidos.
+Sin commit/push de 10B ni inicio de 11A. Ver detalle en navegacion-servidor.md.
+Lector manual de 7B pendiente. Entradas inferiores son antecedentes.
+
+## Bloque 10B implementado localmente — 28/10/2026
+
+Rama feature/navegacion-10b-historial, base 10A publicada e3dd155. Accesos internos
+con foco bajo cabecera a revisión, decisiones e historial; número/referencia/fecha
+y conceptos de cada antecedente. Origen de copia temporal explícito; selección,
+formularios y contratos existentes conservados. Sin rutas nuevas ni habilitación EIPD.
+174 escenarios Chromium aprobados; ajuste final de identidad validado con 18 dirigidos
+y un integrado de tres anchos. Tipos/lint/formato y capturas 320/1280 aprobados.
+Guion asistido pendiente en docs/project/navegacion-servidor.md. Sin commit/push
+autorizado de 10B ni inicio de 11A. Lector manual de 7B pendiente. Excluir next-env.d.ts
+generado y outputs/. Entradas inferiores son antecedentes.
+
 ## Publicación autorizada de 10A — 28/10/2026
 
 Usuario solicita commit y autoriza push de feature/navegacion-10a-capacidades,

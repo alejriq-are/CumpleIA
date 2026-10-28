@@ -205,6 +205,7 @@ function AcceptanceForResolution({
   );
   return (
     <OrganizationAcceptancePanel
+      documentIdentity={`Versión documental de infancia ${resolution.version} · ${String(resolution.document.document_reference ?? "Sin referencia")}`}
       load={load}
       guided={guided}
       designate={designate}

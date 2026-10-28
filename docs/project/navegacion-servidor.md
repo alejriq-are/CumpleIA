@@ -1864,3 +1864,189 @@ No se repiten pruebas por las últimas entradas documentales ni se atribuye CI r
 Excluir frontend/next-env.d.ts generado y outputs/. Verificar identidad remota tras push.
 Sin merge, despliegue ni inicio de 10B. Lector manual de 7B pendiente.
 Las menciones anteriores a autorización pendiente son antecedentes.
+
+## Bloque 10B — revisión e historial del documento seleccionado, 28/10/2026
+
+Implementado localmente en feature/navegacion-10b-historial sobre 10A publicada
+e3dd155c4a454801efc2c36245afe4cd0b225d43. Se verificó origin y contrato antes de
+editar. Se opta por accesos internos y encabezados en los componentes existentes;
+no se crean rutas ni se separa el circuito en nuevas pantallas.
+
+### Alcance implementado
+
+- Versión de infancia consultada identificada por número, referencia y fecha UTC.
+  Accesos Ir a Revisión del documento, Ver revisiones registradas e Ir a Decisión de
+  la organización sitúan foco en su encabezado. Cambiar de actuación conserva los
+  formularios montados y su contenido. Volver al documento consultado conserva selección.
+- El desplazamiento interno calcula la altura real de la cabecera conectada para
+  evitar ocultar destinos al cambiar de ancho; no modifica hash, contexto ni rutas.
+- Las revisiones indican versión y referencia revisadas, resultado, fundamento,
+  referencia de revisión, fecha UTC y persona registrada por identificador disponible.
+  El servidor no aporta un nombre para inventarlo. Se conservan validaciones de
+  identidad/asociación y aislamiento por versión existentes.
+- Las decisiones tienen acceso a su historial y retorno al panel. Junto al historial
+  aparece la identidad de la versión seleccionada; fundamento y acta llevan concepto.
+  Revisiones y decisiones siguen siendo operaciones distintas. Los eventos consultados
+  no se presentan como auditoría completa del expediente.
+- Copiar desde una versión identifica número y referencia de origen de la preparación
+  temporal. El original se conserva y se pide nueva lectura de la vista previa antes
+  de registrar. El origen temporal se retira tras registrar; no se añade metadata a API.
+- No se amplía el circuito formal de la EIPD general, no se introducen revisión favorable,
+  permisos, nuevas escrituras, API, migraciones, dependencias ni activación/confirmación.
+
+### Evidencia ejecutada
+
+174 escenarios Chromium aprobados: navegación conectada, historial de infancia y
+aceptación organizacional. Incluye tres pruebas nuevas 10B y ampliación del caso
+integrado de identidad histórica: accesos con foco visible bajo cabecera a 320/390/1280,
+retorno, revisiones separadas al cambiar versión, metadatos y origen de copia.
+Los accesos y consultas no generan POST; las escrituras de fixtures solo se usan en
+pruebas explícitas de registro. Tras añadir referencia junto al historial de decisiones,
+se repitieron los 18 escenarios de aceptación y el integrado de tres anchos: aprobados.
+Tipos, ESLint y formato de siete archivos afectados aprobados. Capturas 320/1280
+inspeccionadas: lectura por desplazamiento y texto sin recorte horizontal.
+Evidencias locales outputs/10b/ excluidas de publicación. No atribuir CI remota,
+pruebas de backend real o certificación de accesibilidad a fixtures.
+
+### Checklist asistido — recorrido acordado completado
+
+Conservar pestaña con pendientes; para cargar código reciente usar otra pestaña del
+espacio conectado, con datos ficticios. No recargar la pestaña que tenga borradores.
+
+- [x] En Bases de licitud → Documentos guardados, contexto de infancia con versiones,
+  consultar una versión y reconocer su número, referencia y fecha.
+- [x] Ir a Revisión del documento y Ver revisiones registradas; reconocer resultado,
+  fundamento, referencia, fecha y persona por identificador si existen eventos. Volver
+  al documento consultado mantiene identidad. No registrar revisión para probar el acceso.
+- [x] Consultar otra versión y volver a la primera. Revisiones y decisiones pertenecen
+  a la versión seleccionada; ausencia de eventos no reutiliza antecedentes de otra.
+- [x] Ir a Decisión de la organización, Ver decisiones registradas de esta versión y
+  volver. Distinguir decisión de revisión; facultad revocada conserva consulta histórica.
+- [x] Preparar copia con preparación existente muestra confirmación de reemplazo y opción
+  Conservar documento en preparación, como en la captura del usuario. El origen de una
+  copia nueva conserva prueba automatizada; no se atribuye su inspección manual. No
+  registrar otra versión para probar textos.
+- [x] Repetir accesos internos en ventana estrecha y con teclado; destino con foco visible,
+  texto sin recorte bajo cabecera y borradores conservados.
+
+Pendiente validación conjunta; sin commit/push autorizado de 10B ni inicio de 11A.
+Lector manual de 7B permanece pendiente. Las entradas anteriores son antecedentes.
+
+## 10B — primer recorrido OK y accesos destacados, 28/10/2026
+
+Usuario confirma «recorrido OK» para ir a revisión, ver revisiones y volver al documento
+seleccionado. Observa que estos accesos se confunden con el contenido y solicita fondo suave.
+Se aplica a los seis accesos internos de revisión, decisión, historiales y retorno un
+estilo común: fondo azul suave, texto azul oscuro seminegrita, borde, hover y foco de
+teclado visibles; altura mínima 44 px y texto adaptable. Las acciones de registro no
+adoptan este estilo. Sin cambios de navegación ni permisos.
+Tras el ajuste visual: cuatro escenarios dirigidos aprobados (tres 10B e integrado de
+identidad/foco a 320/390/1280); tipos, ESLint, formato y diff-check aprobados. Capturas
+320/1280 inspeccionadas, botones legibles y sin recorte horizontal. La batería previa
+de 174 escenarios se conserva como evidencia anterior, no se atribuye otra ejecución.
+Pendiente confirmación visual del usuario y restantes recorridos asistidos de 10B.
+Sin commit/push autorizado de 10B ni inicio de 11A. Lector manual de 7B pendiente.
+
+## 10B — diseño de accesos aceptado, 28/10/2026
+
+Usuario confirma «Ok el nuevo diseño» tras destacar los seis accesos internos con
+fondo azul suave, texto oscuro, borde y foco visible. Queda aceptado ese ajuste visual,
+sumado al primer recorrido de revisión/historial y retorno ya confirmado.
+Siguiente comprobación asistida: alternar dos versiones de infancia y volver a la
+primera, verificando identidad y antecedentes propios. No registrar actuaciones.
+Restantes recorridos de 10B pendientes; sin commit/push autorizado ni inicio de 11A.
+Este registro documental no modifica producto ni requiere repetir las pruebas previas.
+Lector manual de 7B pendiente. Entradas anteriores son antecedentes.
+
+## 10B — alternancia de versiones OK y consultas destacadas, 28/10/2026
+
+Usuario confirma «recorrido OK» al alternar versiones de infancia y volver a la primera.
+Solicita destacar también Consultar versión documental, Actualizar historial de infancia,
+Consultar valoración y anexos y accesos equivalentes porque se confunden con texto.
+Se extiende el estilo azul suave aprobado a esos controles y a actualización de aceptación,
+descarga de anexos, gestionar/consultar historial de facultades, consulta de alcance RAT,
+evaluación de licitud/LIA, contenido documental guardado, identidad del registro y
+Anterior/Siguiente del paso EIPD. Los desplegables conservan marcador nativo y teclado.
+Los botones deshabilitados se atenúan; altura mínima 44 px, texto adaptable y foco visible.
+La lista de versiones separa los botones con espacio. No se modifica la operación de los
+controles: algunos actualizan consultas o abren contenido en esta misma pantalla, no otra página.
+Guardar/registrar y los formularios conservan sus operaciones y restricciones.
+
+Tras este ajuste: cuatro pruebas dirigidas 10B/integración aprobadas y 52 escenarios de
+valoración/anexos, workspace de licitud y editor de infancia aprobados en otra ejecución.
+Tipos, ESLint y formato aprobados. Capturas de consulta de versión a 320/1280 inspeccionadas:
+accesos destacados y textos sin recorte horizontal. La batería de 174 anterior es antecedente,
+no se atribuye como repetida tras este cambio visual. Evidencias locales outputs/10b/.
+Pendiente aprobación visual de este ajuste y restantes recorridos asistidos (decisiones,
+origen de preparación y teclado/ventana estrecha). Sin commit/push de 10B ni inicio de 11A.
+Lector manual de 7B pendiente.
+
+## 10B — diseño ampliado de consultas aceptado, 28/10/2026
+
+Usuario confirma «OK nuevo diseño» después de destacar consultas de versiones,
+actualización de historiales, valoración/anexos y accesos equivalentes. Se acepta ese
+ajuste visual; primer recorrido y alternancia de versiones ya confirmados.
+Siguiente recorrido: acceder a Decisión de la organización de una versión de infancia,
+consultar su historial y volver conservando identidad; no registrar decisión ni facultad.
+Preparación/origen y repetición con teclado/ventana estrecha siguen pendientes del guion.
+Sin commit/push autorizado de 10B ni inicio de 11A; lector manual de 7B pendiente.
+Registro documental, sin repetir pruebas de producto. Entradas anteriores son antecedentes.
+
+## 10B — decisiones e historial confirmados OK, 28/10/2026
+
+Usuario confirma «recorrido OK» del acceso a Decisión de la organización, consulta
+histórica y retorno. Capturas muestran versión documental de infancia 1, referencia
+SIMULADA-PILOTO-INFANCIA-RES-001, nombre de edición PRUEBA-1 y ausencia de decisiones
+organizacionales registradas. Historial de facultades visible: otorgamiento seguido
+de revocación. No se atribuye nueva decisión, facultad o registro a este recorrido.
+Se confirma el recorrido disponible sin decisiones existentes; no se infiere historial
+de decisiones poblado a partir de los eventos de facultades, que son distintos.
+Pendientes: origen de copia temporal y repetición con teclado/ventana estrecha.
+Sin commit/push autorizado de 10B ni inicio de 11A. Lector manual de 7B pendiente.
+Registro documental: no requiere repetir pruebas automáticas ya ejecutadas.
+
+## 10B — confirmación de copia observada y botón destacado, 28/10/2026
+
+Usuario informa «recorrido OK» y solicita destacar Preparar nueva versión a partir de
+esta como los accesos anteriores. Captura muestra la confirmación de reemplazo por
+una preparación ya existente (Ver pendientes 1), con opciones Reemplazar preparación
+y Conservar documento en preparación. Esta imagen no acredita ejecución de reemplazo,
+copia nueva ni visualización del aviso de origen; no se atribuyen esos efectos.
+Se aplica únicamente al botón de preparar copia la clase común azul suave, borde,
+texto oscuro y foco. La lógica y protección de reemplazo permanecen sin cambios.
+Cuatro pruebas dirigidas de copia, solo lectura, confirmación/conservación y origen
+aprobadas; tipos, ESLint y formato aprobados. Sin nueva batería completa por este ajuste.
+Pendiente confirmación visual; la protección de una preparación existente es el caso
+asistido disponible, origen nuevo conserva evidencia automatizada. Resta teclado y
+ventana estrecha. Sin commit/push de 10B ni inicio de 11A; lector manual de 7B pendiente.
+
+## 10B — recorrido asistido acordado completado, 28/10/2026
+
+Usuario confirma «recorrido OK» tras el recorrido final en ventana estrecha con Tab/Enter:
+Ver revisiones registradas y Volver al documento consultado, destino visible bajo
+cabecera, texto legible y selección/preparación pendiente conservadas según el guion.
+Se suma a revisión e historial, alternancia de versiones, decisiones y retorno ya
+confirmados, y a la aceptación de los estilos visuales solicitados.
+En copia temporal, la captura disponible muestra protección de una preparación
+existente mediante confirmación de reemplazo; origen de copia nueva conserva evidencia
+automatizada, sin afirmar visualización manual de ese aviso. Decisiones sin registros
+es el caso manual disponible; eventos poblados y escenarios excepcionales mantienen
+cobertura automatizada. No se registraron actuaciones nuevas para verificar navegación.
+Guion asistido acordado completado con estos límites; no certifica accesibilidad integral.
+Lector manual de 7B pendiente. 10B listo para commit/push al autorizarse; sin publicación
+ni inicio de 11A. La última actualización es documental, sin repetir pruebas de producto.
+Evidencia previa: 174 Chromium, posteriores ajustes dirigidos (18 y un integrado,
+cuatro dirigidos, 52 de componentes afectados y cuatro de copia en ejecuciones separadas),
+checks estáticos y capturas documentados. No se suman ejecuciones repetidas como casos únicos.
+
+## Publicación autorizada de 10B — 28/10/2026
+
+Usuario solicita commit y autoriza push de feature/navegacion-10b-historial,
+base 10A publicada e3dd155c4a454801efc2c36245afe4cd0b225d43. Incluye accesos internos,
+identidad e historial por versión, origen de copia temporal, estilos de consultas y
+preparación solicitados por el usuario, pruebas y guion asistido con límites documentados.
+174 escenarios Chromium previos y ejecuciones dirigidas posteriores aprobadas según el
+registro detallado; checks estáticos y capturas revisados. La última actualización es
+documental: no se repite batería ni se atribuye CI remota. Excluir next-env.d.ts generado
+y outputs/. Verificar identidad remota tras push. Sin merge, despliegue ni inicio de 11A.
+Lector manual de 7B pendiente. Menciones anteriores a autorización pendiente son antecedentes.
