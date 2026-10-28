@@ -1,6 +1,7 @@
 "use client";
 import type { WorkState } from "@/components/navigation/work-unit-state";
 import { eipdStepLabels } from "@/lib/licitud/eipd-steps";
+import { DocumentCapabilities } from "./DocumentCapabilities";
 import { documentLabels } from "@/lib/licitud/document-labels";
 import Link from "next/link";
 import { useCallback, useEffect, useId, useState } from "react";
@@ -461,6 +462,33 @@ export function AssessmentFlow({
               Consulta el contenido guardado en servidor. Es un borrador documental, distinto de una
               resolución registrada. Los cambios pendientes no se incluyen.
             </p>
+            <DocumentCapabilities
+              object={`EIPD general guardada · evaluación versión ${row.version}`}
+              actions={[
+                {
+                  action: "Consultar documento",
+                  state: "available",
+                  reason:
+                    "Muestra lo guardado; las ediciones pendientes se consultan en el editor y no se incluyen aquí.",
+                },
+                {
+                  action: "Editar en esta consulta",
+                  state: "blocked",
+                  reason:
+                    "Esta vista es de lectura. El borrador se modifica en Completar EIPD, cuando su determinación, rol y estado lo permiten.",
+                },
+                {
+                  action: "Registrar revisión o decisión documental",
+                  state: "blocked",
+                  reason: "El circuito formal de infancia no se aplica al borrador EIPD general.",
+                },
+                {
+                  action: "Confirmar o activar EIPD",
+                  state: "blocked",
+                  reason: "Estas acciones permanecen bloqueadas en el piloto.",
+                },
+              ]}
+            />
             <dl className="space-y-3">
               <div>
                 <dt className="bg-blue-100 p-2 font-semibold text-blue-950">Referencia EIPD</dt>

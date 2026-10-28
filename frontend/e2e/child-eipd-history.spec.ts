@@ -931,3 +931,64 @@ test("6B preparar y nombrar edición no registra una versión ni emite revisión
   await expect(edition).toHaveValue("Edición de ensayo libre");
   expect(await posts(page)).toHaveLength(0);
 });
+
+test("10A versión histórica identifica referencia y limita revisión sin editar el original", async ({
+  page,
+}) => {
+  await mount(page);
+  await select(page);
+  const panel = page.getByRole("complementary", {
+    name: "Acciones y requisitos: Versión documental de infancia 1 · PRUEBA: resolucion 1",
+    exact: true,
+  });
+  await expect(panel).toContainText("Editar esta versión: No disponible.");
+  await expect(panel).toContainText("Falta la declaración de datos ficticios");
+  await enable(page);
+  await fillReview(page);
+  await expect(panel).toContainText("Registrar revisión documental: Disponible.");
+  await expect(panel).toContainText("Confirmar o activar EIPD: No disponible.");
+  const choices = await page
+    .getByLabel("Resultado de la revisión documental")
+    .locator("option")
+    .evaluateAll((els) => els.map((el) => (el as HTMLOptionElement).value));
+  expect(choices).toEqual(["requiere_cambios", "no_continuar"]);
+  expect(await posts(page)).toHaveLength(0);
+});
+test("10A preparación temporal distingue completar y registrar con vista previa", async ({
+  page,
+}) => {
+  await mount(page, { view: "prepare" });
+  const panel = page.getByRole("complementary", {
+    name: "Acciones y requisitos: Preparación temporal de nueva versión de infancia",
+    exact: true,
+  });
+  await expect(panel).toContainText("Falta la declaración de datos ficticios");
+  await enable(page);
+  await expect(panel).toContainText("Completa la referencia del documento");
+  await page
+    .getByLabel("Referencia del documento de infancia *", { exact: true })
+    .fill("PRUEBA: temporal 10A");
+  await expect(panel).toContainText("Abre la vista previa y confirma la lectura");
+  await page
+    .getByRole("button", { name: "Ver vista previa de la versión por registrar", exact: true })
+    .click();
+  await page
+    .getByLabel("He revisado el contenido como responsable ficticio del ensayo", { exact: true })
+    .check();
+  await expect(panel).toContainText("Registrar nueva versión: Disponible.");
+  expect(await posts(page)).toHaveLength(0);
+});
+test("10A error de carga conserva capacidades sin comprobar", async ({ page }) => {
+  await page.evaluate(() => {
+    (window as any).demo.mode = "load-error";
+    (window as any).mount();
+  });
+  await expect(page.getByRole("alert")).toBeVisible();
+  const panel = page.getByRole("complementary", {
+    name: "Acciones y requisitos: Historial de infancia sin consultar",
+    exact: true,
+  });
+  await expect(panel).toContainText("Preparar o registrar actuaciones: Por comprobar.");
+  await expect(panel).toContainText("La consulta falló");
+  expect(await posts(page)).toHaveLength(0);
+});

@@ -13,6 +13,7 @@ import {
   type EipdDiagnostic,
   type EipdDraftRow,
 } from "@/lib/api/eipd-draft";
+import { DocumentCapabilities } from "./DocumentCapabilities";
 import { SaveFeedback } from "./SaveFeedback";
 import { EipdDocumentFields, EipdDocumentView, EipdSteps } from "./EipdDocumentFields";
 import { sessionToken } from "./LicitudWorkspace";
@@ -185,15 +186,19 @@ export function EipdDraftEditor({
     }
   }
   const disabled = readOnly || row?.status !== "borrador" || busy || uncertain;
-  const editingHelp = readOnly
-    ? "Tu rol permite consultar este documento, pero no editarlo ni guardarlo."
-    : row?.status !== "borrador"
-      ? "Este documento solo puede editarse mientras la evaluación está en borrador."
-      : busy
-        ? "Guardando el documento. Espera antes de continuar editando."
-        : uncertain
-          ? "El resultado del guardado es incierto. Conservamos tus campos; consulta el estado antes de volver a guardar."
-          : "";
+  const editingHelp = !row
+    ? error
+      ? "La consulta no está disponible; no se puede comprobar la edición."
+      : "Espera la consulta del documento antes de editar."
+    : readOnly
+      ? "Tu rol permite consultar este documento, pero no editarlo ni guardarlo."
+      : row?.status !== "borrador"
+        ? "Este documento solo puede editarse mientras la evaluación está en borrador."
+        : busy
+          ? "Guardando el documento. Espera antes de continuar editando."
+          : uncertain
+            ? "El resultado del guardado es incierto. Conservamos tus campos; consulta el estado antes de volver a guardar."
+            : "";
   return (
     <section
       aria-label="Documento EIPD en borrador"
@@ -216,7 +221,9 @@ export function EipdDraftEditor({
         <p role="note">
           {row
             ? "Documento EIPD cargado del servidor. Los pendientes jurídicos no se resuelven al guardar."
-            : "Cargando documento EIPD…"}
+            : error
+              ? "Consulta del documento EIPD no disponible."
+              : "Cargando documento EIPD…"}
         </p>
       )}
       {!externalNavigation && (
@@ -341,6 +348,35 @@ export function EipdDraftEditor({
             </aside>
           )}
         </form>
+      )}
+      {!ratingStep && (
+        <DocumentCapabilities
+          object={
+            row
+              ? `Borrador EIPD general · evaluación versión ${row.version}`
+              : "Documento EIPD general sin consultar"
+          }
+          actions={[
+            {
+              action: "Editar y guardar borrador",
+              state: !row ? "pending" : disabled ? "blocked" : "available",
+              reason:
+                editingHelp ||
+                "Actualiza este documento; no crea una versión documental registrada.",
+            },
+            {
+              action: "Registrar revisión o decisión documental",
+              state: "blocked",
+              reason:
+                "Este circuito formal no está integrado para la EIPD general. Las actuaciones de infancia corresponden a una versión de infancia seleccionada.",
+            },
+            {
+              action: "Confirmar o activar EIPD",
+              state: "blocked",
+              reason: "El piloto mantiene ambas acciones bloqueadas, aunque se guarde el borrador.",
+            },
+          ]}
+        />
       )}
       <section
         hidden={ratingStep}

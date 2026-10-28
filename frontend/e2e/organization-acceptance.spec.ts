@@ -13,6 +13,8 @@ test.beforeAll(async () => {
  const demo=window.demo={mode:"ok",calls:[],authorities:[],events:[],may_designate:true,release:null};
  window.fetch=async(url,options)=>{
  demo.calls.push({url,options});
+ if(options.method!=="POST" && demo.mode==="load-wait")await new Promise(resolve=>demo.release=resolve);
+ if(options.method!=="POST" && demo.mode==="load-error")return new Response(JSON.stringify({detail:"PRUEBA"}),{status:503});
  if(options.method==="POST"){
   if(demo.mode==="wait")await new Promise(resolve=>demo.release=resolve);
   if(demo.mode==="unknown")throw new Error("PRUEBA: respuesta incierta");
@@ -230,4 +232,87 @@ test("vista guiada separa facultades y exige seleccionar una decision", async ({
     page.getByText("Decisión documental de prueba registrada.", { exact: false })
   ).toBeVisible();
   expect(await posts(page)).toHaveLength(2);
+});
+
+const capabilities = (page: Page) =>
+  page.getByRole("complementary", {
+    name: "Acciones y requisitos: Decisión sobre la versión de infancia consultada",
+    exact: true,
+  });
+test("10A facultad ausente, otorgada y revocada explican la decisión sin perder historia", async ({
+  page,
+}) => {
+  await mount(page);
+  await expect(capabilities(page)).toContainText("No hay una facultad otorgada");
+  await enable(page);
+  await grant(page);
+  await fillDecision(page);
+  await expect(capabilities(page)).toContainText(
+    "Registrar decisión de la organización: Disponible."
+  );
+  await page
+    .getByRole("button", { name: "Registrar decisión documental ficticia", exact: true })
+    .click();
+  await expect(page.getByRole("status")).toContainText("Decisión documental de prueba registrada");
+  await expect(capabilities(page)).toContainText("no habilita confirmación ni activación");
+  await page.getByLabel("Acción sobre la facultad", { exact: true }).selectOption("revocar");
+  await grant(page);
+  await expect(capabilities(page)).toContainText("La facultad de esta persona está revocada");
+  await expect(
+    page.getByText("Decisión de la organización: Acepta el documento", { exact: true })
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Registrar decisión documental ficticia", exact: true })
+  ).toBeDisabled();
+  expect(await posts(page)).toHaveLength(3);
+});
+for (const state of ["obsoleto", "no_disponible"]) {
+  test(`10A material ${state} conserva la decisión histórica sin atribuir vigencia`, async ({
+    page,
+  }) => {
+    await mount(page);
+    await enable(page);
+    await grant(page);
+    await fillDecision(page);
+    await page
+      .getByRole("button", { name: "Registrar decisión documental ficticia", exact: true })
+      .click();
+    await expect(page.getByRole("status")).toContainText(
+      "Decisión documental de prueba registrada"
+    );
+    await page.evaluate((state) => {
+      (window as any).demo.events[0].material_status = state;
+    }, state);
+    await page
+      .getByRole("button", { name: "Actualizar aceptación de organización", exact: true })
+      .click();
+    await expect(
+      page.getByText("Esta decisión histórica se conserva", { exact: false })
+    ).toContainText("ni declara inválidas las demás versiones");
+    expect(await posts(page)).toHaveLength(2);
+  });
+}
+test("10A consulta fallida no afirma una facultad disponible", async ({ page }) => {
+  await page.evaluate(() => {
+    (window as any).demo.mode = "load-error";
+    (window as any).mount();
+  });
+  await expect(page.getByRole("alert")).toBeVisible();
+  await expect(capabilities(page)).toContainText(
+    "Registrar decisión de la organización: Por comprobar."
+  );
+  await expect(capabilities(page)).toContainText("No se pudo consultar la facultad");
+  await expect(
+    page.getByRole("button", { name: "Registrar decisión documental ficticia", exact: true })
+  ).toHaveCount(0);
+  expect(await posts(page)).toHaveLength(0);
+});
+test("10A consulta en curso no deduce permiso de administración", async ({ page }) => {
+  await page.evaluate(() => {
+    (window as any).demo.mode = "load-wait";
+    (window as any).mount();
+  });
+  await expect(capabilities(page)).toContainText("Registrar facultad: Por comprobar.");
+  await expect(capabilities(page)).not.toContainText("Registrar facultad: Disponible.");
+  expect(await posts(page)).toHaveLength(0);
 });

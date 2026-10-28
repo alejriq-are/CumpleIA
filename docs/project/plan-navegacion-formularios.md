@@ -236,6 +236,8 @@ registrados en la evidencia enlazada. No cierra la prueba manual de lector de 7B
 
 ### 10A. Capacidades por objeto seleccionado
 
+**Estado 28/10/2026:** implementado localmente en `feature/navegacion-10a-capacidades`, base publicada `1429f1d`. Guion asistido acordado completado, incluida consulta de EIPD general guardada en otra evaluación y retorno al borrador con nota conservada. Los casos excepcionales mantienen evidencia automatizada; lector manual de 7B pendiente. Las casillas siguientes no atribuyen ejecución manual de todos los escenarios. Ver [alcance y evidencia](navegacion-servidor.md#bloque-10a--acciones-y-requisitos-por-documento-28102026). Sin publicación de 10A ni inicio de 10B.
+
 **Resuelve:** P6 y G04/G05/G10–G12/G22/G23.
 
 **Cambios:** panel breve de acciones y razones para el documento seleccionado, tomando restricciones efectivas del contrato. Diferenciar EIPD general editable, versión de infancia conservada, preparación temporal, revisión y decisión. Para cada acción visible mostrar disponibilidad por tipo, estado, material, rol y facultad cuando sean aplicables. La facultad no se infiere del rol de administrador. No incorporar revisión favorable o aceptación general inexistentes.

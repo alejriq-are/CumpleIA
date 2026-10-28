@@ -3110,3 +3110,61 @@ test("9B preparación temporal bloqueada se conserva y se recupera al habilitar 
   expect(calls.filter((v) => v.method !== "GET")).toHaveLength(1);
   expect(errors).toEqual([]);
 });
+
+test("10A EIPD general explica guardado sin ofrecer actuaciones formales de infancia", async ({
+  page,
+}) => {
+  await legal(page);
+  await enable(page);
+  await section(page, "Tratamiento y alcance de la EIPD");
+  const panel = main(page).getByRole("complementary", {
+    name: "Acciones y requisitos: Borrador EIPD general · evaluación versión 1",
+    exact: true,
+  });
+  await expect(panel).toContainText("Editar y guardar borrador: Disponible.");
+  await expect(panel).toContainText("Registrar revisión o decisión documental: No disponible.");
+  await expect(panel).toContainText("Confirmar o activar EIPD: No disponible.");
+  await expect(
+    main(page).getByRole("button", { name: "Registrar revisión ficticia", exact: true })
+  ).toHaveCount(0);
+  const before = calls.filter((v) => v.method !== "GET").length;
+  await main(page)
+    .getByLabel("Notas del borrador EIPD (opcional)", { exact: true })
+    .fill("[FICTICIA] Capacidad 10A");
+  await section(page, "Documentos guardados");
+  await section(page, "Tratamiento y alcance de la EIPD");
+  await expect(
+    main(page).getByLabel("Notas del borrador EIPD (opcional)", { exact: true })
+  ).toHaveValue("[FICTICIA] Capacidad 10A");
+  expect(calls.filter((v) => v.method !== "GET")).toHaveLength(before);
+  expect(errors).toEqual([]);
+});
+
+for (const width of [320, 1280]) {
+  test(`10A acciones de EIPD legibles sin desbordamiento a ${width}px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 844 });
+    await legal(page);
+    await enable(page);
+    await section(page, "Tratamiento y alcance de la EIPD");
+    const panel = main(page).getByRole("complementary", {
+      name: "Acciones y requisitos: Borrador EIPD general · evaluación versión 1",
+      exact: true,
+    });
+    await panel.scrollIntoViewIfNeeded();
+    await expect(panel).toBeVisible();
+    const box = await panel.boundingBox();
+    expect(box!.x).toBeGreaterThanOrEqual(0);
+    expect(box!.x + box!.width).toBeLessThanOrEqual(width);
+    expect(await panel.evaluate((el) => el.scrollWidth <= el.clientWidth + 1)).toBe(true);
+    await capture(page, `10a-capacidades-${width}.png`);
+    const stickyHeight = await page
+      .locator("header.prototype-top")
+      .evaluate((el) => el.getBoundingClientRect().height);
+    await panel.evaluate(
+      (el, height) => window.scrollBy(0, el.getBoundingClientRect().top - height - 8),
+      stickyHeight
+    );
+    await capture(page, `10a-capacidades-inicio-${width}.png`);
+    expect(errors).toEqual([]);
+  });
+}

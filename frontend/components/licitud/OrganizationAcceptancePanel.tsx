@@ -1,4 +1,5 @@
 "use client";
+import { DocumentCapabilities } from "./DocumentCapabilities";
 import { documentLabels } from "@/lib/licitud/document-labels";
 import { useState, useEffect, useId, useRef } from "react";
 import { ApiError } from "@/lib/api/client";
@@ -60,6 +61,8 @@ export function OrganizationAcceptancePanel({
     alive.current = true;
     const seq = ++epoch.current;
     setBusy(true);
+    setSnapshot(null);
+    setError("");
     load()
       .then((v) => {
         if (alive.current && seq === epoch.current) {
@@ -167,6 +170,25 @@ export function OrganizationAcceptancePanel({
     }
   }
   const disabled = readOnly || busy || uncertain || !fictitious;
+  const decisionReason = busy
+    ? "La consulta o el registro está en curso; espera el resultado."
+    : !snapshot
+      ? error
+        ? "No se pudo consultar la facultad; actualiza la aceptación antes de decidir."
+        : "Consulta la facultad y los antecedentes de esta versión."
+      : readOnly
+        ? "El rol o el estado de la evaluación permite solo consulta."
+        : uncertain
+          ? "Resultado incierto: no repitas el registro; consulta el historial."
+          : own?.action === "revocar"
+            ? "La facultad de esta persona está revocada. Las decisiones históricas siguen consultables."
+            : !own
+              ? "No hay una facultad otorgada a esta persona. Ser owner o administrador no concede facultad para decidir."
+              : !fictitious
+                ? "Falta declarar datos ficticios para la aceptación."
+                : !choice || !rationale.trim() || !acta.trim()
+                  ? "Selecciona una decisión y completa su fundamento y la referencia del acta ficticia."
+                  : "Registra la decisión sobre esta versión exacta. El servidor valida facultad y material al registrar.";
   return (
     <section
       aria-label="Aceptación documental por organización"
@@ -185,6 +207,62 @@ export function OrganizationAcceptancePanel({
       <button type="button" disabled={busy} onClick={() => void refresh()}>
         Actualizar aceptación de organización
       </button>
+      <DocumentCapabilities
+        object="Decisión sobre la versión de infancia consultada"
+        actions={[
+          {
+            action: "Registrar decisión de la organización",
+            state: !snapshot
+              ? "pending"
+              : !disabled &&
+                  own?.action === "otorgar" &&
+                  !!choice &&
+                  !!rationale.trim() &&
+                  !!acta.trim()
+                ? "available"
+                : "blocked",
+            reason: decisionReason,
+          },
+          {
+            action: "Registrar facultad",
+            state: !snapshot
+              ? "pending"
+              : readOnly ||
+                  busy ||
+                  uncertain ||
+                  !fictitious ||
+                  !snapshot.state.may_designate ||
+                  !target.trim() ||
+                  !faculty.trim() ||
+                  !evidence.trim() ||
+                  (role === "encargado" && !party.trim())
+                ? "blocked"
+                : "available",
+            reason: !snapshot
+              ? "La capacidad de designar todavía no está comprobada."
+              : readOnly
+                ? "El rol o el estado de la evaluación permite solo consulta."
+                : busy || uncertain
+                  ? "Espera un resultado confirmado antes de registrar."
+                  : !snapshot.state.may_designate
+                    ? "El servidor no informa permiso de administración de facultades para esta sesión."
+                    : !fictitious
+                      ? "Falta declarar datos ficticios."
+                      : !target.trim() ||
+                          !faculty.trim() ||
+                          !evidence.trim() ||
+                          (role === "encargado" && !party.trim())
+                        ? "Completa la persona, las referencias de facultad y evidencia y, si actúa como encargado, el responsable mandante."
+                        : "Permite registrar una designación explícita con sus referencias; no equivale a decidir ni autorizar el tratamiento.",
+          },
+          {
+            action: "Confirmar o activar EIPD",
+            state: "blocked",
+            reason:
+              "Acepta el documento es una decisión documental de prueba; no habilita confirmación ni activación.",
+          },
+        ]}
+      />
       {snapshot && (
         <>
           <p className="break-all">Persona de esta sesión de prueba: {snapshot.state.actor_id}</p>
@@ -364,6 +442,14 @@ export function OrganizationAcceptancePanel({
                 <p className="break-all">
                   Actor: {v.actor_id}. Fecha (UTC): {v.created_at}.
                 </p>
+                {v.material_status !== "coincide" && (
+                  <p>
+                    La asociación con el material actual{" "}
+                    {v.material_status === "obsoleto" ? "cambió" : "no está disponible"}. Esta
+                    decisión histórica se conserva; no acredita una decisión sobre el material
+                    actual ni declara inválidas las demás versiones.
+                  </p>
+                )}
               </li>
             ))}
           </ul>

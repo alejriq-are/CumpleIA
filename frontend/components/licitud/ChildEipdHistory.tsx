@@ -1,5 +1,6 @@
 "use client";
 import { useWorkState, type WorkReporter } from "@/components/navigation/work-unit-state";
+import { DocumentCapabilities } from "./DocumentCapabilities";
 import { documentLabels } from "@/lib/licitud/document-labels";
 import { type ReactNode } from "react";
 import { EipdDocumentFields, EipdDocumentView } from "./EipdDocumentFields";
@@ -193,6 +194,19 @@ export function ChildEipdHistory({
     }
   }
   const editable = Boolean(snapshot && snapshot.status === "borrador" && !readOnly && !uncertain);
+  const registrationReason = busy
+    ? "Hay una consulta o un registro en curso; espera su resultado."
+    : !snapshot
+      ? error
+        ? "La consulta falló; actualiza el historial antes de continuar."
+        : "Consulta primero el historial y la política de pruebas."
+      : readOnly
+        ? "El rol o el estado de la evaluación permite solo consulta."
+        : snapshot.status !== "borrador"
+          ? "El expediente debe estar en borrador para registrar actuaciones."
+          : uncertain
+            ? "El resultado anterior es incierto; no repitas el registro. Consulta lo guardado."
+            : "";
   async function write(kind: "resolution" | "review") {
     if (running.current || busy || !editable || !fictitious) return;
     if (
@@ -321,6 +335,23 @@ export function ChildEipdHistory({
         Actualizar historial de infancia
       </button>
       {busy && <p>Cargando operación de historial…</p>}
+      {!snapshot && (
+        <DocumentCapabilities
+          object="Historial de infancia sin consultar"
+          actions={[
+            {
+              action: "Preparar o registrar actuaciones",
+              state: "pending",
+              reason: registrationReason,
+            },
+            {
+              action: "Confirmar o activar EIPD",
+              state: "blocked",
+              reason: "El piloto no habilita estas acciones.",
+            },
+          ]}
+        />
+      )}
       {snapshot && (
         <>
           <p>
@@ -338,6 +369,53 @@ export function ChildEipdHistory({
             Declaro que este registro usa datos ficticios
           </label>
           <div hidden={view === "review"}>
+            <DocumentCapabilities
+              object="Preparación temporal de nueva versión de infancia"
+              actions={[
+                {
+                  action: "Completar preparación y ver vista previa",
+                  state:
+                    !editable || busy || !fictitious || preparationBlocked
+                      ? "blocked"
+                      : "available",
+                  reason:
+                    registrationReason ||
+                    (preparationBlocked
+                      ? "Guarda primero base, fundamento e infancia; la nueva versión usa ese material guardado."
+                      : !fictitious
+                        ? "Declara el uso de datos ficticios para completar la preparación."
+                        : "La preparación vive en esta pestaña; la vista previa todavía no registra una versión."),
+                },
+                {
+                  action: "Registrar nueva versión",
+                  state:
+                    !editable ||
+                    busy ||
+                    !fictitious ||
+                    preparationBlocked ||
+                    !draft.reference.trim() ||
+                    (view !== "all" && (!preparing || reviewed !== fingerprint))
+                      ? "blocked"
+                      : "available",
+                  reason:
+                    registrationReason ||
+                    (preparationBlocked
+                      ? "Hay cambios del material asociado pendientes de guardar."
+                      : !fictitious
+                        ? "Falta la declaración de datos ficticios."
+                        : !draft.reference.trim()
+                          ? "Completa la referencia del documento."
+                          : view !== "all" && (!preparing || reviewed !== fingerprint)
+                            ? "Abre la vista previa y confirma la lectura del contenido antes de registrar."
+                            : "Crea un registro nuevo y conserva los anteriores; el servidor valida la asociación del material al registrar."),
+                },
+                {
+                  action: "Confirmar o activar EIPD",
+                  state: "blocked",
+                  reason: "Registrar una versión no habilita estas acciones.",
+                },
+              ]}
+            />
             {preparationBlocked && (
               <p role="alert" className="rounded border border-amber-400 bg-amber-50 p-3">
                 Guarda primero los cambios de base, fundamento e infancia. La versión documental se
@@ -590,6 +668,56 @@ export function ChildEipdHistory({
                 <h3 className="font-semibold">
                   Versión documental de infancia {selected.version} consultada
                 </h3>
+                <DocumentCapabilities
+                  object={`Versión documental de infancia ${selected.version} · ${String(selected.document.document_reference ?? "Sin referencia")}`}
+                  actions={[
+                    {
+                      action: "Editar esta versión",
+                      state: "blocked",
+                      reason:
+                        "Es un registro histórico conservado. Preparar una copia no modifica este original.",
+                    },
+                    {
+                      action: "Preparar nueva versión a partir de esta",
+                      state: !editable || busy ? "blocked" : "available",
+                      reason:
+                        registrationReason ||
+                        "Copia su contenido a una preparación temporal; solo el registro explícito crea otra versión.",
+                    },
+                    {
+                      action: "Registrar revisión documental",
+                      state:
+                        !editable ||
+                        busy ||
+                        !fictitious ||
+                        !decision ||
+                        !rationale.trim() ||
+                        !reference.trim()
+                          ? "blocked"
+                          : "available",
+                      reason:
+                        registrationReason ||
+                        (!fictitious
+                          ? "Falta la declaración de datos ficticios."
+                          : !decision || !rationale.trim() || !reference.trim()
+                            ? "Selecciona Requiere cambios o No continuar y completa fundamento y referencia en Revisión del documento."
+                            : "Registra una observación sobre esta versión exacta; no modifica el documento ni decide por la organización."),
+                    },
+                    {
+                      action: "Decisión de la organización",
+                      state: organizationAcceptance ? "pending" : "blocked",
+                      reason: organizationAcceptance
+                        ? "Selecciona Decisión de la organización para consultar la facultad de la persona de esta sesión. Ser administrador no concede esa facultad."
+                        : "Este recorrido no tiene integrada una decisión organizacional.",
+                    },
+                    {
+                      action: "Confirmar o activar EIPD",
+                      state: "blocked",
+                      reason:
+                        "Ni una revisión ni Acepta el documento habilitan estas acciones. La consulta histórica no verifica la vigencia del material actual.",
+                    },
+                  ]}
+                />
                 <EipdDocumentView value={selected.document} />
                 {view !== "all" && (
                   <label className="block font-medium">

@@ -1,3 +1,59 @@
+## Publicación autorizada de 10A — 28/10/2026
+
+Usuario solicita commit y autoriza push de feature/navegacion-10a-capacidades,
+base 1429f1d. Incluye resumen de acciones y requisitos por documento, sus pruebas
+y el guion asistido completado documentado. Evidencia previa: 223 escenarios Chromium,
+17 dirigidos tras precisar facultad, dos de capturas y checks estáticos aprobados.
+No se repiten pruebas por las últimas entradas documentales ni se atribuye CI remota.
+Excluir frontend/next-env.d.ts generado y outputs/. Verificar identidad remota tras push.
+Sin merge, despliegue ni inicio de 10B. Lector manual de 7B pendiente.
+Las menciones anteriores a autorización pendiente son antecedentes.
+
+## 10A — guion asistido completado, 28/10/2026
+
+Usuario confirma «recorrido OK» al repetir con nota ficticia nueva el retorno desde
+Documentos guardados al borrador EIPD tras haber recargado antes. No se recuperaron
+los pendientes anteriores: se comprobó conservación durante la nueva navegación.
+Consulta de EIPD general guardada también comprobada en otra evaluación.
+Guion asistido acordado completado; escenarios excepcionales mantienen evidencia
+automatizada y lector manual de 7B pendiente. Listo para commit/push al autorizarse;
+sin publicación de 10A ni inicio de 10B. Entradas inferiores son antecedentes.
+
+## 10A — consulta de EIPD general existente comprobada, 28/10/2026
+
+Captura de otra evaluación muestra EIPD PRUEBA-EIPD-LECTURA-20261010, edición PRUEBA-2,
+y las capacidades de consulta esperadas. Se cubre el caso antes pendiente por ausencia
+de documento. Ver evidencia y límites en navegacion-servidor.md. Falta confirmar el
+retorno a la nota pendiente del borrador EIPD original; preparación de infancia ya comprobada.
+Sin commit/push de 10A ni inicio de 10B. Lector manual de 7B pendiente.
+Entradas inferiores son antecedentes.
+
+## 10A — recorridos asistidos disponibles comprobados, 28/10/2026
+
+Capturas muestran capacidades de EIPD general, versión histórica de infancia,
+facultad revocada, requisitos de preparación y conservación del nombre de edición
+al volver en ventana estrecha. Ver registro detallado en navegacion-servidor.md.
+Pendiente consulta asistida de EIPD general guardada: no existe en el contexto probado;
+no crear un documento solo para comprobar el rótulo. Cobertura automatizada previa
+conservada. Sin declaración de aceptación integral, commit/push de 10A ni inicio de 10B.
+Lector manual de 7B pendiente. Entradas inferiores son antecedentes.
+
+## Bloque 10A — acciones y requisitos por documento, 28/10/2026
+
+Implementado localmente en `feature/navegacion-10a-capacidades`, base 9B publicada
+`1429f1d4bc311a707cf48a5b3a6601b4b2842748`. Resume capacidades del borrador EIPD
+general, consulta guardada, versión histórica de infancia, preparación temporal y
+decisión organizacional. Los requisitos reflejan los controles y contratos existentes;
+facultad explícita separada del rol administrador. Datos sin consultar/error no se
+presentan como permisos comprobados. Material histórico cambiado conserva consulta
+y no implica invalidez general. Sin ampliar revisión favorable, confirmación o activación.
+223 escenarios Chromium con fixtures aprobados; ajuste final de facultad validado
+con 17 escenarios dirigidos, tipos/lint/formato y capturas 320/1280 inspeccionadas.
+Pendiente validación asistida de 10A; sin commit/push autorizado ni inicio de 10B.
+Lector manual de 7B pendiente. Entradas inferiores son antecedentes.
+Ver el checklist y evidencia de 10A en `docs/project/navegacion-servidor.md`.
+Excluir `frontend/next-env.d.ts` generado y `outputs/`.
+
 ## Publicación autorizada de 9B — 28/10/2026
 
 Usuario solicita commit y autoriza push de `feature/navegacion-9b-destinos`, base

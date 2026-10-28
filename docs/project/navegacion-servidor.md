@@ -1710,3 +1710,157 @@ CI remota ni integración backend real. Sin merge/despliegue, lote 10 no iniciad
 manual de 7B pendiente. Excluir `frontend/next-env.d.ts` generado y `outputs/`.
 Las menciones anteriores de autorización pendiente son antecedentes. Verificar identidad
 remota después del push.
+
+## Bloque 10A — acciones y requisitos por documento, 28/10/2026
+
+Rama `feature/navegacion-10a-capacidades`, base 9B publicada
+`1429f1d4bc311a707cf48a5b3a6601b4b2842748`. Se consultó origin y las reglas
+vigentes antes de iniciar. El repositorio confirma que EIPD general y versiones de
+infancia tienen capacidades distintas; el resumen se deriva de esos contratos.
+
+### Implementación y límites
+
+Resumen «Acciones y requisitos» con estados «Disponible», «No disponible» y «Por comprobar»:
+
+- Borrador EIPD general: editar/guardar según carga, rol, estado, operación en curso y
+  resultado incierto. Guardar actualiza el documento y no crea una versión registrada.
+  Revisión o decisión formal del circuito de infancia no disponible para este objeto.
+- Consulta de EIPD guardada: lectura del contenido del servidor; no incluye ediciones
+  pendientes ni admite edición en esa consulta. Explica que editar requiere el flujo
+  Completar EIPD con su determinación y controles efectivos.
+- Versión histórica de infancia: identidad por número y referencia; original no editable.
+  Preparar desde ella produce una copia temporal. Revisión documenta únicamente
+  Requiere cambios o No continuar sobre esa versión; no se introduce revisión favorable.
+- Preparación temporal: distingue completar/vista previa de registrar. Explica declaración,
+  referencia, cambios del material por guardar y lectura de vista previa cuando corresponde.
+  Registro explícito crea una versión nueva; copiar o previsualizar no registra.
+- Decisión organizacional: capacidad y razones consultadas para la sesión; facultad ausente,
+  revocada, rol/estado de solo lectura, declaración y campos requeridos. Owner/admin no
+  equivale a facultad. Gestionar facultades distingue permiso administrativo y designación.
+- Sin consulta o ante error no se informa facultad ni edición como comprobada. Una nueva
+  carga de aceptación retira su snapshot anterior durante la consulta. No se vacían campos.
+- Ante material obsoleto/no disponible informado en eventos se explica que la decisión
+  histórica se conserva y no acredita decisión sobre material actual. No se infiere la
+  invalidez de otras versiones ni se calcula asociación de hashes en la interfaz. El servidor
+  sigue validando material/facultad al registrar; el resumen no otorga autorización.
+- Confirmación y activación permanecen bloqueadas, incluso tras Acepta el documento.
+
+Resumen informativo: no duplica botones ni introduce nuevos registros, rutas, permisos,
+endpoints, dependencias o reglas jurídicas. Se conservan controles, referencias, versiones,
+preparaciones y borradores. Sin cambios backend/API/migraciones ni sincronización entre
+pestañas. Solo datos ficticios. 10B no iniciado.
+
+### Checklist asistido 10A — completado con alcance documentado
+
+Usar `/dashboard/trabajo`. Conservar la pestaña original si tiene cambios; para cargar
+los nuevos controles usar otra pestaña y un escenario ficticio independiente.
+
+- [x] En una evaluación con EIPD habilitada, ir a Completar EIPD → Tratamiento y alcance.
+  Al final del formulario, junto a las acciones de guardado y antes de Diagnóstico del
+  servidor, leer Acciones y requisitos. Debe distinguir editar/guardar de revisión o
+  decisión formal no disponible y de confirmación/activación bloqueadas.
+- [x] En Documentos guardados, si existe EIPD general guardada, comprobar resumen de consulta
+  y diferencia respecto de versiones registradas de infancia. No guardar solo para probar
+  el rótulo; si no existe documento, registrar el caso como no disponible para esta sesión.
+- [x] En contexto de infancia con versiones existentes, consultar una versión. Ver su número
+  y referencia en el resumen; editar original no disponible, preparación de copia temporal,
+  revisión negativa y decisión organizacional separadas. Consultar no envía registros.
+- [x] Seleccionar Decisión de la organización. Leer el motivo de bloqueo correspondiente
+  a facultad ausente/revocada o los requisitos pendientes si está otorgada. No designar ni
+  revocar facultades para comprobar un texto. Las decisiones históricas siguen consultables.
+- [x] En Preparar nueva versión documental de infancia, distinguir completar, vista previa
+  y registrar, con requisito faltante explicado. No registrar otra versión para probar el panel.
+- [x] Volver a un borrador con nota ficticia pendiente y comprobar su conservación. Reducir
+  ventana y verificar texto legible, estados expresados con palabras y sin recorte horizontal.
+
+### Evidencia automatizada y visual
+
+223 escenarios Chromium aprobados en una ejecución de seis archivos: navegación conectada,
+workspace de licitud, editor de infancia, historial de infancia, valoración/anexos y
+aceptación de organización. Incluye 11 casos nuevos 10A: EIPD general y conservación de
+nota, referencia de versión histórica, requisitos de preparación/vista previa, facultad
+ausente/otorgada/revocada, material obsoleto/no disponible, error/carga pendiente y
+lectura sin desbordamiento a 320/1280 px. No se registran actuaciones al consultar los
+resúmenes. Casos anteriores mantienen validación de consulta/solo lectura, expediente
+confirmado, respuesta incompatible, conflicto y resultado incierto.
+
+Después de precisar el rótulo «Registrar facultad» y sus requisitos (distinto de abrir
+Gestionar facultades), se repitieron los 17 escenarios de aceptación: aprobados.
+Tras ajustar únicamente la toma de capturas, se repitieron dos casos de anchos: aprobados.
+Tipos, lint y formato de archivos afectados aprobados. Capturas 320/1280 inspeccionadas:
+estados expresados con texto, ancho adaptable, inicio visible bajo la cabecera y lectura
+por desplazamiento en móvil. Evidencias locales `outputs/10a/` excluidas de publicación.
+
+La cobertura con fixtures no equivale a integración backend real, CI remota o aceptación
+asistida; lector manual de 7B pendiente. No se realiza commit/push hasta autorización.
+
+## 10A — recorridos asistidos disponibles comprobados, 28/10/2026
+
+Las capturas aportadas por el usuario muestran:
+
+- EIPD general: resumen con editar/guardar disponible y revisión/decisión formal y
+  confirmación/activación no disponibles.
+- Documentos guardados de clientes: no hay documento EIPD guardado en este contexto.
+  La consulta del resumen de una EIPD general existente queda pendiente en validación
+  asistida; no se creó ni guardó un documento únicamente para comprobar el rótulo.
+- Infancia: versión documental 1 con referencia SIMULADA-PILOTO-INFANCIA-RES-001;
+  original no editable, copia temporal diferenciada de revisión y decisión.
+- Decisión de organización: facultad revocada como causa explícita de bloqueo;
+  decisiones históricas consultables y confirmación/activación bloqueadas.
+- Preparación temporal: antes de la declaración ficticia explica ese requisito;
+  al marcarla permite completar y explica referencia faltante para registrar.
+- Tras el recorrido solicitado de consulta y retorno, la última captura en ventana
+  estrecha conserva «[Ficticia] Prueba de Infancia Bloque 10A», muestra Ver pendientes (2)
+  y texto legible sin recorte horizontal del resumen. No se atribuye guardado o registro
+  de nueva versión a estas consultas.
+
+Queda comprobado el alcance asistido disponible en esta sesión. La consulta de EIPD
+general guardada sigue pendiente por falta de un caso existente; conserva la cobertura
+automatizada previamente documentada. Los escenarios de material obsoleto/no disponible,
+carga/error y otras facultades tienen cobertura automatizada, sin atribuir su ejecución
+manual al usuario. No se declara validación asistida integral ni prueba con lector.
+
+223 escenarios Chromium con fixtures previamente aprobados, ajuste final de facultad
+validado con 17 escenarios dirigidos y dos de capturas. Este registro solo documental
+no requiere repetir pruebas de producto. Sin commit/push autorizado de 10A ni inicio
+de 10B; lector manual de 7B pendiente. Entradas anteriores son antecedentes.
+
+## 10A — consulta de EIPD general existente comprobada, 28/10/2026
+
+El usuario encontró otra evaluación de Gestión de Clientes con documento EIPD guardado.
+La captura muestra referencia PRUEBA-EIPD-LECTURA-20261010 y nombre de edición PRUEBA-2.
+El resumen distingue consulta disponible, edición fuera de esa vista, circuito formal
+no disponible para EIPD general y confirmación/activación bloqueadas. Queda cubierta
+la comprobación del resumen de consulta que antes faltaba por ausencia de documento
+en el contexto anterior. El contenido expandible no se muestra abierto en la captura;
+no se atribuye inspección de todos sus campos ni escrituras. Se conserva Ver pendientes (2).
+Pendiente la confirmación solicitada de retorno a la nota del borrador EIPD original
+tras visitar Documentos guardados; la conservación de preparación temporal de infancia
+ya tiene evidencia. Sin repetir pruebas automáticas por este registro documental,
+sin commit/push autorizado de 10A ni inicio de 10B. Lector manual de 7B pendiente.
+Las menciones anteriores a ausencia de un caso de consulta son antecedentes.
+
+## 10A — guion asistido completado, 28/10/2026
+
+Tras informar que había recargado y perdido los pendientes de la pestaña, el usuario
+repitió el recorrido con una nota ficticia nueva en el borrador EIPD, fue a Documentos
+guardados y volvió al editor. Confirma «recorrido OK»: nota conservada y pendiente
+identificable, sin guardar ni recargar durante la repetición. Esta evidencia no implica
+recuperación de los borradores anteriores perdidos con la recarga.
+Se completa el guion asistido acordado, incluida la consulta de EIPD general guardada
+en otra evaluación documentada en la entrada anterior. Casos de carga/error, material
+no asociado y facultades adicionales conservan su evidencia automatizada; no se
+atribuyen como pruebas manuales. Lector manual de 7B pendiente.
+10A listo para commit/push cuando se autorice. Sin publicación de 10A ni inicio de 10B.
+Este cierre documental no modifica producto ni requiere repetir la batería previa.
+
+## Publicación autorizada de 10A — 28/10/2026
+
+Usuario solicita commit y autoriza push de feature/navegacion-10a-capacidades,
+base 1429f1d. Incluye resumen de acciones y requisitos por documento, sus pruebas
+y el guion asistido completado documentado. Evidencia previa: 223 escenarios Chromium,
+17 dirigidos tras precisar facultad, dos de capturas y checks estáticos aprobados.
+No se repiten pruebas por las últimas entradas documentales ni se atribuye CI remota.
+Excluir frontend/next-env.d.ts generado y outputs/. Verificar identidad remota tras push.
+Sin merge, despliegue ni inicio de 10B. Lector manual de 7B pendiente.
+Las menciones anteriores a autorización pendiente son antecedentes.
