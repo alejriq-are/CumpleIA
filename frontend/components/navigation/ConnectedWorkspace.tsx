@@ -1032,6 +1032,8 @@ export function ConnectedWorkspace({
                       >
                         <LicitudWorkspace
                           organizaciones={[organization]}
+                          initialTreatmentId={v.treatmentId}
+                          workingDescription={contextLabel(v)}
                           onCreationPending={(value) =>
                             updateWorkUnit({
                               id: `create:${key}`,

@@ -298,6 +298,29 @@ No resolver aquí formularios completos de consentimiento/LIA, metodología de r
 
 ### 11B. Selección de trabajo frente a creación
 
+**Publicación autorizada 29/10/2026:** usuario solicita commit y push de 11B y de la
+corrección RAT pendiente, en commits separados. Bloque validado; sin inicio de 12A.
+
+**Cierre de validación 29/10/2026:** recorrido asistido completado, incluida ventana
+estrecha y conservación de fundamento/contexto al cancelar y retomar. 141 pruebas
+automatizadas aprobadas y comprobaciones estáticas aprobadas. La creación efectiva,
+conflictos y permisos se cubrieron con pruebas automatizadas; no se creó un registro
+en el recorrido asistido. Pendiente commit/push; sin inicio de 12A. Las notas de
+validación pendiente inferiores son antecedentes del bloque.
+
+**Validación asistida 29/10/2026:** el usuario confirma selección frente a creación,
+cancelación/reapertura con conservación del fundamento y cancelación del selector de
+contexto sin cambiar el trabajo del programa con menores. Pendiente recorrido en
+ventana estrecha; no se ha creado una evaluación nueva durante estas comprobaciones.
+
+**Estado 29/10/2026:** implementado en `feature/navegacion-11b-seleccion-creacion`;
+validación asistida pendiente. Se precarga únicamente un tratamiento cuyo ID esté
+incluido en el inventario autorizado. Finalidad y alcance requieren elección explícita
+sobre el RAT actual; no se reutiliza el alcance histórico de otra evaluación. Cancelar
+conserva los campos de la preparación sin crear ni cambiar contexto. TypeScript,
+ESLint y formato aprobados; 141 pruebas de navegación/workspace aprobadas, incluidas
+dos nuevas de precarga autorizada y cancelación. Sin commit/push ni inicio de 12A.
+
 **Resuelve:** parte de P8 y G19. Hipótesis de fricción en selector repetido.
 
 **Cambios:** diferenciar «Trabajando en…» de «Crear evaluación para…». Comprobar si es seguro precargar una selección disponible/autorizada en el formulario de creación; si no, explicar por qué debe elegirse. No crear evaluación automáticamente ni copiar alcance de otra por coincidencia de nombre. Guardar/cancelar creación conserva pendientes independientes.

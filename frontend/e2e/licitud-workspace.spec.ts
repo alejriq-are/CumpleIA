@@ -54,7 +54,7 @@ test.beforeAll(async () => {
   if(url.includes("?offset="))return result(window.demo.rows);
   return result(window.demo.rows[0]);
  };
- window.workspace=(role="owner")=>root.render(React.createElement(LicitudWorkspace,{organizaciones:[{...organization,role}],token:async()=>"PRUEBA"}));
+ window.workspace=(role="owner",initialTreatmentId)=>root.render(React.createElement(LicitudWorkspace,{organizaciones:[{...organization,role}],initialTreatmentId,workingDescription:"[FICTICIA] Trabajo seleccionado",token:async()=>"PRUEBA"}));
  window.flow=(id,readOnly=false)=>root.render(React.createElement(AssessmentFlow,{key:id,organizationId:org,organizationName:organization.name,treatmentId:tid,assessmentId:id,readOnly,token:async()=>"PRUEBA"}));
  window.editor=(id,readOnly=false)=>root.render(React.createElement(LegalAssessmentEditor,{organizationId:org,treatmentId:tid,assessmentId:id,readOnly,token:async()=>"PRUEBA"}));
  `
@@ -922,4 +922,45 @@ test("11A ayudas asociadas y vista previa conservan ediciones sin guardar", asyn
     region.getByRole("status").filter({ hasText: "Borrador EIPD guardado" })
   ).toHaveCount(0);
   await expect(purpose).toHaveValue("[FICTICIA] Otra edición pendiente 11A");
+});
+
+test("11B precarga solo tratamiento autorizado y cancelar conserva la preparación sin crear", async ({
+  page,
+}) => {
+  test.skip(integrated, "Datos controlados");
+  await page.evaluate((tid) => (window as any).workspace("owner", tid), treatment);
+  await expect(page.getByLabel("Tratamiento del RAT", { exact: true })).toHaveValue(treatment);
+  await expect(page.getByRole("heading", { name: "Evaluaciones guardadas" })).toBeVisible();
+  await expect(page.getByLabel("Finalidad", { exact: true })).toHaveValue("");
+  await expect(page.getByLabel("Identidad", { exact: true })).not.toBeChecked();
+  await page.getByLabel("Finalidad", { exact: true }).selectOption({ index: 1 });
+  await page.getByLabel("Fundamento", { exact: true }).fill("[FICTICIA] Preparación 11B");
+  await page.getByRole("button", { name: "Cancelar creación", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Crear borrador", exact: true })).toBeHidden();
+  await expect(page.getByRole("region", { name: "Trabajo seleccionado" })).toContainText(
+    "[FICTICIA] Trabajo seleccionado"
+  );
+  await page.getByRole("button", { name: "Volver a preparar evaluación", exact: true }).click();
+  await expect(page.getByLabel("Fundamento", { exact: true })).toHaveValue(
+    "[FICTICIA] Preparación 11B"
+  );
+  await expect(page.getByLabel("Finalidad", { exact: true })).not.toHaveValue("");
+  expect(
+    await page.evaluate(() => (window as any).demo.calls.filter((c: any) => c.method !== "GET"))
+  ).toHaveLength(0);
+});
+
+test("11B no precarga un identificador ausente del inventario autorizado", async ({ page }) => {
+  test.skip(integrated, "Datos controlados");
+  await page.evaluate(() =>
+    (window as any).workspace("owner", "b0000000-0000-0000-0000-000000000099")
+  );
+  await expect(page.getByRole("status")).toHaveCount(0);
+  await expect(page.getByLabel("Tratamiento del RAT", { exact: true })).toHaveValue("");
+  await expect(page.getByRole("heading", { name: "Crear evaluación en borrador" })).toHaveCount(0);
+  expect(
+    await page.evaluate(() =>
+      (window as any).demo.calls.some((c: any) => c.url.includes("b0000000"))
+    )
+  ).toBe(false);
 });

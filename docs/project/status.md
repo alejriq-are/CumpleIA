@@ -1,9 +1,73 @@
+## 11B — cierre y publicación autorizados, 29/10/2026
+
+El usuario autoriza commit y push del bloque 11B y de la corrección RAT pendiente.
+RAT quedó separado en `a25d20f91c06b00bb897dd33d60f1257adfa6b07`, rama
+`fix/rat-aviso-guardado`. 11B se publica desde
+`feature/navegacion-11b-seleccion-creacion`, que incluye ese commit como antecedente.
+Recorrido asistido completado en escritorio y ventana estrecha; 141 pruebas automáticas,
+TypeScript, ESLint, Prettier y diff aprobados. No se repite la batería por este cierre
+documental. Las notas inferiores de publicación pendiente son antecedentes.
+Sin inicio de 12A, merge ni despliegue. El lector de pantalla manual continúa pendiente.
+Se excluyen `frontend/next-env.d.ts` generado y `outputs/`.
+
 ## Corrección RAT — publicación autorizada, 29/10/2026
 
 El usuario autoriza commit y push de la corrección pendiente del aviso RAT. Se publica
 por separado de 11B en `fix/rat-aviso-guardado`. Recorrido asistido confirmado OK;
 TypeScript, ESLint, formato y diff aprobados. Sin cambios de guardado, API ni permisos.
 Las menciones anteriores a autorización pendiente son antecedentes.
+
+## 11B — validación asistida completada, 29/10/2026
+
+El usuario confirma «recorrido OK» también en ventana estrecha: Cancelar creación y
+Volver a preparar evaluación se leen y pueden activarse; se conservan el fundamento
+y el contexto al cancelar y retomar la preparación, sin recargar ni crear otro borrador.
+Con las comprobaciones anteriores, queda completado el recorrido asistido de 11B.
+Se mantiene la evidencia automatizada de 141 pruebas aprobadas, TypeScript, ESLint,
+Prettier y revisión del diff. No se afirma validación con lector de pantalla ni creación
+real de una evaluación en estas pruebas asistidas.
+
+Bloque 11B validado, pendiente de commit/push. Sin inicio de 12A. La corrección del
+aviso RAT validada se mantiene como cambio separado pendiente de publicación.
+Las entradas anteriores sobre validación pendiente son antecedentes. Excluir
+`frontend/next-env.d.ts` generado y `outputs/`.
+
+## 11B — selección y cancelación validadas por el usuario, 29/10/2026
+
+El usuario confirma «recorrido OK» al distinguir el contexto de «Trabajando en…»
+del formulario de creación, comprobar el tratamiento propuesto y la elección explícita
+de finalidad/categorías/titulares. Confirma que Cancelar creación y Volver a preparar
+conservan el fundamento de prueba y el contexto del programa con menores. La captura
+del selector muestra «Elegir trabajo existente» y que aplicar contexto no crea una
+evaluación; tras cancelar ese panel, el usuario confirma conservación del fundamento
+y del contexto. Estas comprobaciones no registraron una evaluación nueva.
+
+Pendiente: recorrido asistido equivalente en ventana estrecha. Se mantiene la evidencia
+automatizada de 141 pruebas aprobadas y comprobaciones estáticas anteriores. Sin
+commit/push de 11B ni inicio de 12A. La corrección RAT permanece como cambio separado.
+
+## 11B — selección y creación diferenciadas; validación asistida pendiente, 29/10/2026
+
+Rama `feature/navegacion-11b-seleccion-creacion`, base publicada 11A
+`022d15c35e1a4028c9487108dedc860e0f9ee099`. El selector explica que abre trabajo
+existente. Evaluaciones y creación de borrador distingue «Trabajando en…» del
+tratamiento para crear un registro nuevo. Solo se propone el ID del tratamiento si
+figura en el inventario autorizado; no se copian finalidad ni alcance de una evaluación,
+pues pueden conservar un alcance anterior al RAT actual. Se comprueba la identidad
+del tratamiento consultado. Cancelar creación oculta la preparación conservando sus
+campos durante esta visita; volver a preparar los recupera. Cancelar no escribe ni cambia
+el contexto. Crear conserva su acción explícita y explica dónde abrir el resultado.
+
+Verificación: TypeScript, ESLint y Prettier aprobados. 141 pruebas aprobadas: 118 de
+navegación conectada y 23 del workspace, incluidas dos nuevas sobre precarga por ID
+autorizado y cancelación sin escritura con conservación de campos. La batería cubre
+permisos, conflictos y pendientes entre contextos. Falta validación asistida del usuario;
+no se certifica lector de pantalla. Sin cambios de API, permisos ni metodología;
+confirmación y activación EIPD bloqueadas. Sin commit/push de 11B ni inicio de 12A.
+
+La corrección RAT validada permanece en el árbol de trabajo como cambio separado,
+pendiente de publicación; las entradas anteriores que indican «Sin inicio de 11B» son
+antecedentes. Excluir `frontend/next-env.d.ts` generado y `outputs/`.
 
 ## Corrección RAT — recorrido asistido confirmado OK, 29/10/2026
 

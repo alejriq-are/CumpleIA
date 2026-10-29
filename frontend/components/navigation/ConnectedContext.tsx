@@ -123,6 +123,11 @@ export function ConnectedContext({
         : "El contexto está listo para aplicar.");
   return (
     <div className="space-y-4">
+      <h3 className="font-semibold">Elegir trabajo existente</h3>
+      <p>
+        Aplicar contexto cambia tu selección de trabajo; no crea una evaluación. Para crear una
+        nueva, usa Preparar → Evaluaciones y creación de borrador.
+      </p>
       <p>
         Selecciona el contexto guardado en el servidor. Los borradores abiertos se conservan durante
         esta visita; no se copian a otra evaluación.
