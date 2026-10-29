@@ -137,6 +137,7 @@ export function ConnectedWorkspace({
   const current = useRef(location);
   current.current = location;
   const sequence = useRef(0);
+  const restoredHash = useRef<string | null>(null);
   const validationTarget = useRef<WorkLocation | null>(null);
   const rememberedLocations = useRef<Record<string, WorkLocation>>({});
 
@@ -175,6 +176,7 @@ export function ConnectedWorkspace({
       setNotice("");
       if (next.module !== "panel") setLast(next);
       setPanes((prev) => ({ ...prev, [paneKey(next)]: next }));
+      restoredHash.current = encodeWork(next);
       window.history[
         replace || window.location.hash === encodeWork(next) ? "replaceState" : "pushState"
       ](null, "", encodeWork(next));
@@ -256,7 +258,10 @@ export function ConnectedWorkspace({
   );
   useEffect(() => {
     const restore = () => {
-      const parsed = parseWork(window.location.hash);
+      const hash = window.location.hash;
+      if (restoredHash.current === hash) return;
+      restoredHash.current = hash;
+      const parsed = parseWork(hash);
       if (parsed) void validate(parsed);
       else if (window.location.hash) setError("El enlace de navegación no es válido.");
     };
@@ -885,11 +890,6 @@ export function ConnectedWorkspace({
               )}
             </div>
           )}
-          {notice && (
-            <p role="status" className="m-4 rounded bg-blue-50 p-4">
-              {notice}
-            </p>
-          )}
           {location.module === "diagnostico" && (
             <p className="px-4 py-2 text-sm">
               El Autodiagnóstico se guarda por organización; no pertenece a una evaluación de
@@ -930,17 +930,27 @@ export function ConnectedWorkspace({
                   {modules
                     .filter((v) => v.id !== "panel")
                     .map((v) => (
-                      <button
-                        key={v.id}
-                        aria-disabled={v.upcoming || undefined}
-                        className="rounded-xl border bg-white p-5 text-left"
-                        onClick={() =>
-                          v.upcoming ? setNotice(`${v.title}: próximamente.`) : changeModule(v.id)
-                        }
-                      >
-                        <strong>{v.title}</strong>
-                        <p>{v.upcoming ? "Próximamente" : "Abrir módulo →"}</p>
-                      </button>
+                      <div key={v.id} className="rounded-xl border bg-white">
+                        <button
+                          aria-disabled={v.upcoming || undefined}
+                          className="w-full rounded-xl p-5 text-left"
+                          onClick={() =>
+                            v.upcoming ? setNotice(`${v.title}: próximamente.`) : changeModule(v.id)
+                          }
+                        >
+                          <strong>{v.title}</strong>
+                          <p>{v.upcoming ? "Próximamente" : "Abrir módulo →"}</p>
+                        </button>
+                        {v.upcoming && notice === `${v.title}: próximamente.` && (
+                          <p
+                            role="status"
+                            className="mx-5 mb-5 rounded border border-blue-200 bg-blue-50 p-3 text-sm"
+                          >
+                            Esta función aún no está disponible. Puedes abrir otro módulo desde este
+                            panel.
+                          </p>
+                        )}
+                      </div>
                     ))}
                 </div>
                 <Link href="/dashboard/maqueta" className="text-blue-800 underline">

@@ -192,7 +192,24 @@ test.beforeEach(async ({ page }) => {
           texto: `[FICTICIA] Pregunta ${i + 1}`,
         })),
       });
-    if (pathname === "/diagnostico/actual") return result({ detail: "No existe" }, 404);
+    if (pathname === "/diagnostico/actual") {
+      if (mode === "12a-respuestas")
+        return result({
+          id: "diagnostico-prueba",
+          status: "en_progreso",
+          global_score: null,
+          puntaje_por_seccion: [],
+          hallazgos: [],
+          informe: null,
+          respuestas: [
+            { pregunta_id: "q1", answer: "Sí", notes: null },
+            { pregunta_id: "q2", answer: "N/A", notes: null },
+            { pregunta_id: "q3", answer: "valor ajeno", notes: null },
+            { pregunta_id: "fuera-del-catalogo", answer: "Sí", notes: null },
+          ],
+        });
+      return result({ detail: "No existe" }, 404);
+    }
     if (pathname.endsWith("/assessments"))
       return result(url.searchParams.get("offset") === "50" ? [] : Object.values(records));
     const match = pathname.match(/\/assessments\/([^/]+)/);
@@ -3212,3 +3229,164 @@ for (const width of [320, 1280]) {
     expect(errors).toEqual([]);
   });
 }
+
+test("12A progreso cuenta solo respuestas válidas del catálogo activo", async ({ page }) => {
+  mode = "12a-respuestas";
+  await mod(page, "Autodiagnóstico");
+  await expect(main(page).getByText("2 / 50 preguntas respondidas", { exact: true })).toBeVisible();
+  await main(page).getByRole("button", { name: "Parcial", exact: true }).nth(2).click();
+  await expect(main(page).getByText("3 / 50 preguntas respondidas", { exact: true })).toBeVisible();
+  await section(page, "II. Sección final");
+  await expect(main(page).getByText("3 / 50 preguntas respondidas", { exact: true })).toBeVisible();
+  await mod(page, "Panel principal");
+  await mod(page, "Autodiagnóstico");
+  await expect(main(page).getByText("3 / 50 preguntas respondidas", { exact: true })).toBeVisible();
+  expect(calls.filter((v) => v.method !== "GET")).toEqual([]);
+  expect(errors).toEqual([]);
+});
+
+test("12A historial realiza una sola validación por destino restaurado", async ({ page }) => {
+  await legal(page);
+  await section(page, "Base y fundamento");
+  await main(page)
+    .getByRole("textbox", { name: "Fundamento", exact: true })
+    .fill("[FICTICIA] Historial 12A");
+  await section(page, "Alcance del RAT");
+  calls.length = 0;
+  await page.goBack();
+  await expect(main(page).getByRole("textbox", { name: "Fundamento", exact: true })).toHaveValue(
+    "[FICTICIA] Historial 12A"
+  );
+  expect(calls.filter((v) => v.path === `/rat/treatments/${tid}`)).toHaveLength(1);
+  expect(
+    calls.filter((v) => v.path === `/licitud/treatments/${tid}/assessments/${aid}`)
+  ).toHaveLength(1);
+  calls.length = 0;
+  await page.goForward();
+  await expect(page).toHaveURL(/licitud\/alcance/);
+  await expect
+    .poll(
+      () => calls.filter((v) => v.path === `/licitud/treatments/${tid}/assessments/${aid}`).length
+    )
+    .toBe(1);
+  expect(calls.filter((v) => v.path === `/rat/treatments/${tid}`)).toHaveLength(1);
+  expect(calls.filter((v) => v.method !== "GET")).toEqual([]);
+  expect(errors).toEqual([]);
+});
+
+for (const width of [390, 865, 1280]) {
+  test(`12A Próximamente explica la salida junto al control a ${width}`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 900 });
+    const card = main(page).getByRole("button", {
+      name: "Políticas y referencias normativas Próximamente",
+      exact: true,
+    });
+    await card.focus();
+    await card.press("Enter");
+    await expect(card.locator("..").getByRole("status")).toContainText("Puedes abrir otro módulo");
+    await legal(page);
+    const note = main(page).getByLabel("Fundamento sobre EIPD", { exact: true });
+    await note.fill("[FICTICIA] Conservar al consultar Próximamente 12A");
+    const url = page.url();
+    const open = page.getByRole("button", { name: "Abrir menú", exact: true });
+    if (await open.isVisible()) await open.click();
+    const button = page
+      .getByRole("navigation", { name: "Módulos del espacio de trabajo" })
+      .getByRole("button", { name: "Carpeta de evidencias · Próximamente", exact: true });
+    await button.focus();
+    await button.press("Enter");
+    await expect(button.locator("xpath=following-sibling::p[1]")).toContainText(
+      "Elige otro módulo"
+    );
+    expect(page.url()).toBe(url);
+    await capture(page, `12a-aviso-local-${width}.png`);
+    await page.keyboard.press("Escape");
+    await expect(note).toHaveValue("[FICTICIA] Conservar al consultar Próximamente 12A");
+    await capture(page, `12a-proximamente-${width}.png`);
+    expect(calls.filter((v) => v.method !== "GET")).toEqual([]);
+    expect(errors).toEqual([]);
+  });
+}
+
+test("12A recorre las diez secciones y las 50 preguntas del catálogo de referencia", async ({
+  page,
+}) => {
+  const catalog = JSON.parse(
+    await readFile(
+      path.resolve("../backend/seed_data/modulo1/cuestionario_autodiagnostico_config.json"),
+      "utf8"
+    )
+  );
+  const sections = catalog.secciones.map((s: any, index: number) => ({
+    id: s.id,
+    numero_romano: s.numero,
+    nombre: s.nombre,
+    obligacion_id: s.obligacion_id,
+    orden: index + 1,
+  }));
+  const questions = catalog.secciones.flatMap((s: any) =>
+    s.preguntas.map((q: any, index: number) => ({
+      id: q.id,
+      texto: q.texto,
+      seccion_id: s.id,
+      orden: index + 1,
+    }))
+  );
+  expect(sections).toHaveLength(10);
+  expect(questions).toHaveLength(50);
+  await page.route("**/diagnostico/cuestionario", (route) =>
+    route.fulfill({
+      contentType: "application/json",
+      headers: { "access-control-allow-origin": "*" },
+      body: JSON.stringify({
+        secciones: sections,
+        preguntas: questions,
+        obligaciones: catalog.obligaciones,
+        opciones_respuesta: ["Sí", "Parcial", "No", "N/A"],
+      }),
+    })
+  );
+  await mod(page, "Autodiagnóstico");
+  const progress = main(page).getByRole("progressbar");
+  await expect(progress).toHaveAttribute("aria-valuemax", "50");
+  for (const [index, s] of sections.entries()) {
+    if (index) await section(page, `${s.numero_romano}. ${s.nombre}`);
+    for (const q of questions.filter((q: any) => q.seccion_id === s.id))
+      await expect(main(page).getByText(q.texto, { exact: true })).toBeVisible();
+    await expect(progress).toHaveAttribute("aria-valuenow", "0");
+  }
+  await section(page, `${sections[0].numero_romano}. ${sections[0].nombre}`);
+  await main(page).getByRole("button", { name: "N/A", exact: true }).first().click();
+  await expect(progress).toHaveAttribute("aria-valuenow", "1");
+  await mod(page, "Panel principal");
+  await mod(page, "Autodiagnóstico");
+  await expect(progress).toHaveAttribute("aria-valuenow", "1");
+  expect(calls.filter((v) => v.method !== "GET")).toEqual([]);
+  expect(errors).toEqual([]);
+});
+
+test("12A cambiar pasos EIPD no consulta ni escribe y Atrás conserva las notas", async ({
+  page,
+}) => {
+  await legal(page);
+  await enable(page);
+  await section(page, "Describir riesgos");
+  const note = main(page).getByLabel("Notas del borrador EIPD (opcional)", { exact: true });
+  await note.fill("[FICTICIA] Conteo de solicitudes por paso 12A");
+  calls.length = 0;
+  await section(page, "Valorar riesgos");
+  await expect(main(page).getByText("Paso 4 de 7 · Completar EIPD", { exact: true })).toBeVisible();
+  await section(page, "Medidas de mitigación");
+  await expect(main(page).getByText("Paso 5 de 7 · Completar EIPD", { exact: true })).toBeVisible();
+  expect(calls).toEqual([]);
+  await page.goBack();
+  await expect(main(page).getByText("Paso 4 de 7 · Completar EIPD", { exact: true })).toBeVisible();
+  expect(calls.filter((v) => v.path === `/rat/treatments/${tid}`)).toHaveLength(1);
+  expect(
+    calls.filter((v) => v.path === `/licitud/treatments/${tid}/assessments/${aid}`)
+  ).toHaveLength(1);
+  await section(page, "Describir riesgos");
+  await expect(note).toHaveValue("[FICTICIA] Conteo de solicitudes por paso 12A");
+  expect(calls.filter((v) => v.method !== "GET")).toEqual([]);
+  expect(errors).toEqual([]);
+});

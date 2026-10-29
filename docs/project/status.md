@@ -1,3 +1,58 @@
+## 12A — cierre y publicación autorizados, 29/10/2026
+
+El usuario autoriza commit y push del bloque 12A validado, en
+`feature/navegacion-12a-recorridos`. Se incluyen las correcciones de progreso,
+avisos locales e historial, sus pruebas y la aceptación asistida registrada.
+Se conserva la evidencia de pruebas existente; no se repite la batería por este
+cierre documental. Excluir `frontend/next-env.d.ts` generado y `outputs/`.
+Sin inicio de 12B, merge ni despliegue. Las notas anteriores de publicación
+pendiente son antecedentes; el resultado del push se verifica contra la rama remota.
+
+## 12A — validación asistida completada, 29/10/2026
+
+El usuario confirma recorrido OK del avance del autodiagnóstico, los avisos locales
+de Próximamente y el retorno mediante Atrás/Adelante entre pasos EIPD, conservando
+la nota sin guardar al volver a Describir riesgos. Se completa la validación asistida
+del bloque 12A; se conserva la evidencia automatizada registrada en la entrada anterior.
+
+Aclaración comprobada durante el recorrido: N/A es una respuesta válida y aumenta
+el avance. Siguiente permanece deshabilitado mientras queden preguntas pendientes
+en la sección; para visitar otra sección sin completarla se utiliza Cuestionario.
+No se atribuye el bloqueo a N/A ni se cambia esta regla de navegación.
+
+Implementación y validación de 12A completadas, pendiente de commit y push.
+Sin inicio de 12B, merge ni despliegue. La comprobación manual con lector de pantalla
+continúa pendiente. Excluir `frontend/next-env.d.ts` generado y `outputs/`.
+Las menciones anteriores a validación asistida pendiente son antecedentes históricos.
+
+## 12A — implementación y pruebas automáticas, 29/10/2026
+
+Rama `feature/navegacion-12a-recorridos`, base publicada `22f8c74`.
+Se corrigieron dos fallos reproducidos: respuestas ajenas al catálogo o con opciones
+inválidas podían incrementar el avance; Atrás/Adelante disparaba dos consultas del
+mismo tratamiento al recibir popstate y hashchange para un destino.
+El avance cuenta solo respuestas válidas del catálogo activo, incluidas N/A;
+visitar secciones no aumenta el avance ni demuestra guardado o cumplimiento.
+Se conserva el historial por pasos y los borradores. Cambiar pasos EIPD no consulta
+ni escribe; restaurar un destino realiza una validación por contexto.
+Los avisos de Próximamente se muestran junto al control o tarjeta activados.
+En el menú reducido a iconos el aviso dispone de ancho propio para ser legible.
+Describir riesgos y Valorar riesgos se conservan: corresponden a tareas y campos distintos.
+
+Evidencia: 152 pruebas de regresión aprobadas y una captura opcional omitida;
+siete casos dirigidos 12A aprobados, incluidos los diez apartados y las 50 preguntas
+del catálogo JSON de referencia del repositorio, mediante respuestas simuladas.
+Esto no acredita el contenido de la base de datos de la sesión del usuario.
+TypeScript, ESLint, formato y diff comprobados. Capturas revisadas a 390 y 865 px;
+los casos automatizados también cubren 1280 px. Sin cambios de API, puntuación,
+permisos ni habilitación de confirmación/activación EIPD.
+
+Pendiente validación asistida: avance sin responder y con N/A; aviso local de
+Próximamente en escritorio/ventana estrecha; Atrás/Adelante conservando notas.
+No se declara cerrado 12A. Sin commit/push de este bloque ni inicio de 12B.
+Excluir `frontend/next-env.d.ts` generado y `outputs/`. La prueba manual con lector
+de pantalla sigue pendiente. Las entradas anteriores son antecedentes históricos.
+
 ## 11B — cierre y publicación autorizados, 29/10/2026
 
 El usuario autoriza commit y push del bloque 11B y de la corrección RAT pendiente.

@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { type CSSProperties, Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { PrototypeDrawer } from "./PrototypeDrawer";
 import { modules, type ModuleId, type Scenario } from "./prototype-data";
 import {
@@ -39,7 +39,6 @@ export function MainModules({
   go,
   expanded,
   setExpanded,
-  notify,
   navigationLabel = "Módulos de la maqueta",
   drawerId,
 }: {
@@ -53,6 +52,7 @@ export function MainModules({
 }) {
   const [mobile, setMobile] = useState(false);
   const [unavailable, setUnavailable] = useState("");
+  const [noticeTop, setNoticeTop] = useState(0);
   useEffect(() => {
     const media = window.matchMedia("(max-width: 767px)");
     const update = () => {
@@ -89,38 +89,48 @@ export function MainModules({
             {modules
               .filter((item) => group.ids.includes(item.id))
               .map((item) => (
-                <button
-                  key={item.id}
-                  title={item.title}
-                  aria-label={item.title + (item.upcoming ? " · Próximamente" : "")}
-                  aria-disabled={item.upcoming || undefined}
-                  aria-current={item.id === module ? "page" : undefined}
-                  onClick={() => {
-                    if (item.upcoming) {
-                      const message = `${item.title}: próximamente. Aún no está disponible.`;
-                      notify(message);
-                      setUnavailable(message);
-                      return;
-                    }
-                    setExpanded(false);
-                    go(item.id);
-                  }}
-                >
-                  <Icon index={modules.indexOf(item)} />
-                  <span className="prototype-rail-label">
-                    {item.title}
-                    {item.upcoming && <small>Próximamente</small>}
-                  </span>
-                </button>
+                <Fragment key={item.id}>
+                  <button
+                    title={item.title}
+                    aria-label={item.title + (item.upcoming ? " · Próximamente" : "")}
+                    aria-disabled={item.upcoming || undefined}
+                    aria-current={item.id === module ? "page" : undefined}
+                    onClick={(event) => {
+                      if (item.upcoming) {
+                        const message = `${item.title}: próximamente. Aún no está disponible.`;
+                        setNoticeTop(
+                          Math.min(
+                            event.currentTarget.getBoundingClientRect().top,
+                            window.innerHeight - 150
+                          )
+                        );
+                        setUnavailable(message);
+                        return;
+                      }
+                      setExpanded(false);
+                      go(item.id);
+                    }}
+                  >
+                    <Icon index={modules.indexOf(item)} />
+                    <span className="prototype-rail-label">
+                      {item.title}
+                      {item.upcoming && <small>Próximamente</small>}
+                    </span>
+                  </button>
+                  {item.upcoming && unavailable.startsWith(`${item.title}:`) && (
+                    <p
+                      role="status"
+                      style={{ "--prototype-notice-top": `${noticeTop}px` } as CSSProperties}
+                      className="prototype-unavailable mx-2 mb-2 break-words rounded border border-blue-300 bg-blue-950 p-2 text-xs text-white"
+                    >
+                      {unavailable} Elige otro módulo para continuar.
+                    </p>
+                  )}
+                </Fragment>
               ))}
           </div>
         ))}
       </nav>
-      {mobile && unavailable && (
-        <p role="status" className="p-3 text-sm text-white">
-          {unavailable}
-        </p>
-      )}
     </>
   );
   return mobile ? (

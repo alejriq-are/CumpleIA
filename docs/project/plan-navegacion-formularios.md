@@ -336,6 +336,8 @@ dos nuevas de precarga autorizada y cancelación. Sin commit/push ni inicio de 1
 
 ### 12A. Diagnóstico, salidas y navegación histórica
 
+**Estado 29/10/2026:** implementación y validación asistida completadas en `feature/navegacion-12a-recorridos`. El usuario confirma avance del cuestionario, avisos locales de Próximamente y Atrás/Adelante conservando notas EIPD. Siete casos dirigidos aprobados y regresión de 152 pruebas aprobadas (una captura opcional omitida). Commit/push autorizados por el usuario; sin inicio de 12B. Evidencia y aclaración sobre Siguiente en `navegacion-servidor.md`.
+
 **Cubre:** C15/C16/C18 y remanentes de C17 cuando afecten orientación. No supone que todos sean defectos confirmados.
 
 1. Comprobar progreso del autodiagnóstico usando sus 50 preguntas y secciones reales. Mostrar progreso derivado de respuestas válidas, no de visitas ni formularios ilustrativos. Si el contrato no lo permite, explicitar la falta y separar ampliación de API.

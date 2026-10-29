@@ -48,7 +48,11 @@ export function Cuestionario({
   const [respuestas, setRespuestas] = useState<Record<string, RespuestaState>>(() =>
     Object.fromEntries(
       respuestasIniciales
-        .filter((r) => r.answer !== null)
+        .filter(
+          (r) =>
+            cuestionario.preguntas.some((p) => p.id === r.pregunta_id) &&
+            OPCIONES.includes(r.answer as OpcionRespuesta)
+        )
         .map((r) => [r.pregunta_id, { answer: r.answer as OpcionRespuesta, notes: r.notes ?? "" }])
     )
   );
@@ -79,8 +83,12 @@ export function Cuestionario({
   const seccionActual = secciones[paso];
   const preguntasSeccion = preguntasPorSeccion[seccionActual.id] ?? [];
   const totalPreguntas = cuestionario.preguntas.length;
-  const totalRespondidas = Object.values(respuestas).filter((r) => r.answer !== null).length;
-  const seccionCompleta = preguntasSeccion.every((p) => respuestas[p.id]?.answer);
+  const totalRespondidas = cuestionario.preguntas.filter((p) =>
+    OPCIONES.includes(respuestas[p.id]?.answer as OpcionRespuesta)
+  ).length;
+  const seccionCompleta = preguntasSeccion.every((p) =>
+    OPCIONES.includes(respuestas[p.id]?.answer as OpcionRespuesta)
+  );
   const esUltimaSeccion = paso === secciones.length - 1;
 
   function actualizarRespuesta(preguntaId: string, cambios: Partial<RespuestaState>) {
@@ -147,13 +155,25 @@ export function Cuestionario({
             {totalRespondidas} / {totalPreguntas} preguntas respondidas
           </span>
         </div>
-        <div className="mt-2 h-2 overflow-hidden rounded-full bg-gray-200">
+        <div
+          role="progressbar"
+          aria-label="Preguntas respondidas del cuestionario actual"
+          aria-valuemin={0}
+          aria-valuemax={totalPreguntas}
+          aria-valuenow={totalRespondidas}
+          className="mt-2 h-2 overflow-hidden rounded-full bg-gray-200"
+        >
           <div
             className="h-full bg-blue-700 transition-all"
-            style={{ width: `${(totalRespondidas / totalPreguntas) * 100}%` }}
+            style={{ width: `${totalPreguntas ? (totalRespondidas / totalPreguntas) * 100 : 0}%` }}
           />
         </div>
       </div>
+
+      <p className="text-sm text-gray-600">
+        El avance cuenta respuestas del cuestionario actual, incluidas N/A. No indica cumplimiento
+        legal ni confirma el guardado de los cambios pendientes.
+      </p>
 
       <div className="space-y-4 rounded-xl border border-gray-200 bg-white p-6">
         {preguntasSeccion.map((p) => (
