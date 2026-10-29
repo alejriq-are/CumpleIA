@@ -298,12 +298,6 @@ export function TreatmentGeneralForm({
 
       {error && <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
 
-      {saved && (
-        <div className="rounded-lg bg-green-50 px-4 py-3 text-sm text-green-700">
-          Cambios guardados.
-        </div>
-      )}
-
       <section
         hidden={!!activeSection && activeSection !== "general"}
         className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm"
@@ -567,14 +561,21 @@ export function TreatmentGeneralForm({
         </div>
       )}
 
-      <div hidden={!!activeSection && activeSection !== "general"} className="flex justify-end">
-        <button
-          type="submit"
-          disabled={saving}
-          className="rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {saving ? "Guardando…" : editing ? "Guardar cambios" : "Crear actividad"}
-        </button>
+      <div hidden={!!activeSection && activeSection !== "general"} className="space-y-3">
+        {saved && (
+          <div role="status" className="rounded-lg bg-green-50 px-4 py-3 text-sm text-green-700">
+            Cambios guardados.
+          </div>
+        )}
+        <div className="flex justify-end">
+          <button
+            type="submit"
+            disabled={saving}
+            className="rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {saving ? "Guardando…" : editing ? "Guardar cambios" : "Crear actividad"}
+          </button>
+        </div>
       </div>
     </form>
   );

@@ -2100,3 +2100,30 @@ Prettier aprobados. Esta actualización es documental y no requiere repetir la b
 Sin certificación con lector de pantalla (7B pendiente), cambios de servidor, merge,
 despliegue ni inicio de 11B. Excluir `frontend/next-env.d.ts` generado y `outputs/`.
 Las menciones inferiores a validación o autorización pendiente son antecedentes.
+
+## Corrección RAT — confirmación junto a Guardar cambios, 29/10/2026
+
+Observación del usuario posterior al cierre de 11A: Información general del RAT mostraba
+«Cambios guardados» antes del formulario, lejos de su acción. En
+`fix/rat-aviso-guardado`, base publicada `022d15c35e1a4028c9487108dedc860e0f9ee099`,
+se mueve el aviso inmediatamente encima del botón, dentro del bloque de Información
+general. Se añade role=status. Se conserva el retiro del aviso al editar mediante update;
+no se cambia guardado, permisos ni API. TypeScript, ESLint y formato aprobados;
+diff revisado. Validación visual asistida pendiente: guardar una modificación ficticia,
+comprobar proximidad y volver a editar para retirar la confirmación. No se crean pruebas
+que reproduzcan este cambio de presentación. Sin commit/push de esta corrección ni
+inicio de 11B. Excluir next-env.d.ts generado y outputs/.
+
+## Corrección RAT — recorrido asistido confirmado OK, 29/10/2026
+
+El usuario confirma «recorrido OK» tras probar la reubicación de «Cambios guardados»
+encima de «Guardar cambios» en Información general del RAT y el retiro del aviso al
+volver a editar. Se conserva la evidencia estática registrada anteriormente (formato,
+ESLint, TypeScript y diff). Rama `fix/rat-aviso-guardado`; corrección validada,
+pendiente de commit y autorización de push. Sin inicio de 11B. Las notas anteriores
+de validación pendiente son antecedentes.
+
+## Corrección RAT — publicación autorizada, 29/10/2026
+
+El usuario autoriza commit y push del aviso RAT, separado del bloque 11B.
+Recorrido asistido, TypeScript, ESLint, formato y diff aprobados.
