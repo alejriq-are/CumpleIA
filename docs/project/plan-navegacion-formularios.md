@@ -349,6 +349,8 @@ dos nuevas de precarga autorizada y cancelación. Sin commit/push ni inicio de 1
 
 ### 12B. Error temporal frente a sesión ausente
 
+**Estado al 29/10/2026:** implementación y validación asistida completadas en `feature/navegacion-12b-recuperacion`, base `ff85ec7`. El usuario confirma recuperación de conexión, contextos y sesión real conservando el borrador en la pestaña original. Pruebas dirigidas y controles estáticos aprobados; regresión de 185 aprobadas y una captura opcional omitida, seguida de dos pruebas aprobadas del ajuste de aviso vacío. Pendiente commit/push. Evidencia en `navegacion-servidor.md`, entrada de validación asistida 12B.
+
 **Cubre:** seguimiento abierto del lote 1, no un rediseño de autenticación.
 
 **Cambios:** clasificar errores de consulta/autenticación usando el resultado real del proveedor; evitar «Tu sesión expiró» por cualquier fallo. Ofrecer reintento o indicación de iniciar sesión según corresponda, conservando memoria de la pestaña original. No almacenar ni imprimir credenciales, renovar permisos por UI o reutilizar sesión inválida.

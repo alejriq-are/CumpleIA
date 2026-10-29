@@ -4,9 +4,11 @@ import { useEffect, useId, useRef, useState } from "react";
 import { navigationApi, type Applicability, type Determination } from "@/lib/api/navigation";
 import { ApiError } from "@/lib/api/client";
 import { sessionToken } from "@/components/licitud/LicitudWorkspace";
+import { requiresSignIn } from "@/lib/auth/session";
+import { SessionRecovery } from "./SessionRecovery";
 import { navigationReadError } from "./connected-navigation";
 import { connectedDestinations } from "./connected-destinations";
-export type ApplicabilityLoadState = { loading: boolean; error: string };
+export type ApplicabilityLoadState = { loading: boolean; error: string; authRequired?: boolean };
 const pending: Determination = { state: "pendiente", reason: "" };
 export const determinationLabels = {
   pendiente: "Pendiente de analizar",
@@ -59,6 +61,7 @@ export function ConnectedApplicability({
   const [eipd, setEipd] = useState(pending);
   const [infancia, setInfancia] = useState(pending);
   const [error, setError] = useState("");
+  const [authRequired, setAuthRequired] = useState(false);
   const [notice, setNotice] = useState("");
   const [queryNotice, setQueryNotice] = useState("");
   const [conflict, setConflict] = useState(false);
@@ -85,6 +88,7 @@ export function ConnectedApplicability({
   useEffect(() => {
     let active = true;
     setLoading(true);
+    setAuthRequired(false);
     setError("");
     setNotice("");
     setQueryNotice("");
@@ -117,7 +121,8 @@ export function ConnectedApplicability({
         if (active) {
           const message = navigationReadError(e, "No se pudo consultar la determinación.");
           setError(message);
-          onLoadState?.({ loading: false, error: message });
+          setAuthRequired(requiresSignIn(e));
+          onLoadState?.({ loading: false, error: message, authRequired: requiresSignIn(e) });
         }
       } finally {
         if (active) setLoading(false);
@@ -397,9 +402,12 @@ export function ConnectedApplicability({
           </p>
         )}
         {error && (
-          <p role="alert" className="rounded bg-red-50 p-3 text-red-800">
-            {error}
-          </p>
+          <>
+            <p role="alert" className="rounded bg-red-50 p-3 text-red-800">
+              {error}
+            </p>
+            <SessionRecovery required={authRequired} />
+          </>
         )}
       </section>
       <p>

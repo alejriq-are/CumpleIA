@@ -9,6 +9,7 @@ import {
   determinationLabels,
   type ApplicabilityLoadState,
 } from "./ConnectedApplicability";
+import { SessionRecovery } from "./SessionRecovery";
 import type { WorkLocation } from "./connected-navigation";
 import type { AvailabilityReadState } from "./connected-availability";
 import { connectedDestinations } from "./connected-destinations";
@@ -164,6 +165,7 @@ export function ConnectedAssessment({
       {section !== "aplicabilidad" && loadState.error && (
         <section className="space-y-3 rounded border border-red-200 bg-red-50 p-4">
           <p role="alert">No se pudo consultar la aplicabilidad. {loadState.error}</p>
+          <SessionRecovery required={loadState.authRequired} />
           <p>
             Los borradores de esta visita se conservan. Reintentar no guarda ni descarta cambios.
           </p>

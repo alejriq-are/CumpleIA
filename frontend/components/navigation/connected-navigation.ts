@@ -1,3 +1,4 @@
+import { requiresSignIn, sessionRequiredMessage } from "@/lib/auth/session";
 import { eipdStepLabels } from "@/lib/licitud/eipd-steps";
 import type { ModuleId } from "./prototype-data";
 import type { WorkContext } from "./ConnectedContext";
@@ -83,6 +84,7 @@ export const ratSections = [
 export const eipdSections = eipdStepLabels;
 
 export function navigationReadError(error: unknown, fallback: string): string {
+  if (requiresSignIn(error)) return sessionRequiredMessage;
   if (
     error instanceof TypeError &&
     /failed to fetch|networkerror|load failed|network request failed/i.test(error.message)

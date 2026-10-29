@@ -2247,3 +2247,82 @@ Se conserva la evidencia de pruebas existente; no se repite la batería por este
 cierre documental. Excluir `frontend/next-env.d.ts` generado y `outputs/`.
 Sin inicio de 12B, merge ni despliegue. Las notas anteriores de publicación
 pendiente son antecedentes; el resultado del push se verifica contra la rama remota.
+
+
+## 12B — recuperación de consultas y sesión, 29/10/2026
+
+Rama `feature/navegacion-12b-recuperacion`, base publicada `ff85ec7`.
+Implementación terminada; validación asistida pendiente. Sin commit ni push de 12B.
+Las entradas anteriores «Sin inicio de 12B» describen el cierre histórico de 12A.
+
+Se confirmó que el acceso compartido de licitud confundía cualquier error del
+proveedor de sesión con una sesión expirada. Ahora distingue sesión ausente o
+respuesta 401, fallo de conexión, servicio de acceso no disponible y otros errores
+HTTP, incluidos 403 y 503. Un error no habilita el editor condicionado.
+La recuperación se ofrece en las consultas de aplicabilidad, apertura de destinos
+y selector de contexto. El reintento de apertura vuelve a consultar aplicabilidad.
+El selector conserva su selección y permite reintentar su lectura sin aplicar contexto.
+
+Solo cuando falta una sesión válida se ofrece «Iniciar sesión en otra pestaña».
+La ayuda pide conservar la pestaña original y regresar a reintentar: la nueva
+pestaña no recupera sus notas sin guardar. Consultar y reintentar no guardan datos,
+no cambian permisos ni confirman o activan EIPD. Los borradores siguen siendo
+memoria de la pestaña; recargar puede perderlos.
+
+Verificación dirigida: ocho escenarios automatizados aprobados, con ausencia de
+sesión, fallo de red, fallo del proveedor y HTTP 401/403/503; incluye recuperación
+del selector de contexto. Comprueban conservación de notas, ausencia de escrituras
+HTTP y de mensajes falsos de guardado. TypeScript, ESLint y formato aprobados.
+Regresión final: 185 pruebas aprobadas y una omitida (captura visual opcional),
+en navegación conectada, maqueta y espacio de licitud.
+Inspección visual de recuperación en ventana de 390 px sin desbordamiento horizontal.
+La restauración de sesión fue simulada: queda pendiente comprobar conjuntamente
+el proveedor real tras iniciar sesión. No se ejecutó un inicio de sesión real ni
+se almacenaron o imprimieron credenciales. Lector de pantalla manual sigue pendiente.
+
+### Recorrido asistido para reanudar 12B
+
+1. En `/dashboard/trabajo`, abrir Bases de licitud → Determinar aplicabilidad.
+2. Añadir `[FICTICIA] Prueba recuperación 12B` al fundamento, sin guardar.
+3. En Red del navegador seleccionar Offline; no recargar la página.
+4. Pulsar Consultar última determinación guardada. Debe explicar un fallo de conexión,
+   conservar el texto y no indicar sesión expirada ni guardado correcto.
+5. Restablecer No throttling y repetir la consulta: debe recuperar la lectura y
+   conservar el fundamento sin guardarlo.
+6. Después validar por separado sesión ausente/401 y recuperación tras autenticación,
+   conservando la pestaña original; registrar el resultado real, sin confundirlo
+   con las pruebas simuladas. Comprobar también el reintento del selector de contexto.
+
+Excluir `frontend/next-env.d.ts` generado y `outputs/` de una eventual publicación.
+No se inicia lote 13, merge ni despliegue.
+
+### 12B — comprobación asistida de conexión y ajuste del selector
+
+El usuario confirma recuperación de la consulta de aplicabilidad al restablecer
+la conexión, conservando el texto pendiente. La captura de la pestaña actualizada
+confirma error de conexión en español, reintento de contextos y Aplicar bloqueado.
+Se detecta y corrige un aviso contradictorio: la lista vacía solo se anuncia cuando
+la lectura termina sin errores. Dos pruebas dirigidas verifican que no aparezca
+ese aviso ante fallo de sesión o red y que se conserve el borrador al reintentar.
+Pendiente confirmación asistida de recuperación del selector y prueba de sesión real.
+
+## 12B — validación asistida completada, 29/10/2026
+
+El usuario confirma recorrido OK de recuperación de aplicabilidad tras desconexión,
+del selector de contextos tras restablecer la red y de autenticación real.
+La captura de sesión ausente muestra el mensaje específico y el acceso a iniciar
+sesión en otra pestaña, conservando `[FICTICIA] Prueba recuperación 12B` en el
+formulario original. El usuario confirma que, tras iniciar sesión con la misma
+cuenta y reintentar en la pestaña original sin recargar, la consulta se recupera
+y el texto pendiente permanece sin guardar. Se completa la aceptación asistida de 12B.
+
+Durante la prueba del selector se corrigió el aviso contradictorio de lista vacía:
+no se anuncia ausencia de evaluaciones cuando falla la consulta. Dos pruebas
+dirigidas adicionales aprobadas después del ajuste; la regresión previa obtuvo
+185 aprobadas y una captura visual opcional omitida. Controles estáticos aprobados.
+Las menciones anteriores a autenticación real o validación asistida pendientes
+son antecedentes históricos. La prueba manual con lector de pantalla sigue pendiente.
+
+Implementación y validación de 12B completadas; pendiente commit y push, sin
+autorización nueva para publicarlos. No se inicia lote 13, merge ni despliegue.
+Excluir `frontend/next-env.d.ts` generado y `outputs/` de una eventual publicación.

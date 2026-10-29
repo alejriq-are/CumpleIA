@@ -20,7 +20,7 @@ export async function buildConnectedHarness(
     empty = path.join(directory, "empty.cjs");
   await writeFile(
     auth,
-    'export const createClient=()=>({auth:{getSession:async()=>({data:{session:{access_token:"PRUEBA"}}}),signOut:async()=>({})}});'
+    'export const createClient=()=>({auth:{getSession:async()=>globalThis.__testSessionResult??({data:{session:{access_token:"PRUEBA"}}}),signOut:async()=>({})}});'
   );
   await writeFile(
     router,

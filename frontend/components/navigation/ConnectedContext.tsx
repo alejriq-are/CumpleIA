@@ -1,4 +1,7 @@
 "use client";
+import { requiresSignIn } from "@/lib/auth/session";
+import { navigationReadError } from "./connected-navigation";
+import { SessionRecovery } from "./SessionRecovery";
 import { useEffect, useId, useRef, useState } from "react";
 import { api, type OrganizationMembershipOut, type TreatmentSummaryOut } from "@/lib/api/client";
 import { licitudApi, type AssessmentSummary } from "@/lib/api/licitud";
@@ -15,6 +18,7 @@ export function ConnectedContext({
   token = sessionToken,
   applying = false,
   applyError = "",
+  applyAuthRequired = false,
 }: {
   organizations: OrganizationMembershipOut[];
   current: WorkContext;
@@ -26,6 +30,7 @@ export function ConnectedContext({
   token?: () => Promise<string>;
   applying?: boolean;
   applyError?: string;
+  applyAuthRequired?: boolean;
 }) {
   const id = useId();
   const dependencyHelpId = `${id}-dependencies`;
@@ -40,10 +45,13 @@ export function ConnectedContext({
   const [rows, setRows] = useState<AssessmentSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [authRequired, setAuthRequired] = useState(false);
+  const [refreshVersion, setRefreshVersion] = useState(0);
   useEffect(() => {
     let active = true;
     setLoading(true);
     setError("");
+    setAuthRequired(false);
     setTreatments([]);
     (async () => {
       try {
@@ -52,7 +60,10 @@ export function ConnectedContext({
           setTreatments(v);
         }
       } catch (e) {
-        if (active) setError(e instanceof Error ? e.message : "No se pudo cargar el inventario.");
+        if (active) {
+          setError(navigationReadError(e, "No se pudo cargar el inventario."));
+          setAuthRequired(requiresSignIn(e));
+        }
       } finally {
         if (active) setLoading(false);
       }
@@ -60,13 +71,14 @@ export function ConnectedContext({
     return () => {
       active = false;
     };
-  }, [org, token]); // treatment selection is validated against this response
+  }, [org, token, refreshVersion]); // treatment selection is validated against this response
   useEffect(() => {
     let active = true;
     setRows([]);
     if (!tid) return;
     setLoading(true);
     setError("");
+    setAuthRequired(false);
     (async () => {
       try {
         const auth = await token();
@@ -88,8 +100,10 @@ export function ConnectedContext({
           if (!selected) setAid("");
         }
       } catch (e) {
-        if (active)
-          setError(e instanceof Error ? e.message : "No se pudieron cargar las evaluaciones.");
+        if (active) {
+          setError(navigationReadError(e, "No se pudieron cargar las evaluaciones."));
+          setAuthRequired(requiresSignIn(e));
+        }
       } finally {
         if (active) setLoading(false);
       }
@@ -97,7 +111,7 @@ export function ConnectedContext({
     return () => {
       active = false;
     };
-  }, [org, tid, token]);
+  }, [org, tid, token, refreshVersion]);
   const purposes = Array.from(
     new Map(rows.map((v) => [v.series_id ?? v.id, v.purpose_snapshot])).entries()
   );
@@ -220,8 +234,23 @@ export function ConnectedContext({
         </select>
       </label>
       {(loading || applying) && <p role="status">Consultando contextos autorizados…</p>}
-      {(error || applyError) && <p role="alert">{error || applyError}</p>}
-      {tid && !loading && rows.length === 0 && (
+      {(error || applyError) && (
+        <div className="space-y-3">
+          <p role="alert">{error || applyError}</p>
+          <SessionRecovery required={error ? authRequired : applyAuthRequired} />
+          {error && (
+            <button
+              type="button"
+              className="rounded border border-blue-300 bg-blue-50 px-3 py-2 font-semibold text-blue-900"
+              disabled={loading || applying}
+              onClick={() => setRefreshVersion((v) => v + 1)}
+            >
+              Reintentar consulta de contextos
+            </button>
+          )}
+        </div>
+      )}
+      {tid && !loading && !error && !applyError && rows.length === 0 && (
         <p>
           No hay evaluaciones guardadas para este tratamiento. Puedes crearlas desde Bases de
           licitud.

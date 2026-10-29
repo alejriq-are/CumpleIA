@@ -9,14 +9,10 @@ import {
   type TreatmentSummaryOut,
 } from "@/lib/api/client";
 import { SaveFeedback } from "./SaveFeedback";
-import { createClient } from "@/lib/supabase/client";
+import { sessionToken } from "@/lib/auth/session";
+export { sessionToken } from "@/lib/auth/session";
 import { legalBases, legalBasisHelp, licitudApi, type AssessmentSummary } from "@/lib/api/licitud";
 
-export async function sessionToken() {
-  const { data, error } = await createClient().auth.getSession();
-  if (error || !data.session) throw new Error("Tu sesión expiró. Vuelve a iniciar sesión.");
-  return data.session.access_token;
-}
 export function LicitudWorkspace({
   organizaciones,
   token = sessionToken,

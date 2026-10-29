@@ -217,6 +217,10 @@ test.beforeEach(async ({ page }) => {
     if (pathname.endsWith("/applicability")) {
       if (method === "GET" && mode === "app-readonly")
         return result({ ...applicability(id), editable: false });
+      if (method === "GET" && mode === "app-unauthorized")
+        return result({ detail: "PRUEBA token no válido" }, 401);
+      if (method === "GET" && mode === "app-forbidden")
+        return result({ detail: "PRUEBA sin permiso para esta evaluación" }, 403);
       if (method === "GET" && mode === "app-offline") return route.abort("internetdisconnected");
       if (method === "GET" && ["app-hold-fail", "app-hold"].includes(mode)) {
         const fail = mode === "app-hold-fail";
@@ -3390,3 +3394,146 @@ test("12A cambiar pasos EIPD no consulta ni escribe y Atrás conserva las notas"
   expect(calls.filter((v) => v.method !== "GET")).toEqual([]);
   expect(errors).toEqual([]);
 });
+
+for (const failure of ["absent", "network", "provider", "api401", "api403", "api503"]) {
+  test(`12B clasifica ${failure} y recupera consulta conservando borradores`, async ({ page }) => {
+    if (failure === "absent") await page.setViewportSize({ width: 390, height: 844 });
+    await legal(page);
+    await enable(page);
+    await section(page, "Describir riesgos");
+    await main(page)
+      .getByLabel("Notas del borrador EIPD (opcional)")
+      .fill("[FICTICIA] Nota 12B conservada");
+    await section(page, "Determinar aplicabilidad");
+    await main(page)
+      .getByLabel("Fundamento sobre EIPD", { exact: true })
+      .fill("[FICTICIA] Determinación 12B pendiente");
+    calls.length = 0;
+    if (failure.startsWith("api"))
+      mode =
+        failure === "api401"
+          ? "app-unauthorized"
+          : failure === "api403"
+            ? "app-forbidden"
+            : "app-fail";
+    else
+      await page.evaluate((kind) => {
+        (globalThis as any).__testSessionResult = {
+          data: { session: null },
+          error:
+            kind === "absent"
+              ? null
+              : kind === "network"
+                ? { name: "AuthRetryableFetchError", status: 0 }
+                : { name: "AuthApiError", status: 503 },
+        };
+      }, failure);
+    await main(page)
+      .getByRole("button", { name: "Consultar última determinación guardada", exact: true })
+      .click();
+    const alert = main(page).getByRole("alert");
+    const auth = failure === "absent" || failure === "api401";
+    await expect(alert).toContainText(
+      auth
+        ? "No hay una sesión válida"
+        : failure === "network"
+          ? "No se pudo conectar"
+          : failure === "provider"
+            ? "No se pudo comprobar la sesión"
+            : failure === "api403"
+              ? "sin permiso"
+              : "PRUEBA determinación no disponible"
+    );
+    if (!auth) await expect(alert).not.toContainText("sesión expiró");
+    const link = main(page).getByRole("link", {
+      name: "Iniciar sesión en otra pestaña",
+      exact: true,
+    });
+    if (auth) {
+      await expect(link).toHaveAttribute("href", "/login");
+      await expect(link).toHaveAttribute("target", "_blank");
+      await expect(
+        main(page).getByText("La pestaña nueva no recupera tus borradores pendientes.", {
+          exact: false,
+        })
+      ).toBeVisible();
+    } else await expect(link).not.toBeVisible();
+    await openSavedRoute(page, "eipd");
+    await expect(main(page).getByRole("alert")).toBeVisible();
+    await expect(main(page).getByLabel("Notas del borrador EIPD (opcional)")).not.toBeVisible();
+    expect(calls.some((v) => v.method !== "GET")).toBe(false);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+      true
+    );
+    await capture(page, `12b-${failure}-error.png`);
+    mode = "ok";
+    await page.evaluate(() => {
+      delete (globalThis as any).__testSessionResult;
+    });
+    if (failure.startsWith("api"))
+      await main(page).getByRole("button", { name: "Reintentar consulta", exact: true }).click();
+    else await page.getByRole("button", { name: "Reintentar apertura", exact: true }).click();
+    await expect(main(page).getByRole("alert")).not.toBeVisible();
+    await expect(main(page).getByLabel("Notas del borrador EIPD (opcional)")).toHaveValue(
+      "[FICTICIA] Nota 12B conservada"
+    );
+    await section(page, "Determinar aplicabilidad");
+    await expect(main(page).getByLabel("Fundamento sobre EIPD", { exact: true })).toHaveValue(
+      "[FICTICIA] Determinación 12B pendiente"
+    );
+    await expect(
+      main(page).getByText("Determinación guardada en el servidor.", { exact: true })
+    ).not.toBeVisible();
+    expect(calls.some((v) => v.method !== "GET")).toBe(false);
+    expect(errors).toEqual([]);
+  });
+}
+
+for (const failure of ["absent", "network"]) {
+  test(`12B cambio de contexto con ${failure} permite reintentar sin perder selección ni notas`, async ({
+    page,
+  }) => {
+    await legal(page);
+    const note = main(page).getByLabel("Fundamento sobre EIPD", { exact: true });
+    await note.fill("[FICTICIA] Nota antes de consultar contextos 12B");
+    calls.length = 0;
+    await page.evaluate((kind) => {
+      (globalThis as any).__testSessionResult = {
+        data: { session: null },
+        error: kind === "absent" ? null : { name: "AuthRetryableFetchError", status: 0 },
+      };
+    }, failure);
+    await page.getByRole("button", { name: "Cambiar contexto", exact: true }).click();
+    const dialog = page.getByRole("dialog", { name: "Contexto de trabajo", exact: true });
+    await expect(dialog.getByRole("alert")).toContainText(
+      failure === "absent" ? "No hay una sesión válida" : "No se pudo conectar"
+    );
+    await expect(
+      dialog.getByRole("button", { name: "Aplicar contexto", exact: true })
+    ).toBeDisabled();
+    await expect(
+      dialog.getByText("No hay evaluaciones guardadas para este tratamiento.", { exact: false })
+    ).not.toBeVisible();
+    if (failure === "absent")
+      await expect(
+        dialog.getByRole("link", { name: "Iniciar sesión en otra pestaña", exact: true })
+      ).toBeVisible();
+    else
+      await expect(
+        dialog.getByRole("link", { name: "Iniciar sesión en otra pestaña", exact: true })
+      ).not.toBeVisible();
+    await page.evaluate(() => {
+      delete (globalThis as any).__testSessionResult;
+    });
+    await dialog
+      .getByRole("button", { name: "Reintentar consulta de contextos", exact: true })
+      .click();
+    await expect(dialog.getByRole("alert")).not.toBeVisible();
+    await expect(dialog.getByLabel("Tratamiento del RAT", { exact: true })).toHaveValue(tid);
+    await expect(dialog.getByLabel("Evaluación", { exact: true })).toHaveValue(aid);
+    await dialog.getByRole("button", { name: "Cancelar", exact: true }).click();
+    await expect(note).toHaveValue("[FICTICIA] Nota antes de consultar contextos 12B");
+    expect(calls.some((v) => v.method !== "GET")).toBe(false);
+    expect(errors).toEqual([]);
+  });
+}

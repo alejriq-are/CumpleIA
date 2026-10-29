@@ -1,4 +1,6 @@
 "use client";
+import { requiresSignIn } from "@/lib/auth/session";
+import { SessionRecovery } from "./SessionRecovery";
 import { useCallback, useEffect, useRef, useState, type MouseEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -109,6 +111,7 @@ export function ConnectedWorkspace({
   const [context, setContext] = useState(false);
   const [validating, setValidating] = useState(false);
   const [error, setError] = useState("");
+  const [authRequired, setAuthRequired] = useState(false);
   const [notice, setNotice] = useState("");
   const [workUnits, setWorkUnits] = useState<Record<string, WorkUnit>>({});
   const updateWorkUnit = useCallback(
@@ -195,6 +198,7 @@ export function ConnectedWorkspace({
     async (next: WorkLocation, replace = true, refreshConditional = false) => {
       const version = ++sequence.current;
       validationTarget.current = next;
+      setAuthRequired(false);
       setValidating(true);
       setError("");
       if (
@@ -247,8 +251,10 @@ export function ConnectedWorkspace({
         }
         return false;
       } catch (e) {
-        if (version === sequence.current)
+        if (version === sequence.current) {
           setError(navigationReadError(e, "No se pudo abrir el contexto autorizado."));
+          setAuthRequired(requiresSignIn(e));
+        }
         return false;
       } finally {
         if (version === sequence.current) setValidating(false);
@@ -877,12 +883,14 @@ export function ConnectedWorkspace({
           {error && !context && (
             <div className="m-4 space-y-3 rounded bg-red-50 p-4 text-red-800">
               <p role="alert">{error}</p>
+              <SessionRecovery required={authRequired} />
               {validationTarget.current && (
                 <button
                   className="rounded border p-3"
                   disabled={validating}
                   onClick={() => {
-                    if (validationTarget.current) void validate(validationTarget.current);
+                    if (validationTarget.current)
+                      void validate(validationTarget.current, true, true);
                   }}
                 >
                   Reintentar apertura
@@ -1159,6 +1167,7 @@ export function ConnectedWorkspace({
             describeDestination={(value) => locationLabel(appliedContextLocation(location, value))}
             applying={validating}
             applyError={error}
+            applyAuthRequired={authRequired}
             apply={(value) => void apply(value)}
             cancel={closeContext}
           />
