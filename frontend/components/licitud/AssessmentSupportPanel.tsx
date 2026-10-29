@@ -1,7 +1,7 @@
 "use client";
 import { documentNavigationButtonClass } from "./document-focus";
 import { useWorkState, type WorkReporter } from "@/components/navigation/work-unit-state";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import type { Assessment } from "@/lib/api/licitud";
 import { SaveFeedback } from "./SaveFeedback";
 import { ApiError } from "@/lib/api/client";
@@ -60,12 +60,15 @@ function TextField({
   value,
   onChange,
   type = "text",
+  help,
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
   type?: string;
+  help?: string;
 }) {
+  const helpId = useId();
   return (
     <label className="block">
       {label}
@@ -73,6 +76,7 @@ function TextField({
         <input
           type="date"
           aria-label={label}
+          aria-describedby={help ? helpId : undefined}
           className={textClass}
           value={value}
           onChange={(e) => onChange(e.target.value)}
@@ -80,10 +84,16 @@ function TextField({
       ) : (
         <textarea
           aria-label={label}
+          aria-describedby={help ? helpId : undefined}
           className={textClass}
           value={value}
           onChange={(e) => onChange(e.target.value)}
         />
+      )}
+      {help && (
+        <span id={helpId} className="mt-1 block text-sm text-slate-700">
+          {help}
+        </span>
       )}
     </label>
   );
@@ -99,10 +109,15 @@ function RatingFields({
   value: Rating;
   onChange: (value: Rating) => void;
 }) {
+  const helpId = useId();
   return (
-    <fieldset className="space-y-3 rounded border p-3">
+    <fieldset aria-describedby={help ? helpId : undefined} className="space-y-3 rounded border p-3">
       <legend className="font-semibold">{label}</legend>
-      {help && <p className="rounded bg-blue-50 p-3 text-base leading-relaxed">{help}</p>}
+      {help && (
+        <p id={helpId} className="rounded bg-blue-50 p-3 text-base leading-relaxed">
+          {help}
+        </p>
+      )}
       <div className="grid gap-3 md:grid-cols-2">
         {(["probability", "impact"] as const).map((key) => (
           <label key={key}>
@@ -136,6 +151,7 @@ function RatingFields({
         definida, no una probabilidad estadística.
       </p>
       <TextField
+        help="Explica los antecedentes que justifican los niveles elegidos y lo que falta verificar. Elegir un nivel no sustituye su fundamento ni acredita una aprobación."
         label={`${label} — Fundamento`}
         value={value.rationale}
         onChange={(rationale) => onChange({ ...value, rationale })}
@@ -485,12 +501,16 @@ export function AssessmentSupportPanel(props: Props) {
           </details>
           <fieldset disabled={disabled} className="space-y-4">
             <TextField
+              help="Indica el período al que se refiere tu análisis. Ejemplo ficticio: 12 meses. Justifica la probabilidad considerando ese período, sin inventar porcentajes."
               label="Horizonte temporal de la valoración"
               value={analysis.horizon}
               onChange={(horizon) => setAnalysis((v) => ({ ...v, horizon }))}
             />
             {!analysis.risks.length && (
-              <p>Guarda riesgos con identificadores en Documentar EIPD antes de valorarlos.</p>
+              <p>
+                Primero añade cada riesgo con su identificador en Describir riesgos y guarda el
+                borrador EIPD. Después vuelve a Valorar riesgos; aquí se usan los riesgos guardados.
+              </p>
             )}
             {analysis.risks.map((item, index) => (
               <section key={item.risk_id} className="space-y-3 rounded border p-3">
@@ -501,6 +521,7 @@ export function AssessmentSupportPanel(props: Props) {
                   onChange={(harm) => risk(index, { ...item, harm })}
                 />
                 <TextField
+                  help="Explica con qué frecuencia puede ocurrir el suceso y en qué condiciones se exponen las personas. Distingue antecedentes disponibles de supuestos pendientes de comprobar."
                   label={`${item.risk_id} — Antecedentes de frecuencia y exposición`}
                   value={item.frequency_context}
                   onChange={(frequency_context) => risk(index, { ...item, frequency_context })}
@@ -520,7 +541,7 @@ export function AssessmentSupportPanel(props: Props) {
                         ? "Es el riesgo que se espera que permanezca si las medidas propuestas se implementan y funcionan como se prevé. Sirve para planificar; no acredita una reducción del riesgo actual."
                         : key === "residual"
                           ? "Es el riesgo que permanece con las medidas ya implementadas y su funcionamiento comprobado mediante evidencias. Mientras falte esa verificación, deja esta valoración sin evaluar y utiliza el residual previsto."
-                          : undefined
+                          : "Riesgo antes de controles: valora la probabilidad del suceso y el daño a las personas sin atribuir eficacia a las medidas propuestas."
                     }
                     value={item[key]}
                     onChange={(next) => risk(index, { ...item, [key]: next })}
@@ -622,6 +643,10 @@ export function AssessmentSupportPanel(props: Props) {
                 />
               </section>
             ))}
+            <p className="text-sm text-slate-700">
+              Guardar valoración de riesgos registra esta valoración y sus fundamentos. No guarda
+              las ediciones pendientes del documento EIPD ni aprueba el tratamiento.
+            </p>
             <SaveFeedback
               error={error}
               message={message}

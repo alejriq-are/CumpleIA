@@ -885,3 +885,41 @@ for (const basis of [null, "consentimiento_art12", "interes_legitimo_art13d"]) {
     await expect(region.getByRole("region", { name: /LIA/ })).toHaveCount(0);
   });
 }
+
+test("11A ayudas asociadas y vista previa conservan ediciones sin guardar", async ({ page }) => {
+  test.skip(integrated, "Ayudas con datos controlados");
+  await draft(page);
+  await expect(page.getByRole("status")).toContainText("Borrador creado");
+  await page.evaluate((id) => (window as any).flow(id), treatment);
+  await page.getByRole("tab", { name: "Completar datos", exact: true }).click();
+  await page.getByRole("button", { name: "Documentar EIPD", exact: true }).click();
+  const region = page.getByRole("region", { name: "Documento EIPD en borrador", exact: true });
+  await expect(
+    region.getByLabel("Referencia del documento EIPD", { exact: true })
+  ).toHaveAccessibleDescription(/Referencia manual.*no es obligatoria/i);
+  const purpose = region.getByLabel("Finalidad del tratamiento", { exact: true });
+  await expect(purpose).toHaveAccessibleDescription(/para qué se usarán los datos/);
+  await purpose.fill("[FICTICIA] Finalidad pendiente 11A");
+  const before = await page.evaluate(
+    () => (window as any).demo.calls.filter((c: any) => c.method === "PATCH").length
+  );
+  await region.getByRole("button", { name: "Ver vista previa EIPD", exact: true }).click();
+  await expect(
+    region.getByRole("note").filter({ hasText: "Vista previa de tu borrador" })
+  ).toContainText("incluye ediciones pendientes");
+  await expect(
+    region.getByRole("complementary", { name: "Vista previa del borrador EIPD" })
+  ).toContainText("[FICTICIA] Finalidad pendiente 11A");
+  expect(
+    await page.evaluate(
+      () => (window as any).demo.calls.filter((c: any) => c.method === "PATCH").length
+    )
+  ).toBe(before);
+  await region.getByRole("button", { name: "Guardar borrador EIPD", exact: true }).click();
+  await expect(region.getByRole("status")).toContainText("Borrador EIPD guardado");
+  await purpose.fill("[FICTICIA] Otra edición pendiente 11A");
+  await expect(
+    region.getByRole("status").filter({ hasText: "Borrador EIPD guardado" })
+  ).toHaveCount(0);
+  await expect(purpose).toHaveValue("[FICTICIA] Otra edición pendiente 11A");
+});

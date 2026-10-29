@@ -278,6 +278,10 @@ posteriores al ajuste visual en navegacion-servidor.md. Sin commit/push ni inici
 
 ### 11A. Ayuda localizada y verbos que explican el efecto
 
+Cierre 29/10/2026: recorrido asistido confirmado OK por el usuario; commit/push autorizado. Evidencias y límites en `navegacion-servidor.md`. Sin inicio de 11B. Las notas anteriores de implementación pendiente se conservan como antecedente.
+
+Estado 29/10/2026: implementado en `feature/navegacion-11a-ayudas`; comprobaciones automatizadas aprobadas, recorrido asistido pendiente. Ver registro en `navegacion-servidor.md`. Sin inicio de 11B.
+
 **Resuelve:** P1/P5, G01/G03/G06/G08/G18/G20/G23–G26 y LIC-UX-015 en alcance de comprensión.
 
 **Cambios:** piloto en campos de tratamiento/alcance EIPD y descripción/valoración de riesgos. Indicar propósito, formato, obligatoriedad real, ejemplo ficticio y requisitos faltantes solo donde ayude. Diferenciar referencia, nombre manual de edición, secuencia del servidor y códigos solicitados. Explicar términos legales junto al campo, sin sustituirlos ni generar conclusiones legales. Conservar borrador y validación del servidor. Definir una ayuda corta reutilizable por concepto; no un gran glosario obligatorio antes de rellenar.

@@ -1,5 +1,41 @@
 # Backlog — CumpleIA
 
+## 11A — validación asistida completada y publicación autorizada, 29/10/2026
+
+Usuario confirma diferencias entre referencia, nombre de edición y versión, vista previa
+con ediciones pendientes y conservación del texto al navegar. Confirma recorrido final
+de valoración, fundamentos y lectura en ventana estrecha. La captura actualizada muestra
+las ayudas de horizonte temporal y antecedentes de frecuencia/exposición; la captura
+anterior no mostraba esas ayudas y no se atribuye a ella su validación.
+
+11A listo para commit/push expresamente autorizado por el usuario. Rama
+`feature/navegacion-11a-ayudas`, base 10B `741f0423bd37db46cec1912e47a1a13ed68ac22b`.
+Se conserva la evidencia automatizada anterior: 33 casos de soporte/editor de infancia y
+21 del workspace aprobados tras el ajuste de proximidad del aviso; TypeScript, ESLint y
+Prettier aprobados. Esta actualización es documental y no requiere repetir la batería.
+Sin certificación con lector de pantalla (7B pendiente), cambios de servidor, merge,
+despliegue ni inicio de 11B. Excluir `frontend/next-env.d.ts` generado y `outputs/`.
+Las menciones inferiores a validación o autorización pendiente son antecedentes.
+
+## 11A — ayudas localizadas implementadas; validación asistida pendiente, 29/10/2026
+
+Rama `feature/navegacion-11a-ayudas`, base publicada 10B
+`741f0423bd37db46cec1912e47a1a13ed68ac22b`. Se incorporan ayudas breves junto a
+finalidad, operaciones, contexto, tecnologías, códigos del alcance y descripción/análisis
+de riesgos; referencia manual y nombre de edición se distinguen de identidad/secuencia
+del servidor. Valoración explica horizonte temporal, fundamentos y riesgo previo a
+controles; sus ayudas se asocian mediante aria-describedby. Vista previa declara si
+incluye ediciones pendientes y que no escribe. Guardar explica su objeto; el aviso
+permanece junto a la acción y se retira al editar. Sin cambios a validaciones, contratos,
+metodología ni permisos; confirmación/activación EIPD bloqueadas.
+
+Pruebas: 33 escenarios de valoración/anexos y editor de infancia aprobados; tras corregir
+la distancia entre ayuda y botón en móvil, los 21 escenarios del workspace aprobados.
+Dos casos nuevos comprueban ayudas accesibles, vista previa sin escritura y retiro del
+éxito al editar. TypeScript, ESLint y Prettier aprobados. No equivale a prueba con lector
+de pantalla ni a validación asistida del usuario; lector manual de 7B pendiente.
+Sin commit/push de 11A ni inicio de 11B. Excluir `frontend/next-env.d.ts` generado y `outputs/`.
+
 ## Publicación autorizada de 10B — 28/10/2026
 
 Usuario solicita commit y autoriza push de feature/navegacion-10b-historial,

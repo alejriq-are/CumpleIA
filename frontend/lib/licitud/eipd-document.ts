@@ -1,6 +1,7 @@
 // Contrato editable EipdResolutionAssessmentV1; nunca incluye identidad del servidor.
 export type Field = {
   label: string;
+  help?: string;
   kind?: "date" | "codes";
   choices?: [string, string][];
   fields?: Fields;
@@ -30,16 +31,36 @@ export const documentFields: Fields = {
   report_reference: { label: "Referencia del informe" },
   prepared_by: { label: "Preparado por" },
   completed_on: { label: "Fecha del documento", kind: "date" },
-  purpose_description: { label: "Finalidad del tratamiento" },
-  processing_operations: { label: "Operaciones de tratamiento" },
-  processing_context: { label: "Contexto del tratamiento" },
-  technologies_description: { label: "Tecnologías utilizadas" },
+  purpose_description: {
+    label: "Finalidad del tratamiento",
+    help: "Describe para qué se usarán los datos en este alcance. Ejemplo ficticio: coordinar citas solicitadas por clientes. Contrasta con la finalidad de la evaluación seleccionada.",
+  },
+  processing_operations: {
+    label: "Operaciones de tratamiento",
+    help: "Describe qué se hace con los datos: recoger, consultar, comunicar o eliminar. Ejemplo ficticio: registrar una solicitud y consultar la agenda.",
+  },
+  processing_context: {
+    label: "Contexto del tratamiento",
+    help: "Explica quiénes intervienen, a quiénes conciernen los datos y en qué circunstancias se utilizan. Separa los hechos conocidos de los antecedentes pendientes.",
+  },
+  technologies_description: {
+    label: "Tecnologías utilizadas",
+    help: "Identifica los sistemas y herramientas utilizados. Ejemplo ficticio: agenda interna con acceso restringido. Indica lo pendiente de confirmar.",
+  },
   exceptions_coverage_analysis: { label: "Análisis de excepciones" },
   scope: {
     label: "Alcance del documento",
     fields: {
-      data_category_codes: { label: "Códigos de categorías de datos", kind: "codes" },
-      data_subject_codes: { label: "Códigos de titulares", kind: "codes" },
+      data_category_codes: {
+        label: "Códigos de categorías de datos",
+        help: "Usa los códigos de categorías del alcance RAT asociado, uno por línea; no escribas descripciones ni inventes códigos. Puedes dejar este campo sin completar mientras reúnes los antecedentes.",
+        kind: "codes",
+      },
+      data_subject_codes: {
+        label: "Códigos de titulares",
+        help: "Titulares son las personas a quienes conciernen los datos. Usa sus códigos del alcance RAT asociado, uno por línea; no nombres de personas.",
+        kind: "codes",
+      },
     },
   },
   necessity_analysis: { label: "Análisis de necesidad" },
@@ -69,11 +90,26 @@ export const documentFields: Fields = {
   risks: {
     label: "Riesgos",
     item: {
-      risk_id: { label: "Identificador del riesgo" },
-      description: { label: "Descripción" },
-      impact_analysis: { label: "Análisis de impacto" },
-      initial_assessment_analysis: { label: "Análisis del riesgo inicial" },
-      residual_assessment_analysis: { label: "Análisis del riesgo residual" },
+      risk_id: {
+        label: "Identificador del riesgo",
+        help: "Asigna un código que permita vincular este riesgo con su valoración y medidas. Ejemplo ficticio: R1. Conserva el mismo código en los pasos siguientes.",
+      },
+      description: {
+        label: "Descripción",
+        help: "Describe el suceso, su causa y las personas afectadas. Ejemplo ficticio: un acceso indebido permite consultar datos de contacto. Valora su nivel en el paso Valorar riesgos.",
+      },
+      impact_analysis: {
+        label: "Análisis de impacto",
+        help: "Explica el daño potencial a las personas y sus derechos. Ejemplo ficticio: la divulgación de datos de contacto podría exponer a una persona a contactos no deseados.",
+      },
+      initial_assessment_analysis: {
+        label: "Análisis del riesgo inicial",
+        help: "Describe el riesgo antes de considerar controles. La selección de probabilidad e impacto se realiza en Valorar riesgos.",
+      },
+      residual_assessment_analysis: {
+        label: "Análisis del riesgo residual",
+        help: "Explica qué riesgo permanece después de las medidas y qué falta comprobar. Distingue una reducción esperada de una reducción verificada.",
+      },
       evidence: evidences,
     },
   },

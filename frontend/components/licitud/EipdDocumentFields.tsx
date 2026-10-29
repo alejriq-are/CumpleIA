@@ -42,8 +42,10 @@ function CodesInput({
   label,
   value,
   onChange,
+  describedBy,
 }: {
   label: string;
+  describedBy?: string;
   value: unknown;
   onChange: (v: string[]) => void;
 }) {
@@ -58,6 +60,7 @@ function CodesInput({
   return (
     <textarea
       aria-label={label}
+      aria-describedby={describedBy}
       className="block w-full rounded border p-2"
       value={raw}
       onChange={(e) => {
@@ -238,16 +241,23 @@ function Controls({
             ) : f.kind === "date" ? (
               <input
                 aria-label={label}
+                aria-describedby={f.help ? `${controlId}-${key}-field-help` : undefined}
                 type="date"
                 className="block w-full rounded border p-2"
                 value={typeof v === "string" ? v : ""}
                 onChange={(e) => set(e.target.value || null)}
               />
             ) : f.kind === "codes" ? (
-              <CodesInput label={label} value={v} onChange={set} />
+              <CodesInput
+                label={label}
+                value={v}
+                onChange={set}
+                describedBy={f.help ? `${controlId}-${key}-field-help` : undefined}
+              />
             ) : (
               <textarea
                 aria-label={label}
+                aria-describedby={f.help ? `${controlId}-${key}-field-help` : undefined}
                 required={f.required}
                 className="block w-full rounded border p-2"
                 value={
@@ -280,7 +290,15 @@ function Controls({
                 {choiceHelp(v)}
               </span>
             )}
-            {f.kind === "codes" && <span>Un código por línea.</span>}
+            {f.help && (
+              <span
+                id={`${controlId}-${key}-field-help`}
+                className="mt-1 block text-sm font-normal text-slate-700"
+              >
+                {f.help}
+              </span>
+            )}
+            {f.kind === "codes" && !f.help && <span>Un código por línea.</span>}
           </label>
         );
       })}

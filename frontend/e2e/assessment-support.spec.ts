@@ -333,3 +333,20 @@ for (const width of [1280, 390, 320]) {
     }
   });
 }
+
+test("11A valoración explica horizonte, fundamentos y verificación sin escribir", async ({
+  page,
+}) => {
+  const { writes } = await setup(page);
+  await expect(
+    page.getByLabel("Horizonte temporal de la valoración", { exact: true })
+  ).toHaveAccessibleDescription(/período.*12 meses/);
+  await expect(
+    page.getByLabel("R1 — Inherente, antes de controles — Fundamento", { exact: true })
+  ).toHaveAccessibleDescription(/justifican los niveles/);
+  await expect(
+    page.getByRole("group", { name: "R1 — Residual actual verificado", exact: true })
+  ).toHaveAccessibleDescription(/implementadas.*evidencias/);
+  await fillRisk(page);
+  expect(writes).toHaveLength(0);
+});

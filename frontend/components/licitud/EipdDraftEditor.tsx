@@ -53,6 +53,7 @@ export function EipdDraftEditor({
   onStepChange?: (step: number) => void;
 }) {
   const editionHelpId = useId();
+  const referenceHelpId = useId();
   const editingHelpId = useId();
   const [localStep, setLocalStep] = useState(0);
   const activeStep = onStepChange ? step : localStep;
@@ -266,6 +267,7 @@ export function EipdDraftEditor({
               Referencia del documento EIPD
               <input
                 aria-label="Referencia del documento EIPD"
+                aria-describedby={referenceHelpId}
                 className="block w-full rounded border p-2"
                 value={String(doc.document_reference ?? "")}
                 onChange={(e) =>
@@ -273,6 +275,11 @@ export function EipdDraftEditor({
                 }
               />
             </label>
+            <p id={referenceHelpId} className="text-sm text-slate-700">
+              Referencia manual para reconocer el documento. Ejemplo ficticio: SIMULADA-EIPD-001. No
+              es el identificador ni la secuencia de versión del servidor; no es obligatoria para
+              guardar este borrador.
+            </p>
             <label className="block">
               {documentLabels.edition}
               <input
@@ -310,6 +317,10 @@ export function EipdDraftEditor({
                 onChange={(e) => setDoc((value) => ({ ...value, notes: e.target.value || null }))}
               />
             </label>
+            <p className="text-sm text-slate-700">
+              Guardar borrador EIPD conserva los campos de los siete pasos en el servidor. Puedes
+              guardar un análisis incompleto; consulta sus pendientes en el diagnóstico.
+            </p>
             <SaveFeedback
               error={error}
               message={message}
@@ -317,8 +328,10 @@ export function EipdDraftEditor({
               dirty={dirty}
               dirtyMessage="EIPD: cambios sin guardar; se conservan al navegar entre secciones y pestañas."
             />
+
             <button
               type="button"
+              aria-expanded={preview}
               className="rounded border px-4 py-2"
               onClick={() => setPreview(!preview)}
             >
@@ -335,6 +348,12 @@ export function EipdDraftEditor({
               className="space-y-2 rounded border border-blue-300 bg-blue-50 p-3"
               aria-label="Vista previa del borrador EIPD"
             >
+              <p role="note">
+                {dirty
+                  ? "Vista previa de tu borrador: incluye ediciones pendientes que aún no están guardadas en el servidor."
+                  : "Vista previa del borrador cargado: no hay ediciones pendientes."}{" "}
+                Abrir esta vista no guarda ni registra una versión.
+              </p>
               <EipdDocumentView
                 value={doc}
                 expanded
