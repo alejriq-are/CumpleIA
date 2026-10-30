@@ -227,7 +227,7 @@ for (const [filename, size, reason] of [
   ["grande.txt", 2097153, "supera el tamaño máximo"],
   ["vacio.txt", 0, "está vacío"],
 ] as const) {
-  test(`anexo ${filename}: motivo junto al selector, foco en error y campos conservados`, async ({
+  test(`anexo ${filename}: archivo inválido bloquea guardar sin duplicar error y permite corregir`, async ({
     page,
   }) => {
     const { writes } = await setup(page, "annexes");
@@ -237,6 +237,14 @@ for (const [filename, size, reason] of [
     await page
       .getByLabel("Descripción del anexo", { exact: true })
       .fill("[FICTICIA] Descripción conservada");
+    await page.getByLabel("Sección relacionada", { exact: true }).selectOption("medidas");
+    await page.getByText("Vínculos opcionales con riesgos y medidas", { exact: true }).click();
+    await page
+      .getByLabel("Códigos de riesgos vinculados (opcional; ejemplo: R1)", { exact: true })
+      .fill("R1");
+    await page
+      .getByLabel("Códigos de medidas vinculadas (opcional; ejemplo: M1)", { exact: true })
+      .fill("M1");
     const input = page.getByLabel("Archivo ficticio PDF o TXT", { exact: true });
     await input.setInputFiles({
       name: filename,
@@ -244,12 +252,13 @@ for (const [filename, size, reason] of [
       buffer: Buffer.alloc(size, 88),
     });
     await expect(input).toHaveAttribute("aria-invalid", "true");
-    await expect(page.locator("#annex-file-help")).toContainText(reason);
+    await expect(input).toHaveAccessibleDescription(new RegExp(reason));
     await page.getByLabel("Confirmo que el archivo y sus datos son ficticios").check();
-    await page.getByRole("button", { name: "Guardar anexo ficticio", exact: true }).click();
-    const error = page.getByRole("alert");
-    await expect(error).toContainText(reason);
-    await expect(error).toBeFocused();
+    const save = page.getByRole("button", { name: "Guardar anexo ficticio", exact: true });
+    await expect(save).toBeDisabled();
+    await expect(save).toHaveAccessibleDescription(/Corrige el archivo/);
+    await expect(page.getByRole("alert")).toHaveCount(1);
+    await expect(page.getByRole("alert")).toContainText(reason);
     expect(writes).toHaveLength(0);
     await expect(page.getByLabel("Descripción del anexo", { exact: true })).toHaveValue(
       "[FICTICIA] Descripción conservada"
@@ -262,7 +271,22 @@ for (const [filename, size, reason] of [
     });
     await expect(input).toHaveAttribute("aria-invalid", "false");
     await expect(page.getByRole("alert")).toHaveCount(0);
-    await page.getByRole("button", { name: "Guardar anexo ficticio", exact: true }).click();
+    await expect(page.getByLabel("Referencia del anexo (SIMULADA-)", { exact: true })).toHaveValue(
+      "SIMULADA-VALIDACION"
+    );
+    await expect(page.getByLabel("Sección relacionada", { exact: true })).toHaveValue("medidas");
+    await expect(
+      page.getByLabel("Códigos de riesgos vinculados (opcional; ejemplo: R1)", { exact: true })
+    ).toHaveValue("R1");
+    await expect(
+      page.getByLabel("Códigos de medidas vinculadas (opcional; ejemplo: M1)", { exact: true })
+    ).toHaveValue("M1");
+    await expect(
+      page.getByLabel("Confirmo que el archivo y sus datos son ficticios")
+    ).toBeChecked();
+    await expect(save).toBeEnabled();
+    await save.focus();
+    await page.keyboard.press("Space");
     await expect(page.getByRole("status")).toContainText("Anexo ficticio guardado");
     expect(writes).toHaveLength(1);
   });
@@ -350,3 +374,96 @@ test("11A valoración explica horizonte, fundamentos y verificación sin escribi
   await fillRisk(page);
   expect(writes).toHaveLength(0);
 });
+
+test("anexo: borrar selección y rechazo del servidor conservan datos sin anunciar éxito", async ({
+  page,
+}) => {
+  const { writes } = await setup(page, "annexes", "denied");
+  const input = page.getByLabel("Archivo ficticio PDF o TXT", { exact: true });
+  const save = page.getByRole("button", { name: "Guardar anexo ficticio", exact: true });
+  await expect(save).toBeDisabled();
+  await expect(save).toHaveAccessibleDescription(/selecciona un archivo/);
+  await page
+    .getByLabel("Referencia del anexo (SIMULADA-)", { exact: true })
+    .fill("SIMULADA-RECHAZO");
+  await page
+    .getByLabel("Descripción del anexo", { exact: true })
+    .fill("[FICTICIA] Conservar ante rechazo");
+  const file = {
+    name: "valido.txt",
+    mimeType: "text/plain",
+    buffer: Buffer.from("[FICTICIA] Texto"),
+  };
+  await input.setInputFiles(file);
+  await expect(save).toBeDisabled();
+  await expect(save).toHaveAccessibleDescription(/confirma/);
+  await page.getByLabel("Confirmo que el archivo y sus datos son ficticios").check();
+  await expect(save).toBeEnabled();
+  await input.setInputFiles([]);
+  await expect(save).toBeDisabled();
+  await expect(save).toHaveAccessibleDescription(/selecciona un archivo/);
+  await input.setInputFiles(file);
+  await save.click();
+  await expect(page.getByRole("alert")).toHaveCount(1);
+  await expect(page.getByRole("alert")).toContainText("sin permiso");
+  await expect(page.getByRole("alert")).toBeFocused();
+  await expect(page.getByRole("status")).toHaveCount(0);
+  await expect(page.getByLabel("Descripción del anexo", { exact: true })).toHaveValue(
+    "[FICTICIA] Conservar ante rechazo"
+  );
+  await expect(input).toHaveAttribute("aria-invalid", "false");
+  expect(writes).toHaveLength(1);
+});
+
+for (const width of [1280, 390, 320]) {
+  test(`anexos: aviso y vínculos opcionales legibles con teclado a ${width}px`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width, height: 900 });
+    const { writes } = await setup(page, "annexes");
+    const disclosure = page.getByText("Vínculos opcionales con riesgos y medidas", { exact: true });
+    await page.getByLabel("Sección relacionada", { exact: true }).focus();
+    await page.keyboard.press("Tab");
+    await expect(disclosure).toBeFocused();
+    const risks = page.getByLabel("Códigos de riesgos vinculados (opcional; ejemplo: R1)", {
+      exact: true,
+    });
+    for (let cycle = 0; cycle < 3; cycle++) {
+      await page.keyboard.down("Space");
+      await expect(risks).toBeVisible();
+      await page.keyboard.down("Space");
+      await expect(risks).toBeVisible();
+      await page.keyboard.up("Space");
+      await expect(risks).toBeVisible();
+      await expect(disclosure).toBeFocused();
+      if (cycle === 0) await risks.fill("R1");
+      await disclosure.focus();
+      await page.keyboard.press("Space");
+      await expect(risks).toBeHidden();
+    }
+    await page.keyboard.press("Enter");
+    await expect(risks).toBeVisible();
+    await expect(risks).toHaveValue("R1");
+    await disclosure.click();
+    await expect(risks).toBeHidden();
+    await page.getByLabel("Archivo ficticio PDF o TXT", { exact: true }).setInputFiles({
+      name: "invalido.csv",
+      mimeType: "text/csv",
+      buffer: Buffer.from("[FICTICIA]"),
+    });
+    await expect(page.getByRole("alert")).toContainText("Formato no admitido");
+    await expect(
+      page.getByRole("button", { name: "Guardar anexo ficticio", exact: true })
+    ).toBeDisabled();
+    if (process.env.CUMPLEIA_PREVIEW_CSS) {
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+        true
+      );
+      await page.screenshot({
+        path: `/tmp/cumpleia-annex-validation-${width}.png`,
+        fullPage: true,
+      });
+    }
+    expect(writes).toHaveLength(0);
+  });
+}

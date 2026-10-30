@@ -1,5 +1,27 @@
 # Handoff vigente de CumpleIA
 
+## Paso 1 — validación asistida y publicación autorizada, 30/10/2026
+
+El usuario confirmó «recorrido OK» tras el ajuste de Espacio en «Vínculos opcionales con riesgos y medidas» y autorizó commit/push. Quedan aceptados el recorrido de archivo inválido → archivo válido con conservación de campos y la apertura/cierre del bloque con teclado. Las notas anteriores de aceptación/autorización pendiente quedan superadas en este alcance.
+
+Verificación técnica: 42 pruebas Chromium aprobadas en assessment-support y licitud-workspace con respuestas controladas y estilos de la aplicación; tipos y ESLint aprobados. LIC-UX-014 queda resuelto en este alcance. LIC-UX-015 conserva pendientes fuera de los dos desplegables del panel. La validación manual con lector de pantalla continúa pendiente; no se atribuye una subida real nueva de anexo a estas pruebas.
+
+Se publica en `feature/anexos-estado-acciones`. Sin merge ni despliegue; confirmación/activación EIPD bloqueadas. Se excluyen los cambios preexistentes de `frontend/next-env.d.ts` y `outputs/`.
+
+## Paso 1 — anexos y acciones: implementación local, 29/10/2026
+
+Usuario autoriza continuar Paso 1 tras el cierre 13. Rama `feature/anexos-estado-acciones`, base `205f4c9b92ae700bc99efed1447f44d74624ef58`.
+
+LIC-UX-014 implementado localmente: Guardar anexo se deshabilita ante formato no admitido, archivo vacío o mayor de 2 MiB. El motivo queda una sola vez junto al selector, asociado mediante descripción accesible y aviso; junto a Guardar se explica qué corregir sin duplicar el error. Sustituir o quitar el archivo actualiza el estado y conserva los demás campos y la declaración ficticia. La validación del cliente API y del servidor se mantiene; un rechazo de envío conserva foco/aviso y no anuncia éxito.
+
+LIC-UX-015 parcial y acotado al panel de valoración/anexos: metodología y vínculos opcionales usan el patrón compartido de desplegable reconocible con fondo suave, borde y foco. Se corrigió el ancho mínimo del formulario de anexos tras detectar desborde a 320 px. No se declara una auditoría transversal de todos los accesos.
+
+Validación local: 42 pruebas Chromium aprobadas en assessment-support y licitud-workspace, con respuestas controladas; incluye CSV, vacío, sobredimensionado, corrección, conservación de referencia/descripción/sección/vínculos/declaración, retiro de archivo, rechazo de servidor, teclado y anchos 1280/390/320. Inspección visual de captura a 320 px aprobada. No acredita una nueva prueba contra API real ni lector de pantalla manual. Tipos, ESLint, Prettier y diferencias verificados. Una primera ejecución detectó desborde a 320 px; corregido antes de la ejecución final aprobada.
+
+Pendiente: recorrido asistido en `/dashboard/trabajo` → Preparar → Anexos de respaldo: (1) completar metadatos ficticios y elegir CSV, comprobar único error y Guardar bloqueado; (2) reemplazar por TXT válido y confirmar conservación/habilitación según declaración; (3) quitar selección o probar vacío/mayor de 2 MiB, comprobar motivo; (4) abrir/cerrar vínculos con teclado y revisar ventana estrecha. No guardar un anexo nuevo solo para probar presentación. LIC-UX-014 pendiente aceptación asistida; LIC-UX-015 sigue abierto fuera de este panel.
+
+Sin cambios de API, límites, persistencia ni permisos; EIPD bloqueada. No se ejecuta commit/push de este Paso 1 sin autorización específica. Se preservan `frontend/next-env.d.ts` y `outputs/` preexistentes.
+
 ## 13 — cierre y publicación autorizados, 29/10/2026
 
 El usuario autoriza commit y push de la documentación del bloque 13 tras los recorridos asistidos aprobados en el alcance del checklist. Se publican guía de tareas, glosario, ciclo documental y resultados con sus límites. La autorización no acredita lectura completa de las guías ni una nueva ejecución de toda la batería.
@@ -1321,3 +1343,10 @@ docs/ai/pilot-results.md. Accesos: docs/ai/access-matrix.md.
 Los handoffs fechados previos permanecen como antecedentes para preservar enlaces.
 Nuevos cierres historicos, solo cuando aporten una decision o evidencia necesaria,
 van a docs/archive/. No duplicar el historial en este archivo.
+
+### Seguimiento de teclado del Paso 1 — 30/10/2026
+
+- El usuario validó el recorrido de archivo inválido y sustitución por un archivo válido, conservando los campos del anexo.
+- Informó que la barra espaciadora no abría/cerraba «Vínculos opcionales con riesgos y medidas». La prueba aislada con comportamiento nativo no reproducía el fallo; se añadió activación explícita con Espacio, cancelando la acción nativa para evitar un doble cambio y descartando la repetición al mantener la tecla pulsada.
+- Se amplió la prueba para llegar con Tab desde «Sección relacionada», abrir/cerrar tres veces, mantener Espacio, usar Enter y clic, y conservar el código R1. Comprobado en 1280, 390 y 320 píxeles.
+- Falta la validación manual del usuario en su navegador con este ajuste. No se considera una comprobación con lector de pantalla. Sin commit ni push de este paso todavía.

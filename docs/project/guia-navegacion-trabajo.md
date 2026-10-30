@@ -64,7 +64,7 @@ Si el formulario está bloqueado, guarda primero los cambios del documento asoci
 
 En el espacio conectado se admiten PDF o TXT UTF-8, hasta 2 MiB por archivo y 20 MiB/50 anexos por evaluación. El servidor conserva los archivos y sus versiones. En la maqueta de referencia se conservaba solo el nombre: son comportamientos distintos. Un archivo adjunto no acredita por sí mismo evidencia suficiente ni verificación de una medida.
 
-Sigue pendiente mejorar la presentación de ciertos errores y la disponibilidad del botón ante archivos inválidos (LIC-UX-014); la validación no debe darse por superada por el aspecto del botón.
+Actualización local de Paso 1 (LIC-UX-014): Guardar se bloquea ante formato no admitido, archivo vacío o mayor de 2 MiB; el motivo aparece junto al selector y la ayuda del botón indica qué corregir. Cambiar el archivo conserva los demás campos. Pendiente aceptación asistida y publicación de este ajuste; se mantiene la validación al enviar y en el servidor.
 
 ## Qué persiste cada acción
 
@@ -117,3 +117,5 @@ Los siguientes fragmentos van después de `/dashboard/trabajo`; conservan los pa
 | Documentos guardados / historial | `#/licitud/revisar` / `#/licitud/historial` |
 
 Abrir una ruta no elude los controles de permiso, estado, aplicabilidad o material del servidor.
+
+Validación del Paso 1 (30/10/2026): el usuario comprobó la corrección del archivo del anexo y el uso de Espacio para abrir/cerrar «Vínculos opcionales con riesgos y medidas». Cambios aceptados para publicación; permanece pendiente la comprobación manual con lector de pantalla.

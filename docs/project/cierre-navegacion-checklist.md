@@ -1,5 +1,13 @@
 # Cierre de navegación: aceptación y remanentes
 
+## Paso 1 — validación asistida y publicación autorizada, 30/10/2026
+
+El usuario confirmó «recorrido OK» tras el ajuste de Espacio en «Vínculos opcionales con riesgos y medidas» y autorizó commit/push. Quedan aceptados el recorrido de archivo inválido → archivo válido con conservación de campos y la apertura/cierre del bloque con teclado. Las notas anteriores de aceptación/autorización pendiente quedan superadas en este alcance.
+
+Verificación técnica: 42 pruebas Chromium aprobadas en assessment-support y licitud-workspace con respuestas controladas y estilos de la aplicación; tipos y ESLint aprobados. LIC-UX-014 queda resuelto en este alcance. LIC-UX-015 conserva pendientes fuera de los dos desplegables del panel. La validación manual con lector de pantalla continúa pendiente; no se atribuye una subida real nueva de anexo a estas pruebas.
+
+Se publica en `feature/anexos-estado-acciones`. Sin merge ni despliegue; confirmación/activación EIPD bloqueadas. Se excluyen los cambios preexistentes de `frontend/next-env.d.ts` y `outputs/`.
+
 Fecha: 29/10/2026. Bloque 13 en `feature/navegacion-13-guia-cierre`.
 Base funcional publicada: `41c561b78e7b4d96994d927b86422d7d9efed5d1` (12B).
 Estado: **recorridos asistidos ejecutados y aprobados en el alcance registrado**.
@@ -65,7 +73,7 @@ Fuentes de cobertura para localizar casos (su presencia no declara ejecutada otr
 | LIC-RISK-001 | Metodología configurable y versionada. | La matriz interna fija actual no resuelve este requisito. |
 | Accesibilidad 7B | Uso manual con lector de pantalla. | Preparar sesión con herramienta disponible; usuario no dispone de ella en estas pruebas. No certificar por teclado o automatización. |
 | Circuito EIPD general | Versiones históricas, revisión y decisión formales completas no integradas; confirmación/activación bloqueadas. | Definir contratos, facultades y requisitos; no extender automáticamente el circuito de infancia. |
-| Cierre 13 | Revisión de las guías por el usuario y autorización específica de publicación. | Recorridos asistidos concluidos en el alcance de la tabla; no convertir casos no repetidos en pruebas nuevas. |
+| Cierre 13 | Publicación autorizada y verificada en `205f4c9`; lectura completa de guías no acreditada como prueba. | Recorridos asistidos concluidos en el alcance de la tabla; no convertir casos no repetidos en pruebas nuevas. |
 
 ## Trazabilidad de las propuestas
 
@@ -86,3 +94,14 @@ Fuentes de cobertura para localizar casos (su presencia no declara ejecutada otr
 | P13 | Evidencia por tarea, versión, contexto, resultado y límite en este checklist. |
 
 G01–G30 se conservan uno a uno en el glosario, con las sustituciones aceptadas o descartadas. C19 se aplica transversalmente: separar observado, inferido del código y pendiente. Claude es una referencia externa de análisis; no participa en aprobación, ejecución, revisión formal ni decisión del circuito del proyecto.
+
+## Seguimiento posterior: Paso 1, 29/10/2026
+
+LIC-UX-014 implementado localmente en `feature/anexos-estado-acciones`, pendiente aceptación asistida/publicación. LIC-UX-015 abordado solo en desplegables del panel de valoración/anexos; no se cierra transversalmente. Evidencia y recorrido en [registro de navegación](navegacion-servidor.md). Este seguimiento no modifica los resultados históricos de 13.
+
+### Seguimiento de teclado del Paso 1 — 30/10/2026
+
+- El usuario validó el recorrido de archivo inválido y sustitución por un archivo válido, conservando los campos del anexo.
+- Informó que la barra espaciadora no abría/cerraba «Vínculos opcionales con riesgos y medidas». La prueba aislada con comportamiento nativo no reproducía el fallo; se añadió activación explícita con Espacio, cancelando la acción nativa para evitar un doble cambio y descartando la repetición al mantener la tecla pulsada.
+- Se amplió la prueba para llegar con Tab desde «Sección relacionada», abrir/cerrar tres veces, mantener Espacio, usar Enter y clic, y conservar el código R1. Comprobado en 1280, 390 y 320 píxeles.
+- Falta la validación manual del usuario en su navegador con este ajuste. No se considera una comprobación con lector de pantalla. Sin commit ni push de este paso todavía.

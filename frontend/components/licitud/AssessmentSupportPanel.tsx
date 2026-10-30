@@ -1,5 +1,5 @@
 "use client";
-import { documentNavigationButtonClass } from "./document-focus";
+import { documentDisclosureClass, documentNavigationButtonClass } from "./document-focus";
 import { useWorkState, type WorkReporter } from "@/components/navigation/work-unit-state";
 import { useEffect, useId, useRef, useState } from "react";
 import type { Assessment } from "@/lib/api/licitud";
@@ -184,6 +184,17 @@ export function AssessmentSupportPanel(props: Props) {
     [fictitious, setFictitious] = useState(false);
   const analysisDirty = Boolean(baseline && JSON.stringify(analysis) !== baseline),
     annexDirty = Boolean(file || Object.entries(annex).some(([key, v]) => key !== "section" && v));
+  const fileInput = useRef<HTMLInputElement>(null);
+  const fileHelpId = useId();
+  const saveHelpId = useId();
+  const fileError = file ? annexFileError(file) : "";
+  const annexSaveHelp = fileError
+    ? "Guardar no está disponible. Corrige el archivo indicado arriba; los demás campos se conservan."
+    : !file
+      ? "Para guardar, selecciona un archivo PDF o TXT UTF-8 con contenido, de hasta 2 MiB."
+      : !fictitious
+        ? "Para guardar, confirma que el archivo y sus datos son ficticios."
+        : "";
   const [operation, setOperation] = useState<"risk" | "annex" | null>(null);
   useWorkState(props.onRiskState, {
     loaded: valid,
@@ -300,6 +311,10 @@ export function AssessmentSupportPanel(props: Props) {
       uncertain
     )
       return;
+    if (kind === "annex" && fileError) {
+      fileInput.current?.focus();
+      return;
+    }
     running.current = true;
     setOperation(kind);
     setBusy(true);
@@ -417,7 +432,7 @@ export function AssessmentSupportPanel(props: Props) {
       {props.mode === "risks" && (
         <>
           <details className="rounded bg-blue-50 p-3">
-            <summary className="font-semibold">
+            <summary className={documentDisclosureClass}>
               Metodología CUMPLEIA-CUALITATIVA-1 y criterios
             </summary>
             <p>
@@ -757,7 +772,7 @@ export function AssessmentSupportPanel(props: Props) {
             </article>
           ))}
           {props.mode === "annexes" && (
-            <fieldset disabled={disabled} className="space-y-3">
+            <fieldset disabled={disabled} className="min-w-0 space-y-3">
               <legend>Agregar anexo ficticio</legend>
               <TextField
                 label="Referencia del anexo (SIMULADA-)"
@@ -789,7 +804,25 @@ export function AssessmentSupportPanel(props: Props) {
                 alcance, base de licitud u otra sección sin vincularlo a riesgos o medidas.
               </p>
               <details className="space-y-3 rounded border p-3">
-                <summary>Vínculos opcionales con riesgos y medidas</summary>
+                <summary
+                  className={documentDisclosureClass}
+                  onKeyDown={(event) => {
+                    if (event.code !== "Space" && event.key !== " " && event.key !== "Spacebar")
+                      return;
+                    // Cancel the native action so Space toggles once, including on repeated openings.
+                    event.preventDefault();
+                    if (event.repeat) return;
+                    const details = event.currentTarget.parentElement as HTMLDetailsElement;
+                    details.open = !details.open;
+                  }}
+                  onKeyUp={(event) => {
+                    if (event.code === "Space" || event.key === " " || event.key === "Spacebar") {
+                      event.preventDefault();
+                    }
+                  }}
+                >
+                  Vínculos opcionales con riesgos y medidas
+                </summary>
                 <p className="text-sm">
                   Completa estos vínculos solo si el archivo respalda riesgos o medidas específicos.
                   Son independientes de la sección elegida; puedes dejarlos vacíos. Usa códigos ya
@@ -810,13 +843,14 @@ export function AssessmentSupportPanel(props: Props) {
               <label className="block">
                 Archivo ficticio PDF o TXT
                 <input
+                  ref={fileInput}
                   key={support?.annexes.length ?? 0}
                   type="file"
                   className="block max-w-full"
                   accept=".pdf,.txt"
                   aria-label="Archivo ficticio PDF o TXT"
-                  aria-describedby="annex-file-help"
-                  aria-invalid={Boolean(file && annexFileError(file))}
+                  aria-describedby={fileHelpId}
+                  aria-invalid={Boolean(fileError)}
                   onChange={(e) => {
                     setFile(e.target.files?.[0] ?? null);
                     setError("");
@@ -825,14 +859,15 @@ export function AssessmentSupportPanel(props: Props) {
                 />
               </label>
               <p
-                id="annex-file-help"
+                id={fileHelpId}
+                role={fileError ? "alert" : undefined}
                 className={
-                  file && annexFileError(file)
+                  fileError
                     ? "rounded border border-red-600 bg-red-50 p-3 text-red-950"
                     : "text-slate-700"
                 }
               >
-                {(file && annexFileError(file)) ||
+                {fileError ||
                   "Formatos admitidos: PDF o TXT UTF-8. Tamaño máximo: 2 MiB por archivo."}
               </p>
               <label className="block">
@@ -850,10 +885,19 @@ export function AssessmentSupportPanel(props: Props) {
                 dirty={annexDirty && !message}
                 dirtyMessage="Anexo pendiente de guardar. Los campos se conservan al corregir el archivo."
               />
+              {annexSaveHelp && (
+                <p
+                  id={saveHelpId}
+                  className="rounded border border-slate-300 bg-slate-50 p-3 text-slate-800"
+                >
+                  {annexSaveHelp}
+                </p>
+              )}
               <button
                 className="rounded bg-blue-800 px-3 py-2 text-white disabled:opacity-50"
                 type="button"
-                disabled={disabled || !file || !fictitious}
+                disabled={disabled || !file || !!fileError || !fictitious}
+                aria-describedby={annexSaveHelp ? saveHelpId : undefined}
                 onClick={() => void mutate("annex")}
               >
                 {busy ? "Guardando anexo…" : "Guardar anexo ficticio"}
