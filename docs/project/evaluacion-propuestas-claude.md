@@ -1,5 +1,7 @@
 # Evaluación integral de las propuestas de navegación y terminología
 
+Seguimiento vigente al 29/10/2026: [guía consolidada](guia-navegacion-trabajo.md), [glosario G01–G30](glosario-funcional.md) y [aceptación y remanentes del bloque 13](cierre-navegacion-checklist.md). Este análisis conserva las decisiones y la base histórica con que se redactó.
+
 Fecha: 26 de octubre de 2026. Base verificada: `2e3f5460190185413f6e85243ad59958ba148463`.
 
 Estado: análisis y decisiones de diseño para planificar. **No implementa cambios de interfaz, formularios, permisos ni servidor.** Los cambios aceptados para planificación requieren implementación y aceptación por sublote.

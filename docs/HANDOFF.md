@@ -1,5 +1,52 @@
 # Handoff vigente de CumpleIA
 
+## 13 — cierre y publicación autorizados, 29/10/2026
+
+El usuario autoriza commit y push de la documentación del bloque 13 tras los recorridos asistidos aprobados en el alcance del checklist. Se publican guía de tareas, glosario, ciclo documental y resultados con sus límites. La autorización no acredita lectura completa de las guías ni una nueva ejecución de toda la batería.
+
+Se conservan el backlog funcional y la prueba manual con lector de pantalla pendiente. Sesión real conserva evidencia de 12B. Sin cambios de interfaz, merge ni despliegue. Las notas anteriores de autorización pendiente son antecedentes históricos superados por esta autorización.
+
+## 13 — recorridos asistidos consolidados, 29/10/2026
+
+Rama `feature/navegacion-13-guia-cierre`, base funcional publicada `41c561b`.
+Guía, glosario G01–G30, ciclo documental e identidades y checklist único preparados.
+Usuario aprueba los recorridos realizados: conservación y retorno EIPD, vista
+previa/consulta/guardado, aplicabilidad y disponibilidad, consulta de infancia,
+revisión frente a decisión con facultad revocada, copia/previsualización sin
+registro y cancelación de reemplazo, paneles/teclado/zoom 200 %, recuperación de
+red y ámbitos de módulos con localización del formulario de anexos.
+
+Límites: sesión real conserva aceptación anterior de 12B, sin repetirla en 13;
+no se registraron nuevas actuaciones de infancia ni se cargaron anexos en este
+cierre. Lector manual pendiente; backlog funcional preservado. La lectura final
+de las guías y autorización específica de commit/push de 13 quedan pendientes.
+No se modifica interfaz ni contratos en 13. Excluir `frontend/next-env.d.ts` y
+`outputs/` preexistentes; sin merge ni despliegue. Las entradas anteriores de
+13 pendiente de recorridos describen el avance histórico, superado por esta nota.
+
+## 13 — guía y cierre documental preparados, 29/10/2026
+
+Rama `feature/navegacion-13-guia-cierre`, base publicada y verificada
+`41c561b78e7b4d96994d927b86422d7d9efed5d1` (12B).
+Se incorporan guía de tareas, glosario G01–G30, mapa de identidades y actualización
+del ciclo documental, con checklist único de ocho recorridos y remanentes.
+El bloque 13 modifica documentación; no cambia formularios ni contratos.
+
+La validación asistida integral de 13 sigue **No probado**; comenzar con 13-01/13-02.
+No repetir guardados por localizar un editor que ya está habilitado. La evidencia
+anterior conserva sus límites: 185 pruebas aprobadas y una omitida en regresión
+12B, más dos comprobaciones dirigidas del ajuste posterior, sin sumarlas como
+escenarios únicos. Sesión real y recuperación aceptadas por el usuario en 12B.
+Lector de pantalla manual, formularios completos consentimiento/LIA y circuito
+formal EIPD general continúan pendientes. Confirmación/activación EIPD bloqueadas.
+
+Guía: [guia-navegacion-trabajo.md](project/guia-navegacion-trabajo.md).
+Aceptación/remanentes: [cierre-navegacion-checklist.md](project/cierre-navegacion-checklist.md).
+Las notas anteriores de no inicio de 13 o publicación pendiente de 12B son
+históricas: 12B ya está publicado en `41c561b`. Este bloque 13 aún no tiene
+commit/push autorizado. Excluir `frontend/next-env.d.ts` y `outputs/` preexistentes.
+Sin merge, despliegue ni cierre implícito de los pendientes funcionales.
+
 ## 12B — cierre y publicación autorizados, 29/10/2026
 
 El usuario autoriza commit y push del bloque 12B validado en

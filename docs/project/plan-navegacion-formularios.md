@@ -1,5 +1,17 @@
 # Plan de navegación y formularios: lotes 6–13
 
+## 13 — cierre y publicación autorizados, 29/10/2026
+
+El usuario autoriza commit y push de la documentación del bloque 13 tras los recorridos asistidos aprobados en el alcance del checklist. Se publican guía de tareas, glosario, ciclo documental y resultados con sus límites. La autorización no acredita lectura completa de las guías ni una nueva ejecución de toda la batería.
+
+Se conservan el backlog funcional y la prueba manual con lector de pantalla pendiente. Sesión real conserva evidencia de 12B. Sin cambios de interfaz, merge ni despliegue. Las notas anteriores de autorización pendiente son antecedentes históricos superados por esta autorización.
+
+**Actualización 29/10/2026 — bloque 13:** recorridos asistidos completados en el alcance del [checklist único](cierre-navegacion-checklist.md). Pendientes lectura final de guías y autorización de publicación. Sesión real conserva evidencia 12B; lector manual y remanentes funcionales siguen abiertos. Esta actualización prevalece sobre los estados de avance anteriores.
+
+**Estado vigente al 29/10/2026:** sublotes hasta 12B publicados; base `41c561b`. Bloque 13 con documentación preparada y aceptación integral asistida pendiente. [Guía](guia-navegacion-trabajo.md), [glosario](glosario-funcional.md) y [checklist único de cierre](cierre-navegacion-checklist.md). Lector manual pendiente; no hay autorización nueva de commit/push para 13.
+
+**Nota de lectura:** fechas y estados de las entradas anteriores se conservan como antecedentes; prevalece este estado vigente y el checklist de cierre.
+
 Fecha: 26 de octubre de 2026. Base funcional: `2e3f5460190185413f6e85243ad59958ba148463`.
 
 Estado al 27/10/2026: **8B con recorridos asistidos completados**, sobre 8A publicado `e04d8d8`. 111 escenarios de regresión y cinco de apertura repetida aprobados en ejecuciones separadas. Usuario confirma secuencia, conservación, panel móvil/cierres/foco, zoom real 200 %, ampliación y Atrás/Adelante. [Evidencia y límites](navegacion-servidor.md#8b--recorridos-asistidos-completados-27102026). Commit/push de 8B autorizado por el usuario el 27/10/2026; lote 9 no iniciado. Lector manual de 7B pendiente. [Análisis y decisiones](evaluacion-propuestas-claude.md).
@@ -349,7 +361,7 @@ dos nuevas de precarga autorizada y cancelación. Sin commit/push ni inicio de 1
 
 ### 12B. Error temporal frente a sesión ausente
 
-**Estado al 29/10/2026:** implementación y validación asistida completadas en `feature/navegacion-12b-recuperacion`, base `ff85ec7`. El usuario confirma recuperación de conexión, contextos y sesión real conservando el borrador en la pestaña original. Pruebas dirigidas y controles estáticos aprobados; regresión de 185 aprobadas y una captura opcional omitida, seguida de dos pruebas aprobadas del ajuste de aviso vacío. Pendiente commit/push. Evidencia en `navegacion-servidor.md`, entrada de validación asistida 12B.
+**Estado al 29/10/2026:** implementación y validación asistida completadas en `feature/navegacion-12b-recuperacion`, base `ff85ec7`. El usuario confirma recuperación de conexión, contextos y sesión real conservando el borrador en la pestaña original. Pruebas dirigidas y controles estáticos aprobados; regresión de 185 aprobadas y una captura opcional omitida, seguida de dos pruebas aprobadas del ajuste de aviso vacío. Publicado en `41c561b78e7b4d96994d927b86422d7d9efed5d1`, verificado contra la rama remota. Evidencia en `navegacion-servidor.md`, entrada de validación asistida 12B.
 
 **Cubre:** seguimiento abierto del lote 1, no un rediseño de autenticación.
 
@@ -358,6 +370,8 @@ dos nuevas de precarga autorizada y cancelación. Sin commit/push ni inicio de 1
 **Aceptación:** desconexión temporal, sesión realmente ausente y recuperación tras autenticación separados; borrador conservado al reintentar; error no habilita editor ni emite éxito de guardado; la nueva ventana no promete recuperar notas no guardadas de la anterior.
 
 ## 10. Lote 13 — Guía, glosario y cierre comprobable
+
+**Estado 29/10/2026:** entregables Markdown preparados; aceptación integral asistida pendiente. La tabla de resultados y remanentes se mantiene en [cierre-navegacion-checklist.md](cierre-navegacion-checklist.md). No se ejecutan nuevas escrituras funcionales ni se declaran aprobados los ocho recorridos por consolidar documentación.
 
 **Resuelve:** P1–P6 y P13 en documentación final, trazabilidad de G01–G30 y C19 como criterio transversal.
 
@@ -386,6 +400,8 @@ La documentación de cada sublote se actualiza al cerrarlo; este lote consolida,
 
 ## 11. Trazabilidad y pendientes preservados
 
+La columna «Estado al redactar» corresponde al análisis inicial, no al avance vigente de 29/10. Los resultados posteriores están en el checklist único de cierre; se conserva esta tabla para rastrear el origen del plan.
+
 | Origen                                                             | Cobertura en el nuevo plan                            | Estado al redactar                                                         |
 | ------------------------------------------------------------------ | ----------------------------------------------------- | -------------------------------------------------------------------------- |
 | Lotes 1–5 aceptados                                                | Regresión focalizada en todos los cambios adyacentes. | Conservar aceptación; no declararlos pendientes por los informes antiguos. |
@@ -403,7 +419,11 @@ La documentación de cada sublote se actualiza al cerrarlo; este lote consolida,
 
 Los códigos C se conservan como referencias históricas del checklist de revisión: la descripción concreta y el repositorio prevalecen sobre una asociación numérica ambigua en los informes. Los identificadores P y G permiten seguir cada decisión aceptada sin renumerar los lotes 6–8.
 
-## 12. Primer bloque para ejecutar
+## 12. Próximo paso vigente y secuencia histórica
+
+**Próximo paso al 29/10/2026:** aceptar la guía y ejecutar 13-01/13-02 del checklist único; después continuar 13-03 a 13-08 registrando evidencia y límites. El estado siguiente es una nota histórica de 7B, superada por las entradas posteriores.
+
+### Antecedente histórico
 
 **Estado: 7B parcialmente validado; lector de pantalla pendiente.** Recorridos visuales y de teclado confirmados, commit/push autorizado el 27/10/2026; sin inicio de 8A. Registrar esta limitación en cualquier publicación; no cerrar el criterio de lector por éxito automatizado.
 

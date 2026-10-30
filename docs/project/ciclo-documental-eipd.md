@@ -2,7 +2,9 @@
 
 Guía de generación, edición, versiones, revisión y decisión de la organización.
 
-Fecha de referencia: 25 de octubre de 2026. Base funcional contrastada: `e587da6247e06bb1feca074db1e0bb941c633385`.
+Fecha de referencia: 29 de octubre de 2026. Base funcional contrastada: `41c561b78e7b4d96994d927b86422d7d9efed5d1`.
+
+Actualización del bloque 13: [guía de tareas](guia-navegacion-trabajo.md), [glosario](glosario-funcional.md) y [checklist único de aceptación](cierre-navegacion-checklist.md). La versión anterior del 25/10 es antecedente histórico; las copias Word externas de esa fecha no se actualizan automáticamente con este Markdown.
 
 Esta guía permite interpretar los formularios y sus historiales sin confundir una operación de guardado con una revisión o una aprobación. Describe el comportamiento actual y separa expresamente el circuito completo que aún debe integrarse para la EIPD general. Es documentación funcional del producto; no establece criterios jurídicos de obligatoriedad ni habilita operaciones.
 
@@ -54,7 +56,7 @@ El lote 5 de navegación presenta esta consulta como «Consultar última determi
 
 En las bases ordinarias implementadas, confirmar una evaluación sucesora cambia la confirmada anterior a «reemplazado». Estos estados del modelo general no significan que el circuito EIPD ya pueda confirmarse: su confirmación y activación permanecen bloqueadas en el alcance actual.
 
-**Documento EIPD general.** Se edita dentro de la evaluación en borrador. El campo «Etiqueta del documento EIPD» es un texto editable (`document_version`): escribir «v2» no crea una nueva evaluación ni una copia histórica inmutable.
+**Documento EIPD general.** Se edita dentro de la evaluación en borrador. El campo «Nombre de la edición (texto libre)», antes «Etiqueta del documento EIPD», es un texto editable (`document_version`): escribir «v2» no crea una nueva evaluación ni una copia histórica inmutable.
 
 **Resolución de infancia.** El registro asigna una versión documental sucesiva y conserva documento, contexto y autoría. Preparar un sucesor permite trabajar sobre una nueva preparación; la vista previa no lo registra. El registro explícito agrega la nueva resolución y conserva las anteriores.
 
@@ -87,33 +89,49 @@ Para registrar una decisión, el servidor comprueba la facultad de la persona y 
 
 Si se requieren correcciones sobre una resolución registrada, se prepara y registra un sucesor; el original y sus observaciones permanecen en el historial. «Obsoleto» indica que una asociación ya no coincide con el material o contexto actual; no significa que el antecedente deba borrarse.
 
-## 5 Circuito completo previsto
-
-El siguiente esquema es conceptual. Describe la separación de responsabilidades que debe respetar una integración futura; sus etapas no son todos estados persistidos ni acciones habilitadas hoy para la EIPD general.
+## 5 Circuito actual de infancia y ampliación futura
 
 ```mermaid
 flowchart TD
-    A[Preparar y guardar borrador] --> B[Registrar versión documental para revisión]
-    B --> C[Revisión documental]
-    C -- Requiere cambios --> D[Preparar un sucesor y conservar el original]
-    D --> A
-    C -- No continuar --> E[Conservar documento y resultado en historial]
-    C -- Favorable pendiente de integración --> F[Decisión de la organización]
-    F -- Solicita cambios --> D
-    F -- Rechaza --> E
-    F -- Acepta --> G[Aceptación documental registrada]
-    G -. Paso separado actualmente bloqueado .-> H[Confirmación o activación]
+    A[Guardar antecedentes de infancia] --> B[Preparar una nueva versión]
+    B --> C[Vista previa y comprobación del contenido]
+    C --> D[Registrar explícitamente versión de infancia]
+    D --> E[Consultar la versión histórica exacta]
+    E --> F[Registrar revisión documental admitida]
+    E --> G[Registrar decisión de organización si cumple requisitos]
+    E --> H[Copiar a preparación temporal]
+    H --> B
 ```
 
-La revisión analiza el documento; la organización registra su decisión mediante una persona facultada. La eventual aprobación debe identificar quién decidió, sobre qué documento y con qué antecedentes. No basta un rótulo «Aprobado» sin indicar el objeto y el alcance.
+Revisión y decisión son canales distintos sobre una versión concreta. Este esquema no exige una revisión favorable antes de decidir: tal secuencia no se debe atribuir al piloto. Cada actuación sigue sus controles de facultad, estado y material. Las revisiones admitidas por el piloto son negativas; las decisiones de organización tienen su propio contrato. Ambas conservan el original.
 
-Antes de habilitar el circuito completo del EIPD general, deben definirse e integrarse sus versiones documentales, revisión formal, decisiones y requisitos posteriores. No se debe simular su disponibilidad mediante etiquetas del editor ni extender automáticamente las facultades del circuito de infancia.
+Para la **EIPD general**, actualmente editar y guardar actualiza el borrador de la evaluación; consultar muestra ese contenido guardado. Su circuito formal completo de registro de versiones, revisión y decisión todavía debe definirse e integrarse. No se simula cambiando el nombre libre de la edición ni utilizando el circuito de infancia.
 
-Criterios de diseño: identificar el objeto del estado; distinguir pendiente de guardado; vincular cada revisión y decisión al documento exacto; conservar antecedentes; exigir revisión del nuevo contenido o contexto; separar aceptación documental de confirmación y activación.
+```mermaid
+flowchart LR
+    A[Borrador EIPD general editable] --> B[Guardar documento de la evaluación]
+    B --> C[Consultar documento guardado]
+    C -. Integración futura por definir .-> D[Versiones documentales y actuaciones formales generales]
+    D -. Requisitos separados por definir .-> E[Confirmación o activación]
+```
+
+Las flechas discontinuas son trabajo futuro, no acciones disponibles. Confirmación y activación EIPD permanecen bloqueadas. La eventual aprobación debe identificar persona, documento, antecedentes y alcance; un rótulo Aprobado por sí solo no los acredita.
+
+### Mapa de identidades y operaciones
+
+| Objeto | Identidad o secuencia | Qué cambia |
+| --- | --- | --- |
+| Evaluación | Identificador y versión de su serie/finalidad; estado propio. | Crear borrador crea evaluación; editar actualiza la que admite cambios. |
+| Documento EIPD general | Documento dentro de la evaluación; referencia y nombre libre separados. | Guardar borrador actualiza contenido, sin registrar una versión histórica formal. |
+| Determinación | Revisiones de aplicabilidad asociadas al alcance de evaluación. | Guardar agrega revisión, no incrementa la versión de evaluación. |
+| Versión documental de infancia | Registro histórico numerado, antes denominado resolución documental. | Registrar agrega otro; copiar o vista previa solo preparan. |
+| Revisión documental | Evento vinculado a una versión exacta. | Registra resultado y fundamento sin editar el original. |
+| Decisión de organización | Evento vinculado al documento y facultad comprobados. | Registra posición de organización; no activa EIPD ni se hereda al sucesor. |
+| Valoración y anexo | Registros y versiones propios, asociados a la evaluación. | Sus guardados no crean una evaluación ni una versión de infancia. |
 
 ## 6 Comprobación y referencias
 
-Checklist para validar la comprensión y los futuros ajustes de interfaz:
+Criterios de referencia para validar comprensión y futuros ajustes. Los resultados de ejecución se registran únicamente en el [checklist de cierre](cierre-navegacion-checklist.md); estas casillas no son una segunda lista de aceptación:
 
 - [ ] Guardar varias veces el mismo borrador conserva su versión de evaluación.
 - [ ] La consulta guardada distingue claramente las ediciones pendientes.

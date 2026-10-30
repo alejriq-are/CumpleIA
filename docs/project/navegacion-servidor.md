@@ -2326,3 +2326,148 @@ son antecedentes históricos. La prueba manual con lector de pantalla sigue pend
 Implementación y validación de 12B completadas; pendiente commit y push, sin
 autorización nueva para publicarlos. No se inicia lote 13, merge ni despliegue.
 Excluir `frontend/next-env.d.ts` generado y `outputs/` de una eventual publicación.
+
+## 13 — guía y cierre documental preparados, 29/10/2026
+
+Rama `feature/navegacion-13-guia-cierre`, base publicada y verificada
+`41c561b78e7b4d96994d927b86422d7d9efed5d1` (12B).
+Se incorporan guía de tareas, glosario G01–G30, mapa de identidades y actualización
+del ciclo documental, con checklist único de ocho recorridos y remanentes.
+El bloque 13 modifica documentación; no cambia formularios ni contratos.
+
+La validación asistida integral de 13 sigue **No probado**; comenzar con 13-01/13-02.
+No repetir guardados por localizar un editor que ya está habilitado. La evidencia
+anterior conserva sus límites: 185 pruebas aprobadas y una omitida en regresión
+12B, más dos comprobaciones dirigidas del ajuste posterior, sin sumarlas como
+escenarios únicos. Sesión real y recuperación aceptadas por el usuario en 12B.
+Lector de pantalla manual, formularios completos consentimiento/LIA y circuito
+formal EIPD general continúan pendientes. Confirmación/activación EIPD bloqueadas.
+
+Guía: [guia-navegacion-trabajo.md](guia-navegacion-trabajo.md).
+Aceptación/remanentes: [cierre-navegacion-checklist.md](cierre-navegacion-checklist.md).
+Las notas anteriores de no inicio de 13 o publicación pendiente de 12B son
+históricas: 12B ya está publicado en `41c561b`. Este bloque 13 aún no tiene
+commit/push autorizado. Excluir `frontend/next-env.d.ts` y `outputs/` preexistentes.
+Sin merge, despliegue ni cierre implícito de los pendientes funcionales.
+
+## 13 — aceptación asistida: conservación, vista previa y guardado EIPD
+
+El usuario confirma recorrido OK en la evaluación ficticia seleccionada:
+
+- Nota `[FICTICIA] Prueba de cierre 13` conservada al cambiar de módulo y volver por Ver pendientes, con su contexto (13-02 OK).
+- Vista previa del borrador con edición pendiente en Finalidad del tratamiento; no guarda ni registra versión.
+- Documentos guardados no incorpora esa edición pendiente; al volver al editor siguen finalidad y nota (usuario confirma OK).
+- Guardar borrador EIPD explícitamente muestra confirmación; Documentos guardados incorpora la finalidad de prueba y la unidad EIPD deja de figurar en pendientes (usuario confirma OK).
+
+Aclaración de prueba: inicialmente se pidió buscar Notas del borrador EIPD en
+la vista previa. La vista EipdDocumentView recorre documentFields y no presenta
+esa nota general del editor. Se corrigió la instrucción usando Finalidad del
+tratamiento; no se atribuye esa omisión a pérdida del borrador. Contenido preparado
+es desplegable y el código lo abre inicialmente; no se reprodujo un fallo de apertura.
+
+Evidencia: confirmaciones textuales del usuario en esta conversación. No hay
+captura nueva, identificación completa de la evaluación ni commit del proceso
+servido confirmado por captura; referencia de código documental `41c561b`.
+No se registró otra determinación en estas pruebas: esa parte de 13-03 sigue No probado.
+13-04 a 13-08 pendientes de aceptación integral. Próximo: consultar versión de
+infancia y distinguir revisión, decisión y copia temporal sin registrar actuaciones.
+Sin nuevo commit/push, merge ni despliegue.
+
+## 13 — consulta de infancia, copia temporal, paneles y conexión aceptados
+
+Contexto observado en capturas: CumpleIA Demo, [FICTICIA] Programa de
+fidelización con menores, evaluación versión 1 en borrador. Documento consultado:
+versión de infancia 1, SIMULADA-PILOTO-INFANCIA-RES-001.
+
+- Capturas `codex-clipboard-b6ede47e-87c0-48e6-9ced-39814ac7b472.png` y
+  `codex-clipboard-5a558875-1e00-44d6-8a22-2e0de27a7e15.png`: accesos de revisión
+  y decisión conservan versión 1; la decisión muestra facultad revocada y acciones
+  bloqueadas. No se registraron revisiones, facultades ni decisiones.
+- Captura `codex-clipboard-9ac64010-cd52-48a6-8382-03a17b0662b3.png`: origen de copia
+  temporal desde versión 1, referencia y PRUEBA-1 conservados. Usuario confirma
+  vista previa, volver sin registrar, versiones 1 y 2 sin agregar otra y retorno
+  por pendientes con la preparación intacta. No acredita por sí sola la prueba
+  de cancelar un reemplazo previo.
+- Usuario confirma ventana estrecha, Secciones, Escape/foco con aperturas repetidas,
+  cierre de Menú por fondo atenuado y conservación de preparación. No se repitió
+  zoom 200 % ni lectura manual con tecnología de asistencia en este tramo.
+- Usuario confirma fundamento pendiente [FICTICIA] Prueba recuperación 13,
+  Offline, consulta con error de conexión, restablecimiento No throttling y nueva
+  consulta correcta sin perder el texto ni recargar. Sesión real se conserva como
+  evidencia anterior de 12B, no como prueba nueva de 13.
+
+La tabla de aceptación integral mantiene resultados por comprobación, sin ampliar
+estos OK a operaciones no ejecutadas. Próximo: ámbitos de Autodiagnóstico, RAT,
+Mi organización y localización de anexos; después completar pendientes aplicables.
+Sin publicación autorizada de 13 ni cambios en contratos o interfaz.
+
+## 13-08 — ámbitos y formulario de anexos: recorrido asistido OK
+
+El usuario confirma el recorrido de Autodiagnóstico de la organización,
+Inventario del programa con menores y Mi organización, sin presentar la
+evaluación EIPD como ámbito propio de esos módulos. Confirma retorno a
+Preparar → Anexos de respaldo.
+
+La captura `codex-clipboard-9cf65419-e96f-47ba-88e4-6153a4ea2a59.png` muestra
+CumpleIA Demo / [FICTICIA] Programa de fidelización con menores, evaluación
+versión 1 en borrador; no hay anexos registrados y está visible Agregar anexo
+ficticio con referencia, descripción, sección relacionada, vínculos opcionales,
+selector PDF/TXT y declaración ficticia. Se ven dos unidades pendientes en
+la visita; no se infiere de ese contador que el formulario de carga esté bloqueado.
+
+Resultado 13-08 OK en consulta y localización; no se subieron archivos ni se
+modificaron registros para este recorrido. Próximo: zoom 200 % y navegación
+con teclado en el cierre 13; lector de pantalla manual permanece pendiente.
+
+## 13-06 — zoom y teclado: recorrido asistido OK
+
+El usuario confirma zoom del navegador al 200 %, acceso con Tab a Menú/Secciones,
+apertura con Enter o Espacio, lectura/desplazamiento del panel, cierre con Escape
+y retorno del foco; restauración al 100 % sin recargar. Complementa el recorrido
+anterior de ventana estrecha y aperturas repetidas. Resultado OK en ese alcance.
+No hubo prueba manual con lector de pantalla ni se declara certificación.
+Próximo: guardado explícito de determinación ficticia (parte pendiente de 13-03).
+
+## 13-01 y 13-03 — determinación guardada y disponibilidad EIPD
+
+Capturas `codex-clipboard-634b971b-83cf-48a5-a20e-3a61ed34b3d4.png` y
+`codex-clipboard-d335d152-bac4-4e2e-8457-50b4f8471743.png`: contexto ficticio
+Programa de fidelización con menores; revisión de aplicabilidad 2 asociada al
+alcance actual; formulario coincidente con lo consultado en servidor. EIPD queda
+Pendiente de analizar e infancia Corresponde; fundamento de infancia conserva
+[FICTICIA] Prueba recuperación 13. Consulta completada sin ediciones pendientes
+en esa determinación. Una unidad pendiente puede seguir siendo la preparación
+temporal de infancia: no se atribuye su identidad al contador sin abrir la lista.
+
+Usuario confirma explícitamente comprobación EIPD resultado OK: explicación
+EIPD: disponibilidad y retorno a Determinar aplicabilidad, sin cambiar valores.
+13-01 OK; 13-03 guardado y consulta de ambos objetos comprobados, sin confundir
+revisión de aplicabilidad con versión de evaluación o de infancia. Estas dos
+capturas no muestran la posición del aviso de éxito; se conserva como límite
+de evidencia, sin afirmar una captura inexistente.
+
+Próximo: repetir Preparar nueva versión a partir de esta y elegir Conservar
+para verificar cancelación del reemplazo de la preparación existente. No registrar
+otra versión ni descartar la preparación. Publicación del bloque 13 pendiente.
+
+## 13-05 — cancelación de reemplazo confirmada y consolidación
+
+Usuario confirma recorrido OK: Documentos guardados → versión de infancia 1 →
+Preparar nueva versión a partir de esta → Conservar documento en preparación →
+retorno por pendientes con referencia, nombre y notas intactos. No se registró
+otra versión ni se recargó la pestaña. Completa la comprobación de cancelación
+pendiente de 13-05.
+
+Los recorridos asistidos efectuados de 13 quedan aprobados en el alcance del
+checklist. Sesión real de 12B y negativos controlados de sublotes anteriores se
+reutilizan como antecedentes, no como nuevas ejecuciones en 13. La captura de
+facultad revocada de 13 demuestra el bloqueo presentado, no una prueba de alta o
+revocación nueva. Lector de pantalla manual no probado. No hay certificación,
+CI remota nueva, merge ni despliegue. Las guías requieren lectura final del usuario;
+commit/push de 13 todavía sin autorización nueva.
+
+## 13 — cierre y publicación autorizados, 29/10/2026
+
+El usuario autoriza commit y push de la documentación del bloque 13 tras los recorridos asistidos aprobados en el alcance del checklist. Se publican guía de tareas, glosario, ciclo documental y resultados con sus límites. La autorización no acredita lectura completa de las guías ni una nueva ejecución de toda la batería.
+
+Se conservan el backlog funcional y la prueba manual con lector de pantalla pendiente. Sesión real conserva evidencia de 12B. Sin cambios de interfaz, merge ni despliegue. Las notas anteriores de autorización pendiente son antecedentes históricos superados por esta autorización.
