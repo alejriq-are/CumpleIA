@@ -20,7 +20,8 @@ const names: Record<string, string> = {
   source: "Fuente",
   notes: "Notas",
   code: "Código",
-  includes_children: "Incluye niños o niñas",
+  includes_children: "Incluye niños y niñas",
+  is_vulnerable_group: "Grupo vulnerable",
   includes_adolescents: "Incluye adolescentes",
   includes_sensitive_data: "Incluye datos sensibles",
   includes_biometrics: "Incluye datos biométricos",
@@ -80,7 +81,9 @@ function ValueView({ value }: { value: unknown }) {
           .map(([key, item]) => (
             <div key={key}>
               <dt className="rounded-t border border-blue-200 bg-blue-100 px-3 py-2 font-semibold text-blue-950">
-                {names[key] ?? "Otro antecedente registrado"}
+                {key === "notes" && "includes_children" in record(value)
+                  ? "Notas sobre los titulares y edades (opcional)"
+                  : (names[key] ?? "Otro antecedente registrado")}
               </dt>
               <dd className="rounded-b border border-t-0 border-blue-200 bg-white px-3 py-3 whitespace-pre-wrap break-words text-slate-950">
                 <ValueView value={item} />

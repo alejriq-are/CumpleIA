@@ -135,6 +135,7 @@ export function ConnectedWorkspace({
   const [diagnosticSections, setDiagnosticSections] = useState<Record<string, Item[]>>({});
   const [names, setNames] = useState<Record<string, string>>({});
   const [evaluations, setEvaluations] = useState<Record<string, SelectedEvaluation>>({});
+  const [scopeReturn, setScopeReturn] = useState<WorkLocation | null>(null);
   const [last, setLast] = useState<WorkLocation | null>(null);
   const content = useRef<HTMLElement>(null);
   const current = useRef(location);
@@ -987,6 +988,24 @@ export function ConnectedWorkspace({
                   )}
                   {v.module === "rat" && (
                     <>
+                      {scopeReturn &&
+                        scopeReturn.organizationId === v.organizationId &&
+                        scopeReturn.treatmentId === v.treatmentId && (
+                          <div className="mb-4 space-y-2 rounded border border-blue-200 bg-blue-50 p-4">
+                            <p>
+                              Estás revisando el RAT para una evaluación existente. Guarda cada
+                              sección modificada aquí; después vuelve a comparar el alcance
+                              asociado. No se crea otra evaluación ni se copian sus borradores.
+                            </p>
+                            <button
+                              type="button"
+                              className="rounded border border-blue-400 bg-white p-3 font-semibold text-blue-900"
+                              onClick={() => go(scopeReturn)}
+                            >
+                              Volver a revisar alcance de la misma evaluación
+                            </button>
+                          </div>
+                        )}
                       {readOnly && (
                         <p
                           id={permissionHelpId}
@@ -1077,6 +1096,15 @@ export function ConnectedWorkspace({
                         <div hidden={["catalogo"].includes(v.section)}>
                           <ConnectedAssessment
                             active={here}
+                            onEditRat={(section) => {
+                              setScopeReturn({
+                                ...v,
+                                module: "licitud",
+                                section: "alcance",
+                                step: 0,
+                              });
+                              go({ ...v, module: "rat", section, step: 0 });
+                            }}
                             availabilityRefresh={availabilityRefresh[contextKey(v)] ?? 0}
                             location={v}
                             name={organization.name}

@@ -33,6 +33,7 @@ export type AssessmentSummary = {
   legal_basis: string | null;
 };
 export type Assessment = AssessmentSummary & {
+  rat_context_hash?: string;
   rat_context_snapshot?: {
     data_categories?: { category_code: string; category_name: string }[];
     data_subjects?: { category_code: string; category_name: string }[];
@@ -70,6 +71,47 @@ export const licitudApi = {
     apiFetch<Assessment>(`${root(scope)}/${encodeURIComponent(id)}`, {
       ...scope,
       method: "PATCH",
+      body,
+    }),
+};
+
+export type AssessmentScope = Draft["scope"];
+export type ScopeReview = {
+  review_hash: string;
+  changed: boolean;
+  editable: boolean;
+  before: NonNullable<Assessment["rat_context_snapshot"]>;
+  after: NonNullable<Assessment["rat_context_snapshot"]>;
+  history: {
+    revision: number;
+    created_by: string;
+    created_at: string;
+    reason: string;
+    before: Record<string, unknown>;
+    after: Record<string, unknown>;
+  }[];
+};
+export const scopeReviewApi = {
+  preview: (scope: Scope, id: string, selection: AssessmentScope) =>
+    apiFetch<ScopeReview>(`${root(scope)}/${encodeURIComponent(id)}/scope-review/preview`, {
+      ...scope,
+      method: "POST",
+      body: { scope: selection },
+    }),
+  apply: (
+    scope: Scope,
+    id: string,
+    body: {
+      scope: AssessmentScope;
+      review_hash: string;
+      request_id: string;
+      data_kind: "ficticios";
+      reason: string;
+    }
+  ) =>
+    apiFetch<Assessment>(`${root(scope)}/${encodeURIComponent(id)}/scope-review`, {
+      ...scope,
+      method: "POST",
       body,
     }),
 };

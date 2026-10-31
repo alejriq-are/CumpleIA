@@ -1,3 +1,15 @@
+## Paso 2 — aceptación asistida y publicación autorizada
+
+El usuario confirmó los recorridos principales y complementarios del alcance mixto y autorizó commit/push. Quedan aceptados: acceso y retorno a la misma evaluación desde RAT; etiquetas coherentes y orden común en comparación; adopción explícita con motivo; revisión independiente de EIPD/infancia; conservación de borradores, antecedentes y alcance guardado; ventana estrecha, cierre/foco; retirada/restauración de aplicabilidad; cambio del RAT posterior a comparar; error de conexión y recuperación; consulta desde otra pestaña con pendientes independientes. Evidencia asistida reportada por el usuario en este chat; no equivale a auditoría completa ni prueba manual con lector de pantalla.
+
+Rama `feature/alcance-mixto-guiado`, base `8d2cc88`. Publicación del Paso 2 autorizada; sin merge ni despliegue. Confirmación y activación EIPD siguen bloqueadas. Se excluyen los cambios preexistentes de `frontend/next-env.d.ts` y `outputs/`. Contrato y límites: [alcance mixto guiado](alcance-mixto-guiado.md). Las notas inferiores sobre validación o autorización pendiente quedan superadas para el alcance aceptado.
+
+## Paso 2 — alcance mixto guiado: implementación local, 30/10/2026
+
+NAV-UX-005 implementado localmente en `feature/alcance-mixto-guiado`; aceptación asistida pendiente. Permite revisar RAT, regresar a la misma evaluación, comparar y adoptar el alcance con motivo y trazabilidad, conservando borradores y antecedentes. Las determinaciones anteriores requieren revisión para el nuevo alcance; EIPD e infancia siguen independientes.
+
+Evidencia: suite aislada EIPD 1.148 aprobadas; ampliación focalizada alcance/anexos 9 aprobadas (con solapamiento); navegador conectado 135 aprobadas con respuestas controladas. Migración `a84f6e2c9103` aplicada en base aislada y desarrollo local verificado. Sin commit/push de este paso, merge ni despliegue; EIPD bloqueada. Contrato, límites y checklist: [alcance mixto guiado](alcance-mixto-guiado.md).
+
 ## Paso 1 — anexos y acciones: implementación local, 29/10/2026
 
 ## Paso 1 — validación asistida y publicación autorizada, 30/10/2026

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { DATA_SUBJECTS } from "@/lib/rat/dataSubjects";
 import {
@@ -38,6 +38,7 @@ export function TreatmentDataSubjectsSection({
   subjects,
   onSaved,
 }: Props) {
+  const notesId = useId();
   const [items, setItems] = useState<SubjectDraft[]>(
     subjects.map((item) => ({
       category_code: item.category_code,
@@ -165,7 +166,7 @@ export function TreatmentDataSubjectsSection({
               }
               className="h-4 w-4 rounded border-gray-300"
             />
-            Incluye niños
+            Incluye niños y niñas
           </label>
 
           <label className="flex items-center gap-2">
@@ -197,17 +198,24 @@ export function TreatmentDataSubjectsSection({
           </label>
         </div>
 
-        <textarea
-          rows={2}
-          value={item.notes ?? ""}
-          onChange={(e) =>
-            updateSubject(item.category_code, {
-              notes: e.target.value,
-            })
-          }
-          placeholder="Notas opcionales"
-          className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm shadow-sm"
-        />
+        <label className="block text-sm font-medium text-gray-900">
+          Notas sobre los titulares y edades (opcional)
+          <textarea
+            rows={2}
+            value={item.notes ?? ""}
+            onChange={(e) =>
+              updateSubject(item.category_code, {
+                notes: e.target.value,
+              })
+            }
+            aria-describedby={`${notesId}-${item.category_code}`}
+            className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm shadow-sm"
+          />
+        </label>
+        <p id={`${notesId}-${item.category_code}`} className="text-xs text-gray-600">
+          Describe el grupo y, cuando corresponda, sus edades o rango de edades. Las casillas
+          anteriores se marcan por separado; escribir edades no las modifica automáticamente.
+        </p>
       </div>
     );
   }
@@ -222,6 +230,12 @@ export function TreatmentDataSubjectsSection({
           Identifica las categorías de personas cuyos datos son tratados en esta actividad.
         </p>
       </div>
+
+      <p className="mt-3 rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm text-blue-900">
+        Si tratas datos de clientes adultos y de sus hijos, puedes distinguirlos con otra categoría
+        llamada «Hijos de clientes», usando «Agregar otra categoría». Marca en cada grupo si incluye
+        niños y niñas o adolescentes y describe sus edades en las notas.
+      </p>
 
       <div className="mt-6 grid gap-3 md:grid-cols-2">
         {DATA_SUBJECTS.map((subject) => {

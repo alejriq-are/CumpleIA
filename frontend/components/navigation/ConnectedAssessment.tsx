@@ -24,8 +24,10 @@ export function ConnectedAssessment({
   onWorkUnit,
   active,
   availabilityRefresh = 0,
+  onEditRat,
 }: {
   active: boolean;
+  onEditRat?: (section: string) => void;
   availabilityRefresh?: number;
   location: WorkLocation;
   name: string;
@@ -211,6 +213,8 @@ export function ConnectedAssessment({
           onPending={setFlowDirty}
           onWorkUnit={reportUnit}
           onAssessmentSaved={refresh}
+          onEditRat={onEditRat}
+          onDetermine={() => go({ ...location, section: "aplicabilidad", step: 0 })}
           navigation={{
             scope,
             location: flow,

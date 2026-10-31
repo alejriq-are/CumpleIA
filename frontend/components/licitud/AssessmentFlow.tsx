@@ -2,6 +2,7 @@
 import { documentDisclosureClass, documentNavigationButtonClass } from "./document-focus";
 import type { WorkState } from "@/components/navigation/work-unit-state";
 import { eipdStepLabels } from "@/lib/licitud/eipd-steps";
+import { AssessmentScopeReview } from "./AssessmentScopeReview";
 import { DocumentCapabilities } from "./DocumentCapabilities";
 import { documentLabels } from "@/lib/licitud/document-labels";
 import Link from "next/link";
@@ -38,6 +39,8 @@ export function AssessmentFlow({
   onPending,
   onWorkUnit,
   onAssessmentSaved,
+  onEditRat,
+  onDetermine,
 }: {
   organizationId: string;
   organizationName: string;
@@ -54,6 +57,8 @@ export function AssessmentFlow({
   onPending?: (dirty: boolean) => void;
   onWorkUnit?: (kind: string, state: WorkState) => void;
   onAssessmentSaved?: () => void;
+  onEditRat?: (section: string) => void;
+  onDetermine?: () => void;
 }) {
   const legalState = useCallback((state: WorkState) => onWorkUnit?.("base", state), [onWorkUnit]);
   const eipdState = useCallback((state: WorkState) => onWorkUnit?.("eipd", state), [onWorkUnit]);
@@ -93,6 +98,11 @@ export function AssessmentFlow({
   }
   const [row, setRow] = useState<Assessment | null>(null);
   const [refreshVersion, setRefreshVersion] = useState(0);
+  const [scopeDirty, setScopeDirty] = useState(false);
+  const scopeState = useCallback(
+    (state: WorkState) => onWorkUnit?.("alcance", state),
+    [onWorkUnit]
+  );
   const [legalDirty, setLegalDirty] = useState(false);
   const [childDirty, setChildDirty] = useState(false);
   const [resolutionHistory, setResolutionHistory] = useState<boolean | null>(null);
@@ -100,7 +110,7 @@ export function AssessmentFlow({
   const [eipdDirty, setEipdDirty] = useState(false);
   const [supportDirty, setSupportDirty] = useState(false);
   const [support, setSupport] = useState<Support | null>(null);
-  const dirty = legalDirty || childDirty || eipdDirty;
+  const dirty = scopeDirty || legalDirty || childDirty || eipdDirty;
   const hasUnsaved = dirty || documentDirty || supportDirty;
   const childRelevant = navigation
     ? navigation.scope.infancia
@@ -333,10 +343,24 @@ export function AssessmentFlow({
               Este contexto pertenece a la evaluación guardada; no se reemplaza automáticamente al
               editar el RAT.
             </p>
-            <Link className="text-blue-800 underline" href="/dashboard/rat">
-              Consultar inventario RAT
-            </Link>
+            {!navigation && (
+              <Link className="text-blue-800 underline" href="/dashboard/rat">
+                Consultar inventario RAT
+              </Link>
+            )}
           </section>
+          {row && navigation && (
+            <AssessmentScopeReview
+              row={row}
+              readOnly={readOnly}
+              token={token}
+              onSaved={saved}
+              onDirty={setScopeDirty}
+              onWorkState={scopeState}
+              onEditRat={onEditRat}
+              onDetermine={onDetermine}
+            />
+          )}
           <button
             type="button"
             className="rounded bg-blue-800 px-4 py-2 text-white"

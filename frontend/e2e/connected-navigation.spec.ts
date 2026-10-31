@@ -177,7 +177,23 @@ test.beforeEach(async ({ page }) => {
         await new Promise<void>((resolve) => {
           releaseValidation = resolve;
         });
-      return result(detail);
+      return result(
+        mode.startsWith("scope")
+          ? {
+              ...detail,
+              data_subjects: [
+                ...detail.data_subjects,
+                {
+                  category_code: "hijos",
+                  category_name: "Hijos de clientes · 10 a 17 años",
+                  includes_children: true,
+                  includes_adolescents: true,
+                  notes: "[FICTICIA] Alcance mixto",
+                },
+              ],
+            }
+          : detail
+      );
     }
     if (pathname === "/diagnostico/cuestionario")
       return result({
@@ -214,6 +230,56 @@ test.beforeEach(async ({ page }) => {
       return result(url.searchParams.get("offset") === "50" ? [] : Object.values(records));
     const match = pathname.match(/\/assessments\/([^/]+)/);
     const id = match?.[1] ?? aid;
+    if (pathname.endsWith("/scope-review/preview"))
+      return result({
+        review_hash: "c".repeat(64),
+        changed: true,
+        editable: true,
+        before: {
+          ...records[id].rat_context_snapshot,
+          data_subjects: records[id].rat_context_snapshot.data_subjects.map((v: object) =>
+            Object.fromEntries(Object.entries(v).reverse())
+          ),
+        },
+        after: {
+          ...detail,
+          purpose: records[id].purpose_snapshot,
+          data_subjects: [
+            ...detail.data_subjects,
+            {
+              category_code: "hijos",
+              category_name: "Hijos de clientes",
+              includes_children: true,
+              includes_adolescents: true,
+              notes: "PRUEBA 10 a 17 años",
+            },
+          ],
+        },
+        history: [],
+      });
+    if (pathname.endsWith("/scope-review")) {
+      if (mode === "scope-conflict")
+        return result({ detail: "El RAT cambió. Compara nuevamente antes de actualizar" }, 409);
+      records[id] = {
+        ...records[id],
+        rat_context_hash: "c".repeat(64),
+        rat_context_snapshot: {
+          ...detail,
+          purpose: records[id].purpose_snapshot,
+          data_subjects: [
+            ...detail.data_subjects,
+            {
+              category_code: "hijos",
+              category_name: "Hijos de clientes",
+              includes_children: true,
+              includes_adolescents: true,
+            },
+          ],
+        },
+      };
+      determinations[id] = { ...applicability(id), context_hash: "c".repeat(64), current: false };
+      return result(records[id]);
+    }
     if (pathname.endsWith("/applicability")) {
       if (method === "GET" && mode === "app-readonly")
         return result({ ...applicability(id), editable: false });
@@ -3537,3 +3603,107 @@ for (const failure of ["absent", "network"]) {
     expect(errors).toEqual([]);
   });
 }
+
+test("alcance mixto: ida y vuelta al RAT, comparación explícita y borradores conservados", async ({
+  page,
+}) => {
+  mode = "scope-ok";
+  await legal(page);
+  await enable(page);
+  await section(page, "Tratamiento y alcance de la EIPD");
+  await main(page)
+    .getByLabel("Notas del borrador EIPD (opcional)")
+    .fill("PRUEBA conservar EIPD al revisar alcance");
+  await section(page, "Determinar aplicabilidad");
+  await main(page)
+    .getByLabel("Fundamento sobre EIPD", { exact: true })
+    .fill("PRUEBA fundamento pendiente");
+  await main(page)
+    .getByRole("button", { name: "Revisar o actualizar alcance del RAT asociado" })
+    .click();
+  const scope = main(page).getByRole("region", { name: "Revisar alcance asociado" });
+  await scope.getByRole("button", { name: "Revisar titulares y edades en el RAT" }).click();
+  await expect(page).toHaveURL(/rat\/titulares/);
+  await main(page)
+    .getByRole("button", { name: /Volver.*alcance/ })
+    .click();
+  await scope.getByRole("button", { name: "Consultar RAT actual para revisar alcance" }).click();
+  await scope.getByLabel(/Hijos de clientes/).check();
+  await scope.getByRole("button", { name: "Comparar alcance guardado y propuesto" }).click();
+  await expect(scope.getByRole("region", { name: "Alcance guardado", exact: true })).toBeVisible();
+  await expect(scope.getByRole("region", { name: "Alcance propuesto", exact: true })).toBeVisible();
+  const fields = [
+    "Código de categoría",
+    "Categoría",
+    "Incluye niños y niñas",
+    "Incluye adolescentes",
+    "Notas sobre los titulares y edades (opcional)",
+  ];
+  for (const name of ["Alcance guardado", "Alcance propuesto"]) {
+    const labels = await scope
+      .getByRole("region", { name, exact: true })
+      .locator("dt")
+      .allTextContents();
+    const positions = fields.map((label) => labels.indexOf(label));
+    expect(positions.every((pos) => pos >= 0)).toBe(true);
+    expect(positions).toEqual([...positions].sort((a, b) => a - b));
+  }
+
+  await scope.getByLabel("Motivo del cambio de alcance").fill("PRUEBA incorporar hijos");
+  await scope
+    .getByLabel("Revisé la comparación y declaro datos ficticios para actualizar el alcance.")
+    .check();
+  await scope.getByRole("button", { name: "Actualizar alcance de esta evaluación" }).click();
+  await expect(scope.getByText(/Alcance actualizado en esta evaluación/)).toBeVisible();
+  await scope
+    .getByRole("button", { name: "Volver a determinar aplicabilidad en esta evaluación" })
+    .click();
+  await expect(main(page).getByLabel("Fundamento sobre EIPD", { exact: true })).toHaveValue(
+    "PRUEBA fundamento pendiente"
+  );
+  await openSavedRoute(page, "eipd");
+  // The stored determination is stale; the draft remains in its mounted work unit.
+  await page.getByRole("button", { name: /Ver pendientes/ }).click();
+  await expect(
+    page.getByRole("dialog").getByText("Borrador EIPD · siete pasos", { exact: true })
+  ).toBeVisible();
+  await page.getByRole("dialog").getByRole("button", { name: "Cerrar pendientes" }).click();
+  await openSavedRoute(page, "aplicabilidad");
+  await main(page)
+    .getByLabel("Declaro que esta prueba utiliza únicamente datos ficticios.")
+    .check();
+  await main(page).getByRole("button", { name: "Guardar determinación", exact: true }).click();
+  await section(page, "Tratamiento y alcance de la EIPD");
+  await expect(main(page).getByLabel("Notas del borrador EIPD (opcional)")).toHaveValue(
+    "PRUEBA conservar EIPD al revisar alcance"
+  );
+  expect(calls.filter((c) => c.path.endsWith("/scope-review") && c.method === "POST")).toHaveLength(
+    1
+  );
+  expect(calls.filter((c) => c.path.endsWith("/assessments") && c.method === "POST")).toHaveLength(
+    0
+  );
+  expect(errors).toEqual([]);
+});
+test("alcance mixto: conflicto conserva propuesta y motivo sin guardar", async ({ page }) => {
+  mode = "scope-conflict";
+  await legal(page);
+  await main(page)
+    .getByRole("button", { name: "Revisar o actualizar alcance del RAT asociado" })
+    .click();
+  const scope = main(page).getByRole("region", { name: "Revisar alcance asociado" });
+  await scope.getByRole("button", { name: "Consultar RAT actual para revisar alcance" }).click();
+  await scope.getByLabel(/Hijos de clientes/).check();
+  await scope.getByRole("button", { name: "Comparar alcance guardado y propuesto" }).click();
+  await scope.getByLabel("Motivo del cambio de alcance").fill("PRUEBA motivo conservado");
+  await scope
+    .getByLabel("Revisé la comparación y declaro datos ficticios para actualizar el alcance.")
+    .check();
+  await scope.getByRole("button", { name: "Actualizar alcance de esta evaluación" }).click();
+  await expect(scope.getByRole("alert")).toContainText("El RAT cambió");
+  await expect(scope.getByLabel("Motivo del cambio de alcance")).toHaveValue(
+    "PRUEBA motivo conservado"
+  );
+  await expect(scope.getByLabel(/Hijos de clientes/)).toBeChecked();
+  expect(errors).toEqual([]);
+});

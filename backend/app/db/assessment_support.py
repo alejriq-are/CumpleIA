@@ -29,14 +29,14 @@ class AssessmentSupportRecord(Base):
             "assessment_id", "request_id", name="uq_assessment_support_request"
         ),
         sa.CheckConstraint(
-            "kind IN ('risk','annex','applicability')", name="support_kind"
+            "kind IN ('risk','annex','applicability','scope')", name="support_kind"
         ),
         sa.CheckConstraint(
             "revision > 0 AND data_kind='ficticios'", name="support_fictitious"
         ),
         sa.CheckConstraint("document_hash ~ '^[0-9a-f]{64}$'", name="support_hash"),
         sa.CheckConstraint(
-            "(kind IN ('risk','applicability') AND content IS NULL) OR (kind='annex' AND content IS NOT NULL AND octet_length(content) BETWEEN 1 AND 2097152)",
+            "(kind IN ('risk','applicability','scope') AND content IS NULL) OR (kind='annex' AND content IS NOT NULL AND octet_length(content) BETWEEN 1 AND 2097152)",
             name="support_content",
         ),
     )

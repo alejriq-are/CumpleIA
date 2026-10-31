@@ -47,7 +47,7 @@ export function ConnectedApplicability({
   onDirty: (v: boolean) => void;
   onWorkState?: WorkReporter;
   onLoadState?: (v: ApplicabilityLoadState) => void;
-  onOpen: (section: "eipd" | "infancia" | "revisar") => void;
+  onOpen: (section: "eipd" | "infancia" | "revisar" | "alcance") => void;
   token?: () => Promise<string>;
   refreshVersion?: number;
 }) {
@@ -322,6 +322,19 @@ export function ConnectedApplicability({
           ))}
         </section>
       )}
+      <div className="rounded border border-blue-200 bg-blue-50 p-4">
+        <p>
+          Si el tratamiento ahora incluye adultos y menores, revisa el RAT y el alcance asociado
+          antes de guardar esta determinación. Incorporar menores no determina por sí solo una EIPD.
+        </p>
+        <button
+          type="button"
+          className="mt-2 rounded border border-blue-400 bg-white px-3 py-2 font-semibold text-blue-800"
+          onClick={() => onOpen("alcance")}
+        >
+          Revisar o actualizar alcance del RAT asociado
+        </button>
+      </div>
       {(
         [
           ["EIPD", eipd, setEipd],

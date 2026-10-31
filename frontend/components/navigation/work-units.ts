@@ -21,6 +21,7 @@ export const assessmentUnits: Record<
   string,
   { label: string; section: string; step?: number; temporary?: boolean }
 > = {
+  alcance: { label: "Revisión de alcance RAT asociado", section: "alcance", temporary: true },
   aplicabilidad: { label: "Determinación de aplicabilidad", section: "aplicabilidad" },
   base: { label: "Base de licitud y fundamento", section: "base" },
   eipd: { label: "Borrador EIPD · siete pasos", section: "eipd" },
