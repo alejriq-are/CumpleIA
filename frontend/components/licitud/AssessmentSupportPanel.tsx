@@ -4,6 +4,7 @@ import { useWorkState, type WorkReporter } from "@/components/navigation/work-un
 import { useEffect, useId, useRef, useState } from "react";
 import type { Assessment } from "@/lib/api/licitud";
 import { SaveFeedback } from "./SaveFeedback";
+import { SavedRiskRelations } from "./SavedRiskRelations";
 import { ApiError } from "@/lib/api/client";
 import {
   supportApi,
@@ -187,6 +188,7 @@ export function AssessmentSupportPanel(props: Props) {
   const fileInput = useRef<HTMLInputElement>(null);
   const fileHelpId = useId();
   const saveHelpId = useId();
+  const annexListId = useId();
   const fileError = file ? annexFileError(file) : "";
   const annexSaveHelp = fileError
     ? "Guardar no está disponible. Corrige el archivo indicado arriba; los demás campos se conservan."
@@ -403,7 +405,7 @@ export function AssessmentSupportPanel(props: Props) {
           ? "Valorar riesgos para las personas"
           : props.mode === "annexes"
             ? "Anexos de respaldo"
-            : "Valoración guardada y anexos de respaldo"}
+            : "Valoración EIPD guardada y anexos de respaldo"}
       </h2>
       <p>
         Solo datos ficticios. Los registros se conservan con nuevas revisiones; no modifican
@@ -416,7 +418,7 @@ export function AssessmentSupportPanel(props: Props) {
         disabled={busy}
         onClick={() => void loadRef.current()}
       >
-        Consultar valoración y anexos
+        Consultar valoración y anexos de respaldo
       </button>
       {props.blocked && (
         <p role="note">
@@ -720,17 +722,30 @@ export function AssessmentSupportPanel(props: Props) {
           )}
         </>
       )}
+      {props.mode === "review" && valuation && (
+        <SavedRiskRelations
+          valuation={valuation}
+          document={props.row?.eipd_resolution_assessment ?? {}}
+          annexes={support?.annexes ?? []}
+          annexTarget={(index) => `${annexListId}-${index}`}
+        />
+      )}
       {(props.mode === "annexes" || props.mode === "review") && (
         <>
-          <h3 className="font-semibold">Anexos guardados</h3>
+          <h3 className="text-lg font-semibold">Anexos guardados</h3>
           <p>
             PDF o TXT UTF-8, hasta 2 MiB por archivo y 20 MiB/50 anexos por evaluación. Las
             versiones se conservan. El JSON incluye el índice y hashes; los archivos se descargan
             por separado.
           </p>
           {!support?.annexes.length && <p>Sin anexos registrados.</p>}
-          {support?.annexes.map((item) => (
-            <article key={item.id} className="space-y-2 rounded border p-3">
+          {support?.annexes.map((item, index) => (
+            <article
+              key={item.id}
+              id={`${annexListId}-${index}`}
+              tabIndex={-1}
+              className="scroll-mt-80 space-y-2 rounded border p-3 focus:outline focus:outline-2 focus:outline-blue-700"
+            >
               <h4 className="font-semibold text-blue-900">
                 {item.reference} · versión {item.version}
               </h4>

@@ -427,7 +427,7 @@ export function AssessmentFlow({
         {row && (
           <>
             <section aria-label="Alcance RAT guardado" className="space-y-3 rounded border p-4">
-              <h3 className="font-semibold">Alcance RAT asociado guardado</h3>
+              <h3 className="text-lg font-semibold">Alcance RAT asociado guardado</h3>
               <details>
                 <summary className={documentDisclosureClass}>Consultar alcance RAT</summary>
                 <DossierDocumentView
@@ -448,7 +448,7 @@ export function AssessmentFlow({
               aria-label="Evaluación de licitud guardada"
               className="space-y-3 rounded border p-4"
             >
-              <h3 className="font-semibold">
+              <h3 className="text-lg font-semibold">
                 Base de licitud y fundamento
                 {row.legal_basis === "interes_legitimo_art13d" ? " · LIA" : ""} · evaluación versión{" "}
                 {row.version}
@@ -480,7 +480,7 @@ export function AssessmentFlow({
             className="space-y-3 rounded border p-4"
             aria-label="Borrador EIPD guardado para consulta"
           >
-            <h3 className="font-semibold">
+            <h3 className="text-lg font-semibold">
               Documento EIPD guardado · evaluación versión {row.version}
             </h3>
             <p>

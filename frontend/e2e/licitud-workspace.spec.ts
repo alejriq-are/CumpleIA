@@ -319,7 +319,7 @@ test("crea borrador, abre y guarda LIA y recupera el historial sin activar EIPD"
       .click();
     expect((await download).suggestedFilename()).toBe("matriz-ensayo.txt");
     await page.getByRole("tab", { name: "Revisar documentos", exact: true }).click();
-    await page.getByText("Contenido del documento guardado", { exact: true }).first().click();
+    await page.getByText("Contenido del documento EIPD guardado", { exact: true }).first().click();
     await expect(
       page
         .getByRole("table", { name: "Valoración cualitativa de R1", exact: true })

@@ -1,5 +1,27 @@
 # Handoff vigente de CumpleIA
 
+## Paso 3 — aceptación asistida y publicación autorizada, 31/10/2026
+
+El usuario confirmó «Recorrido OK» para Consultar anexo desde una valoración asociada al documento actual, tras aceptar la consulta histórica y los ajustes de nombres y títulos. Queda aceptado LIC-UX-013 en este alcance: consulta de relaciones guardadas y navegación a la ficha del anexo correspondiente. La evidencia asistida es el resultado comunicado por el usuario; no equivale a auditoría jurídica ni verificación real de controles.
+
+Verificación técnica previa: 83 pruebas Chromium aprobadas con respuestas controladas; tipos, ESLint, formato y diferencias aprobados. La prueba manual con lector de pantalla sigue pendiente. Se mantienen separadas las valoraciones históricas y las relaciones del documento actual; no cambia el cálculo, API ni permisos. Confirmación y activación EIPD permanecen bloqueadas.
+
+Commit y push autorizados en `feature/riesgos-medidas-evidencias`; sin merge ni despliegue. Se excluyen `frontend/next-env.d.ts` y `outputs/` preexistentes. Las notas inferiores sobre aceptación o autorización pendiente quedan superadas para este alcance.
+
+## Paso 3 — LIC-UX-013: detalle relacionado preparado, 31/10/2026
+
+Ajuste solicitado tras el recorrido de anexos históricos reportado OK: los rótulos identifican el contenido EIPD guardado, la valoración EIPD y sus anexos de respaldo; infancia conserva su denominación específica. En la consulta guardada, títulos principales de 20 px, subtítulos de 18 px y encabezados de riesgo de 16 px, todos seminegrita. Verificación del ajuste: tipos, ESLint y formato aprobados; 83 pruebas Chromium de valoración/anexos, consulta integrada e historial de infancia aprobadas con respuestas controladas. Pendiente revisión visual del usuario; sin cambios en datos o relaciones históricas.
+
+Rama `feature/riesgos-medidas-evidencias`, base `15239c6` (Paso 2 publicado). Implementación local de consulta por riesgo en Documentos guardados → Consultar valoración y anexos: niveles residuales previsto/actual, fundamentos, medidas asociadas, estado/eficacia y referencias de verificación, evidencias declaradas y anexos explícitamente vinculados. Los accesos a anexos llevan a su ficha/versionado y colocan el foco; la descarga mantiene su comprobación existente.
+
+Usa valoración y documento guardados; no incorpora ediciones pendientes. Ante valoración histórica muestra sus niveles/fundamentos sin unir medidas ni anexos del documento actual. Sin valoración guardada conserva el aviso existente. No cambia cálculo, API, permisos, persistencia ni activación EIPD. Un vínculo no acredita eficacia ni aprobación.
+
+Evidencia local: tipos, ESLint y Prettier aprobados; 22 pruebas Chromium del panel aprobadas con respuestas controladas. Los tres casos nuevos comprueban relaciones explícitas, exclusión de anexos ajenos, versión/destino/foco, teclado, ancho 320/1280, lectura de valoración histórica, ausencia de escrituras y conservación/separación del control pendiente. No acredita todavía una prueba asistida con relaciones reales del servidor ni lector de pantalla.
+
+Validación asistida pendiente: en `/dashboard/trabajo`, elegir una evaluación ficticia con valoración guardada y medidas/anexos relacionados; abrir Documentos guardados → Consultar valoración y anexos. Localizar «Medidas y respaldos del riesgo residual», desplegar un riesgo y contrastar sus medidas/referencias con el documento guardado. Pulsar Consultar anexo y comprobar referencia/versión/foco. Comprobar texto pendiente conservado al volver al editor, teclado y ventana estrecha. Si falta valoración o vínculos, registrar ese estado sin inventar relaciones ni crear registros solo para comprobar el diseño.
+
+Sin commit/push nuevo, merge ni despliegue. Excluir `frontend/next-env.d.ts` y `outputs/` preexistentes. LIC-UX-013 queda pendiente de aceptación asistida, no cerrado por la prueba automatizada.
+
 ## Paso 2 — aceptación asistida y publicación autorizada
 
 El usuario confirmó los recorridos principales y complementarios del alcance mixto y autorizó commit/push. Quedan aceptados: acceso y retorno a la misma evaluación desde RAT; etiquetas coherentes y orden común en comparación; adopción explícita con motivo; revisión independiente de EIPD/infancia; conservación de borradores, antecedentes y alcance guardado; ventana estrecha, cierre/foco; retirada/restauración de aplicabilidad; cambio del RAT posterior a comparar; error de conexión y recuperación; consulta desde otra pestaña con pendientes independientes. Evidencia asistida reportada por el usuario en este chat; no equivale a auditoría completa ni prueba manual con lector de pantalla.

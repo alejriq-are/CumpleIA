@@ -113,7 +113,7 @@ export function EipdRiskTable({
     "max-w-full overflow-x-auto rounded border border-slate-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-700";
   return (
     <section aria-label="Resumen de riesgos y controles" className="my-4 space-y-5">
-      <h3 className="rounded bg-blue-100 p-3 font-semibold text-blue-950">
+      <h3 className="rounded bg-blue-100 p-3 text-lg font-semibold text-blue-950">
         Relación entre riesgos, controles y riesgo residual
       </h3>
       <p>
@@ -157,7 +157,7 @@ export function EipdRiskTable({
             aria-label={`Detalle del riesgo ${id}`}
             className="min-w-0 space-y-4 rounded border border-slate-300 p-3 md:p-4"
           >
-            <h4 className="rounded bg-blue-900 p-3 text-lg font-semibold text-white">
+            <h4 className="rounded bg-blue-900 p-3 text-base font-semibold text-white">
               Riesgo {id}
             </h4>
             <dl className="grid gap-3 md:grid-cols-2">

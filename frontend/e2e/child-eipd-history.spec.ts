@@ -599,7 +599,9 @@ test("documento completo persiste análisis, relaciones, fuentes, consulta y evi
     ]);
   expect(d.context_binding).toBeUndefined();
   expect(d.document_hash).toBeUndefined();
-  await page.getByText("Contenido del documento guardado", { exact: true }).click();
+  await page
+    .getByText("Contenido del documento de infancia y adolescencia guardado", { exact: true })
+    .click();
   await expect(page.getByText("PRUEBA: necessity_analysis", { exact: true })).toBeVisible();
   await expect(
     page.getByText(

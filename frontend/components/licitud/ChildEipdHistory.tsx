@@ -801,7 +801,10 @@ export function ChildEipdHistory({
                     },
                   ]}
                 />
-                <EipdDocumentView value={selected.document} />
+                <EipdDocumentView
+                  value={selected.document}
+                  documentKind="de infancia y adolescencia"
+                />
                 {view !== "all" && (
                   <label className="block font-medium">
                     Tipo de actuación

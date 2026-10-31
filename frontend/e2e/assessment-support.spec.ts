@@ -13,7 +13,7 @@ test.beforeAll(async () => {
  import {AssessmentSupportPanel} from ${JSON.stringify(path.resolve("components/licitud/AssessmentSupportPanel.tsx"))};
  const root=createRoot(document.getElementById("root"));let key=0;
  const row={status:"borrador",eipd_resolution_assessment:{risks:[{risk_id:"R1"}],measures:[{measure_id:"M1",risk_ids:["R1"]}]}};
- window.show=(mode="risks",readOnly=false)=>root.render(React.createElement(AssessmentSupportPanel,{key:++key,organizationId:${JSON.stringify(org)},treatmentId:${JSON.stringify(tid)},assessmentId:${JSON.stringify(aid)},token:async()=>"PRUEBA",row,readOnly,blocked:false,refreshVersion:0,mode,hidden:false,onSaved:()=>{},onLoaded:()=>{},onDirty:()=>{}}));
+ window.show=(mode="risks",readOnly=false,keep=false)=>root.render(React.createElement(AssessmentSupportPanel,{key:keep?key:++key,organizationId:${JSON.stringify(org)},treatmentId:${JSON.stringify(tid)},assessmentId:${JSON.stringify(aid)},token:async()=>"PRUEBA",row,readOnly,blocked:false,refreshVersion:0,mode,hidden:false,onSaved:()=>{},onLoaded:()=>{},onDirty:()=>{}}));
  `);
 });
 async function setup(page: Page, mode = "risks", failure = "", readOnly = false) {
@@ -465,5 +465,149 @@ for (const width of [1280, 390, 320]) {
       });
     }
     expect(writes).toHaveLength(0);
+    expect(
+      await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)
+    ).toBeTruthy();
+  });
+}
+
+for (const [current, width] of [
+  [true, 1280],
+  [true, 320],
+  [false, 1280],
+] as const) {
+  test(`LIC-UX-013 consulta relaciones guardadas, valoración actual=${current}, ancho=${width}`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width, height: 850 });
+    const { state, writes } = await setup(page, "review");
+    const point = { probability: 2, impact: 3, rationale: "[FICTICIA] Fundamento guardado" };
+    state.risk_evaluation = {
+      id: aid,
+      revision: 3,
+      current,
+      analysis: {
+        methodology: "CUMPLEIA-CUALITATIVA-1",
+        horizon: "12 meses",
+        risks: [
+          {
+            risk_id: "R1",
+            harm: "Daño",
+            frequency_context: "Ensayo",
+            inherent: point,
+            projected: point,
+            residual: point,
+            action: "Revisar",
+            owner_reference: "Ensayo",
+            review_on: null,
+          },
+        ],
+        controls: [
+          {
+            measure_id: "M1",
+            dimension: "probabilidad",
+            effectiveness: "parcial",
+            status: "propuesta",
+            rationale: "[FICTICIA] Control guardado",
+            evidence_references: ["REF-M1"],
+          },
+        ],
+      },
+      result: {
+        risks: [{ risk_id: "R1", inherent: "alto", projected: "medio", residual: "sin_resolver" }],
+        worst_residual: "sin_resolver",
+        unresolved: true,
+        can_confirm: false,
+        activation: "deshabilitada",
+      },
+    };
+    state.annexes = [
+      {
+        id: "direct",
+        reference: "SIMULADA-R1",
+        filename: "riesgo.txt",
+        description: "Respaldo directo",
+        version: 1,
+        risk_ids: ["R1"],
+        measure_ids: [],
+        section: "riesgos",
+      },
+      {
+        id: "measure",
+        reference: "SIMULADA-M1",
+        filename: "medida.txt",
+        description: "Respaldo de medida",
+        version: 2,
+        risk_ids: [],
+        measure_ids: ["M1"],
+        section: "medidas",
+      },
+      {
+        id: "other",
+        reference: "SIMULADA-OTRO",
+        filename: "otro.txt",
+        description: "No relacionado",
+        version: 1,
+        risk_ids: ["R2"],
+        measure_ids: ["M2"],
+        section: "fuentes",
+      },
+    ];
+    await page
+      .getByRole("button", { name: "Consultar valoración y anexos de respaldo", exact: true })
+      .click();
+    const relations = page.getByRole("region", {
+      name: "Medidas y respaldos del riesgo residual",
+      exact: true,
+    });
+    await expect(relations).toContainText("revisión 3");
+    const disclosure = relations.getByText("Consultar fundamentos y medidas de R1", {
+      exact: true,
+    });
+    await disclosure.focus();
+    await page.keyboard.press("Space");
+    await expect(relations).toContainText("Fundamento guardado");
+    await page.keyboard.press("Space");
+    await expect(
+      relations.getByText("Anexos vinculados al riesgo R1", { exact: true })
+    ).toBeHidden();
+    await page.keyboard.press("Enter");
+    await expect(relations).toContainText("Fundamento guardado");
+    if (current) {
+      await expect(relations.getByRole("region", { name: "Medida M1 de R1" })).toContainText(
+        "Control guardado"
+      );
+      await expect(relations).toContainText("REF-M1");
+      await expect(relations).not.toContainText("SIMULADA-OTRO");
+      await relations
+        .getByRole("button", { name: "Consultar anexo SIMULADA-M1 · versión 2", exact: true })
+        .click();
+      const target = page
+        .getByRole("article")
+        .filter({ hasText: "medida.txt — Respaldo de medida" });
+      await expect(target).toBeFocused();
+      await expect(target).toContainText("Medidas vinculadas: M1");
+    } else {
+      await expect(relations).toContainText("Valoración histórica");
+      await expect(relations.getByRole("button")).toHaveCount(0);
+      await expect(relations).not.toContainText("Control guardado");
+    }
+    if (current) {
+      await page.evaluate(() => (window as any).show("risks", false, true));
+      await page
+        .getByLabel("M1 — Fundamento de mitigación", { exact: true })
+        .fill("[FICTICIA] Edición pendiente");
+      await page.evaluate(() => (window as any).show("review", false, true));
+      await expect(relations).toContainText("Control guardado");
+      await expect(relations).not.toContainText("Edición pendiente");
+      await page.evaluate(() => (window as any).show("risks", false, true));
+      await expect(page.getByLabel("M1 — Fundamento de mitigación", { exact: true })).toHaveValue(
+        "[FICTICIA] Edición pendiente"
+      );
+    }
+    expect(writes).toHaveLength(0);
+    expect(
+      await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)
+    ).toBeTruthy();
   });
 }
