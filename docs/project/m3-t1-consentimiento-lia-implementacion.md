@@ -1,5 +1,9 @@
 # LIC-FORM-001 — Contrato de desarrollo de consentimiento y LIA
 
+> Estado actualizado 02/11/2026: entrega v1 del Paso 4 aceptada y cerrada por el usuario. LIC-FORM-001 conserva remanentes FORM-R01 a FORM-R05. Las descripciones iniciales de desarrollo pendiente que siguen son antecedentes; no acreditan cierre global del contrato. [Cierre y pendientes](paso4-consentimiento-lia.md).
+
+> Avance 31/10/2026: primera entrega local sobre el esquema v1, sin cierre de paquetes ni de LIC-FORM-001. [Estado, validación y pendientes](paso4-consentimiento-lia.md).
+
 Estado: pendiente de desarrollo. Registro solicitado por el usuario el 23/10/2026.
 Base técnica comprobada: a236ccd, rama feature/m3-t1-licitud-persistencia.
 Este documento define el trabajo posterior; no declara implementados los formularios,

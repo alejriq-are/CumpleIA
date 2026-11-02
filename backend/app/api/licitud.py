@@ -35,6 +35,7 @@ from app.schemas.licitud import (
     EipdResolutionReviewOutV2,
     EipdResolutionReviewOutV3,
     LegalAssessmentSummaryOut,
+    SavedBasisDiagnosticsOut,
 )
 from app.schemas.mvp_dossier import MvpDossierOut
 from app.schemas.organization_acceptance import (
@@ -143,6 +144,22 @@ async def confirmar_evaluacion(
 ):
     return await service.confirm_legal_assessment_v1(
         db, x_organization_id, treatment_id, assessment_id, profile.id
+    )
+
+
+@router.get(
+    "/treatments/{treatment_id}/assessments/{assessment_id}/basis-diagnostics",
+    response_model=SavedBasisDiagnosticsOut,
+)
+async def consultar_diagnosticos_guardados(
+    treatment_id: uuid.UUID,
+    assessment_id: uuid.UUID,
+    x_organization_id: Annotated[uuid.UUID, Header()],
+    profile: Profile = Depends(require_permission(Permission.view_content)),
+    db: AsyncSession = Depends(get_db),
+):
+    return await service.get_saved_basis_diagnostics_v1(
+        db, x_organization_id, treatment_id, assessment_id
     )
 
 

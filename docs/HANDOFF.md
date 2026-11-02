@@ -1,5 +1,23 @@
 # Handoff vigente de CumpleIA
 
+## Paso 4 — publicación autorizada y verificación final, 02/11/2026
+
+El usuario autorizó commit y push de la entrega v1 aceptada, su cierre y el diseño LIC-GOV-001 en `feature/consentimiento-lia-formularios`. Se repitieron y aprobaron 172 pruebas de servicios y 41 pruebas Chromium con respuestas controladas; TypeScript, ESLint/Prettier dirigidos, Ruff/Black dirigidos y diferencias sin errores. No se ejecutaron nuevas escrituras reales contra API/PostgreSQL aislado. LIC-FORM-001 conserva FORM-R01 a FORM-R05; siguiente tarea acordada: 5A, contrato común del circuito documental. Las notas inferiores de cambios locales o publicación pendiente quedan superadas por esta autorización. Se excluyen `frontend/next-env.d.ts` y `outputs/` preexistentes. Sin merge ni despliegue; confirmación y activación EIPD bloqueadas.
+
+## Paso 4: entrega v1 cerrada — 02/11/2026
+
+El usuario solicita el cierre de la entrega aceptada. LIC-FORM-001 conserva abiertos FORM-R01 a FORM-R05; no se cierran todos los requisitos del contrato. Evidencia registrada: 41 Chromium controladas y 172 pruebas de servicios, sin repetirlas por este cierre. [Cierre, límites y remanentes](project/paso4-consentimiento-lia.md).
+
+Siguiente tarea acordada: 5A contrato común del circuito documental; luego 5B versiones EIPD general, 5C revisión/decisión EIPD y 5D Base y fundamento, coordinado con LIC-GOV-001. No habilitar confirmación/activación EIPD. Los cambios siguen locales, sin nueva autorización de publicación en esta instrucción. Excluir `frontend/next-env.d.ts` y `outputs/` preexistentes. Las notas históricas de aceptación pendiente quedan superadas solo para el alcance aceptado.
+
+## Diseño aprobado — revisión y aceptación de Base y fundamento, 02/11/2026
+
+Se documentó LIC-GOV-001: revisión del fundamento y decisión de la organización como actuaciones distintas, vinculadas al contenido exacto y a facultades expresas. Implementación pendiente; no reutilizar permisos de infancia para la base general ni conceder aceptación automática al delegado/administrador. Próximo lote GOV-01: precisar contrato, transiciones y permisos antes de nuevas escrituras. [Diseño y checklist](project/revision-aceptacion-base-licitud.md). Esta actualización es documental; preserva el trabajo local de Paso 4. Sin nuevo commit/push.
+
+## Paso 4 — LIC-FORM-001 iniciado, 31/10/2026
+
+Entrega inicial local en `feature/consentimiento-lia-formularios`, desde `3d058327`: editor consentimiento v1 (16 controles), ocho grupos LIA (59 campos), conservación entre bases, consulta legible y diagnóstico guardado independiente. 41 pruebas Chromium con respuestas controladas y 172 pruebas de servicios aprobadas; tipos, lint y formato dirigidos aprobados. Se agregó GET basis-diagnostics para consultar cada formulario conservado sin guardar nuevamente ni descartar pendientes, con las respuestas exactas analizadas. No cambian evaluadores, contratos de entrada ni expediente manual. Avisos aceptados por el usuario. Resumen de la última base y fundamento consultados añadido antes del editor; resumen aceptado por el usuario; pendiente integración real aislada y ampliaciones de desgloses/evidencia por criterio y versión. LIC-FORM-001 sigue abierto. Estado y siguiente recorrido: [Paso 4](project/paso4-consentimiento-lia.md). Sin commit/push de esta entrega; excluir `frontend/next-env.d.ts` y `outputs/` preexistentes.
+
 ## Paso 3 — aceptación asistida y publicación autorizada, 31/10/2026
 
 El usuario confirmó «Recorrido OK» para Consultar anexo desde una valoración asociada al documento actual, tras aceptar la consulta histórica y los ajustes de nombres y títulos. Queda aceptado LIC-UX-013 en este alcance: consulta de relaciones guardadas y navegación a la ficha del anexo correspondiente. La evidencia asistida es el resultado comunicado por el usuario; no equivale a auditoría jurídica ni verificación real de controles.

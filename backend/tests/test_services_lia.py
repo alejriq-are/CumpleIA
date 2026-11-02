@@ -465,3 +465,88 @@ def test_factores_no_producen_conclusion_aislada(lia_context):
         lia["reasonable_expectations"][field] = {"answer": "si"}
     lia["necessity"]["fewer_data_possible"] = {"answer": "si"}
     assert evaluate_lia_assessment_v1(lia, rat).result == "completo"
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "active_basis", ["consentimiento_art12", "interes_legitimo_art13d"]
+)
+async def test_saved_form_diagnostics_evaluate_both_exact_saved_documents(
+    lia_context, monkeypatch, active_basis
+):
+    import uuid
+    from types import SimpleNamespace
+
+    from app.schemas.licitud import SavedBasisDiagnosticsOut
+    from app.services import licitud
+    from app.services.consentimiento import evaluate_consent_assessment_v1
+
+    lia, rat = lia_context
+    consent = {
+        "schema_version": 1,
+        "given_by": "titular",
+        "grant_method": "electronico",
+        "answers": [
+            {
+                "question_id": "consentimiento_libre",
+                "answer": "si",
+                "comment": "[FICTICIA] Respuesta conservada",
+            }
+        ],
+        "evidence": [],
+    }
+    ids = [uuid.uuid4() for _ in range(3)]
+    row = SimpleNamespace(
+        id=ids[2],
+        legal_basis=active_basis,
+        purpose_snapshot=rat["purpose"],
+        rat_context_snapshot=rat,
+        lia_assessment=lia,
+        consent_assessment=consent,
+    )
+    before = deepcopy(row.__dict__)
+    sentinel = object()  # No execute/flush/commit: any extra database access fails.
+
+    async def get_saved(db, org, treatment, assessment):
+        assert db is sentinel
+        assert (org, treatment, assessment) == tuple(ids)
+        return row
+
+    monkeypatch.setattr(licitud, "get_legal_assessment_v1", get_saved)
+    result = SavedBasisDiagnosticsOut.model_validate(
+        await licitud.get_saved_basis_diagnostics_v1(sentinel, *ids)
+    )
+    assert (
+        result.lia.result == evaluate_lia_assessment_v1(lia, rat).result == "completo"
+    )
+    assert result.consent.result == evaluate_consent_assessment_v1(consent).result
+    assert not any(
+        i.question_id == "consentimiento_libre" for i in result.consent.issues
+    )
+    assert (
+        result.consent_document.answers[0].comment == "[FICTICIA] Respuesta conservada"
+    )
+    assert (
+        result.lia_document.purpose_and_interest.legitimate_interest
+        == "Interés documentado"
+    )
+    assert row.__dict__ == before
+
+
+@pytest.mark.asyncio
+async def test_saved_form_diagnostics_propagate_scope_denial(monkeypatch):
+    import uuid
+
+    from fastapi import HTTPException
+
+    from app.services import licitud
+
+    async def denied(*args):
+        raise HTTPException(status_code=404, detail="No disponible")
+
+    monkeypatch.setattr(licitud, "get_legal_assessment_v1", denied)
+    with pytest.raises(HTTPException) as error:
+        await licitud.get_saved_basis_diagnostics_v1(
+            object(), *[uuid.uuid4() for _ in range(3)]
+        )
+    assert error.value.status_code == 404

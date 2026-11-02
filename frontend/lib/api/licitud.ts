@@ -43,6 +43,7 @@ export type Assessment = AssessmentSummary & {
   child_adolescent_assessment?: unknown;
   eipd_resolution_assessment?: Record<string, unknown> | null;
   justification: string | null;
+  consent_assessment?: Record<string, unknown> | null;
   lia_assessment: Record<string, unknown> | null;
 };
 export type Draft = {
@@ -61,11 +62,22 @@ export const licitudApi = {
     apiFetch<Assessment>(root(scope), { ...scope, method: "POST", body }),
   get: (scope: Scope, id: string) =>
     apiFetch<Assessment>(`${root(scope)}/${encodeURIComponent(id)}`, scope),
+  readiness: (scope: Scope, id: string) =>
+    apiFetch<{ consent?: BasisReadiness | null; lia?: BasisReadiness | null }>(
+      `${root(scope)}/${encodeURIComponent(id)}/readiness`,
+      scope
+    ),
+  basisDiagnostics: (scope: Scope, id: string) =>
+    apiFetch<SavedBasisDiagnostics>(
+      `${root(scope)}/${encodeURIComponent(id)}/basis-diagnostics`,
+      scope
+    ),
   save: (
     scope: Scope,
     id: string,
     body: Pick<Assessment, "legal_basis" | "justification"> & {
       lia_assessment?: Record<string, unknown>;
+      consent_assessment?: Record<string, unknown>;
     }
   ) =>
     apiFetch<Assessment>(`${root(scope)}/${encodeURIComponent(id)}`, {
@@ -114,4 +126,20 @@ export const scopeReviewApi = {
       method: "POST",
       body,
     }),
+};
+
+export type BasisReadiness = {
+  result: string;
+  issues: { field: string; code: string; category: string }[];
+  applicability?: { field: string; applicability: string }[];
+};
+
+export type SavedBasisDiagnostics = {
+  assessment_id: string;
+  legal_basis: string | null;
+  purpose_snapshot: string;
+  consent_document: Record<string, unknown> | null;
+  lia_document: Record<string, unknown> | null;
+  consent: BasisReadiness;
+  lia: BasisReadiness;
 };

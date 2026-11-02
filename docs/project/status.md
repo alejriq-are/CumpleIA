@@ -1,4 +1,10 @@
+## Paso 4 — cierre aceptado y publicación autorizada, 02/11/2026
+
+Entrega v1 aceptada; commit/push autorizados en `feature/consentimiento-lia-formularios`. Verificación final repetida: 172 pruebas de servicios y 41 Chromium con respuestas controladas aprobadas; tipos, lint, formato dirigidos y diferencias aprobados. Persistencia real aislada pendiente. LIC-FORM-001 mantiene FORM-R01 a FORM-R05; continuidad 5A–5D según [cierre y remanentes](paso4-consentimiento-lia.md). LIC-GOV-001 es diseño aprobado, pendiente implementación. Sin merge/despliegue ni activación EIPD. Este registro supera las notas históricas inferiores de publicación pendiente.
+
 ## Paso 3 — LIC-UX-013: detalle relacionado preparado, 31/10/2026
+
+> Actualización 02/11/2026: entrega v1 del Paso 4 aceptada y cerrada; LIC-FORM-001 mantiene FORM-R01 a FORM-R05 abiertos. Próxima tarea: Paso 5A, contrato común del circuito documental. Cambios locales sin nueva publicación. Ver [cierre y remanentes](paso4-consentimiento-lia.md) y [handoff](../HANDOFF.md).
 
 ## Paso 3 — aceptación asistida y publicación autorizada, 31/10/2026
 

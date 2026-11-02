@@ -34,7 +34,13 @@ test.beforeAll(async () => {
   const method=opts.method??"GET";window.demo.calls.push({url,method,body:opts.body?JSON.parse(opts.body):null});
   const result=value=>new Response(JSON.stringify(value),{status:200});
   if(url.endsWith("/support"))return result(window.demo.support??{schema_version:1,organization_id:org,treatment_id:tid,assessment_id:tid,document_hash:"f".repeat(64),risk_evaluation:null,risk_history:[],annexes:[],can_confirm:false,activation:"deshabilitada"});
+  if(url.endsWith("/basis-diagnostics")){
+   if(window.demo.mode==="diagnostic-down")return new Response(JSON.stringify({detail:"PRUEBA diagnóstico no disponible"}),{status:503});
+   const row=window.demo.rows[0];
+   return result({assessment_id:row.id,legal_basis:row.legal_basis,purpose_snapshot:row.purpose_snapshot,consent_document:row.consent_assessment??null,lia_document:row.lia_assessment??null,consent:window.demo.basisReadiness?.consent??{result:"incompleto",issues:[],applicability:[]},lia:window.demo.basisReadiness?.lia??{result:"incompleto",issues:[],applicability:[]}});
+  }
   if(url.endsWith("/readiness")&&window.demo.mode==="diagnostic-down")return new Response(JSON.stringify({detail:"PRUEBA diagnóstico no disponible"}),{status:503});
+  if(url.endsWith("/readiness")&&window.demo.basisReadiness)return result(window.demo.basisReadiness);
   if(url.endsWith("/readiness"))return result({assessment_id:tid,rat_context_current:true,eipd_resolution:window.demo.rows[0]?.eipd_resolution_assessment?{result:"incompleto",issues:[{field:"risks",code:"analisis_pendiente",category:"incompleto"}]}:null,eipd_controls_v5:null});
   if(url.endsWith("/eipd-child/v4/policy"))return result({policy:{policy_schema_version:1,policy_reference:"m3-t1-infancia-pruebas-negativas-v1",sources_status:"pendiente",acceptance_status:"pendiente",activation:"deshabilitada",allowed_decisions:["requiere_cambios","no_continuar"],global_policy_identity:{policy_version:1,policy_reference:"PRUEBA",policy_hash:"d".repeat(64)}},policy_hash:"e".repeat(64),authorizes_action:false,can_confirm:false});
   if(url.endsWith("/eipd-child/v4/resolutions"))return result([]);
@@ -963,4 +969,220 @@ test("11B no precarga un identificador ausente del inventario autorizado", async
       (window as any).demo.calls.some((c: any) => c.url.includes("b0000000"))
     )
   ).toBe(false);
+});
+
+test("formularios v1 conservan respuestas estructuradas, medidas y referencias al reabrir", async ({
+  page,
+}) => {
+  await draft(page);
+  await page.evaluate((id) => (window as any).editor(id), treatment);
+  await page.getByLabel("¿Contribuye a la finalidad?", { exact: true }).selectOption("si");
+  await page
+    .getByLabel("¿Contribuye a la finalidad? — Fundamento", { exact: true })
+    .fill("[FICTICIA] Relación documentada");
+  await page.getByRole("button", { name: "Agregar medida de la LIA", exact: true }).click();
+  await page
+    .getByLabel("Medida 1 — Descripción", { exact: true })
+    .fill("[FICTICIA] Accesos limitados");
+  await page
+    .getByLabel("Medida 1 — Impacto mitigado", { exact: true })
+    .fill("[FICTICIA] Exposición");
+  await page.getByLabel("Conclusión propuesta", { exact: true }).selectOption("requiere_revision");
+  await page.getByRole("button", { name: "Guardar borrador", exact: true }).click();
+  await expect(page.getByRole("status")).toContainText("Borrador guardado");
+  await page.getByLabel("Base de licitud propuesta").selectOption("consentimiento_art12");
+  await expect(page.getByLabel("Quién otorga el consentimiento")).toHaveValue("");
+  await expect(page.getByLabel("Método de otorgamiento")).toHaveValue("");
+  await page.getByLabel("Quién otorga el consentimiento").selectOption("titular");
+  await page.getByLabel("Método de otorgamiento").selectOption("electronico");
+  await page.getByLabel("¿El consentimiento es libre?", { exact: true }).selectOption("pendiente");
+  await page
+    .getByLabel("¿El consentimiento es libre? — Fundamento", { exact: true })
+    .fill("[FICTICIA] Pendiente revisión");
+  await page.getByRole("button", { name: "Agregar referencia de evidencia", exact: true }).click();
+  await page.getByLabel("Tipo de evidencia 1", { exact: true }).fill("[FICTICIA] Registro");
+  await page.getByLabel("Fecha de obtención 1", { exact: true }).fill("2026-10-31");
+  await page.getByRole("button", { name: "Guardar borrador", exact: true }).click();
+  await expect(page.getByRole("status")).toContainText("Borrador guardado");
+  const row = await page.evaluate(() => (window as any).demo.rows[0]);
+  expect(row.consent_assessment.evidence[0].obtained_on).toBe("2026-10-31");
+  expect(row.lia_assessment.necessity.contributes_to_purpose).toEqual({
+    answer: "si",
+    comment: "[FICTICIA] Relación documentada",
+  });
+  expect(row.lia_assessment.safeguards.measures[0].description).toContain("Accesos limitados");
+  await page.evaluate(() => (window as any).workspace());
+  await page.evaluate((id) => (window as any).editor(id), treatment);
+  await expect(
+    page.getByLabel("¿El consentimiento es libre? — Fundamento", { exact: true })
+  ).toHaveValue("[FICTICIA] Pendiente revisión");
+  await page.getByLabel("Base de licitud propuesta").selectOption("interes_legitimo_art13d");
+  await expect(page.getByLabel("Conclusión propuesta", { exact: true })).toHaveValue(
+    "requiere_revision"
+  );
+  await expect(page.getByLabel("Medida 1 — Descripción", { exact: true })).toHaveValue(
+    "[FICTICIA] Accesos limitados"
+  );
+});
+
+test("guardar otra base no marca como guardadas las ediciones del formulario inactivo", async ({
+  page,
+}) => {
+  await draft(page);
+  await page.evaluate((id) => (window as any).editor(id), treatment);
+  await page
+    .getByLabel("Interés legítimo declarado", { exact: true })
+    .fill("[FICTICIA] Solo en esta pestaña");
+  await page.getByLabel("Base de licitud propuesta").selectOption("consentimiento_art12");
+  await page.getByRole("button", { name: "Guardar borrador", exact: true }).click();
+  await expect(page.getByText("Cambios sin guardar.", { exact: false }).first()).toBeVisible();
+  expect(await page.evaluate(() => (window as any).demo.rows[0].lia_assessment)).toBeNull();
+  await page.getByLabel("Base de licitud propuesta").selectOption("interes_legitimo_art13d");
+  await expect(page.getByLabel("Interés legítimo declarado", { exact: true })).toHaveValue(
+    "[FICTICIA] Solo en esta pestaña"
+  );
+  await page.getByRole("button", { name: "Guardar borrador", exact: true }).click();
+  await expect(page.getByText("Cambios sin guardar.", { exact: false })).toHaveCount(0);
+  await page.evaluate(() => ((window as any).demo.mode = "diagnostic-down"));
+  await page.getByRole("button", { name: "Consultar diagnóstico guardado", exact: true }).click();
+  await expect(page.getByRole("alert")).toContainText("No se pudo consultar el diagnóstico");
+  await expect(page.getByRole("status")).toContainText("Borrador guardado");
+});
+
+test("No aplica depende del diagnóstico guardado y no se ofrece de forma general", async ({
+  page,
+}) => {
+  await draft(page);
+  await page.evaluate((id) => (window as any).editor(id), treatment);
+  const direct = page.getByLabel("¿Se informó al recoger directamente los datos?", { exact: true });
+  await expect(direct.locator('option[value="no_aplica"]')).toHaveCount(0);
+  await page.evaluate(
+    () =>
+      ((window as any).demo.basisReadiness = {
+        lia: {
+          result: "incompleto",
+          issues: [],
+          applicability: [
+            {
+              field: "reasonable_expectations.informed_at_direct_collection",
+              applicability: "no_aplicable",
+            },
+          ],
+        },
+      })
+  );
+  await page.getByRole("button", { name: "Consultar diagnóstico guardado", exact: true }).click();
+  await expect(direct.locator('option[value="no_aplica"]')).toHaveCount(1);
+  await direct.selectOption("no_aplica");
+  await page.getByRole("button", { name: "Guardar borrador", exact: true }).click();
+  await expect(page.getByRole("status").filter({ hasText: "Borrador guardado" })).toBeVisible();
+  await page.getByLabel("Base de licitud propuesta").selectOption("consentimiento_art12");
+  await page.getByLabel("Quién otorga el consentimiento").selectOption("titular");
+  await page.getByRole("button", { name: "Guardar borrador", exact: true }).click();
+  const mandate = page.getByLabel("¿El mandatario cuenta con facultad expresa?", { exact: true });
+  await expect(mandate.locator('option[value="no_aplica"]')).toHaveCount(0);
+  await page.evaluate(
+    () =>
+      ((window as any).demo.basisReadiness = {
+        consent: {
+          result: "incompleto",
+          issues: [],
+          applicability: [
+            { field: "answers.mandatario_facultad_expresa", applicability: "no_aplicable" },
+          ],
+        },
+      })
+  );
+  await page.getByRole("button", { name: "Consultar diagnóstico guardado", exact: true }).click();
+  await expect(mandate.locator('option[value="no_aplica"]')).toHaveCount(1);
+  await expect(
+    page
+      .getByLabel("¿El consentimiento es libre?", { exact: true })
+      .locator('option[value="no_aplica"]')
+  ).toHaveCount(0);
+});
+
+test("diagnóstico consulta cada formulario guardado sin guardar ni sustituir ediciones pendientes", async ({
+  page,
+}) => {
+  await draft(page);
+  await page.evaluate((id) => (window as any).editor(id), treatment);
+  await page
+    .getByLabel("Interés legítimo declarado", { exact: true })
+    .fill("[FICTICIA] Interés guardado");
+  await page.getByRole("button", { name: "Guardar borrador", exact: true }).click();
+  await expect(page.getByRole("status")).toContainText("Borrador guardado");
+  await page.getByLabel("Base de licitud propuesta").selectOption("consentimiento_art12");
+  await page.getByLabel("Quién otorga el consentimiento").selectOption("titular");
+  await page.getByLabel("Método de otorgamiento").selectOption("electronico");
+  await page.getByRole("button", { name: "Guardar borrador", exact: true }).click();
+  await expect(page.getByRole("status")).toContainText("Borrador guardado");
+  await page.evaluate(() => (window as any).workspace());
+  await page.evaluate((id) => (window as any).editor(id), treatment);
+  const query = page.getByRole("button", { name: "Consultar diagnóstico guardado", exact: true });
+  await query.click();
+  await expect(page.getByText("Consentimiento: diagnóstico del contenido guardado")).toBeVisible();
+  await page.getByLabel("Base de licitud propuesta").selectOption("interes_legitimo_art13d");
+  await page
+    .getByLabel("Interés legítimo declarado", { exact: true })
+    .fill("[FICTICIA] Edición pendiente");
+  const writes = await page.evaluate(
+    () => (window as any).demo.calls.filter((c: any) => c.method === "PATCH").length
+  );
+  await expect(query).toBeEnabled();
+  await query.click();
+  await expect(page.getByText("LIA: diagnóstico del contenido guardado")).toBeVisible();
+  await expect(
+    page.getByText("La base propuesta que está guardada como seleccionada es:", { exact: false })
+  ).toBeVisible();
+  await page.getByText("Respuestas guardadas analizadas", { exact: true }).click();
+  await expect(page.getByText("[FICTICIA] Interés guardado", { exact: true })).toBeVisible();
+  await expect(page.getByLabel("Interés legítimo declarado", { exact: true })).toHaveValue(
+    "[FICTICIA] Edición pendiente"
+  );
+  expect(
+    await page.evaluate(
+      () => (window as any).demo.calls.filter((c: any) => c.method === "PATCH").length
+    )
+  ).toBe(writes);
+  await page.evaluate(() => ((window as any).demo.mode = "diagnostic-down"));
+  await query.click();
+  await expect(page.getByRole("alert")).toContainText("No se pudo consultar el diagnóstico");
+  await expect(page.getByText("LIA: diagnóstico del contenido guardado")).toHaveCount(0);
+  await page.evaluate(() => ((window as any).demo.mode = "ok"));
+  await query.click();
+  await expect(page.getByText("LIA: diagnóstico del contenido guardado")).toBeVisible();
+  await expect(page.getByLabel("Interés legítimo declarado", { exact: true })).toHaveValue(
+    "[FICTICIA] Edición pendiente"
+  );
+});
+
+test("resumen de base y fundamento conserva lo guardado mientras se edita y se actualiza al guardar", async ({
+  page,
+}) => {
+  await draft(page);
+  await page.evaluate((id) => (window as any).editor(id), treatment);
+  const summary = page.getByRole("region", {
+    name: "Última base y fundamento consultados en el servidor",
+    exact: true,
+  });
+  await expect(summary).toBeVisible();
+  await page.getByLabel("Base de licitud propuesta").selectOption("consentimiento_art12");
+  await page
+    .getByLabel("Fundamento", { exact: true })
+    .fill("[FICTICIA] Fundamento guardado del resumen");
+  await page.getByRole("button", { name: "Guardar borrador", exact: true }).click();
+  await expect(summary).toContainText("[FICTICIA] Fundamento guardado del resumen");
+  await expect(summary).toContainText("Consentimiento");
+  await page.getByLabel("Base de licitud propuesta").selectOption("interes_legitimo_art13d");
+  await page
+    .getByLabel("Fundamento", { exact: true })
+    .fill("[FICTICIA] Fundamento pendiente del resumen");
+  await expect(summary).toContainText("Tienes cambios sin guardar");
+  await expect(summary).toContainText("[FICTICIA] Fundamento guardado del resumen");
+  await expect(summary).not.toContainText("[FICTICIA] Fundamento pendiente del resumen");
+  await page.getByRole("button", { name: "Guardar borrador", exact: true }).click();
+  await expect(summary).toContainText("[FICTICIA] Fundamento pendiente del resumen");
+  await expect(summary).toContainText("Interés legítimo (LIA)");
+  await expect(summary).not.toContainText("Tienes cambios sin guardar");
 });

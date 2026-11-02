@@ -4,6 +4,7 @@ import type { Support } from "@/lib/api/assessment-support";
 import type { Dossier } from "@/lib/api/mvp-dossier";
 import { legalBases } from "@/lib/api/licitud";
 import { liaFields } from "@/lib/licitud/lia-fields";
+import { consentQuestions } from "./LegalBasisForms";
 import { EipdDocumentView } from "./EipdDocumentFields";
 
 type Value = Record<string, unknown>;
@@ -40,9 +41,33 @@ const names: Record<string, string> = {
   answer: "Respuesta",
   reference: "Referencia",
   measures: "Medidas",
+  comment: "Fundamento",
+  mitigated_impact: "Impacto mitigado",
+  evidence_type: "Tipo de evidencia",
+  obtained_on: "Fecha de obtención",
+  mechanism: "Mecanismo",
+
   public_benefit: "Beneficio declarado",
 };
 const choices: Record<string, string> = {
+  no_aplica: "No aplica",
+  titular: "Titular",
+  representante_legal: "Representante legal",
+  mandatario: "Mandatario",
+  escrito: "Escrito",
+  verbal: "Verbal",
+  electronico: "Electrónico",
+  acto_afirmativo: "Acto afirmativo",
+  otro_documentado: "Otro documentado",
+  responsable: "Responsable",
+  tercero: "Tercero",
+  ambos: "Ambos",
+  baja: "Baja",
+  media: "Media",
+  alta: "Alta",
+  puede_basarse: "Puede basarse",
+  no_puede_basarse: "No puede basarse",
+  requiere_revision: "Requiere revisión",
   si: "Sí",
   no: "No",
   pendiente: "Pendiente",
@@ -172,6 +197,10 @@ export function DossierDocumentView({
         ))}
       </dl>
     );
+  return <SavedBasisDocumentView value={value} />;
+}
+
+export function SavedBasisDocumentView({ value }: { value: Value }) {
   return (
     <div className="space-y-4">
       <dl className="space-y-4">
@@ -188,6 +217,57 @@ export function DossierDocumentView({
         />
         <Field label="Fundamento" value={value.justification} />
       </dl>
+      {value.consent_assessment != null && (
+        <section className="space-y-3" aria-label="Consentimiento guardado">
+          <h4 className="font-semibold">
+            {value.legal_basis === "consentimiento_art12"
+              ? "Consentimiento guardado"
+              : "Consentimiento guardado como antecedente previo"}
+          </h4>
+          {value.legal_basis !== "consentimiento_art12" && (
+            <p>Se conserva para consulta. No fundamenta la base propuesta actualmente.</p>
+          )}
+          <dl className="space-y-3">
+            <Field
+              label="Quién otorga el consentimiento"
+              value={record(value.consent_assessment).given_by}
+            />
+            <Field
+              label="Método de otorgamiento"
+              value={record(value.consent_assessment).grant_method}
+            />
+            {consentQuestions.map(([key, label]) => (
+              <Field
+                key={key}
+                label={label}
+                value={
+                  (Array.isArray(record(value.consent_assessment).answers)
+                    ? (record(value.consent_assessment).answers as Record<string, unknown>[])
+                    : []
+                  ).find((a) => a.question_id === key)
+                    ? {
+                        answer: (
+                          record(value.consent_assessment).answers as Record<string, unknown>[]
+                        ).find((a) => a.question_id === key)?.answer,
+                        comment: (
+                          record(value.consent_assessment).answers as Record<string, unknown>[]
+                        ).find((a) => a.question_id === key)?.comment,
+                      }
+                    : null
+                }
+              />
+            ))}
+            <Field
+              label="Referencias documentales del consentimiento"
+              value={record(value.consent_assessment).evidence}
+            />
+            <Field
+              label="Notas del consentimiento"
+              value={record(value.consent_assessment).notes}
+            />
+          </dl>
+        </section>
+      )}
       {value.lia_assessment != null && (
         <section
           aria-label={
