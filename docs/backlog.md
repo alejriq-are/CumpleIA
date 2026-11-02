@@ -1,3 +1,7 @@
+## LIC-DOC-001 — Paso 5A, contrato común del circuito documental
+
+Propuesta preparada el 02/11/2026, pendiente de validación conjunta de V1–V3. [Contrato, alcance y plan 5B–5D](project/circuito-documental-comun.md). 5B: registro/consulta de versiones EIPD general; 5C: revisión/decisión y facultades; 5D: adopción por Base y fundamento (LIC-GOV-001). Implementación pendiente, sin cambios retroactivos al circuito de infancia. Mantener FORM-R01 a FORM-R05. No habilitar confirmación/activación EIPD.
+
 ## Paso 2 — aceptación asistida y publicación autorizada
 
 ## Paso 3 — aceptación asistida y publicación autorizada, 31/10/2026

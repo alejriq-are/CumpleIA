@@ -1,5 +1,7 @@
 # Ciclo documental de la EIPD en CumpleIA
 
+> Continuidad 02/11/2026: el [contrato propuesto del Paso 5A](circuito-documental-comun.md) define la ampliación 5B–5D, pendiente de validación conjunta. Esta guía conserva la distinción entre comportamiento actual y futuro.
+
 Guía de generación, edición, versiones, revisión y decisión de la organización.
 
 Fecha de referencia: 29 de octubre de 2026. Base funcional contrastada: `41c561b78e7b4d96994d927b86422d7d9efed5d1`.

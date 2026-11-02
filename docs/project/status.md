@@ -1,3 +1,7 @@
+## Paso 5A — propuesta contractual preparada, 02/11/2026
+
+LIC-DOC-001 preparado; pendiente de validar V1–V3 con el usuario. [Contrato común y lotes 5B–5D](circuito-documental-comun.md). Solo documentación, sin nuevas capacidades, migraciones o pruebas funcionales. LIC-GOV-001 conserva su diseño aprobado y su implementación pendiente; FORM-R01 a FORM-R05 siguen abiertos. Commit/push de la propuesta documental autorizados el 02/11/2026; V1–V3 siguen pendientes de validación funcional. Sin activación EIPD.
+
 ## Paso 4 — cierre aceptado y publicación autorizada, 02/11/2026
 
 Entrega v1 aceptada; commit/push autorizados en `feature/consentimiento-lia-formularios`. Verificación final repetida: 172 pruebas de servicios y 41 Chromium con respuestas controladas aprobadas; tipos, lint, formato dirigidos y diferencias aprobados. Persistencia real aislada pendiente. LIC-FORM-001 mantiene FORM-R01 a FORM-R05; continuidad 5A–5D según [cierre y remanentes](paso4-consentimiento-lia.md). LIC-GOV-001 es diseño aprobado, pendiente implementación. Sin merge/despliegue ni activación EIPD. Este registro supera las notas históricas inferiores de publicación pendiente.

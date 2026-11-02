@@ -1,3 +1,7 @@
+## Paso 5A — contrato preparado, 02/11/2026
+
+Contrato LIC-DOC-001 preparado en `feature/circuito-documental-5a`, base `f0d53ef`. Alcance solo documental: identidades, transiciones, facultades, correspondencia material, concurrencia y continuidad 5B–5D. V1–V3 pendientes de validación conjunta; no iniciar implementación de 5B ni cambiar infancia con esta propuesta. [Contrato y recorrido conceptual](project/circuito-documental-comun.md). Commit y push de la propuesta 5A autorizados por el usuario el 02/11/2026; la publicación no sustituye la validación funcional de V1–V3. Excluir `frontend/next-env.d.ts` y `outputs/` preexistentes. Confirmación/activación EIPD bloqueadas.
+
 # Handoff vigente de CumpleIA
 
 ## Paso 4 — publicación autorizada y verificación final, 02/11/2026
