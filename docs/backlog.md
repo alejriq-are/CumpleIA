@@ -1,3 +1,11 @@
+## LIC-DOC-001 — 5B.1 implementado localmente, 02/11/2026
+
+Servidor de versiones EIPD general separado del borrador: registro inmutable, origen esperado, idempotencia, consulta de historial/solicitud y permisos/RLS. [Contrato técnico y límites](project/eipd-versiones-5b1.md). Migración `b95e7f3d1204` aplicada solo en base aislada; sin interfaz nueva ni cambio operacional. Validación final: 191 pruebas aprobadas en PostgreSQL aislado, incluida concurrencia entre series; Ruff, Black y diferencias verificados. Próximo sublote 5B.2, interfaz y validación conjunta; 5C/5D y FORM-R01 a FORM-R05 abiertos. Commit y push de 5B.1 autorizados por el usuario el 02/11/2026; sin merge ni despliegue. Confirmación/activación EIPD bloqueadas. Excluir `frontend/next-env.d.ts` y `outputs/` preexistentes. Supera las notas inferiores de 5B.1 pendiente de iniciar.
+
+## LIC-DOC-001 — actuaciones y reglas aprobadas, 02/11/2026
+
+V1–V3 y distribución de actuaciones aprobadas por el usuario; [registro y límites](project/circuito-documental-comun.md). 5A completado en su validación funcional explícita; implementación 5B–5D pendiente. Próximo sublote: 5B.1. Precisar separación de autoría/revisión en 5C sin convertirla en aprobación inferida. Mantener LIC-GOV-001 y FORM-R01 a FORM-R05; no alterar infancia ni habilitar EIPD. Las notas inferiores de V1–V3 pendientes quedan superadas.
+
 ## LIC-DOC-001 — Paso 5A, contrato común del circuito documental
 
 Propuesta preparada el 02/11/2026, pendiente de validación conjunta de V1–V3. [Contrato, alcance y plan 5B–5D](project/circuito-documental-comun.md). 5B: registro/consulta de versiones EIPD general; 5C: revisión/decisión y facultades; 5D: adopción por Base y fundamento (LIC-GOV-001). Implementación pendiente, sin cambios retroactivos al circuito de infancia. Mantener FORM-R01 a FORM-R05. No habilitar confirmación/activación EIPD.

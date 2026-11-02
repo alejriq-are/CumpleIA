@@ -19,6 +19,7 @@ from app.db.models import Membership, Profile, UserRole
 class Permission(str, enum.Enum):
     view_content = "view_content"
     edit_content = "edit_content"
+    register_document = "register_document"
     manage_members = "manage_members"
     manage_organization = "manage_organization"
 
@@ -29,11 +30,14 @@ class Permission(str, enum.Enum):
 # que exista gestión de miembros, no un permiso.
 _ROLE_PERMISSIONS: dict[UserRole, frozenset[Permission]] = {
     UserRole.viewer: frozenset({Permission.view_content}),
-    UserRole.editor: frozenset({Permission.view_content, Permission.edit_content}),
+    UserRole.editor: frozenset(
+        {Permission.view_content, Permission.edit_content, Permission.register_document}
+    ),
     UserRole.admin: frozenset(
         {
             Permission.view_content,
             Permission.edit_content,
+            Permission.register_document,
             Permission.manage_members,
             Permission.manage_organization,
         }
@@ -42,6 +46,7 @@ _ROLE_PERMISSIONS: dict[UserRole, frozenset[Permission]] = {
         {
             Permission.view_content,
             Permission.edit_content,
+            Permission.register_document,
             Permission.manage_members,
             Permission.manage_organization,
         }

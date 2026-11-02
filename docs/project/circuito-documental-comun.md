@@ -1,10 +1,28 @@
 # Paso 5A — contrato común del circuito documental
 
 Identificador: **LIC-DOC-001**. Fecha: 02/11/2026.
-Estado: **propuesta contractual preparada; pendiente de validación conjunta**.
+Estado: **actuaciones y reglas V1–V3 aprobadas por el usuario el 02/11/2026; implementación pendiente**.
 Base inspeccionada: `f0d53ef92e4daacc8d692cad1525c9f1716594ba`.
 Rama de preparación: `feature/circuito-documental-5a`.
 Publicación: commit y push de la propuesta autorizados el 02/11/2026; no equivalen a validar V1–V3 ni a implementar 5B–5D.
+
+## Aprobación funcional — 02/11/2026
+
+El usuario aprobó expresamente las siguientes actuaciones y las tres reglas V1–V3. Esta aprobación de diseño es posterior a la publicación de la propuesta `a5a51c3`; no acredita implementación ni concede facultades personales.
+
+| Actuación | Quién la realiza |
+| --- | --- |
+| Preparar la base y su fundamento | Persona encargada de completar la evaluación, con permiso de edición |
+| Revisar el fundamento y emitir una conclusión | Delegado u otra persona autorizada para revisar |
+| Aceptar la base por la organización | Persona con facultad expresa para esa decisión; puede ser el delegado previa comprobación de sus atribuciones e independencia |
+
+1. Registrar una versión incompleta permite conservarla; aceptarla exige requisitos completos y revisión favorable.
+2. Editar, revisar y decidir requieren atribuciones diferenciadas; ser DPD o administrador no concede aceptación automática.
+3. Cada aceptación corresponde a una versión exacta y no se hereda a las siguientes.
+
+La aprobación cubre estas reglas funcionales. Los detalles técnicos de API, migraciones, concurrencia e idempotencia deben concretarse y comprobarse en los sublotes. La regla adicional propuesta de impedir la revisión favorable por la propia persona autora no se considera aprobada por inferencia: debe precisarse al diseñar 5C. La posibilidad de que el delegado revise y decida exige las comprobaciones expresamente aprobadas arriba.
+
+5B.1: implementación local del servidor preparada; ver [contrato técnico, evidencia y límites](eipd-versiones-5b1.md). Siguiente tarea: 5B.2, integración de la interfaz y validación conjunta. No cambiar retroactivamente el circuito de infancia. FORM-R01 a FORM-R05 continúan abiertos.
 
 ## 1. Objetivo y límites
 
@@ -159,7 +177,7 @@ Las migraciones serán nuevas y append-only; no convertir el `document_version` 
 
 | Lote | Entrega acotada | Evidencia necesaria antes del cierre |
 | --- | --- | --- |
-| **5A** | Este contrato y continuidad documental | Validar decisiones V1–V3 siguientes; revisar enlaces y consistencia contra código |
+| **5A** | Este contrato y continuidad documental | V1–V3 aprobadas; revisar enlaces y consistencia contra código |
 | **5B.1** | Contrato API/migración, registro inmutable EIPD general e idempotencia | PostgreSQL aislado con RLS/runtime real, tenant ajeno, permisos, concurrencia y resultado incierto |
 | **5B.2** | Vista previa, registro explícito, consulta histórica y preparación de sucesora | Navegador y recorrido conjunto; pendientes conservados, teclado, foco y ventana estrecha |
 | **5C.1** | Revisión EIPD general y facultades de revisión | Resultado motivado sobre versión exacta; separación de autoría; historial inmutable y aislamiento |
@@ -169,10 +187,10 @@ Las migraciones serán nuevas y append-only; no convertir el `document_version` 
 
 Cada lote requiere sus comprobaciones y validación conjunta antes de pasar al siguiente. Una prueba con respuestas controladas no sustituye persistencia/aislamiento real. Infancia mantiene pruebas de regresión y contratos actuales. No hay merge ni despliegue por completar estos lotes.
 
-### Decisiones a validar con el usuario
+### Reglas funcionales aprobadas y precisión pendiente
 
 - **V1:** registrar permite conservar un documento incompleto con faltantes; aceptar exige requisitos completos y revisión favorable de esa versión.
-- **V2:** para los circuitos nuevos, la autoría queda separada de la revisión favorable; quien revisa puede decidir solo con facultad expresa y compatibilidad documentada. No se modifica infancia por esta propuesta.
+- **V2:** editar, revisar y decidir requieren atribuciones diferenciadas; ser DPD o administrador no concede aceptación automática. El delegado puede decidir con facultad expresa y comprobación de independencia. La restricción adicional de autoría/revisión sigue pendiente de precisión en 5C.
 - **V3:** la aceptación se vincula al paquete exacto y nunca se hereda por cambios o sucesoras; los registros anteriores permanecen consultables con su correspondencia histórica.
 
 ### Recorrido explicativo de validación de 5A
@@ -183,7 +201,7 @@ Cada lote requiere sus comprobaciones y validación conjunta antes de pasar al s
 4. Cambiar el borrador y registrar versión 2: versión 1 conserva sus antecedentes; versión 2 requiere su propia revisión/decisión.
 5. En Base y fundamento, conservar consentimiento y LIA con base pendiente: son antecedentes; no hay una base aceptada. Seleccionar una base y registrar su paquete permite iniciar su circuito específico.
 
-Este recorrido es conceptual para aprobar el diseño; todavía no es una prueba disponible en la aplicación.
+Este recorrido explica las reglas aprobadas; todavía no es una prueba disponible en la aplicación.
 
 ## 12. Fuentes y verificación de esta entrega
 
@@ -195,4 +213,4 @@ Este recorrido es conceptual para aprobar el diseño; todavía no es una prueba 
 - [Esquemas de versiones de infancia](../../backend/app/schemas/eipd_child_persistence.py), [persistencia de infancia](../../backend/app/services/eipd_child_persistence.py).
 - [Esquemas de facultades/decisiones de infancia](../../backend/app/schemas/organization_acceptance.py), [servicio de aceptación](../../backend/app/services/organization_acceptance.py).
 
-Entrega solo documental: se inspeccionaron contratos/código de referencia y diferencias. No se ejecutaron pruebas funcionales nuevas ni escrituras de datos; las pruebas de Paso 4 siguen siendo evidencia de aquella entrega. Preparar 5A no acredita implementación de 5B–5D ni aprobación de V1–V3.
+Entrega solo documental: se inspeccionaron contratos/código de referencia y diferencias. No se ejecutaron pruebas funcionales nuevas ni escrituras de datos; las pruebas de Paso 4 siguen siendo evidencia de aquella entrega. La aprobación funcional de V1–V3 está registrada arriba; no acredita implementación de 5B–5D.

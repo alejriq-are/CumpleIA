@@ -1,3 +1,11 @@
+## LIC-DOC-001 — 5B.1 implementado localmente, 02/11/2026
+
+Servidor de versiones EIPD general separado del borrador: registro inmutable, origen esperado, idempotencia, consulta de historial/solicitud y permisos/RLS. [Contrato técnico y límites](project/eipd-versiones-5b1.md). Migración `b95e7f3d1204` aplicada solo en base aislada; sin interfaz nueva ni cambio operacional. Validación final: 191 pruebas aprobadas en PostgreSQL aislado, incluida concurrencia entre series; Ruff, Black y diferencias verificados. Próximo sublote 5B.2, interfaz y validación conjunta; 5C/5D y FORM-R01 a FORM-R05 abiertos. Commit y push de 5B.1 autorizados por el usuario el 02/11/2026; sin merge ni despliegue. Confirmación/activación EIPD bloqueadas. Excluir `frontend/next-env.d.ts` y `outputs/` preexistentes. Supera las notas inferiores de 5B.1 pendiente de iniciar.
+
+## Paso 5A — actuaciones y V1–V3 aprobadas, 02/11/2026
+
+El usuario aprobó preparar por la persona encargada de la evaluación, revisar por delegado/persona autorizada y aceptar por persona expresamente facultada (incluido delegado con atribuciones e independencia comprobadas). Aprobó conservar versiones incompletas, exigir requisitos completos y revisión favorable para aceptar, diferenciar atribuciones y no heredar aceptación entre versiones. [Registro exacto y límites](project/circuito-documental-comun.md). Próximo sublote previsto: 5B.1. La restricción adicional de autoría/revisión se precisará en 5C; no se infiere aprobada. Sin implementación ni nueva autorización de commit/push de este registro; EIPD bloqueada. Esta nota supera las menciones inferiores de V1–V3 pendientes.
+
 ## Paso 5A — contrato preparado, 02/11/2026
 
 Contrato LIC-DOC-001 preparado en `feature/circuito-documental-5a`, base `f0d53ef`. Alcance solo documental: identidades, transiciones, facultades, correspondencia material, concurrencia y continuidad 5B–5D. V1–V3 pendientes de validación conjunta; no iniciar implementación de 5B ni cambiar infancia con esta propuesta. [Contrato y recorrido conceptual](project/circuito-documental-comun.md). Commit y push de la propuesta 5A autorizados por el usuario el 02/11/2026; la publicación no sustituye la validación funcional de V1–V3. Excluir `frontend/next-env.d.ts` y `outputs/` preexistentes. Confirmación/activación EIPD bloqueadas.

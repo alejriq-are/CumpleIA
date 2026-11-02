@@ -1,3 +1,11 @@
+## LIC-DOC-001 — 5B.1 implementado localmente, 02/11/2026
+
+Servidor de versiones EIPD general separado del borrador: registro inmutable, origen esperado, idempotencia, consulta de historial/solicitud y permisos/RLS. [Contrato técnico y límites](eipd-versiones-5b1.md). Migración `b95e7f3d1204` aplicada solo en base aislada; sin interfaz nueva ni cambio operacional. Validación final: 191 pruebas aprobadas en PostgreSQL aislado, incluida concurrencia entre series; Ruff, Black y diferencias verificados. Próximo sublote 5B.2, interfaz y validación conjunta; 5C/5D y FORM-R01 a FORM-R05 abiertos. Commit y push de 5B.1 autorizados por el usuario el 02/11/2026; sin merge ni despliegue. Confirmación/activación EIPD bloqueadas. Excluir `frontend/next-env.d.ts` y `outputs/` preexistentes. Supera las notas inferiores de 5B.1 pendiente de iniciar.
+
+## Paso 5A — aprobación funcional, 02/11/2026
+
+Actuaciones y reglas V1–V3 aprobadas expresamente. [Contrato y alcance de la aprobación](circuito-documental-comun.md). Siguiente trabajo previsto: 5B.1, contrato técnico y versiones registradas EIPD general; implementación pendiente. No se infiere aprobación de restricciones adicionales de autoría/revisión. FORM-R01 a FORM-R05 abiertos; infancia sin cambios; confirmación/activación EIPD bloqueadas. Registro local sin nuevo commit/push. Supera las notas inferiores de validación V1–V3 pendiente.
+
 ## Paso 5A — propuesta contractual preparada, 02/11/2026
 
 LIC-DOC-001 preparado; pendiente de validar V1–V3 con el usuario. [Contrato común y lotes 5B–5D](circuito-documental-comun.md). Solo documentación, sin nuevas capacidades, migraciones o pruebas funcionales. LIC-GOV-001 conserva su diseño aprobado y su implementación pendiente; FORM-R01 a FORM-R05 siguen abiertos. Commit/push de la propuesta documental autorizados el 02/11/2026; V1–V3 siguen pendientes de validación funcional. Sin activación EIPD.

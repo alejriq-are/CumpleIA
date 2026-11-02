@@ -2,6 +2,9 @@
 
 Estado: diseño funcional aprobado por el usuario el 02/11/2026; implementación pendiente.
 
+
+Ratificación 02/11/2026: el usuario aprobó expresamente la distribución de preparación, revisión y aceptación, junto con V1–V3 del [contrato común 5A](circuito-documental-comun.md#aprobación-funcional--02112026). La implementación se desarrollará en 5B–5D; las facultades del delegado y su independencia deben comprobarse.
+
 ## Objetivo y alcance
 
 Distinguir la preparación de una base propuesta, la revisión de su fundamento y la decisión de la organización para una evaluación concreta. Esta aprobación es un acuerdo de producto; no atribuye por sí misma facultades legales a una persona ni certifica la suficiencia jurídica del análisis.
