@@ -11,6 +11,7 @@ import type { Assessment } from "@/lib/api/licitud";
 import { LegalAssessmentEditor } from "./LegalAssessmentEditor";
 import { sessionToken } from "./LicitudWorkspace";
 import { EipdDocumentView } from "./EipdDocumentFields";
+import { EipdVersions } from "./EipdVersions";
 import { EipdDraftEditor } from "./EipdDraftEditor";
 import { AssessmentSupportPanel } from "./AssessmentSupportPanel";
 import { DossierDocumentView } from "./DossierDocumentView";
@@ -545,6 +546,13 @@ export function AssessmentFlow({
             )}
           </section>
         )}
+
+        <EipdVersions
+          organizationId={organizationId}
+          treatmentId={treatmentId}
+          assessmentId={assessmentId}
+          token={token}
+        />
 
         {childReviewVisible ? (
           <p>

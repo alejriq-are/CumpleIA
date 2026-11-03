@@ -214,3 +214,7 @@ Este recorrido explica las reglas aprobadas; todavía no es una prueba disponibl
 - [Esquemas de facultades/decisiones de infancia](../../backend/app/schemas/organization_acceptance.py), [servicio de aceptación](../../backend/app/services/organization_acceptance.py).
 
 Entrega solo documental: se inspeccionaron contratos/código de referencia y diferencias. No se ejecutaron pruebas funcionales nuevas ni escrituras de datos; las pruebas de Paso 4 siguen siendo evidencia de aquella entrega. La aprobación funcional de V1–V3 está registrada arriba; no acredita implementación de 5B–5D.
+
+## Continuidad 5B.2
+
+La interfaz de versiones EIPD general está implementada localmente; ver [5B.2](eipd-versiones-5b2.md) para alcance, evidencia y checklist de aceptación asistida pendiente. La migración de 5B.1 ya está aplicada en desarrollo local. No se implementan por ello revisión, decisión ni aceptación del documento general (5C), ni el circuito de Base y fundamento (5D). Las versiones incompletas se pueden conservar; registrarlas no constituye aceptación.

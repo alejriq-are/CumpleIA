@@ -1,0 +1,502 @@
+"use client";
+import { useEffect, useId, useRef, useState } from "react";
+import { ApiError } from "@/lib/api/client";
+import { editableEipd, type EipdValue } from "@/lib/api/eipd-draft";
+import {
+  eipdVersionsApi,
+  type VersionMaterial,
+  type VersionPreview,
+  type VersionRequest,
+  type RegisteredVersion,
+  type VersionMetadata,
+} from "@/lib/api/eipd-versions";
+import { ValueView } from "./DossierDocumentView";
+import { EipdDocumentView } from "./EipdDocumentFields";
+import { documentDisclosureClass, documentNavigationButtonClass as button } from "./document-focus";
+
+function MaterialView({ value }: { value: VersionMaterial }) {
+  const a = value.saved_assessment;
+  const doc = a.eipd_resolution_assessment;
+  return (
+    <div className="space-y-3">
+      <dl className="space-y-2">
+        <div>
+          <dt className="font-semibold">Finalidad guardada</dt>
+          <dd>{String(a.purpose_snapshot ?? "Sin finalidad")}</dd>
+        </div>
+        <div>
+          <dt className="font-semibold">Versión de la evaluación de origen</dt>
+          <dd>{String(a.version)}</dd>
+        </div>
+      </dl>
+      <dl className="space-y-3">
+        {[
+          ["Referencia del documento EIPD", doc.document_reference],
+          ["Nombre de la edición (texto libre)", doc.document_version],
+          ["Notas del borrador EIPD conservadas", doc.notes],
+        ].map(([label, content]) => (
+          <div key={String(label)}>
+            <dt className="font-semibold">{String(label)}</dt>
+            <dd className="whitespace-pre-wrap break-words">
+              {String(content || "Sin información registrada")}
+            </dd>
+          </div>
+        ))}
+      </dl>
+      <EipdDocumentView
+        value={doc}
+        expanded
+        summaryLabel="Contenido EIPD conservado para esta versión"
+      />
+      <p>
+        Se conserva el diagnóstico, la determinación, la política y el contexto consultados al
+        registrar. Los respaldos históricos no acreditan controles actuales. Los archivos anexos no
+        se copian dentro de esta versión.
+      </p>
+      <details>
+        <summary className={documentDisclosureClass}>
+          Contexto y antecedentes conservados con la versión
+        </summary>
+        {(
+          [
+            ["Alcance RAT guardado", a.rat_context_snapshot],
+            ["Determinación de aplicabilidad", value.applicability],
+            ["Diagnóstico al registrar", value.diagnostic],
+            ["Política consultada", value.policy],
+            ["Índice de valoraciones y anexos consultados", value.support_records],
+          ] as const
+        ).map(([label, content]) => (
+          <div key={label} className="my-3">
+            <h4 className="font-semibold">{label}</h4>
+            <div className="rounded border border-blue-200 bg-white p-3">
+              <ValueView value={content} />
+            </div>
+          </div>
+        ))}
+      </details>
+    </div>
+  );
+}
+
+type Props = {
+  organizationId: string;
+  treatmentId: string;
+  assessmentId: string;
+  token: () => Promise<string>;
+  canRegister?: boolean;
+  blockedReason?: string;
+  sourceRevision?: string;
+  onPending?: (value: boolean) => void;
+  onLock?: (value: boolean) => void;
+  onCopy?: (value: EipdValue) => void;
+  draftDirty?: boolean;
+  canCopy?: boolean;
+};
+// A context-keyed instance keeps request IDs and preparations isolated to their evaluation.
+export function EipdVersions(props: Props) {
+  return (
+    <VersionsPanel
+      key={`${props.organizationId}/${props.treatmentId}/${props.assessmentId}`}
+      {...props}
+    />
+  );
+}
+function VersionsPanel({
+  organizationId,
+  treatmentId,
+  assessmentId,
+  token,
+  canRegister = false,
+  blockedReason,
+  sourceRevision,
+  onPending,
+  onLock,
+  onCopy,
+  draftDirty,
+  canCopy = false,
+}: Props) {
+  const id = useId();
+  const [preview, setPreview] = useState<VersionPreview | null>(null);
+  const [history, setHistory] = useState<VersionMetadata[] | null>(null);
+  const [detail, setDetail] = useState<RegisteredVersion | null>(null);
+  const [reason, setReason] = useState("");
+  const [fictitious, setFictitious] = useState(false);
+  const [reviewed, setReviewed] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [pending, setPending] = useState<VersionRequest | null>(null);
+  const [missing, setMissing] = useState(false);
+  const [confirmCopy, setConfirmCopy] = useState(false);
+  const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
+  const alive = useRef(true);
+  const running = useRef(false);
+  const actionTrigger = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    if (busy) return;
+    const trigger = actionTrigger.current;
+    actionTrigger.current = null;
+    if (
+      trigger?.isConnected &&
+      document.activeElement === document.body &&
+      !trigger.matches(":disabled")
+    ) {
+      trigger.focus({ preventScroll: true });
+    }
+  }, [busy]);
+  useEffect(() => {
+    alive.current = true;
+    return () => {
+      alive.current = false;
+    };
+  }, []);
+  useEffect(() => {
+    setPreview(null);
+    setReviewed(false);
+    setFictitious(false);
+  }, [sourceRevision, canRegister]);
+  useEffect(() => {
+    onPending?.(!!reason.trim() || !!pending || busy);
+  }, [reason, pending, busy, onPending]);
+  useEffect(() => {
+    onLock?.(busy || !!pending);
+  }, [busy, pending, onLock]);
+
+  const scope = async () => ({ organizationId, treatmentId, assessmentId, token: await token() });
+  async function action(work: () => Promise<void>) {
+    if (running.current) return;
+    running.current = true;
+    actionTrigger.current =
+      document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    setBusy(true);
+    setError("");
+    setMessage("");
+    try {
+      await work();
+    } catch (e) {
+      if (alive.current)
+        setError(
+          e instanceof ApiError
+            ? e.message
+            : "No se pudo conectar con el servidor. Conservamos esta preparación; vuelve a intentar la consulta."
+        );
+    } finally {
+      running.current = false;
+      if (alive.current) setBusy(false);
+    }
+  }
+  function accepted(v: RegisteredVersion) {
+    if (!alive.current) return;
+    setDetail(v);
+    setPreview(null);
+    setPending(null);
+    setMissing(false);
+    setReason("");
+    setReviewed(false);
+    setFictitious(false);
+    setConfirmCopy(false);
+    setHistory((h) =>
+      [...(h ?? []).filter((r) => r.id !== v.id), v].sort((a, b) => a.version - b.version)
+    );
+    setMessage(
+      `Versión EIPD ${v.version} registrada en el servidor. El borrador no cambió. No constituye aprobación ni activa EIPD.`
+    );
+  }
+  async function send(body: VersionRequest) {
+    try {
+      accepted(await eipdVersionsApi.register(await scope(), body));
+    } catch (e) {
+      if (!alive.current) return;
+      // A network failure, 408, server failure or unverifiable response may follow a committed POST.
+      const unknown = !(e instanceof ApiError) || e.status >= 500 || e.status === 408;
+      if (!unknown) {
+        setPending(null);
+        setPreview(null);
+        setReviewed(false);
+      }
+      setMissing(false);
+      setError(
+        unknown
+          ? "Resultado del registro por comprobar. No generes otra solicitud ni cierres esta pestaña. Consulta el resultado; se conserva el identificador para reintentar sin duplicar."
+          : `Registro rechazado. ${e.message} Consulta una nueva vista previa antes de registrar. Tu borrador no cambió.`
+      );
+    }
+  }
+  const disabled = busy || !!pending;
+  return (
+    <section
+      aria-label="Versiones documentales EIPD general"
+      className="space-y-4 rounded border border-blue-300 bg-blue-50 p-4"
+    >
+      <h3 className="text-lg font-semibold">Versiones documentales EIPD general</h3>
+      <p>
+        Guardar borrador permite seguir editando. Registrar conserva una copia de lo guardado, con
+        número propio e historial; no aprueba el documento. Se permiten versiones incompletas y se
+        conserva su diagnóstico. Revisión y decisión se incorporarán en el siguiente bloque.
+      </p>
+      {onCopy && (
+        <p>
+          Los siete pasos pertenecen a un mismo borrador. Guarda sus cambios antes de preparar el
+          registro de una versión.
+        </p>
+      )}
+      {blockedReason && <p>{blockedReason}</p>}
+      {onCopy && (
+        <button
+          type="button"
+          className={button}
+          disabled={disabled || !canRegister}
+          onClick={() =>
+            void action(async () => {
+              const v = await eipdVersionsApi.preview(await scope());
+              if (alive.current) {
+                setPreview(v);
+                setReviewed(false);
+                setFictitious(false);
+              }
+            })
+          }
+        >
+          Preparar registro de versión EIPD
+        </button>
+      )}
+      <button
+        type="button"
+        className={button}
+        disabled={busy}
+        onClick={() =>
+          void action(async () => {
+            const rows = await eipdVersionsApi.history(await scope());
+            if (alive.current) setHistory(rows);
+          })
+        }
+      >
+        Consultar historial de versiones EIPD
+      </button>
+      {history && (
+        <div className="space-y-2">
+          <h4 className="font-semibold">Versiones EIPD registradas</h4>
+          {!history.length && <p>No hay versiones EIPD registradas en esta evaluación.</p>}
+          {history.map((v) => (
+            <div key={v.id} className="rounded border bg-white p-3">
+              <p>
+                Versión EIPD {v.version} · {v.created_at} · {v.reason}
+              </p>
+              <button
+                type="button"
+                className={button}
+                disabled={busy}
+                onClick={() =>
+                  void action(async () => {
+                    const v2 = await eipdVersionsApi.detail(await scope(), v.id);
+                    if (alive.current) {
+                      setDetail(v2);
+                      setConfirmCopy(false);
+                    }
+                  })
+                }
+              >
+                Consultar versión EIPD {v.version}
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+      {preview && !pending && (
+        <div
+          className="space-y-3 rounded border bg-white p-3"
+          aria-label="Vista previa para registrar versión EIPD"
+        >
+          <h4 className="text-lg font-semibold">
+            Vista previa del contenido guardado para registrar
+          </h4>
+          <p>
+            Próxima versión prevista: {preview.latest_version + 1}. El servidor verificará
+            nuevamente el origen y la secuencia al registrar. Esta consulta no guarda ni registra.
+          </p>
+          <MaterialView value={preview.bundle} />
+          <label className="block" htmlFor={id + "-reason"}>
+            Motivo del registro de versión EIPD
+          </label>
+          <textarea
+            id={id + "-reason"}
+            className="block w-full rounded border p-2"
+            maxLength={4000}
+            disabled={disabled}
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+          />
+          <label className="block">
+            <input
+              type="checkbox"
+              checked={fictitious}
+              disabled={disabled}
+              onChange={(e) => setFictitious(e.target.checked)}
+            />{" "}
+            Declaro datos ficticios para esta versión EIPD
+          </label>
+          <label className="block">
+            <input
+              type="checkbox"
+              checked={reviewed}
+              disabled={disabled}
+              onChange={(e) => setReviewed(e.target.checked)}
+            />{" "}
+            He leído el contenido guardado y sus pendientes antes de registrar
+          </label>
+          <p>
+            Registrar conserva esta versión exacta. Las versiones anteriores no se reemplazan. La
+            confirmación y activación EIPD permanecen bloqueadas.
+          </p>
+          <button
+            type="button"
+            className={button}
+            disabled={disabled || !canRegister || !reason.trim() || !fictitious || !reviewed}
+            onClick={() => {
+              if (running.current) return;
+              const body: VersionRequest = {
+                request_id: crypto.randomUUID(),
+                data_kind: "ficticios",
+                expected_source_hash: preview.source_hash,
+                expected_latest_version: preview.latest_version,
+                reason: reason.trim(),
+              };
+              setPending(body);
+              void action(() => send(body));
+            }}
+          >
+            Registrar versión documental EIPD
+          </button>
+          <button
+            type="button"
+            className={button}
+            disabled={disabled}
+            onClick={() => {
+              setPreview(null);
+              setReason("");
+              setReviewed(false);
+              setFictitious(false);
+            }}
+          >
+            Cancelar preparación de registro
+          </button>
+        </div>
+      )}
+      {pending && (
+        <div className="space-y-3 rounded border border-amber-400 bg-amber-50 p-3">
+          <p>
+            Solicitud de registro pendiente de comprobar. Conserva abierta esta pestaña hasta
+            resolverla.
+          </p>
+          <button
+            type="button"
+            className={button}
+            disabled={busy}
+            onClick={() =>
+              void action(async () => {
+                try {
+                  accepted(await eipdVersionsApi.lookup(await scope(), pending.request_id));
+                } catch (e) {
+                  if (e instanceof ApiError && e.status === 404) {
+                    if (alive.current) {
+                      setMissing(true);
+                      setMessage(
+                        "La consulta aún no encuentra esta solicitud. Puedes reintentar el mismo registro con el mismo identificador y contenido; no se prepara otro."
+                      );
+                    }
+                  } else throw e;
+                }
+              })
+            }
+          >
+            Consultar resultado del registro EIPD
+          </button>
+          {missing && (
+            <button
+              type="button"
+              className={button}
+              disabled={busy}
+              onClick={() => void action(() => send(pending))}
+            >
+              Reintentar el mismo registro EIPD
+            </button>
+          )}
+        </div>
+      )}
+      {error && (
+        <p role="alert" className="rounded border border-red-300 bg-red-50 p-3">
+          {error}
+        </p>
+      )}
+      <p role="status">{busy ? "Consultando o registrando versión EIPD…" : message}</p>
+      {detail && (
+        <article
+          aria-label={`Versión EIPD ${detail.version} consultada`}
+          className="space-y-3 rounded border bg-white p-4"
+        >
+          <h4 className="text-lg font-semibold">Versión EIPD {detail.version} consultada</h4>
+          <p>
+            Registro histórico de solo lectura. No acredita vigencia del contexto actual ni
+            aprobación.
+          </p>
+          <dl>
+            <dt className="font-semibold">Motivo del registro</dt>
+            <dd>{detail.reason}</dd>
+            <dt className="font-semibold">Fecha registrada (UTC)</dt>
+            <dd>{detail.created_at}</dd>
+            <dt className="font-semibold">Registrada por (identificador)</dt>
+            <dd className="break-all">{detail.created_by}</dd>
+          </dl>
+          <MaterialView value={detail.bundle} />
+          <details>
+            <summary className={documentDisclosureClass}>Identidad de la versión EIPD</summary>
+            <p className="break-all">Identificador: {detail.id}</p>
+            <p className="break-all">Huella del contenido: {detail.bundle_hash}</p>
+            <p className="break-all">
+              Versión precedente: {detail.bundle.predecessor_id ?? "Primera versión"}
+            </p>
+          </details>
+          {onCopy && (
+            <button
+              type="button"
+              className={button}
+              disabled={disabled || !canCopy}
+              onClick={() => setConfirmCopy(true)}
+            >
+              Preparar borrador desde esta versión EIPD
+            </button>
+          )}
+          {confirmCopy && onCopy && (
+            <div className="space-y-2 rounded border border-amber-400 bg-amber-50 p-3">
+              <p>
+                Se reemplazarán los campos del borrador en esta pestaña con una copia del documento
+                de esta versión. {draftDirty && "Hay cambios sin guardar que se reemplazarán."} El
+                original, el borrador del servidor y las versiones registradas no cambian. No se
+                copian decisiones ni se declara vigente una valoración histórica.
+              </p>
+              <button
+                type="button"
+                className={button}
+                disabled={disabled || !canCopy}
+                onClick={() => {
+                  if (!canCopy) return;
+                  onCopy(editableEipd(detail.bundle.saved_assessment.eipd_resolution_assessment));
+                  setPreview(null);
+                  setReviewed(false);
+                  setConfirmCopy(false);
+                  setMessage(
+                    "Copia preparada en el borrador de esta pestaña. Revísala y guárdala explícitamente antes de registrar otra versión."
+                  );
+                }}
+              >
+                Reemplazar borrador con esta copia
+              </button>
+              <button type="button" className={button} onClick={() => setConfirmCopy(false)}>
+                Conservar mi borrador actual
+              </button>
+            </div>
+          )}
+        </article>
+      )}
+    </section>
+  );
+}

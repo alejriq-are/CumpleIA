@@ -48,6 +48,29 @@ const names: Record<string, string> = {
   mechanism: "Mecanismo",
 
   public_benefit: "Beneficio declarado",
+  data_subjects: "Titulares de los datos",
+  data_categories: "Categorías de datos",
+  data_sources: "Fuentes",
+  systems: "Sistemas",
+  retention: "Conservación",
+  third_parties: "Terceros",
+  international_transfers: "Transferencias internacionales",
+  current: "Asociado al alcance al registrar",
+  eipd: "EIPD",
+  child: "Infancia y adolescencia",
+  state: "Resultado",
+  status: "Estado",
+  revision: "Revisión",
+  version: "Versión",
+  readiness: "Requisitos documentales",
+  issues: "Observaciones",
+  message: "Descripción",
+  policy_reference: "Referencia de la política",
+  policy_version: "Versión de la política",
+  created_at: "Fecha de registro",
+  kind: "Tipo de respaldo",
+  payload: "Contenido del respaldo",
+
 };
 const choices: Record<string, string> = {
   no_aplica: "No aplica",
@@ -75,7 +98,7 @@ const choices: Record<string, string> = {
   confirmado: "Confirmado",
   reemplazado: "Reemplazado",
 };
-function ValueView({ value }: { value: unknown }) {
+export function ValueView({ value }: { value: unknown }) {
   if (value == null || value === "" || (Array.isArray(value) && !value.length))
     return <span>Sin información registrada</span>;
   if (typeof value === "boolean") return <span>{value ? "Sí" : "No"}</span>;

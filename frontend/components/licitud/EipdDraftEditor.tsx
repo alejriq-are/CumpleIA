@@ -13,6 +13,7 @@ import {
   type EipdDiagnostic,
   type EipdDraftRow,
 } from "@/lib/api/eipd-draft";
+import { EipdVersions } from "./EipdVersions";
 import { DocumentCapabilities } from "./DocumentCapabilities";
 import { SaveFeedback } from "./SaveFeedback";
 import { EipdDocumentFields, EipdDocumentView, EipdSteps } from "./EipdDocumentFields";
@@ -68,6 +69,8 @@ export function EipdDraftEditor({
   const [error, setError] = useState(""),
     [message, setMessage] = useState("");
   const [preview, setPreview] = useState(false);
+  const [versionPending, setVersionPending] = useState(false);
+  const [versionLock, setVersionLock] = useState(false);
   const running = useRef(false),
     alive = useRef(false),
     generation = useRef(0);
@@ -76,14 +79,14 @@ export function EipdDraftEditor({
     loaded: !!row,
     loading: !row && busy,
     saving: !!row && busy,
-    dirty,
+    dirty: dirty || versionPending,
     saved: !!message,
     error: !!error,
     uncertain,
   });
   useEffect(() => {
-    onDirty?.(dirty || busy || uncertain);
-  }, [dirty, busy, uncertain, onDirty]);
+    onDirty?.(dirty || busy || uncertain || versionPending);
+  }, [dirty, busy, uncertain, versionPending, onDirty]);
   useEffect(() => {
     let active = true;
     alive.current = true;
@@ -145,7 +148,15 @@ export function EipdDraftEditor({
     if (dirty) setMessage("");
   }, [dirty]);
   async function save() {
-    if (running.current || busy || uncertain || readOnly || row?.status !== "borrador") return;
+    if (
+      running.current ||
+      busy ||
+      uncertain ||
+      versionLock ||
+      readOnly ||
+      row?.status !== "borrador"
+    )
+      return;
     running.current = true;
     setBusy(true);
     setError("");
@@ -186,7 +197,7 @@ export function EipdDraftEditor({
       if (alive.current) setBusy(false);
     }
   }
-  const disabled = readOnly || row?.status !== "borrador" || busy || uncertain;
+  const disabled = readOnly || row?.status !== "borrador" || busy || uncertain || versionLock;
   const editingHelp = !row
     ? error
       ? "La consulta no está disponible; no se puede comprobar la edición."
@@ -367,6 +378,38 @@ export function EipdDraftEditor({
             </aside>
           )}
         </form>
+      )}
+      {row && (
+        <div hidden={ratingStep}>
+          <EipdVersions
+            organizationId={organizationId}
+            treatmentId={treatmentId}
+            assessmentId={assessmentId}
+            token={token}
+            canRegister={!readOnly && row.status === "borrador" && !dirty && !busy && !uncertain}
+            canCopy={!readOnly && row.status === "borrador" && !busy && !uncertain}
+            blockedReason={
+              readOnly
+                ? "Tu rol permite consultar versiones; no registrarlas."
+                : row.status !== "borrador"
+                  ? "La evaluación no está en borrador; solo se permite consultar versiones."
+                  : dirty
+                    ? "Guarda los cambios del borrador antes de preparar el registro."
+                    : uncertain
+                      ? "Comprueba primero el resultado del guardado del borrador."
+                      : undefined
+            }
+            sourceRevision={baseline + String(refreshVersion)}
+            onPending={setVersionPending}
+            onLock={setVersionLock}
+            draftDirty={dirty}
+            onCopy={(value) => {
+              setDoc(value);
+              setPreview(false);
+              setMessage("");
+            }}
+          />
+        </div>
       )}
       {!ratingStep && (
         <DocumentCapabilities

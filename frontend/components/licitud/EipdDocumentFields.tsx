@@ -445,12 +445,14 @@ export function EipdDocumentFields({
 export function EipdDocumentView({
   value,
   expanded = false,
+  summaryLabel,
   documentKind = "EIPD",
   valuation,
   annexes,
 }: {
   value: Value;
   expanded?: boolean;
+  summaryLabel?: string;
   documentKind?: "EIPD" | "de infancia y adolescencia";
   valuation?: RiskEvaluation | null;
   annexes?: Annex[];
@@ -489,7 +491,8 @@ export function EipdDocumentView({
   return (
     <details open={expanded || undefined}>
       <summary className={documentDisclosureClass}>
-        {expanded ? "Contenido preparado" : `Contenido del documento ${documentKind} guardado`}
+        {summaryLabel ??
+          (expanded ? "Contenido preparado" : `Contenido del documento ${documentKind} guardado`)}
       </summary>
       <EipdRiskTable value={value} valuation={valuation} annexes={annexes} />
       <div className="mt-4 space-y-4">
