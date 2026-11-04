@@ -187,11 +187,27 @@ Las migraciones serán nuevas y append-only; no convertir el `document_version` 
 
 Cada lote requiere sus comprobaciones y validación conjunta antes de pasar al siguiente. Una prueba con respuestas controladas no sustituye persistencia/aislamiento real. Infancia mantiene pruebas de regresión y contratos actuales. No hay merge ni despliegue por completar estos lotes.
 
-### Reglas funcionales aprobadas y precisión pendiente
+### Roles y separación de actuaciones en 5C
 
-- **V1:** registrar permite conservar un documento incompleto con faltantes; aceptar exige requisitos completos y revisión favorable de esa versión.
-- **V2:** editar, revisar y decidir requieren atribuciones diferenciadas; ser DPD o administrador no concede aceptación automática. El delegado puede decidir con facultad expresa y comprobación de independencia. La restricción adicional de autoría/revisión sigue pendiente de precisión en 5C.
-- **V3:** la aceptación se vincula al paquete exacto y nunca se hereda por cambios o sucesoras; los registros anteriores permanecen consultables con su correspondencia histórica.
+| Actuación | Facultad requerida |
+| --- | --- |
+| Preparar el borrador y registrar la versión | Autor con permiso de edición y registro para el expediente. |
+| Emitir una conclusión sobre la versión registrada | Revisor autorizado, que puede ser el DPD u otra persona facultada. |
+| Aceptar la versión por la organización | Persona con facultad expresa de decisión para el expediente. |
+
+La regla general contempla tres personas distintas. En un esquema de dos personas, la persona revisora puede también decidir si ambas facultades son expresas y se documenta la excepción y la comprobación de independencia. La persona autora queda separada de ambas actuaciones. Ser DPD o administrador no concede por sí solo la facultad de aceptar.
+
+La gestión de estas facultades se propone en **Mi organización → Personas y facultades**. Debe poder consultarse quién tiene cada facultad, su alcance, su vigencia y su historial. El servidor comprueba la facultad y su vigencia al registrar cada actuación.
+
+### Reglas de registro, revisión y aceptación
+
+- **V1.** Se puede registrar una versión incompleta y conservar sus faltantes. Para aceptarla, deben estar completos los requisitos y existir una revisión favorable de esa misma versión.
+- **V2.** Editar, revisar y decidir son actuaciones separadas. Cada una requiere su propia facultad y queda registrada con la identidad de quien la realiza.
+- **V3.** La aceptación identifica la versión exacta. Una sucesora requiere su propia revisión y decisión. Las versiones anteriores conservan su historial.
+
+### Activación de EIPD fuera de 5C
+
+Aceptar una versión registra la decisión documental de la organización. En un futuro flujo de activación, una acción separada designaría la versión aceptada como referencia operativa para las medidas, responsables, plazos y seguimiento del riesgo residual. Por ejemplo, activar la versión 4 dejaría trazabilidad de quién la activó y cuándo. Registrar o aceptar la versión 5 no reemplazaría automáticamente esa referencia. La confirmación y la activación siguen bloqueadas en el piloto.
 
 ### Recorrido explicativo de validación de 5A
 
