@@ -1,3 +1,21 @@
+## PAUSA VIGENTE — retomar antes del Paso 8 de 5C.1 — 06/11/2026
+
+Usuario solicita pausar por unas horas y autoriza commit/push del aviso de conflicto y registro del avance. Pasos manuales 1–7 confirmados: consulta/reconsideración, conflicto con aviso corregido, revocación y vencimiento con historial conservado. CumpleIA Demo, Evaluación n.º 1, Versión EIPD 5, última revisión 12 (SIMULADA-CONFLICTO-A3); B tiene su facultad vencida. No reenviar B2/B3. [Punto exacto de reanudación](project/eipd-revision-5c1.md#punto-de-reanudación-vigente-pausa-antes-del-paso-8--06112026).
+
+Próximo paso: como A, consultar el estado y registrar expresamente la sucesora (6 si la última sigue siendo 5); comprobar su historial independiente y después Favorable sobre una versión completa. Paso 8 aún no ejecutado. No se cierra 5C.1 ni se inicia 5C.2. Evidencia del ajuste: 19 Chromium y tipos/lint/formato previamente aprobados; sin nueva ejecución de pruebas durante la pausa. Solo se publica el ajuste y documentación; cambios ajenos siguen locales. Sin merge ni despliegue.
+
+## 5C.1 — conflicto aceptado; revocación registrada por A — 06/11/2026
+
+Usuario confirma Paso 3 OK después de A3 (actuación 12) y rechazo visible de B3: campos conservados y ausencia de actuación B3 tras consulta. También confirma el paso de revocación desde A. Pendiente comprobar desde B que la facultad revocada bloquea nuevas revisiones y conserva lectura de las 12 anteriores; luego vencimiento, sucesora y favorable. [Recorrido y evidencia](project/eipd-revision-5c1.md). No hay cierre global de 5C.1 ni nueva publicación.
+
+## 5C.1 — rechazo de conflicto observado; aviso corregido — 06/11/2026
+
+Paso 3: B2 no registrado y última revisión 11; en la consola de la pestaña se observa respuesta 409 de la ruta de revisión. Se corrige la interfaz para mostrar/enfocar el rechazo, conservar campos, exigir consulta antes de reenvío y mantener el aviso tras consultar. Se muestra la revisión previa consultada. Tipos/lint y 19 Chromium aprobados, incluida reproducción de dos pestañas a 320/1280. [Evidencia y siguiente paso](project/eipd-revision-5c1.md). Pendiente cargar la interfaz nueva y aceptar visualmente el aviso; no reenviar B2 sobre el historial ya actualizado. Ajuste local, sin nueva publicación.
+
+## Recorrido manual 5C.1: pasos 1/2 OK; conflicto pendiente — 06/11/2026
+
+Usuario confirma consulta inicial y reconsideración. Paso 3 aún no concluyente: A y B se registraron como actuaciones 9/10 de Versión EIPD 5. Verificación de solo lectura de las huellas: A envió previa 8 y B previa 9; no se acredita aceptación de una solicitud con previa desactualizada. [Evidencia y siguiente intento controlado](project/eipd-revision-5c1.md). No modificar historial; repetir con ambas pestañas partiendo de la misma revisión. Sin cambios de código ni nueva publicación.
+
 ## Commit y push autorizados — 06/11/2026
 
 El usuario autoriza publicar este recorrido en feature/eipd-5c1-revision. Validación final de la copia exacta preparada: 60 Chromium, tipos/lint/formato aprobados; Ruff/Black dirigidos aprobados. Alcance: 5C.1 y ajustes relacionados de consulta EIPD, nomenclatura e identidad. Se excluyen outputs/, next-env.d.ts y ajustes previos independientes de infancia/aplicabilidad; siguen locales. La autorización no cierra las comprobaciones manuales pendientes ni habilita 5C.2, confirmación, activación, merge o despliegue. [Alcance y siguiente paso](project/eipd-revision-5c1.md).

@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { apiFetch, ApiError } from "@/lib/api/client";
 import type { RegisteredVersion, VersionScope } from "@/lib/api/eipd-versions";
-import { documentNavigationButtonClass as button } from "./document-focus";
+import { documentNavigationButtonClass as button, focusDocumentSection } from "./document-focus";
 
 type Review = {
   id: string;
@@ -40,6 +40,7 @@ type State = {
   can_favorable: boolean;
   may_manage: boolean;
   authorities: Faculty[];
+  refreshRequired?: boolean;
 };
 type Request = {
   request_id: string;
@@ -55,6 +56,10 @@ const labels = {
   requiere_cambios: "Requiere cambios",
   no_continuar: "No continuar",
 };
+
+function focusFeedback(node: HTMLParagraphElement | null) {
+  if (node) focusDocumentSection(node);
+}
 
 export function EipdVersionReviews({
   version,
@@ -117,13 +122,18 @@ export function EipdVersionReviews({
       throw new Error("Respuesta de revisión incompatible. Consulta de nuevo.");
     }
     setState(v);
+    if (state?.refreshRequired) {
+      setError(
+        "Historial actualizado. El intento anterior no se registró y tus campos se conservan. Revisa la revisión previa indicada antes de volver a enviar."
+      );
+    }
     return v;
   }
-  async function action(fn: () => Promise<void>) {
+  async function action(fn: () => Promise<void>, clearNotice = true) {
     if (working.current) return;
     working.current = true;
     setBusy(true);
-    setError("");
+    if (clearNotice) setError("");
     setMessage("");
     try {
       await fn();
@@ -163,7 +173,14 @@ export function EipdVersionReviews({
       });
       await accepted(v, body);
     } catch (e) {
-      if (e instanceof ApiError && [403, 404, 409, 422].includes(e.status)) {
+      if (e instanceof ApiError && e.status === 409) {
+        setPending(null);
+        setState((current) => (current ? { ...current, refreshRequired: true } : current));
+        throw new Error(
+          `${e.message}. No se registró una nueva reconsideración. Tus campos se conservan: pulsa Consultar revisiones y facultades antes de reintentar.`
+        );
+      }
+      if (e instanceof ApiError && [403, 404, 422].includes(e.status)) {
         setPending(null);
         setState(null);
       }
@@ -188,11 +205,22 @@ export function EipdVersionReviews({
         onClick={() =>
           void action(async () => {
             await read();
-          })
+          }, false)
         }
       >
         Consultar revisiones y facultades
       </button>
+      {error && (
+        <p
+          key={error}
+          ref={focusFeedback}
+          role="alert"
+          tabIndex={-1}
+          className="rounded border border-red-300 bg-red-50 p-3 font-medium text-red-950"
+        >
+          {error}
+        </p>
+      )}
       {state && (
         <>
           <ol className="space-y-3">
@@ -216,22 +244,35 @@ export function EipdVersionReviews({
               están completos.
             </p>
           )}
+          <p className="rounded border border-blue-200 bg-blue-50 p-3">
+            Revisión previa consultada:{" "}
+            {state.reviews.at(-1)?.sequence ?? "ninguna (primera revisión)"}.
+            {state.refreshRequired && " El historial cambió. Consulta de nuevo antes de registrar."}
+          </p>
           <form
             className="space-y-2"
             onSubmit={(e) => {
               e.preventDefault();
-              if (!state.can_review || !state.authority_id || pending || working.current) return;
-              const body: Request = {
-                request_id: crypto.randomUUID(),
-                data_kind: "ficticios",
-                authority_id: state.authority_id,
-                expected_previous_id: state.reviews.at(-1)?.id ?? null,
-                outcome,
-                reason: reason.trim(),
-                reference: reference.trim(),
-              };
-              setPending(body);
-              void action(() => send(body));
+              if (pending || working.current) return;
+              if (state.refreshRequired || !state.can_review || !state.authority_id) {
+                setError(
+                  "Consulta las revisiones y la facultad vigente antes de registrar. Tus campos se conservan."
+                );
+                return;
+              }
+              void action(async () => {
+                const body: Request = {
+                  request_id: crypto.randomUUID(),
+                  data_kind: "ficticios",
+                  authority_id: state.authority_id!,
+                  expected_previous_id: state.reviews.at(-1)?.id ?? null,
+                  outcome,
+                  reason: reason.trim(),
+                  reference: reference.trim(),
+                };
+                setPending(body);
+                await send(body);
+              });
             }}
           >
             <label className="block">
@@ -279,9 +320,11 @@ export function EipdVersionReviews({
               Declaro datos ficticios para esta revisión
             </label>
             <button
+              type="submit"
               className={button}
               disabled={
                 busy ||
+                !!state.refreshRequired ||
                 !!pending ||
                 !state.can_review ||
                 !fictitious ||
@@ -460,7 +503,6 @@ export function EipdVersionReviews({
           )}
         </div>
       )}
-      {error && <p role="alert">{error}</p>}
       {(busy || message) && (
         <p role="status" aria-label="Estado de revisión EIPD">
           {busy ? "Consultando o registrando revisión…" : message}

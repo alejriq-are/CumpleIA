@@ -142,3 +142,95 @@ La publicación no declara terminado el checklist manual: se confirmó autorrevi
 
 
 Validación final de publicación: copia temporal creada desde el árbol exacto preparado en Git, sin los cambios locales excluidos. TypeScript, ESLint y Prettier aprobados; 55 Chromium de versiones/contexto/revisiones/pendientes/espacio de trabajo/identidad y 5 dirigidas de navegación aprobadas (60 en total). Ruff y Black dirigidos del servidor aprobados. Las 59 pruebas PostgreSQL y su exclusión histórica documentadas arriba conservan su evidencia previa; no se declaran repetidas por esta publicación. Siguiente paso funcional: continuar el checklist asistido de reconsideración/revocación antes de cerrar 5C.1.
+
+
+### Recorrido asistido: reconsideración confirmada y concurrencia no concluyente — 06/11/2026
+
+El usuario confirma Paso 1 OK (consulta de la revisión existente como B) y Paso 2 OK (reconsideración). En las capturas siguientes se observa la reconsideración No continuar con referencia SIMULADA-5C1-RECONSIDERACION-02 como actuación 8; existen actuaciones de prueba anteriores.
+
+Para Paso 3, la primera captura muestra CONCURRENCIA-A registrada como actuación 9 y la segunda muestra CONCURRENCIA-B registrada como actuación 10, ambas de la versión del documento EIPD 5. No se valida todavía el rechazo de una pestaña desactualizada. La instrucción anterior de esperar exactamente tres actuaciones no era aplicable al historial ya existente.
+
+Comprobación ejecutada en desarrollo local, transacción de solo lectura y consultas limitadas a ambas referencias dentro de CumpleIA Demo: A referencia la actuación previa 8; B referencia la previa 9. Se reconstruyeron los datos de cada solicitud y su huella almacenada: ambas coinciden con esos precedentes. La solicitud B no coincide con una previa 8. Esto acredita que B llegó al servidor con previa 9; no demuestra aceptación de una solicitud desactualizada ni permite atribuir por sí solo la causa de actualización de la segunda pestaña. Se solicitó al usuario aclarar si consultó o recargó entre ambos envíos.
+
+Próximo paso: repetir Paso 3 de forma controlada con el historial actual (10 actuaciones): ambas pestañas consultan primero la 10; primera registra A y la segunda envía sin consultar ni recargar. Comprobar rechazo, conservación de campos y ausencia de nueva actuación B. No eliminar ni reescribir las actuaciones de prueba existentes. Sin cambios de código, escrituras de datos, pruebas automáticas nuevas, commit ni push por este diagnóstico.
+
+
+### Segundo intento de conflicto: B2 no registrado — 06/11/2026
+
+Las capturas preparatorias muestran ambas pestañas con última actuación 10 y B2 preparado. El usuario confirma A2 como actuación 11 y luego reporta «prueba fallida». La captura posterior conserva fundamento/referencia/declaración de B2, muestra la actuación 11 y no incluye un aviso de resultado dentro del encuadre.
+
+Verificación adicional ejecutada en transacción de solo lectura y limitada al mismo tenant/documento: SIMULADA-CONFLICTO-A2 existe como actuación 11, previa 10; SIMULADA-CONFLICTO-B2 no existe y la última actuación sigue siendo 11. No se acredita un registro indebido de B2; tampoco se declara aprobado el rechazo por conflicto sin conocer la respuesta mostrada o recibida. La captura posterior ya muestra el historial actualizado a 11, por lo que no debe reenviarse B2 con ese estado para intentar demostrar una previa 10.
+
+Próximo paso: comprobar el mensaje de resultado debajo del formulario y aclarar qué ocurrió al enviar B2. Mantener el historial intacto y no avanzar a revocación hasta resolver el resultado del Paso 3. Sin cambios de código ni nuevas escrituras de datos, pruebas automáticas, commit o push.
+
+
+### Conflicto observado en navegador y aviso corregido — 06/11/2026
+
+El usuario informa que Registrar reconsideración no agrega actuación ni muestra aviso y solicita continuar. Inspección de la pestaña Comet mediante la habilidad computer-use: la consola conserva una respuesta 409 Conflict para POST a la ruta de revisiones de la versión EIPD 5; la página no muestra alerta y conserva los campos B2. No se pulsó Registrar, no se reenviaron solicitudes y no se cambió el historial durante la inspección. Se cerró el panel de diagnóstico al finalizar.
+
+El componente anterior quitaba el formulario ante 409, dejaba el aviso al final sin foco y borraba el error al iniciar cualquier consulta. Se corrige EipdVersionReviews.tsx: aviso destacado y enfocado/desplazado a la vista; formulario conservado tras conflicto, con reenvío bloqueado hasta consulta explícita; aviso de intento no registrado que permanece al actualizar historial; revisión previa consultada visible. La preparación de la solicitud queda dentro del manejo de errores. No cambia el control transaccional del servidor.
+
+Validación: tipos y ESLint aprobados; 19 Chromium aprobadas en revisiones y versiones. Incluye dos pestañas reales controladas por una ruta simulada común: ambas consultan 10, A registra 11, B envía previa 10 y recibe 409; se comprueban ausencia de actuación 12, campos/declaración conservados, aviso enfocado y dentro del viewport a 1280/320, bloqueo del reenvío, ausencia de consulta automática y actualización explícita a previa 11 sin nuevo POST. Se inspeccionaron capturas; sin repetir pruebas backend porque no se modifica su código. El servidor local compila el ajuste; la pestaña que estaba abierta aún no muestra el nuevo rótulo, por lo que necesita una carga nueva para verificar la corrección visual.
+
+Paso 3: se observó rechazo 409 y ausencia de B2; la presentación del resultado requería corrección. Pendiente aceptación manual del aviso actualizado antes de continuar a las pruebas de facultad revocada/vencida. Conservar B2 sin reenviar; se puede abrir una pareja de pestañas nuevas para cargar el ajuste y comprobar que ambas indican Revisión previa consultada: 11. Sin commit/push, merge ni despliegue de este ajuste.
+
+
+### Paso 3 aceptado y revocación registrada por el usuario — 06/11/2026
+
+El usuario confirma A3 como actuación 12 (SIMULADA-CONFLICTO-A3) y aporta captura del aviso visible de conflicto al enviar B3 desde previa 11. Posteriormente confirma Paso 3 OK: campos conservados, registro bloqueado hasta consulta explícita, historial actualizado a previa 12 y ausencia de actuación SIMULADA-CONFLICTO-B3. Queda aceptado el recorrido asistido de conflicto con el aviso corregido; la corrección de interfaz continúa local, sin nueva publicación.
+
+A continuación se indica descartar únicamente los campos del intento B3 y, como A, registrar la revocación de la facultad de B con referencia SIMULADA-5C1-REVOCACION-B. El usuario responde «recorrido OK» a ese paso: se registra confirmación del otorgante sobre la revocación, sin atribuir todavía una comprobación posterior de bloqueo desde B ni una verificación nueva de base de datos.
+
+Próximo paso inmediato: como B, consultar revisiones y facultades de la versión EIPD 5 y comprobar facultad no vigente, imposibilidad de nuevas actuaciones y consulta intacta de las 12 anteriores. Después quedan por completar vencimiento, sucesora independiente y recorrido favorable sobre una versión completa según el contrato. No se cierra globalmente 5C.1 ni se inicia 5C.2 por estas confirmaciones.
+
+
+### Paso 5 aceptado: revocación bloquea actuaciones y conserva historial — 06/11/2026
+
+El usuario confirma Paso 5 OK y aporta captura de B con Revisión previa consultada: 12, registro de reconsideración deshabilitado e historial de facultades que conserva otorgamiento (1) y revocación (2), esta última con referencia SIMULADA-5C1-REVOCACION-B. Se incorpora la confirmación del usuario sobre consulta de las 12 revisiones anteriores y bloqueo por falta de facultad vigente. No se ejecutó una consulta nueva de base de datos ni se modificaron actuaciones.
+
+Próximo paso inmediato: A otorga una nueva facultad a B con vencimiento futuro cercano (cinco minutos, hora local); comprobar desde B que se habilita la revisión antes del vencimiento y, después, que se bloquea sin borrar los registros anteriores. No registrar revisiones adicionales solo para verificar la habilitación. Después continúan sucesora independiente y favorable sobre versión completa. Sin cierre global de 5C.1 ni nueva publicación.
+
+
+### Pasos 6/7 aceptados: facultad temporal y vencimiento — 06/11/2026
+
+El usuario confirma la habilitación temporal (Paso 6) y Paso 7 OK tras vencer. La captura de administración conserva otorgamiento 1, revocación 2, un otorgamiento 3 sin vencimiento seguido de revocación 4, y otorgamiento 5 con referencia SIMULADA-5C1-VENCIMIENTO-B, registrado 2026-11-06T17:51:39.980994+00:00 y vencimiento 2026-11-06T17:56:00+00:00 (14:56 hora local). El reloj de la captura muestra 15:00. No aparece una revocación posterior al otorgamiento 5.
+
+Se registra la confirmación del usuario de que B pudo consultar las 12 revisiones y quedó bloqueado después del vencimiento. La captura aportada corresponde a la administración de facultades por A; no se la presenta como imagen del bloqueo de B. No se ejecutaron nuevas escrituras ni consultas de base de datos para esta anotación.
+
+Próximo paso inmediato: registrar expresamente, como A, una versión sucesora EIPD de prueba y comprobar que comienza sin revisiones mientras la versión 5 conserva las 12 anteriores. Después completar la comprobación de Favorable sobre una versión documental que cumpla requisitos, contrastando que completar el borrador no habilita retrospectivamente Favorable para la versión 5. La facultad de B está vencida y requerirá un nuevo otorgamiento explícito antes de una actuación futura.
+
+
+## Punto de reanudación vigente: pausa antes del Paso 8 — 06/11/2026
+
+El usuario solicita detener el recorrido para retomarlo en unas horas, registrar avance, ejecutar commit y autoriza push. Queda pausado el recorrido manual exactamente antes de iniciar el Paso 8. No se ha ejecutado el registro de la sucesora por este paso; no se programa recordatorio ni se continúan pruebas manuales durante la pausa.
+
+### Avance aceptado en este recorrido
+
+- Paso 1: consulta de la revisión existente como B, identidad de la sesión y bloqueo de Favorable en la versión incompleta.
+- Paso 2: reconsideración con conservación de las actuaciones anteriores.
+- Paso 3: conflicto entre pestañas, rechazo visible y enfocado, campos conservados, consulta explícita requerida, ausencia de B3 y actualización del historial sin reenvío.
+- Paso 4: revocación registrada por A.
+- Paso 5: B bloqueado tras revocación; lectura de las 12 actuaciones e historial de facultades conservados.
+- Paso 6: facultad temporal habilitada antes del vencimiento.
+- Paso 7: B bloqueado tras el vencimiento; historial conservado sin nueva revocación por el mero transcurso del tiempo.
+
+La evidencia manual es la confirmación del usuario y las capturas descritas en los apartados anteriores; no se amplía a una aceptación de todo 5C.1 ni a pruebas todavía pendientes.
+
+### Estado que debe reconocerse al volver
+
+- Rama: feature/eipd-5c1-revision.
+- Organización: CumpleIA Demo; evaluación n.º 1, tratamiento ficticio Gestión de trabajadores.
+- Versión del documento EIPD utilizada: 5, referencia SIMULADA-EIPD-TRABAJADORES-001.
+- Última revisión aceptada en el recorrido: 12, referencia SIMULADA-CONFLICTO-A3. Los intentos B2/B3 no deben reenviarse.
+- B: perfil b73b52fc-127a-4c84-8ecc-f7611852ad9b. La facultad del otorgamiento 5 ya venció; no habilita nuevas revisiones. Requerirá un nuevo otorgamiento expreso antes de revisar en etapas posteriores.
+- No se ejecutó el Paso 8; la versión sucesora para esa prueba sigue pendiente.
+
+### Próxima acción exacta
+
+Retomar como A: abrir la misma evaluación, consultar el estado actual y preparar el registro de una versión sucesora desde el borrador guardado. Si la última versión sigue siendo 5, la sucesora será la 6. Motivo de prueba: [FICTICIA] Versión sucesora para comprobar que su historial de revisiones es independiente. Revisar el paquete y sus pendientes, marcar declaraciones ficticia/lectura y registrar expresamente. Después comprobar historial vacío de la sucesora y conservación de las 12 revisiones de la versión 5.
+
+Quedan pendientes la sucesora independiente y la revisión Favorable sobre una versión completa, incluyendo el rechazo de Favorable sobre la versión 5 incompleta aunque se complete después el borrador. No iniciar 5C.2 ni habilitar confirmación/activación.
+
+### Alcance del commit autorizado en esta pausa
+
+Solo EipdVersionReviews.tsx, su prueba e2e/eipd-version-reviews.spec.ts y esta documentación/HANDOFF. Corrección del aviso de conflicto ya validada: 19 Chromium aprobadas, incluidos dos escenarios de dos pestañas a 1280/320; tipos, lint y formato aprobados. Se conserva esa evidencia sin atribuir una nueva ejecución durante la pausa. Los ajustes previos ajenos de infancia/aplicabilidad, next-env.d.ts y outputs/ quedan locales. Sin merge ni despliegue.

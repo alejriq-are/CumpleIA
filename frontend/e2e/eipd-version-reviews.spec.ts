@@ -162,7 +162,16 @@ test("conflict preserves fields and requires a fresh history consultation", asyn
   await fill(page);
   await page.getByRole("button", { name: "Registrar revisión", exact: true }).click();
   await expect(page.getByRole("alert")).toContainText("revisión previa cambió");
+  await expect(page.getByRole("alert")).toBeFocused();
+  await expect(page.getByLabel("Fundamento de la revisión")).toHaveValue(
+    "[FICTICIA] Se requieren antecedentes"
+  );
+  await expect(
+    page.getByRole("button", { name: "Registrar revisión", exact: true })
+  ).toBeDisabled();
   await page.getByRole("button", { name: "Consultar revisiones y facultades" }).click();
+  await expect(page.getByRole("alert")).toContainText("Historial actualizado");
+  await expect(page.getByRole("alert")).toBeFocused();
   await expect(page.getByLabel("Fundamento de la revisión")).toHaveValue(
     "[FICTICIA] Se requieren antecedentes"
   );
@@ -212,3 +221,125 @@ test("keyboard and narrow viewport retain readable form and explicit discard", a
     true
   );
 });
+
+for (const width of [1280, 320]) {
+  test(
+    "two tabs keep the stale predecessor and expose the conflict at " + width,
+    async ({ context }) => {
+      const pageA = await context.newPage(),
+        pageB = await context.newPage();
+      for (const p of [pageA, pageB]) await p.setViewportSize({ width, height: 900 });
+      const reviews = Array.from({ length: 10 }, (_, i) => ({
+        id: "20000000-0000-0000-0000-" + String(i + 1).padStart(12, "0"),
+        version_id: vid,
+        sequence: i + 1,
+        previous_id: i ? "20000000-0000-0000-0000-" + String(i).padStart(12, "0") : null,
+        outcome: "requiere_cambios",
+        reason: "[FICTICIA] Antecedente " + (i + 1),
+        reference: "SIMULADA-" + (i + 1),
+        created_by: actor,
+        created_at: "2026-11-06T03:00:00Z",
+      }));
+      const posts: any[] = [];
+      const reads = new Map<Page, number>();
+      await context.route("http://localhost:3000/fixture", (route) =>
+        route.fulfill({
+          contentType: "text/html",
+          body: '<div id="root"></div>',
+        })
+      );
+      await context.route("http://test.invalid/**", async (route) => {
+        const req = route.request(),
+          p = req.frame().page();
+        const reply = (value: unknown, status = 200) =>
+          route.fulfill({ status, contentType: "application/json", body: JSON.stringify(value) });
+        if (req.url().endsWith("/review-state")) {
+          reads.set(p, (reads.get(p) ?? 0) + 1);
+          return reply({
+            version_id: vid,
+            organization_id: org,
+            treatment_id: tid,
+            assessment_id: aid,
+            reviews,
+            authority_id: faculty,
+            can_review: true,
+            blocked_reason: null,
+            can_favorable: false,
+            may_manage: false,
+            authorities: [],
+          });
+        }
+        if (req.method() === "POST" && req.url().endsWith("/reviews")) {
+          const body = req.postDataJSON();
+          posts.push(body);
+          if (body.expected_previous_id !== reviews.at(-1)!.id)
+            return reply({ detail: "La revisión previa cambió; consulta el historial" }, 409);
+          const row = {
+            ...body,
+            id: "20000000-0000-0000-0000-000000000011",
+            version_id: vid,
+            sequence: reviews.length + 1,
+            previous_id: body.expected_previous_id,
+            created_by: actor,
+            created_at: "2026-11-06T03:10:00Z",
+          };
+          reviews.push(row);
+          return reply(row, 201);
+        }
+        throw new Error("Solicitud inesperada en el ensayo de dos pestañas");
+      });
+      for (const p of [pageA, pageB]) {
+        await p.goto("http://localhost:3000/fixture");
+        await p.addScriptTag({ content: bundle });
+        await p.getByRole("button", { name: "Consultar revisiones y facultades" }).click();
+        await expect(p.getByText("Revisión previa consultada:", { exact: false })).toContainText(
+          "10"
+        );
+      }
+      await fill(pageB);
+      await pageB.getByLabel("Referencia de respaldo de la revisión").fill("SIMULADA-B2");
+      await fill(pageA);
+      await pageA.getByLabel("Referencia de respaldo de la revisión").fill("SIMULADA-A2");
+      await pageA.getByRole("button", { name: "Registrar reconsideración", exact: true }).click();
+      await expect(pageA.getByText("11. Requiere cambios", { exact: true })).toBeVisible();
+      await pageB.getByRole("button", { name: "Registrar reconsideración", exact: true }).click();
+      const alert = pageB.getByRole("alert");
+      await expect(alert).toContainText("No se registró una nueva reconsideración");
+      await expect(alert).toBeFocused();
+      await expect(pageB.getByLabel("Referencia de respaldo de la revisión")).toHaveValue(
+        "SIMULADA-B2"
+      );
+      await expect(pageB.getByLabel("Declaro datos ficticios para esta revisión")).toBeChecked();
+      await expect(
+        pageB.getByRole("button", { name: "Registrar reconsideración", exact: true })
+      ).toBeDisabled();
+      const rect = await alert.boundingBox();
+      expect(rect!.y).toBeGreaterThanOrEqual(0);
+      expect(rect!.y + rect!.height).toBeLessThanOrEqual(900);
+      expect(reads.get(pageB)).toBe(1);
+      expect(posts).toHaveLength(2);
+      expect(posts[0].expected_previous_id).toBe(posts[1].expected_previous_id);
+      expect(reviews).toHaveLength(11);
+      await pageB.screenshot({
+        path: `/tmp/cumpleia-review-conflict-${width}.png`,
+        fullPage: false,
+      });
+      await pageB.getByRole("button", { name: "Consultar revisiones y facultades" }).click();
+      await expect(alert).toContainText("Historial actualizado");
+      await expect(pageB.getByText("Revisión previa consultada:", { exact: false })).toContainText(
+        "11"
+      );
+      await expect(pageB.getByLabel("Referencia de respaldo de la revisión")).toHaveValue(
+        "SIMULADA-B2"
+      );
+      await expect(
+        pageB.getByRole("button", { name: "Registrar reconsideración", exact: true })
+      ).toBeEnabled();
+      expect(reads.get(pageB)).toBe(2);
+      expect(posts).toHaveLength(2);
+      expect(reviews).toHaveLength(11);
+      await pageA.close();
+      await pageB.close();
+    }
+  );
+}
