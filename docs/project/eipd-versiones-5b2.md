@@ -63,3 +63,18 @@ Se aceptó presentar los antecedentes conservados con etiquetas legibles en luga
 Bloque 5B.2 aceptado dentro de este alcance. Siguiente trabajo: 5C, revisión y decisión de versiones EIPD general y atribuciones diferenciadas; 5D y FORM-R01–R05 siguen abiertos. Sin merge, despliegue ni habilitación de confirmación/activación EIPD.
 
 Verificación de cierre repetida el 03/11/2026: TypeScript y ESLint dirigidos aprobados; ocho pruebas Chromium de versiones aprobadas. Las 32 pruebas previas se conservan como evidencia histórica y no se declaran repetidas en este cierre.
+
+
+## Ajuste de presentación aprobado — 03/11/2026
+
+Implementado en `feature/eipd-orden-navegacion`: resumen de versiones al entrar, consulta automática del historial, controles separados para mostrar/ocultar y actualizar, consulta histórica antes del borrador y preparación del registro después del formulario y diagnóstico. La vista previa del borrador ofrece volver a editar y guardar el borrador. Editar una versión histórica sigue requiriendo copiar al borrador con confirmación; el original no cambia. Los pendientes muestran la ruta de campos y elementos, evitando repetir únicamente el nombre general del alcance.
+
+Validación: TypeScript y ESLint dirigidos aprobados; 14 pruebas Chromium de versiones y vista previa aprobadas. Una integración opcional omitida. Sin cambios de servidor ni nuevas versiones creadas por estas pruebas controladas. Pendiente aceptación visual conjunta del nuevo orden, guardado desde vista previa y lectura de pendientes. Sin commit/push de este ajuste.
+
+Recorrido pendiente: abrir Tratamiento y alcance; comprobar resumen inicial; mostrar/ocultar historial; consultar una versión; comprobar que la copia exige confirmar; editar borrador y abrir vista previa; volver a editar o guardar desde ella; revisar nombres específicos en diagnóstico; preparar registro después de guardar. No registrar una versión solo para verificar la presentación.
+
+### Corrección de presentación de pendientes
+
+Se sustituye «Diagnóstico del servidor» por «Pendientes del contenido guardado». La lista repetitiva se reemplaza por una tabla Sección / Pendiente / Acción. Se identifican por separado categorías de datos, titulares y daño potencial de cada riesgo, usando el identificador guardado. Los accesos abren la sección de edición correspondiente sin guardar ni modificar el borrador. Los antecedentes que no pertenecen a un campo editable se indican para revisión, sin ofrecer un destino incorrecto.
+
+Validación: TypeScript y ESLint correctos; 9 pruebas Playwright correctas (pendientes y versiones, con respuestas controladas). Pendiente validación visual del usuario en su evaluación.

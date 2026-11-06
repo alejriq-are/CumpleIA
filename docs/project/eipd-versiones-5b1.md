@@ -68,3 +68,8 @@ Siguientes pasos:
 4. Validar conjuntamente el recorrido completo. Mantener 5C, 5D y FORM-R01 a FORM-R05 abiertos.
 
 Sin merge ni despliegue. Cambios preexistentes de `frontend/next-env.d.ts` y `outputs/` excluidos.
+
+
+## Nombres visibles actualizados — 05/11/2026
+
+En la interfaz, la anterior «versión de evaluación» se presenta como **Evaluación n.º N**. Las copias inmutables se denominan **Versión del documento EIPD** o **Versión EIPD**, y sus actuaciones siguen llamándose **Revisión**. No cambia este contrato de persistencia ni la numeración. Véase [Terminología de la interfaz](circuito-documental-comun.md#terminología-de-la-interfaz--05112026).

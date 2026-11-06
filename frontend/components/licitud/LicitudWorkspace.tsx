@@ -301,7 +301,7 @@ export function LicitudWorkspace({
                     className="text-blue-700 underline"
                     href={`/dashboard/licitud/${tid}/${row.id}?organizationId=${encodeURIComponent(org)}`}
                   >
-                    {row.purpose_snapshot} — versión {row.version} ({row.status})
+                    {row.purpose_snapshot} — evaluación n.º {row.version} ({row.status})
                   </Link>
                 </li>
               ))}
@@ -459,7 +459,8 @@ export function LicitudWorkspace({
                       className="block font-semibold text-blue-800 underline"
                       href={`/dashboard/licitud/${tid}/${item.id}?organizationId=${encodeURIComponent(org)}`}
                     >
-                      Abrir borrador existente: {item.purpose_snapshot} — versión {item.version}
+                      Abrir borrador existente: {item.purpose_snapshot} — evaluación n.º{" "}
+                      {item.version}
                     </Link>
                   ))}
                 </div>

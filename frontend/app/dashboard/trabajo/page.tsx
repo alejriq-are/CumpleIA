@@ -10,7 +10,10 @@ export default async function ConnectedPage() {
     data: { session },
   } = await (await createClient()).auth.getSession();
   if (!session) redirect("/login");
-  const organizations = await api.me.organizations(session.access_token);
+  const [organizations, profile] = await Promise.all([
+    api.me.organizations(session.access_token),
+    api.me.get(session.access_token),
+  ]);
   if (!organizations.length)
     return (
       <main className="space-y-4" aria-labelledby="connected-empty-title">
@@ -23,5 +26,10 @@ export default async function ConnectedPage() {
         </Link>
       </main>
     );
-  return <ConnectedWorkspace organizations={organizations} />;
+  return (
+    <ConnectedWorkspace
+      organizations={organizations}
+      currentUser={{ id: profile.id, email: profile.email, full_name: profile.full_name }}
+    />
+  );
 }

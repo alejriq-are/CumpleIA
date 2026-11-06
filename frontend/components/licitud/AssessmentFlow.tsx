@@ -3,7 +3,6 @@ import { documentDisclosureClass, documentNavigationButtonClass } from "./docume
 import type { WorkState } from "@/components/navigation/work-unit-state";
 import { eipdStepLabels } from "@/lib/licitud/eipd-steps";
 import { AssessmentScopeReview } from "./AssessmentScopeReview";
-import { DocumentCapabilities } from "./DocumentCapabilities";
 import { documentLabels } from "@/lib/licitud/document-labels";
 import Link from "next/link";
 import { useCallback, useEffect, useId, useState } from "react";
@@ -108,11 +107,12 @@ export function AssessmentFlow({
   const [childDirty, setChildDirty] = useState(false);
   const [resolutionHistory, setResolutionHistory] = useState<boolean | null>(null);
   const [documentDirty, setDocumentDirty] = useState(false);
+  const [versionReviewDirty, setVersionReviewDirty] = useState(false);
   const [eipdDirty, setEipdDirty] = useState(false);
   const [supportDirty, setSupportDirty] = useState(false);
   const [support, setSupport] = useState<Support | null>(null);
   const dirty = scopeDirty || legalDirty || childDirty || eipdDirty;
-  const hasUnsaved = dirty || documentDirty || supportDirty;
+  const hasUnsaved = dirty || documentDirty || supportDirty || versionReviewDirty;
   const childRelevant = navigation
     ? navigation.scope.infancia
     : Boolean(
@@ -169,7 +169,7 @@ export function AssessmentFlow({
             <p className="font-semibold">{organizationName}</p>
             <p>Finalidad: {row?.purpose_snapshot ?? "Cargando evaluación…"}</p>
             <p>
-              Evaluación: {row ? `versión ${row.version} · ${row.status}` : "pendiente de carga"}.{" "}
+              Evaluación {row ? `n.º ${row.version} · ${row.status}` : "pendiente de carga"}.{" "}
               {readOnly && "Tu rol permite solo consulta."}
             </p>
             <p className="text-sm">
@@ -425,8 +425,70 @@ export function AssessmentFlow({
           Consulta lo guardado; las ediciones pendientes no se incluyen. Consultar contenido no
           emite una revisión formal.
         </p>
+        <EipdVersions
+          organizationId={organizationId}
+          treatmentId={treatmentId}
+          assessmentId={assessmentId}
+          token={token}
+          consultationOnly
+          onPending={setVersionReviewDirty}
+        />
+        {row?.eipd_resolution_assessment && (
+          <section
+            className="space-y-3 rounded border p-4"
+            aria-label="Borrador EIPD guardado para consulta"
+          >
+            <h3 className="text-lg font-semibold">
+              Borrador EIPD guardado · evaluación n.º {row.version}
+            </h3>
+            <p>
+              Contenido guardado para seguir trabajando. Sus cambios posteriores no modifican las
+              versiones registradas.
+            </p>
+            <details>
+              <summary className={documentDisclosureClass}>
+                Consultar borrador EIPD guardado
+              </summary>
+              <p className="my-3">
+                Consulta de solo lectura. Para modificarlo, abre Completar EIPD. Las revisiones se
+                registran sobre una versión documental de arriba, no sobre este borrador.
+              </p>
+              <dl className="space-y-3">
+                <div>
+                  <dt className="bg-blue-100 p-2 font-semibold text-blue-950">Referencia EIPD</dt>
+                  <dd className="bg-white p-3">
+                    {String(row.eipd_resolution_assessment.document_reference ?? "Sin referencia")}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="bg-blue-100 p-2 font-semibold text-blue-950">
+                    {documentLabels.edition}
+                  </dt>
+                  <dd className="bg-white p-3">
+                    {String(
+                      row.eipd_resolution_assessment.document_version ?? "Sin nombre de edición"
+                    )}
+                  </dd>
+                </div>
+              </dl>
+              <EipdDocumentView
+                value={row.eipd_resolution_assessment}
+                valuation={support?.risk_evaluation}
+                annexes={support?.annexes}
+              />
+            </details>
+          </section>
+        )}
+
         {row && (
-          <>
+          <details className="space-y-3 rounded border p-4">
+            <summary className={documentDisclosureClass}>
+              Antecedentes de la evaluación n.º {row.version}
+            </summary>
+            <p>
+              Consulta aquí la base jurídica y el alcance RAT guardados. El contenido EIPD
+              registrado se consulta en las versiones de arriba.
+            </p>
             <section aria-label="Alcance RAT guardado" className="space-y-3 rounded border p-4">
               <h3 className="text-lg font-semibold">Alcance RAT asociado guardado</h3>
               <details>
@@ -451,7 +513,7 @@ export function AssessmentFlow({
             >
               <h3 className="text-lg font-semibold">
                 Base de licitud y fundamento
-                {row.legal_basis === "interes_legitimo_art13d" ? " · LIA" : ""} · evaluación versión{" "}
+                {row.legal_basis === "interes_legitimo_art13d" ? " · LIA" : ""} · evaluación n.º{" "}
                 {row.version}
               </h3>
               <details>
@@ -473,86 +535,8 @@ export function AssessmentFlow({
                 />
               </details>
             </section>
-          </>
+          </details>
         )}
-
-        {row?.eipd_resolution_assessment && (
-          <section
-            className="space-y-3 rounded border p-4"
-            aria-label="Borrador EIPD guardado para consulta"
-          >
-            <h3 className="text-lg font-semibold">
-              Documento EIPD guardado · evaluación versión {row.version}
-            </h3>
-            <p>
-              Consulta el contenido guardado en servidor. Es un borrador documental, distinto de una
-              resolución registrada. Los cambios pendientes no se incluyen.
-            </p>
-            <DocumentCapabilities
-              object={`EIPD general guardada · evaluación versión ${row.version}`}
-              actions={[
-                {
-                  action: "Consultar documento",
-                  state: "available",
-                  reason:
-                    "Muestra lo guardado; las ediciones pendientes se consultan en el editor y no se incluyen aquí.",
-                },
-                {
-                  action: "Editar en esta consulta",
-                  state: "blocked",
-                  reason:
-                    "Esta vista es de lectura. El borrador se modifica en Completar EIPD, cuando su determinación, rol y estado lo permiten.",
-                },
-                {
-                  action: "Registrar revisión o decisión documental",
-                  state: "blocked",
-                  reason: "El circuito formal de infancia no se aplica al borrador EIPD general.",
-                },
-                {
-                  action: "Confirmar o activar EIPD",
-                  state: "blocked",
-                  reason: "Estas acciones permanecen bloqueadas en el piloto.",
-                },
-              ]}
-            />
-            <dl className="space-y-3">
-              <div>
-                <dt className="bg-blue-100 p-2 font-semibold text-blue-950">Referencia EIPD</dt>
-                <dd className="bg-white p-3">
-                  {String(row.eipd_resolution_assessment.document_reference ?? "Sin referencia")}
-                </dd>
-              </div>
-              <div>
-                <dt className="bg-blue-100 p-2 font-semibold text-blue-950">
-                  {documentLabels.edition}
-                </dt>
-                <dd className="bg-white p-3">
-                  {String(
-                    row.eipd_resolution_assessment.document_version ?? "Sin nombre de edición"
-                  )}
-                </dd>
-              </div>
-            </dl>
-            <EipdDocumentView
-              value={row.eipd_resolution_assessment}
-              valuation={support?.risk_evaluation}
-              annexes={support?.annexes}
-            />
-            {childReviewVisible && (
-              <p>
-                El registro de revisiones disponible abajo corresponde a resoluciones de infancia
-                seleccionadas; no se atribuye a este borrador EIPD general.
-              </p>
-            )}
-          </section>
-        )}
-
-        <EipdVersions
-          organizationId={organizationId}
-          treatmentId={treatmentId}
-          assessmentId={assessmentId}
-          token={token}
-        />
 
         {childReviewVisible ? (
           <p>
@@ -562,8 +546,8 @@ export function AssessmentFlow({
         ) : (
           <p>
             {row?.eipd_resolution_assessment
-              ? "El borrador EIPD general está disponible para consulta. El registro de revisiones formales de este documento aún no está integrado."
-              : "No hay un documento EIPD guardado. El alcance RAT y la evaluación de licitud están disponibles arriba."}
+              ? "Para emitir una revisión formal, consulta una versión EIPD registrada y abre Consultar revisiones y facultades."
+              : "No hay un borrador EIPD guardado. Puedes consultar las versiones registradas y los antecedentes disponibles arriba."}
           </p>
         )}
       </section>

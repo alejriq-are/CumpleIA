@@ -17,6 +17,7 @@ import { MainModules } from "./PrototypeMenus";
 import { ConnectedPendingSummary } from "./ConnectedPendingSummary";
 import type { WorkUnit } from "./work-units";
 import { PrototypeDrawer } from "./PrototypeDrawer";
+import { SessionIdentity, type SessionPerson } from "./SessionIdentity";
 import { ConnectedContextSummary, type SelectedEvaluation } from "./ConnectedContextSummary";
 import { ConnectedAssessment } from "./ConnectedAssessment";
 import { ConnectedContext, type WorkContext } from "./ConnectedContext";
@@ -89,8 +90,10 @@ function memoryKey(v: WorkLocation) {
 }
 export function ConnectedWorkspace({
   organizations,
+  currentUser,
 }: {
   organizations: OrganizationMembershipOut[];
+  currentUser?: SessionPerson | null;
 }) {
   const first: WorkLocation = {
     organizationId: organizations[0]?.id ?? "",
@@ -391,7 +394,7 @@ export function ConnectedWorkspace({
       `Organización: ${organization}`,
       scoped && v.treatmentId ? `Tratamiento: ${names[v.treatmentId] ?? v.treatmentId}` : "",
       evaluation
-        ? `Finalidad: ${evaluation.purpose} · Evaluación: versión ${evaluation.version} · ${evaluation.status}`
+        ? `Finalidad: ${evaluation.purpose} · Evaluación n.º ${evaluation.version} · ${evaluation.status}`
         : v.module === "licitud" && v.assessmentId
           ? `Evaluación: ${v.assessmentId} (detalle sin consultar)`
           : "",
@@ -627,7 +630,7 @@ export function ConnectedWorkspace({
     }
     if (value.module === "licitud" && value.assessmentId) {
       parts.push(
-        `Finalidad y evaluación: ${evaluations[value.assessmentId] ? `${evaluations[value.assessmentId].purpose} · versión ${evaluations[value.assessmentId].version} · ${evaluations[value.assessmentId].status}` : "Evaluación seleccionada"}`
+        `Finalidad y evaluación: ${evaluations[value.assessmentId] ? `${evaluations[value.assessmentId].purpose} · evaluación n.º ${evaluations[value.assessmentId].version} · ${evaluations[value.assessmentId].status}` : "Evaluación seleccionada"}`
       );
     }
     return parts.join(" · ");
@@ -758,6 +761,10 @@ export function ConnectedWorkspace({
                 }
                 assessmentSelected={location.module === "licitud" && !!location.assessmentId}
                 evaluation={evaluations[location.assessmentId]}
+                currentUser={currentUser}
+                organizationRole={
+                  organizations.find((item) => item.id === location.organizationId)?.role
+                }
               />
               <ConnectedPendingSummary
                 units={pendingUnits}
@@ -1121,6 +1128,9 @@ export function ConnectedWorkspace({
                   )}
                   {v.module === "organizacion" && (
                     <>
+                      <div className="mb-4">
+                        <SessionIdentity person={currentUser} role={organization.role} />
+                      </div>
                       {organizationReadOnly && (
                         <p
                           id={permissionHelpId}

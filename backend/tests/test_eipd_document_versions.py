@@ -41,6 +41,16 @@ async def ready(saved, explicit_review_policy, _session_factory):
         yield saved
     finally:
         async with _session_factory() as db:
+            await db.execute(
+                text("DELETE FROM eipd_version_reviews WHERE treatment_id=:tid"),
+                {"tid": saved[0]},
+            )
+            await db.execute(
+                text(
+                    "DELETE FROM eipd_review_authority_events WHERE treatment_id=:tid"
+                ),
+                {"tid": saved[0]},
+            )
             await db.execute(delete(Version).where(Version.treatment_id == saved[0]))
             await db.commit()
 

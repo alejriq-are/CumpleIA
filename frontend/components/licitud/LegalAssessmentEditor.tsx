@@ -171,7 +171,7 @@ export function LegalAssessmentEditor({
       {row ? (
         <form onSubmit={save} className="space-y-4">
           <p>
-            {row.purpose_snapshot} — versión {row.version} ({row.status})
+            {row.purpose_snapshot} — evaluación n.º {row.version} ({row.status})
           </p>
           <p>Contenido cargado del servidor. Guardar no equivale a aprobación jurídica.</p>
           <p>
@@ -185,9 +185,9 @@ export function LegalAssessmentEditor({
               Última base y fundamento consultados en el servidor
             </h3>
             <p>
-              Evaluación versión {row.version} · {row.status}. Este resumen muestra lo cargado al
-              abrir la evaluación o después de guardar en esta pestaña. No incluye ediciones
-              pendientes ni se actualiza automáticamente con cambios de otras pestañas.
+              Evaluación n.º {row.version} · {row.status}. Este resumen muestra lo cargado al abrir
+              la evaluación o después de guardar en esta pestaña. No incluye ediciones pendientes ni
+              se actualiza automáticamente con cambios de otras pestañas.
             </p>
             <dl className="space-y-2">
               <div>

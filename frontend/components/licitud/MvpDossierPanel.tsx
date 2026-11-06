@@ -124,7 +124,7 @@ export function MvpDossierPanel({
                 </p>
                 <p>
                   {d.kind === "eipd" && !record(d.content).document
-                    ? `Evaluación asociada: versión ${packet.assessment_version}.`
+                    ? `Evaluación asociada n.º ${packet.assessment_version}.`
                     : `Versión: ${d.version ?? "no disponible"}.`}
                 </p>
                 <DossierDocumentView document={d} support={packet.support} />

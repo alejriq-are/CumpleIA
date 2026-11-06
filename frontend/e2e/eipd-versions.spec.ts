@@ -100,8 +100,9 @@ async function setup(page: Page, mode = "success", props = {}) {
         }
         if (url.includes("/requests/"))
           return w.found ? response(w.found) : response({ detail: "No encontrado" }, 404);
+        if (w.byId?.[url.split("/").at(-1)!]) return response(w.byId[url.split("/").at(-1)!]);
         if (url.endsWith("/" + vid)) return response(w.found);
-        return response(w.found ? [w.found] : []);
+        return response(w.versionHistory ?? (w.found ? [w.found] : []));
       };
     },
     { preview, org, tid, aid, actor, vid, mode }
@@ -132,8 +133,12 @@ test("registro explícito, consulta histórica y copia confirmada sin otra escri
     .getByRole("button", { name: "Registrar versión documental EIPD", exact: true })
     .click();
   await expect(page.getByRole("status")).toContainText("Versión EIPD 1 registrada");
-  await page.getByRole("button", { name: "Consultar historial de versiones EIPD" }).click();
+  await page.getByRole("button", { name: "Mostrar historial de versiones EIPD" }).click();
   await page.getByRole("button", { name: "Consultar versión EIPD 1", exact: true }).click();
+  await page.getByRole("button", { name: "Ocultar historial de versiones EIPD" }).click();
+  await expect(
+    page.getByRole("button", { name: "Consultar versión EIPD 1", exact: true })
+  ).toBeHidden();
   await expect(page.getByRole("article")).toContainText("Contenido guardado");
   await page.getByRole("button", { name: "Preparar borrador desde esta versión EIPD" }).click();
   await page.getByRole("button", { name: "Conservar mi borrador actual" }).click();
@@ -208,7 +213,7 @@ test("ediciones pendientes bloquean registro pero conservan consulta", async ({ 
   await expect(
     page.getByRole("button", { name: "Preparar registro de versión EIPD", exact: true })
   ).toBeDisabled();
-  await page.getByRole("button", { name: "Consultar historial de versiones EIPD" }).click();
+  await page.getByRole("button", { name: "Mostrar historial de versiones EIPD" }).click();
   await expect(
     page.getByText("No hay versiones EIPD registradas en esta evaluación.")
   ).toBeVisible();
@@ -238,12 +243,73 @@ test("consulta de solo lectura no ofrece registro ni reemplazo y admite teclado"
   await expect(
     page.getByRole("button", { name: "Preparar registro de versión EIPD", exact: true })
   ).toHaveCount(0);
-  const history = page.getByRole("button", { name: "Consultar historial de versiones EIPD" });
+  const history = page.getByRole("button", { name: "Mostrar historial de versiones EIPD" });
   await history.focus();
   await page.keyboard.press("Space");
   await expect(
     page.getByText("No hay versiones EIPD registradas en esta evaluación.")
   ).toBeVisible();
-  await expect(history).toBeFocused();
+  await expect(
+    page.getByRole("button", { name: "Ocultar historial de versiones EIPD" })
+  ).toBeFocused();
+  expect(await page.evaluate(() => (window as any).posts.length)).toBe(0);
+});
+
+test("consulta abre versiones recientes primero sin formulario de registro", async ({ page }) => {
+  await setup(page, "success", { consultationOnly: true });
+  await page.evaluate(
+    ({ preview, org, tid, aid, actor, vid }) => {
+      const w = window as any;
+      const first = {
+        id: vid,
+        organization_id: org,
+        treatment_id: tid,
+        assessment_id: aid,
+        version: 1,
+        created_by: actor,
+        created_at: "2026-11-05T12:00:00Z",
+        request_id: crypto.randomUUID(),
+        reason: "[FICTICIA] Primera",
+        source_hash: "a".repeat(64),
+        bundle_hash: "b".repeat(64),
+        bundle: {
+          ...preview.bundle,
+          version: 1,
+          predecessor_id: null,
+          reason: "[FICTICIA] Primera",
+          registered_by: actor,
+        },
+        can_confirm: false,
+        activation: "deshabilitada",
+      };
+      const second = {
+        ...first,
+        id: crypto.randomUUID(),
+        version: 2,
+        reason: "[FICTICIA] Segunda",
+        bundle: { ...first.bundle, version: 2, predecessor_id: vid, reason: "[FICTICIA] Segunda" },
+      };
+      w.versionHistory = [first, second];
+      w.byId = { [first.id]: first, [second.id]: second };
+    },
+    { preview, org, tid, aid, actor, vid }
+  );
+  await page.getByRole("button", { name: "Actualizar historial de versiones EIPD" }).click();
+  await expect(page.getByRole("button", { name: /^Consultar versión EIPD/ })).toHaveText([
+    "Consultar versión EIPD 2",
+    "Consultar versión EIPD 1",
+  ]);
+  await expect(
+    page.getByRole("region", { name: "Registrar versión EIPD", exact: true })
+  ).toHaveCount(0);
+  await page.getByRole("button", { name: "Consultar versión EIPD 2", exact: true }).click();
+  await expect(
+    page.getByRole("article", { name: "Versión EIPD 2 consultada", exact: true })
+  ).toBeVisible();
+  const content = page.getByText("Contenido EIPD conservado para esta versión", { exact: true });
+  await expect(content.locator("..")).not.toHaveAttribute("open", "");
+  await expect(
+    page.getByRole("button", { name: "Consultar revisiones y facultades", exact: true })
+  ).toBeVisible();
   expect(await page.evaluate(() => (window as any).posts.length)).toBe(0);
 });

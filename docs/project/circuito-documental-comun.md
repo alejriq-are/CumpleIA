@@ -6,6 +6,22 @@ Base inspeccionada: `f0d53ef92e4daacc8d692cad1525c9f1716594ba`.
 Rama de preparación: `feature/circuito-documental-5a`.
 Publicación: commit y push de la propuesta autorizados el 02/11/2026; no equivalen a validar V1–V3 ni a implementar 5B–5D.
 
+## Terminología de la interfaz — 05/11/2026
+
+Se adopta la propuesta del usuario para distinguir el trabajo de evaluación de sus documentos:
+
+| Concepto | Nombre visible vigente |
+| --- | --- |
+| Identidad numerada de la evaluación de licitud | **Evaluación n.º N** |
+| Copia EIPD registrada e inmutable | **Versión del documento EIPD N**, abreviado **Versión EIPD N** |
+| Actuación sobre esa copia exacta | **Revisión** |
+
+Ejemplo: **Evaluación n.º 1 → Versión EIPD 5 → Revisión 1**. Cada copia documental conserva su propio contenido, diagnóstico e historial de revisiones.
+
+Se elige Evaluación n.º en lugar de Ciclo de evaluación para no atribuir etapas ni reglas de apertura/cierre de ciclos que todavía no se han definido. Guardar cambios en una evaluación no crea automáticamente otra evaluación numerada; registrar explícitamente una copia EIPD sí crea su siguiente versión documental. Una nueva evaluación tiene su identidad y no continúa automáticamente la numeración documental de otra.
+
+Este es un cambio de nomenclatura del producto. Se conservan los campos técnicos version/assessment_version, los identificadores, la numeración existente y las reglas de registro. Las expresiones históricas «versión de evaluación» de los contratos se leen como «Evaluación n.º» en la interfaz actual. La distinción se aplica a la evaluación de origen; no renombra las versiones de anexos ni las actuaciones del circuito de infancia.
+
 ## Aprobación funcional — 02/11/2026
 
 El usuario aprobó expresamente las siguientes actuaciones y las tres reglas V1–V3. Esta aprobación de diseño es posterior a la publicación de la propuesta `a5a51c3`; no acredita implementación ni concede facultades personales.

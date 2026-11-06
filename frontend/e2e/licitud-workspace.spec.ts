@@ -33,6 +33,7 @@ test.beforeAll(async () => {
  if(!${integrated})window.fetch=async(url,opts)=>{
   const method=opts.method??"GET";window.demo.calls.push({url,method,body:opts.body?JSON.parse(opts.body):null});
   const result=value=>new Response(JSON.stringify(value),{status:200});
+  if(url.endsWith("/eipd-versions/v1"))return result([]);
   if(url.endsWith("/support"))return result(window.demo.support??{schema_version:1,organization_id:org,treatment_id:tid,assessment_id:tid,document_hash:"f".repeat(64),risk_evaluation:null,risk_history:[],annexes:[],can_confirm:false,activation:"deshabilitada"});
   if(url.endsWith("/basis-diagnostics")){
    if(window.demo.mode==="diagnostic-down")return new Response(JSON.stringify({detail:"PRUEBA diagnóstico no disponible"}),{status:503});
@@ -142,7 +143,7 @@ test("crea borrador, abre y guarda LIA y recupera el historial sin activar EIPD"
 }) => {
   await draft(page);
   await expect(page.getByRole("status")).toContainText("Borrador creado");
-  const link = page.getByRole("link", { name: /versión 1/ });
+  const link = page.getByRole("link", { name: /evaluación n.º 1/ });
   const href = await link.getAttribute("href");
   expect(href).toContain(`/dashboard/licitud/${treatment}/`);
   expect(href).toContain(`organizationId=${org}`);
@@ -163,7 +164,7 @@ test("crea borrador, abre y guarda LIA y recupera el historial sin activar EIPD"
   await page.evaluate(() => (window as any).workspace());
   await expect(page.getByLabel("Tratamiento del RAT", { exact: true })).toBeVisible();
   await page.getByLabel("Tratamiento del RAT").selectOption(treatment);
-  await expect(page.getByRole("link", { name: /versión 1/ })).toBeVisible();
+  await expect(page.getByRole("link", { name: /evaluación n.º 1/ })).toBeVisible();
   await page.evaluate((id) => (window as any).editor(id), id);
   await expect(page.getByLabel("Análisis de necesidad", { exact: true }).first()).toHaveValue(
     "[FICTICIA] Necesidad de prueba"
@@ -274,7 +275,7 @@ test("crea borrador, abre y guarda LIA y recupera el historial sin activar EIPD"
   ).toBeVisible();
   await expect(
     page.getByRole("region", { name: "Borrador EIPD guardado para consulta", exact: true })
-  ).toContainText("borrador documental");
+  ).toContainText("Contenido guardado para seguir trabajando");
   if (integrated) {
     await page.getByRole("tab", { name: "Completar datos", exact: true }).click();
     await page.getByRole("button", { name: "4. Valorar riesgos", exact: true }).click();
@@ -360,7 +361,7 @@ test("rechazo de creación conserva el formulario y no presenta éxito", async (
   await expect(page.getByLabel("Fundamento", { exact: true })).toHaveValue(
     "[FICTICIA] Prueba de recorrido"
   );
-  await expect(page.getByRole("link", { name: /versión 1/ })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: /evaluación n.º 1/ })).toHaveCount(0);
 });
 test("editar LIA conserva campos anteriores no representados", async ({ page }) => {
   test.skip(integrated, "Fixture de preservación controlada");
@@ -619,7 +620,7 @@ for (const mode of ["adultos", "infancia", "error"] as const) {
     });
     if (mode === "adultos") {
       await expect(
-        page.getByText("No hay un documento EIPD guardado.", {
+        page.getByText("No hay un borrador EIPD guardado.", {
           exact: false,
         })
       ).toBeVisible();
@@ -641,7 +642,9 @@ for (const mode of ["adultos", "infancia", "error"] as const) {
         page.getByRole("region", { name: "Borrador EIPD guardado para consulta", exact: true })
       ).toBeVisible();
       await expect(
-        page.getByText("El borrador EIPD general está disponible para consulta.", { exact: false })
+        page.getByText("Para emitir una revisión formal, consulta una versión EIPD registrada", {
+          exact: false,
+        })
       ).toBeVisible();
       await expect(history).toBeHidden();
       await expect(
@@ -877,13 +880,14 @@ for (const basis of [null, "consentimiento_art12", "interes_legitimo_art13d"]) {
     }, basis);
     await page.evaluate((id) => (window as any).flow(id), treatment);
     await page.getByRole("tab", { name: "Revisar documentos", exact: true }).click();
+    await page.getByText("Antecedentes de la evaluación n.º 1", { exact: true }).click();
     const region = page.getByRole("region", {
       name: "Evaluación de licitud guardada",
       exact: true,
     });
     const active = basis === "interes_legitimo_art13d";
     await expect(region.getByRole("heading")).toHaveText(
-      `Base de licitud y fundamento${active ? " · LIA" : ""} · evaluación versión 1`
+      `Base de licitud y fundamento${active ? " · LIA" : ""} · evaluación n.º 1`
     );
     await region
       .getByText(`Consultar evaluación de licitud${active ? " y LIA" : ""}`, { exact: true })
@@ -1186,3 +1190,101 @@ test("resumen de base y fundamento conserva lo guardado mientras se edita y se a
   await expect(summary).toContainText("Interés legítimo (LIA)");
   await expect(summary).not.toContainText("Tienes cambios sin guardar");
 });
+
+for (const width of [1280, 320]) {
+  test(`documentos guardados: versiones primero y borrador separado a ${width}px`, async ({
+    page,
+  }) => {
+    test.skip(integrated, "Recorrido de orden con respuestas ficticias");
+    await page.setViewportSize({ width, height: 900 });
+    await draft(page);
+    await expect(page.getByRole("status")).toContainText("Borrador creado");
+    await page.evaluate(() => {
+      const w = window as any;
+      w.demo.rows[0].eipd_resolution_assessment = {
+        schema_version: 1,
+        document_reference: "SIMULADA-ORDEN",
+        notes: "[FICTICIA] Guardado",
+      };
+      const original = w.fetch;
+      w.fetch = async (url: string, options: any = {}) => {
+        if (url.endsWith("/eipd-versions/v1")) {
+          w.demo.calls.push({ url, method: options.method ?? "GET" });
+          return new Response(
+            JSON.stringify([
+              {
+                id: "10000000-0000-0000-0000-000000000001",
+                version: 1,
+                created_at: "2026-11-05T12:00:00Z",
+                reason: "[FICTICIA] Primera",
+                bundle_hash: "a".repeat(64),
+              },
+              {
+                id: "10000000-0000-0000-0000-000000000002",
+                version: 5,
+                created_at: "2026-11-05T13:00:00Z",
+                reason: "[FICTICIA] Quinta",
+                bundle_hash: "b".repeat(64),
+              },
+            ]),
+            { status: 200 }
+          );
+        }
+        return original(url, options);
+      };
+    });
+    await page.evaluate((id) => (window as any).flow(id), treatment);
+    await page.getByRole("tab", { name: "Completar datos", exact: true }).click();
+    await page.getByRole("button", { name: "Documentar EIPD", exact: true }).click();
+    await page
+      .getByLabel("Notas del borrador EIPD (opcional)", { exact: true })
+      .fill("[FICTICIA] Pendiente que debe conservarse");
+    const before = await page.evaluate(
+      () => (window as any).demo.calls.filter((c: any) => c.method !== "GET").length
+    );
+    await page.getByRole("tab", { name: "Revisar documentos", exact: true }).click();
+    const versions = page.getByRole("region", {
+      name: "Versiones del documento EIPD",
+      exact: true,
+    });
+    const savedDraft = page.getByRole("region", {
+      name: "Borrador EIPD guardado para consulta",
+      exact: true,
+    });
+    const context = page.getByText("Antecedentes de la evaluación n.º 1", { exact: true });
+    await expect(
+      versions.getByRole("heading", { name: "Versiones del documento EIPD guardadas", exact: true })
+    ).toBeVisible();
+    const options = versions.getByRole("button", { name: /^Consultar versión EIPD/ });
+    await expect(options).toHaveText(["Consultar versión EIPD 5", "Consultar versión EIPD 1"]);
+    expect((await versions.boundingBox())!.y).toBeLessThan((await savedDraft.boundingBox())!.y);
+    expect((await savedDraft.boundingBox())!.y).toBeLessThan((await context.boundingBox())!.y);
+    await expect(
+      versions.getByRole("region", { name: "Registrar versión EIPD", exact: true })
+    ).toHaveCount(0);
+    expect(await savedDraft.locator("details[open]").count()).toBe(0);
+    await expect(
+      page.getByRole("region", { name: "Evaluación de licitud guardada", exact: true })
+    ).toHaveCount(0);
+    await page.screenshot({ path: `/tmp/cumpleia-documents-order-${width}.png`, fullPage: true });
+    await savedDraft.getByText("Consultar borrador EIPD guardado", { exact: true }).click();
+    await expect(savedDraft.getByText("SIMULADA-ORDEN", { exact: true })).toBeVisible();
+    await context.click();
+    const basis = page.getByRole("region", { name: "Evaluación de licitud guardada", exact: true });
+    await basis.getByText("Consultar evaluación de licitud y LIA", { exact: true }).click();
+    await expect(basis.getByText("Referencia EIPD", { exact: true })).toHaveCount(0);
+    await expect(basis.getByText("SIMULADA-ORDEN", { exact: true })).toHaveCount(0);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+      true
+    );
+    await page.getByRole("tab", { name: "Completar datos", exact: true }).click();
+    await expect(
+      page.getByLabel("Notas del borrador EIPD (opcional)", { exact: true })
+    ).toHaveValue("[FICTICIA] Pendiente que debe conservarse");
+    expect(
+      await page.evaluate(
+        () => (window as any).demo.calls.filter((c: any) => c.method !== "GET").length
+      )
+    ).toBe(before);
+  });
+}

@@ -812,13 +812,15 @@ for (const width of [1280, 390]) {
     const context = page.getByTestId("connected-context-summary");
     await expect(context).toContainText("Organización: [FICTICIA] Organización conectada");
     await expect(context).toContainText("Tratamiento: [FICTICIA] Actividad mixta");
-    await expect(context).toContainText("versión 1 · borrador");
+    await expect(context).toContainText("Evaluación n.º 1 · borrador");
     await page.getByRole("button", { name: "Ver contexto completo", exact: true }).click();
     const detailPanel = page.getByRole("dialog", { name: "Contexto seleccionado", exact: true });
     await expect(
       detailPanel.getByText("[FICTICIA] Finalidad de prueba", { exact: true })
     ).toBeVisible();
-    await expect(detailPanel.getByText("versión 1 · borrador", { exact: true })).toBeVisible();
+    await expect(
+      detailPanel.getByText("Evaluación n.º 1 · borrador", { exact: true })
+    ).toBeVisible();
     await page.keyboard.press("Escape");
     for (const moduleName of ["Autodiagnóstico", "Mi organización", "Panel principal"]) {
       await mod(page, moduleName);
@@ -829,7 +831,7 @@ for (const width of [1280, 390]) {
     await expect(context).not.toContainText("Finalidad");
     await expect(context).not.toContainText("versión");
     await mod(page, "Bases de licitud");
-    await expect(context).toContainText("versión 1 · borrador");
+    await expect(context).toContainText("Evaluación n.º 1 · borrador");
     await expect(main(page).getByRole("textbox", { name: "Fundamento", exact: true })).toHaveValue(
       "[FICTICIA] Lote 2 conservar"
     );
@@ -860,7 +862,7 @@ test("Continuar identifica evaluación y versión recordadas sin cambiar el dest
   await expect(resume).toContainText("Organización: [FICTICIA] Organización conectada");
   await expect(resume).toContainText("Tratamiento: [FICTICIA] Actividad mixta");
   await expect(resume).toContainText(
-    "Finalidad y evaluación: [FICTICIA] Finalidad de prueba · versión 2 · borrador"
+    "Finalidad y evaluación: [FICTICIA] Finalidad de prueba · evaluación n.º 2 · borrador"
   );
   await expect(page.getByTestId("connected-context-summary")).not.toContainText("versión");
   await page.setViewportSize({ width: 320, height: 844 });
@@ -2190,7 +2192,7 @@ test("7B estado confirmado explica consulta sin atribuirla falsamente al rol", a
   await expect(field).toBeDisabled();
   await expect(
     main(page).getByRole("group", {
-      name: "Documento de consulta · evaluación versión 1",
+      name: "Documento de consulta · evaluación n.º 1",
       exact: true,
     })
   ).toHaveAccessibleDescription(/solo puede editarse mientras la evaluación está en borrador/);
@@ -2289,7 +2291,7 @@ for (const width of [1280, 390, 320]) {
           contextDetail.getByText(records[aid].purpose_snapshot, { exact: true })
         ).toBeVisible();
         await expect(
-          contextDetail.getByText("versión 1 · borrador", { exact: true })
+          contextDetail.getByText("Evaluación n.º 1 · borrador", { exact: true })
         ).toBeVisible();
         await expectAccessibleReferences(page);
         if (dir && longNames) await page.screenshot({ path: path.join(dir, `detalle-${key}.png`) });
@@ -2429,12 +2431,14 @@ test("8A distingue evaluación activa de versión documental histórica", async 
     })
   ).toBeVisible();
   await expect(main(page).getByText("SIMULADA-8A-HISTORICA-001", { exact: true })).toBeVisible();
-  await expect(page.getByTestId("connected-context-summary")).toContainText("versión 2 · borrador");
+  await expect(page.getByTestId("connected-context-summary")).toContainText(
+    "Evaluación n.º 2 · borrador"
+  );
   await page.getByRole("button", { name: "Ver contexto completo", exact: true }).click();
   await expect(
     page
       .getByRole("dialog", { name: "Contexto seleccionado", exact: true })
-      .getByText("versión 2 · borrador", { exact: true })
+      .getByText("Evaluación n.º 2 · borrador", { exact: true })
   ).toBeVisible();
   await page.keyboard.press("Escape");
   expect(calls.filter((v) => v.method !== "GET")).toHaveLength(0);
@@ -2752,8 +2756,8 @@ test("9A dos evaluaciones mantienen dos borradores EIPD con identidad separada",
     .fill("[FICTICIA] Segunda evaluación");
   await pendingButton(page, 2).click();
   await expect(pendingDialog(page).locator("li")).toHaveCount(2);
-  await expect(pendingDialog(page)).toContainText("Evaluación: versión 1");
-  await expect(pendingDialog(page)).toContainText("Evaluación: versión 2");
+  await expect(pendingDialog(page)).toContainText("Evaluación n.º 1");
+  await expect(pendingDialog(page)).toContainText("Evaluación n.º 2");
   expect(errors).toEqual([]);
 });
 
@@ -2969,7 +2973,7 @@ test("9B pendiente de otra evaluación anticipa destino, cancela y confirma sin 
   const before = page.url(),
     writes = calls.filter((v) => v.method !== "GET").length;
   await pendingButton(page, 2).click();
-  const first = pendingDialog(page).locator("li").filter({ hasText: "Evaluación: versión 1" });
+  const first = pendingDialog(page).locator("li").filter({ hasText: "Evaluación n.º 1" });
   await first
     .getByRole("button", { name: "Ir a Borrador EIPD · siete pasos", exact: true })
     .click();
@@ -2978,8 +2982,8 @@ test("9B pendiente de otra evaluación anticipa destino, cancela y confirma sin 
   });
   await expect(confirmation).toContainText("Antes de cambiar de contexto");
   await expect(confirmation).toContainText("Destino: Tratamiento y alcance de la EIPD");
-  await expect(confirmation).toContainText("versión 1");
-  await expect(confirmation).toContainText("versión 2");
+  await expect(confirmation).toContainText("evaluación n.º 1");
+  await expect(confirmation).toContainText("evaluación n.º 2");
   await confirmation.getByRole("button", { name: "Cancelar cambio", exact: true }).click();
   expect(page.url()).toBe(before);
   await expect(
@@ -3002,7 +3006,7 @@ test("9B pendiente de otra evaluación anticipa destino, cancela y confirma sin 
   await pendingButton(page, 2).click();
   await pendingDialog(page)
     .locator("li")
-    .filter({ hasText: "Evaluación: versión 2" })
+    .filter({ hasText: "Evaluación n.º 2" })
     .getByRole("button", { name: "Ir a Borrador EIPD · siete pasos", exact: true })
     .click();
   await confirmation
@@ -3249,7 +3253,7 @@ test("10A EIPD general explica guardado sin ofrecer actuaciones formales de infa
   await enable(page);
   await section(page, "Tratamiento y alcance de la EIPD");
   const panel = main(page).getByRole("complementary", {
-    name: "Acciones y requisitos: Borrador EIPD general · evaluación versión 1",
+    name: "Acciones y requisitos: Borrador EIPD general · evaluación n.º 1",
     exact: true,
   });
   await expect(panel).toContainText("Editar y guardar borrador: Disponible.");
@@ -3278,7 +3282,7 @@ for (const width of [320, 1280]) {
     await enable(page);
     await section(page, "Tratamiento y alcance de la EIPD");
     const panel = main(page).getByRole("complementary", {
-      name: "Acciones y requisitos: Borrador EIPD general · evaluación versión 1",
+      name: "Acciones y requisitos: Borrador EIPD general · evaluación n.º 1",
       exact: true,
     });
     await panel.scrollIntoViewIfNeeded();
@@ -3706,4 +3710,71 @@ test("alcance mixto: conflicto conserva propuesta y motivo sin guardar", async (
   );
   await expect(scope.getByLabel(/Hijos de clientes/)).toBeChecked();
   expect(errors).toEqual([]);
+});
+
+for (const width of [1280, 320]) {
+  test(`usuario de sesión visible en organización y contexto sin perder pendientes a ${width}px`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width, height: 900 });
+    await mod(page, "Mi organización");
+    const identity = main(page).getByRole("region", {
+      name: "Usuario de esta sesión",
+      exact: true,
+    });
+    await expect(identity.getByText("Persona de prueba", { exact: true })).toBeVisible();
+    await expect(identity.getByText("persona.prueba@example.test", { exact: true })).toBeVisible();
+    await expect(identity.getByText("Propietario", { exact: true })).toBeVisible();
+    await main(page)
+      .getByLabel("Nombre de la organización", { exact: true })
+      .fill("[FICTICIA] Pendiente identidad");
+    const writes = calls.filter((v) => v.method !== "GET").length;
+    await page.getByRole("button", { name: "Ver contexto completo", exact: true }).click();
+    const dialog = page.getByRole("dialog", { name: "Contexto seleccionado", exact: true });
+    const detailIdentity = dialog.getByRole("region", {
+      name: "Usuario de esta sesión",
+      exact: true,
+    });
+    await expect(
+      detailIdentity.getByText("persona.prueba@example.test", { exact: true })
+    ).toBeVisible();
+    await expect(detailIdentity.getByText("Propietario", { exact: true })).toBeVisible();
+    await detailIdentity.getByText("Identificador de la persona", { exact: true }).click();
+    await expect(
+      detailIdentity.getByText("10000000-0000-0000-0000-000000000099", { exact: true })
+    ).toBeVisible();
+    expect(await detailIdentity.evaluate((el) => el.scrollWidth <= el.clientWidth)).toBe(true);
+    await page.screenshot({ path: `/tmp/cumpleia-session-context-${width}.png`, fullPage: true });
+    await page.keyboard.press("Escape");
+    await expect(
+      page.getByRole("button", { name: "Ver contexto completo", exact: true })
+    ).toBeFocused();
+    await expect(main(page).getByLabel("Nombre de la organización", { exact: true })).toHaveValue(
+      "[FICTICIA] Pendiente identidad"
+    );
+    expect(calls.filter((v) => v.method !== "GET")).toHaveLength(writes);
+    await page.screenshot({
+      path: `/tmp/cumpleia-session-organization-${width}.png`,
+      fullPage: true,
+    });
+    expect(errors).toEqual([]);
+  });
+}
+
+test("usuario editor ve su rol e identificador aunque no puede modificar organización", async ({
+  page,
+}) => {
+  await visit(page, "", editorHarness.script);
+  await mod(page, "Mi organización");
+  const identity = main(page).getByRole("region", { name: "Usuario de esta sesión", exact: true });
+  await expect(identity.getByText("Editor", { exact: true })).toBeVisible();
+  await expect(main(page).getByLabel("Nombre de la organización", { exact: true })).toBeDisabled();
+  await identity.getByText("Identificador de la persona", { exact: true }).click();
+  await expect(
+    identity.getByText("10000000-0000-0000-0000-000000000099", { exact: true })
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Ver contexto completo", exact: true }).click();
+  const dialog = page.getByRole("dialog", { name: "Contexto seleccionado", exact: true });
+  await expect(dialog.getByText("Editor", { exact: true })).toBeVisible();
+  expect(calls.filter((v) => v.method !== "GET")).toHaveLength(0);
 });

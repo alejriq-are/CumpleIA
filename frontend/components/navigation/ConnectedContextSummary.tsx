@@ -1,5 +1,6 @@
 "use client";
 import { useCallback, useRef, useState } from "react";
+import { SessionIdentity, type SessionPerson } from "./SessionIdentity";
 import { PrototypeDrawer } from "./PrototypeDrawer";
 
 export type SelectedEvaluation = { purpose: string; version: number; status: string };
@@ -10,11 +11,15 @@ export function ConnectedContextSummary({
   treatment,
   evaluation,
   assessmentSelected,
+  currentUser,
+  organizationRole,
 }: {
   organization: string;
   treatment?: string;
   evaluation?: SelectedEvaluation;
   assessmentSelected: boolean;
+  currentUser?: SessionPerson | null;
+  organizationRole?: string;
 }) {
   const [open, setOpen] = useState(false);
   const trigger = useRef<HTMLButtonElement>(null);
@@ -23,7 +28,7 @@ export function ConnectedContextSummary({
     requestAnimationFrame(() => trigger.current?.focus({ preventScroll: true }));
   }, []);
   const evaluationLabel = evaluation
-    ? `versión ${evaluation.version} · ${evaluation.status}`
+    ? `Evaluación n.º ${evaluation.version} · ${evaluation.status}`
     : "Evaluación seleccionada";
   return (
     <>
@@ -45,7 +50,7 @@ export function ConnectedContextSummary({
             )}
           </div>
           {assessmentSelected && (
-            <p className="connected-evaluation-badge" aria-label={`Evaluación: ${evaluationLabel}`}>
+            <p className="connected-evaluation-badge" aria-label={evaluationLabel}>
               {evaluationLabel}
             </p>
           )}
@@ -76,6 +81,7 @@ export function ConnectedContextSummary({
           Consulta del contexto de trabajo. Abrir este detalle no cambia la selección ni guarda el
           formulario.
         </p>
+        <SessionIdentity person={currentUser} role={organizationRole} />
         <dl>
           <dt>Organización</dt>
           <dd>{organization}</dd>
@@ -96,8 +102,8 @@ export function ConnectedContextSummary({
         </dl>
         {assessmentSelected && (
           <p>
-            La versión indicada corresponde a la evaluación seleccionada. Los documentos históricos
-            conservan su propia versión, referencia y revisiones en Documentos guardados.
+            El número identifica la evaluación seleccionada. Cada versión del documento EIPD
+            conserva su propio número, referencia e historial de revisiones en Documentos guardados.
           </p>
         )}
       </PrototypeDrawer>

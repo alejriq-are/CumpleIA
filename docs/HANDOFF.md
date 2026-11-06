@@ -1,3 +1,33 @@
+## Commit y push autorizados — 06/11/2026
+
+El usuario autoriza publicar este recorrido en feature/eipd-5c1-revision. Validación final de la copia exacta preparada: 60 Chromium, tipos/lint/formato aprobados; Ruff/Black dirigidos aprobados. Alcance: 5C.1 y ajustes relacionados de consulta EIPD, nomenclatura e identidad. Se excluyen outputs/, next-env.d.ts y ajustes previos independientes de infancia/aplicabilidad; siguen locales. La autorización no cierra las comprobaciones manuales pendientes ni habilita 5C.2, confirmación, activación, merge o despliegue. [Alcance y siguiente paso](project/eipd-revision-5c1.md).
+
+## Identidad de sesión visible en organización y contexto — 06/11/2026
+
+Mi organización y Ver contexto completo muestran nombre disponible, correo, rol de la organización y desplegable con identificador de la persona. Perfil obtenido en servidor mediante /me, sin nuevas facultades ni cambios de datos. 12 Chromium dirigidas, tipos/lint/formato aprobados; capturas 320/1280 inspeccionadas. [Detalle y siguiente paso](project/eipd-revision-5c1.md). Pendiente comprobación manual de las identidades A/B y continuación de reconsideración de 5C.1. Sin commit/push.
+
+## Nomenclatura: Evaluación n.º y Versión del documento EIPD — 05/11/2026
+
+Se adopta la alternativa numerada propuesta por el usuario: Evaluación n.º N → Versión EIPD N → Revisión. Rótulos actualizados en las pantallas conectadas y en el contrato común (Terminología de la interfaz); sin cambios en datos, numeración, campos técnicos ni circuito de infancia. 71 casos Chromium dirigidos aprobados, tipos/lint/formato verificados. [Detalle y siguiente paso](project/eipd-revision-5c1.md). Pendiente comprobación manual de los nombres y continuación de reconsideración; sin cierre de 5C.1 ni commit/push.
+
+## 5C.1 — Documentos guardados prioriza versiones EIPD, 05/11/2026
+
+Usuario acepta la consulta resumida de antecedentes y pide ordenar la página. Nuevo orden local: versiones EIPD registradas (historial abierto, reciente primero), borrador guardado plegado y antecedentes de evaluación plegados (RAT/base jurídica). Contenido de la versión seleccionada plegado para acceder a revisión; preparación/registro sigue en el borrador. Avisos obsoletos corregidos y pendientes de revisión integrados al aviso general. 54 casos Chromium distintos aprobados; las 9 de versiones repetidas tras el último ajuste. Tipos/lint/formato/diferencias aprobados; capturas 320/1280 inspeccionadas. [Detalle y siguiente paso](project/eipd-revision-5c1.md). Pendiente validación visual del nuevo orden y continuación manual de reconsideración; sin cierre global de 5C.1 ni commit/push.
+
+## 5C.1 — antecedentes históricos simplificados, 05/11/2026
+
+Ajuste local solicitado durante la prueba asistida: Contexto y antecedentes se abre como cinco apartados cerrados con resúmenes, rótulos de conservación/eliminación, observaciones por sección y respaldos por tipo. Detalles independientes y retorno con foco a revisiones; sin alterar datos guardados ni campos pendientes. 21 Chromium y tipos/lint/formato dirigidos aprobados; capturas 320/1280 inspeccionadas. [Evidencia y siguiente paso](project/eipd-revision-5c1.md). Pendiente comprobar la nueva consulta con el usuario y retomar la reconsideración de la primera revisión ya confirmada; 5C.1 no cerrado, sin commit/push.
+
+## 5C.1 — revisión de versiones implementada localmente, 05/11/2026
+
+En `feature/eipd-5c1-revision`, base `baaaa69`: facultades expresas con historial/vencimiento, revisión de versión exacta, separación de autoría, reconsideración/idempotencia y coordinación con revocación. Interfaz desde la versión consultada, con recuperación de solicitudes y pendientes conservados. [Contrato, archivos, evidencia y siguiente paso](project/eipd-revision-5c1.md).
+
+59 pruebas de servidor y 17 Chromium aprobadas; tipos/lint/formato dirigidos aprobados. Una prueba histórica de reversión de infancia excluida por claves dependientes de 5B/5C; detalle en contrato, sin declarar aprobada. Migración `c53e19d8a621` aplicada en base aislada y desarrollo local: se conservaron 6 evaluaciones, 34 respaldos y 5 versiones, sin crear revisiones locales. Próximo paso: recorrido asistido conectado de 5C.1 con dos personas ficticias, luego contrato 5C.2. Decisión organizacional pendiente; confirmación/activación siguen bloqueadas. Se preservaron los cambios locales previos; sin commit/push, merge ni despliegue de esta entrega.
+
+## EIPD — reorganización de página implementada, 03/11/2026
+
+Rama `feature/eipd-orden-navegacion`. Propuesta aprobada por el usuario: versiones al inicio, historial mostrar/ocultar separado de actualizar, borrador/vista previa y diagnóstico antes del registro. Pendientes con rutas específicas. TypeScript/ESLint y 14 Chromium aprobados; integración opcional omitida. Validación visual conjunta pendiente. Detalle y recorrido en `docs/project/eipd-versiones-5b2.md`. Sin commit/push de este ajuste; excluir `frontend/next-env.d.ts` y `outputs/` preexistentes. 5C sigue pendiente y confirmación/activación bloqueadas.
+
 ## LIC-DOC-001 — 5B.2 aceptado; publicación autorizada, 03/11/2026
 
 Checklist asistido completado por el usuario: registro, consulta, copia, conflicto de origen, recuperación sin duplicados, teclado y ventana estrecha. Antecedentes conservados presentados con etiquetas legibles. Ver `docs/project/eipd-versiones-5b2.md` para evidencia y límites. Commit/push autorizados; sin merge ni despliegue. Lector de pantalla pendiente. Próximo bloque 5C; 5D y FORM-R01–R05 abiertos. Confirmación/activación EIPD bloqueadas. Esta nota supera las menciones inferiores de aceptación pendiente. Excluir `frontend/next-env.d.ts` y `outputs/` preexistentes.
@@ -1422,3 +1452,5 @@ van a docs/archive/. No duplicar el historial en este archivo.
 - Informó que la barra espaciadora no abría/cerraba «Vínculos opcionales con riesgos y medidas». La prueba aislada con comportamiento nativo no reproducía el fallo; se añadió activación explícita con Espacio, cancelando la acción nativa para evitar un doble cambio y descartando la repetición al mantener la tecla pulsada.
 - Se amplió la prueba para llegar con Tab desde «Sección relacionada», abrir/cerrar tres veces, mantener Espacio, usar Enter y clic, y conservar el código R1. Comprobado en 1280, 390 y 320 píxeles.
 - Falta la validación manual del usuario en su navegador con este ajuste. No se considera una comprobación con lector de pantalla. Sin commit ni push de este paso todavía.
+
+Corrección pendiente de aceptación visual: tabla «Pendientes del contenido guardado» en EIPD, con descripciones de campos y accesos a sus secciones. Pruebas automáticas: 9 correctas. No se ha realizado commit ni push de este ajuste.

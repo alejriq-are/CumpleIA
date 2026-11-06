@@ -133,7 +133,7 @@ export function ConnectedContext({
     (!tid
       ? "Puedes aplicar solo la organización. El tratamiento y la evaluación son opcionales."
       : !series
-        ? "Puedes aplicar organización y tratamiento. Para trabajar con una evaluación, elige también su finalidad y versión."
+        ? "Puedes aplicar organización y tratamiento. Para trabajar con una evaluación, elige también su finalidad y la evaluación numerada."
         : "El contexto está listo para aplicar.");
   return (
     <div className="space-y-4">
@@ -228,7 +228,7 @@ export function ConnectedContext({
             .filter((v) => (v.series_id ?? v.id) === series)
             .map((v) => (
               <option key={v.id} value={v.id}>
-                Versión {v.version} · {v.status}
+                Evaluación n.º {v.version} · {v.status}
               </option>
             ))}
         </select>
@@ -271,7 +271,7 @@ export function ConnectedContext({
             {organizations.find((v) => v.id === org)?.name ?? "Organización sin seleccionar"} ·{" "}
             {treatments.find((v) => v.id === tid)?.name ?? "Sin tratamiento seleccionado"} ·{" "}
             {rows.find((v) => v.id === aid)
-              ? `${rows.find((v) => v.id === aid)!.purpose_snapshot} · versión ${rows.find((v) => v.id === aid)!.version} · ${rows.find((v) => v.id === aid)!.status}`
+              ? `${rows.find((v) => v.id === aid)!.purpose_snapshot} · evaluación n.º ${rows.find((v) => v.id === aid)!.version} · ${rows.find((v) => v.id === aid)!.status}`
               : "Sin evaluación seleccionada"}
           </p>
           <p>

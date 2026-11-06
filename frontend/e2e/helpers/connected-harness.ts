@@ -34,7 +34,7 @@ export async function buildConnectedHarness(
   const entry = path.join(directory, "entry.js");
   await writeFile(
     entry,
-    `import React from "react";import {createRoot} from "react-dom/client";import {ConnectedWorkspace} from ${JSON.stringify(path.resolve("components/navigation/ConnectedWorkspace.tsx"))};import {DashboardContent} from ${JSON.stringify(path.resolve("components/navigation/DashboardContent.tsx"))};createRoot(document.getElementById("root")).render(React.createElement("div",{className:"dashboard-shell"},React.createElement(DashboardContent,null,React.createElement(ConnectedWorkspace,{organizations:${JSON.stringify(organizations)}}))));`
+    `import React from "react";import {createRoot} from "react-dom/client";import {ConnectedWorkspace} from ${JSON.stringify(path.resolve("components/navigation/ConnectedWorkspace.tsx"))};import {DashboardContent} from ${JSON.stringify(path.resolve("components/navigation/DashboardContent.tsx"))};createRoot(document.getElementById("root")).render(React.createElement("div",{className:"dashboard-shell"},React.createElement(DashboardContent,null,React.createElement(ConnectedWorkspace,{organizations:${JSON.stringify(organizations)},currentUser:{id:"10000000-0000-0000-0000-000000000099",email:"persona.prueba@example.test",full_name:"Persona de prueba"}}))));`
   );
   const runtime = require("next/dist/compiled/webpack/webpack");
   runtime.init();
