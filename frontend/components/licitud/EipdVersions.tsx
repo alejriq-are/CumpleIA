@@ -10,6 +10,7 @@ import {
   type RegisteredVersion,
   type VersionMetadata,
 } from "@/lib/api/eipd-versions";
+import { EipdVersionDecisions } from "./EipdVersionDecisions";
 import { EipdVersionReviews } from "./EipdVersionReviews";
 import { EipdVersionContext } from "./EipdVersionContext";
 import { EipdDocumentView } from "./EipdDocumentFields";
@@ -130,6 +131,8 @@ function VersionsPanel({
   const [reviewed, setReviewed] = useState(false);
   const [busy, setBusy] = useState(false);
   const [reviewLock, setReviewLock] = useState(false);
+  const [decisionLock, setDecisionLock] = useState(false);
+  const acting = reviewLock || decisionLock;
   const [pending, setPending] = useState<VersionRequest | null>(null);
   const [missing, setMissing] = useState(false);
   const [confirmCopy, setConfirmCopy] = useState(false);
@@ -140,6 +143,7 @@ function VersionsPanel({
   const listButton = useRef<HTMLButtonElement>(null);
   const detailHeading = useRef<HTMLHeadingElement>(null);
   const reviewSection = useRef<HTMLDivElement>(null);
+  const decisionSection = useRef<HTMLDivElement>(null);
   const contentSection = useRef<HTMLDivElement>(null);
   const contextSection = useRef<HTMLDivElement>(null);
   const actionTrigger = useRef<HTMLElement | null>(null);
@@ -167,11 +171,11 @@ function VersionsPanel({
     setFictitious(false);
   }, [sourceRevision, canRegister]);
   useEffect(() => {
-    onPending?.(!!reason.trim() || !!pending || busy || reviewLock);
-  }, [reason, pending, busy, reviewLock, onPending]);
+    onPending?.(!!reason.trim() || !!pending || busy || acting);
+  }, [reason, pending, busy, acting, onPending]);
   useEffect(() => {
-    onLock?.(busy || !!pending || reviewLock);
-  }, [busy, pending, reviewLock, onLock]);
+    onLock?.(busy || !!pending || acting);
+  }, [busy, pending, acting, onLock]);
 
   useEffect(() => {
     let current = true;
@@ -271,7 +275,7 @@ function VersionsPanel({
         type="button"
         ref={listButton}
         className={button}
-        disabled={busy || reviewLock}
+        disabled={busy || acting}
         onClick={() =>
           void action(async () => {
             const rows = await eipdVersionsApi.history(await scope());
@@ -298,6 +302,21 @@ function VersionsPanel({
             onClick={() => openDisclosure(reviewSection.current)}
           >
             Ir a Revisiones y facultades
+          </button>
+        </div>
+      )}
+      {consultationOnly && decisionLock && (
+        <div className="space-y-2 rounded border border-amber-300 bg-amber-50 p-3">
+          <p role="status">
+            Hay una decisión o actuación de facultad de decisión en curso o pendiente. Resuélvela
+            para actualizar la lista o cambiar de versión.
+          </p>
+          <button
+            type="button"
+            className={button}
+            onClick={() => openDisclosure(decisionSection.current)}
+          >
+            Ir a Decisión de la organización
           </button>
         </div>
       )}
@@ -334,7 +353,7 @@ function VersionsPanel({
                 <button
                   type="button"
                   className={button}
-                  disabled={busy || reviewLock}
+                  disabled={busy || acting}
                   onClick={() =>
                     void action(async () => {
                       const v2 = await eipdVersionsApi.detail(await scope(), v.id);
@@ -362,7 +381,7 @@ function VersionsPanel({
             <button
               type="button"
               className={button}
-              disabled={busy || reviewLock}
+              disabled={busy || acting}
               onClick={() => {
                 setDetail(null);
                 listButton.current?.focus();
@@ -412,6 +431,13 @@ function VersionsPanel({
                     <button
                       type="button"
                       className={button}
+                      onClick={() => openDisclosure(decisionSection.current)}
+                    >
+                      Decisión de la organización
+                    </button>
+                    <button
+                      type="button"
+                      className={button}
                       onClick={() => openDisclosure(contentSection.current)}
                     >
                       Contenido conservado
@@ -430,6 +456,14 @@ function VersionsPanel({
           </div>
           {consultationOnly && (
             <>
+              <div ref={decisionSection}>
+                <EipdVersionDecisions
+                  key={detail.id}
+                  version={detail}
+                  scope={scope}
+                  onLock={setDecisionLock}
+                />
+              </div>
               <div ref={contentSection}>
                 <MaterialView value={detail.bundle} expandedDocument={false} showContext={false} />
               </div>
@@ -622,7 +656,7 @@ function VersionsPanel({
               <button
                 type="button"
                 className={button}
-                disabled={busy || reviewLock}
+                disabled={busy || acting}
                 onClick={() =>
                   void action(async () => {
                     try {
@@ -646,7 +680,7 @@ function VersionsPanel({
                 <button
                   type="button"
                   className={button}
-                  disabled={busy || reviewLock}
+                  disabled={busy || acting}
                   onClick={() => void action(() => send(pending))}
                 >
                   Reintentar el mismo registro EIPD

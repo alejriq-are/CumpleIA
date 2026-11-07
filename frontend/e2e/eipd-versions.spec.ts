@@ -56,6 +56,78 @@ async function setup(page: Page, mode = "success", props = {}) {
             status,
             headers: { "Content-Type": "application/json" },
           });
+        if (url.endsWith("/decision-state")) {
+          const versionId = url.split("/").at(-2);
+          const canDecide = versionId !== vid;
+          return response({
+            organization_id: org,
+            treatment_id: tid,
+            assessment_id: aid,
+            version_id: versionId,
+            decisions: w.decisions ?? [],
+            authorities: w.decisionAuthorities ?? [],
+            latest_review_id: w.latestDecisionReview ?? null,
+            authority_id: canDecide ? actor : null,
+            may_manage: canDecide,
+            can_decide: canDecide,
+            can_accept: canDecide && !!w.latestDecisionReview,
+            blocked_reason: canDecide
+              ? null
+              : "Se requiere una facultad expresa y vigente de decisión",
+            acceptance_blocked_reason: w.latestDecisionReview
+              ? null
+              : "La última revisión de esta versión debe ser Favorable",
+          });
+        }
+        if (url.endsWith("/decision-authorities") && method === "POST") {
+          const body = JSON.parse(init.body);
+          const value = {
+            ...body,
+            id: crypto.randomUUID(),
+            created_by: actor,
+            sequence: body.expected_sequence + 1,
+            created_at: "2026-11-07T12:00:00Z",
+          };
+          w.decisionAuthorities = [...(w.decisionAuthorities ?? []), value];
+          return response(value, 201);
+        }
+        if (url.endsWith("/decisions") && method === "POST") {
+          const body = JSON.parse(init.body);
+          w.decisionPosts = [...(w.decisionPosts ?? []), body];
+          if (w.decisionPosts.length === 1 && mode === "decision-conflict") {
+            w.latestDecisionReview = crypto.randomUUID();
+            return response({ detail: "La revisión previa cambió." }, 409);
+          }
+          if (w.decisionPosts.length === 1 && mode === "decision-missing") {
+            throw new TypeError("Connection lost");
+          }
+          const value = {
+            id: crypto.randomUUID(),
+            organization_id: org,
+            treatment_id: tid,
+            assessment_id: aid,
+            version_id: url.split("/").at(-2),
+            request_id: body.request_id,
+            sequence: 1,
+            review_id: body.expected_review_id,
+            authority_id: body.expected_authority_id,
+            previous_id: body.expected_decision_id,
+            reason: body.reason,
+            reference: body.reference,
+            outcome: body.outcome,
+            created_by: actor,
+            created_at: "2026-11-07T12:00:00Z",
+          };
+          w.decisions = [value];
+          if (mode === "decision-conflict") throw new TypeError("Response lost");
+          return response(value, 201);
+        }
+        if (url.includes("/decision-requests/")) {
+          const value = w.decisions?.find((d: { request_id: string }) =>
+            url.endsWith("/" + d.request_id)
+          );
+          return value ? response(value) : response({ detail: "Solicitud no encontrada" }, 404);
+        }
         if (url.endsWith("/preview"))
           return response(
             w.mode === "foreign"
@@ -269,8 +341,7 @@ test("consulta de solo lectura no ofrece registro ni reemplazo y admite teclado"
   expect(await page.evaluate(() => (window as any).posts.length)).toBe(0);
 });
 
-test("consulta abre versiones recientes primero sin formulario de registro", async ({ page }) => {
-  await setup(page, "success", { consultationOnly: true });
+async function seedVersions(page: Page) {
   await page.evaluate(
     ({ preview, org, tid, aid, actor, vid }) => {
       const w = window as any;
@@ -308,6 +379,11 @@ test("consulta abre versiones recientes primero sin formulario de registro", asy
     },
     { preview, org, tid, aid, actor, vid }
   );
+}
+
+test("consulta abre versiones recientes primero sin formulario de registro", async ({ page }) => {
+  await setup(page, "success", { consultationOnly: true });
+  await seedVersions(page);
   await page.getByRole("button", { name: "Actualizar lista de versiones" }).click();
   await expect(page.getByRole("button", { name: /^Consultar versión EIPD/ })).toHaveText([
     "Consultar versión EIPD 2",
@@ -377,3 +453,84 @@ test("consulta abre versiones recientes primero sin formulario de registro", asy
   await expect(admin).toHaveCount(0);
   expect(await page.evaluate(() => (window as any).posts.length)).toBe(0);
 });
+
+for (const mode of ["decision-conflict", "decision-missing"]) {
+  test(`decisión sobre versión exacta conserva el formulario y recupera la solicitud (${mode})`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 320, height: 800 });
+    await setup(page, mode, { consultationOnly: true });
+    await seedVersions(page);
+    await page.getByRole("button", { name: "Actualizar lista de versiones" }).click();
+    await page.getByRole("button", { name: "Consultar versión EIPD 1", exact: true }).click();
+    await page.getByRole("button", { name: "Decisión de la organización", exact: true }).click();
+    const read = page.getByRole("button", {
+      name: "Consultar decisiones y facultades",
+      exact: true,
+    });
+    await read.click();
+    await expect(
+      page.getByText("Se requiere una facultad expresa y vigente de decisión")
+    ).toBeVisible();
+    await expect(page.getByLabel("Resultado de la decisión")).toHaveCount(0);
+    await page.getByRole("button", { name: "Volver a versiones EIPD" }).click();
+    await page.getByRole("button", { name: "Consultar versión EIPD 2", exact: true }).click();
+    await page.getByRole("button", { name: "Decisión de la organización", exact: true }).click();
+    await expect(
+      page.locator("summary").filter({ hasText: /^Decisión de la organización$/ })
+    ).toBeFocused();
+    await read.click();
+    await expect(page.getByRole("option", { name: "Acepta", exact: true })).toHaveAttribute(
+      "disabled",
+      ""
+    );
+    if (mode === "decision-conflict") {
+      await page.getByText("Administrar facultades de decisión", { exact: true }).click();
+      await page.getByLabel("Identificador de la persona destinataria").fill(actor);
+      await page.getByLabel("Motivo de la facultad de decisión").fill("[FICTICIA] Designación");
+      await page.getByLabel("Referencia de respaldo de la facultad de decisión").fill("MEMO-001");
+      await page
+        .getByLabel("Fundamento de compatibilidad de funciones")
+        .fill("[FICTICIA] Compatibilidad");
+      await page
+        .getByRole("button", { name: "Registrar actuación de facultad de decisión" })
+        .click();
+      await expect(page.getByText("Actuación de facultad de decisión registrada.")).toBeVisible();
+      await page.getByText("Historial de facultades de decisión", { exact: true }).click();
+      await expect(
+        page.getByText("Compatibilidad documentada: [FICTICIA] Compatibilidad")
+      ).toBeVisible();
+    }
+    const reason = page.getByLabel("Fundamento de la decisión");
+    await reason.fill("[FICTICIA] Decisión de ensayo");
+    await page.getByLabel("Referencia del acta").fill("ACTA-001");
+    await page.getByLabel("Declaro datos ficticios para esta decisión").check();
+    await expect(page.getByRole("button", { name: "Volver a versiones EIPD" })).toBeDisabled();
+    const register = page.getByRole("button", { name: "Registrar decisión", exact: true });
+    await register.click();
+    if (mode === "decision-conflict") {
+      const error = page.getByRole("alert").filter({ hasText: "Tus campos se conservan" });
+      await expect(error).toBeFocused();
+      await expect(reason).toHaveValue("[FICTICIA] Decisión de ensayo");
+      await expect(register).toBeDisabled();
+      await read.click();
+      await page.getByLabel("Resultado de la decisión").selectOption("acepta");
+      await register.click();
+    }
+    await page
+      .getByRole("button", { name: "Consultar resultado de la solicitud de decisión" })
+      .click();
+    if (mode === "decision-missing") {
+      await page.getByRole("button", { name: "Reintentar la misma decisión" }).click();
+      expect(
+        await page.evaluate(() => {
+          const posts = (window as any).decisionPosts;
+          return posts[0].request_id === posts[1].request_id;
+        })
+      ).toBe(true);
+    }
+    await expect(page.getByText("Decisión documental registrada.")).toBeVisible();
+    await expect(page.getByText("Referencia del acta: ACTA-001")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Volver a versiones EIPD" })).toBeEnabled();
+  });
+}

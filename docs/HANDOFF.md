@@ -1,6 +1,10 @@
-## 5C.2 — contrato propuesto
+## 5C.2 cerrado — recorrido conectado verificado
 
-Se preparó el [contrato de decisión de la organización](project/eipd-decision-5c2.md) sobre la base publicada `c711141`. Próximo paso. Validar la administración de facultades, la separación de autoría y la compatibilidad de revisión y decisión. Después, cerrar la proyección de correspondencia material y el orden de bloqueo antes de implementar las escrituras.
+La rama `feature/eipd-5c2-decision` incorpora la migración `a52c910be604` y la API para consultar y registrar decisiones, administrar facultades independientes y recuperar solicitudes. El usuario confirmó las reglas de administración, separación de autoría y compatibilidad de funciones. La aceptación comprueba la revisión favorable de la versión exacta y la correspondencia material. Confirmación y activación siguen bloqueadas.
+
+El ejecutor dirigido de versiones, revisiones y decisiones arrojó 62 pruebas aprobadas y una exclusión histórica de reversión de infancia. Se probó el rol real `app_user`, el registro y la consulta posterior, la revocación concurrente y el conflicto con una escritura RAT en curso. Black y Ruff dirigidos aprobados. La migración se validó en la base aislada y se aplicó después en la base local de desarrollo `cumpleia`. Se conservaron 6 evaluaciones, 37 respaldos, 8 versiones y 12 revisiones. Las tablas de decisión y facultad se crearon vacías y con RLS. Se verificaron las cinco rutas locales de 5C.2.
+
+La interfaz **Decisión de la organización** quedó integrada en Documentos guardados. Pasaron 21 pruebas dirigidas en Chromium con respuestas controladas, TypeScript, ESLint y Prettier. En CumpleIA Demo, B registró la revisión Favorable n.º 1 y la decisión Acepta n.º 1 en la versión EIPD 8. A revocó la facultad de decisión y B conservó acceso a la decisión histórica. La versión 5 mantuvo 12 revisiones y cero decisiones. El usuario autorizó publicar el cierre. Próximo paso. Precisar el contrato de 5D.1 para el paquete documental y la revisión de Base y fundamento. [Evidencia del recorrido](project/eipd-decision-5c2.md).
 
 ## Navegación de Documentos guardados — antes de 5C.2
 
