@@ -200,7 +200,7 @@ Se registra la confirmación del usuario de que B pudo consultar las 12 revision
 Próximo paso inmediato: registrar expresamente, como A, una versión sucesora EIPD de prueba y comprobar que comienza sin revisiones mientras la versión 5 conserva las 12 anteriores. Después completar la comprobación de Favorable sobre una versión documental que cumpla requisitos, contrastando que completar el borrador no habilita retrospectivamente Favorable para la versión 5. La facultad de B está vencida y requerirá un nuevo otorgamiento explícito antes de una actuación futura.
 
 
-## Punto de reanudación vigente: pausa antes del Paso 8 — 06/11/2026
+## Punto de reanudación histórico: pausa antes del Paso 8 — 06/11/2026
 
 El usuario solicita detener el recorrido para retomarlo en unas horas, registrar avance, ejecutar commit y autoriza push. Queda pausado el recorrido manual exactamente antes de iniciar el Paso 8. No se ha ejecutado el registro de la sucesora por este paso; no se programa recordatorio ni se continúan pruebas manuales durante la pausa.
 
@@ -234,3 +234,17 @@ Quedan pendientes la sucesora independiente y la revisión Favorable sobre una v
 ### Alcance del commit autorizado en esta pausa
 
 Solo EipdVersionReviews.tsx, su prueba e2e/eipd-version-reviews.spec.ts y esta documentación/HANDOFF. Corrección del aviso de conflicto ya validada: 19 Chromium aprobadas, incluidos dos escenarios de dos pestañas a 1280/320; tipos, lint y formato aprobados. Se conserva esa evidencia sin atribuir una nueva ejecución durante la pausa. Los ajustes previos ajenos de infancia/aplicabilidad, next-env.d.ts y outputs/ quedan locales. Sin merge ni despliegue.
+
+## Cierre del recorrido manual — 07/11/2026
+
+El usuario aceptó el recorrido de 5C.1 y solicitó su cierre. Las comprobaciones se realizaron con datos ficticios en CumpleIA Demo, tratamiento Gestión de trabajadores, Evaluación n.º 1.
+
+| Paso | Resultado observado |
+| --- | --- |
+| 8 | A revisó la asociación de la determinación con el alcance actual, guardó la determinación y registró la versión EIPD 6. |
+| 9 | La versión 6 empezó con cero revisiones. La versión 5 conservó sus 12 revisiones, con `SIMULADA-CONFLICTO-A3` como última. |
+| 10 | Favorable estuvo bloqueado en las versiones 5 y 7 por requisitos de su contenido conservado. Tras resolver los pendientes documentales y registrar la versión 8, la consulta como B mostró Favorable habilitado. La versión 8 tenía cero revisiones. |
+
+La comprobación de Favorable se aceptó en la interfaz. Quedan pendientes como verificaciones separadas el registro y la consulta posterior de una conclusión Favorable, y la prueba con lector de pantalla. Este cierre documental usa la evidencia manual compartida y las verificaciones automáticas ya registradas.
+
+El siguiente paso es precisar el contrato de 5C.2 para la decisión de la organización sobre una versión EIPD y las facultades independientes para emitirla. Confirmación y activación quedan fuera de ese contrato.

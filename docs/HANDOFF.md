@@ -1,4 +1,12 @@
-## PAUSA VIGENTE — retomar antes del Paso 8 de 5C.1 — 06/11/2026
+## 5C.1 cerrado — recorrido manual aceptado — 07/11/2026
+
+Pasos 1–10 aceptados en CumpleIA Demo con datos ficticios. La versión EIPD 6 se registró como sucesora y comenzó con cero revisiones. La versión 5 conservó 12 revisiones, con `SIMULADA-CONFLICTO-A3` como última. Favorable estuvo bloqueado en las versiones 5 y 7 por sus requisitos documentales. Tras resolver los pendientes del borrador y registrar la versión 8, B pudo seleccionar Favorable. La versión 8 tenía cero revisiones en la evidencia aportada.
+
+La aceptación del paso 10 se basa en la disponibilidad de Favorable en la interfaz. El registro efectivo de una conclusión Favorable y la comprobación con lector de pantalla quedan como verificaciones pendientes. No se volvieron a ejecutar pruebas automáticas para este cierre documental.
+
+Próximo paso. Definir el contrato de 5C.2 para la decisión de la organización y las facultades independientes para emitirla. Confirmación y activación quedan fuera de ese bloque. [Evidencia y alcance del cierre](project/eipd-revision-5c1.md#cierre-del-recorrido-manual--07112026).
+
+## PAUSA HISTÓRICA — retomar antes del Paso 8 de 5C.1 — 06/11/2026
 
 Usuario solicita pausar por unas horas y autoriza commit/push del aviso de conflicto y registro del avance. Pasos manuales 1–7 confirmados: consulta/reconsideración, conflicto con aviso corregido, revocación y vencimiento con historial conservado. CumpleIA Demo, Evaluación n.º 1, Versión EIPD 5, última revisión 12 (SIMULADA-CONFLICTO-A3); B tiene su facultad vencida. No reenviar B2/B3. [Punto exacto de reanudación](project/eipd-revision-5c1.md#punto-de-reanudación-vigente-pausa-antes-del-paso-8--06112026).
 
