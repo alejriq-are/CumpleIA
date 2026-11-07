@@ -383,6 +383,16 @@ async function seedVersions(page: Page) {
 
 test("consulta abre versiones recientes primero sin formulario de registro", async ({ page }) => {
   await setup(page, "success", { consultationOnly: true });
+  const guide = page.locator("details").filter({
+    has: page.getByText("Cómo revisar y decidir una EIPD", { exact: true }),
+  });
+  await expect(guide).toHaveAttribute("open", "");
+  await expect(guide.getByRole("listitem")).toHaveText([
+    /^Registra la versión/,
+    /^Consulta la versión exacta/,
+    /^Registra la revisión/,
+    /^Registra la decisión/,
+  ]);
   await seedVersions(page);
   await page.getByRole("button", { name: "Actualizar lista de versiones" }).click();
   await expect(page.getByRole("button", { name: /^Consultar versión EIPD/ })).toHaveText([
@@ -396,6 +406,7 @@ test("consulta abre versiones recientes primero sin formulario de registro", asy
   await expect(
     page.getByRole("article", { name: "Versión EIPD 2 consultada", exact: true })
   ).toBeVisible();
+  await expect(page.getByText("Orden para aceptar esta versión.", { exact: true })).toBeVisible();
   const content = page.getByText("Contenido EIPD conservado para esta versión", { exact: true });
   await expect(content.locator("..")).not.toHaveAttribute("open", "");
   const reviewMenu = page.locator("summary").getByText("Revisiones y facultades", { exact: true });

@@ -1,3 +1,9 @@
+## Guía de actuaciones EIPD — antes de 5D.1
+
+En `feature/guia-actuaciones-eipd`, Documentos guardados muestra una guía plegable antes de la lista de versiones EIPD. Describe el orden de registro, consulta, revisión y decisión, junto con las facultades que intervienen. El detalle de la versión resume la secuencia para llegar a Acepta. El cambio es de presentación.
+
+El usuario confirmó el recorrido en CumpleIA Demo y autorizó la publicación. Pasaron 21 pruebas dirigidas en Chromium, TypeScript y ESLint. Próximo paso. Precisar el contrato de 5D.1 para Base y fundamento.
+
 ## 5C.2 cerrado — recorrido conectado verificado
 
 La rama `feature/eipd-5c2-decision` incorpora la migración `a52c910be604` y la API para consultar y registrar decisiones, administrar facultades independientes y recuperar solicitudes. El usuario confirmó las reglas de administración, separación de autoría y compatibilidad de funciones. La aceptación comprueba la revisión favorable de la versión exacta y la correspondencia material. Confirmación y activación siguen bloqueadas.

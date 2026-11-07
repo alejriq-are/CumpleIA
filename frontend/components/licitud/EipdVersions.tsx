@@ -271,6 +271,41 @@ function VersionsPanel({
           ? "Elige una versión registrada para consultar su contenido y sus revisiones. La evaluación se identifica por su número; cada versión del documento EIPD tiene otro número y sus propias revisiones."
           : "Guardar borrador permite seguir editando. Registrar conserva una copia con número propio, diagnóstico e historial de revisiones; no aprueba ni activa la EIPD. La decisión de la organización sigue pendiente."}
       </p>
+      {consultationOnly && !detail && (
+        <details open className="space-y-3 rounded border border-slate-200 bg-white p-3">
+          <summary className="cursor-pointer font-semibold text-slate-950">
+            Cómo revisar y decidir una EIPD
+          </summary>
+          <ol className="list-decimal space-y-2 pl-5 marker:font-semibold">
+            <li>
+              <strong>Registra la versión.</strong> Quien prepara la EIPD guarda el borrador en{" "}
+              <strong>Completar EIPD</strong> y registra una versión de ese contenido.
+            </li>
+            <li>
+              <strong>Consulta la versión exacta.</strong> En la lista de abajo, pulsa{" "}
+              <strong>Consultar versión EIPD</strong> y comprueba su número y referencia.
+            </li>
+            <li>
+              <strong>Registra la revisión.</strong> Abre <strong>Revisiones y facultades</strong>.
+              Una persona distinta de quien registró la versión y con facultad de revisión vigente
+              emite la conclusión.
+            </li>
+            <li>
+              <strong>Registra la decisión.</strong> Abre{" "}
+              <strong>Decisión de la organización</strong>. Se requiere una facultad de decisión
+              independiente. <strong>Acepta</strong> exige que la última revisión de esa versión sea{" "}
+              <strong>Favorable</strong>, que el documento esté completo y que su contexto siga
+              vigente.
+            </li>
+          </ol>
+          <p className="text-sm">
+            La administración del expediente otorga cada facultad desde su sección. Quien registró
+            la versión queda excluido de decidir sobre ella. Si la misma persona revisa y decide, la
+            facultad de decisión debe documentar esa compatibilidad.
+          </p>
+          <p className="text-sm">La confirmación y la activación siguen bloqueadas.</p>
+        </details>
+      )}
       <button
         type="button"
         ref={listButton}
@@ -417,6 +452,14 @@ function VersionsPanel({
             </>
           ) : (
             <MaterialView value={detail.bundle} />
+          )}
+          {consultationOnly && (
+            <p className="rounded border border-blue-200 bg-blue-50 p-3 text-sm">
+              <strong>Orden para aceptar esta versión.</strong> Consulta la última conclusión en{" "}
+              <strong>Revisiones y facultades</strong>. Si falta, regístrala allí. Con una revisión{" "}
+              <strong>Favorable</strong>, consulta <strong>Decisión de la organización</strong> para
+              comprobar si <strong>Acepta</strong> está disponible.
+            </p>
           )}
           <div ref={reviewSection}>
             <EipdVersionReviews
