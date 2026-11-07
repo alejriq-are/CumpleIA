@@ -1,3 +1,7 @@
+## 5C.2 — contrato propuesto
+
+Se preparó el [contrato de decisión de la organización](project/eipd-decision-5c2.md) sobre la base publicada `c711141`. Próximo paso. Validar la administración de facultades, la separación de autoría y la compatibilidad de revisión y decisión. Después, cerrar la proyección de correspondencia material y el orden de bloqueo antes de implementar las escrituras.
+
 ## Navegación de Documentos guardados — antes de 5C.2
 
 En la rama `feature/documentos-guardados-eipd`, el espacio de trabajo ofrece cuatro destinos de consulta desde Documentos guardados. Versiones EIPD es la entrada principal. El borrador guardado, la evaluación de licitud y el alcance RAT asociado se consultan en destinos separados. El detalle de una versión ofrece un menú de Revisiones y facultades junto a los accesos a contenido conservado y antecedentes. El menú reúne consulta, historial de facultades y administración, según los permisos consultados. Cuando hay una actuación pendiente, el aviso permite volver al formulario antes de actualizar la lista o cambiar de versión.
