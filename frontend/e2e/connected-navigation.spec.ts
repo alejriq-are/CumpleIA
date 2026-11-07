@@ -377,6 +377,7 @@ async function mod(page: Page, name: string) {
     .click();
 }
 async function section(page: Page, name: string) {
+  if (name === "Documentos guardados") name = "Versiones EIPD";
   const trigger = page.locator("header").getByRole("button", { name: "Secciones", exact: true });
   if (await trigger.isVisible()) {
     await trigger.click();
@@ -1530,6 +1531,27 @@ test("6A destinos únicos directos con nombre común y sin escrituras", async ({
     "Bases de licitud › Documentos guardados"
   );
   await expect(documents).toHaveAttribute("aria-current", "page");
+  const options = header.locator('summary[aria-label="Opciones de Documentos guardados"]');
+  await options.focus();
+  await options.press("Space");
+  const menu = options.locator("..");
+  await expect(menu.getByRole("button")).toHaveText([
+    "Versiones EIPD",
+    "Borrador EIPD guardado",
+    "Evaluación de licitud guardada",
+    "Alcance RAT asociado",
+  ]);
+  await menu.getByRole("button", { name: "Alcance RAT asociado", exact: true }).click();
+  await expect(
+    main(page).getByRole("heading", { name: "Alcance RAT asociado guardado" })
+  ).toBeVisible();
+  await expect(
+    main(page).getByText("Versiones del documento EIPD guardadas", { exact: true })
+  ).not.toBeVisible();
+  await documents.click();
+  await expect(
+    main(page).getByText("Versiones del documento EIPD guardadas", { exact: true })
+  ).toBeVisible();
   await capture(page, "6a-documentos-escritorio.png");
   const history = header.getByRole("link", { name: "Historial y descargas", exact: true });
   await history.click();
@@ -1613,7 +1635,7 @@ for (const width of [390, 320]) {
     await page.getByRole("button", { name: "Secciones", exact: true }).click();
     const drawer = page.getByRole("dialog", { name: "Secciones del módulo", exact: true });
     await expect(
-      drawer.getByRole("button", { name: "Documentos guardados", exact: true })
+      drawer.getByRole("button", { name: "Versiones EIPD", exact: true })
     ).toHaveAttribute("aria-current", "page");
     await capture(page, `6a-secciones-${width}.png`);
     await page.keyboard.press("Escape");

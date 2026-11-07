@@ -83,6 +83,8 @@ export function AssessmentFlow({
   const supportPanelId = `${flowId}-support`;
   const tab = navigation?.location.tab ?? localTab;
   const section = navigation?.location.section ?? localSection;
+  const savedDocumentStep =
+    navigation && tab === "revisar" && navigation.location.step <= 3 ? navigation.location.step : 0;
   const eipdStep = navigation?.location.step ?? localStep;
   function setTab(value: FlowTab) {
     if (navigation) navigation.go({ ...navigation.location, tab: value });
@@ -425,18 +427,21 @@ export function AssessmentFlow({
           Consulta lo guardado; las ediciones pendientes no se incluyen. Consultar contenido no
           emite una revisión formal.
         </p>
-        <EipdVersions
-          organizationId={organizationId}
-          treatmentId={treatmentId}
-          assessmentId={assessmentId}
-          token={token}
-          consultationOnly
-          onPending={setVersionReviewDirty}
-        />
+        <div hidden={savedDocumentStep !== 0}>
+          <EipdVersions
+            organizationId={organizationId}
+            treatmentId={treatmentId}
+            assessmentId={assessmentId}
+            token={token}
+            consultationOnly
+            onPending={setVersionReviewDirty}
+          />
+        </div>
         {row?.eipd_resolution_assessment && (
           <section
             className="space-y-3 rounded border p-4"
             aria-label="Borrador EIPD guardado para consulta"
+            hidden={!!navigation && savedDocumentStep !== 1}
           >
             <h3 className="text-lg font-semibold">
               Borrador EIPD guardado · evaluación n.º {row.version}
@@ -445,13 +450,13 @@ export function AssessmentFlow({
               Contenido guardado para seguir trabajando. Sus cambios posteriores no modifican las
               versiones registradas.
             </p>
-            <details>
+            <details open={navigation ? true : undefined}>
               <summary className={documentDisclosureClass}>
                 Consultar borrador EIPD guardado
               </summary>
               <p className="my-3">
                 Consulta de solo lectura. Para modificarlo, abre Completar EIPD. Las revisiones se
-                registran sobre una versión documental de arriba, no sobre este borrador.
+                registran sobre una versión documental registrada, no sobre este borrador.
               </p>
               <dl className="space-y-3">
                 <div>
@@ -481,17 +486,14 @@ export function AssessmentFlow({
         )}
 
         {row && (
-          <details className="space-y-3 rounded border p-4">
-            <summary className={documentDisclosureClass}>
-              Antecedentes de la evaluación n.º {row.version}
-            </summary>
-            <p>
-              Consulta aquí la base jurídica y el alcance RAT guardados. El contenido EIPD
-              registrado se consulta en las versiones de arriba.
-            </p>
-            <section aria-label="Alcance RAT guardado" className="space-y-3 rounded border p-4">
+          <>
+            <section
+              hidden={!!navigation && savedDocumentStep !== 3}
+              aria-label="Alcance RAT guardado"
+              className="space-y-3 rounded border p-4"
+            >
               <h3 className="text-lg font-semibold">Alcance RAT asociado guardado</h3>
-              <details>
+              <details open={navigation ? true : undefined}>
                 <summary className={documentDisclosureClass}>Consultar alcance RAT</summary>
                 <DossierDocumentView
                   document={{
@@ -509,6 +511,7 @@ export function AssessmentFlow({
             </section>
             <section
               aria-label="Evaluación de licitud guardada"
+              hidden={!!navigation && savedDocumentStep !== 2}
               className="space-y-3 rounded border p-4"
             >
               <h3 className="text-lg font-semibold">
@@ -516,7 +519,7 @@ export function AssessmentFlow({
                 {row.legal_basis === "interes_legitimo_art13d" ? " · LIA" : ""} · evaluación n.º{" "}
                 {row.version}
               </h3>
-              <details>
+              <details open={navigation ? true : undefined}>
                 <summary className={documentDisclosureClass}>
                   Consultar evaluación de licitud
                   {row.legal_basis === "interes_legitimo_art13d" ? " y LIA" : ""}
@@ -535,20 +538,20 @@ export function AssessmentFlow({
                 />
               </details>
             </section>
-          </details>
+          </>
         )}
 
-        {childReviewVisible ? (
+        {savedDocumentStep === 0 && childReviewVisible && (
           <p>
             Elige una resolución y lee su contenido. Revisar deja una observación; decidir por la
             organización requiere facultad vigente. Ninguna acción edita el original.
           </p>
-        ) : (
-          <p>
-            {row?.eipd_resolution_assessment
-              ? "Para emitir una revisión formal, consulta una versión EIPD registrada y abre Consultar revisiones y facultades."
-              : "No hay un borrador EIPD guardado. Puedes consultar las versiones registradas y los antecedentes disponibles arriba."}
-          </p>
+        )}
+        {savedDocumentStep === 1 && !row?.eipd_resolution_assessment && (
+          <p>No hay un borrador EIPD guardado en esta evaluación.</p>
+        )}
+        {(savedDocumentStep === 2 || savedDocumentStep === 3) && !row && (
+          <p>Los antecedentes guardados de esta evaluación no están disponibles.</p>
         )}
       </section>
       <section
@@ -585,7 +588,7 @@ export function AssessmentFlow({
         }
         hidden={
           !(
-            tab === "revisar" ||
+            (tab === "revisar" && savedDocumentStep === 0) ||
             (tab === "completar" &&
               ((section === "eipd" && eipdStep === 3) || section === "anexos"))
           )

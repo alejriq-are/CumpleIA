@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { apiFetch, ApiError } from "@/lib/api/client";
 import type { RegisteredVersion, VersionScope } from "@/lib/api/eipd-versions";
 import { documentNavigationButtonClass as button, focusDocumentSection } from "./document-focus";
@@ -65,11 +65,24 @@ export function EipdVersionReviews({
   version,
   scope,
   onLock,
+  showActionMenu = false,
+  adjacentActions,
 }: {
   version: RegisteredVersion;
   scope: () => Promise<VersionScope>;
   onLock: (value: boolean) => void;
+  showActionMenu?: boolean;
+  adjacentActions?: ReactNode;
 }) {
+  const history = useRef<HTMLDetailsElement>(null);
+  const administration = useRef<HTMLDetailsElement>(null);
+
+  function openSection(section: HTMLDetailsElement | null) {
+    if (!section) return;
+    section.open = true;
+    section.querySelector("summary")?.focus();
+  }
+
   const [state, setState] = useState<State | null>(null);
   const [busy, setBusy] = useState(false);
   const working = useRef(false);
@@ -187,8 +200,62 @@ export function EipdVersionReviews({
       throw e;
     }
   }
+  const consultButton = (
+    <button
+      type="button"
+      className={button}
+      disabled={busy || !!pending}
+      onClick={() =>
+        void action(async () => {
+          await read();
+        }, false)
+      }
+    >
+      Consultar revisiones y facultades
+    </button>
+  );
   return (
     <section aria-label="Revisión de la versión EIPD" className="space-y-3 rounded border p-3">
+      {showActionMenu ? (
+        <nav aria-label="Secciones de la versión EIPD" className="flex flex-wrap items-start gap-2">
+          <details className="rounded border border-blue-300 bg-blue-50 p-2">
+            <summary className="cursor-pointer font-semibold">Revisiones y facultades</summary>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {consultButton}
+              <button
+                type="button"
+                className={button}
+                disabled={busy || !!pending}
+                onClick={() => {
+                  if (state) openSection(history.current);
+                  else
+                    void action(async () => {
+                      await read();
+                      requestAnimationFrame(() => openSection(history.current));
+                    }, false);
+                }}
+              >
+                Ver historial de facultades del expediente
+              </button>
+              {state?.may_manage && (
+                <button
+                  type="button"
+                  className={button}
+                  onClick={() => openSection(administration.current)}
+                >
+                  Administrar facultades del expediente
+                </button>
+              )}
+            </div>
+            {!state && (
+              <p className="mt-2 text-sm">
+                Consulta las facultades para ver las acciones disponibles para tu sesión.
+              </p>
+            )}
+          </details>
+          {adjacentActions}
+        </nav>
+      ) : null}
       <h5 className="font-semibold">Revisiones de la versión {version.version}</h5>
       <p>
         Referencia:{" "}
@@ -198,18 +265,7 @@ export function EipdVersionReviews({
         )}
         . Cada conclusión corresponde exclusivamente a esta versión conservada.
       </p>
-      <button
-        type="button"
-        className={button}
-        disabled={busy || !!pending}
-        onClick={() =>
-          void action(async () => {
-            await read();
-          }, false)
-        }
-      >
-        Consultar revisiones y facultades
-      </button>
+      {!showActionMenu && consultButton}
       {error && (
         <p
           key={error}
@@ -336,8 +392,11 @@ export function EipdVersionReviews({
               {state.reviews.length ? "Registrar reconsideración" : "Registrar revisión"}
             </button>
           </form>
-          <details>
+          <details ref={history}>
             <summary>Historial de facultades del expediente</summary>
+            {state.authorities.length === 0 && (
+              <p>Todavía no hay actuaciones de facultad registradas.</p>
+            )}
             <ul>
               {state.authorities.map((f) => (
                 <li key={f.id} className="my-2 break-words">
@@ -349,7 +408,7 @@ export function EipdVersionReviews({
             </ul>
           </details>
           {state.may_manage && (
-            <details>
+            <details ref={administration}>
               <summary>Administrar facultad de revisión del expediente</summary>
               <p>
                 La facultad permite revisar y no autoriza decisiones de la organización. No puedes

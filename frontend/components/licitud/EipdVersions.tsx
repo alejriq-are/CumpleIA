@@ -15,12 +15,21 @@ import { EipdVersionContext } from "./EipdVersionContext";
 import { EipdDocumentView } from "./EipdDocumentFields";
 import { documentDisclosureClass, documentNavigationButtonClass as button } from "./document-focus";
 
+function openDisclosure(section: HTMLDivElement | null) {
+  const disclosure = section?.querySelector("details");
+  if (!disclosure) return;
+  disclosure.open = true;
+  disclosure.querySelector("summary")?.focus();
+}
+
 function MaterialView({
   value,
   expandedDocument = true,
+  showContext = true,
 }: {
   value: VersionMaterial;
   expandedDocument?: boolean;
+  showContext?: boolean;
 }) {
   const a = value.saved_assessment;
   const doc = a.eipd_resolution_assessment;
@@ -55,12 +64,16 @@ function MaterialView({
         expanded={expandedDocument}
         summaryLabel="Contenido EIPD conservado para esta versión"
       />
-      <p>
-        Se conserva el diagnóstico, la determinación, la política y el contexto consultados al
-        registrar. Los respaldos históricos no acreditan controles actuales. Los archivos anexos no
-        se copian dentro de esta versión.
-      </p>
-      <EipdVersionContext value={value} />
+      {showContext && (
+        <>
+          <p>
+            Se conserva el diagnóstico, la determinación, la política y el contexto consultados al
+            registrar. Los respaldos históricos no acreditan controles actuales. Los archivos anexos
+            no se copian dentro de esta versión.
+          </p>
+          <EipdVersionContext value={value} />
+        </>
+      )}
     </div>
   );
 }
@@ -124,6 +137,11 @@ function VersionsPanel({
   const [message, setMessage] = useState("");
   const alive = useRef(true);
   const running = useRef(false);
+  const listButton = useRef<HTMLButtonElement>(null);
+  const detailHeading = useRef<HTMLHeadingElement>(null);
+  const reviewSection = useRef<HTMLDivElement>(null);
+  const contentSection = useRef<HTMLDivElement>(null);
+  const contextSection = useRef<HTMLDivElement>(null);
   const actionTrigger = useRef<HTMLElement | null>(null);
   useEffect(() => {
     if (busy) return;
@@ -251,6 +269,7 @@ function VersionsPanel({
       </p>
       <button
         type="button"
+        ref={listButton}
         className={button}
         disabled={busy || reviewLock}
         onClick={() =>
@@ -263,18 +282,37 @@ function VersionsPanel({
           })
         }
       >
-        Actualizar historial de versiones EIPD
+        {consultationOnly
+          ? "Actualizar lista de versiones"
+          : "Actualizar historial de versiones EIPD"}
       </button>
-      <button
-        type="button"
-        className={button}
-        aria-expanded={historyOpen}
-        onClick={() => setHistoryOpen(!historyOpen)}
-      >
-        {historyOpen
-          ? "Ocultar historial de versiones EIPD"
-          : "Mostrar historial de versiones EIPD"}
-      </button>
+      {consultationOnly && reviewLock && (
+        <div className="space-y-2 rounded border border-amber-300 bg-amber-50 p-3">
+          <p role="status">
+            Hay una revisión o actuación de facultad en curso o pendiente. Resuélvela para
+            actualizar la lista o cambiar de versión.
+          </p>
+          <button
+            type="button"
+            className={button}
+            onClick={() => openDisclosure(reviewSection.current)}
+          >
+            Ir a Revisiones y facultades
+          </button>
+        </div>
+      )}
+      {!consultationOnly && (
+        <button
+          type="button"
+          className={button}
+          aria-expanded={historyOpen}
+          onClick={() => setHistoryOpen(!historyOpen)}
+        >
+          {historyOpen
+            ? "Ocultar historial de versiones EIPD"
+            : "Mostrar historial de versiones EIPD"}
+        </button>
+      )}
       <p>
         {history
           ? history.length
@@ -283,7 +321,7 @@ function VersionsPanel({
           : "Consultando versiones registradas…"}
       </p>
       {historyError && <p role="alert">{historyError}</p>}
-      {history && historyOpen && (
+      {history && historyOpen && (!consultationOnly || !detail) && (
         <div className="space-y-2">
           <h4 className="font-semibold">Versiones EIPD registradas</h4>
           {[...history]
@@ -302,6 +340,8 @@ function VersionsPanel({
                       const v2 = await eipdVersionsApi.detail(await scope(), v.id);
                       if (alive.current) {
                         setDetail(v2);
+                        if (consultationOnly)
+                          requestAnimationFrame(() => detailHeading.current?.focus());
                         setConfirmCopy(false);
                       }
                     })
@@ -318,7 +358,22 @@ function VersionsPanel({
           aria-label={`Versión EIPD ${detail.version} consultada`}
           className="space-y-3 rounded border bg-white p-4"
         >
-          <h4 className="text-lg font-semibold">Versión EIPD {detail.version} consultada</h4>
+          {consultationOnly && (
+            <button
+              type="button"
+              className={button}
+              disabled={busy || reviewLock}
+              onClick={() => {
+                setDetail(null);
+                listButton.current?.focus();
+              }}
+            >
+              Volver a versiones EIPD
+            </button>
+          )}
+          <h4 ref={detailHeading} tabIndex={-1} className="text-lg font-semibold">
+            Versión EIPD {detail.version} consultada
+          </h4>
           <p>
             Registro histórico de solo lectura. No acredita vigencia del contexto actual ni
             aprobación.
@@ -331,13 +386,63 @@ function VersionsPanel({
             <dt className="font-semibold">Registrada por (identificador)</dt>
             <dd className="break-all">{detail.created_by}</dd>
           </dl>
-          <MaterialView value={detail.bundle} expandedDocument={!consultationOnly} />
-          <EipdVersionReviews
-            key={detail.id}
-            version={detail}
-            scope={scope}
-            onLock={setReviewLock}
-          />
+          {consultationOnly ? (
+            <>
+              <p>
+                Referencia:{" "}
+                {String(
+                  detail.bundle.saved_assessment.eipd_resolution_assessment.document_reference ??
+                    "Sin referencia"
+                )}
+              </p>
+            </>
+          ) : (
+            <MaterialView value={detail.bundle} />
+          )}
+          <div ref={reviewSection}>
+            <EipdVersionReviews
+              key={detail.id}
+              version={detail}
+              scope={scope}
+              onLock={setReviewLock}
+              showActionMenu={consultationOnly}
+              adjacentActions={
+                consultationOnly && (
+                  <>
+                    <button
+                      type="button"
+                      className={button}
+                      onClick={() => openDisclosure(contentSection.current)}
+                    >
+                      Contenido conservado
+                    </button>
+                    <button
+                      type="button"
+                      className={button}
+                      onClick={() => openDisclosure(contextSection.current)}
+                    >
+                      Contexto y antecedentes
+                    </button>
+                  </>
+                )
+              }
+            />
+          </div>
+          {consultationOnly && (
+            <>
+              <div ref={contentSection}>
+                <MaterialView value={detail.bundle} expandedDocument={false} showContext={false} />
+              </div>
+              <div ref={contextSection} className="space-y-3">
+                <p>
+                  Se conserva el diagnóstico, la determinación, la política y el contexto
+                  consultados al registrar. Los respaldos históricos no acreditan controles
+                  actuales. Los archivos anexos no se copian dentro de esta versión.
+                </p>
+                <EipdVersionContext value={detail.bundle} />
+              </div>
+            </>
+          )}
           <details>
             <summary className={documentDisclosureClass}>Identidad de la versión EIPD</summary>
             <p className="break-all">Identificador: {detail.id}</p>

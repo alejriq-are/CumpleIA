@@ -28,6 +28,13 @@ export const connectedDestinations = {
   },
 } as const;
 
+export const savedDocumentSections = [
+  "Versiones EIPD",
+  "Borrador EIPD guardado",
+  "Evaluación de licitud guardada",
+  "Alcance RAT asociado",
+] as const;
+
 export function connectedDestinationLabel(
   location: WorkLocation,
   diagnosticItems: { id: string; label: string }[] = []
@@ -42,6 +49,8 @@ export function connectedDestinationLabel(
   }
   if (location.module === "licitud" && location.section === "eipd")
     return eipdSections[location.step];
+  if (location.module === "licitud" && location.section === "revisar" && location.step)
+    return savedDocumentSections[location.step] ?? connectedDestinations.licitud.revisar;
   const destinations: Partial<Record<ModuleId, Readonly<Record<string, string>>>> =
     connectedDestinations;
   const label = destinations[location.module]?.[location.section];

@@ -34,7 +34,11 @@ import {
 } from "./connected-navigation";
 import { modules, type ModuleId } from "./prototype-data";
 import { availabilityReason, type AvailabilityReadState } from "./connected-availability";
-import { connectedDestinations, connectedDestinationLabel } from "./connected-destinations";
+import {
+  connectedDestinations,
+  connectedDestinationLabel,
+  savedDocumentSections,
+} from "./connected-destinations";
 import "./navigation-prototype.css";
 import "./connected-navigation.css";
 
@@ -510,8 +514,12 @@ export function ConnectedWorkspace({
               ...(location.assessmentId
                 ? [
                     {
-                      label: "Revisar y decidir",
-                      items: [{ id: "revisar", label: connectedDestinations.licitud.revisar }],
+                      label: connectedDestinations.licitud.revisar,
+                      items: savedDocumentSections.map((label, step) => ({
+                        id: "revisar",
+                        label,
+                        step,
+                      })),
                     },
                     {
                       label: "Historial y descargas",
@@ -812,73 +820,120 @@ export function ConnectedWorkspace({
                     </a>
                   </div>
                 ) : (
-                  <details
+                  <div
                     key={g.label}
-                    data-current-group={g.items.some(isCurrent) || undefined}
-                    onBlur={(event) => {
-                      if (!event.currentTarget.contains(event.relatedTarget))
-                        event.currentTarget.open = false;
-                    }}
-                    onToggle={(event) => {
-                      if (!event.currentTarget.open) return;
-                      closeDesktopGroups(event.currentTarget);
-                      const pop = event.currentTarget.querySelector<HTMLElement>(":scope > div");
-                      if (pop) {
-                        pop.style.left = "0px";
-                        const rect = pop.getBoundingClientRect();
-                        pop.style.left = `${Math.max(8 - rect.left, Math.min(0, window.innerWidth - 8 - rect.right))}px`;
-                      }
-                    }}
+                    className={
+                      g.items[0]?.id === "revisar" ? "connected-document-group" : "contents"
+                    }
                   >
-                    <summary
-                      onKeyDown={(event) => {
-                        if (event.code !== "Space" && event.key !== " " && event.key !== "Spacebar")
-                          return;
-                        // Handle Space explicitly; cancel the native action to avoid a second toggle.
-                        event.preventDefault();
-                        if (event.repeat) return;
-                        const group = event.currentTarget.parentElement as HTMLDetailsElement;
-                        if (!group.open) closeDesktopGroups(group);
-                        group.open = !group.open;
-                      }}
-                      onKeyUp={(event) => {
-                        if (event.code === "Space" || event.key === " " || event.key === "Spacebar")
+                    {g.items[0]?.id === "revisar" ? (
+                      <a
+                        href={encodeWork({ ...location, section: "revisar", step: 0 })}
+                        aria-current={isCurrent(g.items[0]) ? "page" : undefined}
+                        onClick={(event) => {
+                          if (
+                            event.button !== 0 ||
+                            event.metaKey ||
+                            event.ctrlKey ||
+                            event.shiftKey ||
+                            event.altKey
+                          )
+                            return;
                           event.preventDefault();
+                          closeDesktopGroups();
+                          section(g.items[0]);
+                        }}
+                      >
+                        {g.label}
+                      </a>
+                    ) : null}
+                    <details
+                      data-current-group={g.items.some(isCurrent) || undefined}
+                      onBlur={(event) => {
+                        if (!event.currentTarget.contains(event.relatedTarget))
+                          event.currentTarget.open = false;
+                      }}
+                      onToggle={(event) => {
+                        if (!event.currentTarget.open) return;
+                        closeDesktopGroups(event.currentTarget);
+                        const pop = event.currentTarget.querySelector<HTMLElement>(":scope > div");
+                        if (pop) {
+                          pop.style.left = "0px";
+                          const rect = pop.getBoundingClientRect();
+                          pop.style.left = `${Math.max(8 - rect.left, Math.min(0, window.innerWidth - 8 - rect.right))}px`;
+                        }
                       }}
                     >
-                      {g.reason ? g.availabilityLabel : g.label}
-                    </summary>
-                    <div>
-                      {g.reason && (
-                        <div className="connected-availability-reason">
-                          <p>{g.reason}</p>
+                      <summary
+                        aria-label={
+                          g.items[0]?.id === "revisar"
+                            ? "Opciones de Documentos guardados"
+                            : undefined
+                        }
+                        onKeyDown={(event) => {
+                          if (
+                            event.target !== event.currentTarget ||
+                            (event.code !== "Space" &&
+                              event.key !== " " &&
+                              event.key !== "Spacebar")
+                          )
+                            return;
+                          // Handle Space explicitly; cancel the native action to avoid a second toggle.
+                          event.preventDefault();
+                          if (event.repeat) return;
+                          const group = event.currentTarget.parentElement as HTMLDetailsElement;
+                          if (!group.open) closeDesktopGroups(group);
+                          group.open = !group.open;
+                        }}
+                        onKeyUp={(event) => {
+                          if (
+                            event.code === "Space" ||
+                            event.key === " " ||
+                            event.key === "Spacebar"
+                          )
+                            event.preventDefault();
+                        }}
+                      >
+                        {g.items[0]?.id === "revisar" ? (
+                          <span aria-hidden="true">▾</span>
+                        ) : g.reason ? (
+                          g.availabilityLabel
+                        ) : (
+                          g.label
+                        )}
+                      </summary>
+                      <div>
+                        {g.reason && (
+                          <div className="connected-availability-reason">
+                            <p>{g.reason}</p>
+                            <button
+                              onClick={(event) => {
+                                event.currentTarget.closest("details")?.removeAttribute("open");
+                                section({
+                                  id: "aplicabilidad",
+                                  label: connectedDestinations.licitud.aplicabilidad,
+                                });
+                              }}
+                            >
+                              Ir a Determinar aplicabilidad
+                            </button>
+                          </div>
+                        )}
+                        {g.items.map((item) => (
                           <button
-                            onClick={(event) => {
-                              event.currentTarget.closest("details")?.removeAttribute("open");
-                              section({
-                                id: "aplicabilidad",
-                                label: connectedDestinations.licitud.aplicabilidad,
-                              });
+                            key={`${item.id}:${item.step ?? 0}`}
+                            aria-current={isCurrent(item) ? "page" : undefined}
+                            onClick={(e) => {
+                              e.currentTarget.closest("details")?.removeAttribute("open");
+                              section(item);
                             }}
                           >
-                            Ir a Determinar aplicabilidad
+                            {item.label}
                           </button>
-                        </div>
-                      )}
-                      {g.items.map((item) => (
-                        <button
-                          key={`${item.id}:${item.step ?? 0}`}
-                          aria-current={isCurrent(item) ? "page" : undefined}
-                          onClick={(e) => {
-                            e.currentTarget.closest("details")?.removeAttribute("open");
-                            section(item);
-                          }}
-                        >
-                          {item.label}
-                        </button>
-                      ))}
-                    </div>
-                  </details>
+                        ))}
+                      </div>
+                    </details>
+                  </div>
                 )
               )}
             </div>

@@ -100,6 +100,20 @@ async function setup(page: Page, mode = "success", props = {}) {
         }
         if (url.includes("/requests/"))
           return w.found ? response(w.found) : response({ detail: "No encontrado" }, 404);
+        if (url.endsWith("/review-state")) {
+          const version = w.byId?.[url.split("/").at(-2)!];
+          return response({
+            version_id: version?.id,
+            organization_id: org,
+            treatment_id: tid,
+            assessment_id: aid,
+            can_review: true,
+            can_favorable: true,
+            may_manage: version?.version === 2,
+            reviews: [],
+            authorities: [],
+          });
+        }
         if (w.byId?.[url.split("/").at(-1)!]) return response(w.byId[url.split("/").at(-1)!]);
         if (url.endsWith("/" + vid)) return response(w.found);
         return response(w.versionHistory ?? (w.found ? [w.found] : []));
@@ -294,7 +308,7 @@ test("consulta abre versiones recientes primero sin formulario de registro", asy
     },
     { preview, org, tid, aid, actor, vid }
   );
-  await page.getByRole("button", { name: "Actualizar historial de versiones EIPD" }).click();
+  await page.getByRole("button", { name: "Actualizar lista de versiones" }).click();
   await expect(page.getByRole("button", { name: /^Consultar versión EIPD/ })).toHaveText([
     "Consultar versión EIPD 2",
     "Consultar versión EIPD 1",
@@ -308,8 +322,58 @@ test("consulta abre versiones recientes primero sin formulario de registro", asy
   ).toBeVisible();
   const content = page.getByText("Contenido EIPD conservado para esta versión", { exact: true });
   await expect(content.locator("..")).not.toHaveAttribute("open", "");
+  const reviewMenu = page.locator("summary").getByText("Revisiones y facultades", { exact: true });
+  await reviewMenu.focus();
+  await page.keyboard.press("Enter");
   await expect(
     page.getByRole("button", { name: "Consultar revisiones y facultades", exact: true })
   ).toBeVisible();
+  const admin = page.getByRole("button", {
+    name: "Administrar facultades del expediente",
+    exact: true,
+  });
+  await expect(admin).toHaveCount(0);
+  await page
+    .getByRole("button", { name: "Ver historial de facultades del expediente", exact: true })
+    .click();
+  await expect(
+    page.getByText("Historial de facultades del expediente", { exact: true })
+  ).toBeFocused();
+  await admin.click();
+  await expect(
+    page.getByText("Administrar facultad de revisión del expediente", { exact: true })
+  ).toBeFocused();
+  await page.getByRole("button", { name: "Contenido conservado", exact: true }).click();
+  await expect(content).toBeFocused();
+  await expect(content.locator("..")).toHaveAttribute("open", "");
+  await page.getByRole("button", { name: "Contexto y antecedentes", exact: true }).click();
+  await expect(
+    page.getByText("Contexto y antecedentes conservados con la versión", { exact: true })
+  ).toBeFocused();
+  await page
+    .getByRole("button", { name: "Consultar revisiones y facultades", exact: true })
+    .click();
+  await page.getByLabel("Fundamento de la revisión").fill("[FICTICIA] Nota pendiente");
+  await expect(page.getByRole("button", { name: "Actualizar lista de versiones" })).toBeDisabled();
+  await expect(page.getByRole("button", { name: "Volver a versiones EIPD" })).toBeDisabled();
+  await page.getByRole("button", { name: "Ir a Revisiones y facultades" }).click();
+  await expect(reviewMenu).toBeFocused();
+  await expect(page.getByLabel("Fundamento de la revisión")).toHaveValue(
+    "[FICTICIA] Nota pendiente"
+  );
+  await page
+    .getByRole("button", { name: "Descartar campos de revisión y facultad sin registrar" })
+    .click();
+  await page.getByRole("button", { name: "Volver a versiones EIPD" }).click();
+  await expect(
+    page.getByRole("button", { name: "Consultar versión EIPD 2", exact: true })
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Consultar versión EIPD 1", exact: true }).click();
+  await reviewMenu.click();
+  await page
+    .getByRole("button", { name: "Consultar revisiones y facultades", exact: true })
+    .click();
+  await expect(page.getByLabel("Fundamento de la revisión")).toBeVisible();
+  await expect(admin).toHaveCount(0);
   expect(await page.evaluate(() => (window as any).posts.length)).toBe(0);
 });

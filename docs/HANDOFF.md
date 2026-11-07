@@ -1,3 +1,9 @@
+## Navegación de Documentos guardados — antes de 5C.2
+
+En la rama `feature/documentos-guardados-eipd`, el espacio de trabajo ofrece cuatro destinos de consulta desde Documentos guardados. Versiones EIPD es la entrada principal. El borrador guardado, la evaluación de licitud y el alcance RAT asociado se consultan en destinos separados. El detalle de una versión ofrece un menú de Revisiones y facultades junto a los accesos a contenido conservado y antecedentes. El menú reúne consulta, historial de facultades y administración, según los permisos consultados. Cuando hay una actuación pendiente, el aviso permite volver al formulario antes de actualizar la lista o cambiar de versión.
+
+Verificación local. 28 pruebas dirigidas en Chromium con respuestas controladas, TypeScript, ESLint dirigido y comprobación del diff aprobados. El usuario recorrió visualmente la navegación y pidió agrupar las acciones de revisión. Tras ese ajuste, las 19 pruebas dirigidas de versiones y revisiones, TypeScript y ESLint dirigido pasaron. El usuario confirmó el recorrido visual del menú ajustado y autorizó publicar la navegación. Siguiente paso. Definir el contrato de 5C.2.
+
 ## 5C.1 cerrado — recorrido manual aceptado — 07/11/2026
 
 Pasos 1–10 aceptados en CumpleIA Demo con datos ficticios. La versión EIPD 6 se registró como sucesora y comenzó con cero revisiones. La versión 5 conservó 12 revisiones, con `SIMULADA-CONFLICTO-A3` como última. Favorable estuvo bloqueado en las versiones 5 y 7 por sus requisitos documentales. Tras resolver los pendientes del borrador y registrar la versión 8, B pudo seleccionar Favorable. La versión 8 tenía cero revisiones en la evidencia aportada.

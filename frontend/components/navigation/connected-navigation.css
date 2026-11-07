@@ -115,15 +115,29 @@
   line-height: 1.4;
   color: #0f172a;
 }
+.connected-document-group {
+  display: flex;
+  align-items: stretch;
+}
+.connected-document-group summary {
+  list-style: none;
+}
+.connected-document-group summary::-webkit-details-marker {
+  display: none;
+}
+
+.connected-document-group > a,
 .connected-direct-group > a {
   display: block;
   padding: 10px;
   border-bottom: 3px solid transparent;
   font-weight: 600;
 }
+.connected-document-group > a:hover,
 .connected-direct-group > a:hover {
   background: #eff6ff;
 }
+.connected-document-group > a[aria-current="page"],
 .connected-direct-group > a[aria-current="page"],
 .connected-desktop-sections details[data-current-group] > summary {
   border-bottom: 3px solid #1d4ed8;
