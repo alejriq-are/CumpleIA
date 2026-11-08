@@ -9,7 +9,7 @@ from sqlalchemy import text
 from app.services import assessment_support as support
 from app.services import base_fundamento_versions as versions
 from app.services import licitud
-from app.services.base_fundamento_catalog import BASES, CATALOG_VERSION
+from app.services.base_fundamento_catalog import favorable_requirements
 from app.services.eipd_version_reviews import rows, scope
 from app.services.organization_acceptance import member, series_lock
 
@@ -23,65 +23,6 @@ async def exact(db, org, tid, aid, vid):
         raise HTTPException(404, detail="Versión documental no encontrada")
     versions.output(row)  # Verify the immutable bundle before using its diagnosis.
     return row
-
-
-EQUIVALENT_EVIDENCE_CODES = frozenset(
-    {
-        "evidencia_ausente",
-        "evidencia_incompleta",
-        "tipo_evidencia_vacio",
-        "referencia_de_respaldo_ausente",
-    }
-)
-
-
-def favorable_requirements(bundle):
-    """Describe the required resolutions without changing the frozen diagnosis."""
-    diagnostic = bundle.get("diagnostic", {})
-    if (
-        diagnostic.get("rule_set") != CATALOG_VERSION
-        or diagnostic.get("legal_basis") not in BASES
-        or not isinstance(diagnostic.get("findings"), list)
-        or not isinstance(diagnostic.get("applicability"), list)
-    ):
-        return [
-            {
-                "criterion_id": None,
-                "field": "diagnostic",
-                "code": "diagnostico_no_habilitado",
-                "resolution": None,
-            }
-        ]
-    requirements = []
-    for finding in diagnostic["findings"]:
-        equivalent = (
-            finding["criterion_id"] == "base.respaldo"
-            and finding["code"] in EQUIVALENT_EVIDENCE_CODES
-        )
-        requirements.append(
-            {
-                "criterion_id": finding["criterion_id"],
-                "field": finding["field"],
-                "code": finding["code"],
-                "resolution": "respaldo_equivalente" if equivalent else None,
-            }
-        )
-    for item in diagnostic["applicability"]:
-        if item["applicability"] == "aplicable" and item["criterion_id"] is not None:
-            continue
-        requirements.append(
-            {
-                "criterion_id": item["criterion_id"],
-                "field": item["field"],
-                "code": "aplicabilidad",
-                "resolution": (
-                    "no_aplica"
-                    if item["criterion_id"] and item["applicability"] == "no_aplicable"
-                    else None
-                ),
-            }
-        )
-    return requirements
 
 
 def _resolution_key(value):

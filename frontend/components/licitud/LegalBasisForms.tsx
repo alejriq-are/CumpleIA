@@ -251,14 +251,15 @@ export function ConsentForm({
   value,
   onChange,
   disabled,
-  applicability,
 }: {
   value: LegalDocument;
   onChange: (value: LegalDocument) => void;
   disabled: boolean;
-  applicability: Record<string, string>;
 }) {
   const stored = (Array.isArray(value.answers) ? value.answers : []) as LegalDocument[];
+  const contractContext = stored.find(
+    (answer) => answer.question_id === "contexto_contrato_servicio"
+  )?.answer;
   const evidence = (Array.isArray(value.evidence) ? value.evidence : []) as LegalDocument[];
   function update(key: string, item: unknown) {
     onChange({ ...value, schema_version: 1, [key]: item });
@@ -269,8 +270,8 @@ export function ConsentForm({
       <p>
         Registra únicamente datos ficticios. Esta entrega utiliza los 16 controles del contrato v1;
         no sustituye el desglose de las 19 prácticas originales ni acredita consentimiento válido.
-        No aplica solo se ofrece cuando el diagnóstico del servidor lo permite para el formulario
-        guardado, o si ya consta en el antecedente.
+        No aplica está disponible en las preguntas condicionales cuando las respuestas del borrador
+        indican que quedan fuera de alcance. La persona revisora deberá justificarlo.
       </p>
       <Select
         label="Quién otorga el consentimiento"
@@ -299,7 +300,11 @@ export function ConsentForm({
           key={key}
           label={label}
           value={stored.find((a) => a.question_id === key)}
-          allowNA={applicability["answers." + key] === "no_aplicable"}
+          allowNA={
+            (key === "mandatario_facultad_expresa" &&
+              (value.given_by === "titular" || value.given_by === "representante_legal")) ||
+            (key === "tratamiento_necesario_contrato_servicio" && contractContext === "no")
+          }
           onChange={(item) =>
             update("answers", [
               ...stored.filter((a) => a.question_id !== key),

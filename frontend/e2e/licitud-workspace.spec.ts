@@ -1053,7 +1053,7 @@ test("guardar otra base no marca como guardadas las ediciones del formulario ina
   await expect(page.getByRole("status")).toContainText("Borrador guardado");
 });
 
-test("No aplica depende del diagnóstico guardado y no se ofrece de forma general", async ({
+test("No aplica sigue el diagnóstico de LIA y las condiciones del borrador de Consentimiento", async ({
   page,
 }) => {
   await draft(page);
@@ -1081,24 +1081,15 @@ test("No aplica depende del diagnóstico guardado y no se ofrece de forma genera
   await page.getByRole("button", { name: "Guardar borrador", exact: true }).click();
   await expect(page.getByRole("status").filter({ hasText: "Borrador guardado" })).toBeVisible();
   await page.getByLabel("Base de licitud propuesta").selectOption("consentimiento_art12");
-  await page.getByLabel("Quién otorga el consentimiento").selectOption("titular");
-  await page.getByRole("button", { name: "Guardar borrador", exact: true }).click();
+  const grantor = page.getByLabel("Quién otorga el consentimiento");
   const mandate = page.getByLabel("¿El mandatario cuenta con facultad expresa?", { exact: true });
+  await grantor.selectOption("mandatario");
   await expect(mandate.locator('option[value="no_aplica"]')).toHaveCount(0);
-  await page.evaluate(
-    () =>
-      ((window as any).demo.basisReadiness = {
-        consent: {
-          result: "incompleto",
-          issues: [],
-          applicability: [
-            { field: "answers.mandatario_facultad_expresa", applicability: "no_aplicable" },
-          ],
-        },
-      })
-  );
-  await page.getByRole("button", { name: "Consultar diagnóstico guardado", exact: true }).click();
+  await mandate.selectOption("si");
+  await grantor.selectOption("titular");
+  await expect(mandate).toHaveValue("si");
   await expect(mandate.locator('option[value="no_aplica"]')).toHaveCount(1);
+  await mandate.selectOption("no_aplica");
   await expect(
     page
       .getByLabel("¿El consentimiento es libre?", { exact: true })

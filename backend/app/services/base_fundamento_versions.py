@@ -8,7 +8,11 @@ from sqlalchemy import select, text
 from app.db.base_fundamento_versions import BaseFundamentoVersion as Version
 from app.services import assessment_support as support
 from app.services import licitud
-from app.services.base_fundamento_catalog import BASES, evaluate_base_document
+from app.services.base_fundamento_catalog import (
+    BASES,
+    evaluate_base_document,
+    favorable_requirements,
+)
 from app.services.eipd_document_versions import canonical
 from app.services.organization_acceptance import member, series_lock
 
@@ -35,6 +39,7 @@ def output(row):
         source_hash=row.source_hash,
         bundle_hash=row.bundle_hash,
         bundle=row.bundle,
+        favorable_requirements=favorable_requirements(row.bundle),
         can_confirm=False,
         activation="deshabilitada",
     )
@@ -135,6 +140,7 @@ async def preview(db, org, tid, aid, annex_ids):
         source_hash=token,
         latest_version=rows[-1].version if rows else 0,
         bundle=material,
+        favorable_requirements=favorable_requirements(material),
         can_confirm=False,
         activation="deshabilitada",
     )

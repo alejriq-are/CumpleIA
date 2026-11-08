@@ -53,6 +53,10 @@ async def test_pending_basis_and_alternatives_frozen(assessment):
         preview = (await http.get(url + "/preview")).json()
         bundle = preview["bundle"]
         assert bundle["primary_form"] is None
+        assert any(
+            r["code"] == "base_pendiente" and r["resolution"] is None
+            for r in preview["favorable_requirements"]
+        )
         assert set(bundle["alternatives"]) == {"consent_assessment", "lia_assessment"}
         assert any(
             f["code"] == "base_pendiente" for f in bundle["diagnostic"]["findings"]

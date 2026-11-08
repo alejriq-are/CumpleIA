@@ -1,8 +1,10 @@
-## 5D.1 — registro y revisión disponibles en la API
+## 5D.1 — registro y revisión integrados en la interfaz
 
 En `feature/base-fundamento-5d1`, el [contrato aprobado](project/base-fundamento-5d1.md) tiene catálogo versionado para las seis bases y API de registro, consulta y revisión. La migración `d51ba5e1a702` incorpora facultades independientes y conclusiones sobre una versión exacta. Favorable comprueba los bloqueos y las resoluciones aplicables. Las observaciones de seguimiento se conservan por separado.
 
-Pasaron 79 pruebas dirigidas en PostgreSQL aislado y quedó una exclusión histórica de reversión de infancia. En la etapa de catálogo pasaron 361 pruebas unitarias dirigidas. La migración de revisión se aplicó solo en la base de pruebas. Próximo paso. Integrar el registro y las revisiones en la interfaz y preparar el recorrido conectado.
+Pasaron 79 pruebas dirigidas en PostgreSQL aislado y quedó una exclusión histórica de reversión de infancia. En la etapa de catálogo pasaron 361 pruebas unitarias dirigidas. La migración de revisión se aplicó solo en la base de pruebas. La interfaz ya permite registrar desde Base y fundamento y revisar desde Evaluación de licitud guardada. Pasaron 30 pruebas dirigidas en Chromium con respuestas controladas, TypeScript, ESLint y Prettier. Se aplicaron ambas migraciones en desarrollo local y se verificaron 9 rutas, 11 métodos y la interfaz servida. Se conservaron 6 evaluaciones, 37 respaldos, 8 versiones EIPD, 13 revisiones EIPD y 1 decisión EIPD. Las tres tablas nuevas quedaron vacías con RLS. Próximo paso. Ejecutar el recorrido en CumpleIA Demo. La Evaluación n.º 1 de Gestión de trabajadores ya tiene base pendiente y ambos formularios guardados.
+
+Durante el recorrido, la versión 1 se registró con base pendiente, A otorgó la facultad a B y B registró Requiere cambios n.º 1. A partir de la observación del usuario se organizó el diagnóstico de vista previa y revisión por tipo de requisito, con el detalle técnico plegado. Consentimiento ofrece No aplica en sus preguntas condicionales según los datos del borrador. Si queda una respuesta incompatible, el diagnóstico muestra primero cómo corregirla y reserva la justificación para la revisión. Pasaron tres pruebas dirigidas en Chromium, TypeScript y ESLint. Próximo paso. Como A, corregir la respuesta sobre el mandatario, guardar y preparar la versión 2. Como B, justificar los requisitos que no aplican y documentar el respaldo equivalente que corresponda.
 
 ## Guía de actuaciones EIPD — antes de 5D.1
 

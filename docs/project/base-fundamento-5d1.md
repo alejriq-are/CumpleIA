@@ -1,6 +1,6 @@
 # 5D.1 · Versión documental y revisión de Base y fundamento
 
-Contrato funcional aprobado. Catálogo, registro de versiones y revisión implementados en servidor. Interfaz pendiente. Base Git `7087c47`. Desarrolla [LIC-GOV-001](revision-aceptacion-base-licitud.md) y el [circuito documental común](circuito-documental-comun.md).
+Contrato funcional aprobado. Catálogo, registro, revisión e interfaz implementados localmente. Recorrido conectado pendiente. Base Git `7087c47`. Desarrolla [LIC-GOV-001](revision-aceptacion-base-licitud.md) y el [circuito documental común](circuito-documental-comun.md).
 
 ## Recorrido
 
@@ -114,4 +114,16 @@ La migración `d51ba5e1a702` crea facultades y revisiones específicas de Base y
 
 `favorable_requirements` indica los bloqueos y las resoluciones admitidas para la versión exacta. `can_favorable` indica que la versión carece de bloqueos que exijan modificar el contenido, pero el registro exige aportar todas las resoluciones indicadas. El respaldo equivalente solo resuelve hallazgos de acreditación documental. No aplica exige una condición que el evaluador ya identifica como no aplicable y su justificación. Las observaciones con responsable y fecha se conservan por separado y no levantan bloqueos. El formulario de revisión deberá mostrar esas diferencias.
 
-Validación dirigida con `app_user` en PostgreSQL aislado. 79 pruebas aprobadas y una exclusión histórica de reversión de infancia. Se probó la aceptación de un Favorable con respaldo equivalente, dos condiciones no aplicables justificadas y una observación, además de facultad independiente, bloqueo de autorrevisión, revocación concurrente, aislamiento e idempotencia. Migración aplicada solo a la base de pruebas. Próximo paso. Integrar el registro y la revisión en la interfaz y preparar el recorrido conectado.
+Validación dirigida con `app_user` en PostgreSQL aislado. 79 pruebas aprobadas y una exclusión histórica de reversión de infancia. Se probó la aceptación de un Favorable con respaldo equivalente, dos condiciones no aplicables justificadas y una observación, además de facultad independiente, bloqueo de autorrevisión, revocación concurrente, aislamiento e idempotencia. Migración aplicada solo a la base de pruebas. La interfaz se describe en la sección siguiente.
+
+
+## Interfaz y recorrido conectado
+
+En Base y fundamento se prepara el registro con los anexos seleccionados y se consulta una vista previa del contenido guardado. Documentos guardados → Evaluación de licitud guardada ofrece la lista de versiones y, para cada versión, el contenido conservado, el diagnóstico, el historial de revisiones y la administración de facultades según permiso. Los formularios mantienen los campos ante conflicto y permiten consultar el recibo de una solicitud incierta.
+
+Las migraciones `bf5d10a26c41` y `d51ba5e1a702` se aplicaron en desarrollo local. Se verificaron RLS y la conservación de los registros anteriores. Recorrido en CumpleIA Demo con datos ficticios:
+
+1. Como A, guarda una propuesta con base pendiente en una evaluación de ensayo. Prepara y registra su versión. Comprueba que Consentimiento y LIA, si están guardados, aparecen como antecedentes.
+2. Abre la versión desde Evaluación de licitud guardada. Verifica el bloqueo de autorrevisión y otorga a B la facultad de revisión de Base y fundamento. Como B, comprueba el bloqueo de Favorable en la versión pendiente y registra Requiere cambios.
+3. Como A, guarda una base definida y registra una versión nueva. Como B, revisa el diagnóstico conservado. Para ensayar Favorable, resuelve los requisitos aplicables con respaldo equivalente o No aplica justificado donde se ofrezcan esas vías. Registra una observación menor con responsable y plazo.
+4. Comprueba que cada versión conserva su historial. Como A, revoca la facultad y verifica como B que la consulta histórica sigue disponible y el registro queda bloqueado.

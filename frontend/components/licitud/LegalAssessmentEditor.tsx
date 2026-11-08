@@ -290,13 +290,6 @@ export function LegalAssessmentEditor({
             <ConsentForm
               value={consent ?? { schema_version: 1 }}
               disabled={disabled}
-              applicability={
-                diagnostic && matchesConsultation
-                  ? Object.fromEntries(
-                      (diagnostic?.applicability ?? []).map((a) => [a.field, a.applicability])
-                    )
-                  : {}
-              }
               onChange={(v) => {
                 setConsent(v);
                 setMessage("");

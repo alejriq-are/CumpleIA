@@ -1,4 +1,5 @@
 "use client";
+import { BaseFundamentoHistory, BaseFundamentoRegister } from "./BaseFundamentoVersions";
 import { documentDisclosureClass, documentNavigationButtonClass } from "./document-focus";
 import type { WorkState } from "@/components/navigation/work-unit-state";
 import { eipdStepLabels } from "@/lib/licitud/eipd-steps";
@@ -110,11 +111,25 @@ export function AssessmentFlow({
   const [resolutionHistory, setResolutionHistory] = useState<boolean | null>(null);
   const [documentDirty, setDocumentDirty] = useState(false);
   const [versionReviewDirty, setVersionReviewDirty] = useState(false);
+  const [baseRegisterPending, setBaseRegisterPending] = useState(false);
+  const [baseReviewPending, setBaseReviewPending] = useState(false);
+  const baseScope = async () => ({
+    organizationId,
+    treatmentId,
+    assessmentId,
+    token: await token(),
+  });
   const [eipdDirty, setEipdDirty] = useState(false);
   const [supportDirty, setSupportDirty] = useState(false);
   const [support, setSupport] = useState<Support | null>(null);
   const dirty = scopeDirty || legalDirty || childDirty || eipdDirty;
-  const hasUnsaved = dirty || documentDirty || supportDirty || versionReviewDirty;
+  const hasUnsaved =
+    dirty ||
+    documentDirty ||
+    supportDirty ||
+    versionReviewDirty ||
+    baseRegisterPending ||
+    baseReviewPending;
   const childRelevant = navigation
     ? navigation.scope.infancia
     : Boolean(
@@ -385,6 +400,16 @@ export function AssessmentFlow({
             onDirty={setLegalDirty}
             onWorkState={legalState}
           />
+          {!readOnly && row?.status === "borrador" && (
+            <BaseFundamentoRegister
+              key={assessmentId}
+              scope={baseScope}
+              onPending={setBaseRegisterPending}
+              blocked={scopeDirty || legalDirty || supportDirty}
+              savedRevision={refreshVersion}
+              annexes={support?.annexes ?? []}
+            />
+          )}
           <p className="text-sm">
             Guarda el borrador para que tus cambios aparezcan en Revisar documentos.
             {childRelevant && " Los análisis de infancia se completan en su sección específica."}
@@ -519,6 +544,11 @@ export function AssessmentFlow({
                 {row.legal_basis === "interes_legitimo_art13d" ? " · LIA" : ""} · evaluación n.º{" "}
                 {row.version}
               </h3>
+              <BaseFundamentoHistory
+                key={assessmentId}
+                scope={baseScope}
+                onPending={setBaseReviewPending}
+              />
               <details open={navigation ? true : undefined}>
                 <summary className={documentDisclosureClass}>
                   Consultar evaluación de licitud
