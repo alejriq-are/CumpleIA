@@ -1,8 +1,8 @@
-## 5D.1 — catálogo y registro de versiones
+## 5D.1 — registro y revisión disponibles en la API
 
-En `feature/base-fundamento-5d1`, el [contrato aprobado](project/base-fundamento-5d1.md) ya tiene catálogo versionado para las seis bases y API de vista previa, registro, consulta y recuperación. Se conserva una sola base activa, las alternativas Consentimiento y LIA, el diagnóstico guardado y la identidad exacta de los anexos seleccionados. Se admite base pendiente como antecedente documental. Pasaron 76 pruebas dirigidas en PostgreSQL aislado con una exclusión histórica de reversión de infancia. En la etapa de catálogo pasaron 361 pruebas unitarias dirigidas. Ruff y Black dirigidos aprobados.
+En `feature/base-fundamento-5d1`, el [contrato aprobado](project/base-fundamento-5d1.md) tiene catálogo versionado para las seis bases y API de registro, consulta y revisión. La migración `d51ba5e1a702` incorpora facultades independientes y conclusiones sobre una versión exacta. Favorable comprueba los bloqueos y las resoluciones aplicables. Las observaciones de seguimiento se conservan por separado.
 
-Próximo paso. Implementar facultades de revisión específicas, conclusiones y validación de las resoluciones de requisitos para Favorable. Después, integrar el flujo en la interfaz.
+Pasaron 79 pruebas dirigidas en PostgreSQL aislado y quedó una exclusión histórica de reversión de infancia. En la etapa de catálogo pasaron 361 pruebas unitarias dirigidas. La migración de revisión se aplicó solo en la base de pruebas. Próximo paso. Integrar el registro y las revisiones en la interfaz y preparar el recorrido conectado.
 
 ## Guía de actuaciones EIPD — antes de 5D.1
 

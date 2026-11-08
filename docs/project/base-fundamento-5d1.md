@@ -1,6 +1,6 @@
 # 5D.1 · Versión documental y revisión de Base y fundamento
 
-Contrato funcional aprobado. Catálogo y registro de versiones implementados localmente. Revisión e interfaz pendientes. Base Git `7087c47`. Desarrolla [LIC-GOV-001](revision-aceptacion-base-licitud.md) y el [circuito documental común](circuito-documental-comun.md).
+Contrato funcional aprobado. Catálogo, registro de versiones y revisión implementados en servidor. Interfaz pendiente. Base Git `7087c47`. Desarrolla [LIC-GOV-001](revision-aceptacion-base-licitud.md) y el [circuito documental común](circuito-documental-comun.md).
 
 ## Recorrido
 
@@ -106,3 +106,12 @@ El catálogo `cumpleia.base_fundamento.v1` reutiliza los seis evaluadores docume
 La migración `bf5d10a26c41` crea la serie de versiones de Base y fundamento por evaluación, con RLS, claves de ámbito e inmutabilidad. La API implementa vista previa, registro, historial, detalle y recuperación de solicitudes. `annex_ids` indica la selección explícita en vista previa y registro. Cada respaldo seleccionado conserva ID, revisión, número de versión y SHA-256 del archivo. La huella del origen incorpora el sello de actualización del borrador para rechazar vistas previas obsoletas. Los bloqueos se toman en orden solicitud → serie para registrar y solo serie para la vista previa.
 
 La migración se aplicó en PostgreSQL aislado. Próximo paso. Incorporar las facultades de revisión, la persistencia de conclusiones y la validación de resoluciones por requisito sobre una versión exacta.
+
+
+## Implementación local de las revisiones
+
+La migración `d51ba5e1a702` crea facultades y revisiones específicas de Base y fundamento, con RLS, historial inmutable y validación transaccional de la facultad, la autoría y la secuencia. La API permite consultar el estado, otorgar y revocar, registrar conclusiones y recuperar el recibo de una solicitud. La secuencia de una revisión es propia de la versión consultada.
+
+`favorable_requirements` indica los bloqueos y las resoluciones admitidas para la versión exacta. `can_favorable` indica que la versión carece de bloqueos que exijan modificar el contenido, pero el registro exige aportar todas las resoluciones indicadas. El respaldo equivalente solo resuelve hallazgos de acreditación documental. No aplica exige una condición que el evaluador ya identifica como no aplicable y su justificación. Las observaciones con responsable y fecha se conservan por separado y no levantan bloqueos. El formulario de revisión deberá mostrar esas diferencias.
+
+Validación dirigida con `app_user` en PostgreSQL aislado. 79 pruebas aprobadas y una exclusión histórica de reversión de infancia. Se probó la aceptación de un Favorable con respaldo equivalente, dos condiciones no aplicables justificadas y una observación, además de facultad independiente, bloqueo de autorrevisión, revocación concurrente, aislamiento e idempotencia. Migración aplicada solo a la base de pruebas. Próximo paso. Integrar el registro y la revisión en la interfaz y preparar el recorrido conectado.
