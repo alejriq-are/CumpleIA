@@ -1,3 +1,9 @@
+## 5D.1 — catálogo y registro de versiones
+
+En `feature/base-fundamento-5d1`, el [contrato aprobado](project/base-fundamento-5d1.md) ya tiene catálogo versionado para las seis bases y API de vista previa, registro, consulta y recuperación. Se conserva una sola base activa, las alternativas Consentimiento y LIA, el diagnóstico guardado y la identidad exacta de los anexos seleccionados. Se admite base pendiente como antecedente documental. Pasaron 76 pruebas dirigidas en PostgreSQL aislado con una exclusión histórica de reversión de infancia. En la etapa de catálogo pasaron 361 pruebas unitarias dirigidas. Ruff y Black dirigidos aprobados.
+
+Próximo paso. Implementar facultades de revisión específicas, conclusiones y validación de las resoluciones de requisitos para Favorable. Después, integrar el flujo en la interfaz.
+
 ## Guía de actuaciones EIPD — antes de 5D.1
 
 En `feature/guia-actuaciones-eipd`, Documentos guardados muestra una guía plegable antes de la lista de versiones EIPD. Describe el orden de registro, consulta, revisión y decisión, junto con las facultades que intervienen. El detalle de la versión resume la secuencia para llegar a Acepta. El cambio es de presentación.
