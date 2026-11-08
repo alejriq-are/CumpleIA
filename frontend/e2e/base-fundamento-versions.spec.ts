@@ -18,7 +18,10 @@ test.beforeAll(async () => {
       mode === "register"
         ? React.createElement(BaseFundamentoRegister, { scope, onPending: v => window.locked = v, blocked: false, savedRevision: 0,
             annexes: [{ id: ${JSON.stringify(actor)}, reference: "SIMULADA-ANEXO-001", version: 1, filename: "respaldo.txt" }] })
-        : React.createElement(BaseFundamentoHistory, { scope, onPending: v => window.locked = v })
+        : React.createElement(BaseFundamentoHistory, { scope, onPending: v => window.locked = v,
+            savedEvaluation: React.createElement("details", null,
+              React.createElement("summary", null, "Consultar evaluación de licitud"),
+              "Borrador guardado de prueba") })
     );`);
 });
 
@@ -221,6 +224,18 @@ test("revisión favorable conserva requisitos y observación ante conflicto y re
   await page.setViewportSize({ width: 320, height: 800 });
   await setup(page, "review");
   await page.getByRole("button", { name: "Consultar versiones de Base y fundamento" }).click();
+  await page.getByRole("button", { name: "Consultar versión de Base y fundamento 1" }).click();
+  const consultation = page.getByText("Consultar evaluación de licitud", { exact: true });
+  await expect(consultation).toHaveCount(1);
+  await consultation.click();
+  await expect(
+    page.getByText("Contenido y diagnóstico conservados en la versión 1.")
+  ).toBeVisible();
+  await expect(page.getByText("Borrador guardado de prueba")).toHaveCount(0);
+  await page.getByRole("button", { name: "Volver a versiones de Base y fundamento" }).click();
+  await expect(consultation).toHaveCount(1);
+  await consultation.click();
+  await expect(page.getByText("Borrador guardado de prueba")).toBeVisible();
   await page.getByRole("button", { name: "Consultar versión de Base y fundamento 1" }).click();
   const read = page.getByRole("button", {
     name: "Consultar revisiones y facultades de Base y fundamento",

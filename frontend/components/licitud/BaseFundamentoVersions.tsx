@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import { apiFetch } from "@/lib/api/client";
 import type { Annex } from "@/lib/api/assessment-support";
 import type { VersionScope } from "@/lib/api/eipd-versions";
@@ -323,7 +323,11 @@ export function BaseFundamentoRegister({
   );
 }
 
-export function BaseFundamentoHistory({ scope, onPending }: ScopeProps) {
+export function BaseFundamentoHistory({
+  scope,
+  onPending,
+  savedEvaluation,
+}: ScopeProps & { savedEvaluation?: ReactNode }) {
   const [items, setItems] = useState<BaseVersionItem[] | null>(null);
   const [detail, setDetail] = useState<BaseVersion | null>(null);
   const [reviewPending, setReviewPending] = useState(false);
@@ -434,9 +438,10 @@ export function BaseFundamentoHistory({ scope, onPending }: ScopeProps) {
             onPending={setReviewPending}
           />
           <details>
-            <summary className={documentDisclosureClass}>
-              Contenido y diagnóstico conservados
-            </summary>
+            <summary className={documentDisclosureClass}>Consultar evaluación de licitud</summary>
+            <p className="py-2">
+              Contenido y diagnóstico conservados en la versión {detail.version}.
+            </p>
             <BaseMaterialView
               material={detail.bundle}
               requirements={detail.favorable_requirements}
@@ -444,6 +449,7 @@ export function BaseFundamentoHistory({ scope, onPending }: ScopeProps) {
           </details>
         </article>
       )}
+      {!detail && savedEvaluation}
     </section>
   );
 }

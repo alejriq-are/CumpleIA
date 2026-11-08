@@ -548,25 +548,27 @@ export function AssessmentFlow({
                 key={assessmentId}
                 scope={baseScope}
                 onPending={setBaseReviewPending}
+                savedEvaluation={
+                  <details open={navigation ? true : undefined}>
+                    <summary className={documentDisclosureClass}>
+                      Consultar evaluación de licitud
+                      {row.legal_basis === "interes_legitimo_art13d" ? " y LIA" : ""}
+                    </summary>
+                    <DossierDocumentView
+                      document={{
+                        kind: "licitud_lia",
+                        status: "disponible",
+                        version: row.version,
+                        coverage: "",
+                        content_hash: null,
+                        organization_acceptance: "sin_flujo",
+                        acceptance_events: [],
+                        content: { ...row },
+                      }}
+                    />
+                  </details>
+                }
               />
-              <details open={navigation ? true : undefined}>
-                <summary className={documentDisclosureClass}>
-                  Consultar evaluación de licitud
-                  {row.legal_basis === "interes_legitimo_art13d" ? " y LIA" : ""}
-                </summary>
-                <DossierDocumentView
-                  document={{
-                    kind: "licitud_lia",
-                    status: "disponible",
-                    version: row.version,
-                    coverage: "",
-                    content_hash: null,
-                    organization_acceptance: "sin_flujo",
-                    acceptance_events: [],
-                    content: { ...row },
-                  }}
-                />
-              </details>
             </section>
           </>
         )}
