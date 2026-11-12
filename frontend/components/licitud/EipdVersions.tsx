@@ -505,6 +505,10 @@ function VersionsPanel({
                   version={detail}
                   scope={scope}
                   onLock={setDecisionLock}
+                  documentLabel={`Versión EIPD ${detail.version} · ${String(
+                    detail.bundle.saved_assessment.eipd_resolution_assessment.document_reference ??
+                      "Sin referencia"
+                  )}`}
                 />
               </div>
               <div ref={contentSection}>

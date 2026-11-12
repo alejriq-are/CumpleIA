@@ -10,10 +10,13 @@ from app.core.deps import require_active_subscription, require_permission
 from app.db.models import Profile
 from app.db.session import get_db
 from app.schemas.base_fundamento_versions import (
+    BaseFundamentoDecisionAuthority,
+    BaseFundamentoDecisionRegister,
     BaseFundamentoReviewAuthority,
     BaseFundamentoReviewRegister,
     BaseFundamentoVersionRegister,
 )
+from app.services import base_fundamento_decisions as decisions_service
 from app.services import base_fundamento_reviews as reviews_service
 from app.services import base_fundamento_versions as service
 from app.services.authorization import Permission
@@ -191,6 +194,89 @@ async def review_request(
     db: AsyncSession = Depends(get_db),
 ):
     return await reviews_service.lookup(
+        db,
+        x_organization_id,
+        treatment_id,
+        assessment_id,
+        version_id,
+        profile.id,
+        request_id,
+    )
+
+
+@router.get("/decision-authorities/history")
+async def decision_authorities(
+    treatment_id: UUID,
+    assessment_id: UUID,
+    x_organization_id: Annotated[UUID, Header()],
+    profile: Profile = Depends(require_permission(Permission.view_content)),
+    db: AsyncSession = Depends(get_db),
+):
+    return await decisions_service.authorities(
+        db, x_organization_id, treatment_id, assessment_id
+    )
+
+
+@router.post("/decision-authorities", status_code=201)
+async def designate_decider(
+    treatment_id: UUID,
+    assessment_id: UUID,
+    payload: BaseFundamentoDecisionAuthority,
+    x_organization_id: Annotated[UUID, Header()],
+    profile: Profile = Depends(require_permission(Permission.manage_members)),
+    db: AsyncSession = Depends(get_db),
+):
+    return await decisions_service.designate(
+        db, x_organization_id, treatment_id, assessment_id, profile.id, payload
+    )
+
+
+@router.get("/{version_id}/decision-state")
+async def decision_state(
+    treatment_id: UUID,
+    assessment_id: UUID,
+    version_id: UUID,
+    x_organization_id: Annotated[UUID, Header()],
+    profile: Profile = Depends(require_permission(Permission.view_content)),
+    db: AsyncSession = Depends(get_db),
+):
+    return await decisions_service.state(
+        db, x_organization_id, treatment_id, assessment_id, version_id, profile.id
+    )
+
+
+@router.post("/{version_id}/decisions", status_code=201)
+async def record_decision(
+    treatment_id: UUID,
+    assessment_id: UUID,
+    version_id: UUID,
+    payload: BaseFundamentoDecisionRegister,
+    x_organization_id: Annotated[UUID, Header()],
+    profile: Profile = Depends(require_permission(Permission.view_content)),
+    db: AsyncSession = Depends(get_db),
+):
+    return await decisions_service.record(
+        db,
+        x_organization_id,
+        treatment_id,
+        assessment_id,
+        version_id,
+        profile.id,
+        payload,
+    )
+
+
+@router.get("/{version_id}/decision-requests/{request_id}")
+async def decision_request(
+    treatment_id: UUID,
+    assessment_id: UUID,
+    version_id: UUID,
+    request_id: UUID,
+    x_organization_id: Annotated[UUID, Header()],
+    profile: Profile = Depends(require_permission(Permission.view_content)),
+    db: AsyncSession = Depends(get_db),
+):
+    return await decisions_service.lookup(
         db,
         x_organization_id,
         treatment_id,

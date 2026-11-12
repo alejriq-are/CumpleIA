@@ -1,6 +1,6 @@
 # 5D.1 · Versión documental y revisión de Base y fundamento
 
-Contrato funcional aprobado. Catálogo, registro, revisión e interfaz implementados localmente. Recorrido conectado pendiente. Base Git `7087c47`. Desarrolla [LIC-GOV-001](revision-aceptacion-base-licitud.md) y el [circuito documental común](circuito-documental-comun.md).
+Contrato funcional aprobado. Catálogo, registro, revisión e interfaz implementados localmente. Recorrido conectado completado. Base Git `7087c47`. Desarrolla [LIC-GOV-001](revision-aceptacion-base-licitud.md) y el [circuito documental común](circuito-documental-comun.md).
 
 ## Recorrido
 
@@ -127,3 +127,5 @@ Las migraciones `bf5d10a26c41` y `d51ba5e1a702` se aplicaron en desarrollo local
 2. Abre la versión desde Evaluación de licitud guardada. Verifica el bloqueo de autorrevisión y otorga a B la facultad de revisión de Base y fundamento. Como B, comprueba el bloqueo de Favorable en la versión pendiente y registra Requiere cambios.
 3. Como A, guarda una base definida y registra una versión nueva. Como B, revisa el diagnóstico conservado. Para ensayar Favorable, resuelve los requisitos aplicables con respaldo equivalente o No aplica justificado donde se ofrezcan esas vías. Registra una observación menor con responsable y plazo.
 4. Comprueba que cada versión conserva su historial. Como A, revoca la facultad y verifica como B que la consulta histórica sigue disponible y el registro queda bloqueado.
+
+En CumpleIA Demo, la versión 1 conservó Requiere cambios n.º 1 y la versión 2 conservó Favorable n.º 1 con respaldo equivalente y No aplica justificado. La consulta histórica siguió disponible para B tras la revocación y el registro quedó bloqueado. La prueba conectada de Favorable se realizó sin observaciones de seguimiento. La validación automatizada cubrió su registro. Continúa la [contrato 5D.2 aprobado](base-fundamento-5d2.md).

@@ -136,6 +136,22 @@ async function setup(page: Page, mode: "register" | "review") {
             },
           });
         }
+        if (route.endsWith("/base-fundamento-versions/v1/" + vid + "/decision-state"))
+          return response({
+            organization_id: org,
+            treatment_id: tid,
+            assessment_id: aid,
+            version_id: vid,
+            decisions: [],
+            authorities: [],
+            latest_review_id: null,
+            authority_id: actor,
+            may_manage: false,
+            can_decide: true,
+            can_accept: false,
+            blocked_reason: null,
+            acceptance_blocked_reason: "La última revisión de esta versión debe ser Favorable",
+          });
         if (route.endsWith("/review-state"))
           return response({
             version_id: vid,
@@ -278,4 +294,23 @@ test("revisión favorable conserva requisitos y observación ante conflicto y re
     page.getByText(/Normalizar la referencia · Responsable: Equipo de ensayo/)
   ).toBeVisible();
   expect(await page.evaluate(() => (window as any).posts.length)).toBe(2);
+});
+
+test("consulta decisiones de Base y fundamento en la versión exacta", async ({ page }) => {
+  const duplicateKeys: string[] = [];
+  page.on("console", (message) => {
+    if (message.type() === "error" && message.text().includes("same key")) {
+      duplicateKeys.push(message.text());
+    }
+  });
+  await setup(page, "review");
+  await page.getByRole("button", { name: "Consultar versiones de Base y fundamento" }).click();
+  await page.getByRole("button", { name: "Consultar versión de Base y fundamento 1" }).click();
+  await page.getByText("Decisión de la organización", { exact: true }).click();
+  await page.getByRole("button", { name: "Consultar decisiones y facultades" }).click();
+  await expect(
+    page.getByText("La última revisión de esta versión debe ser Favorable", { exact: false })
+  ).toBeVisible();
+  await expect(page.getByRole("option", { name: "Acepta" })).toHaveAttribute("disabled", "");
+  expect(duplicateKeys).toEqual([]);
 });

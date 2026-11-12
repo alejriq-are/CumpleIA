@@ -6,6 +6,7 @@ import type { Annex } from "@/lib/api/assessment-support";
 import type { VersionScope } from "@/lib/api/eipd-versions";
 import { SavedBasisDocumentView, ValueView } from "./DossierDocumentView";
 import { BaseFundamentoRequirements } from "./BaseFundamentoRequirements";
+import { EipdVersionDecisions } from "./EipdVersionDecisions";
 import { BaseFundamentoReviews } from "./BaseFundamentoReviews";
 import { documentDisclosureClass, documentNavigationButtonClass as button } from "./document-focus";
 import {
@@ -331,11 +332,12 @@ export function BaseFundamentoHistory({
   const [items, setItems] = useState<BaseVersionItem[] | null>(null);
   const [detail, setDetail] = useState<BaseVersion | null>(null);
   const [reviewPending, setReviewPending] = useState(false);
+  const [decisionPending, setDecisionPending] = useState(false);
   const detailHeading = useRef<HTMLHeadingElement>(null);
   const historyButton = useRef<HTMLButtonElement>(null);
   const op = useBaseOperation();
   const { busy, run } = op;
-  useBasePending(busy || reviewPending, onPending);
+  useBasePending(busy || reviewPending || decisionPending, onPending);
 
   async function history() {
     const s = await scope();
@@ -377,7 +379,7 @@ export function BaseFundamentoHistory({
         ref={historyButton}
         type="button"
         className={button}
-        disabled={busy || reviewPending}
+        disabled={busy || reviewPending || decisionPending}
         onClick={() => void run(history)}
       >
         {items
@@ -385,10 +387,10 @@ export function BaseFundamentoHistory({
           : "Consultar versiones de Base y fundamento"}
       </button>
       <OperationFeedback error={op.error} notice={op.notice} />
-      {reviewPending && (
+      {(reviewPending || decisionPending) && (
         <p>
-          Termina o descarta los campos pendientes de revisión o facultad antes de cambiar de
-          versión.
+          Termina o descarta los campos pendientes de revisión, decisión o facultad antes de cambiar
+          de versión.
         </p>
       )}
       {items?.length === 0 && <p>Todavía no hay versiones registradas de Base y fundamento.</p>}
@@ -416,7 +418,7 @@ export function BaseFundamentoHistory({
           <button
             type="button"
             className={button}
-            disabled={busy || reviewPending}
+            disabled={busy || reviewPending || decisionPending}
             onClick={() => {
               setDetail(null);
               historyButton.current?.focus();
@@ -432,10 +434,18 @@ export function BaseFundamentoHistory({
           </p>
           <p className="break-words">Registrada por: {detail.created_by}</p>
           <BaseFundamentoReviews
-            key={detail.id}
+            key={`review-${detail.id}`}
             version={detail}
             scope={scope}
             onPending={setReviewPending}
+          />
+          <EipdVersionDecisions
+            key={`decision-${detail.id}`}
+            version={detail}
+            scope={scope}
+            onLock={setDecisionPending}
+            documentPath="base-fundamento-versions"
+            documentLabel={`Versión de Base y fundamento ${detail.version}`}
           />
           <details>
             <summary className={documentDisclosureClass}>Consultar evaluación de licitud</summary>

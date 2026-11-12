@@ -59,6 +59,7 @@ type DecisionState = {
   treatment_id: string;
   assessment_id: string;
   version_id: string;
+  consulted_by?: string;
   decisions: Decision[];
   authorities: Faculty[];
   latest_review_id: string | null;
@@ -68,6 +69,7 @@ type DecisionState = {
   can_accept: boolean;
   blocked_reason: string | null;
   acceptance_blocked_reason: string | null;
+  historical_acceptance_reason?: string | null;
 };
 const emptyFaculty = {
   subject: "",
@@ -82,8 +84,15 @@ export function EipdVersionDecisions({
   version,
   scope,
   onLock,
+  documentLabel,
+  documentPath = "eipd-versions",
 }: {
-  version: RegisteredVersion;
+  version: Pick<
+    RegisteredVersion,
+    "id" | "version" | "organization_id" | "treatment_id" | "assessment_id"
+  >;
+  documentLabel: string;
+  documentPath?: "eipd-versions" | "base-fundamento-versions";
   scope: () => Promise<VersionScope>;
   onLock: (locked: boolean) => void;
 }) {
@@ -121,7 +130,7 @@ export function EipdVersionDecisions({
   }, [locked]);
 
   const path = (s: VersionScope) =>
-    `/licitud/treatments/${encodeURIComponent(s.treatmentId)}/assessments/${encodeURIComponent(s.assessmentId)}/eipd-versions/v1`;
+    `/licitud/treatments/${encodeURIComponent(s.treatmentId)}/assessments/${encodeURIComponent(s.assessmentId)}/${documentPath}/v1`;
   const versionPath = (s: VersionScope) => path(s) + "/" + version.id;
   function matchesVersion(
     value: Pick<
@@ -281,13 +290,7 @@ export function EipdVersionDecisions({
   return (
     <details className="space-y-3 rounded border p-3">
       <summary className={documentDisclosureClass}>Decisión de la organización</summary>
-      <p>
-        Versión EIPD {version.version} ·{" "}
-        {String(
-          version.bundle.saved_assessment.eipd_resolution_assessment.document_reference ??
-            "Sin referencia"
-        )}
-      </p>
+      <p>{documentLabel}</p>
       <p>
         La decisión documental queda asociada a esta versión. Confirmación y activación permanecen
         bloqueadas.
@@ -296,7 +299,16 @@ export function EipdVersionDecisions({
         type="button"
         className={button}
         disabled={busy || !!pending}
-        onClick={() => void action(read)}
+        onClick={() =>
+          void action(async () => {
+            try {
+              await read();
+            } catch (error) {
+              setState(null);
+              throw error;
+            }
+          })
+        }
       >
         Consultar decisiones y facultades
       </button>
@@ -314,6 +326,7 @@ export function EipdVersionDecisions({
       {message && <p role="status">{message}</p>}
       {state && (
         <>
+          {state.consulted_by && <p>Identificador de quien consulta: {state.consulted_by}</p>}
           <h5 className="font-semibold">Historial de decisiones de la versión {version.version}</h5>
           {state.decisions.length === 0 && <p>Esta versión todavía no tiene decisiones.</p>}
           {state.decisions.length > 0 && (
@@ -335,6 +348,9 @@ export function EipdVersionDecisions({
                 </li>
               ))}
             </ol>
+          )}
+          {state.historical_acceptance_reason && (
+            <p>Aceptación histórica. {state.historical_acceptance_reason}.</p>
           )}
           {state.blocked_reason && <p>{state.blocked_reason}</p>}
           {state.can_decide && state.acceptance_blocked_reason && (
