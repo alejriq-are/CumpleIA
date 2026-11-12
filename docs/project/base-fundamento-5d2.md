@@ -68,4 +68,6 @@ Pasaron 14 pruebas dirigidas en Chromium con respuestas controladas, TypeScript,
 - La versión 1 conservó su historial de decisiones vacío y mostró **Acepta** deshabilitado porque su última revisión era **Requiere cambios**.
 - A revocó la facultad de decisión. B siguió consultando la decisión n.º 1 de la versión 2 y el sistema bloqueó nuevas decisiones por falta de facultad vigente.
 
+- A guardó un cambio en el fundamento y registró la versión 3. Su historial de decisiones empezó vacío. Al volver a la versión 2, el historial conservó **Acepta n.º 1** y mostró el aviso **Aceptación histórica** por la diferencia entre el fundamento guardado y el conservado.
+
 Durante el recorrido se añadió el identificador de quien consulta y se corrigieron las claves duplicadas de los paneles de revisión y decisión. Pasaron las tres pruebas de navegador de Base y fundamento después de la corrección. El bloqueo tras cambiar el fundamento se verificó en PostgreSQL aislado.

@@ -1,6 +1,6 @@
 ## 5D.2 · Decisión de la organización
 
-Servidor e interfaz implementados localmente. Pasaron 14 pruebas dirigidas en Chromium con respuestas controladas. La migración pasó en PostgreSQL aislado y se aplicó en desarrollo local. Pasó la prueba de integración con `app_user`. El recorrido del 12/11/2026 confirmó Acepta n.º 1 en la versión 2, el bloqueo en la versión 1 y la consulta histórica tras revocar la facultad de decisión. Próximo paso. Revisar el plan del circuito documental antes de iniciar el siguiente bloque. [Contrato y estado de 5D.2](project/base-fundamento-5d2.md).
+Servidor e interfaz implementados localmente. Pasaron 14 pruebas dirigidas en Chromium con respuestas controladas. La migración pasó en PostgreSQL aislado y se aplicó en desarrollo local. Pasó la prueba de integración con `app_user`. El recorrido del 12/11/2026 confirmó Acepta n.º 1 en la versión 2, el bloqueo en la versión 1 y la consulta histórica tras revocar la facultad de decisión. La versión sucesora 3 comenzó con historial de decisiones vacío. La versión 2 conservó Acepta n.º 1 y mostró el aviso de aceptación histórica tras cambiar el fundamento. Próximo paso. Revisar la rama para preparar su integración. [Contrato y estado de 5D.2](project/base-fundamento-5d2.md).
 
 ## 5D.1 — registro y revisión integrados en la interfaz
 
