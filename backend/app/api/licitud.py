@@ -10,6 +10,8 @@ from app.core.deps import require_active_subscription, require_permission
 from app.db.models import Profile
 from app.db.session import get_db
 from app.schemas.licitud import (
+    EipdResolutionReviewIn,
+    EipdResolutionReviewOut,
     LegalAssessmentDraftCreate,
     LegalAssessmentDraftUpdate,
     LegalAssessmentOut,
@@ -104,4 +106,22 @@ async def obtener_preparacion(
 ):
     return await service.get_legal_assessment_readiness_v1(
         db, x_organization_id, treatment_id, assessment_id
+    )
+
+
+@router.post(
+    "/treatments/{treatment_id}/assessments/{assessment_id}/eipd-resolution/reviews",
+    response_model=EipdResolutionReviewOut,
+    status_code=status.HTTP_201_CREATED,
+)
+async def registrar_revision_eipd(
+    treatment_id: uuid.UUID,
+    assessment_id: uuid.UUID,
+    payload: EipdResolutionReviewIn,
+    x_organization_id: Annotated[uuid.UUID, Header()],
+    profile: Profile = Depends(require_permission(Permission.edit_content)),
+    db: AsyncSession = Depends(get_db),
+):
+    return await service.record_eipd_resolution_review_v1(
+        db, x_organization_id, treatment_id, assessment_id, profile.id, payload
     )
