@@ -199,6 +199,34 @@ export const eipdReviewApi = {
           })
         | null;
       representation_context_coverage?: "no_aplica" | "pendiente";
+      eipd_controls_v4?: {
+        evaluation_version: 4;
+        evaluation_scope: "requisitos_documentales";
+        authorizes_action: false;
+        can_confirm: false;
+        policy: EipdPolicyStatus;
+        review_prerequisites_v4: {
+          evaluation_version: 4;
+          evaluation_scope: "requisitos_documentales";
+          authorizes_action: false;
+          can_confirm: false;
+          continuar: {
+            prerequisites_met: false;
+            context_metadata: null;
+            issues: EipdReviewIssueV3[];
+          };
+          requiere_cambios: {
+            prerequisites_met: false;
+            context_metadata: null;
+            issues: EipdReviewIssueV3[];
+          };
+          no_continuar: {
+            prerequisites_met: false;
+            context_metadata: null;
+            issues: EipdReviewIssueV3[];
+          };
+        };
+      } | null;
       eipd_controls_v3: {
         evaluation_version: 3;
         can_confirm: false;
@@ -265,7 +293,68 @@ export const eipdReviewApi = {
         })),
       };
     }
+    const successor = value.eipd_controls_v4 ?? null;
     const controls = value.eipd_controls_v3;
+    if (successor !== null) {
+      requireContract(controls === null);
+      requireContract(
+        successor.evaluation_version === 4 &&
+          successor.evaluation_scope === "requisitos_documentales" &&
+          successor.authorizes_action === false &&
+          successor.can_confirm === false
+      );
+      const result = successor.review_prerequisites_v4;
+      requireContract(
+        result &&
+          result.evaluation_version === 4 &&
+          result.evaluation_scope === "requisitos_documentales" &&
+          result.authorizes_action === false &&
+          result.can_confirm === false
+      );
+      for (const name of ["continuar", "requiere_cambios", "no_continuar"] as const) {
+        const decision = result[name];
+        requireContract(
+          decision &&
+            decision.prerequisites_met === false &&
+            decision.context_metadata === null &&
+            Array.isArray(decision.issues) &&
+            decision.issues.length > 0
+        );
+        for (const issue of decision.issues) {
+          requireContract(
+            issue &&
+              [
+                "state",
+                "rat",
+                "ordinary",
+                "research",
+                "frontier",
+                "detection",
+                "resolution",
+                "sources",
+                "activation",
+                "review",
+              ].includes(issue.stage) &&
+              typeof issue.field === "string" &&
+              typeof issue.code === "string" &&
+              [
+                "incompleto",
+                "requiere_revision",
+                "pendiente_revision",
+                "supuesto_declarado",
+              ].includes(issue.category) &&
+              (issue.question_id === null || typeof issue.question_id === "string")
+          );
+        }
+      }
+      const policy = successor.policy;
+      requireContract(
+        policy &&
+          ["pendiente", "verificadas"].includes(policy.sources_status) &&
+          ["pendiente", "aceptada"].includes(policy.acceptance_status) &&
+          policy.activation === "deshabilitada"
+      );
+    }
     if (controls !== null) {
       requireContract(
         controls &&
@@ -337,13 +426,19 @@ export const eipdReviewApi = {
       sensitive_representation: representation,
       representation_context_coverage: coverage,
       policy_status:
-        controls === null
-          ? null
-          : {
-              sources_status: controls.policy.sources_status,
-              acceptance_status: controls.policy.acceptance_status,
-              activation: controls.policy.activation,
-            },
+        successor !== null
+          ? {
+              sources_status: successor.policy.sources_status,
+              acceptance_status: successor.policy.acceptance_status,
+              activation: successor.policy.activation,
+            }
+          : controls === null
+            ? null
+            : {
+                sources_status: controls.policy.sources_status,
+                acceptance_status: controls.policy.acceptance_status,
+                activation: controls.policy.activation,
+              },
       latest_review_context_status:
         controls === null || coverage === "pendiente"
           ? null

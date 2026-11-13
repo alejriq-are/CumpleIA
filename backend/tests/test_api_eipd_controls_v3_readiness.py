@@ -153,7 +153,10 @@ async def test_openapi_closed_v3():
         ]
         == 3
     )
-    readiness = schemas["LegalAssessmentRepresentationReadinessOutV1"]["properties"]
+    reference = app.openapi()["paths"][
+        "/licitud/treatments/{treatment_id}/assessments/{assessment_id}/readiness"
+    ]["get"]["responses"]["200"]["content"]["application/json"]["schema"]["$ref"]
+    readiness = schemas[reference.rsplit("/", 1)[-1]]["properties"]
     assert "eipd_controls_v3" in readiness
     assert "sensitive_representation" in readiness
     assert "representation_context_coverage" in readiness

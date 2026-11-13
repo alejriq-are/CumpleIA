@@ -367,3 +367,87 @@ No import API nuevo todavia: composicion actual V3 solo admite contexto2 y metad
 Proximo conjunto coherente: composicion sucesora con contexto3/diagnostico propio,
 metadatos/prerrequisitos conservadores y salida; despues builder/writer/API/localDB.
 M3-T1 EN PROGRESO; ficticios hasta MVP; EIPD bloqueada.
+
+## 2026-10-14 — M3-T1 §257: composicion documental representacion/EIPD
+
+Nuevo adaptador puro recibe IDs org/tratamiento/evaluacion de servidor y ContextV3
+cerrado. Evalua asociacion propia de representacion separada de binding EIPD; integra
+motivos reales y sustituye solo el placeholder de evaluacion pendiente. Conserva
+motivo de falta de cobertura V1/V2. Metadata V2 solo para binding3/contexto actual;
+identidad puede describir documento incompleto, nunca acredita facultad/preparacion.
+Cambio de ID puede dejar binding EIPD vigente pero representacion obsoleta: no
+confundir ambas relaciones. Resultado siempre authorizes_action/can_confirm false.
+
+Once casos nuevos, incluidos completo documental sin autoridad, retiro, cambio
+corporal, IDs y version antigua. 66 pruebas composicion/evaluadores/metadata aprobadas
+en 0.40 s en base fija aislada verificada; Ruff/Black correctos. Una asercion inicial
+se alineo con codigo existente asociacion_documento_obsoleta, sin cambiar reglas.
+Runner incorpora suite. No accion/API/builder operativo conectado aun; composicion
+transversal, politica y prerrequisitos mantienen barreras propias. Proximo: integrar
+adaptador en readiness/salida de servidor como conjunto con writer y lectura V3.
+M3-T1 EN PROGRESO; datos ficticios hasta MVP; activacion EIPD bloqueada.
+
+## 2026-10-14 — M3-T1 §258: composicion transversal V4
+
+Composicion pura V4 recibe IDs de servidor/contexto3 y combina representacion,
+resolucion, controles ordinarios, deteccion/frontera, revision y politica. Reutiliza
+nucleos historicos mediante parametros internos con defaults anteriores; contexto
+normativo proyectado explicitamente para deteccion, identidad documental V3 no se
+proyecta. Ruta investigacion solo cuando existe/declarada; no agrega barrera de
+investigacion a ruta ordinaria. Barrera politica_representacion_no_implementada en
+preparacion/revision/confirmacion y flags false aun con revision/politica vigentes.
+No rutas normativas nuevas o habilitacion implicita por metadatos.
+
+Diez casos nuevos. 166 pruebas composicion V4, nucleos previos y readiness HTTP
+V1/V2/V3 aprobadas en 11.51 s, base fija aislada verificada; Ruff/Black correctos.
+Runner incorpora suite. Validacion anterior interrumpida por limite temporal del
+reviewer, ahora resuelta por canal normal. Sin API/builder operativo nuevo todavia;
+siguiente conjunto: salida/prerrequisitos V4 y conexion CRUD/readiness coherentes.
+M3-T1 EN PROGRESO; datos ficticios hasta MVP; activacion EIPD bloqueada.
+
+## 2026-10-14 — M3-T1 §259: salida y requisitos V4 bloqueados
+
+Contrato cerrado EipdControlCompositionV4Out conserva controles ordinarios,
+representacion, deteccion version2/3 segun ruta, resolucion binding1/2/3, revision y
+politica. Proyeccion explicita de propiedades/flags; context_metadata identifica
+material actual, no evento humano ni permiso. Requisitos de tres decisiones V4
+exigen prerequisites_met=false/context_metadata=null y flags false aun cuando haya
+identidad actual. Root ReadinessOutV2 prepara campo separado opcional; root V1 intacto.
+
+Nueve casos nuevos; 56 pruebas salida/composicion/contratos aprobadas en 0.54 s,
+base fija aislada verificada. Roundtrip JSON, rutas ordinaria/investigacion/contexto
+no disponible, flags positivos y uso de metadata documental como contexto de accion
+rechazados. Ruff/Black correctos; runner incorpora suite. Sin cambio de endpoints,
+eventos o politica. Proximo: conectar builder/writer/CRUD/readiness y validar HTTP
+antes de aplicar migracion a base operativa local. M3-T1 EN PROGRESO; EIPD bloqueada.
+
+## 2026-10-14 — M3-T1 §260: API V3/V4 conectada
+
+POST/PATCH de resolucion eligen ContextV3 servidor cuando hay representacion o
+binding3 previo, despues de recomponer RAT/consentimientos/aportes. API usa salida
+OutV2 capaz de leer binding3. Readiness conecta campo separado eipd_controls_v4,
+compone identidades/motivos/politica y conserva caminos V1/V2/V3 anteriores donde
+corresponden. Tres decisiones V4 bloqueadas; confirmacion/revision HTTP releen y
+rechazan tambien binding3 tras retirar material, sin degradar cobertura ni crear
+eventos. Campos/contratos de entrada no ampliados a envelopes editables.
+
+Dos recorridos HTTP nuevos: crear todo junto, o aportar/modificar/reaportar/retirar;
+verifican lectura estable, obsolescencia, metadata2, V3 conservado y cero eventos
+tras acciones 409. 49 HTTP focalizadas aprobadas en 18.29 s. Suite runner aislado:
+892 aprobadas en 259.36 s; no equivale a suite completa de producto. Ruff global y
+Black (255 archivos) correctos. OpenAPI test resuelve root publicado; assertions V3
+historicas conservadas, caso representacion ahora comprueba decisiones V4.
+
+Cliente conserva politica V4 sin presentarla como requisitos V3 o vigencia historica;
+valida flags/decision bloqueada/contexto accion null y rechaza mezcla V3/V4. Seis
+casos nuevos; 37 frontend aprobados en 4.1 s, tipos/lint y formato correctos. Todavia
+no presenta lista completa de motivos V4 ni identidad actual como vista nueva.
+
+Migracion f52d6c9b3e10 aplicada a cumpleia local solo despues de suite aislada y
+comprobacion explicita host/base/head/roles. Conteos y huellas de contenido iguales
+en legal_assessments, reviews, publicaciones/selecciones/selector de politica.
+Sin backfill ni material de usuario nuevo. Script inicial aviso de cierre de pool
+por ciclos async separados; migracion/comparacion correctas, lectura final en un
+solo ciclo confirmo head/constraint/rol sin aviso. Backend health 200. EIPD sigue
+bloqueada, sin merge/despliegue; ficticios hasta MVP. Proximo: vista completa V4 y
+lectura/revision versionada compatible con metadata2 antes de cualquier nueva accion.
