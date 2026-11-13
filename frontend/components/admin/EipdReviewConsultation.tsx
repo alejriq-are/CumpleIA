@@ -31,8 +31,10 @@ export function consultationError(error: unknown): string {
 }
 
 export function PreparationView({ value }: { value: EipdReviewPreparationOut }) {
+  const current = value.review_prerequisites_v4 ?? null;
   const result =
-    value.representation_context_coverage === "pendiente" ? null : value.review_prerequisites_v3;
+    current ??
+    (value.representation_context_coverage === "pendiente" ? null : value.review_prerequisites_v3);
   return (
     <section aria-labelledby="preparation-heading" className="space-y-4">
       <h2 id="preparation-heading" className="text-xl font-semibold">
@@ -102,9 +104,9 @@ export function PreparationView({ value }: { value: EipdReviewPreparationOut }) 
       )}
       {value.representation_context_coverage === "pendiente" && (
         <p role="status" className="rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm">
-          Las revisiones EIPD anteriores no cubren este material de representación. La integración
-          de esa cobertura está pendiente; no se presenta vigencia global ni se permite registrar
-          una nueva revisión EIPD o confirmar.
+          {current !== null
+            ? "El diagnóstico actual incluye la representación. Consultarlo no acredita la vigencia de revisiones guardadas ni permite registrar una nueva revisión EIPD o confirmar."
+            : "Las revisiones EIPD anteriores no cubren este material de representación. La integración de esa cobertura está pendiente; no se presenta vigencia global ni se permite registrar una nueva revisión EIPD o confirmar."}
         </p>
       )}
       {value.latest_review_context_status !== null &&
@@ -135,6 +137,21 @@ export function PreparationView({ value }: { value: EipdReviewPreparationOut }) 
             </p>
           </section>
         )}
+      {value.current_control_issues_v4 && value.current_control_issues_v4.length > 0 && (
+        <section
+          aria-labelledby="current-controls-heading"
+          className="space-y-3 rounded-lg border bg-white p-4"
+        >
+          <h3 id="current-controls-heading" className="font-semibold">
+            Motivos del expediente actual
+          </h3>
+          <p className="text-sm text-gray-600">
+            Incluye los controles documentales y los bloqueos de revisión y confirmación. Las
+            repeticiones idénticas se agrupan.
+          </p>
+          <EipdReviewIssues issues={value.current_control_issues_v4} />
+        </section>
+      )}
       {result === null ? (
         <p>
           {value.representation_context_coverage === "pendiente"
@@ -154,9 +171,11 @@ export function PreparationView({ value }: { value: EipdReviewPreparationOut }) 
                     : "Requisitos documentales pendientes."}
                 </p>
                 <p className="mt-2 text-sm">
-                  {diagnostic.context_metadata === null
-                    ? "Identidad auditable no disponible."
-                    : "Identidad del material actual disponible."}
+                  {current !== null
+                    ? "Registro de revisión no habilitado."
+                    : diagnostic.context_metadata === null
+                      ? "Identidad auditable no disponible."
+                      : "Identidad del material actual disponible."}
                 </p>
                 {diagnostic.issues.length > 0 && <EipdReviewIssues issues={diagnostic.issues} />}
               </article>
