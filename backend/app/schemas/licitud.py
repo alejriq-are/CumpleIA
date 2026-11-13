@@ -990,6 +990,43 @@ class SpecialConditionsV1(SpecialConditionsDraftIn):
     )
 
 
+class ResearchAssessmentV1(LegalAssessmentScopeIn):
+    model_config = ConfigDict(extra="forbid", revalidate_instances="always")
+    schema_version: Literal[1] = 1
+    purpose_type: (
+        Literal["historico", "estadistico", "cientifico", "estudio_investigacion"]
+        | None
+    ) = None
+    purpose_description: str | None = None
+    public_interest_analysis: str | None = None
+    exclusive_use: ContractResponseV1 | None = None
+    exclusivity_controls_analysis: str | None = None
+    quality_measures_analysis: str | None = None
+    security_measures_analysis: str | None = None
+    measures_implemented: ContractResponseV1 | None = None
+    evidence: list[ContractEvidenceV1] = Field(default_factory=list)
+    publication_planned: ContractResponseV1 | None = None
+    anonymization_method: str | None = None
+    anonymization_analysis: str | None = None
+    anonymization_evidence: list[ContractEvidenceV1] = Field(default_factory=list)
+    retention_analysis: str | None = None
+
+
+class ResearchContextBindingV1(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid", frozen=True, revalidate_instances="always"
+    )
+    schema_version: Literal[1] = 1
+    context_hash: str = Field(pattern=r"^[0-9a-f]{64}$")
+    document_hash: str = Field(pattern=r"^[0-9a-f]{64}$")
+
+
+class BoundResearchAssessmentV1(BaseModel):
+    model_config = ConfigDict(extra="forbid", revalidate_instances="always")
+    assessment: ResearchAssessmentV1
+    context_binding: ResearchContextBindingV1
+
+
 class LegalAssessmentDraftCreate(BaseModel):
     """Entrada para crear una nueva versión en estado borrador."""
 
@@ -999,6 +1036,7 @@ class LegalAssessmentDraftCreate(BaseModel):
     justification: str | None = None
     consent_assessment: ConsentAssessmentV1 | None = None
     lia_assessment: LiaAssessmentV1 | None = None
+    research_assessment: ResearchAssessmentV1 | None = None
     geolocation_assessment: GeolocationAssessmentV1 | None = None
     sensitive_consent_assessment: SensitiveConsentAssessmentV1 | None = None
     health_assessment: HealthAssessmentV1 | None = None
@@ -1026,6 +1064,7 @@ class LegalAssessmentDraftUpdate(BaseModel):
     justification: str | None = None
     consent_assessment: ConsentAssessmentV1 | None = None
     lia_assessment: LiaAssessmentV1 | None = None
+    research_assessment: ResearchAssessmentV1 | None = None
     geolocation_assessment: GeolocationAssessmentV1 | None = None
     sensitive_consent_assessment: SensitiveConsentAssessmentV1 | None = None
     health_assessment: HealthAssessmentV1 | None = None
@@ -1254,6 +1293,7 @@ class LegalAssessmentOut(BaseModel):
     rat_context_snapshot: dict
     consent_assessment: ConsentAssessmentV1 | None
     lia_assessment: LiaAssessmentV1 | None
+    research_assessment: BoundResearchAssessmentV1 | None = None
     special_conditions: SpecialConditionsV1 | None
     contract_assessment: ContractAssessmentV1 | None
     legal_obligation_assessment: LegalObligationAssessmentV1 | None
@@ -1293,6 +1333,15 @@ class DocumentaryReadinessOut(BaseModel):
     result: Literal["completo", "requiere_revision", "incompleto"]
     issues: list[ReadinessIssueOut]
     applicability: list[ReadinessApplicabilityOut]
+
+
+class ResearchDocumentReadinessOut(DocumentaryReadinessOut):
+    """Completitud y asociacion independientes de autoridad para confirmar."""
+
+    model_config = ConfigDict(extra="forbid")
+    association_result: Literal["vigente", "requiere_revision"]
+    association_issues: list[str]
+    can_confirm: Literal[False] = False
 
 
 class EipdResolutionDocumentReadinessOut(DocumentaryReadinessOut):
@@ -1460,6 +1509,7 @@ class LegalAssessmentReadinessOut(BaseModel):
     status: LegalAssessmentStatus
     legal_basis: LegalBasis | None
     rat_context_current: bool | None
+    research: ResearchDocumentReadinessOut | None = None
     consent: DocumentaryReadinessOut | None
     lia: DocumentaryReadinessOut | None
     contract: DocumentaryReadinessOut | None

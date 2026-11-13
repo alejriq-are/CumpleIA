@@ -336,5 +336,45 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 
 - [x] Consolidar secuencia personal deshabilitada, coherencia persistida y preflight posterior ok; head verificado.
 - [x] Separar pendientes operacionales y juridicos en docs/project/m3-t1-eipd-cierre-validacion-local.md.
-- [ ] Preparar ejecutor de pruebas que exija base aislada antes de nuevas suites de escritura.
+- [x] Preparar ejecutor focalizado que exige base aislada antes de pytest: §123, 60 pruebas aprobadas. Pytest directo no queda protegido por el wrapper.
 - [ ] Validar rotacion/retiro y recuperacion, fuentes/aceptacion y alcance integral; M3-T1 EN PROGRESO.
+
+## M3-T1 §123 — pruebas aisladas
+
+- [x] Ejecutar suite focalizada mediante guardas de destino/head/roles/estado, con 60 aprobadas.
+- [x] Ejecutar ensayo aislado de rotacion/retiro y recuperacion §124: 63 pruebas aprobadas; snapshot de pruebas sin cambios.
+- [ ] Validar ciclo de vida del canal provisionado con historial real y renovacion segura de procesos; no ejecutado en §124.
+
+## M3-T1 §125 — rotacion real preparada
+
+- [x] Verificar canal/destino/head y preparar drenaje, reemplazo privado, recuperacion y comprobacion posterior.
+- [x] Rotacion real local ejecutada §126: credencial anterior rechazada en conexion nueva; nuevo canal ok y snapshot completo intacto.
+- [x] Acceso personal tras reinicio confirmado por captura y copia privada anterior retirada (§126).
+
+## M3-T1 §127 — retiro reversible real
+
+- [x] Drenar canal real, comprobar NOLOGIN con conexion nueva, restaurar LOGIN y verificar snapshot completo intacto/revision 1.
+- [x] Acceso personal tras reinicio de recuperacion confirmado por captura §127. Retiro definitivo no ejecutado.
+
+## M3-T1 §128 — investigacion documental
+
+- [x] Delimitar primer incremento de investigacion con datos no sensibles/adultos y LIA, completitud/aplicabilidad y fuente primaria.
+- [x] Implementar schema/evaluador puro §129; sin persistencia ni gates, can_confirm=false.
+- [x] Ampliar aplicabilidad/limites §130: 20 casos nuevos; suite aislada 107 aprobadas.
+- [x] Implementar binding independiente de investigacion y chequeo de obsolescencia §131; 119 pruebas aisladas aprobadas. Historicos intactos, sin conversion automatica.
+- [x] Delimitar persistencia/API §132 en docs/project/m3-t1-investigacion-integracion.md.
+- [x] Schema/modelo/migracion nullable sin backfill §133; 121 pruebas aisladas, upgrade/check en ambas bases y auditoria EIPD intacta.
+- [x] Integrar servicios/API create/GET/PATCH con binding de servidor y pruebas de acceso §134; nuevas asociaciones especiales/EIPD pendientes.
+
+### M3-T1 §134 — API del expediente de investigacion
+
+- [x] Create/GET/PATCH con binding de servidor y omision/null/reaporte; contratos cliente cerrados.
+- [x] 127 pruebas focalizadas aprobadas y 174 HTTP existentes de compatibilidad aprobadas; estados historicos protegidos.
+- [x] Readiness documental/asociacion de investigacion §135. Confirmacion sigue bloqueada; M3-T1 EN PROGRESO.
+- [ ] Nuevas versiones especiales/EIPD que cubran investigacion y aceptacion revisada antes de habilitar el gate.
+
+### M3-T1 §135 — Readiness de investigacion
+
+- [x] Completitud, aplicabilidad y asociacion vigentes/obsoletas expuestas sin escrituras; bloqueo compartido de confirmacion incluso con expediente completo.
+- [x] 303 pruebas ampliadas aisladas aprobadas; Black/Ruff aprobados.
+- [ ] Nuevas versiones de binding especial/EIPD e integracion posterior; M3-T1 EN PROGRESO y activacion bloqueada.

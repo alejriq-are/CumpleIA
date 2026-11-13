@@ -9000,3 +9000,290 @@ Pendientes separados: (1) asegurar ejecucion de futuras suites solo en base aisl
 No se identifica una fuente nueva ni se cambia una regla legal en esta revision.
 Ley 21.719/19.628 reformada fija. M3-T1 EN PROGRESO; activacion EIPD bloqueada.
 Sin commit/push.
+
+## 2026-10-09 — M3-T1 §123: ejecutor focalizado de pruebas aisladas
+
+backend/scripts/run_eipd_tests.py proporciona python -m scripts.run_eipd_tests.
+Deriva ambas URLs solo en entorno hijo hacia cumpleia_eipd_tests_20261009, mantiene
+roles separados y exige development, hosts loopback iguales, sin parametros URL,
+runtime app_user. Antes de pytest consulta readonly current_database/head y registro
+EIPD vacio, confirma runtime sin superuser/BYPASSRLS. Rechaza destino/head/roles/estado
+incompatibles con salida logica 2 y mensaje sin secretos. No crea/borra DB ni copia
+datos; no imprime URLs. Elimina overrides heredados de pytest y credenciales Supabase/
+canal administrativo; usa emisor sintetico de pruebas y targets fijos sin argumentos.
+
+Guardas probadas: URLs a base fija y roles intactos, entorno padre sin cambios,
+rechazo remoto/query/produccion, runtime owner/destinos distintos, DB/head/registro
+no vacio y privilegios runtime incompatibles. Ejecucion por el runner: 60 aprobadas
+en 9.45 s (56 API/concurrencia + 4 guardas); Black/Ruff aprobados. Invocacion con
+argumento extra bloqueada antes de pytest. Sin nuevas escrituras operacionales ni
+cambios de perfil/secretos/backend. No suite completa nueva.
+
+Alcance: protege las invocaciones mediante este ejecutor; pytest directo sigue
+resolviendo DATABASE_URL habitual y no queda protegido por este wrapper. Usar este
+punto de entrada para la suite EIPD focalizada, sin ejecutar pytest directo contra
+la base operacional. Cambios de head requieren revision explicita de la guarda.
+Siguiente: preparar ensayo de rotacion/retiro y recuperacion local preservando
+historial. Fuentes/aceptacion y alcance integral pendientes; ley fija, M3-T1 EN
+PROGRESO y activacion bloqueada. Sin commit/push.
+
+## 2026-10-09 — M3-T1 §124: ensayo aislado de rotacion/retiro y recuperacion
+
+Se agregan tres pruebas PostgreSQL de ciclo de vida al ejecutor fijo, sobre login
+aleatorio temporal de fixture y base aislada. Rotacion: clave antigua rechazada en
+conexiones nuevas (28P01), conexion previa sobrevive, pool se dispone y clave nueva
+permite recuperar el canal; rol local e identidad se limpian tras rollback. NOLOGIN:
+conexion nueva rechazada (28000), conexion previa sigue viva pero _prepare_channel
+rechaza con 503; restaurar LOGIN y renovar pool recupera. Retiro de membresia:
+conexion caliente rechazada por guarda 503, restauracion recupera el canal.
+
+63 pruebas focalizadas aprobadas en 13.03 s; Black/Ruff aprobados. El snapshot de
+pruebas permanece igual antes/despues de cada ensayo (registro inicialmente vacio
+por guarda del runner); no se extrapola a prueba de historial no vacio. Fixtures
+restauran flags/membresia cuando procede, disponen pools y eliminan solo su rol
+aleatorio. No cambian login/secreto/pool operacional ni perfil personal.
+Preflight readonly posterior del canal original: ok, auditoria coherente, selector
+revision 1 y activation_authorized false. No rotacion/retiro real del canal de usuario
+ni actualizacion de su archivo privado en este checkpoint.
+
+Pendiente operacional: ensayo coordinado sobre canal provisionado, renovacion de
+procesos/conexiones y referencia de recuperacion segura con historial real. Ensayo
+tecnico aislado no acredita ese cambio. Fuentes/aceptacion y alcance integral siguen
+pendientes; ley fija, M3-T1 EN PROGRESO y activacion EIPD bloqueada. Sin commit/push.
+
+## 2026-10-09 — M3-T1 §125: rotacion real local preparada
+
+Plan concreto en docs/project/m3-t1-eipd-plan-rotacion-local.md. Lectura previa:
+archivo externo 0600, destino development/loopback y login dedicado esperado;
+preflight ok, revision 1, head b17d95c0286f. Dos conexiones idle durante diagnostico
+(incluida la propia); pool del diagnostico dispuesto al terminar. Requerir nueva
+comprobacion de drenaje antes de ejecutar. No se cambia clave/archivo/rol/proceso.
+
+Secuencia preparada: snapshot previo, detener solo validacion 8001 y drenar,
+reemplazo privado/recuperacion 0600, cambio de clave y sustitucion atomica con
+recuperacion ante fallo, conexiones nuevas antigua rechazada/nueva aceptada,
+comparacion exacta de auditoria, reinicio y comprobacion personal. Backend 8000 y
+perfil permanecen fuera del cambio. Rotacion REAL pendiente, no acreditada por
+ensayo aislado §124 ni por este plan. Sin nueva suite; ultima focalizada 63 §124.
+Fuentes/aceptacion y alcance integral pendientes; ley fija, M3-T1 EN PROGRESO y
+activacion bloqueada. Sin commit/push.
+
+## 2026-10-09 — M3-T1 §126: rotacion real local ejecutada
+
+Se detuvo el proceso propio de validacion 8001 y se comprobo ausencia de conexiones
+del login dedicado antes de alterar password. Destino development/loopback, login
+esperado, archivo privado 0600 y head b17d95c0286f verificados. Snapshot previo
+validado: 1 publicacion deshabilitada, 1 seleccion, revision 1.
+
+Nueva clave aleatoria en memoria, copia privada de recuperacion 0600 externa al
+repo y reemplazo privado preparado; cambio password de eipd_backend_local y
+sustitucion atomica de admin.env. Conexion NUEVA con credencial anterior rechazada;
+nueva credencial: preflight ok. Snapshot completo posterior exactamente igual al
+previo; no cambios de perfiles, permisos, publicaciones, eventos ni selector.
+
+Proceso propio 8001 reiniciado con nuevo secreto en memoria, DEBUG=false y sin
+access log. GET /admin/eipd/status sin token -> 401. Backend previo 8000 fuera del
+cambio. No secretos ni PII en documentos/logs/repositorio. Copia privada de
+recuperacion conservada hasta confirmar sesion personal; retirada aun pendiente.
+No se afirma validacion personal tras reinicio a partir del diagnostico tecnico.
+
+Proximo: usuario Comprobar acceso y Consultar registro en pantalla con sesion real,
+confirmar revision 1/politica deshabilitada y luego retirar copia privada anterior.
+No suite nueva (ultima 63 §124). Fuentes/aceptacion y alcance integral pendientes;
+ley fija, M3-T1 EN PROGRESO y activacion EIPD bloqueada. Sin commit/push.
+
+## 2026-10-09 — M3-T1 §127: retiro reversible del canal real y recuperacion
+
+Proceso propio 8001 detenido y ausencia de sesiones dedicadas comprobada tras
+snapshot previo validado. Login local eipd_backend_local cambiado temporalmente
+a NOLOGIN: conexion NUEVA con credencial actual rechazada, SQLSTATE 28000.
+LOGIN restaurado en finally; nueva conexion y preflight ok. Snapshot completo
+posterior exactamente igual al previo, selector revision 1. No cambio de password,
+archivo privado, membresias, perfiles, publicaciones, eventos ni selector.
+
+Proceso 8001 reiniciado con credencial privada actual, DEBUG=false y sin access log;
+GET /status sin token -> 401. Backend 8000 fuera del ensayo. Comprobacion personal
+posterior al reinicio pendiente. No constituye retiro definitivo del canal ni
+revocacion instantanea de transacciones ya autorizadas; se dreno antes del cambio.
+No nueva suite; ultima 63 §124. Ley fija, fuentes/aceptacion y alcance integral
+pendientes; M3-T1 EN PROGRESO y activacion EIPD bloqueada. Sin commit/push.
+
+## 2026-10-09 — M3-T1 §128: siguiente brecha funcional delimitada
+
+Tras cerrar ciclo local del canal, se revisa codigo actual: salud/biometria por
+consentimiento ya tienen evaluadores; investigacion_art16quinquies aun deriva a
+validador_no_implementado. Se elige preparacion documental inicial para datos no
+sensibles/adultos con LIA vigente, decision de producto sin atribuirla como limite
+juridico universal. Fuente primaria BCN Ley 21.719/art16quinquies consultada.
+
+Diseno, completitud/aplicabilidad, integracion por pasos y criterios de aceptacion
+en docs/project/m3-t1-investigacion-diseno.md. Proximo: schema y evaluador puro,
+sin persistir ni levantar bloqueos hasta integrar/aceptar. Sin cambios de codigo,
+politicas ni secretos; sin nueva suite. Ley fija, M3-T1 EN PROGRESO y activacion
+EIPD bloqueada. Sin commit/push.
+
+## 2026-10-09 — M3-T1 §129: contrato/evaluador puro de investigacion
+
+Se agregan app/schemas/research.py (ResearchAssessmentV1 cerrado, borrador opcional,
+revalidacion de instancias) y app/services/research.py. Evaluador puro reutiliza LIA,
+canonizacion de finalidad y RAT; exige base interes_legitimo y cobertura completa
+conservadora, deriva sensibles/menores/vulnerabilidad a revision. Completa finalidad,
+interes publico, exclusividad, medidas/evidencia y conservacion. Difusion si exige
+documentacion de anonimizacion; no la hace no aplicable y material residual requiere
+revision; pendiente deja aplicabilidad sin resolver. No verifica eficacia material.
+
+Resultado completo solo describe preparacion documental; can_confirm siempre false.
+No integra persistencia/API/binding ni levanta validador_no_implementado especial.
+Snapshots y hashes historicos intactos; sin migracion ni escrituras operacionales.
+Pruebas nuevas: ausencia de campos, si/no/pendiente, difusion/material residual,
+alcance, finalidad/base/LIA incompatible, sensibles/menores, schema cerrado,
+revalidacion, determinismo y entradas sin cambios. Runner aislado ampliado para
+incluir pruebas de investigacion; Black/Ruff aprobados. Suite aislada: 87 pruebas
+aprobadas en 13.20 s (24 nuevas de investigacion y 63 previas). No nueva suite completa.
+
+Proximo: ampliar casos de aplicabilidad y limites antes de diseñar binding nuevo e
+integracion persistente. Ley fija, M3-T1 EN PROGRESO y activacion EIPD bloqueada.
+Sin commit/push.
+
+## 2026-10-09 — M3-T1 §130: limites y aplicabilidad de investigacion probados
+
+20 casos nuevos en test_services_research.py: difusion ausente/pendiente mantiene
+anonimizacion sin resolver, evidencia con referencia/tipo vacios no acredita
+preparacion, cada componente de anonimizacion requerido si se publica, RAT parcial
+y selectores semanticamente duplicados requieren revision, adolescentes/vulnerables/
+sensibilidad declarada no evaden limites iniciales, expediente/snapshot ausentes y
+respuestas sin razonamiento impiden completo. No fue necesario cambiar evaluador.
+
+Suite via ejecutor aislado: 107 aprobadas en 13.05 s (44 investigacion, 63 previas).
+Black/Ruff aprobados. Sin escritura operacional, cambios legales ni politicas;
+can_confirm sigue false, sin persistencia/API/binding ni integracion especial.
+
+Proximo: implementar identidad/binding documental nuevo y probar cambios de
+finalidad, RAT, LIA y expediente; conservar schemas y hashes historicos. No inferir
+asociacion vigente a partir de completitud. Ley fija, M3-T1 EN PROGRESO y activacion
+EIPD bloqueada. Sin commit/push.
+
+## 2026-10-09 — M3-T1 §131: asociacion nueva de investigacion
+
+ResearchContextBindingV1 y BoundResearchAssessmentV1 son contratos cerrados nuevos,
+independientes de SpecialContextBinding historico. research_binding.py calcula
+SHA-256 con dominio/version explicitos: contexto incluye RAT completo/base/LIA;
+documento incluye expediente completo. JSON ordenado por claves; orden de listas y
+textos conservado deliberadamente (comparacion conservadora, sin prometer equivalencia
+semantica). Bind revalida y devuelve copia; chequeo no actualiza hashes automaticamente.
+
+Cambios RAT/finalidad/base/LIA producen asociacion_contexto_obsoleta; cambios de
+expediente producen asociacion_documento_obsoleta. Ausencia requiere revision;
+contrato historico/version desconocida no se convierte silenciosamente. Asociacion
+vigente no acredita completitud/autoridad; can_confirm sigue false. Sin migracion,
+API, persistencia ni cambios de bindings/hashes historicos.
+
+La primera ejecucion detecto error previo de catalogo: evaluador research usaba
+interes_legitimo abreviado. Corregido a interes_legitimo_art13d, igual que LegalBasis;
+pruebas actualizadas y regresion rechaza el alias. Suite final aislada: 119 aprobadas
+en 10.04 s (11 asociacion, 45 evaluador investigacion y 63 previas). Black/Ruff
+aprobados. Sin escrituras operacionales ni cambio de selector EIPD.
+
+Proximo: diseñar persistencia/API y versiones de asociacion especiales/EIPD para
+incorporar investigacion sin reinterpretar historicos. Ley fija, M3-T1 EN PROGRESO,
+confirmacion de investigacion y activacion EIPD bloqueadas. Sin commit/push.
+
+## 2026-10-09 — M3-T1 §132: persistencia/API de investigacion delimitadas
+
+Plan concreto en docs/project/m3-t1-investigacion-integracion.md: columna JSONB
+nullable sin backfill, input documental/output con binding de servidor, contratos
+sin ciclos de importacion y semantica PATCH omision/null/reaporte. Contexto cambiado
+sin reaporte conserva binding y debe marcar obsolescencia. Historicos no reciben
+hash nuevo automaticamente; protecciones tenant/inmutabilidad y gates preservados.
+
+Orden: schema/modelo/migracion, luego servicios/API, readiness y finalmente nuevas
+versiones especiales/EIPD con aceptacion. Sin cambios de codigo ni migracion aplicada,
+no nueva suite; ultima focalizada 119 §131. Siguiente implementar primer incremento
+persistente de schema/modelo/migracion en base aislada. Ley fija, M3-T1 EN PROGRESO,
+confirmacion de investigacion y activacion EIPD bloqueadas. Sin commit/push.
+
+## 2026-10-09 — M3-T1 §133: almacenamiento nullable de investigacion
+
+Migracion append-only c28f1a9d730b sobre b17d95c0286f agrega research_assessment
+JSONB nullable a legal_assessments, CHECK SQL NULL u objeto, sin backfill. ORM
+agrega campo/constraint; ninguno de los expedientes historicos se reinterpreta.
+Contratos nuevos movidos antes de DraftCreate en licitud.py y reexportados por
+schemas/research.py para evitar ciclos de importacion; no se agrega input/output
+API aun, evitando aceptar datos sin servicio de guardado. Hashes historicos intactos.
+
+Primero upgrade/head y alembic check en base aislada aprobados. Dos pruebas nuevas
+verifican columna/nullable/RLS/permisos runtime y borrador HTTP real con SQL NULL,
+rechazo arrays/texto/numero/bool/JSON null y almacenamiento objeto. CHECK SQL no
+valida todo el contrato; servicio/API posterior lo hara. La primera comprobacion
+por nombre de constraint fallo por convencion de nombres; ajustada a tabla/definicion.
+Suite final aislada: 121 aprobadas en 10.03 s. Black/Ruff aprobados; runner exige
+nuevo head c28f1a9d730b, base aislada y registro EIPD vacio como antes.
+
+Luego migracion aplicada al desarrollo local, alembic check aprobado y snapshot
+EIPD completo exactamente igual antes/despues: selector revision 1. Sin cambios de
+password/perfil/politicas; no suite contra base operacional ni despliegue remoto.
+Nuevo head de ambas bases c28f1a9d730b; procedimientos antiguos con head previo son
+historicos, requieren ese sucesor para la version actual del codigo.
+
+Proximo: crear/leer/PATCH de expediente con binding de servidor, omision/null/reaporte
+y aislamiento tenant, manteniendo investigacion bloqueada hasta integrar readiness.
+Ley fija, M3-T1 EN PROGRESO y activacion EIPD bloqueada. Sin commit/push.
+
+## 2026-10-09 — M3-T1 §134: expediente de investigacion en API de borrador
+
+Create/PATCH aceptan ResearchAssessmentV1 nullable; salida GET/POST/PATCH expone
+BoundResearchAssessmentV1 nullable. Servidor genera hashes con RAT/base/LIA finales.
+PATCH model_fields_set distingue omision (preserva objeto/binding), null (retira)
+y reaporte (revalida/vincula). Base/LIA cambiadas sin reaporte conservan asociacion
+anterior, detectable como obsoleta sin renovacion en GET. No cambios a contratos,
+hashes ni gates historicos especiales/EIPD. No nueva migracion.
+
+Seis casos HTTP/OpenAPI nuevos contra PostgreSQL aislado: crear/consultar, cambio
+simultaneo LIA/base/reaporte, obsolescencia sin reaporte, retiro, rechazo de binding
+cliente en create/PATCH, acceso con organizacion ajena rechazado y PATCH bloqueado
+en confirmado/reemplazado con expediente conservado. Estados historicos preparados
+por fixture con metadatos validos; no equivale a habilitar confirmacion investigacion.
+La prueba de acceso usa identidad A con cabecera B (403); no afirma por si sola una
+prueba SQL directa de RLS. Las pruebas HTTP existentes verifican compatibilidad.
+
+Primera suite ampliada: 297 aprobadas y tres fallos de preparacion de pruebas nuevas
+(dict LIA y overrides de identidad). Corregidos; segundo intento detecto metadatos
+obligatorios de ciclo de vida en fixtures, corregidos sin cambiar restricciones.
+Resultado final: 127 pruebas focalizadas aprobadas en 11.78 s; los 174 casos HTTP
+existentes de licitud ya aprobaron en la ejecucion ampliada. Black/Ruff aprobados.
+Runner incluye ambas suites para siguientes ejecuciones. Sin pruebas en base
+operacional, cambios de politica/credenciales ni despliegue remoto.
+
+Proximo: integrar readiness documental y estado de asociacion de investigacion,
+con bloqueo conservador e inmutabilidad; luego versiones especiales/EIPD nuevas.
+Ley fija, M3-T1 EN PROGRESO, confirmacion de investigacion y activacion EIPD
+bloqueadas. Sin commit/push en este paso.
+
+## 2026-10-09 — M3-T1 §135: readiness de investigacion y bloqueo conservador
+
+Readiness agrega research nullable con result/issues/applicability documentales,
+association_result/association_issues independientes y can_confirm fijo false.
+Evalua sobre RAT actual recomponible, base y LIA; compara binding persistido sin
+renovarlo. Si RAT no disponible informa contexto_rat_no_disponible; si investigacion
+es declarada y no hay expediente informa expediente/asociacion ausentes. Historicos
+sin expediente ni regimen detectado conservan research null, sin hash sintetico.
+
+Control transversal compartido por readiness y confirmacion agrega bloqueo 409
+investigacion_confirmacion_bloqueada si hay expediente o regimen detectado, incluso
+si se declararon respuestas negativas o el documento esta completo/vigente.
+No se cambia validador especial ni versiones/hashes especiales/EIPD anteriores.
+Completitud documental no implica autoridad ni activa una ruta excepcional.
+
+Nuevos casos HTTP verifican completo+vigente+bloqueado, confirmacion 409 sin mutar
+expediente, lectura reiterada sin escrituras, LIA cambiada sin reaporte produce
+obsolescencia aun con documento completo, reaporte recupera vigencia, falta evidencia
+produce incompleto y retiro deja null para ruta no declarada. Otro caso verifica
+investigacion declarada sin documento, con bloqueos y sin asociacion sintetica.
+Validacion final ampliada en base aislada: 303 pruebas aprobadas en 248.17 s
+(incluye 174 HTTP existentes de licitud y 129 focalizadas). Black/Ruff aprobados.
+Sin ejecucion de suite contra base operacional ni nueva migracion.
+
+Proximo: delimitar nuevas versiones de asociaciones especiales/EIPD que cubran el
+expediente de investigacion sin reinterpretar material historico. Mantener el gate
+bloqueado hasta integracion completa y aceptacion revisada. Ley fija, M3-T1 EN
+PROGRESO, activacion EIPD bloqueada. Sin migracion/despliegue ni commit/push.
