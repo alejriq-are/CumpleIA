@@ -319,3 +319,51 @@ cobertura/hash incompatibles, campo faltante, tenant/actor/padre/no_auth. 38 pru
 nuevas/historicas/guardas aprobadas en 4.32 s; alembic check sin drift, Ruff/Black
 correctos. Base operativa local sigue en e41 hasta integrar lectores/writer coherentes.
 M3-T1 EN PROGRESO; ficticios hasta MVP; activacion EIPD bloqueada.
+
+## 2026-10-14 — M3-T1 §254: seleccion de binding V3 desde servidor
+
+Writer compartido valida contexto V3 cerrado antes de cualquier proyeccion y elige
+binding3 cuando hay material de representacion. Reaporte tras retiro conserva V3
+previo; contexto V2 no puede degradar esa cobertura. Sin representacion ni V3 previo,
+seleccion V1/V2 historica conservada. Previous es documento validado de servidor,
+no version propuesta por cliente. Omision/null siguen responsabilidad del caller.
+
+Ocho casos nuevos; 29 pruebas writer/binding y HTTP V2 historico aprobadas en 3.51 s,
+base fija aislada verificada. Runner incorpora suite. Ruff/Black correctos. Builder
+operativo sigue proporcionando V2: falta dispatch/readiness compatible V3, metadata
+proyectada y contratos API antes de conectar su uso. Sin nuevos eventos, cambio de
+politica o datos operativos. M3-T1 EN PROGRESO; EIPD bloqueada; datos ficticios.
+
+## 2026-10-14 — M3-T1 §255: dispatch/readiness documental V3
+
+Adaptador versionado admite binding/context3, selecciona hash/documento/modelo
+correspondiente y conserva proyeccion V1/V2 para reglas historicas. Contexto V3
+cerrado se valida antes de proyectar. Material representacion con binding1/2 añade
+asociacion_representacion_no_cubierta, invalida contexto y revision previa; V3
+reconoce identidad pero conserva motivo representacion_evaluacion_integracion_pendiente
+hasta conectar evaluacion conjunta. Nunca can_confirm=true. Contexto V2 no acepta
+binding3; cambios/retiro invalidan asociacion sin reparar documentos.
+
+Seis casos nuevos; 47 pruebas adaptador/historicas/metadata/writer/HTTP V3 anteriores
+aprobaron en 6.47 s, con base fija aislada verificada. Caso historico reforzado despues:
+revision realmente vigente con hashes de su version pasa obsoleta al añadir material;
+seis casos nuevos revalidados en 0.20 s. Ruff/Black correctos; runner incorpora suite.
+No builder operativo/contexto API cambiado aun, nuevos eventos o politica. Proximo:
+composicion y contratos de salida antes de activar writer V3 en endpoints.
+M3-T1 EN PROGRESO; datos ficticios hasta MVP; EIPD bloqueada.
+
+## 2026-10-14 — M3-T1 §256: salidas preparadas de binding V3
+
+LegalAssessmentRepresentationOutV2 admite resoluciones StoredV1/V2/V3 sin convertir
+identidad; contrato activo OutV1 conservado. EipdResolutionDocumentVersionedOutV2
+admite binding1/2/3/null estricto y can_confirm literal false; contrato anterior
+no acepta binding3. Entradas Create/PATCH siguen documentos sin context_binding,
+no envelopes ni version elegida por cliente. Catorce casos nuevos prueban union
+exacta del campo, rechazo de binding de entrada y versiones/flags invalidos.
+
+47 pruebas contratos nuevos/representacion e investigacion HTTP aprobadas en
+4.30 s, base fija aislada verificada; Ruff/Black correctos. Runner incorpora suite.
+No import API nuevo todavia: composicion actual V3 solo admite contexto2 y metadata1.
+Proximo conjunto coherente: composicion sucesora con contexto3/diagnostico propio,
+metadatos/prerrequisitos conservadores y salida; despues builder/writer/API/localDB.
+M3-T1 EN PROGRESO; ficticios hasta MVP; EIPD bloqueada.
