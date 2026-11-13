@@ -611,3 +611,221 @@ apilados; Panel de adecuacion, Inventario de tratamientos (RAT), proceso y evalu
 legibles sin recortes aparentes en area visible. Sin medicion nueva de overflow ni
 prueba de acciones de enlaces. M3-T1 EN PROGRESO; fuentes/aceptacion y API entre
 cuentas pendientes; confirmacion/activacion bloqueadas.
+
+## 2026-10-12 — M3-T1 §191: segunda cuenta redirigida desde consulta interna
+
+Usuario informa redireccion al panel al abrir consulta interna con segunda cuenta
+personal. Captura Edge Responsive 390 x 749 muestra /dashboard, identidad de segunda
+cuenta y panel general; consulta interna y expediente no visibles. Comprobacion
+manual de barrera de navegacion administrativa, complementando §190.
+No acredita rechazo de endpoints EIPD con token de segunda cuenta ni aislamiento
+integral RLS/API. Sin cambios de permisos, sesiones, codigo o datos.
+
+Registro documental; tests no repetidos. M3-T1 EN PROGRESO; fuentes/aceptacion y
+prueba directa API entre cuentas pendientes; confirmacion/activacion bloqueadas.
+
+## 2026-10-12 — M3-T1 §192: segunda cuenta consulta tratamiento ajeno
+
+Captura Edge Responsive 390 x 749 muestra segunda cuenta personal y URL del
+tratamiento original con organizacion original. Mensaje Actividad de tratamiento
+no encontrada; nombre y descripcion visibles vacios. Consola muestra GET RAT al
+tratamiento con 404. No contenido del tratamiento original visible. Comprobacion
+manual de rechazo de lectura RAT desde segunda sesion, sin inspeccion de headers,
+respuesta completa o evidencia de cobertura integral RLS. API EIPD aun pendiente.
+
+Sin cambios de codigo, permisos o datos; no completar ni guardar formulario vacio.
+Registro documental; tests no repetidos. M3-T1 EN PROGRESO; fuentes/aceptacion
+pendientes; confirmacion/activacion bloqueadas.
+
+## 2026-10-12 — M3-T1 §193: lectura historica EIPD con segunda sesion
+
+Usuario reutiliza peticion GET RAT capturada con segunda cuenta personal mediante
+Edge Network Console, cambia solo URL a endpoint de lectura historica EIPD v2 del
+expediente original y envia. Captura muestra URL calculada correcta, GET, estado
+404 Not Found y cuerpo detail Evaluacion juridica no encontrada; sin datos del evento.
+Identidad de segunda cuenta visible en pagina. Headers/auth conservados por instruccion,
+no expuestos ni inspeccionados en captura. No contrasenas ni tokens copiados al registro.
+
+Prueba manual directa de ese endpoint de lectura desde segunda sesion, complementa
+rechazo RAT y redireccion UI. No acredita todos los endpoints, escritura, reciprocidad,
+contenido exacto de headers ni cobertura integral RLS. No se modifican permisos ni
+expediente. Tests no repetidos: registro de evidencia manual. M3-T1 EN PROGRESO;
+fuentes/aceptacion y cobertura restante pendientes; confirmacion/activacion bloqueadas.
+
+## 2026-10-13 — M3-T1 §194: requisitos EIPD rechazados con segunda sesion
+
+Capturas del usuario con segunda cuenta visible muestran URL readiness correcta,
+metodo GET, estado 404 Not Found y respuesta detail Evaluacion juridica no encontrada.
+No requisitos del expediente original expuestos. Usuario reutiliza peticion RAT
+reciente mediante Edit and Resend y cambia solo URL; cabeceras contraidas, sin copiar
+credenciales al registro. Comprobacion manual directa del endpoint de requisitos.
+
+Intento previo con copia antigua devolvio 401 Token expirado: acredita rechazo de
+credencial vencida, no aislamiento entre organizaciones. Repeticion posterior retorna
+404 descrito arriba. No inspeccion de headers, prueba de escritura, reciprocidad ni
+cobertura integral RLS. Complementa lectura historica §193 y rechazo RAT §192.
+Sin cambios de codigo, datos o permisos; tests no repetidos por evidencia manual.
+M3-T1 EN PROGRESO; fuentes/aceptacion y cobertura restante pendientes;
+confirmacion/activacion bloqueadas.
+
+## 2026-10-13 — M3-T1 §195: requisitos recuperados en sesion original
+
+Tras instruccion de cerrar segunda cuenta y reingresar con cuenta original, captura
+Edge Responsive 390 x 749 muestra borrador, vinculo documental vigente, aviso sin
+autoridad y Continuar pendiente con 252 motivos. Network muestra readiness tipo
+fetch 200 (distinto de preflight tambien 200). Identidad y campos fuera del area
+capturada: secuencia de cuenta por contexto del ensayo, sin inspeccion de headers.
+Contrasta con rechazo 404 de segunda sesion §194; no demuestra reciprocidad completa
+ni acceso a todos los endpoints. No aprobacion, confirmacion o activacion.
+
+Sin cambios de codigo, datos o permisos; registro documental, tests no repetidos.
+M3-T1 EN PROGRESO; fuentes/aceptacion y cobertura restante pendientes.
+
+## 2026-10-13 — M3-T1 §196: lectura historica recuperada en sesion original
+
+Dos capturas Edge Responsive 390 x 749 tras consulta con sesion original del ensayo:
+General muestra URL historica v2 exacta, GET y 200 OK; Response muestra decision
+requiere_cambios y response_schema_version 2, metadata historica. UI conserva
+fundamento y referencia PRUEBA-REVISION-LECTURA-20261010 originales. Headers de
+solicitud contraidos; no credenciales registradas. Identidad fuera de area capturada,
+cuenta por secuencia del ensayo. Contrasta con GET historico 404 de segunda sesion
+§193 y complementa contraste readiness §194-§195. No cobertura integral entre tenants.
+
+Sin cambios de codigo, datos o permisos; registro documental, tests no repetidos.
+M3-T1 EN PROGRESO; fuentes/aceptacion y cobertura restante pendientes;
+confirmacion/activacion bloqueadas.
+
+## 2026-10-13 — M3-T1 §197: regresion focalizada de escritura EIPD
+
+Ejecutadas suites existentes test_api_eipd_negative_review_v2 y
+test_api_eipd_resolution_writer_v2: 14 aprobadas en 6.91 s. Antes de pytest se aplican
+build_environment y verify_destination del ejecutor: base aislada fija, head previsto,
+registro global vacio y runtime app_user sin bypass/superuser verificados. No pytest
+sobre base operativa. Fixtures sinteticas y autenticacion de tests; no sesiones reales.
+
+Cobertura focal: persistencia negativa/metadata y barreras, material rechazado sin
+evento, rollback tras fallo, vinculo final/omision/reaporte, rechazo de vinculacion
+inyectada por cliente y bloqueo de patch de confirmado. No suite completa ni nueva
+prueba manual de escritura entre cuentas. Expediente operativo sin cambios.
+Registro documental; codigo y permisos sin cambios. M3-T1 EN PROGRESO;
+fuentes/aceptacion pendientes; confirmacion/activacion bloqueadas.
+
+## 2026-10-13 — M3-T1 §198: regresion focalizada de permisos y confirmacion
+
+Ejecutadas suites existentes test_api_eipd_resolution_reviews,
+test_api_eipd_review_response_v2, test_api_eipd_review_prerequisites_v3 y
+test_api_eipd_confirmation_v2: 45 aprobadas en 18.24 s. build_environment y
+verify_destination verifican base aislada fija/head/registro vacio y runtime
+app_user restringido antes de pytest. Expedientes operativos sin cambios.
+
+Casos incluyen rechazo de organizacion ajena, permiso de escritura, lectura y
+respuesta historica v2, diagnosticos por decision y barreras/identidad de confirmacion.
+Fixtures sinteticas de politicas y autenticacion: resultados no habilitan politica
+operativa, confirmacion o activacion del expediente real de prueba. No suite completa
+ni nueva prueba manual de escritura/reciprocidad entre cuentas. Codigo y permisos
+sin cambios; registro documental. M3-T1 EN PROGRESO; fuentes/aceptacion pendientes;
+confirmacion/activacion bloqueadas.
+
+## 2026-10-13 — M3-T1 §199: regresion focalizada de concurrencia
+
+Suites existentes test_eipd_negative_review_v2_concurrency y
+test_api_eipd_admin_concurrency: 26 aprobadas en 8.18 s. build_environment y
+verify_destination comprueban base aislada/head/registro vacio y runtime restringido
+antes de pytest; no cambios de politica o expedientes operativos.
+
+Casos de espera y recarga de material/politica, commit/rollback, revisiones negativas
+simultaneas sin eventos parciales/perdidos, cancelacion y reintento; revocacion de
+facultades administrativas y conflictos de seleccion/publicacion. Fixtures sinteticas,
+no ensayo de usuarios concurrentes reales ni suite completa. Registro documental;
+codigo y permisos sin cambios. M3-T1 EN PROGRESO; fuentes/aceptacion pendientes;
+confirmacion/activacion bloqueadas.
+
+## 2026-10-13 — M3-T1 §214: estado actual de politica visible en consulta
+
+Cliente readiness V3 proyecta sources_status/acceptance_status/activation existentes
+como policy_status, null fuera de V3. Enum cerrado y coherencia de habilitada con
+fuentes verificadas/aceptacion aceptada; no inferencia ni escritura. Vista Estado de
+la politica EIPD con etiquetas españolas y aviso sin autoridad; separada de historia.
+Consulta de evento limpia bloque. Estado registrado no verifica externamente fuentes.
+
+13 pruebas cliente (510 ms), 8 interacciones Chromium (3.4 s), tipos/lint aprobados.
+Casos nuevos: estados pendientes/habilitados sinteticos, valores desconocidos,
+incoherencia y null; bloque visible y retirada al consultar historia. Fixtures
+mockeados, no sesion real/CSS completa. Inspeccion manual pendiente. Backend,
+politica/datos/permisos sin cambios. M3-T1 EN PROGRESO;
+confirmacion/activacion bloqueadas; revisiones ficticias hasta MVP.
+
+## 2026-10-13 — M3-T1 §215: comprobacion visual de estado de politica
+
+Captura usuario Edge Responsive 480 x 749: Estado de la politica EIPD muestra fuentes
+pendientes de verificacion, aceptacion pendiente y habilitacion deshabilitada, con
+aviso sin autoridad. Vinculo ultima revision vigente separado; Continuar mantiene
+requisitos pendientes (252 motivos). Network readiness 200 visible; no headers
+inspeccionados. Textos ajustados en area capturada, sin medicion nueva de overflow.
+
+Comprobacion manual con expediente ficticio; no pruebas de otros estados reales ni
+alternancia historica del bloque nuevo en esta captura. Sin cambios de codigo/datos;
+tests previos no repetidos. M3-T1 EN PROGRESO; revisiones ficticias hasta MVP;
+confirmacion/activacion bloqueadas.
+
+## 2026-10-13 — M3-T1 §216: estado actual separado de historia
+
+Captura usuario Edge Responsive 390 x 749 tras Consultar revision: evento historico
+Requiere cambios, referencia/fundamento/fecha originales y aviso historico visibles.
+Entre formulario y evento no aparecen Estado de politica ni Vinculo ultima revision.
+Network /v2 tipo fetch 200 visible. Politica registrada del evento conserva su
+referencia; no se interpreta como estado actual. Textos ajustados en area capturada.
+
+Completa alternancia manual del bloque nuevo §§214-215. No estados habilitados reales
+ni nueva medicion de overflow. Solo registro documental; tests previos no repetidos;
+codigo/datos/permisos sin cambios. M3-T1 EN PROGRESO;
+revisiones ficticias hasta MVP; confirmacion/activacion bloqueadas.
+
+## 2026-10-13 — M3-T1 §217: estados ficticios de politica en interfaz
+
+Nueva interaccion con tres combinaciones sinteticas: fuentes verificadas/aceptacion
+pendiente/deshabilitada; verificadas/aceptada/deshabilitada; verificadas/aceptada/
+habilitada. Labels segun registro, aviso sin autoridad, requisitos pendientes y
+sin botones de confirmar/activar/aprobar en todos los casos. Mock del componente;
+no politica publicada ni cambio de registro operativo. 9 interacciones Chromium
+aprobadas (3.7 s), tipos/lint correctos. Cliente/backend sin cambios; tests/docs solo.
+No captura CSS real ni aceptacion juridica. M3-T1 EN PROGRESO;
+revisiones ficticias hasta MVP; confirmacion/activacion operativas bloqueadas.
+
+## 2026-10-13 — M3-T1 §218: aviso visible de pruebas ficticias
+
+La consulta interna recuerda utilizar unicamente datos ficticios hasta disponer de
+la version MVP, conforme al acuerdo de desarrollo del usuario. Mantiene el aviso
+M3-T1 en progreso y confirmacion/activacion bloqueadas. Es una instruccion visible,
+no un detector automatico de datos reales ni una nueva barrera de servidor.
+Sin cambios de politica, permisos, datos o endpoints. Comprobacion de visibilidad
+incluida en la interaccion existente de consulta; 9 interacciones Chromium aprobadas
+(3.9 s), tipos y lint correctos. No comprobacion de CSS real ni sesion integrada.
+
+## 2026-10-13 — M3-T1 §219: recuperacion visible de sesion
+
+Consulta interna muestra enlace Volver a iniciar sesion a /login ante ApiError 401.
+Se limpian resultados anteriores y el enlace al cambiar identificadores o iniciar
+otra consulta. Otros errores no ofrecen este enlace. No redireccion automatica,
+renovacion de token ni persistencia de identificadores/credenciales. Permisos y
+politica operativos sin cambios; pruebas ficticias hasta MVP.
+
+10 interacciones Chromium aprobadas (4.1 s), tipos/lint correctos. Nueva prueba
+simula 401 tras resultado, comprueba enlace y retirada/recuperacion; prueba 403
+existente confirma ausencia del enlace. Mock del componente, no login integrado.
+Confirmacion y activacion siguen bloqueadas; M3-T1 EN PROGRESO.
+
+## 2026-10-13 — M3-T1 §220: compilacion de produccion y regresion frontend
+
+Comprobado commit d300a6c: 13 pruebas cliente (427 ms) y 10 interacciones Chromium
+(3.9 s), todas aprobadas. next build completo: compilacion, tipos/lint, paginas y
+trazas correctos; incluye /admin/licitud-validation y /login. Copia temporal de
+fuentes sin .env ni artefactos previos, dependencias instaladas enlazadas y valores
+publicos ficticios; copia retirada al finalizar. No alteracion de .next del servidor
+de desarrollo, politica, datos o permisos; no despliegue ni prueba de login real.
+
+Build informa aviso de Supabase sobre Node 20 y recomendacion de Node 22 o superior;
+pendiente validar actualizacion del runtime, sin cambiar dependencias en esta etapa.
+Avisos de cache webpack sin fallo de compilacion. La compilacion no acredita MVP
+completo ni aceptacion juridica. Pruebas ficticias hasta MVP; M3-T1 EN PROGRESO y
+confirmacion/activacion bloqueadas.
