@@ -2,6 +2,7 @@ import pytest
 from pydantic import ValidationError
 
 from app.schemas.licitud import (
+    ConsentAssessmentV1,
     LegalAssessmentDraftCreate,
     LegalAssessmentDraftUpdate,
     RatCanonicalContextV1,
@@ -221,3 +222,82 @@ def test_legal_assessment_draft_update_rechaza_scope_null_explicito():
         LegalAssessmentDraftUpdate.model_validate({"scope": None})
 
     assert "scope no puede ser null" in str(exc.value)
+
+
+def test_consent_assessment_v1_admite_borrador_y_listas_independientes():
+    draft = ConsentAssessmentV1.model_validate({})
+    partial = ConsentAssessmentV1.model_validate(
+        {"answers": [{"question_id": "consentimiento_libre", "answer": "pendiente"}]}
+    )
+    assert draft.given_by is None
+    assert draft.grant_method is None
+    assert draft.answers == []
+    assert draft.evidence == []
+    assert partial.answers[0].answer == "pendiente"
+    assert draft.answers is not partial.answers
+
+
+def test_consent_assessment_v1_preserva_evidencia_en_json():
+    payload = {
+        "schema_version": 1,
+        "given_by": "mandatario",
+        "grant_method": "electronico",
+        "answers": [
+            {
+                "question_id": "mandatario_facultad_expresa",
+                "answer": "si",
+                "comment": "Verificado",
+            },
+            {"question_id": "contexto_contrato_servicio", "answer": "no"},
+            {
+                "question_id": "tratamiento_necesario_contrato_servicio",
+                "answer": "no_aplica",
+            },
+        ],
+        "evidence": [
+            {
+                "evidence_type": "registro",
+                "reference": "EV-1",
+                "obtained_on": "2026-10-05",
+                "mechanism": "Portal",
+                "notes": "Original",
+            }
+        ],
+        "notes": "Pendiente de confirmación",
+    }
+    assessment = ConsentAssessmentV1.model_validate(payload)
+    serialized = assessment.model_dump(mode="json")
+    assert serialized["evidence"] == payload["evidence"]
+    assert serialized["answers"][0] == payload["answers"][0]
+    assert (
+        ConsentAssessmentV1.model_validate_json(assessment.model_dump_json())
+        == assessment
+    )
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        {"schema_version": 2},
+        {"given_by": "tercero"},
+        {"grant_method": "desconocido"},
+        {"answers": [{"question_id": "desconocida", "answer": "si"}]},
+        {"answers": [{"question_id": "consentimiento_libre", "answer": "tal_vez"}]},
+        {"evidence": [{"evidence_type": "registro", "obtained_on": "2026-02-30"}]},
+    ],
+)
+def test_consent_assessment_v1_rechaza_dominios_y_fecha_invalidos(payload):
+    with pytest.raises(ValidationError):
+        ConsentAssessmentV1.model_validate(payload)
+
+
+def test_consent_assessment_v1_rechaza_preguntas_duplicadas():
+    with pytest.raises(ValidationError, match="question_id duplicados"):
+        ConsentAssessmentV1.model_validate(
+            {
+                "answers": [
+                    {"question_id": "consentimiento_libre", "answer": "si"},
+                    {"question_id": "consentimiento_libre", "answer": "no"},
+                ]
+            }
+        )
