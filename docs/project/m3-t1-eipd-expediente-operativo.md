@@ -398,3 +398,142 @@ Pendientes separados: (1) asegurar ejecucion de futuras suites solo en base aisl
 No se identifica una fuente nueva ni se cambia una regla legal en esta revision.
 Ley 21.719/19.628 reformada fija. M3-T1 EN PROGRESO; activacion EIPD bloqueada.
 Sin commit/push.
+
+## 2026-10-09 — M3-T1 §123: ejecutor focalizado de pruebas aisladas
+
+backend/scripts/run_eipd_tests.py proporciona python -m scripts.run_eipd_tests.
+Deriva ambas URLs solo en entorno hijo hacia cumpleia_eipd_tests_20261009, mantiene
+roles separados y exige development, hosts loopback iguales, sin parametros URL,
+runtime app_user. Antes de pytest consulta readonly current_database/head y registro
+EIPD vacio, confirma runtime sin superuser/BYPASSRLS. Rechaza destino/head/roles/estado
+incompatibles con salida logica 2 y mensaje sin secretos. No crea/borra DB ni copia
+datos; no imprime URLs. Elimina overrides heredados de pytest y credenciales Supabase/
+canal administrativo; usa emisor sintetico de pruebas y targets fijos sin argumentos.
+
+Guardas probadas: URLs a base fija y roles intactos, entorno padre sin cambios,
+rechazo remoto/query/produccion, runtime owner/destinos distintos, DB/head/registro
+no vacio y privilegios runtime incompatibles. Ejecucion por el runner: 60 aprobadas
+en 9.45 s (56 API/concurrencia + 4 guardas); Black/Ruff aprobados. Invocacion con
+argumento extra bloqueada antes de pytest. Sin nuevas escrituras operacionales ni
+cambios de perfil/secretos/backend. No suite completa nueva.
+
+Alcance: protege las invocaciones mediante este ejecutor; pytest directo sigue
+resolviendo DATABASE_URL habitual y no queda protegido por este wrapper. Usar este
+punto de entrada para la suite EIPD focalizada, sin ejecutar pytest directo contra
+la base operacional. Cambios de head requieren revision explicita de la guarda.
+Siguiente: preparar ensayo de rotacion/retiro y recuperacion local preservando
+historial. Fuentes/aceptacion y alcance integral pendientes; ley fija, M3-T1 EN
+PROGRESO y activacion bloqueada. Sin commit/push.
+
+## 2026-10-09 — M3-T1 §124: ensayo aislado de rotacion/retiro y recuperacion
+
+Se agregan tres pruebas PostgreSQL de ciclo de vida al ejecutor fijo, sobre login
+aleatorio temporal de fixture y base aislada. Rotacion: clave antigua rechazada en
+conexiones nuevas (28P01), conexion previa sobrevive, pool se dispone y clave nueva
+permite recuperar el canal; rol local e identidad se limpian tras rollback. NOLOGIN:
+conexion nueva rechazada (28000), conexion previa sigue viva pero _prepare_channel
+rechaza con 503; restaurar LOGIN y renovar pool recupera. Retiro de membresia:
+conexion caliente rechazada por guarda 503, restauracion recupera el canal.
+
+63 pruebas focalizadas aprobadas en 13.03 s; Black/Ruff aprobados. El snapshot de
+pruebas permanece igual antes/despues de cada ensayo (registro inicialmente vacio
+por guarda del runner); no se extrapola a prueba de historial no vacio. Fixtures
+restauran flags/membresia cuando procede, disponen pools y eliminan solo su rol
+aleatorio. No cambian login/secreto/pool operacional ni perfil personal.
+Preflight readonly posterior del canal original: ok, auditoria coherente, selector
+revision 1 y activation_authorized false. No rotacion/retiro real del canal de usuario
+ni actualizacion de su archivo privado en este checkpoint.
+
+Pendiente operacional: ensayo coordinado sobre canal provisionado, renovacion de
+procesos/conexiones y referencia de recuperacion segura con historial real. Ensayo
+tecnico aislado no acredita ese cambio. Fuentes/aceptacion y alcance integral siguen
+pendientes; ley fija, M3-T1 EN PROGRESO y activacion EIPD bloqueada. Sin commit/push.
+
+## 2026-10-09 — M3-T1 §125: rotacion real local preparada
+
+Plan concreto en docs/project/m3-t1-eipd-plan-rotacion-local.md. Lectura previa:
+archivo externo 0600, destino development/loopback y login dedicado esperado;
+preflight ok, revision 1, head b17d95c0286f. Dos conexiones idle durante diagnostico
+(incluida la propia); pool del diagnostico dispuesto al terminar. Requerir nueva
+comprobacion de drenaje antes de ejecutar. No se cambia clave/archivo/rol/proceso.
+
+Secuencia preparada: snapshot previo, detener solo validacion 8001 y drenar,
+reemplazo privado/recuperacion 0600, cambio de clave y sustitucion atomica con
+recuperacion ante fallo, conexiones nuevas antigua rechazada/nueva aceptada,
+comparacion exacta de auditoria, reinicio y comprobacion personal. Backend 8000 y
+perfil permanecen fuera del cambio. Rotacion REAL pendiente, no acreditada por
+ensayo aislado §124 ni por este plan. Sin nueva suite; ultima focalizada 63 §124.
+Fuentes/aceptacion y alcance integral pendientes; ley fija, M3-T1 EN PROGRESO y
+activacion bloqueada. Sin commit/push.
+
+## 2026-10-09 — M3-T1 §126: rotacion real local ejecutada
+
+Se detuvo el proceso propio de validacion 8001 y se comprobo ausencia de conexiones
+del login dedicado antes de alterar password. Destino development/loopback, login
+esperado, archivo privado 0600 y head b17d95c0286f verificados. Snapshot previo
+validado: 1 publicacion deshabilitada, 1 seleccion, revision 1.
+
+Nueva clave aleatoria en memoria, copia privada de recuperacion 0600 externa al
+repo y reemplazo privado preparado; cambio password de eipd_backend_local y
+sustitucion atomica de admin.env. Conexion NUEVA con credencial anterior rechazada;
+nueva credencial: preflight ok. Snapshot completo posterior exactamente igual al
+previo; no cambios de perfiles, permisos, publicaciones, eventos ni selector.
+
+Proceso propio 8001 reiniciado con nuevo secreto en memoria, DEBUG=false y sin
+access log. GET /admin/eipd/status sin token -> 401. Backend previo 8000 fuera del
+cambio. No secretos ni PII en documentos/logs/repositorio. Copia privada de
+recuperacion conservada hasta confirmar sesion personal; retirada aun pendiente.
+No se afirma validacion personal tras reinicio a partir del diagnostico tecnico.
+
+Proximo: usuario Comprobar acceso y Consultar registro en pantalla con sesion real,
+confirmar revision 1/politica deshabilitada y luego retirar copia privada anterior.
+No suite nueva (ultima 63 §124). Fuentes/aceptacion y alcance integral pendientes;
+ley fija, M3-T1 EN PROGRESO y activacion EIPD bloqueada. Sin commit/push.
+
+## 2026-10-09 — M3-T1 §126: comprobacion personal posterior y retirada de copia
+
+El usuario aporta captura posterior al reinicio con mensaje de acceso administrativo
+confirmado y activacion EIPD bloqueada; pantalla conserva revision 1, 1 publicacion,
+1 seleccion y politica deshabilitada/seleccionada. Evidencia visual del usuario,
+sin inspeccion independiente del JWT ni captura de credenciales.
+
+Tras esta confirmacion se retira exclusivamente la copia privada anterior creada
+para recuperacion §126, comprobando ruta/tipo/modo 0600 y ausencia posterior.
+Archivo actual privado 0600 conservado. No se elimina historial, roles ni perfil;
+no nuevas publicaciones/selecciones. La retirada es eliminacion del archivo de
+recuperacion, sin afirmar borrado forense del almacenamiento.
+
+Rotacion local y acceso posterior confirmados; recuperacion temporal cerrada.
+Retiro definitivo del canal no ejecutado. Fuentes/aceptacion y alcance integral
+siguen pendientes; ley fija, M3-T1 EN PROGRESO y activacion bloqueada.
+Sin commit/push.
+
+## 2026-10-09 — M3-T1 §127: retiro reversible del canal real y recuperacion
+
+Proceso propio 8001 detenido y ausencia de sesiones dedicadas comprobada tras
+snapshot previo validado. Login local eipd_backend_local cambiado temporalmente
+a NOLOGIN: conexion NUEVA con credencial actual rechazada, SQLSTATE 28000.
+LOGIN restaurado en finally; nueva conexion y preflight ok. Snapshot completo
+posterior exactamente igual al previo, selector revision 1. No cambio de password,
+archivo privado, membresias, perfiles, publicaciones, eventos ni selector.
+
+Proceso 8001 reiniciado con credencial privada actual, DEBUG=false y sin access log;
+GET /status sin token -> 401. Backend 8000 fuera del ensayo. Comprobacion personal
+posterior al reinicio pendiente. No constituye retiro definitivo del canal ni
+revocacion instantanea de transacciones ya autorizadas; se dreno antes del cambio.
+No nueva suite; ultima 63 §124. Ley fija, fuentes/aceptacion y alcance integral
+pendientes; M3-T1 EN PROGRESO y activacion EIPD bloqueada. Sin commit/push.
+
+## 2026-10-09 — M3-T1 §127: acceso personal recuperado confirmado
+
+El usuario aporta captura con mensaje «Acceso administrativo confirmado. La
+activacion EIPD permanece bloqueada» posterior al reinicio de recuperacion.
+Se registra como evidencia visual del usuario, sin inspeccion independiente de
+JWT/solicitud original ni almacenamiento de imagen, datos personales o tokens.
+La captura no muestra el registro; su coherencia y revision 1 fueron comprobadas
+tecnicamente antes/despues del ensayo y no se deducen de esta imagen.
+
+Ensayo reversible real y acceso posterior confirmados. Canal activo restaurado;
+no retiro definitivo, nuevas credenciales ni cambios de politica. No nueva suite.
+Fuentes/aceptacion y alcance integral pendientes; ley fija, M3-T1 EN PROGRESO,
+activacion EIPD bloqueada. Sin commit/push.

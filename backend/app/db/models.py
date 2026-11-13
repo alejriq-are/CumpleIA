@@ -1487,6 +1487,10 @@ class LegalAssessment(Base):
             "health_assessment IS NULL OR jsonb_typeof(health_assessment) = 'object'",
             name="ck_legal_assessments_health_object",
         ),
+        CheckConstraint(
+            "research_assessment IS NULL OR jsonb_typeof(research_assessment) = 'object'",
+            name="ck_legal_assessments_research_object",
+        ),
         CheckConstraint("version >= 1", name="ck_legal_assessments_version"),
         CheckConstraint(
             "schema_version >= 1",
@@ -1598,6 +1602,9 @@ class LegalAssessment(Base):
         JSONB(none_as_null=True), nullable=True
     )
     biometric_assessment: Mapped[dict | None] = mapped_column(
+        JSONB(none_as_null=True), nullable=True
+    )
+    research_assessment: Mapped[dict | None] = mapped_column(
         JSONB(none_as_null=True), nullable=True
     )
     health_assessment: Mapped[dict | None] = mapped_column(
