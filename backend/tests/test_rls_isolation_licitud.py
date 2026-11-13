@@ -22,7 +22,6 @@ from sqlalchemy.pool import NullPool
 from app.core.config import get_settings
 from app.db.models import LegalAssessment, LegalAssessmentSeries, Treatment
 
-
 settings = get_settings()
 
 
@@ -175,9 +174,7 @@ async def licitud_base_data(
             )
         )
         await session.execute(
-            delete(Treatment).where(
-                Treatment.id.in_([treatment_a_id, treatment_b_id])
-            )
+            delete(Treatment).where(Treatment.id.in_([treatment_a_id, treatment_b_id]))
         )
         await session.commit()
 
@@ -196,8 +193,7 @@ async def test_rls_licitud_permite_lectura_de_series_propias(
 
     result = await app_role_session.execute(
         text(
-            "SELECT id FROM legal_assessment_series "
-            "WHERE organization_id = :org_id"
+            "SELECT id FROM legal_assessment_series " "WHERE organization_id = :org_id"
         ),
         {"org_id": str(org_a_id)},
     )
@@ -217,8 +213,7 @@ async def test_rls_licitud_bloquea_lectura_de_series_ajenas(
 
     result = await app_role_session.execute(
         text(
-            "SELECT id FROM legal_assessment_series "
-            "WHERE organization_id = :org_id"
+            "SELECT id FROM legal_assessment_series " "WHERE organization_id = :org_id"
         ),
         {"org_id": str(org_a_id)},
     )
@@ -236,10 +231,7 @@ async def test_rls_licitud_bloquea_lectura_de_evaluaciones_ajenas(
     await _set_auth_user(app_role_session, auth_b_id)
 
     result = await app_role_session.execute(
-        text(
-            "SELECT id FROM legal_assessments "
-            "WHERE organization_id = :org_id"
-        ),
+        text("SELECT id FROM legal_assessments " "WHERE organization_id = :org_id"),
         {"org_id": str(org_a_id)},
     )
 

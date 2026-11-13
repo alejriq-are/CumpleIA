@@ -181,13 +181,17 @@ async def _validate_activation(
         missing.append("international_transfers_declaration")
     elif international_declaration == "si":
         transfer_statuses = (
-            await db.execute(
-                select(InternationalTransfer.adequacy_status).where(
-                    InternationalTransfer.organization_id == organization_id,
-                    InternationalTransfer.treatment_id == treatment.id,
+            (
+                await db.execute(
+                    select(InternationalTransfer.adequacy_status).where(
+                        InternationalTransfer.organization_id == organization_id,
+                        InternationalTransfer.treatment_id == treatment.id,
+                    )
                 )
             )
-        ).scalars().all()
+            .scalars()
+            .all()
+        )
 
         if not transfer_statuses or "pendiente" in transfer_statuses:
             missing.append("international_transfers")

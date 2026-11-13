@@ -1422,8 +1422,7 @@ class LegalAssessment(Base):
             name="ck_legal_assessments_legal_basis",
         ),
         CheckConstraint(
-            "replaced_by_assessment_id IS NULL "
-            "OR replaced_by_assessment_id <> id",
+            "replaced_by_assessment_id IS NULL " "OR replaced_by_assessment_id <> id",
             name="ck_legal_assessments_not_self_replaced",
         ),
         CheckConstraint(
