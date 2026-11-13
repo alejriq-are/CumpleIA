@@ -159,3 +159,93 @@ El anexo de respuestas crudas y, en general, cualquier bitácora de auditoría f
 - [x] Next production build PASS.
 
 **Siguiente:** M2-T3.3 — finalidades, categorías de datos, titulares y fuentes.
+
+
+## Módulo 3 — M3-T1, persistencia y reglas de bases de licitud
+
+**Estado:** EN PROGRESO (revisión 2026-10-06).
+
+Matriz de implementación, evidencia y brechas en
+[Revisión de aceptación M3-T1](project/m3-t1-revision-aceptacion.md).
+Diseño y alcance en [Bases de licitud](project/modulo3-licitud-diseno.md).
+Última suite completa registrada: 2234 passed (§58); no acredita cierre integral.
+
+- [x] Núcleo persistente, alcance por finalidad, snapshot/hash, RLS y lifecycle.
+- [x] Seis bases ordinarias; geolocalización y consentimiento expreso sensible
+  del titular con preparación, asociaciones y barreras de confirmación.
+- [x] Screening EIPD; positivos/pendientes mantienen bloqueo.
+- [x] Completar evidencia HTTP conjunta sensible/geolocalización (4 casos
+  focalizados aprobados: pérdida de preparación, EIPD y conservación/reemplazo).
+- [x] Ampliar concurrencia con constructor RAT real: consentimiento con
+  sensibilidad/geolocalización, 8 casos nuevos; otras cinco bases conservan
+  cobertura de concurrencia con RAT simulado.
+- [x] Priorizar próximo régimen: salud/perfil biológico; primer alcance
+  documental por consentimiento expreso, diseño §31.
+- [x] Definir contrato/matriz documental de salud (§32).
+- [x] Implementar schema de salud y pruebas (§33: 49 pruebas nuevas).
+- [x] Persistencia/exposición de salud y asociaciones compatibles (§34).
+- [x] Evaluador de salud y readiness (§35).
+- [x] Integración del gate de salud para primer soporte; restricciones y EIPD conservados (§36).
+- [x] HTTP conjunto salud/sensible/geolocalización y concurrencia de salud con RAT real
+  por consentimiento_art12/contexto otro (§37: 18 casos nuevos; 35 verificaciones focalizadas).
+- [x] Revisar alcance de representación sensible y criterios de cierre M3-T1 (§38);
+  revisión no equivale a cierre ni habilita representación.
+- [x] Verificar por HTTP representante_legal/mandatario en sensible, con y sin salud:
+  rechazo, conservación del vigente y reparación a titular.
+- [x] Validación integral posterior a representación (§39): 1429 passed.
+- [x] Revisión focalizada de cambios y cadena Alembic (§40): head aplicado,
+  46 archivos con formato/lint correctos; tablas M3 sin diferencias autogenerate.
+- [x] Investigar/corregir drift global de metadata sin eliminar índices (§41):
+  29 índices declarados y nombre de unique alineado; alembic check aprobado.
+- [x] Preparar propuesta concreta de entrega inicial y pendientes (§42):
+  [Propuesta de alcance](project/m3-t1-propuesta-entrega.md).
+- [x] Decisión explícita: continuar alcance integral (§43); entrega inicial no
+  adoptada como recorte de cierre.
+- [x] Actualizar aceptación según decisión integral (§43).
+- [x] Biometría: contrato/matriz de primera ruta consentimiento expreso (§44).
+- [x] Biometría: schemas y pruebas (§45: 53 casos nuevos; 150 contratos aprobados).
+- [x] Biometría: persistencia/API/asociaciones compatibles (§46): diez casos HTTP;
+  suite integral 1492 passed y Alembic check aprobado.
+- [x] Biometría: evaluador puro/readiness (§47): 73 pruebas puras y un caso HTTP
+  nuevos; suite integral 1566 passed.
+- [x] Biometría: integrar gate/EIPD y HTTP de primera ruta (§48): 19 pruebas
+  transversales nuevas; suite integral 1585 passed.
+- [x] Biometría: HTTP seis bases y concurrencia con RAT real (§49): 22 casos
+  nuevos; 58 verificaciones focalizadas. Concurrencia real: consentimiento_art12.
+- [x] Delimitar primera excepción biométrica: derechos art16ter -> art16bis(d),
+  con dependencia sensible art16d y barrera EIPD conservada (§50).
+- [x] Diseñar contratos/matriz de excepción sensible y biométrica de derechos (§51).
+- [x] Implementar schemas/pruebas de ambas excepciones (§52): 102 casos nuevos,
+  252 contratos seleccionados aprobados.
+- [x] Persistencia/API de ambas excepciones (§53), con barrera explicita
+  mientras falta cobertura de asociaciones y tres casos HTTP aprobados.
+- [x] Asociaciones especiales v10/EIPD v11 de ambas excepciones (§54), con
+  comparadores historicos, obsolescencia y reaporte explicito; 118 casos nuevos.
+- [x] Evaluador puro de preparacion/aplicabilidad sensible de derechos (§55);
+  172 casos aprobados, sin habilitar confirmacion.
+- [x] Readiness e integracion sensible en detector/gates (§56), residualidad
+  explicita en ambos sentidos y EIPD conservado; doce casos nuevos.
+- [x] Evaluador puro biometrico de derechos y vinculos sensibles (§57),
+  208 casos aprobados, sin habilitar confirmacion.
+- [x] Readiness e integracion biometrica en detector/gates (§58), residualidad
+  explicita y EIPD conservado; doce casos nuevos, sin confirmar excepciones.
+- [x] Delimitar resolucion EIPD acotada (§59): registro externo, revision humana
+  trazable y gate separado; screening positivo conservado, sin habilitacion actual.
+- [ ] Contratos/matriz, schemas, persistencia/eventos y evaluadores de resolucion
+  EIPD; aislamiento, obsolescencia y concurrencia antes de habilitar la frontera.
+- [ ] Verificar/registrar listas y orientaciones oficiales aplicables antes de
+  desbloquear confirmaciones; busqueda acotada no acredita inexistencia.
+- [ ] Completar demás excepciones biométricas dentro del alcance integral.
+- [ ] Completar representación, excepciones sensibles/salud y contextos restringidos,
+  infancia/adolescencia, investigación y alcance granular según diseño propio.
+- [ ] Validación y revisión final del alcance integral antes de declarar DONE.
+
+Workflow completo EIPD diferido; frontend M3 no se agrega como requisito de
+esta tarea mediante esta revisión. Sin cierre DONE ni commit.
+
+- [x] M3-T1 §60: contratos/matriz de resolucion EIPD, documento parcial, condicionales y revision humana con campos de servidor definidos (solo diseño).
+- [x] M3-T1 §61: schemas separados de resolucion/revision EIPD y 111 pruebas de contrato implementados; 419 pruebas de schemas aprobadas.
+- [x] M3-T1 §62: asociacion/hash de resolucion v1 puros implementados; 89 pruebas nuevas y 296 focalizadas aprobadas.
+- [x] M3-T1 §63: persistencia JSONB y eventos append-only/RLS de resolucion EIPD; migracion b51d3f6a9c20 y 36 casos PostgreSQL, suite integral 2470 passed.
+- [x] M3-T1 §64: API documental/binding de resolucion EIPD; 25 HTTP con RAT real y suite integral 2495 passed, historial conservado.
+- [ ] M3-T1: evaluador puro/readiness, accion de revision EIPD, vigencia/gates, concurrencia y fuentes pendientes antes de habilitar confirmacion.

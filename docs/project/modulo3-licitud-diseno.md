@@ -483,6 +483,175 @@ compatibilidad funcional con endpoints existentes, ya que M3 aún no posee
 API ni flujo productivo.
 
 
+### 15.6 Detección estructurada de condiciones especiales v1
+
+Referencia: [texto oficial BCN de Ley 21.719](https://www.bcn.cl/leychile/navegar?idNorma=1209272),
+artículos 16 a 16 sexies del régimen previsto para diciembre de 2026.
+La revisión distingue datos sensibles, salud/perfil biológico, identificación
+biométrica, infancia/adolescencia, finalidades de investigación y geolocalización.
+Estos grupos no se tratarán como autorizaciones intercambiables. Los hechos,
+las condiciones seleccionadas y su revisión documental se mantendrán separados.
+
+Las declaraciones se limitarán al alcance de la finalidad evaluada, no a todos
+los datos de la organización. Identificadores estables del primer contrato:
+
+- `datos_sensibles`;
+- `salud_perfil_biologico`;
+- `biometricos_identificacion_unica`;
+- `ninos_ninas`;
+- `adolescentes`;
+- `datos_sensibles_adolescentes_menores_16`;
+- `fines_historicos_estadisticos_cientificos_investigacion`;
+- `geolocalizacion`;
+- `grupos_vulnerables`.
+
+Cada declaración tendrá `question_id`, `answer = si | no | pendiente`,
+`rationale` opcional en borrador y listas opcionales `data_category_codes` y
+`data_subject_codes` que precisan el subconjunto afectado. Los códigos deben
+existir en el alcance del snapshot; no son UUID operacionales ni se infiere su
+significado jurídico. No se aceptarán códigos vacíos/duplicados, preguntas
+repetidas ni `no_aplica`. Para resolver la detección deben estar las nueve
+preguntas con `si`/`no` y fundamento no vacío.
+
+Las declaraciones complementan los hechos RAT; no los sobrescriben. Se
+compararán `datos_sensibles`, `ninos_ninas`, `adolescentes` y `grupos_vulnerables`
+con sus indicadores estructurados del snapshot. Una discordancia produce
+revisión del contexto/declaración y no se resuelve automáticamente.
+Salud o biometría afirmativas con `has_sensitive_data = false` también exigen
+revisión de la clasificación, sin corregir silenciosamente M2.
+
+Una afirmativa sobre datos sensibles de adolescentes menores de 16 requiere
+que el snapshot incluya adolescentes y datos sensibles, además de justificar
+la edad y su asociación al subconjunto declarado. La presencia conjunta de los
+dos indicadores RAT no demuestra ese cruce: una negativa no se contradice
+únicamente por coexistir ambos. No se recopilan fechas de nacimiento de personas
+ni se infiere edad desde nombres de categorías.
+
+Una respuesta afirmativa activa revisión del régimen correspondiente. Los
+regímenes pueden coexistir; no se elige uno para suprimir los demás. La
+vulnerabilidad actúa como factor de revisión y no como una autorización especial
+inventada. Las preguntas sobre investigación y geolocalización se responden
+explícitamente, sin inferirlas desde finalidad, sistemas, fuentes o prosa libre.
+
+### 15.7 Contrato documental SpecialConditionsV1
+
+Se usará la columna existente `legal_assessments.special_conditions` como
+expediente versionado, independiente del screening EIPD. Contrato físico:
+
+- `schema_version`: entero literal `1`;
+- `declarations`: lista de declaraciones de §15.6, inicialmente vacía;
+- `conditions`: lista de expedientes por régimen, inicialmente vacía;
+- `notes`: texto opcional;
+- `context_binding`: asociación documental calculada por servidor.
+
+Cada expediente de `conditions` contendrá:
+
+- `regime_id`: `sensibles_art16 | salud_perfil_biologico_art16bis |
+  biometricos_art16ter | infancia_adolescencia_art16quater |
+  investigacion_art16quinquies | geolocalizacion_art16sexies`;
+- `authorization_route`: `consentimiento | excepcion_legal | regla_especifica`
+  o `null` en borrador; documenta una ruta propuesta, sin aprobarla;
+- `sensitive_condition_id`: uno de los siete identificadores de §15.3 o `null`;
+  solo se admite en `sensibles_art16`, no se aplica como permiso genérico a
+  salud/biometría u otros regímenes;
+- `legal_reference`: referencia jurídica documental opcional;
+- `documentary_analysis`: análisis opcional en borrador;
+- `uses_consent_assessment`: `true | false | null`, referencia al expediente
+  de consentimiento de esta misma evaluación, sin copiarlo ni enlazar UUID externo;
+- `data_category_codes` y `data_subject_codes`: listas que precisan alcance;
+- `evidence`: metadata documental con `evidence_type`, `reference`,
+  `obtained_on` factual, `mechanism` y `notes`, sin integración M5;
+- `notes`: observaciones opcionales.
+
+Un `regime_id` no podrá repetirse en v1; subconjuntos con rutas incompatibles
+requerirán revisión de la separación de finalidades, no entradas ambiguas.
+Los códigos se validarán contra el alcance RAT de la evaluación. Una condición
+para un régimen no detectado se conservará pero se marcará para revisión.
+Campos, regímenes, condiciones y versiones desconocidos se rechazarán;
+no habrá un diccionario libre de respuestas que simule requisitos implementados.
+
+Este contrato permite documentar borradores, pero no declara implementados los
+requisitos específicos de ninguna ruta. La matriz de validadores se registrará
+por `regime_id` y ruta. Inicialmente todos estarán como **no implementados**;
+la salida derivada expondrá esa barrera, sin aceptar un estado aportado por el
+cliente. Los cuestionarios concretos y sus requisitos se incorporarán mediante
+una decisión explícita de versionado antes de habilitar una ruta.
+
+### 15.8 Preparación, asociación y dependencia con EIPD
+
+La entrada `SpecialConditionsDraftIn` contendrá únicamente versión,
+declaraciones, condiciones y notas. El servidor calculará `context_binding`
+con versión literal `1` y hash SHA-256 de JSON determinista sobre:
+`rat_context_snapshot`, `legal_basis`, `consent_assessment` y `lia_assessment`
+con sus valores finales serializados o null cuando corresponda. Se preservarán
+valores factuales y orden de listas, con claves ordenadas, separadores compactos,
+Unicode sin escape ASCII y UTF-8. Esta asociación no modifica el hash RAT v1.
+
+Omisión en PATCH conserva el expediente y su asociación; objeto reemplaza la
+unidad y calcula asociación sobre el resultado final; null elimina el expediente
+solo en borrador. Cambios de base, snapshot o cuestionarios sin reaportar el
+expediente no lo reasocian: queda desactualizado. La entrada no admite asociación,
+resultado ni validadores supuestamente aprobados por el cliente.
+
+El evaluador de detección/preparación devolverá motivos y regímenes afectados:
+
+- `incompleto`: expediente ausente, declaraciones/fundamentos sin resolver,
+  códigos fuera de alcance o régimen activado sin expediente correspondiente;
+- `requiere_revision`: asociación desactualizada, discordancias con RAT,
+  condiciones residuales, referencias incoherentes a consentimiento o cualquier
+  ruta cuyo validador específico no esté implementado;
+- `sin_regimenes_declarados`: declaraciones completas, negativas, fundadas,
+  coherentes con RAT, sin condiciones residuales y asociación vigente.
+
+La precedencia será `incompleto > requiere_revision > sin_regimenes_declarados`,
+conservando todos los motivos. Un expediente documental completo de un régimen
+positivo continuará bloqueado mientras su validador sea no implementado.
+No se introducirá un resultado `aprobado` o un bypass por comentario.
+
+La relación con EIPD requiere evolucionar su asociación documental a
+**context_binding.schema_version = 2** cuando se implemente este contrato:
+el material será snapshot RAT completo, LIA y `special_conditions` finales.
+El orden de guardado será base/cuestionarios, snapshot, condiciones especiales
+y después screening EIPD. La asociación de condiciones no incluye EIPD y por
+ello no hay un ciclo de hashes.
+
+No se reescribirán asociaciones EIPD v1 existentes. Con condiciones especiales
+no nulas, una asociación EIPD v1 no cubre este contexto: se devolverá revisión
+y se requerirá reaportar el screening bajo la asociación v2. Los screenings v1
+sin condiciones conservarán evaluación histórica conforme a su contrato; al
+crear o reaportar screening con la nueva implementación se usará v2. El
+cuestionario EIPD seguirá en schema_version 1; evoluciona solo su asociación.
+
+También se comparará la declaración EIPD sobre excepción al consentimiento
+con las rutas especiales documentadas. No se deducirá una excepción únicamente
+a partir de legal_basis. Si hay una ruta pendiente/no validada, la preparación
+mostrará esa incertidumbre y no una autorización resuelta.
+
+### 15.9 Matriz y aceptación del primer bloque especial
+
+| Régimen | Detección/alcance a documentar | Cobertura inicial |
+| --- | --- | --- |
+| Sensibles | Declaración y flag RAT; condición art16 propuesta | Guardado/detección, validación jurídica bloqueada |
+| Salud/perfil biológico | Declaración, subconjunto y contexto de uso | Guardado/detección, reglas específicas pendientes |
+| Biometría | Declaración de identificación única y subconjunto | Guardado/detección, información/requisitos específicos pendientes |
+| Infancia/adolescencia | Indicadores RAT, edad pertinente y cruce con sensibles | Guardado/detección, autorización/requisitos específicos pendientes |
+| Investigación | Declaración de finalidad y análisis documental | Guardado/detección, requisitos específicos pendientes |
+| Geolocalización | Declaración y alcance documentado | Guardado/detección, información/requisitos específicos pendientes |
+| Vulnerabilidad | Declaración y flag RAT | Factor de revisión, sin ruta de autorización especial |
+
+Antes de implementar se cubrirán con pruebas: borradores parciales; campos,
+regímenes y rutas desconocidos; duplicados; códigos ajenos al alcance; flags
+RAT discordantes; cruce sensible/adolescente no inferido; varios regímenes;
+rutas no implementadas; consentimiento referenciado pero ausente; omisión/null;
+asociación especial desactualizada; EIPD v1 con condiciones nuevas; guardado
+conjunto con asociación v2; conservación de históricos y consultas HTTP/RLS.
+
+El primer bloque no desbloqueará condiciones positivas ni LIA. La habilitación
+posterior exige validadores específicos, cobertura transversal EIPD y pruebas
+transaccionales/concurrentes. Esta definición solo modifica documentación;
+no añade modelos/código ni nuevas migraciones. Última suite backend:
+**558 passed**. M3-T1 sigue en progreso.
+
 ## 16. Estrategia de persistencia: núcleo relacional + JSONB versionado
 
 ### 16.1 Decisión
@@ -725,6 +894,281 @@ determinación jurídica automática.
 
 La evaluación M3 sólo podrá pasar a `confirmado` mediante una acción explícita
 del usuario autorizado.
+
+### 17.9 Identificadores estables del checklist de consentimiento v1
+
+El contrato físico v1 utilizará identificadores técnicos estables para las
+preguntas cerradas del checklist. Estos identificadores no son texto jurídico
+ni etiquetas de interfaz; permiten conservar el significado histórico aunque
+la redacción visible cambie en el futuro.
+
+Preguntas generales de consentimiento v1:
+
+- `consentimiento_libre`;
+- `consentimiento_informado`;
+- `consentimiento_especifico_finalidad`;
+- `consentimiento_previo`;
+- `voluntad_inequivoca`;
+- `accion_afirmativa_clara`;
+- `revocacion_posible`;
+- `revocacion_medio_equivalente`;
+- `revocacion_expedita`;
+- `revocacion_fidedigna`;
+- `revocacion_gratuita`;
+- `revocacion_disponible_permanentemente`;
+- `responsable_puede_acreditar`;
+- `contexto_contrato_servicio`, indica si el consentimiento se solicita dentro de la ejecución de un
+  contrato o de la prestación de un servicio.
+
+Preguntas condicionales v1:
+
+- `mandatario_facultad_expresa`, aplicable cuando `given_by = mandatario`;
+- `tratamiento_necesario_contrato_servicio`, aplicable cuando `contexto_contrato_servicio` tenga respuesta `si`.
+
+Cada identificador utilizará la respuesta estructurada común
+`si | no | no_aplica | pendiente` y un comentario opcional.
+
+La condición operativa de completitud se derivará del conjunto de respuestas
+y de las reglas de aplicabilidad. El identificador estable no implica por sí
+solo que una respuesta determinada produzca automáticamente una conclusión
+jurídica.
+
+### 17.10 Contrato físico del checklist de consentimiento v1
+
+El JSONB `consent_assessment` utilizará el siguiente contrato físico v1:
+
+- `schema_version`: versión entera del contrato, inicialmente `1`;
+- `given_by`: `titular | representante_legal | mandatario`;
+- `grant_method`: `escrito | verbal | electronico | acto_afirmativo | otro_documentado`;
+- `answers`: lista de respuestas estructuradas;
+- `evidence`: lista de metadata documental de evidencia;
+- `notes`: texto opcional.
+
+Cada elemento de `answers` contendrá:
+
+- `question_id`: uno de los identificadores estables definidos en §17.9;
+- `answer`: `si | no | no_aplica | pendiente`;
+- `comment`: texto opcional.
+
+Un mismo `question_id` no podrá aparecer más de una vez dentro de una misma evaluación.
+Mientras la evaluación permanezca en `borrador`, `given_by` y `grant_method` podrán permanecer en `null` y el contrato podrá conservar sólo un subconjunto de preguntas. La obligatoriedad de estos campos y la completitud del checklist se evaluarán al confirmar, según las reglas de aplicabilidad.
+
+Cada elemento de `evidence` contendrá:
+
+- `evidence_type`: texto que identifica el tipo de evidencia;
+- `reference`: referencia o identificador opcional;
+- `obtained_on`: fecha factual opcional de obtención, sin semántica de timestamp de sistema;
+- `mechanism`: sistema o mecanismo utilizado, opcional;
+- `notes`: observaciones opcionales.
+
+Esta metadata pertenece al expediente documental M3 y no crea todavía una dependencia con `EvidenceEvent` de M5. Una integración futura con la bitácora de evidencia no deberá reinterpretar silenciosamente los JSONB históricos de consentimiento.
+
+### 17.11 Aplicabilidad y completitud operativa del consentimiento v1
+
+Las reglas siguientes fijan un control de preparación del expediente M3.
+No constituyen una determinación automática de validez jurídica. Se ejecutarán
+sobre el contrato validado `ConsentAssessmentV1`, sin modificar sus respuestas.
+
+Para confirmar una evaluación con `legal_basis = consentimiento_art12`,
+`consent_assessment` deberá existir, tener `schema_version = 1` y contener
+`given_by` y `grant_method` no nulos.
+
+Las 14 preguntas generales de §17.9 serán siempre aplicables. Cada una deberá
+estar presente con respuesta `si` o `no`. Una pregunta general omitida, con
+`pendiente` o con `no_aplica` hará que el checklist sea `incompleto`.
+`contexto_contrato_servicio = no` será una respuesta resuelta, sin alerta por
+sí misma; esa pregunta determina aplicabilidad y no exige respuesta afirmativa.
+
+La aplicabilidad de las dos preguntas condicionales se resolverá así:
+
+| Pregunta | Aplicable | No aplicable | Aplicabilidad sin resolver |
+| --- | --- | --- | --- |
+| `mandatario_facultad_expresa` | `given_by = mandatario` | `given_by = titular` o `representante_legal` | `given_by = null` |
+| `tratamiento_necesario_contrato_servicio` | `contexto_contrato_servicio = si` | `contexto_contrato_servicio = no` | Pregunta general omitida, `pendiente` o `no_aplica` |
+
+Una pregunta condicional aplicable deberá estar presente con respuesta `si`
+o `no`; omisión, `pendiente` o `no_aplica` producirán `incompleto`.
+Una pregunta condicional no aplicable podrá omitirse o responderse `no_aplica`.
+Si conserva `si`, `no` o `pendiente`, se señalará una inconsistencia que requiere
+revisión; no se borrará ni convertirá automáticamente la respuesta. Esto permite
+detectar respuestas residuales cuando cambien los campos que determinan su
+aplicabilidad.
+
+Cuando la aplicabilidad no pueda resolverse, el resultado será `incompleto`,
+aunque exista una respuesta para la pregunta condicional. Una respuesta
+condicional no sustituye al dato que determina su aplicabilidad.
+
+`comment`, `notes` y los campos opcionales de evidencia no serán obligatorios
+para completar este checklist v1. Si se declara un elemento de `evidence`, su
+`evidence_type` deberá contener texto no vacío tras ignorar espacios en los
+extremos; una fecha aportada deberá ser válida según el contrato Pydantic.
+No se impondrá un número mínimo de evidencias ni la presencia de `reference`
+en este control. La cantidad de metadata no demuestra por sí sola la capacidad
+de acreditar el consentimiento; esa cuestión se documenta mediante la respuesta
+`responsable_puede_acreditar` y la revisión humana del expediente.
+
+Las condiciones especiales de §17.6 se validarán separadamente cuando sean
+aplicables. Completar este checklist no satisface automáticamente dichas
+condiciones.
+
+### 17.12 Resultado derivado y motivos v1
+
+El evaluador devolverá un resultado operativo y motivos identificables,
+sin persistirlos como un nuevo estado de la evaluación ni incorporarlos al
+JSONB histórico de consentimiento.
+
+Se aplicará esta precedencia:
+
+1. `incompleto`: falta el expediente, `given_by` o `grant_method`; hay preguntas
+   aplicables omitidas, pendientes o respondidas `no_aplica`; no puede resolverse
+   una condición de aplicabilidad; o una evidencia declarada carece de tipo
+   documental no vacío.
+2. `requiere_revision`: no existen faltantes anteriores, pero una pregunta
+   general distinta de `contexto_contrato_servicio` tiene respuesta `no`, una
+   pregunta condicional aplicable tiene respuesta `no`, o una pregunta
+   condicional no aplicable conserva una respuesta distinta de `no_aplica`.
+3. `completo`: no existen faltantes ni motivos de revisión según estas reglas.
+
+El evaluador conservará todos los motivos detectados, incluidos los de revisión
+cuando el resultado agregado sea `incompleto`. La salida deberá identificar el
+campo o `question_id` afectado, distinguir faltante de respuesta desfavorable y
+exponer la aplicabilidad de ambas preguntas condicionales como
+`aplicable | no_aplicable | sin_resolver`. Los motivos se ordenarán por campos
+obligatorios, orden de preguntas de §17.9 y posición de evidencia, para obtener
+una salida determinista independiente del orden de `answers`.
+
+Un contrato inválido (versión no admitida, identificador desconocido, respuesta
+fuera de catálogo, preguntas duplicadas o fecha inválida) se rechazará antes
+de evaluar completitud. No se convertirá un error de estructura en un resultado
+`completo` ni se descartarán entradas silenciosamente.
+
+### 17.13 Puerta de confirmación y casos de aceptación v1
+
+En el flujo v1, únicamente el resultado `completo` permitirá continuar la
+confirmación explícita por un usuario autorizado. `incompleto` y
+`requiere_revision` bloquearán esa transición y devolverán sus motivos.
+No habrá un bypass mediante comentarios ni una confirmación forzada en v1.
+
+El bloqueo es una política operativa de preparación de CumpleIA: no declara
+jurídicamente inválido el consentimiento. El usuario podrá revisar y corregir
+el borrador conservando la trazabilidad prevista para M3.
+
+El resultado se recalculará dentro del flujo transaccional de §20.9 con el
+payload vigente. Un resultado calculado anteriormente por la interfaz no será
+fuente de autorización. También deberán superarse la revalidación del contexto
+RAT y las demás validaciones de la evaluación; `completo` no confirma por sí
+solo ni reemplaza una evaluación anterior.
+
+Casos mínimos para la futura implementación:
+
+| Caso | Resultado esperado |
+| --- | --- |
+| Expediente vacío o ausente | `incompleto` |
+| Titular, método informado, 13 respuestas generales afirmativas y contexto contractual `no`; condicionales omitidas o `no_aplica` | `completo` |
+| Mandatario con `mandatario_facultad_expresa` omitida o `no_aplica` | `incompleto` |
+| Mandatario con facultad expresa `no` y resto resuelto favorablemente | `requiere_revision` |
+| Contexto contractual `si` y necesidad omitida o `pendiente` | `incompleto` |
+| Contexto contractual `si`, necesidad `no` y resto resuelto favorablemente | `requiere_revision` |
+| Contexto contractual `no` y necesidad conserva `si` | `requiere_revision` |
+| Pregunta general con `no_aplica` | `incompleto` |
+| Una pregunta general desfavorable y otra pendiente | `incompleto`, conservando ambos motivos |
+| Evidencia declarada con tipo vacío o solo espacios | `incompleto` |
+| Mismas respuestas en distinto orden | Mismo resultado, aplicabilidad y orden de motivos |
+
+El evaluador puro `evaluate_consent_assessment_v1` está implementado en
+`backend/app/services/consentimiento.py`, con resultados y motivos inmutables,
+revalidación estructural de entrada y sin escrituras de persistencia.
+`ConsentReadinessV1.can_confirm` expresa únicamente la habilitación de este
+control; no ejecuta ni autoriza por sí solo la transición de estado.
+
+La validación específica comprende 40 casos nuevos de consentimiento y
+136 pruebas aprobadas junto con los contratos y servicios M3 existentes.
+Formato, lint y comprobación de whitespace pasan para este bloque.
+No se ejecutó la suite completa backend en este paso.
+
+El service layer incorpora `confirm_legal_assessment_v1` para consentimiento
+ordinario v1: bloquea la serie, relee el estado y payload del borrador después
+del bloqueo, evalúa el consentimiento vigente, exige justificación y alcance,
+recompone el contexto RAT y rechaza un hash distinto. El snapshot documental
+persistido se conserva; un cambio semántico exige revisar y actualizar el
+borrador antes de confirmar.
+
+La función reemplaza la evaluación anterior y confirma la sucesora con actor
+y fecha en la misma transacción. Hace flush del reemplazo antes de confirmar
+para respetar el índice parcial de una única evaluación confirmada. No hace
+commit ni rollback: el caller debe cerrar la unidad de trabajo y revertirla
+completamente ante un error. El caller también debe validar los permisos del
+usuario y el acceso al tenant. La API inicial de §17.14 invoca esta función con los controles del caller.
+
+Creación y actualización de borradores admiten `consent_assessment`, validado
+con el contrato v1 y serializado en modo JSON para preservar fechas compatibles
+con JSONB. En una actualización, omitir el campo conserva su valor y `null`
+lo elimina. El checklist se reemplaza como unidad, sin fusionar respuestas.
+
+Hasta implementar las demás reglas de M3, la confirmación rechaza otras bases,
+versiones de contrato no admitidas, cualquier indicador de régimen especial
+activo y cualquier payload `special_conditions` no nulo. Esta barrera expresa
+una limitación de implementación, no una conclusión jurídica sobre esos casos.
+
+Validación inicial de la integración: suite completa backend, **341 passed**; formato,
+lint y whitespace pasan. Se verificaron reemplazo y rollback real en PostgreSQL
+con `app_user`, además del rechazo cross-tenant con RLS. La prueba de reemplazo
+usa un constructor RAT simulado; no sustituye una prueba completa del flujo API.
+Las comprobaciones posteriores de concurrencia y API se registran en §17.14.
+
+M3-T1 permanece en progreso. Quedan pendientes los contratos y validaciones
+de las demás bases/condiciones especiales y la ampliación del flujo M3 más
+allá del consentimiento ordinario.
+
+### 17.14 API inicial y validación concurrente
+
+La API inicial de M3 utiliza el prefijo `/licitud`. Todas las operaciones
+requieren autenticación, `X-Organization-Id` validado y suscripción activa o
+en grace. Los permisos se comprueban en el servidor mediante el catálogo
+existente: `view_content` para lectura y `edit_content` para crear, editar y
+confirmar. Un editor puede confirmar según esta política inicial; no se crea
+un permiso de aprobación nuevo en este bloque.
+
+| Método | Ruta bajo `/licitud` | Operación |
+| --- | --- | --- |
+| POST | `/treatments/{treatment_id}/assessments` | Crear borrador, respuesta 201 |
+| GET | `/treatments/{treatment_id}/assessments/{assessment_id}` | Leer versión borrador, confirmada o reemplazada |
+| PATCH | `/treatments/{treatment_id}/assessments/{assessment_id}` | Actualizar únicamente borrador |
+| POST | `/treatments/{treatment_id}/assessments/{assessment_id}/confirm` | Confirmar explícitamente consentimiento ordinario |
+
+La respuesta utiliza `LegalAssessmentOut`. El tenant y el actor provienen del
+header validado y del perfil autenticado, respectivamente. El cliente no fija
+el estado, número de versión, actor ni fechas de confirmación/reemplazo.
+`get_db` hace commit al terminar correctamente y rollback ante un error;
+los servicios conservan la responsabilidad de flush y validación sin cerrar
+la transacción por sí mismos.
+
+Se verificaron tres escenarios con dos conexiones PostgreSQL como `app_user`:
+
+- dos confirmaciones del mismo borrador: la segunda espera el bloqueo de serie
+  y después recibe conflicto, conservando una sola versión confirmada;
+- la primera confirmación se revierte: la segunda puede confirmar tras obtener
+  el bloqueo, sin reemplazos huérfanos;
+- una actualización cambia el checklist mientras otra sesión intenta confirmar:
+  la confirmación espera y evalúa el payload actualizado, rechazando el pendiente.
+
+Las pruebas verifican la espera con `pg_blocking_pids`, con tiempos máximos
+acotados; no suponen que una demora fija demuestra un bloqueo. Estas pruebas
+usan un constructor RAT simulado y prueban locks, filas y transacciones reales.
+
+La suite HTTP verifica el constructor RAT real y las transacciones PostgreSQL:
+guardado de fechas JSONB, confirmación y reemplazo, conservación de la versión
+anterior ante un checklist incompleto, rechazo de cambio de contexto y revisión
+posterior del borrador, inmutabilidad de versiones confirmadas, validación del
+contrato, aislamiento de organización y tratamiento, permisos viewer/editor,
+y bloqueo por suscripción suspendida con acceso permitido en grace.
+
+Validación de este bloque: **350 pruebas backend aprobadas**, formato, lint
+de los archivos Python afectados y whitespace sin errores. No se modificaron
+migraciones ni el contrato de hash v1. M3-T1 permanece en progreso: faltan LIA,
+condiciones especiales y validaciones de las demás bases, además de la interfaz
+M3. La validación concurrente de creación de series/versiones se registra en §20.7.1.
+
 ## 18. Evaluación de Interés Legítimo (LIA) — schema v1
 
 ### 18.1 Objetivo
@@ -975,6 +1419,685 @@ de alto riesgo que pueden requerir una EIPD, M3 deberá:
 El flujo completo de EIPD queda fuera del alcance inicial de M3,
 salvo la detección y derivación documentada.
 
+### 18.14 Contrato físico LIA v1 para borradores
+
+`LiaAssessmentV1` implementa el contrato JSONB con `schema_version = 1` y
+las ocho secciones de §18.2. Las secciones omitidas se crean vacías; sus campos
+textuales, respuestas y decisión son opcionales para permitir borradores.
+Una sección explícitamente `null` se rechaza. La completitud se evaluará
+separadamente, sin confundir estructura válida con expediente preparado.
+
+Cada pregunta cerrada se identifica por su ruta estable `seccion.campo`,
+no por una etiqueta de interfaz. Su valor es `null` (sin responder) o
+`LiaResponseV1` con `answer = si | no | no_aplica | pendiente` y `comment`
+opcional. Un objeto de respuesta aportado debe incluir `answer`.
+
+Campos físicos por sección:
+
+- `purpose_and_interest`: `purpose_description`, `legitimate_interest`,
+  `interest_holder` (`responsable | tercero | ambos`), `controller_benefit`,
+  `third_party_benefit`, `public_benefit`, `interest_importance`,
+  `consequences_without_processing`, `relevant_rules`, `ethical_considerations`.
+- `necessity`: respuestas `contributes_to_purpose`, `linked_to_interest`,
+  `achievable_without_personal_data`, `less_intrusive_alternative`,
+  `fewer_data_possible`, `categories_necessary_and_relevant`; textos
+  `necessity_analysis`, `proportionality_analysis`, `alternatives_analysis`,
+  `minimization_analysis`.
+- `nature_and_scope`: respuesta `exclusively_professional_context`; textos
+  `volume_and_scope`, `special_rules_description`, `additional_risk_factors`.
+  Las categorías y los indicadores estructurados de datos/titulares se consumen
+  del `rat_context_snapshot` de la evaluación; no se duplican dentro de LIA.
+- `reasonable_expectations`: respuestas `prior_relationship`,
+  `significant_change_of_use`, `informed_at_direct_collection`,
+  `foreseeable_purpose_and_method`, `innovative_processing`; textos
+  `relationship_description`, `third_party_information`,
+  `technology_or_context_changes`, `expectations_evidence`,
+  `expectations_analysis`.
+- `impact`: respuestas `loss_of_control`, `reasonable_opposition_likelihood`,
+  `transparently_explainable`, `relevant_unmitigated_impacts`; textos
+  `negative_effects`, `intrusion_analysis`, `rights_and_freedoms_analysis`,
+  `vulnerable_people_impact`, `impact_analysis`; `severity` y `likelihood`
+  con valores `baja | media | alta | pendiente` o `null`. Estos valores
+  documentan una valoración del usuario; no generan un scoring automático.
+- `safeguards`: lista `measures`, inicialmente vacía, y texto
+  `safeguards_analysis`. Cada medida contiene `description` de tipo texto
+  obligatorio y `mitigated_impact` opcional. La concreción y ausencia de textos
+  vacíos se controlarán al evaluar completitud; se admite contenido pendiente
+  en borrador.
+- `transparency_and_opposition`: `information_method`, `interest_communication`,
+  `opposition_channel`, `opposition_procedure`, `responsible_area`.
+- `conclusion`: `balancing_summary`, `identified_interest`,
+  `necessity_and_proportionality_result`, `main_impacts`, `relevant_safeguards`,
+  `rights_protection_reasoning` y `decision` con el catálogo de §18.11 o `null`.
+
+El contrato rechaza campos desconocidos en raíz, secciones, respuestas y
+medidas, así como versiones y valores fuera de catálogo. Los textos factuales
+se conservan sin trim ni canonización. Evolucionar estas claves exige una
+decisión explícita de versionado, sin reinterpretar expedientes históricos.
+
+Creación y actualización de borradores admiten `lia_assessment`. Se valida
+antes de persistir y se serializa como JSON. En PATCH, omitir el campo conserva
+el expediente, aportar un objeto lo reemplaza como unidad (sin merge de
+secciones) y `null` lo elimina. La lectura API utiliza el mismo contrato.
+
+La confirmación de `interes_legitimo_art13d` permanece bloqueada, incluso si
+el cliente aporta `decision = puede_basarse`. Quedan pendientes las reglas de
+aplicabilidad/completitud, los motivos derivados y su integración transaccional.
+
+Validación: **377 pruebas backend aprobadas**, incluidas pruebas de estructura,
+dominios, preservación documental y flujo HTTP con PostgreSQL/RLS. Formato,
+lint de los archivos modificados y whitespace pasan. M3-T1 sigue en progreso.
+
+### 18.15 Aplicabilidad y datos mínimos de LIA v1
+
+Esta definición es una política operativa de preparación documental de CumpleIA,
+no una certificación automática de licitud. El evaluador recibirá el expediente
+`LiaAssessmentV1` y el `RatContextSnapshotV1` vigente de la evaluación, sin
+modificarlos ni inferir hechos desde nombres, comentarios o narrativas.
+
+Un contrato inválido se rechazará antes de calcular el resultado. Un expediente
+o snapshot ausente dará resultado `incompleto`. El snapshot debe contener
+finalidad no vacía, categorías de datos y titulares no vacíos y rol de la
+organización informado. Estos controles no sustituyen la revalidación del
+contexto M2 ni la comprobación de hash al confirmar.
+
+Un texto obligatorio se considera aportado cuando no es `null` y contiene
+caracteres distintos de espacios tras aplicar `strip()` para comprobarlo.
+La comprobación no recorta ni modifica el valor persistido y no determina
+si su contenido es jurídicamente suficiente. Esa valoración sigue siendo
+humana; no se utilizarán umbrales de longitud ni análisis automático de prosa.
+
+Campos siempre obligatorios:
+
+| Sección | Campos |
+| --- | --- |
+| `purpose_and_interest` | `purpose_description`, `legitimate_interest`, `interest_holder`, `interest_importance`, `consequences_without_processing` |
+| `necessity` | Las seis respuestas cerradas y los cuatro textos de análisis definidos en §18.14 |
+| `nature_and_scope` | Respuesta `exclusively_professional_context`; contexto de categorías y titulares del snapshot |
+| `reasonable_expectations` | Respuestas `prior_relationship`, `significant_change_of_use`, `foreseeable_purpose_and_method`, `innovative_processing`; texto `expectations_analysis` |
+| `impact` | Las cuatro respuestas cerradas de §18.14; `severity`, `likelihood`; textos `negative_effects`, `intrusion_analysis`, `rights_and_freedoms_analysis`, `impact_analysis` |
+| `safeguards` | `safeguards_analysis`, incluso cuando explique por qué no se proponen medidas adicionales |
+| `transparency_and_opposition` | Los cinco textos definidos en §18.14 |
+| `conclusion` | Los seis textos definidos en §18.14 y `decision` |
+
+Las respuestas cerradas aplicables deben estar presentes con `si` o `no`.
+Omisión, respuesta `pendiente` o `no_aplica` en una pregunta aplicable producen
+`incompleto`. `severity` y `likelihood` requieren `baja`, `media` o `alta`;
+`null` o `pendiente` producen `incompleto`.
+
+Los análisis de ausencia de efectos o salvaguardas pueden documentar
+expresamente esa ausencia; dejar el texto vacío no sustituye el análisis.
+La finalidad declarada en `purpose_description` debe coincidir con la finalidad
+del snapshot bajo la canonización textual v1 existente. Una diferencia produce
+un motivo de revisión, sin reemplazar ni reinterpretar ninguna finalidad.
+
+### 18.16 Campos condicionales y aplicabilidad LIA v1
+
+| Campo | Condición que exige contenido |
+| --- | --- |
+| `purpose_and_interest.controller_benefit` | `interest_holder = responsable` o `ambos` |
+| `purpose_and_interest.third_party_benefit` | `interest_holder = tercero` o `ambos` |
+| `reasonable_expectations.relationship_description` | `prior_relationship = si` |
+| `reasonable_expectations.informed_at_direct_collection` | Al menos una fuente del snapshot tiene `source_type = titular` |
+| `reasonable_expectations.third_party_information` | Al menos una fuente del snapshot tiene `source_type = tercero` |
+| `impact.vulnerable_people_impact` | El snapshot indica niños, adolescentes o grupos vulnerables |
+| `nature_and_scope.special_rules_description` | Cualquier indicador de `special_regimes` del snapshot es verdadero |
+| `safeguards.measures` | Se activa alguno de los indicadores de documentación de mitigación definidos debajo |
+
+Los campos condicionales textuales pueden quedar vacíos cuando no se cumpla
+su condición. Si contienen texto, se conserva; no se considera contradictorio
+por sí solo. Los campos opcionales restantes de §18.14 no son obligatorios
+para la completitud v1, aunque pueden apoyar la revisión humana.
+
+Para `informed_at_direct_collection`, una lista de fuentes no vacía sin
+`source_type = titular` da `no_aplicable`: se permite omitir la respuesta o
+usar `no_aplica`. Si conserva `si`, `no` o `pendiente`, se devuelve un motivo
+de revisión por respuesta residual. Una lista de fuentes vacía da
+`sin_resolver` tanto para la respuesta sobre recolección directa como para
+la información de terceros: no permite establecer esas aplicabilidades y
+produce `incompleto`. No se interpreta `recogida_automatica`, `fuente_publica` ni
+`otro` como recolección directa o de terceros sin una decisión adicional.
+Si hay fuentes `titular` y `tercero`, se exigen ambos campos correspondientes.
+
+Una condición dependiente de `interest_holder` o `prior_relationship` no
+resuelta se informa como `sin_resolver` y produce `incompleto`. La falta del
+dato controlador no vuelve opcional su documentación dependiente.
+
+Los siguientes indicadores exigen al menos una medida documental:
+`severity` o `likelihood` en `media`/`alta`, `loss_of_control = si`,
+`reasonable_opposition_likelihood = si` o `relevant_unmitigated_impacts = si`.
+Son disparadores de documentación de mitigación, no umbrales legales ni
+scoring de riesgo. Si todos están resueltos y ninguno se activa, las medidas
+pueden omitirse y el análisis de salvaguardas deberá explicar la valoración.
+Si no hay un disparador afirmativo y alguno está sin resolver, la aplicabilidad
+de medidas es `sin_resolver`, con resultado `incompleto`.
+
+Cada medida aportada debe tener `description` no vacía. Cuando se exigen medidas,
+cada una deberá además identificar mediante `mitigated_impact` no vacío qué
+impacto pretende mitigar. Una lista no vacía no demuestra eficacia ni elimina
+un motivo por impactos no mitigados. Las medidas no se generan ni se validan
+jurídicamente de forma automática.
+
+### 18.17 Resultado operativo y motivos de revisión LIA v1
+
+La salida será derivada, con `result`, motivos estructurados y aplicabilidad
+de los campos condicionales, sin nuevos estados persistidos ni alteraciones
+del JSONB histórico. Se aplicará la precedencia
+`incompleto > requiere_revision > completo`, conservando todos los motivos.
+
+`incompleto` se obtiene por cualquier faltante de §§18.15–18.16 o condición
+sin resolver. Sin faltantes, `requiere_revision` se obtiene por:
+
+- `contributes_to_purpose = no`, `linked_to_interest = no` o
+  `categories_necessary_and_relevant = no`;
+- `achievable_without_personal_data = si` o `less_intrusive_alternative = si`;
+- `foreseeable_purpose_and_method = no`;
+- `informed_at_direct_collection = no` cuando sea aplicable;
+- `transparently_explainable = no`;
+- `relevant_unmitigated_impacts = si`;
+- `decision = no_puede_basarse` o `requiere_revision`;
+- finalidad documental diferente de la del snapshot;
+- respuesta residual a una pregunta condicional no aplicable.
+
+`fewer_data_possible = si` exige el análisis de minimización ya obligatorio,
+pero no produce por sí solo un bloqueo por respuesta desfavorable. La ausencia
+de relación previa, un cambio de uso, el carácter innovador, la pérdida de
+control, la probabilidad de oposición y las valoraciones de gravedad/probabilidad
+son factores documentados de ponderación; no se traducen aisladamente en una
+conclusión jurídica. Los disparadores de medidas de §18.16 siguen aplicándose.
+
+`completo` significa únicamente que no existen faltantes ni motivos de revisión
+bajo estas reglas y que la decisión propuesta es `puede_basarse`. No prueba
+la suficiencia de la ponderación, la eficacia de las medidas ni la licitud.
+
+Cada motivo identificará la ruta afectada y un código estable que distinga
+campo faltante, respuesta pendiente, `no_aplica` inválido, aplicabilidad no
+resuelta, respuesta que requiere revisión, finalidad distinta, medida incompleta
+o decisión que requiere revisión. Se ordenarán primero los motivos del contexto
+RAT y luego los del expediente siguiendo el orden de secciones y campos del
+contrato físico, con las medidas en su orden original. La aplicabilidad usará
+`aplicable | no_aplicable | sin_resolver` y el mismo orden estable.
+
+### 18.18 Confirmación futura y casos de aceptación LIA v1
+
+Cuando se implemente la integración, solo `completo` permitirá superar el
+control LIA. `incompleto` y `requiere_revision` bloquearán la confirmación y
+expondrán todos los motivos; no habrá bypass mediante comentarios o la decisión
+favorable aportada por el cliente. El resultado se recalculará tras bloquear
+la serie y releer el borrador, dentro de la transacción de confirmación.
+
+También deberán superarse justificación, alcance, contexto/hash RAT y las
+condiciones especiales aplicables. El contrato y evaluador LIA no sustituyen
+la detección/derivación de posible EIPD de §18.13; ese control y las condiciones
+especiales deberán revisarse antes de habilitar la confirmación de esta base.
+La confirmación de interés legítimo permanece bloqueada en la implementación
+actual: este paso define reglas y no cambia el lifecycle.
+
+Casos mínimos del futuro evaluador:
+
+| Caso | Resultado esperado |
+| --- | --- |
+| LIA o snapshot ausente; sección o texto obligatorio sin resolver | `incompleto` |
+| Respuesta aplicable `pendiente` o `no_aplica` | `incompleto` |
+| Fuentes `titular` y `tercero`, sin información sobre la recolección directa o de terceros | `incompleto` |
+| Fuentes vacías aunque exista respuesta sobre información directa | `incompleto`, aplicabilidad sin resolver |
+| Solo fuentes no directas y respuesta directa omitida o `no_aplica` | Sin faltante por esa pregunta |
+| Solo fuentes no directas y respuesta directa `si` | `requiere_revision` si el resto está completo |
+| `interest_holder = ambos` sin uno de los beneficios exigidos | `incompleto` |
+| Indicador de mitigación activo y medidas vacías | `incompleto` |
+| Medidas exigidas con descripción o impacto mitigado vacío | `incompleto` |
+| Alternativa menos intrusiva `si` y resto completo | `requiere_revision` |
+| Impactos no mitigados `si` y medidas documentadas | `requiere_revision`, sin eliminar el motivo |
+| Decisión favorable con faltantes | `incompleto` |
+| Decisión favorable y una respuesta desfavorable | `requiere_revision` |
+| Un faltante y un motivo de revisión | `incompleto`, conservando ambos motivos |
+| Campos resueltos, finalidad coherente y sin motivos de revisión | `completo`, sin certificación de licitud |
+| Mismo input evaluado dos veces | Mismo resultado, motivos y aplicabilidad, sin mutar entrada |
+
+### 18.19 Evaluador puro LIA v1 implementado
+
+`evaluate_lia_assessment_v1` en `backend/app/services/lia.py` implementa
+§§18.15–18.17. Recibe expediente y snapshot como modelos o diccionarios,
+revalida ambos contratos incluso si una instancia fue modificada y rechaza
+una estructura inválida aunque el otro input esté ausente.
+
+Devuelve `LiaReadinessV1` con resultado, tupla de `LiaIssueV1` y tupla de
+`LiaFieldApplicabilityV1`, todos inmutables. Los motivos usan rutas de campos
+y códigos estables; se ordenan primero los del contexto RAT y después los
+campos LIA en su orden contractual, con las medidas en su orden original.
+La evaluación no modifica ni persiste entradas o resultados.
+
+`can_confirm` indica que el expediente supera únicamente este control.
+No ejecuta una transición ni habilita todavía interés legítimo en el servicio
+transaccional. La confirmación permanece bloqueada mientras se revisan la
+integración y los controles pendientes de condiciones especiales/EIPD.
+
+Validación: **129 casos nuevos** del evaluador y **506 pruebas backend
+aprobadas** en la suite completa. Se verifican campos mínimos, respuestas
+aplicables, dependencia de fuentes/beneficiarios/regímenes, disparadores de
+mitigación, ausencia de inputs, motivos de revisión, precedencia, canonización
+textual de finalidad, orden determinista, inmutabilidad de salida y preservación
+de entradas. Formato, lint de los nuevos archivos y whitespace pasan.
+
+Este bloque no modifica API, lifecycle, migraciones ni hash v1. M3-T1 sigue
+en progreso. El próximo paso es revisar los controles de EIPD y condiciones
+especiales y definir la integración de LIA sin omitirlos.
+
+### 18.20 Revisión de controles pendientes antes de integrar LIA
+
+La completitud LIA implementada no resuelve por sí sola la aplicabilidad de
+EIPD ni las autorizaciones de regímenes especiales. No se habilitará
+`interes_legitimo_art13d` mediante una simple sustitución del evaluador de
+consentimiento por el de LIA dentro de `confirm_legal_assessment_v1`.
+
+Referencia normativa de esta revisión: [Ley 21.719, texto oficial BCN](https://www.bcn.cl/leychile/navegar?idNorma=1209272),
+artículo 15 ter incorporado a la Ley 19.628, texto del régimen previsto para
+el 1 de diciembre de 2026. El precepto considera alto riesgo y contempla
+supuestos de evaluación sistemática con automatización y efectos jurídicos
+significativos, procesamiento masivo, monitoreo sistemático de espacios públicos
+y datos sensibles/especialmente protegidos bajo excepciones al consentimiento.
+Esta referencia no fija umbrales numéricos propios de CumpleIA ni convierte
+las valoraciones LIA en una conclusión automática de aplicabilidad.
+
+Brechas de información verificadas contra el contrato y constructor actuales:
+
+| Control | Hechos disponibles | Brecha o límite |
+| --- | --- | --- |
+| Evaluación sistemática y exhaustiva con automatización y efectos jurídicos significativos | `automated_decisions.has_automated_decisions` y descripción factual | No hay indicadores estructurados de evaluación sistemática/exhaustiva ni de efectos jurídicos significativos |
+| Tratamiento masivo o a gran escala | Texto LIA `volume_and_scope` | No hay declaración estructurada ni criterio verificado de escala; no inferir desde texto |
+| Observación o monitoreo sistemático de zona de acceso público | Fuentes y descripciones RAT | No hay declaración estructurada del supuesto; fuente pública no equivale a monitoreo |
+| Datos sensibles/especialmente protegidos bajo excepción al consentimiento | `special_regimes` y base general | Falta contrato/validación de condición especial; base general y condición no son equivalentes |
+| Alto riesgo por naturaleza, alcance, contexto, tecnología o fines | Valoraciones y narrativas LIA | No hay revisión estructurada general de este supuesto; gravedad o probabilidad alta no resuelven solas el examen |
+| Salud, biometría, geolocalización, investigación y edad específica | Categorías seleccionadas e indicadores generales RAT | No hay discriminadores estructurados suficientes para todos los regímenes; no inferirlos desde nombres o códigos libres |
+
+Estas brechas también afectan el futuro control transversal de M3. La actual
+confirmación de consentimiento ordinario conserva su alcance limitado; pasar
+sus barreras actuales no demuestra que se haya evaluado EIPD ni que se hayan
+detectado todos los regímenes de §15.4. No se declarará cerrado M3-T1 con esa
+cobertura parcial.
+
+### 18.21 Definición del próximo control de detección EIPD v1
+
+El próximo bloque implementará un contrato de screening independiente de la
+conclusión LIA. No implementará la realización, aprobación o custodia completa
+de una EIPD. El contrato físico y la persistencia se fijan en §18.23 antes de introducir
+el screening en los schemas o cambiar tablas.
+
+Preguntas cerradas propuestas, con identificadores estables y respuestas
+`si | no | pendiente`, sin `no_aplica`:
+
+- `evaluacion_sistematica_automatizada_efectos_significativos`: declaración
+  sobre el supuesto conjunto de evaluación personal sistemática/exhaustiva,
+  automatización y efectos jurídicos significativos;
+- `tratamiento_masivo_o_gran_escala`;
+- `monitoreo_sistematico_zona_publica`;
+- `datos_protegidos_excepcion_consentimiento`;
+- `probable_alto_riesgo_contextual`: revisión general del riesgo atendiendo
+  a naturaleza, alcance, contexto, tecnología y fines.
+
+Cada declaración incluirá fundamento documental, obligatorio y no vacío
+cuando se evalúe preparación para confirmar. Las preguntas serán siempre
+aplicables al screening. Su ausencia o `pendiente` significan que el supuesto
+no está resuelto; no se interpretarán como `no`. La salida conservará todos
+los motivos y distinguirá hechos declarados de indicadores del RAT/LIA.
+
+Resultados derivados propuestos:
+
+- `requiere_eipd`: existe al menos una respuesta `si` con fundamento; si hay
+  otras pendientes, se conservan también sus motivos de incompletitud;
+- `pendiente_revision`: no hay respuesta afirmativa resuelta y falta alguna
+  respuesta o fundamento, o hay una inconsistencia entre declaraciones y
+  hechos estructurados disponibles;
+- `sin_supuestos_declarados`: las cinco respuestas son `no`, están fundadas
+  y no hay inconsistencias detectadas. No equivale a una exención ni a una
+  certificación de que la EIPD no es exigible.
+
+La revisión deberá detectar contradicciones verificables sin analizar prosa.
+Por ejemplo, declarar el supuesto automatizado afirmativo cuando RAT declara
+que no hay decisiones automatizadas exige revisión del contexto. Una alerta
+LIA de impacto alto se mostrará como antecedente de revisión; no se utilizará
+por sí sola para resolver el supuesto legal.
+
+En la primera integración, `requiere_eipd` y `pendiente_revision` bloquearán
+la confirmación. No se permitirá eludirlos mediante una decisión LIA favorable
+ni una referencia documental genérica. Un mecanismo futuro para continuar
+tras una EIPD documentada exige diseño explícito de expediente, revisión y
+trazabilidad; queda fuera de este primer screening.
+
+El catálogo se versionará. Antes de desbloquear el flujo se deberá verificar
+si hay orientaciones/listas oficiales aplicables y registrar cuáles se han
+utilizado. Esta revisión no afirma que esas orientaciones ya existan ni que
+el catálogo propuesto cubra futuros cambios regulatorios.
+
+### 18.22 Condiciones especiales y secuencia de integración
+
+La ausencia de `special_conditions` no acredita que un régimen sea inaplicable.
+Los indicadores generales verdaderos del snapshot seguirán bloqueando la
+confirmación hasta implementar su contrato y validaciones. Los casos que no
+pueden clasificarse con datos estructurados permanecerán pendientes; no se
+resolverán por nombres de categorías, comentarios o una casilla de bypass.
+
+El próximo diseño deberá separar:
+
+- declaraciones factuales de categorías/regímenes y edad cuando corresponda;
+- condición especial seleccionada, su identificador y fundamento;
+- respuestas/evidencia que documentan sus requisitos;
+- resultado derivado de preparación y motivos;
+- screening EIPD y su relación con el contexto/versionado.
+
+No se agregará un catálogo especial operativo incompleto copiando únicamente
+los valores de §15.3: también deben definirse aplicabilidad, datos mínimos,
+contradicciones, requisitos y casos de aceptación de los regímenes de §15.4.
+Un estado `completo` de LIA no subsana la ausencia de ese expediente.
+
+Orden de la integración futura:
+
+1. fijar e implementar el contrato físico del screening EIPD y sus pruebas;
+2. definir el contrato de detección/condiciones especiales y su validación;
+3. conectar los controles al guardado/lectura de borradores, incluyendo las
+   reglas de revalidación cuando cambie el alcance o contexto RAT;
+4. después de bloquear la serie y releer el borrador, revalidar contratos,
+   justificar/seleccionar alcance y recomponer el contexto/hash RAT;
+5. ejecutar evaluador LIA, screening EIPD y condiciones especiales vigentes;
+6. solo si todos los controles implementados permiten continuar, reemplazar
+   la versión anterior y confirmar la sucesora dentro de la misma transacción.
+
+Casos mínimos antes de habilitar interés legítimo: LIA completa con screening
+pendiente; LIA completa con EIPD requerida; declaraciones incompatibles con
+RAT; condición especial ausente o no soportada; cambio de alcance/contexto;
+error tras reemplazo con rollback; actualización concurrente de screening o
+condiciones antes de confirmar. Ninguno debe dejar una confirmación parcial.
+
+Este paso es una revisión y definición documental: no modifica código, API,
+lifecycle ni migraciones. La confirmación de interés legítimo continúa
+bloqueada. La última suite completa sigue en **506 passed**; no se repitió
+por este cambio de documentación. M3-T1 permanece en progreso.
+
+### 18.23 Contrato físico y persistencia del screening EIPD v1
+
+El screening se guardará en una columna dedicada
+`legal_assessments.eipd_screening JSONB NULL`. Será independiente de
+`lia_assessment` y `special_conditions`, y utilizable con cualquier base general.
+No contendrá una EIPD realizada ni reemplazará su expediente probatorio.
+
+La columna se incorporará mediante una migración append-only posterior a la
+persistencia M3 existente. No se modificará una migración aplicada ni se
+crearán resultados ficticios para evaluaciones anteriores. Las filas existentes
+mantendrán `NULL`, que significa screening no documentado, nunca screening
+superado. El RLS y las FK tenant-aware de la tabla seguirán aplicándose.
+
+Contrato físico `EipdScreeningV1`:
+
+- `schema_version`: entero literal `1`;
+- `answers`: lista, inicialmente vacía, de declaraciones estructuradas;
+- `notes`: texto opcional;
+- `context_binding`: objeto de asociación calculado por el servidor.
+
+Cada declaración contendrá:
+
+- `question_id`: uno de los cinco identificadores definidos en §18.21;
+- `answer`: `si | no | pendiente`;
+- `rationale`: texto opcional en borrador, obligatorio y no vacío para
+  considerar resuelta la declaración.
+
+Los identificadores no podrán repetirse; se rechazarán preguntas, campos,
+respuestas y versiones desconocidas. En borrador se admitirá un subconjunto
+de preguntas y fundamentos pendientes. No se admite `no_aplica`, porque todas
+las preguntas examinan la presencia de un supuesto en el contexto evaluado.
+Los textos se conservarán literalmente.
+
+`context_binding` contendrá:
+
+- `schema_version`: entero literal `1`, versión de la asociación documental;
+- `hash`: SHA-256 hexadecimal minúsculo de 64 caracteres, calculado por servidor.
+
+El material de esta asociación v1 será exactamente:
+
+```json
+{
+  "rat_context_snapshot": "objeto completo del snapshot documental v1",
+  "lia_assessment": "objeto LIA v1 serializado o null"
+}
+```
+
+Los textos entre comillas del ejemplo describen valores: en la serialización
+real se usarán los objetos JSON correspondientes, no esas cadenas de ejemplo.
+Se aplicará JSON con claves ordenadas, separadores compactos, Unicode sin
+escape ASCII, codificación UTF-8 y SHA-256 sobre sus bytes. La asociación
+preservará orden de listas y valores factuales; no aplicará canonización de
+textos ni deduplicación.
+
+Este hash es independiente de `rat_context_hash` y no modifica el contrato
+RAT canónico v1. Usar únicamente ese hash canónico sería insuficiente: por
+diseño excluye sistemas y algunos metadatos documentales que pueden ser
+relevantes para la revisión del screening. La asociación al snapshot completo
+y LIA evita reaplicar silenciosamente declaraciones a hechos documentales
+cambiados. Una modificación factual o textual puede exigir revisión aun
+cuando el hash semántico RAT se conserve; esa sensibilidad es deliberada.
+
+### 18.24 Entrada API y revalidación de la asociación EIPD
+
+El contrato de entrada `EipdScreeningDraftIn` contendrá únicamente
+`schema_version`, `answers` y `notes`. No aceptará `context_binding` ni un
+resultado derivado aportado por el cliente. La respuesta expondrá el contrato
+persistido `EipdScreeningV1`; la asociación será obligatoria en todo objeto
+persistido no nulo.
+
+En creación o PATCH:
+
+- omitir `eipd_screening` conserva su valor en PATCH y guarda `NULL` en creación;
+- enviar `null` elimina el screening de un borrador;
+- enviar un objeto valida y reemplaza el screening completo; el servidor
+  calcula la asociación sobre el snapshot y LIA finales de esa misma operación;
+- si un PATCH incluye alcance/LIA y screening, se aplicarán primero los cambios
+  y la recomposición RAT y después se asociará el screening al resultado;
+- si cambia alcance, snapshot o LIA pero el screening se omite, se conserva su
+  contenido y asociación anterior, para poder mostrar que requiere revisión;
+  nunca se reasocia automáticamente una declaración previa.
+
+La asociación se recalculará para comparar al evaluar preparación y nuevamente
+al confirmar sobre el contexto RAT recompuesto y la LIA vigente, tras bloquear
+la serie y releer el borrador. Una diferencia genera `contexto_desactualizado`
+y bloquea la confirmación, sin borrar ni reinterpretar respuestas. También se
+comprobarán cambios del snapshot actual que no alteran el hash RAT canónico.
+La asociación no representa aislamiento de snapshot de PostgreSQL: permanece
+la limitación de composición M2 bajo READ COMMITTED ya documentada.
+
+Para un contexto desactualizado se devolverá `pendiente_revision`, conservando
+los motivos positivos de posible EIPD encontrados en declaraciones previas.
+No se presentarán esas declaraciones históricas como una determinación vigente.
+Si el contexto coincide y hay una declaración afirmativa fundada, el resultado
+será `requiere_eipd`, aunque también haya preguntas pendientes; se conservarán
+los motivos pendientes. Ninguno de ambos resultados permite confirmar.
+
+La confirmación histórica seguirá siendo inmutable. Que una versión anterior
+carezca de screening no autoriza completar retroactivamente su JSONB ni
+reclasificarla automáticamente; una revisión requiere un nuevo borrador.
+
+### 18.25 Migración y aceptación del bloque EIPD
+
+El contrato exterior `LegalAssessment` conserva su `schema_version = 1`:
+la nueva columna es una extensión nullable y el cuestionario/ asociación
+se versionan de forma independiente. No se cambia `rat_context_schema_version`
+ni se reescriben los JSONB históricos de consentimiento/LIA.
+
+La migración agregará únicamente la columna nullable y una restricción de
+forma `eipd_screening IS NULL OR jsonb_typeof(eipd_screening) = 'object'`.
+La validación del contrato interno se realizará en Pydantic antes de persistir;
+la restricción SQL no sustituye dicha validación. No se agregan índices GIN ni
+nuevas tablas porque el primer flujo accede por evaluación, serie y tenant.
+
+La implementación y verificación del próximo bloque comprenderán:
+
+1. migración append-only, modelo ORM y schemas de entrada/salida;
+2. asociación documental determinista y persistencia del screening en borradores;
+3. evaluador de §18.21 con detección de asociación desactualizada;
+4. pruebas de upgrade, downgrade y re-upgrade aisladas del drift histórico;
+5. pruebas HTTP/RLS de guardado, omisión, eliminación, revalidación y asociación
+   calculada por servidor, además de invariancia del hash RAT v1;
+6. pruebas de todos los resultados y de rechazo de preguntas duplicadas,
+   `no_aplica`, fundamentos vacíos y asociaciones aportadas por el cliente.
+
+La confirmación de interés legítimo seguirá bloqueada durante este bloque.
+Antes de habilitarla deben resolverse condiciones especiales y el alcance de
+las orientaciones aplicables al screening. Este diseño no constituye una
+verificación de que esas orientaciones existan o hayan sido incorporadas.
+
+Este paso solo fija contrato y persistencia: no añade todavía la columna ni
+schemas/código. Última suite backend: **506 passed**. M3-T1 sigue en progreso.
+
+### 18.26 Persistencia EIPD implementada
+
+La migración append-only `7c9e1a3b5d20_eipd_screening.py`, descendiente de
+`5997a757f17b`, agrega la columna nullable y la restricción de forma definida
+en §18.25. Se aplicó mediante upgrade a la base local de desarrollo. El modelo
+ORM utiliza `JSONB(none_as_null=True)` para que eliminar el screening guarde
+SQL NULL, no el valor JSON `null` que no satisface la restricción de objeto.
+
+Se implementaron `EipdScreeningDraftIn`, `EipdDeclarationV1`,
+`EipdContextBindingV1` y `EipdScreeningV1`, con rechazo de campos desconocidos,
+duplicados y dominios inválidos. La asociación es obligatoria al persistir
+un objeto no nulo y se rechaza si el cliente intenta aportarla en la entrada.
+
+`build_eipd_context_binding_hash_v1` y `bind_eipd_screening_v1` implementan
+la asociación documental de §18.23. Creación, actualización y lectura API
+admiten el screening. El guardado calcula la asociación después de recomponer
+el snapshot y aplicar LIA. Omitir screening conserva su contenido/asociación;
+null lo elimina. No se reasocian automáticamente declaraciones anteriores.
+
+Mientras no exista el evaluador EIPD integrado, cualquier screening no nulo
+bloquea la confirmación, incluso para consentimiento ordinario, evitando que
+sus declaraciones se ignoren. Los expedientes anteriores sin screening
+conservan el alcance limitado de confirmación ya documentado; no representan
+una comprobación EIPD completa. Interés legítimo continúa bloqueado.
+
+Validación de este bloque:
+
+- upgrade aplicado en desarrollo y upgrade/downgrade/re-upgrade verificados
+  sobre un schema PostgreSQL transaccional aislado, sin retirar la columna
+  de datos locales existentes;
+- restricción SQL admite objeto/SQL NULL y rechaza array;
+- bytes/hash deterministas, preservación de textos, asociación afectada por
+  snapshot completo y LIA, e invariancia del hash canónico RAT;
+- flujo HTTP/RLS de guardado, omisión, null, reemplazo conjunto con LIA,
+  asociación de servidor y rechazo de acceso a otra organización;
+- regresión específica: **49 passed**; suite completa backend: **519 passed**;
+- formato, lint de los archivos afectados y whitespace sin errores.
+
+El drift global histórico de Alembic no se declara resuelto por esta extensión.
+No se modificaron migraciones anteriores ni hash RAT v1. El evaluador EIPD,
+la exposición del resultado y su integración transaccional siguen pendientes.
+M3-T1 permanece en progreso.
+
+### 18.27 Evaluador EIPD v1 implementado
+
+`evaluate_eipd_screening_v1` en `backend/app/services/eipd.py` recibe el
+screening persistido, snapshot vigente y LIA opcional. Revalida todos los
+contratos, incluidas instancias modificadas, antes de evaluar; un input
+inválido no se oculta porque otro esté ausente.
+
+Devuelve `EipdReadinessV1` inmutable con:
+
+- `result`: los tres valores de §18.21;
+- `context_current`: la asociación del screening coincide con snapshot/LIA
+  recibidos; es falso si alguno de los dos primeros inputs está ausente;
+- `issues`: tupla de motivos con ruta, código, categoría y question_id cuando
+  corresponda, en orden de contexto y preguntas del catálogo;
+- `observations`: tupla separada de antecedentes LIA de gravedad/probabilidad
+  alta, sin convertirlos por sí solos en un supuesto afirmativo;
+- `can_continue`: verdadero solo para `sin_supuestos_declarados`; supera
+  únicamente este control, sin exención legal ni autorización M3 automática.
+
+La precedencia operativa queda explícita:
+
+1. screening/snapshot ausente, asociación desactualizada o automatización
+   declarada afirmativa sin estar documentada en el indicador RAT producen
+   `pendiente_revision`, conservando también supuestos afirmativos encontrados;
+2. con contexto vigente y sin esa inconsistencia, cualquier declaración `si`
+   fundada produce `requiere_eipd`, conservando preguntas/fundamentos pendientes;
+3. sin afirmativas fundadas, cualquier faltante produce `pendiente_revision`;
+4. cinco declaraciones `no` fundadas, sin inconsistencias y con asociación
+   vigente producen `sin_supuestos_declarados`.
+
+Los códigos de motivos son `screening_ausente`, `snapshot_ausente`,
+`contexto_desactualizado`, `pregunta_omitida`, `respuesta_pendiente`,
+`fundamento_ausente`, `supuesto_declarado`, `automatizacion_no_documentada`.
+Una afirmativa sin fundamento no se considera resuelta; mantiene el pendiente.
+El indicador RAT aislado no demuestra todos los componentes del supuesto:
+una declaración negativa no se marca contradictoria únicamente porque el RAT
+registre decisiones automatizadas. La inconsistencia inversa exige revisión
+conjunta, sin concluir jurídicamente la verdad de la declaración.
+
+La salida conserva textos y motivos históricos: `context_current = false`
+evita presentar afirmativas anteriores como determinación vigente. No se
+eliminan alertas porque la decisión LIA sea favorable ni se analizan narrativas
+para inferir automatización, escala, monitoreo o eficacia de mitigaciones.
+
+Validación: **36 casos nuevos**, **47 passed** en el archivo específico EIPD
+y **555 passed** en la suite backend completa. Se comprobaron los cinco
+supuestos, omisiones/pendientes/fundamentos vacíos, precedencia, asociación
+actual/desactualizada, ausencia de inputs, revalidación estructural,
+observaciones LIA, orden de preguntas independiente de la lista de entrada,
+preservación de inputs e inmutabilidad de salida. Formato, lint de los archivos
+afectados y whitespace pasan.
+
+Este bloque no modifica migraciones, API ni la puerta de confirmación. La
+API aún no expone el resultado derivado. El siguiente paso es exponer la
+preparación de la evaluación con resultados LIA/EIPD, manteniendo las barreras
+de condiciones especiales y la confirmación de interés legítimo bloqueada.
+M3-T1 sigue en progreso.
+
+### 18.28 Consulta de preparación por API
+
+`GET /licitud/treatments/{treatment_id}/assessments/{assessment_id}/readiness`
+expone `LegalAssessmentReadinessOut`. Requiere autenticación, tenant validado,
+suscripción activa/grace y `view_content`, por lo que viewer puede consultar
+los resultados. No confirma, edita, reasocia ni bloquea filas de la evaluación.
+
+La respuesta contiene:
+
+- identidad, estado y base de la evaluación;
+- `rat_context_current`: comparación del hash RAT actual con el guardado;
+  `null` cuando la finalidad/alcance actuales no permiten recomponer el contexto;
+- `consent`: resultado, motivos y aplicabilidad cuando la base sea consentimiento;
+- `lia`: resultado, motivos y aplicabilidad cuando la base sea interés legítimo;
+- `eipd`: resultado, asociación vigente, motivos y observaciones LIA;
+- `confirmation_blockers`: barreras del flujo de confirmación actualmente
+  implementado, con campo, código y mensaje;
+- `pending_controls`: controles transversales incompletos de detección de
+  regímenes, condiciones especiales e integración EIPD.
+
+Los bloques documentales no aplicables a la base seleccionada son `null`.
+EIPD se evalúa para cualquier base y su ausencia aparece como pendiente.
+Los resultados utilizan el snapshot RAT recompuesto actual; si no está
+disponible, los evaluadores reciben snapshot ausente y no se presenta el
+histórico como si fuera vigente. Los errores estructurales del expediente se
+rechazan, y errores ajenos a finalidad/alcance no se ocultan como preparación.
+
+La lista de bloqueos no es una certificación de preparación completa. El flujo
+actual conserva consentimiento ordinario sin screening dentro de su cobertura
+limitada, mientras `pending_controls` expone que faltan controles transversales.
+No se devuelve un booleano global de aprobación ni se autoriza un usuario
+viewer a confirmar. Screening no nulo sigue bloqueando confirmación por
+integración pendiente; LIA sigue bloqueada aunque sus resultados sean completos.
+
+Consultar una versión confirmada o reemplazada conserva sus datos históricos
+y devuelve el bloqueo de estado no editable. El resultado actual se deriva
+en lectura; no se guarda en JSONB ni actualiza timestamps, snapshot o versiones.
+Es orientativo bajo READ COMMITTED y no sustituye la revalidación transaccional
+que se realizará al intentar confirmar.
+
+Validación: flujo HTTP/RLS de preparación, permisos viewer/editor, aislamiento
+por organización y tratamiento, ausencia de escrituras/timestamps modificados,
+versión histórica, cambio semántico RAT, cambio documental sin cambio de hash,
+contexto no recomponible y declaraciones EIPD positivas. Archivo API:
+**11 passed**; suite completa backend: **558 passed**. Formato, lint de los
+archivos afectados y whitespace pasan. No se modificaron migraciones ni el
+lifecycle de confirmación. M3-T1 permanece en progreso.
+
+Próximo bloque: definir detección y contrato de condiciones especiales antes
+de integrar las barreras pendientes y habilitar confirmación LIA.
+
 ## 19. Cardinalidad de la base de licitud en M3 v1
 
 ### 19.1 Una base general por finalidad
@@ -1125,6 +2248,7 @@ Campos preliminares:
 - `consent_assessment JSONB NULL`;
 - `lia_assessment JSONB NULL`;
 - `special_conditions JSONB NULL`;
+- `eipd_screening JSONB NULL` (extensión implementada, §§18.23–18.26);
 - `schema_version INTEGER NOT NULL`;
 - `confirmed_at TIMESTAMPTZ NULL`;
 - `confirmed_by UUID NULL`;
@@ -1173,6 +2297,37 @@ que haya sido asignada y persistida no se reutilizará aunque posteriormente el
 borrador sea descartado. Si la transacción de creación falla completamente y
 no llega a persistirse, no se considerará que exista una versión histórica
 asignada.
+
+### 20.7.1 Validación concurrente de creación y reserva
+
+La lectura bloqueante de `_get_or_create_series_for_update_v1` usa
+`populate_existing=True`: obtener `FOR UPDATE` no basta para refrescar una
+serie que ya estaba cargada en el identity map de la sesión. La reserva debe
+utilizar el `next_version` leído de PostgreSQL después de obtener el bloqueo,
+no un valor cargado antes de la transacción concurrente.
+
+Una prueba reprodujo la regresión antes de corregirla: la segunda sesión
+conservaba `next_version = 2`; la primera creaba y confirmaba la versión 2,
+y al liberar el bloqueo la segunda intentaba reutilizarla. El refresco hace
+que la segunda cree la versión 3 y deje `next_version = 4`.
+
+Se verificaron cinco escenarios con contexto RAT real, PostgreSQL y RLS como
+`app_user`, usando dos conexiones y comprobación de espera con
+`pg_blocking_pids`:
+
+- serie nueva y commit de la primera creación: una serie, un borrador v1;
+  la segunda solicitud recibe conflicto sin consumir otra versión;
+- serie nueva y rollback de la primera creación: la segunda crea v1;
+- serie existente y commit del nuevo borrador: la segunda recibe conflicto;
+- serie existente y rollback de la reserva: la segunda reutiliza la versión
+  no comprometida, sin salto del contador;
+- serie previamente cargada por la segunda sesión y creación/confirmación
+  concurrente: el contador se refresca y se asigna la siguiente versión libre.
+
+En todos los casos se comprobaron unicidad de serie, una sola versión borrador,
+versiones persistidas esperadas y `next_version` coherente. Los servicios no
+hacen commit ni rollback internos. La suite completa posterior a la corrección
+arroja **355 passed**; formato, lint y whitespace pasan para este bloque.
 
 ### 20.8 Unicidad de borrador y confirmado
 
@@ -2381,3 +3536,3333 @@ canonización al valor factual para esta ordenación.
 
 La ordenación no deduplicará filas. La multiplicidad observada en M2 se
 conservará en el snapshot.
+
+
+### 15.10 Implementación del contrato especial y asociación EIPD v2
+
+El borrador admite `special_conditions` con declaraciones factuales,
+condiciones propuestas y evidencias. Los identificadores son cerrados; no se
+admiten preguntas o regímenes repetidos ni selectores fuera del alcance RAT.
+El servidor calcula la asociación sobre el snapshot completo, base jurídica,
+consentimiento y LIA finales. El cliente no puede suministrar esa asociación.
+La entrada puede ser parcial: persistir un expediente no acredita completitud
+ni aplicabilidad ni autorización jurídica.
+
+CREATE y PATCH vinculan los screenings suministrados mediante asociación v2:
+snapshot RAT completo, LIA y condiciones especiales finales. El cuestionario
+mantiene schema_version 1. Omitir un campo conserva su expediente y asociación;
+null elimina las condiciones especiales como SQL NULL. Los screenings v1
+históricos siguen intactos. Con condiciones especiales no nulas, su evaluación
+informa `asociacion_especial_no_cubierta` y requiere revisión; no se reasocian
+silenciosamente. Reenviar el screening genera la asociación v2 explícita.
+
+La confirmación de condiciones especiales permanece bloqueada. El evaluador
+de detección/preparación especial y los validadores jurídicos por régimen
+siguen pendientes. M3-T1 permanece EN PROGRESO.
+
+
+### 15.11 Evaluador de detección/preparación especial implementado
+
+`evaluate_special_conditions_v1` es puro y conserva todos los motivos con
+precedencia incompleto > requiere_revision > sin_regimenes_declarados.
+Exige nueve declaraciones si/no fundadas y asociación vigente; compara los
+cuatro indicadores RAT, revisa salud/biometría sin clasificación sensible y
+el cruce sensible/adolescente afirmativo con subconjunto documentado. No
+infiere ese cruce a partir de la coexistencia de indicadores. Detecta regímenes
+coexistentes desde RAT y declaraciones, expedientes ausentes o residuales,
+alcance inválido y referencias incoherentes al consentimiento. Vulnerabilidad
+es un factor de revisión, sin autorización propia.
+
+Todos los validadores por régimen/ruta permanecen no implementados; los
+expedientes positivos nunca producen aprobación. GET readiness expone `special`
+con result, context_current, detected_regimes e issues, usando contexto RAT
+recompuesto. El evaluador no modifica expedientes ni asociaciones. El bloqueo
+de confirmación existente permanece intacto incluso con declaraciones negativas.
+
+La revisión de edades y requisitos jurídicos específicos no se resuelve con
+texto libre. Sigue pendiente el contraste transversal entre la pregunta EIPD
+sobre excepción al consentimiento y las rutas especiales propuestas; por ello
+se mantienen los pending_controls de cobertura transversal, junto a los
+validadores jurídicos pendientes. M3-T1 permanece EN PROGRESO.
+
+
+### 15.12 Contraste documental EIPD/rutas especiales implementado
+
+Con expediente especial explícito, el evaluador EIPD contrasta la pregunta
+`datos_protegidos_excepcion_consentimiento` con las rutas propuestas:
+
+- `excepcion_legal` siempre informa `excepcion_especial_no_validada`, pues los
+  validadores por régimen todavía no existen; una respuesta EIPD negativa
+  añade `excepcion_consentimiento_discordante` sobre las declaraciones;
+- ruta null o `regla_especifica` informa `ruta_especial_pendiente`, porque no
+  puede determinarse una excepción al consentimiento desde esa selección;
+- respuesta EIPD afirmativa sin ruta `excepcion_legal` documentada informa
+  `excepcion_consentimiento_no_documentada`; no se crea automáticamente una ruta.
+
+Estos motivos fuerzan pendiente_revision y conservan los supuestos afirmativos,
+las omisiones y los motivos de obsolescencia. No validan exigibilidad jurídica
+de EIPD ni autorizaciones especiales. Una ruta de consentimiento con respuesta
+negativa no añade contradicción EIPD; sigue sometida a preparación especial y
+al bloqueo de sus validadores jurídicos. No se usa legal_basis para inferir
+excepción. No se analizan nombres, referencias jurídicas ni prosa libre.
+
+Se conserva la evaluación histórica sin expediente especial explícito. Los
+screenings v1 con condiciones especiales mantienen además su aviso de asociación
+no cubierta. El contraste es puro, ordena motivos por régimen y no modifica
+asociaciones ni datos; readiness lo expone mediante los issues EIPD existentes.
+Siguen pendientes los validadores específicos, la integración transaccional
+EIPD/condiciones con confirmación y el expediente de EIPD exigible. M3-T1 EN PROGRESO.
+
+
+### 15.13 Contrato de integración transversal en confirmación ordinaria
+
+Decisión del siguiente bloque: la confirmación de un borrador de consentimiento
+ordinario exigirá consentimiento preparado, detección especial negativa y
+screening EIPD negativo, todos evaluados contra el mismo bundle RAT recompuesto.
+Esta sección define comportamiento futuro; la implementación actual conserva
+los bloqueos globales descritos en los checkpoints anteriores.
+
+No se admitirá ausencia de los expedientes transversales como vía alternativa.
+Los borradores existentes sin special_conditions o eipd_screening deberán
+completarlos antes de confirmar bajo el nuevo flujo. Las versiones ya
+confirmadas/reemplazadas conservan estado y contenido; no hay migración,
+reasociación automática ni reevaluación que cambie su estado histórico.
+
+| Control | Resultado exigido para continuar | Rechazo propuesto |
+| --- | --- | --- |
+| Estado y versión | Borrador y versiones admitidas | 409 |
+| Base | consentimiento_art12 | 409 para otras bases |
+| Justificación, alcance y rol RAT | Completos | 400 |
+| Consentimiento | can_confirm del evaluador existente | 400 con sus motivos |
+| Contexto semántico RAT | Hash coincide con RAT actual | 409 |
+| Detección especial | sin_regimenes_declarados y context_current true | 400 si incompleto; 409 si requiere_revision |
+| Screening EIPD | sin_supuestos_declarados y context_current true | 400 si ausente o incompleto; 409 si requiere_eipd o revisión de contexto/rutas |
+
+Los motivos de ambos controles se conservarán, aun cuando uno bloquee primero.
+Contrato inválido produce 400 y nunca se convierte en una evaluación negativa.
+La clasificación EIPD para HTTP se hará desde motivos estructurados: ausencia,
+pregunta omitida, respuesta pendiente y fundamento ausente son incompletitud;
+asociación obsoleta/no cubierta y discordancias/rutas no validadas son revisión.
+Si concurren ambos tipos, revisión tiene prioridad HTTP 409. Los detalles
+incluirán resultado, contexto vigente y motivos; no un booleano de aprobación.
+
+El expediente especial completo con nueve negativas fundadas, sin condiciones
+residuales y coherente con RAT podrá superar el control especial. Vulnerabilidad
+positiva, cualquier régimen detectado o ruta propuesta no validada continuará
+bloqueando. Un consentimiento referenciado no desbloquea una ruta especial.
+Una EIPD afirmativa no se supera con una referencia documental: la gestión de
+EIPD realizada y revisada queda pendiente de un contrato propio.
+
+Confirmación volverá a evaluar dentro de la transacción después de bloquear
+la serie y refrescar el borrador. No consumirá resultados enviados por cliente
+ni una respuesta GET readiness anterior. Usará un único bundle recompuesto
+para hash RAT y evaluadores; no actualizará snapshots/asociaciones al confirmar.
+Cambios documentales que no alteren el hash semántico también deben detectarse
+mediante las asociaciones de special_conditions y EIPD. La serialización de
+serie no equivale a bloquear todos los escritores M2; no se atribuye garantía
+adicional de aislamiento RAT al lock M3.
+
+Todas las validaciones ocurrirán antes de reemplazar la confirmada anterior.
+Se conserva doble flush, índice parcial y commit/rollback a cargo del caller.
+Un fallo deja la anterior confirmada y el borrador intactos. Permisos,
+suscripción y RLS mantienen el contrato actual; no se añade permiso nuevo.
+
+GET readiness y POST confirm compartirán la construcción de barreras del
+nuevo flujo, evitando diferencias por ausencia de expedientes o resultados
+negativos. Readiness seguirá siendo lectura orientativa: no promete éxito
+posterior frente a cambios de estado/contexto ni autoriza jurídicamente.
+Los pending_controls continuarán señalando validadores positivos y expediente
+EIPD pendientes, sin presentar la integración ordinaria como M3-T1 terminado.
+
+Aceptación previa a habilitar: ambos expedientes ausentes y cada uno ausente;
+ambos negativos vigentes; parcial/pendiente/fundamento vacío; indicadores RAT
+positivos y contradicciones; condiciones residuales; EIPD afirmativa y rutas
+pendientes; asociaciones obsoletas aun con hash RAT idéntico; v1 histórico
+no cubierto; fracaso sin reemplazo de anterior; relectura tras espera por lock;
+confirmación concurrente; consistencia de motivos GET/POST; permisos, tenant y
+RLS existentes. Los tests previos que confirmaban sin expedientes deberán usar
+inputs negativos completos, conservando sus escenarios de concurrencia.
+
+
+### 15.14 Integración transversal ordinaria implementada
+
+Confirmación y readiness usan evaluate_transversal_readiness_v1 sobre el mismo
+bundle RAT recompuesto por cada operación. La confirmación exige consentimiento
+preparado, special.sin_regimenes_declarados y eipd.sin_supuestos_declarados con
+ambas asociaciones vigentes. Los bloqueos globales por objeto no nulo fueron
+sustituidos por evaluación documental; no se habilitan regímenes positivos.
+Borradores sin los expedientes requeridos ya no pueden confirmar. Históricos
+confirmados mantienen estado y datos.
+
+POST conserva los motivos de ambos controles en detail.special/detail.eipd y
+confirmation_blockers idénticos a readiness para las barreras transversales.
+Se rechaza incompletitud con 400, revisión/EIPD afirmativa con 409; si ambos
+controles bloquean, se toma el mayor código. Contrato inválido produce 400.
+La respuesta de consentimiento y las validaciones anteriores conservan su
+orden/contrato; GET puede mostrar además otros bloqueos de estado/contexto.
+
+Todas estas validaciones ocurren tras lock/refresco y antes de reemplazar
+la confirmada anterior. No se modifica ninguna asociación al confirmar ni se
+hace commit en el servicio. PATCH vacío puede actualizar el snapshot RAT pero
+no reasocia los controles omitidos; deberán reaportarse explícitamente.
+Readiness conserva pending_controls para validadores especiales y expediente
+EIPD/revisión pendientes; deja de señalar detección y screening ordinarios como
+integraciones ausentes. M3-T1 sigue EN PROGRESO. LIA permanece bloqueada.
+
+
+### 18.29 Contrato para habilitar confirmación ordinaria de interés legítimo
+
+Revisión de cobertura: LIA v1 ya evalúa secciones, respuestas, medidas,
+aplicabilidad y concordancia de finalidad con RAT; los controles especiales
+negativos y EIPD negativos ya se comparten entre readiness y confirmación.
+Persistencia, reemplazo, lock/refresco y RLS están implementados para el flujo
+ordinario. Falta integrar la selección de base y la preparación LIA en POST,
+retirar base_no_implementada para esta base en GET y cubrirlo en pruebas reales.
+Este paso es documental; interés legítimo sigue bloqueado en el código actual.
+
+La siguiente implementación admitirá exclusivamente consentimiento_art12 e
+interes_legitimo_art13d en la confirmación ordinaria. Las otras bases conservarán
+409. La selección de base determina el expediente que debe superar preparación:
+consentimiento usa su evaluador actual; interés legítimo exige LIA completo,
+recalculado contra el bundle RAT actual. Una decisión puede_basarse aislada
+no supera el control. LIA ausente, parcial o incompleto devuelve 400; LIA
+requiere_revision devuelve 409, conservando todos sus motivos y aplicabilidad.
+
+Justificación, alcance, rol, hash RAT actual, detección especial negativa
+vigente y screening EIPD negativo vigente siguen siendo obligatorios. Una LIA
+completa no desbloquea datos sensibles, infancia/adolescencia, biometría,
+geolocalización, investigación ni vulnerabilidad positiva. Tampoco desbloquea
+EIPD afirmativa o pendiente. No hay habilitación automática de excepciones.
+Valoraciones LIA altas permanecen antecedentes EIPD y factores documentales;
+no se convierten por sí solas en autorización o prohibición nuevas.
+
+No se exigirá consentimiento preparado cuando la base sea interés legítimo.
+Si existe expediente de consentimiento residual, no se eliminará ni confirmará
+como autorización adicional: sigue formando parte de la asociación especial.
+Un contrato residual inválido se rechaza al validar documentos; las referencias
+especiales incoherentes conservan sus motivos. No se modificarán cuestionarios
+ni seleccionará una base diferente durante confirmación.
+
+LIA no necesita una nueva asociación física para esta integración: special
+ya vincula snapshot/base/consentimiento/LIA completos y EIPD v2 vincula
+snapshot/LIA/special. Ambas asociaciones vigentes son obligatorias. Cambiar
+LIA o base sin reaportar controles deja asociaciones obsoletas y bloquea, aun
+cuando el hash semántico RAT no cambie. No se reasociará al confirmar.
+
+La revalidación ocurre después del lock de serie y refresco del borrador;
+se compone un único bundle RAT para hash, LIA y controles transversales. Todas
+las validaciones anteceden al reemplazo. Se conserva doble flush, auditoría,
+rollback del caller y versiones históricas inmutables. No se cambia esquema,
+migración, permisos de edición, suscripción ni políticas RLS.
+
+GET readiness y POST compartirán la construcción de resultado LIA/barrera
+lia_no_preparada; se elimina base_no_implementada solo para la base recién
+integrada. En el rechazo LIA, detail incluirá code, result, issues y
+applicability compatibles con la salida LIA de readiness. El consentimiento
+mantiene su respuesta anterior para evitar cambios ajenos a esta integración.
+Los controles transversales conservan su contrato de rechazo independiente.
+Readiness sigue siendo orientativo y no garantiza confirmación posterior.
+
+Casos de aceptación: LIA completa con controles negativos confirma; decisión
+favorable aislada/expediente ausente no confirma; respuestas desfavorables,
+medidas condicionales incompletas, finalidad discordante y aplicabilidad sin
+resolver bloquean con motivos; cambios factuales RAT o cambios LIA/base sin
+reasociar bloquean; EIPD afirmativa y cualquier régimen positivo bloquean;
+reemplazo de consentimiento por LIA y viceversa respeta la serie; rechazo o
+fallo de flush conserva anterior; cambios de base/LIA tras espera por lock se
+releen; creación/confirmación concurrentes preservan una confirmada; permisos,
+suscripción, otro tenant y RLS mantienen protección. Actualizar expectativas
+anteriores que asumían interés legítimo siempre no implementado.
+
+M3-T1 permanece EN PROGRESO aun tras esta integración: otras bases jurídicas,
+validadores por régimen/ruta especial y gestión de EIPD realizada/revisada
+siguen pendientes de contratos y cobertura propios.
+
+
+### 18.30 Confirmación ordinaria LIA implementada
+
+POST confirm admite consentimiento_art12 e interes_legitimo_art13d. Las demás
+bases conservan su bloqueo. Para interés legítimo, evaluate_lia_gate_v1 se
+comparte con readiness y recalcula LIA contra el bundle RAT actual tras lock y
+refresco. LIA incompleto/ausente produce 400, requiere_revision produce 409;
+los motivos y aplicabilidad coinciden con GET. Decisión favorable aislada no
+basta. GET ya no muestra base_no_implementada para interés legítimo.
+
+LIA no exige un expediente de consentimiento preparado. Los controles
+transversales negativos completos y vigentes siguen siendo obligatorios,
+incluyendo asociación al documento LIA completo. No se añaden asociaciones
+físicas, migraciones ni permisos. No se modifica ningún expediente al confirmar.
+Otras bases, regímenes especiales positivos y continuación tras EIPD afirmativa
+siguen bloqueados. M3-T1 EN PROGRESO.
+
+Las pruebas reales cubren consentimiento -> LIA -> consentimiento en la misma
+serie, rechazo previo sin reemplazar anterior, respuesta LIA compatible con
+readiness y bloqueo EIPD afirmativo con LIA completa. Los escenarios PostgreSQL
+de rollback/fallo de flush y concurrencia se ejecutan para ambas bases,
+incluida modificación LIA incompleta mientras otra sesión espera por el lock.
+
+
+## 19. Contrato y medidas precontractuales: siguiente base ordinaria
+
+### 19.1 Alcance y decisión de producto
+
+Siguiente bloque: contrato_precontractual_art13c. Referencia normativa:
+[BCN, Ley 21.719, artículo 13 letra c](https://www.leychile.cl/leychile/Navegar/imprimir?idNorma=1209272&idParte=).
+La disposición vincula la base a la necesidad del tratamiento para celebrar o
+ejecutar un contrato entre titular y responsable, o a medidas precontractuales
+solicitadas por el titular. El producto separará esas rutas y sus antecedentes.
+Estas reglas operativas de documentación no certifican suficiencia jurídica.
+Este paso no habilita la base: código actual continúa rechazándola con 409.
+
+El expediente cubrirá la finalidad/alcance evaluados, sin identificar personas
+con nombres, documentos o fechas de nacimiento. Casos con rutas incompatibles
+por subconjunto deberán separar finalidades; el primer contrato no admite una
+lista ambigua de contratos/personas para simular cobertura. Contrato laboral,
+datos sensibles u otros indicadores especiales no eluden el control transversal.
+
+### 19.2 ContractAssessmentV1 y persistencia propuesta
+
+Nueva columna nullable contract_assessment JSONB con none_as_null=True y check
+SQL NULL u objeto, mediante migración append-only. Conserva tenant y RLS actuales.
+No se reutilizarán consent_assessment, lia_assessment, special_conditions ni
+justification para ocultar un expediente de base diferente.
+
+Contrato cerrado, extra forbid, schema_version literal 1:
+
+- route: celebracion_contrato | ejecucion_contrato | medidas_precontractuales,
+  nullable en borrador;
+- purpose_description: texto opcional;
+- relationship_description: descripción documental de las partes/relación,
+  sin identificación personal;
+- contractual_reference: referencia de contrato/proyecto, opcional en borrador;
+- contractual_object: objeto documentado;
+- processing_operations: operaciones necesarias para esa finalidad;
+- necessity_analysis y data_minimization_analysis: análisis documentales;
+- holder_is_party: respuesta si/no/pendiente;
+- necessary_for_route: respuesta si/no/pendiente;
+- purpose_within_route: respuesta si/no/pendiente;
+- precontractual_measures: texto condicional;
+- requested_by_holder: respuesta si/no/pendiente o null;
+- request_reference: referencia documental condicional;
+- evidence: lista de metadata documental con evidence_type, reference,
+  obtained_on date opcional, mechanism y notes;
+- notes: opcional.
+
+Las respuestas serán objetos con answer y rationale opcional; no admitirán
+no_aplica. Campos de respuesta generales nullable en borrador. Se rechazan
+versiones/campos/rutas desconocidos; la completitud se deriva en evaluador puro.
+Entrada CREATE/PATCH opcional: omisión conserva, objeto reemplaza la unidad,
+null elimina solo en borrador. La salida conserva también contratos históricos.
+No se reciben resultado ni bandera de aprobación del cliente.
+
+### 19.3 Preparación operativa v1
+
+Resultado incompleto > requiere_revision > completo, conservando todos los
+motivos en orden físico. Contrato inválido produce error de validación.
+
+Incompleto: expediente/snapshot ausente, route sin resolver, textos comunes
+vacíos, respuestas generales ausentes/pendientes o sin fundamento, evidence
+sin al menos una entrada con tipo y referencia no vacíos, o requisitos de
+ruta sin resolver. Las tres respuestas generales deben ser si/no fundadas.
+
+Celebración/ejecución exige contractual_reference y contractual_object.
+Medidas precontractuales exige precontractual_measures, requested_by_holder
+si/no fundado y request_reference; no exige un contrato ya firmado. Objeto
+contractual se documenta también para contextualizar esas medidas.
+requested_by_holder, request_reference y precontractual_measures son no
+aplicables a las otras rutas; su contenido residual provoca revisión, no se
+borra. Si route falta, aplicabilidad sin_resolver y resultado incompleto.
+
+Requiere_revision sin faltantes: respuesta general no, requested_by_holder no
+cuando aplica, finalidad distinta del snapshot tras canonización v1 o contexto
+con rol distinto de responsable. El último control es un límite operativo del
+primer bloque del producto; no afirma que toda actuación de un encargado sea
+ilícita. También requiere revisión cualquier respuesta residual condicional.
+
+Completo: sin faltantes ni motivos de revisión. No demuestra por sí solo la
+necesidad jurídica; un contrato/referencia adjuntos no superan respuestas
+negativas o análisis faltantes. No se analiza prosa mediante LLM para declarar
+licitud ni se confunde necesaria_para_contrato del checklist de consentimiento
+con la preparación independiente de esta base.
+
+### 19.4 Asociación documental y compatibilidad
+
+La preparación contractual debe quedar cubierta por las asociaciones, incluso
+si cambia un texto sin alterar RAT. Nueva asociación especial v2 incluirá
+snapshot, legal_basis, consentimiento, LIA y contract_assessment finales.
+Nueva asociación EIPD v3 incluirá snapshot, LIA, contract_assessment y
+special_conditions finales. Mantienen algoritmos deterministas existentes y
+no cambian hash RAT canónico ni versiones de los cuestionarios.
+
+No se reescribirán asociaciones existentes. Asociaciones especiales v1 y EIPD
+v1/v2 con expediente contractual no nulo informarán contexto no cubierto y
+revisión. Sin expediente contractual conservarán comparación histórica. Nuevo
+guardado/reaporte usará nuevas versiones. Orden: base/cuestionarios/contrato,
+snapshot, special_conditions, EIPD. Sin ciclos ni reasociación al confirmar.
+
+### 19.5 Secuencia de implementación y aceptación
+
+1. Schemas y nueva columna/migración, guardado y lectura del borrador; la base
+   sigue bloqueada. Asociaciones especiales v2/EIPD v3 y compatibilidad histórica.
+2. Evaluador puro con motivos, aplicabilidad y consulta readiness contractual.
+3. Integración POST cuando completo y controles transversales negativos
+   completos/vigentes. 400 incompleto/contrato inválido, 409 revisión; selección
+   de base determina expediente requerido, sin exigir consentimiento o LIA.
+
+Antes de habilitar: parcial/ausente, enums y campos inválidos, null/omisión,
+rutas contractuales completas y precontractual completo sin contrato firmado,
+solicitud ausente/negativa, fundamento faltante, finalidad distinta, encargado,
+campos residuales, evidencia incompleta, contexto factual cambiado, versiones
+históricas no cubiertas, controles positivos, GET/POST coherentes, reemplazo
+entre bases, rollback, lock/relectura, concurrencia y aislamiento tenant/RLS.
+
+M3-T1 sigue EN PROGRESO: obligaciones económicas, obligación legal, defensa
+de derechos, validadores especiales y expediente EIPD permanecen pendientes.
+
+
+### 19.6 Schemas/persistencia contractual implementados
+
+Implementados ContractAssessmentV1 y columna contract_assessment nullable
+JSONB con restricción SQL NULL/objeto; migración 8d2f4a6c9e31 posterior a
+7c9e1a3b5d20 aplicada localmente. CREATE/PATCH guardan borradores parciales,
+serializan fechas, conservan omisión y eliminan con SQL NULL. Salida GET incluye
+el expediente. Validación de campos/enums/versiones cerrada; no hay evaluador
+contractual ni habilitación POST para esta base todavía.
+
+Nuevo guardado/reaporte vincula special_conditions mediante asociación v2 y
+EIPD mediante v3, incorporando el contrato final. Se conservan comparadores y
+constructores históricos. Asociación especial v1 o EIPD v1/v2 con contrato
+no nulo informa asociacion_contractual_no_cubierta sin modificar los objetos.
+Sin contrato conserva comparación histórica; v1 EIPD con especiales sigue
+informando además su limitación previa cuando corresponde. Cambiar contrato
+sin reaportar controles vuelve obsoletas las asociaciones y bloquea también
+el flujo ordinario si el documento contractual es residual en otra base.
+
+Pruebas cubren contrato parcial, fechas, rechazo de estructura y campos,
+lectura/escritura ajenas al tenant, omisión/null, restricción SQL objeto,
+asociación conjunta final, cambio contractual sin reasociar y compatibilidad
+histórica. No se reescriben documentos ya confirmados. M3-T1 EN PROGRESO.
+
+
+### 19.7 Evaluador contractual e integración readiness implementados
+
+Evaluador puro evaluate_contract_assessment_v1: incompleto > requiere_revision
+> completo, motivos en orden físico, sin mutación y con aplicabilidad estable.
+Evalúa ruta, textos, respuestas/fundamentos, evidencia, finalidad RAT y rol.
+Celebración y ejecución requieren referencia contractual; medidas previas
+requieren medidas, solicitud del titular fundadamente afirmativa y referencia
+de solicitud. No exigen contrato firmado. Referencia contractual aportada en
+ruta precontractual se conserva como apoyo opcional y no constituye residuo;
+no_aplicable indica que no es un requisito obligatorio en esa ruta.
+
+Aclaración operativa de evidencia: se exige al menos una entrada y todas las
+entradas aportadas deben tener tipo/referencia no vacíos. Una entrada completa
+no oculta otras pendientes. obtained_on factual, mechanism y notes permanecen
+opcionales. Respuestas a solicitud/medidas/referencia de solicitud fuera de
+ruta aplicable producen revisión, sin borrar datos. Rol distinto de responsable
+es revisión bajo el límite operativo definido en §19.3.
+
+GET readiness añade contract (resultado, issues y applicability) para la base
+contractual; null en otras bases. Recompone RAT antes de evaluar. Si no puede
+recomponer el contexto, snapshot ausente produce incompleto. La barrera
+contrato_no_preparado aparece cuando corresponde; base_no_implementada sigue
+presente aun con contrato completo, pues POST contractual continúa bloqueado.
+No se altera estado, fechas de auditoría ni asociaciones al consultar.
+
+Pruebas cubren las tres rutas, faltantes, respuestas negativas/pendientes,
+fundamentos vacíos, residuales, evidencia incompleta, ausencia de contexto,
+canonización de finalidad, orden/inmutabilidad y lectura HTTP con tenant y RAT
+actual. No se añaden migraciones ni se habilita confirmación. M3-T1 EN PROGRESO.
+
+
+### 19.8 Confirmación contractual ordinaria implementada
+
+POST confirm admite contrato_precontractual_art13c junto a consentimiento e
+interés legítimo. evaluate_contract_gate_v1 comparte resultado y barrera con
+readiness; contrato incompleto/ausente produce 400, requiere_revision produce
+409. Los motivos/resultados/aplicabilidad del rechazo coinciden con GET.
+GET elimina base_no_implementada para esta base. Las otras tres bases mantienen
+el bloqueo actual.
+
+Se exige expediente contractual completo y controles especiales/EIPD negativos
+completos con asociaciones vigentes. No se exige consentimiento o LIA para
+contrato. Las tres rutas superan la preparación bajo sus reglas, incluida
+precontractual sin contrato firmado cuando la solicitud está documentada.
+Regímenes positivos, EIPD afirmativa, documentos incompletos o asociaciones
+obsoletas permanecen bloqueados. La evaluación ocurre tras lock/refresco y usa
+el bundle RAT actual antes de reemplazar anterior. No reasocia ni modifica el
+expediente; conserva doble flush, auditoría y commit/rollback del caller.
+
+Pruebas incluyen rutas completas, ausencia/parcial, respuestas negativas,
+finalidad distinta, cambio documental sin reaporte, indicadores especiales y
+EIPD afirmativa. PostgreSQL verifica rollback/fallo de flush y concurrencia
+para las tres bases, incluida actualización contractual mientras otra sesión
+espera. API cubre consentimiento -> precontractual -> consentimiento, motivos
+GET/POST y conservación de anterior ante rechazo. M3-T1 EN PROGRESO.
+
+
+## 20. Obligación legal o tratamiento dispuesto por ley
+
+### 20.1 Fundamento y alcance del siguiente bloque
+
+Siguiente base: obligacion_legal_art13b. Referencia oficial:
+[Diario Oficial, Ley 21.719, artículo 13 letra b, página 8](https://www.diariooficial.interior.gob.cl/publicaciones/2024/12/13/44023/01/2583630.pdf).
+El precepto cubre necesidad para ejecución/cumplimiento de una obligación legal
+o tratamiento dispuesto por ley. El producto separará las rutas
+cumplimiento_obligacion_legal y tratamiento_dispuesto_por_ley.
+
+Seleccionar esta base o citar el artículo 13(b) no documenta por sí solo la
+obligación/disposición concreta del tratamiento. Referencia, versión aplicable,
+análisis y declaraciones se conservarán por finalidad/alcance RAT. No se
+inventará una excepción desde una obligación contractual, política interna o
+recomendación profesional. Las fuentes complementarias no sustituyen el
+fundamento legal identificado y analizado por quien prepara el expediente.
+Estas son reglas operativas documentales, no un dictamen automatizado.
+La base continúa bloqueada en el código actual; este paso define el contrato.
+
+### 20.2 LegalObligationAssessmentV1 propuesto
+
+Nueva columna legal_obligation_assessment JSONB nullable, none_as_null=True,
+check SQL NULL/objeto, migración append-only con tenant/RLS existentes.
+No se reutilizarán justificación ni expedientes de otras bases.
+Contrato cerrado extra forbid y schema_version literal 1:
+
+- route: cumplimiento_obligacion_legal | tratamiento_dispuesto_por_ley,
+  nullable en borrador;
+- purpose_description: texto;
+- normative_requirement_description: obligación o disposición concreta;
+- processing_operations: operaciones fundamentadas;
+- applicability_analysis: por qué alcanza a la organización y este contexto;
+- necessity_analysis y data_minimization_analysis: análisis del alcance/datos;
+- normative_references: lista de referencias cerradas con norm_name,
+  provision, official_source_url, version_reference y relevance_analysis;
+- normative_basis_reviewed: respuesta si/no/pendiente con rationale;
+- normative_basis_in_force: respuesta si/no/pendiente con rationale;
+- processing_within_legal_scope: respuesta si/no/pendiente con rationale;
+- obligation_applies_to_controller: respuesta condicional;
+- processing_required_by_law: respuesta condicional;
+- evidence: metadata con evidence_type, reference, obtained_on date opcional,
+  mechanism y notes;
+- notes: opcional.
+
+Textos, respuestas y campos de referencia podrán ser null en borrador; listas
+vacías inicialmente. La respuesta condicional aplica solo a su ruta. Respuestas
+admiten si/no/pendiente, sin no_aplica. Referencias usan URL http/https validada
+sintácticamente cuando está presente; no se descargan fuentes desde esa entrada.
+Version_reference documenta la versión/vigencia analizada como texto factual,
+sin inferir fechas ni certificar actualización externa. Fechas de evidencia
+se conservan; no se recopilan identidades personales para justificar la norma.
+
+Omisión CREATE/PATCH conserva el contrato anterior cuando existe; objeto
+reemplaza la unidad, null elimina solo en borrador. Campos/versiones/rutas
+extraños se rechazan; resultado derivado o aprobación no vienen del cliente.
+GET incluye expediente también en históricos.
+
+### 20.3 Preparación operativa
+
+Evaluador puro con incompleto > requiere_revision > completo, motivos en orden
+físico y aplicabilidad estable. Revalida ambos contratos aun con input ausente.
+
+Incompleto: expediente/snapshot ausente, ruta sin resolver, textos comunes
+vacíos, respuestas aplicables ausentes/pendientes/sin fundamento, referencias
+vacías o con cualquiera de sus cinco campos incompleto, evidencia vacía o
+entrada aportada sin tipo/referencia. Cada referencia declarada debe estar
+completa; una correcta no oculta otras pendientes.
+
+Cumplimiento exige obligation_applies_to_controller si/no fundado.
+Tratamiento dispuesto por ley exige processing_required_by_law si/no fundado.
+La otra respuesta condicional es no aplicable; objeto residual provoca revisión
+sin borrar contenido. Ruta ausente deja aplicabilidad sin_resolver.
+
+Sin faltantes, respuesta aplicable no, finalidad distinta del snapshot tras
+canonización v1 o rol distinto de responsable producen requiere_revision.
+La restricción de rol es límite operativo del primer bloque, no afirmación de
+ilicitud universal del encargado. Si hay faltantes y alertas, se conservan todos
+los motivos pero prevalece incompleto.
+
+Completo únicamente significa documentación resuelta con declaraciones
+favorables bajo estas reglas. No confirma autenticidad, jerarquía, vigencia
+real de la norma ni corrección del análisis jurídico. URL con dominio oficial,
+texto largo, fecha o respuesta normativa positiva no constituyen verificación
+automática. No hay búsqueda/RAG/LLM ni acceso de red desde este evaluador.
+La evaluación jurídica documentada permanece responsabilidad de la organización.
+
+### 20.4 Asociaciones y compatibilidad propuestas
+
+Nueva asociación especial v3: snapshot, base, consentimiento, LIA, contrato y
+legal_obligation_assessment finales. Nueva asociación EIPD v4: snapshot, LIA,
+contrato, legal_obligation_assessment y special_conditions finales. Mismo hash
+determinista, sin alterar hash RAT ni schema_version de cuestionarios.
+
+No se reescriben asociaciones históricas. Especiales v1/v2 y EIPD v1/v2/v3 con
+expediente de obligación legal no nulo informan asociación no cubierta y
+revisión; sin él conservan comparación conforme a su versión, incluidas
+limitaciones contractuales anteriores. Cambiar expediente sin reaportar
+controles los vuelve obsoletos, también cuando el documento sea residual en
+otra base. Guardado: base/expedientes, snapshot, especiales y finalmente EIPD.
+No hay ciclos ni reasociación al confirmar.
+
+### 20.5 Secuencia y aceptación
+
+1. Schemas/columna/migración, persistencia/lectura y asociaciones especiales v3/
+   EIPD v4 con históricos intactos; confirmación sigue bloqueada.
+2. Evaluador puro y salida legal_obligation en readiness, conserva
+   base_no_implementada hasta integración POST.
+3. Gate compartido GET/POST: exige completo y controles transversales negativos
+   vigentes, sin exigir consentimiento/LIA/contrato de otras bases. 400 si
+   incompleto/contrato inválido, 409 revisión, contexto obsoleto o controles
+   positivos. Relectura tras lock y evaluación con un bundle RAT antes de
+   reemplazar anterior; mismo lifecycle y rollback del caller.
+
+Aceptación: ambas rutas completas, parcial/ausente, enum/versiones/URLs
+inválidos, omisión/null SQL, referencia/evidencia incompleta, fundamentos
+faltantes, normativa no revisada/no vigente declarada, solicitud condicional
+residual, finalidad distinta, rol no admitido, asociación histórica no cubierta,
+fecha factual preservada, cambios sin reasociar, regímenes/EIPD positivos,
+GET/POST coherentes, reemplazo entre bases, rollback, concurrencia/lock y RLS.
+
+M3-T1 EN PROGRESO. Obligaciones económicas art13a, defensa de derechos art13e,
+validadores especiales y gestión de EIPD siguen pendientes. Este diseño no
+introduce una vía para confirmar esos supuestos por comentario libre.
+
+
+### 20.6 Schemas/persistencia y asociaciones implementados
+
+LegalObligationAssessmentV1 admite borradores cerrados/parciales, referencias
+normativas con URL http/https sintácticamente validada y metadata de evidencia.
+CREATE/PATCH/GET guardan el expediente en columna propia, preservan omisión y
+fechas y eliminan con SQL NULL. Migración 9e3b5d7f1a42 posterior a 8d2f4a6c9e31
+aplicada localmente con check SQL NULL/objeto. No hay acceso de red ni validación
+automática de la norma al guardar una URL.
+
+Nuevo guardado/reaporte usa asociación especial v3 y EIPD v4 con obligación
+legal final, además de los documentos previamente incluidos. Lectura/evaluación
+conserva asociaciones históricas y marca asociacion_obligacion_legal_no_cubierta
+si un documento no nulo no está cubierto por su versión. Cambio sin reaportar
+controles vuelve obsoletas las asociaciones. Sin documento de obligación legal
+continúan los comparadores históricos, con sus limitaciones contractuales.
+
+Pruebas cubren guardado parcial/fechas, estructura/URL/respuesta inválidas,
+protección de escritura tenant, cambio sin reasociar, guardado conjunto,
+check SQL objeto, SQL NULL, compatibilidad especial v1/v2/v3 y EIPD v1/v2/v3/v4.
+Los flujos ordinarios existentes se conservan. El evaluador de preparación
+normativa y readiness específico siguen pendientes; POST obligación legal sigue
+bloqueado. M3-T1 EN PROGRESO.
+
+
+### 20.7 Evaluador normativo y readiness implementados
+
+Evaluador puro evaluate_legal_obligation_assessment_v1: incompleto >
+requiere_revision > completo, motivos en orden físico y aplicabilidad estable.
+Ambas rutas exigen textos comunes, tres respuestas normativas fundadas,
+referencias completas y evidencia completa. Se exige la respuesta condicional
+propia y se marca como revisión la residual de la otra ruta. Referencia/evidencia
+completa no oculta otras entradas incompletas; URL solo se valida como http/https,
+sin acceso de red, comprobación de dominio o certificación de vigencia jurídica.
+
+GET readiness añade legal_obligation para obligacion_legal_art13b (null en
+otras bases), evaluado contra RAT recompuesto. Muestra obligación incompleta,
+revisión por finalidad/rol y motivos de referencia/fundamento. Si falta contexto,
+el resultado es incompleto. Consulta conserva expedientes y asociaciones.
+La barrera obligacion_legal_no_preparada aparece cuando corresponde;
+base_no_implementada sigue presente aun con expediente completo: confirmación
+continúa bloqueada en este paso. Sin migraciones adicionales.
+
+Pruebas cubren ambas rutas, faltantes, referencias incompletas aun con otra
+completa, negativas/pendientes/fundamentos, residuales, evidencia, precedencia,
+canonización y orden, estructura/URL inválidas, lectura API/RAT actual,
+protección tenant y ausencia de mutaciones. M3-T1 EN PROGRESO.
+
+
+### 20.8 Confirmación ordinaria de obligación legal implementada
+
+POST confirm admite obligacion_legal_art13b; catálogo de bases habilitadas es
+compartido con readiness. evaluate_legal_obligation_gate_v1 usa el evaluador
+normativo contra RAT recompuesto tras lock/refresco. Incompleto/ausente produce
+400, requiere_revision produce 409; motivos/resultados/aplicabilidad coinciden
+con GET. Readiness elimina base_no_implementada para esta base.
+
+Ambas rutas requieren expediente completo y controles especiales/EIPD negativos
+completos con asociaciones vigentes. No se exige preparación de consentimiento,
+LIA o contrato de otra base. Regímenes positivos, EIPD afirmativa y asociaciones
+obsoletas siguen bloqueados. Las referencias normativas continúan siendo
+metadata y análisis declarados: confirmar el expediente no verifica externamente
+su autenticidad, vigencia real o suficiencia jurídica.
+
+Todas las validaciones anteceden al reemplazo. Se preservan documentos,
+asociaciones, doble flush, auditoría y commit/rollback del caller. Pruebas reales
+cubren consentimiento -> obligación legal -> consentimiento en ambas rutas,
+rechazo sin reemplazo, normativa declarada no vigente, coherencia GET/POST y
+rollback/fallo de flush/concurrencia PostgreSQL para cuatro bases. Actualización
+normativa mientras otra sesión espera se relee. No hay migraciones ni permisos
+nuevos. Art13a y art13e, validadores especiales y gestión EIPD siguen pendientes.
+M3-T1 EN PROGRESO.
+
+
+## 21. Formulación, ejercicio o defensa de derechos
+
+### 21.1 Fundamento y frontera del primer contrato
+
+Siguiente base: defensa_derechos_art13e. Referencia oficial:
+[Diario Oficial, Ley 21.719, artículo 13 letra e, página 8](https://www.diariooficial.interior.gob.cl/publicaciones/2024/12/13/44023/01/2583630.pdf).
+El supuesto vincula la necesidad del tratamiento a la formulación, ejercicio o
+defensa de un derecho ante tribunales de justicia u órganos públicos.
+El producto separará esas tres rutas y el foro documentado. Seleccionar
+esta base no identifica por sí solo el derecho ni demuestra necesidad.
+
+Se documentará la finalidad/alcance RAT y las operaciones relacionadas con el
+derecho, sin copiar escritos judiciales, datos personales de partes o nombres
+de testigos al cuestionario. Referencias de expediente/evidencia serán metadata.
+Preparación para formular un derecho no exige que ya exista una causa iniciada.
+Fuera del foro previsto por esta base no habrá una categoría otra para eludir
+revisión. Esta base general no habilita defensa_derechos_art16d ni otros
+regímenes sensibles: sus validadores siguen pendientes y controles positivos
+continúan bloqueando. Este paso es documental; POST art13e sigue rechazado.
+
+### 21.2 RightsDefenseAssessmentV1 propuesto
+
+Nueva columna rights_defense_assessment JSONB nullable con none_as_null=True,
+check SQL NULL/objeto y migración append-only; mismos tenant, RLS y lifecycle.
+Contrato cerrado extra forbid, schema_version literal 1:
+
+- route: formulacion_derecho | ejercicio_derecho | defensa_derecho, nullable;
+- purpose_description: finalidad;
+- right_description y right_basis_reference: derecho concreto y fundamento
+  documentado, sin exigir que toda referencia sea un artículo de ley;
+- right_holder: responsable | tercero | ambos, nullable;
+- holder_connection_analysis: relación de la organización/tratamiento con el
+  derecho y su titular, sin identidad personal;
+- forum_type: tribunal_justicia | organo_publico, nullable;
+- forum_description: órgano o tribunal/documentación del foro pertinente;
+- proceeding_stage: preparacion | en_curso | finalizado, nullable;
+- proceeding_reference: referencia cuando existe expediente;
+- preparatory_actions: actuaciones previstas al preparar la formulación;
+- processing_operations, necessity_analysis, data_minimization_analysis:
+  operaciones y análisis documentales;
+- related_to_right, necessary_for_route, within_forum_scope:
+  respuestas si/no/pendiente con rationale opcional;
+- post_proceeding_necessity_analysis: análisis condicional tras finalización;
+- evidence: metadata evidence_type, reference, obtained_on date opcional,
+  mechanism, notes;
+- notes: opcional.
+
+Campos nullable/listas vacías en borrador; no resultado/aprobación del cliente.
+Respuestas no admiten no_aplica. Omisión conserva, objeto reemplaza unidad,
+null elimina solo borrador; GET conserva históricos y fechas factuales.
+Valores/campos/versiones desconocidos se rechazan. No se consultan tribunales,
+órganos públicos ni fuentes externas al guardar referencias.
+
+### 21.3 Preparación y aplicabilidad operativa
+
+Evaluador puro: incompleto > requiere_revision > completo, conserva todos los
+motivos, orden físico y aplicabilidad estable. Revalida expediente y snapshot.
+
+Incompleto: expediente/snapshot ausente, route/right_holder/forum_type/stage
+sin resolver, textos comunes vacíos, respuesta general ausente/pendiente/sin
+fundamento, evidencia vacía o entrada con tipo/referencia incompletos, o campo
+condicional aplicable sin completar. Cada evidencia aportada debe completarse.
+Los textos comunes son finalidad, derecho, fundamento, conexión del titular,
+foro, operaciones, necesidad y minimización.
+
+Preparacion aplica preparatory_actions y no exige proceeding_reference.
+En_curso/finalizado exige proceeding_reference y no aplica preparatory_actions.
+Finalizado aplica post_proceeding_necessity_analysis; otras etapas no lo exigen.
+Etapa ausente produce aplicabilidad sin_resolver. Referencia de expediente en
+preparación puede conservarse como apoyo opcional, sin sustituir actuaciones.
+Contenido residual de actuaciones/análisis posterior en etapa no aplicable
+produce revisión sin borrar datos.
+
+Sin faltantes, respuesta general no, finalidad distinta de RAT por canonización
+v1, rol distinto de responsable o etapa preparacion para ejercicio/defensa
+produce requiere_revision. Este último caso es límite operativo inicial:
+requiere revisar la ruta o el contexto, no declara ilícita toda preparación de
+una defensa. Formulacion puede estar completa en preparación sin causa iniciada.
+Etapa finalizado con análisis completo no obtiene por sí sola una alerta nueva,
+pero debe justificar continuidad del tratamiento; no se infieren plazos de
+conservación, prescripción o exigibilidad desde una fecha/nombre.
+
+Completo es preparación documental, no certificación de existencia del derecho,
+competencia del foro, legitimación procesal, necesidad jurídica ni eficacia de
+la defensa. No se analiza prosa con LLM, no se presupone éxito y una referencia
+de causa no sustituye respuestas o análisis faltantes.
+
+### 21.4 Asociaciones y compatibilidad
+
+Nueva asociación especial v4 incluye snapshot/base/consentimiento/LIA/contrato/
+obligación legal/rights_defense_assessment finales. Nueva EIPD v5 incluye
+snapshot/LIA/contrato/obligación legal/rights_defense_assessment/special finales.
+Mismo algoritmo determinista, hash RAT y versiones de cuestionarios intactos.
+
+Versiones anteriores no se reescriben: con expediente de derechos no nulo,
+especiales v1/v2/v3 y EIPD v1/v2/v3/v4 informan asociación no cubierta; sin él
+conservan comparación histórica y limitaciones documentales anteriores.
+Cambio sin reaportar controles vuelve asociaciones obsoletas, incluso como
+expediente residual en otra base. Orden de guardado conserva expedientes,
+snapshot, especiales, EIPD. Sin ciclos o reasociación durante confirmación.
+
+### 21.5 Secuencia y aceptación
+
+1. Schemas/columna/migración y persistencia, asociaciones v4/v5 compatibles;
+   confirmación art13e sigue bloqueada.
+2. Evaluador y salida rights_defense en readiness; base_no_implementada permanece
+   hasta integrar confirmación.
+3. Gate GET/POST: completo y controles transversales negativos vigentes; 400
+   incompleto/contrato inválido, 409 revisión/contexto/control positivo. No exige
+   expedientes de otras bases. Revalida tras lock/refresco, mismo bundle RAT,
+   antes del reemplazo y con rollback del caller.
+
+Aceptación: tres rutas y dos foros completos; formulación sin causa iniciada;
+parcial/ausente/enums/respuestas inválidos; solicitud de preparación en ruta
+incoherente; etapa sin resolver; referencia y análisis posterior condicionales;
+residuales; evidencia incompleta; finalidad/rol distintos; omisión/null SQL;
+fechas factuales; asociaciones históricas no cubiertas y cambio sin reasociar;
+regímenes/EIPD positivos; GET/POST coherentes; reemplazo entre bases; rollback,
+relectura tras lock, concurrencia PostgreSQL y protección tenant/RLS.
+
+M3-T1 EN PROGRESO. Obligaciones económicas art13a, regímenes especiales positivos
+y gestión EIPD permanecen pendientes. No se añade una base residual genérica.
+
+
+### 21.6 Schemas/persistencia y asociaciones implementados
+
+RightsDefenseAssessmentV1 admite borradores cerrados/parciales con rutas,
+foros, etapas y evidencia factual. CREATE/PATCH/GET preservan omisión y fechas,
+reemplazan unidades y eliminan con SQL NULL. Migración ae4c6e8b2f53 posterior a
+9e3b5d7f1a42 aplicada localmente con check SQL NULL/objeto y RLS existente.
+No se accede a fuentes/tribunales al guardar referencias. El evaluador específico
+y readiness de derechos siguen pendientes; confirmación art13e sigue bloqueada.
+
+Nuevo guardado/reaporte usa asociación especial v4 y EIPD v5 con el expediente
+final de derechos además de los documentos anteriores. Comparadores históricos
+se conservan. Versiones especiales anteriores a v4 y EIPD anteriores a v5 con
+derechos no nulos informan asociacion_derechos_no_cubierta, sin reescribir datos.
+Con expediente ausente comparan según versión y mantienen limitaciones previas.
+Cambios omitidos en controles conservan sus asociaciones y quedan obsoletos.
+
+Pruebas incluyen estructura/enums/respuestas/fechas inválidas, persistencia
+parcial, omisión, fecha factual, protección tenant, guardado conjunto final,
+cambio sin reaportar, check SQL objeto, SQL NULL y versiones especiales
+v1/v2/v3/v4 y EIPD v1/v2/v3/v4/v5. Bases ordinarias anteriores se conservan.
+M3-T1 EN PROGRESO.
+
+
+### 21.7 Evaluador de derechos y readiness implementados
+
+Evaluador puro evaluate_rights_defense_assessment_v1: incompleto >
+requiere_revision > completo, motivos ordenados y aplicabilidad por etapa.
+Exige ruta/titular/foro/etapa, textos comunes, tres respuestas fundadas y
+evidencia completa. Preparación aplica actuaciones previstas, sin exigir causa
+iniciada; en_curso/finalizado aplica referencia; finalizado aplica análisis de
+necesidad posterior. Referencia aportada en preparación es apoyo opcional.
+Actuaciones/análisis posteriores residuales en etapa no aplicable producen
+revisión, al igual que preparación en ejercicio/defensa, finalidad distinta o
+rol no admitido. No se infieren plazos ni competencia jurídica desde referencias.
+
+GET readiness añade rights_defense para art13e, null en otras bases, contra RAT
+actual recompuesto. Barrera defensa_derechos_no_preparada cuando corresponda;
+base_no_implementada permanece aun con preparación completa. POST derechos
+sigue bloqueado. Lectura no modifica expedientes ni asociaciones.
+
+Pruebas cubren tres rutas/dos foros, etapas y condicionales, ausencia/faltantes,
+negativas/pendientes/fundamentos, residuales, evidencia, precedencia, estructura,
+canonización, orden/inmutabilidad y API con tenant/contexto actual. No hay nuevas
+migraciones ni habilitación de confirmación. M3-T1 EN PROGRESO.
+
+
+### 21.8 Confirmación ordinaria de derechos implementada
+
+Gate evaluate_rights_defense_gate_v1 compartido con readiness; art13e entra
+al catálogo de bases confirmables. Expediente incompleto responde 400 y revisión
+409 con resultado, motivos y aplicabilidad compatibles con GET. Completo exige
+además justificación, contexto RAT actual y controles especiales/EIPD negativos
+vigentes. No exige expedientes de otras bases ni valida competencia del foro.
+
+Confirmación reevalúa el borrador leído después del bloqueo de serie y compone
+RAT actual antes de modificar estados. Reemplazo en dos flush y transacción del
+caller mantienen atomicidad. Pruebas HTTP cubren tres rutas/dos foros, rechazo,
+conservación de vigente, reemplazo y protección del confirmado. Pruebas reales
+PostgreSQL/app_user amplían rollback/fallo de flush y concurrencia a cinco bases,
+incluido cambio a pendiente mientras otro confirmador espera el bloqueo.
+Art13a, regímenes especiales positivos y gestión EIPD permanecen pendientes.
+Sin migraciones nuevas ni commit. M3-T1 EN PROGRESO.
+
+
+## 22. Obligaciones económicas, financieras, bancarias o comerciales
+
+### 22.1 Fundamento y frontera del contrato inicial
+
+Base obligaciones_economicas_art13a. El art13(a) vincula los datos con
+obligaciones económicas/financieras/bancarias/comerciales y exige conformidad
+con Título III; incluye situación socioeconómica. No basta finalidad comercial.
+Referencia: [Diario Oficial, Ley 21.719, art13(a), página 8 y modificaciones
+arts17–19, página 14](https://www.diariooficial.interior.gob.cl/publicaciones/2024/12/13/44023/01/2583630.pdf).
+Para revisar Título III usar [BCN, Ley 19.628, versión diferida 2026-12-01](https://www.bcn.cl/leychile/Navegar/imprimir?idNorma=141599&idParte=&idVersion=2026-12-01),
+sin confundirla con la versión vigente antes de esa fecha. El régimen contiene
+restricciones de comunicación, exclusiones, efectos del pago/extinción y
+supresión de obligaciones prescritas. Requiere examinar normas y hechos del caso.
+
+Decisión de producto: expediente documental, sin consultar registros de deuda,
+calcular prescripción ni inferir habilitación desde un monto, fecha o nombre.
+Distinguir operaciones sin comunicación de las que incluyen comunicación;
+ambas documentan régimen aplicable. No se presume que toda deuda puede
+comunicarse. Las excepciones de comunicación a tribunales requieren revisión
+específica y quedan fuera de la primera ruta ordinaria confirmable; no se
+habilitan mediante una respuesta genérica ni se redirigen automáticamente a
+art13e. Una finalidad comercial o interés de cobro no reemplaza este expediente.
+
+Situación socioeconómica mantiene el tratamiento factual existente de datos
+sensibles. Art13a no fuerza flags RAT a negativos ni desactiva validadores
+especiales; el primer gate exige controles especiales/EIPD negativos vigentes.
+Un caso con controles positivos seguirá bloqueado hasta implementar su régimen.
+Las rutas describen alcance operativo, no nuevos supuestos legales.
+
+### 22.2 EconomicObligationsAssessmentV1 propuesto
+
+Nueva columna economic_obligations_assessment JSONB nullable, none_as_null=True,
+check SQL NULL/objeto, migración append-only tras ae4c6e8b2f53. Mismos tenant/RLS,
+serie y lifecycle; sin tabla nueva ni cambios al hash canónico RAT.
+Contrato cerrado extra forbid, schema_version literal1:
+
+- route: sin_comunicacion | con_comunicacion, nullable;
+- obligation_type: economica | financiera | bancaria | comercial, nullable;
+- purpose_description, obligation_description, obligation_reference:
+  finalidad y obligación/soporte concreto, metadata sin datos personales;
+- holder_connection_analysis: relación del titular de datos con la obligación;
+- processing_operations, applicability_analysis, data_minimization_analysis:
+  operaciones, encaje documentado en régimen y alcance mínimo;
+- title_iii_analysis, retention_and_deletion_analysis,
+  accuracy_and_update_analysis: revisión del régimen, conservación/supresión y
+  mecanismos de actualización; no se convierten en plazos legales automáticos;
+- normative_references: lista NormativeReferenceV1, al menos una completa;
+- operations_include_communication: ContractResponseV1 factual sobre las
+  operaciones; si/no son valores coherentes según route, pendiente sin resolver;
+- related_to_obligation, title_iii_reviewed, processing_within_title_iii,
+  retention_and_deletion_compatible, accuracy_controls_documented:
+  ContractResponseV1 si/no/pendiente con rationale;
+- communication_scope, communication_eligibility_analysis,
+  communication_restrictions_analysis, payment_and_extinction_controls:
+  textos condicionales para con_comunicacion;
+- communication_permitted, excluded_data_screened,
+  communication_limits_respected: respuestas condicionales ContractResponseV1;
+- evidence: lista ContractEvidenceV1 con metadata/fechas factuales;
+- notes: opcional.
+
+Todos los enums/textos/respuestas nullable y listas vacías permitidos en borrador.
+El tipo identifica el carácter documentado predominante y no decide elegibilidad
+ni impide describir otros caracteres concurrentes en obligation_description.
+No se incorpora enum de estado de deuda que autorice/rechace por sí solo.
+Respuesta no_aplica no admitida; la aplicabilidad la calcula el servidor.
+Omisión conserva, objeto reemplaza unidad, null elimina en borrador. GET conserva
+históricos; campos/enums/versiones desconocidos y fechas inválidas se rechazan.
+No resultado/aprobación aportados por cliente ni búsquedas externas al guardar.
+
+### 22.3 Completitud y aplicabilidad
+
+Evaluador puro evaluate_economic_obligations_assessment_v1: incompleto >
+requiere_revision > completo, todos los motivos ordenados por campos y evidencia,
+sin mutaciones. Valida contrato y snapshot independientemente. Can_confirm
+significa preparación documental, no certificación de legalidad de la deuda.
+
+Incompleto: expediente/snapshot ausente, route/obligation_type sin resolver,
+texto común vacío, respuesta común ausente/pendiente/sin rationale, referencias
+normativas vacías/incompletas o evidencia vacía/incompleta. Cada referencia
+aportada exige nombre, disposición, URL oficial sintáctica, versión y análisis;
+cada evidencia aportada exige tipo/referencia. Textos comunes: los enumerados
+antes de normative_references, incluida revisión del Título III y mecanismos.
+Las referencias deben documentar arts17–19 y otras reglas aplicables en el
+análisis; no se inspecciona prosa para inferir cobertura ni se verifica URL.
+
+Con_comunicacion aplica los cuatro textos y tres respuestas condicionales.
+Sin_comunicacion no los exige; contenido residual no vacío/respuesta aportada
+produce revisión y se conserva. Ruta ausente: aplicabilidad sin_resolver y
+sin exigir todavía esos campos. Contenido en notes no reemplaza requisitos.
+
+Respuesta aplicable no con fundamento, finalidad distinta de RAT por
+canonización v1, rol distinto de responsable o discordancia de operaciones
+produce revisión. operations_include_communication ausente/pendiente/sin
+fundamento es incompleto; si exige con_comunicacion y no exige sin_comunicacion.
+Discordancia explícita entre esta respuesta y route produce revisión. Snapshot
+RAT v1 no contiene un catálogo de operaciones: no se inventan códigos ni se
+clasifica processing_operations mediante prosa. Terceros/transferencias RAT se
+revisan en applicability_analysis, sin asumir que todo encargado o transferencia
+equivale a la comunicación regulada por Título III. No inferir prescripción,
+exigibilidad o admisibilidad desde fechas de evidencia. El análisis documental
+de conservación no exige como regla propia un plazo fijo para toda operación.
+
+Completo exige respuestas jurídicas aplicables si con fundamento y respuesta
+factual operations_include_communication coherente con route, sin faltantes ni motivos
+de revisión. El producto no transforma una afirmación del usuario en verificación
+externa de exclusiones, pago o vigencia normativa. Primer soporte ordinario
+excluye excepciones judiciales: si dependen de ellas, processing_within_title_iii
+o communication_permitted se deja pendiente y se documenta revisión requerida.
+
+### 22.4 Asociaciones y compatibilidad
+
+Asociación especial v5 añade economic_obligations_assessment a snapshot/base/
+consentimiento/LIA/contrato/obligación legal/derechos finales. Asociación EIPD v6
+lo añade a snapshot/LIA/contrato/obligación legal/derechos/especiales finales.
+Versiones de cuestionario siguen1; hash y canonización RAT intactos.
+
+Comparadores especiales v1–v4/EIPD v1–v5 se conservan. Con expediente económico
+no nulo informan asociacion_economica_no_cubierta; sin él mantienen comparación
+y limitaciones históricas. Sin reescribir históricos ni reasociar al confirmar.
+Cambio económico sin reaporte de controles vuelve asociaciones obsoletas incluso
+si es documento residual en otra base o el hash RAT no cambia. CREATE/PATCH
+compone documentos finales, snapshot, especiales y EIPD en ese orden.
+
+### 22.5 Secuencia y aceptación
+
+1. Schemas/columna/migración/persistencia y asociaciones v5/v6 compatibles;
+   confirmación art13a bloqueada.
+2. Evaluador y economic_obligations nullable en readiness, con motivo
+   obligaciones_economicas_no_preparadas; base_no_implementada permanece.
+3. Gate compartido GET/POST: completo, justificación, RAT actual y controles
+   transversales negativos vigentes. Incompleto/contrato inválido400; revisión,
+   contexto obsoleto/control positivo409. No exige expedientes de otras bases.
+   Relectura tras lock, revalidación antes de modificar estados, rollback del
+   caller y reemplazo entre bases con dos flush existentes.
+
+Aceptación: ambas rutas/cuatro tipos; condicionales sin resolver y residuales;
+textos/respuestas/referencias/evidencias incompletos; negativas/pendientes y
+precedencia; finalidad/rol/operaciones discordantes; ausencia/snapshot inválido;
+inmutabilidad y motivos ordenados; versiones/enums/fechas/campos inválidos;
+omisión/null SQL/check objeto; guardado conjunto y cambio sin reaporte;
+asociaciones históricas con y sin expediente; controles sensibles/EIPD positivos;
+tenant/RLS; HTTP GET/POST coherentes; rechazo sin reemplazo, reemplazo, rollback,
+fallo de flush, relectura tras lock y concurrencia real para seis bases.
+
+Este paso modifica documentación únicamente; art13a sigue bloqueado en código.
+M3-T1 EN PROGRESO. Regímenes especiales positivos y gestión EIPD pendientes.
+
+
+### 22.6 Schemas/persistencia y asociaciones implementados
+
+EconomicObligationsAssessmentV1 implementa borradores cerrados/parciales con
+rutas, tipo, declaraciones, textos condicionales, referencias normativas y
+metadata de evidencia. CREATE/PATCH/GET admiten omisión, reemplazo de unidad y
+null SQL; fechas factuales se preservan. Migración bf5d7f9c3a64 posterior a
+ae4c6e8b2f53 añade JSONB nullable/check objeto, con RLS/lifecycle existentes.
+
+Nuevas escrituras usan asociación especial v5/EIPD v6 con todos los expedientes
+finales, incluido económico. Comparadores anteriores se conservan; económico
+no nulo con especiales v1–v4/EIPD v1–v5 informa asociacion_economica_no_cubierta.
+Sin expediente conserva comparación histórica y sus limitaciones (EIPD v1 no
+cubre especiales). Cambios sin reaporte no reasocian ni reescriben históricos.
+
+Pruebas HTTP PostgreSQL/app_user cubren fechas, estructura/enums/respuestas
+inválidos, aislamiento tenant, omisión/null SQL/check objeto, cambio sin reaporte,
+guardado conjunto y todas las versiones históricas. Schemas prueban dos rutas
+por cuatro tipos y contratos cerrados. Evaluador/readiness específicos pendientes;
+confirmación art13a continúa bloqueada. M3-T1 EN PROGRESO. Sin commit.
+
+
+### 22.7 Evaluador económico y readiness implementados
+
+Evaluador puro evaluate_economic_obligations_assessment_v1 exige campos comunes,
+referencias y evidencias completas, declaraciones jurídicas fundadas y factual
+de comunicación coherente con ruta. Con_comunicacion aplica cuatro textos y
+tres respuestas; sin_comunicacion no los exige y conserva residuales como
+revisión; ruta ausente deja aplicabilidad sin_resolver. No se clasifica prosa,
+consulta fuentes, calcula prescripción ni declara admisibilidad de una deuda.
+
+Precedencia incompleto > requiere_revision > completo; conserva todos los
+motivos ordenados, sin mutar expediente/snapshot. Evalúa finalidad canonizada y
+rol contra RAT actual. GET readiness expone economic_obligations solo en art13a;
+otras bases null. Barrera obligaciones_economicas_no_preparadas según motivos;
+base_no_implementada permanece aun con preparación completa. POST bloqueado.
+
+Pruebas cubren ambas rutas/cuatro tipos, faltantes, respuestas/precedencia,
+declaración factual, condicionales/residuales, referencias/evidencias incompletas,
+finalidad/rol, canonización, orden/inmutabilidad y HTTP con tenant/contexto actual.
+Sin nuevas migraciones ni commit. M3-T1 EN PROGRESO.
+
+
+### 22.8 Confirmación ordinaria económica implementada
+
+Gate evaluate_economic_obligations_gate_v1 compartido con readiness. Art13a
+integra el catálogo de seis bases confirmables ordinarias. Incompleto responde
+400 y revisión409 con resultado, motivos y aplicabilidad compatibles con GET.
+Completo exige justificación, RAT actual y controles especiales/EIPD negativos
+vigentes. No exige expedientes de otras bases ni verifica deuda/fuente externa.
+
+Relectura del borrador después del bloqueo, recomposición RAT y validación antes
+de modificar estados mantienen el reemplazo atómico y rollback del caller.
+Pruebas HTTP cubren ambas rutas/cuatro tipos, rechazo/conservación/reemplazo,
+motivos comunes GET/POST y protección de confirmado. Pruebas reales PostgreSQL
+amplían rollback/fallo de flush y concurrencia a seis bases; cambio documental
+a pendiente mientras otro confirmador espera el bloqueo vuelve a evaluarse.
+
+Regímenes especiales positivos y gestión EIPD siguen pendientes, así como
+excepciones judiciales del régimen económico. No se certifica el cumplimiento
+del Título III por completar el cuestionario. Sin nuevas migraciones ni commit.
+M3-T1 EN PROGRESO.
+
+
+## 23. Cobertura ordinaria y primer validador especial: geolocalización
+
+### 23.1 Revisión conjunta de cobertura
+
+Revisión contra código y pruebas actuales, no inferida del catálogo conceptual:
+
+| Base | Gate documental | Flujo HTTP | Rollback/flush/concurrencia PostgreSQL |
+| --- | --- | --- | --- |
+| consentimiento_art12 | Checklist de consentimiento | Confirmación/reemplazo | Cubierto |
+| obligaciones_economicas_art13a | Expediente económico | Ambas rutas/cuatro tipos | Cubierto |
+| obligacion_legal_art13b | Expediente normativo | Ambas rutas | Cubierto |
+| contrato_precontractual_art13c | Expediente contractual | Tres rutas | Cubierto |
+| interes_legitimo_art13d | LIA | Confirmación/rechazo/reemplazo | Cubierto |
+| defensa_derechos_art13e | Expediente de derechos | Tres rutas/dos foros | Cubierto |
+
+CONFIRMABLE_ORDINARY_BASES contiene las seis bases. GET/POST usan gates comunes
+para cinco expedientes; consentimiento conserva evaluador común y formato de
+motivos propio ya probado. Todas requieren justificación, alcance, RAT vigente
+y barreras transversales. Tests reales de confirmación cubren seis bases con
+app_user/RLS; esos tests simulan composición RAT. HTTP recompone RAT real.
+No implica que toda combinación entre bases/regímenes haya sido probada ni
+que los validadores especiales estén implementados. Última suite914 passed.
+
+### 23.2 Elección y alcance
+
+Primer régimen especial: geolocalizacion_art16sexies. El art16sexies mantiene
+las fuentes de licitud de arts12/13 y exige informar al titular sobre tipo de
+datos, finalidad, duración y comunicación/cesión para servicios de valor añadido,
+con claridad, suficiencia y oportunidad.
+Fuente: [Diario Oficial, Ley 21.719, art16sexies, página14](https://www.diariooficial.interior.gob.cl/publicaciones/2024/12/13/44023/01/2583630.pdf).
+
+Decisión de producto: validar preparación documental de esa información sin
+crear una base nueva o exigir consentimiento para toda geolocalización. La base
+general conserva su gate, incluida LIA cuando corresponda. Declaración explícita
+de geolocalización activa el régimen; no se infiere desde nombres libres.
+El primer soporte admite este régimen como único especial validado, sin excluir
+regímenes concurrentes del resultado. Otros especiales positivos/vulnerabilidad
+sin resolver siguen bloqueando. Screening EIPD no se fuerza a negativo: vigilancia,
+volumen, automatización o riesgo contextual pueden mantener la confirmación
+bloqueada aun con expediente de geolocalización preparado.
+
+### 23.3 GeolocationAssessmentV1 propuesto
+
+Columna independiente geolocation_assessment JSONB nullable, none_as_null=True,
+check SQL NULL/objeto y migración append-only tras bf5d7f9c3a64. Mantiene series,
+RLS y permisos; no cambia SpecialConditionsV1 ni su normalización histórica.
+Contrato cerrado schema_version literal1, extra forbid:
+
+- purpose_description, geolocation_data_description, processing_operations:
+  finalidad RAT, tipos/precisión de datos y operaciones documentadas;
+- duration_description: duración de tratamiento informada;
+- scope: SpecialScopeV1 con categorías/titulares seleccionados;
+- notice_reference, notice_version_reference, notice_delivery_mechanism:
+  metadata del aviso y del medio de entrega, sin personas/coordenadas;
+- notice_provided_on: date opcional factual; no prueba oportunidad por sí sola;
+- notice_content_analysis: cómo cubre los elementos exigidos;
+- information_clear, information_sufficient, information_timely,
+  data_types_disclosed, purpose_disclosed, duration_disclosed,
+  third_party_information_disclosed: ContractResponseV1 si/no/pendiente+rationale;
+- value_added_third_party_transfer: ContractResponseV1 factual si/no/pendiente;
+- third_party_disclosure_description: texto común, incluida explicación cuando
+  no se prevé comunicación/cesión para servicios de valor añadido;
+- value_added_service_description, third_party_recipient_description:
+  textos aplicables cuando value_added_third_party_transfer es si;
+- evidence: list ContractEvidenceV1, metadata de aviso/entrega/revisión;
+- notes: opcional.
+
+Textos/respuestas/scope nullable y listas vacías en borrador. No aprobación del
+cliente ni estado legal de comunicación inferido. Omisión conserva, objeto
+reemplaza unidad, null elimina en borrador; históricos inmutables. Se rechazan
+campos/versiones/valores desconocidos y fechas inválidas; no consultas externas.
+Scope no vacío, subconjunto válido de snapshot y coincide con la selección del
+expediente geolocalizacion_art16sexies y su declaración afirmativa. Si esos dos
+selectores difieren requiere revisión; no se presupone cobertura total de otros
+regímenes ni se modifica M2 para hacerlos coincidir. No nombres/coordenadas de
+titulares en este contrato, solo descripción y evidencia referenciada.
+
+### 23.4 Evaluador y asociación
+
+Evaluador puro evaluate_geolocation_assessment_v1 con expediente, snapshot y
+special_conditions. Precedencia incompleto > requiere_revision > completo;
+conserva motivos ordenados y aplicabilidad estable, sin mutar entradas.
+
+Incompleto: expediente/snapshot ausente, campos comunes/scope ausentes o vacíos,
+respuestas ausentes/pendientes/sin fundamento, evidencia vacía/entrada incompleta,
+campos condicionales aplicables vacíos. Toda evidencia exige tipo y referencia.
+Todos los textos de §23.3 salvo notes y los dos condicionales son comunes.
+Value_added_third_party_transfer no presume que no sea negativo válido: si/no
+resuelve aplicabilidad, pendiente/ausente deja sin_resolver. Condicionales
+no aplicables con texto no vacío producen revisión y se conservan.
+
+Revisión: respuesta jurídica no con fundamento, finalidad diferente de RAT por
+canonizaciónv1, rol distinto de responsable, alcance inválido/discordante,
+ruta especial distinta de regla_especifica, sensitive_condition_id presente o
+uses_consent_assessment true en el expediente de geolocalización. Esta condición
+no requiere referenciar el checklist; consentimiento como base general mantiene
+su requisito propio. No comparar prosa del aviso con LLM ni inferir oportunidad
+por fecha. Legal_reference/documentary_analysis y evidencia del expediente
+especial genérico continúan exigidos/documentados por su preparación.
+
+Añadir asociación especial v6 y EIPD v7 que incluyen geolocation_assessment
+final junto a todos los documentos actuales. Hash RAT/canonización/cuestionarios
+intactos. Comparadores anteriores se conservan; documento no nulo con asociación
+anterior informa asociacion_geolocalizacion_no_cubierta. Documento ausente
+mantiene comparación/limitaciones históricas. Cambios sin reaporte vuelven
+asociaciones obsoletas; ningún GET/confirmación reasocia documentos.
+
+### 23.5 Integración transversal sin autorización global
+
+Primero schemas/persistencia/asociaciones, confirmación especial bloqueada.
+Después evaluador geolocation nullable en readiness; geolocalización afirmativa
+requiere expediente. Documento presente sin régimen detectado es residual y
+no habilita confirmación ordinaria silenciosamente.
+
+Integración posterior del detector especial: solo esta ruta puede sustituir
+validador_no_implementado por sus motivos reales. Agregar resultado
+regimenes_preparados cuando hay régimen(s) soportados completos, sin pendientes,
+residuales ni discordancias; conservar sin_regimenes_declarados para negativos.
+No interpretar un régimen preparado como ausencia del régimen. Gate acepta
+ambos resultados únicamente con asociación vigente y controles EIPD preparados.
+
+EIPD actualmente marca regla_especifica como pendiente. Ajustar exclusivamente
+geolocalización preparada, evaluada por servidor contra mismos documentos/RAT;
+ninguna otra regla específica obtiene esa excepción. Resultado derivado no se
+acepta del cliente ni entra como hash circular. No validar excepciones sensibles
+ni cambiar automáticamente respuestas del screening. Mantener respuesta sobre
+excepciones al consentimiento coherente con rutas reales: geolocalización no
+es excepción sensible y no fuerza esa pregunta a si por base art13. Si EIPD
+requiere_eipd/pendiente_revision, confirmación sigue bloqueada.
+
+Confirmación revalida base y régimen tras bloqueo/refresco con mismo bundle RAT,
+antes de reemplazo. Incompleto400, revisión/contexto409, rollback del caller.
+Pending_controls debe distinguir lo ya implementado de validadores/EIPD aún
+pendientes; no anunciar que todas las condiciones especiales están habilitadas.
+
+### 23.6 Aceptación y siguiente paso
+
+Schemas/persistencia: fechas, contratos cerrados, omisión/null SQL/check objeto,
+protección tenant/RLS, guardado conjunto y cambios sin reaporte; todas las
+asociaciones históricas con/sin documento. Evaluador: ambas declaraciones
+factuales, faltantes/negativas/pendientes, condicionales y residuales, referencias,
+finalidad/rol/scope, canonización y orden/inmutabilidad. Integración: seis bases
+con geolocalización sola preparada, ningún régimen concurrente ignorado,
+EIPD positivo continúa bloqueado y regla_especifica de otro régimen bloqueada.
+HTTP motivos GET/POST y rechazo sin reemplazo; rollback/fallo de flush y
+concurrencia para ruta especial admitida; históricos no se reescriben.
+
+Paso actual documental. Ninguna confirmación especial se habilita. M3-T1
+EN PROGRESO. Próximo paso: schemas/persistencia y asociaciones de geolocalización;
+luego evaluador y finalmente integración del gate especial/EIPD.
+
+
+### 23.7 Schemas/persistencia y asociaciones implementados
+
+GeolocationAssessmentV1 guarda borradores cerrados/parciales de aviso, entrega,
+respuestas, scope y evidencia; fechas factuales se preservan. CREATE/PATCH/GET
+admiten omisión, reemplazo de unidad y SQL NULL. Migración c06e8a1d4b75 posterior
+a bf5d7f9c3a64 aplicada localmente: JSONB nullable/check objeto, RLS existente.
+No cambia estructura ni normalización de SpecialConditionsV1.
+
+Nuevas escrituras usan asociación especial v6/EIPD v7 con todos los documentos
+finales, incluida geolocalización. Comparadores anteriores se conservan;
+geolocalización no nula con especiales v1–v5/EIPD v1–v6 produce
+asociacion_geolocalizacion_no_cubierta. Ausente conserva comparación/limitaciones
+históricas. Cambios sin reaporte conservan asociación anterior y la desactualizan.
+
+Documento sin régimen detectado produce expediente_geolocalizacion_residual;
+régimen declarado conserva validador_no_implementado. Ninguno habilita
+confirmación en este paso. Evaluador/readiness específicos pendientes.
+Pruebas cubren fechas, schemas cerrados, omisión/null SQL/check objeto, tenant,
+guardado conjunto/cambios sin reaporte, todas las versiones históricas y
+confirmación expresamente bloqueada con régimen declarado. M3-T1 EN PROGRESO.
+
+
+### 23.8 Evaluador de geolocalización y readiness implementados
+
+Evaluador puro evaluate_geolocation_assessment_v1 exige preparación del aviso,
+respuestas jurídicas fundadas, declaración factual de servicios a terceros,
+evidencia y alcance coherente con RAT/declaración/condición específica. Compara
+selectores por canonización v1, detecta vacíos/duplicados semánticos/subconjuntos
+inválidos y discordancias. No certifica entrega ni oportunidad desde fechas.
+
+Declaración factual si aplica servicio/destinatario; no los deja no aplicables y
+contenido residual produce revisión; pendiente/ausente deja sin_resolver.
+Precedencia incompleto > requiere_revision > completo, motivos estables y sin
+mutaciones. Revalida todos los contratos y los selectores externos aunque falte
+scope propio. Condición genérica requiere regla_especifica, referencia/análisis
+y evidencia; referencia al checklist no sustituye el aviso.
+
+GET readiness expone geolocation si hay expediente o régimen detectado; null
+cuando ambos ausentes. Motivo geolocalizacion_no_preparada según resultado.
+Preparación completa no elimina validador_no_implementado ni bloqueo EIPD:
+confirmación especial continúa bloqueada. Bases ordinarias conservan sus gates.
+
+Pruebas cubren ambas declaraciones factuales, faltantes/negativas/pendientes,
+condicionales/residuales, scope propio/externo, finalidad/rol, referencias,
+evidencia, contratos inválidos, canonización y orden/inmutabilidad; HTTP protege
+tenant y muestra cambios del RAT actual sin reescribir documentos históricos.
+Sin nuevas migraciones ni commit. M3-T1 EN PROGRESO.
+
+
+### 23.9 Gate especial de geolocalización y coherencia EIPD implementados
+
+Detector especial sustituye validador_no_implementado únicamente para
+geolocalizacion_art16sexies por motivos del evaluador real. Resultado
+regimenes_preparados conserva regímenes detectados y exige ausencia de motivos
+incompletos/revisión, incluidos controles concurrentes. Negativos mantienen
+sin_regimenes_declarados. Gate compartido GET/POST admite ambos con asociación
+vigente; una preparación de geolocalización no suprime otros regímenes.
+
+EIPD deja de marcar ruta_especial_pendiente solo para regla_especifica de
+geolocalización preparada, evaluada por servidor contra mismos documentos/RAT.
+Otras rutas/reglas específicas/excepciones conservan sus bloqueos. Todas las
+preguntas EIPD se evalúan y sus positivos siguen bloqueando confirmación.
+No inferir excepción sensible desde una base art13 ni forzar respuestas.
+
+Readiness conserva geolocation y describe validacion_otros_regimenes_especiales
+como pendiente, además de gestión EIPD. Incompleto/revisión mantienen motivos
+GET/POST compatibles; cambios sin reaporte desactualizan asociaciones aun si el
+aviso permanece completo. Confirmación reevalúa tras bloqueo antes de reemplazo.
+
+Pruebas HTTP cubren geolocalización preparada con las seis bases, rechazo con
+conservación de vigente, EIPD positivo, reemplazo en ambas direcciones y
+protección de confirmado. Pruebas PostgreSQL/app_user amplían rollback/fallo de
+flush y concurrencia a geolocalización para las seis bases; cambio del aviso a
+pendiente durante espera se relee y rechaza. Pruebas puras cubren cada supuesto
+EIPD, regímenes concurrentes/vulnerabilidad, residuales/asociaciones obsoletas y
+reglas no implementadas, sin mutaciones. Otros regímenes especiales y gestión
+EIPD siguen pendientes. Sin nuevas migraciones ni commit. M3-T1 EN PROGRESO.
+
+
+## 24. Consentimiento expreso para datos sensibles
+
+### 24.1 Fundamento y frontera inicial
+
+Segundo validador especial: sensibles_art16 con authorization_route
+consentimiento y sensitive_condition_id consentimiento_expreso_art16.
+Art16 contempla consentimiento expreso mediante declaración escrita, verbal o
+medio tecnológico equivalente. Salud/perfil biológico, biometría e infancia
+mantienen condiciones específicas en preceptos posteriores.
+Fuente: [Diario Oficial, Ley 21.719, art16, página12 y preceptos siguientes](https://www.diariooficial.interior.gob.cl/publicaciones/2024/12/13/44023/01/2583630.pdf).
+
+Decisión de producto: preparación documental, sin certificar identidad, contenido
+ni vigencia de una declaración. El checklist ConsentAssessmentV1 no documenta
+por sí solo carácter expreso y alcance sensible: su evidencia puede estar vacía
+y grant_method acto_afirmativo no demuestra declaración expresa. Mantener ese
+contrato/comportamiento histórico y añadir expediente específico independiente.
+No cambiarlo para exigir retroactivamente evidencia a consentimientos ordinarios.
+
+La base general y condición especial siguen separadas. Las seis bases conservan
+sus gates; si se selecciona esta condición, el checklist general y expediente
+expreso son obligatorios incluso cuando la base general es art13. No se cambia
+la base ni se infiere consentimiento desde una finalidad o ausencia de excepción.
+Rutas art16(a–f) permanecen no implementadas. Preparación de consentimiento
+expreso no autoriza salud, biometría, infancia o investigación concurrentes ni
+sustituye gestión EIPD. Geolocalización preparada puede coexistir con este
+validador, manteniendo ambos expedientes y sus condiciones.
+
+### 24.2 SensitiveConsentAssessmentV1 propuesto
+
+Nueva columna sensitive_consent_assessment JSONB nullable, none_as_null=True,
+check SQL NULL/objeto y migración append-only tras c06e8a1d4b75. Misma serie/RLS,
+permisos y lifecycle; no modifica ConsentAssessmentV1 ni SpecialConditionsV1.
+Contrato cerrado extra forbid, schema_version literal1:
+
+- purpose_description, sensitive_data_description, processing_operations:
+  finalidad RAT, tipos sensibles y operaciones cubiertas;
+- scope: SpecialScopeV1 nullable en borrador;
+- expression_method: escrito | verbal | tecnologico_equivalente, nullable;
+- declaration_reference: metadata de declaración y su registro;
+- declaration_version_reference: opcional; no exigir plantilla versionada para
+  toda declaración verbal;
+- declaration_obtained_on: date opcional factual;
+- declaration_content_analysis: cómo documenta una declaración expresa respecto
+  del tratamiento/alcance sensible;
+- express_declaration_documented, sensitive_scope_explicit, purpose_specific,
+  proof_available, consent_current: ContractResponseV1 si/no/pendiente+rationale;
+- technology_equivalence_analysis: texto condicional para medio tecnológico;
+- evidence: list ContractEvidenceV1, metadata, tipo/referencia requeridos para
+  preparación; sin declaraciones completas ni identidades/coordenadas;
+- notes: opcional.
+
+Omisión conserva, objeto reemplaza unidad, null elimina en borrador. Fechas
+factuales se conservan; campos/versiones/enums/respuestas desconocidos y fechas
+inválidas rechazados. No approval del cliente, no consultas a registros ni
+verificación automática de documentos al guardar referencias.
+
+### 24.3 Completitud, coherencia y alcance
+
+Evaluador puro evaluate_sensitive_consent_assessment_v1 recibe expediente,
+ConsentAssessmentV1, snapshot y SpecialConditionsV1; revalida todos los contratos,
+sin mutaciones. Precedencia incompleto > requiere_revision > completo, motivos
+ordenados y aplicabilidad estable. Incluir motivos del checklist general con
+prefijo consent_assessment y preservar question_id; no modificar su evaluador.
+
+Incompleto: expediente/snapshot/checklist ausentes; checklist incompleto;
+expression_method/scope sin resolver; textos comunes vacíos; respuestas
+jurídicas ausentes/pendientes/sin fundamento; evidencia vacía o entrada
+incompleta; campo tecnológico aplicable vacío. Textos comunes son finalidad,
+tipos sensibles, operaciones, declaración/referencia y análisis. Versión y fecha
+son apoyos opcionales. Tecnología aplica equivalencia; otros medios no la
+requieren y texto residual produce revisión; método ausente deja sin_resolver.
+
+Revisión: checklist requiere_revision; respuesta jurídica no con fundamento;
+finalidad distinta por canonizaciónv1; rol distinto de responsable; ruta/ID
+sensible distintos; uses_consent_assessment no true; alcance inválido/discordante;
+medio contradictorio con checklist. Escrito corresponde a grant_method escrito,
+verbal a verbal, tecnológico a electronico. Acto_afirmativo/otro_documentado no
+se convierten automáticamente en declaración expresa; requieren revisión del
+medio y actualización documental, sin declarar ilícitas esas categorías.
+
+Primer soporte operativo confirma given_by titular. Representante legal o
+mandatario mantiene datos pero requiere_revision hasta diseñar acreditación y
+vinculación de representación en esta ruta sensible. Este límite de producto no
+niega que exista representación jurídicamente válida. No inferir representante,
+edad o capacidad desde nombres y no aprobar infancia mediante este límite.
+
+Declaración datos_sensibles afirmativa, condición sensibles_art16 y scope propio
+requieren selectores no vacíos, semánticamente únicos y coincidentes. Comparar
+por canonizaciónv1; validar cada selector externo incluso si falta scope propio.
+Categorías seleccionadas deben ser sensibles en snapshot, sin cambiar M2. Para
+el primer gate, cubrir todas las categorías sensibles del alcance RAT de la
+evaluación y todos sus grupos de titulares. Si la cobertura es menor, revisar
+alcance M3 o esperar soporte granular; no confirmar silenciosamente datos fuera
+del consentimiento documentado. Esta es una frontera conservadora del producto:
+RAT v1 no contiene una matriz categoría/grupo que permita demostrar cobertura
+parcial por pares. No inferirla desde prosa ni exigir consentimiento a categorías
+ordinarias ajenas al subconjunto sensible.
+
+Si RAT no tiene categorías sensibles/flag coherente, requiere revisión del
+contexto/declaración. Documento sin régimen detectado es residual y bloquea.
+La condición genérica conserva requisitos de referencia legal/análisis/evidencia.
+Consent_current es declaración fundada de actualidad, no vigilancia externa de
+revocaciones; fecha registrada no decide vigencia ni oportunidad por sí sola.
+
+### 24.4 Asociaciones y compatibilidad
+
+Nuevas asociaciones especiales v7 y EIPD v8 incluyen sensitive_consent_assessment
+final junto a todos los documentos existentes. No alteran hash/canonización RAT,
+cuestionarios ni normalización de contratos anteriores. Comparadores históricos
+se conservan; sensible expreso no nulo con especial v1–v6/EIPD v1–v7 informa
+asociacion_consentimiento_sensible_no_cubierta. Ausente conserva comparación y
+limitaciones anteriores. Cambio del checklist o expediente sin reaporte vuelve
+asociaciones obsoletas; no se reasocia durante GET/confirmación. Guardado ordenado:
+documentos finales, snapshot, especiales y EIPD. Sin hashes circulares derivados.
+
+### 24.5 Secuencia e integración transversal
+
+1. Schemas/persistencia/asociaciones v7/v8 compatibles; ruta sensible bloqueada.
+2. Evaluador y sensitive_consent nullable en readiness cuando hay expediente o
+   condición sensibles_art16 de consentimiento propuesta. Motivo
+   consentimiento_sensible_no_preparado; preparación no habilita gate aún.
+3. Detector admite solo consentimiento_expreso_art16 preparado por evaluador.
+   Mantiene regimenes_preparados con todos los regímenes detectados, nunca borra
+   concurrentes. Rutas sensibles distintas siguen validador_no_implementado;
+   referencias incompletas/representación/alcance bloquean antes de reemplazo.
+
+EIPD no infiere excepción al consentimiento desde una base art13 ni cambia sus
+respuestas. Esta ruta es consentimiento y no valida excepción sensible. Detectar
+consentimiento especial pendiente/incoherente mediante evaluación del servidor;
+ninguna ruta de otro régimen se considera preparada por compartir la palabra
+consentimiento. Geolocalización conserva su exención limitada de ruta pendiente.
+Cada pregunta EIPD y régimen concurrente mantiene sus propios motivos; positivo/
+pendiente sigue bloqueando confirmación incluso con consentimiento expreso listo.
+
+Gate GET/POST compartido: base preparada, todos los regímenes soportados
+preparados, asociaciones vigentes y screening negativo. Revalidar tras bloqueo
+con mismo bundle RAT antes de modificar estados; rollback del caller y dos flush
+existentes. Motivos compatibles GET/POST; incompleto400/revisión409 según barreras
+concurrentes. Pending_controls conserva otros validadores/gestión EIPD pendientes.
+
+### 24.6 Aceptación
+
+Tres medios coherentes con checklist, condicional tecnológico y residuales;
+checklist ausente/incompleto/desfavorable, evidencia expresa obligatoria;
+respuestas negativas/pendientes/fundamentos; ruta/ID/referencia incoherentes;
+given_by representante/mandatario conserva revisión; alcance vacío/duplicado/
+fuera de RAT/no sensible/parcial/discordante, selectores externos independientes;
+finalidad/rol, contratos inválidos, fechas factuales, orden/inmutabilidad.
+Persistencia omisión/null SQL/check objeto, tenant/RLS, guardado conjunto y cambio
+sin reaporte; todas las asociaciones históricas con/sin expediente.
+
+Integración: seis bases con sensibles simples preparados; coexistencia con
+geolocalización; salud/biometría/infancia/investigación/vulnerabilidad pendientes
+siguen bloqueados; cada supuesto EIPD positivo bloqueado. HTTP rechazo conserva
+vigente, reemplazo en ambas direcciones y protección de confirmado; rollback,
+fallo de flush/relectura tras lock y concurrencia PostgreSQL de ruta sensible.
+
+Paso actual documental: ninguna nueva ruta sensible se habilita. Última suite
+1044 passed. M3-T1 EN PROGRESO. Próximo paso: schemas/persistencia y asociaciones;
+después evaluador y finalmente integración transversal.
+
+
+## 25. Contrato del expediente sensible — avance incremental
+
+Implementado SensitiveConsentAssessmentV1 de §24 como contrato independiente.
+Admite borradores parciales y conserva fechas documentales; cierra campos,
+versión y medios, reutilizando alcance, respuestas y evidencia existentes.
+No incorpora todavía el expediente a entradas/salidas HTTP ni persistencia:
+la siguiente etapa debe incorporarlo junto con asociaciones v7/v8 y bloqueo
+residual para evitar que un documento nuevo eluda el gate vigente.
+
+Validación focalizada 58 passed, incluidas 30 pruebas nuevas del contrato.
+Última suite completa anterior 1044 passed; no se repitió en esta etapa de
+contrato aislado. M3-T1 EN PROGRESO, sin commit ni migración nueva.
+
+
+## 26. Persistencia y asociaciones del expediente sensible
+
+Completada etapa 24.5.1: entrada CREATE/PATCH y salida GET para expediente
+sensible; columna JSONB nullable con none_as_null y check objeto. Migración
+aditiva d17f9b2e5c86 después de c06e8a1d4b75, aplicada en desarrollo local.
+Omisión conserva, objeto reemplaza y null borra borrador; fechas se conservan.
+
+Guardados actuales especiales v7/EIPD v8 incluyen documento final. Constructores
+y comparadores previos siguen disponibles. Especiales v1–v6/EIPD v1–v7 con
+expediente sensible no nulo requieren revisión por
+asociacion_consentimiento_sensible_no_cubierta; con null conservan comparación
+histórica. Cambiar expediente sin reaportar controles vuelve hashes obsoletos.
+Lectura y confirmación no actualizan asociaciones.
+
+Expediente sin régimen sensible detectado agrega
+expediente_consentimiento_sensible_residual y bloquea. Régimen sensible declarado
+mantiene validador_no_implementado: esta etapa no habilita confirmación.
+
+Suite completa 1082 passed; formato/lint/whitespace correctos. M3-T1 EN PROGRESO,
+sin commit. Próximo paso: evaluador y preparación sensible nullable en readiness;
+posteriormente integración del gate compartido.
+
+
+## 27. Evaluador y preparación sensible en readiness
+
+Completada etapa 24.5.2: evaluate_sensitive_consent_assessment_v1 recibe
+expediente, snapshot, condiciones especiales y checklist; revalida contratos,
+no modifica entradas y deriva incompleto > requiere_revision > completo.
+Motivos ordenados con índices numéricos, question_id conservado y prefijo
+consent_assessment; aplicabilidad incluye checklist y equivalencia tecnológica.
+
+Textos/respuestas/evidencia obligatorios, medio coherente y finalidad/rol según
+§24. Alcance propio, declaración y condición se validan independientemente,
+incluso sin scope propio. Selección debe cubrir exactamente categorías sensibles
+y todos los grupos del alcance RAT; selectores extra/duplicados/fuera del RAT o
+cobertura parcial requieren revisión. Representación permanece pendiente;
+fechas/versiones no se convierten en requisitos de vigencia automáticos.
+
+Readiness incluye sensitive_consent cuando hay documento o propuesta de condición
+sensibles_art16 por consentimiento/consentimiento_expreso_art16; en otro caso null.
+Preparación no completa agrega consentimiento_sensible_no_preparado. GET sigue
+orientativo: completo no habilita confirmación, pues detector sensible mantiene
+validador_no_implementado. EIPD y asociaciones conservan sus barreras.
+
+Suite completa 1159 passed, incluidas 74 pruebas puras y HTTP con tres medios,
+confirmación rechazada sin mutación, cambio pendiente/asociaciones obsoletas y
+borrado con ruta propuesta. Formato/lint/whitespace correctos. Sin commit ni
+migración nueva; M3-T1 EN PROGRESO. Próximo paso: etapa 24.5.3, detector/gate
+compartido y coherencia EIPD para ruta sensible preparada.
+
+
+## 28. Integración transversal del consentimiento expreso sensible
+
+Completada etapa 24.5.3: detector admite únicamente sensibles_art16 con ruta
+consentimiento e ID consentimiento_expreso_art16 si su evaluador está preparado.
+Usa motivos del evaluador para incompletitud/revisión y conserva los restantes
+regímenes. Otras rutas sensibles mantienen validador_no_implementado; no se
+habilitan salud/biometría/infancia/investigación por compartir datos sensibles.
+
+EIPD contrasta preparación de propuestas sensibles por consentimiento usando el
+checklist actual. Propuesta sin preparación conserva ruta_especial_pendiente;
+completa puede mantener screening negativo únicamente con respuestas/coherencia
+y asociaciones vigentes. No infiere excepción desde art13. Geolocalización
+conserva su exención limitada de ruta pendiente y no borra regímenes concurrentes.
+
+Barrera consentimiento_sensible_no_preparado compartida GET/POST, con 400 para
+incompleto y 409 para revisión; otras barreras pueden elevar el rechazo a 409.
+GET expone preparación orientativa; POST reevalúa tras lock antes de estados.
+Los validadores de las seis bases, asociaciones y EIPD siguen siendo obligatorios.
+
+Suite completa 1217 passed. HTTP cubre seis bases y tres medios, pendientes,
+EIPD positivo, protección de confirmado y reemplazo hacia alcance ordinario.
+Pruebas transversales cubren sensibilidad/geolocalización simultáneas y regímenes
+concurrentes bloqueados. Pruebas con PostgreSQL/app_user/RLS y RAT simulado amplían
+rollback/fallo de flush y concurrencia a consentimiento sensible con seis bases,
+incluido cambio de prueba a pendiente durante espera del lock. HTTP usa RAT real.
+
+Formato/lint/whitespace correctos. Sin commit ni migración nueva. M3-T1 EN PROGRESO;
+próximo paso: revisar brechas de aceptación y priorizar régimen pendiente.
+
+
+## 29. Evidencia HTTP de coexistencia sensible/geolocalización
+
+Añadida prueba parametrizada test_api_sensitive_geolocation_joint_confirmation:
+ambos expedientes preparados, pérdida por no/pendiente en cualquiera, cambios
+sin reaporte y asociaciones obsoletas; reaporte no aprueba documento desfavorable.
+Rechazo conserva íntegro confirmado y borrador, con coherencia GET/POST de
+resultados especiales/EIPD. EIPD positivo conserva bloqueo; reparación conjunta
+y screening negativo permiten reemplazo. PATCH de confirmado sigue rechazado.
+
+Cuatro casos aprobados con PostgreSQL/app_user/RLS y RAT real. Verificación
+focalizada 4 passed, 85 deselected; última suite completa anterior 1217 passed,
+no repetida en esta etapa de cobertura. Black/Ruff/whitespace correctos.
+Matriz/backlog actualizados. Sin cambios de implementación/migración ni commit.
+M3-T1 EN PROGRESO; siguiente brecha: concurrencia con constructor RAT real.
+
+
+## 30. Concurrencia con constructor RAT real y regímenes conjuntos
+
+Añadida test_confirmation_concurrent_real_rat_joint: base consentimiento,
+expedientes sensible/geolocalización preparados, constructor RAT sin mock,
+filas M2 reales y dos conexiones PostgreSQL/app_user/RLS. Segunda sesión precarga
+borrador; espera de bloqueo observada mediante pg_blocking_pids.
+
+Commit de primera confirmación rechaza segunda; rollback permite segunda.
+Cambio pendiente de cualquier documento rechaza tras espera y conserva vigente.
+Cambio is_sensitive en M2 se relee y rechaza por contexto distinto; snapshots
+históricos no se reescriben al rechazar. Se conserva un único confirmado.
+
+Ocho casos nuevos aprobados; módulo completo 13 passed. Alcance de esta evidencia:
+base consentimiento y ambos regímenes; concurrencia de otras cinco bases sigue
+probada con constructor RAT simulado. Última suite completa anterior 1217 passed;
+no repetida por extensión focalizada. Formato/lint/whitespace correctos, sin
+implementación/migración nueva ni commit. M3-T1 EN PROGRESO. Próximo paso:
+priorizar y delimitar régimen especial pendiente.
+
+
+## 31. Priorización del siguiente régimen: salud y perfil biológico
+
+Decisión de implementación incremental, 2026-10-06: siguiente régimen
+salud_perfil_biologico_art16bis. Se reutiliza preparación sensible existente como
+prerrequisito, sin asumir que ella prepare las condiciones propias de salud.
+Este checkpoint delimita alcance; no crea schema, migración ni habilita gate.
+
+Fuente para el diseño: Ley 21.719 publicada en Diario Oficial,
+https://www.diariooficial.interior.gob.cl/publicaciones/2024/12/13/44023/01/2583630.pdf,
+artículo 16 bis. Contraste con BCN:
+https://www.bcn.cl/leychile/navegar?idNorma=1209272.
+El texto vincula la ruta con consentimiento a fines previstos en legislación
+sanitaria especial, distingue supuestos sin consentimiento y contempla
+restricciones por contexto de recolección. El contrato siguiente debe reflejar
+esas dimensiones separadamente; no basta añadir un campo approved.
+
+### 31.1 Primer alcance de producto
+
+Preparación documental de la ruta con consentimiento expreso del titular,
+responsable y alcance de salud/perfil biológico declarado explícitamente.
+Mantener los límites actuales de representación y cobertura conservadora.
+Requiere checklist general y expediente sensible preparados, referencia concreta
+al fundamento sanitario especial y análisis de su aplicación a finalidad,
+operaciones y alcance. No elegir una ley sanitaria por defecto ni inferirla
+por nombre de actividad. Referencia documental no equivale a verificación externa.
+
+Documentar origen/contexto de recolección, operaciones y eventual cesión/muestras
+mediante metadata. Contexto sin resolver o restricciones sin fundamento suficiente
+impiden preparación; ningún consentimiento elimina automáticamente restricciones.
+No almacenar historias clínicas, resultados genéticos ni muestras en el expediente.
+
+Primer bloque no habilita excepciones sin consentimiento, representación,
+infancia/adolescencia, biometría ni investigación concurrentes. Son fronteras
+de producto: no equivalen a prohibiciones jurídicas generales.
+
+### 31.2 Diseño físico pendiente, antes de persistencia
+
+Siguiente paso: fijar HealthAssessmentV1 independiente, campos cerrados/versionados,
+respuestas fundadas y evidencia; definir respuestas de origen/contexto, selectores,
+condicionales, residualidad y matriz de motivos. Distinguir falta de dato,
+contradicción y ruta fuera del primer soporte. Referencias normativas deben
+identificar norma/artículo y fuente oficial; fechas factuales no deciden vigencia.
+
+Resolver vínculo inequívoco con consentimiento expreso y condiciones especiales,
+y preservar contratos existentes. No incorporar campos de cliente que calculen
+preparación ni reemplazar la base general. Asociaciones nuevas solo después de
+fijar contrato; conservar comparadores previos con documento nuevo no cubierto.
+
+### 31.3 Secuencia y aceptación del bloque
+
+1. Diseño de contrato y matriz completitud/aplicabilidad; revisión del artículo
+   completo y fundamento sanitario necesario antes de programar gate.
+2. Schema, persistencia nullable y asociaciones compatibles; régimen bloqueado.
+3. Evaluador puro/readiness con motivos deterministas e inmutabilidad.
+4. Gate compartido y EIPD, habilitando solo la ruta diseñada y preparada.
+
+Aceptar: borradores parciales, contratos inválidos, fundamento/referencias y
+prueba ausentes, alcance no sensible/fuera de RAT/parcial/discordante, contexto
+sin resolver o restringido, operación/cesión/muestras sin análisis; checklist o
+consentimiento sensible no preparados. Fronteras concurrentes siguen bloqueadas.
+Persistencia/RLS/fechas/null/históricos/obsolescencia y guardado conjunto.
+HTTP: completo, rechazo sin reemplazo, EIPD positivo, protección del confirmado.
+Concurrencia/rollback y relectura con RAT real según alcance elegido.
+
+No se declara completo el diseño físico ni habilitada la ruta. Próximo paso:
+definir contrato documental y matriz de completitud/aplicabilidad de salud.
+M3-T1 EN PROGRESO, sin commit. Checkpoint exclusivamente documental.
+
+
+## 32. HealthAssessmentV1 y matriz de preparación — diseño
+
+2026-10-06. Desarrollo documental de §31; no se añade código ni habilita salud.
+Fuente revisada completa: artículo 16 bis, páginas 12–13 de la publicación oficial
+https://www.diariooficial.interior.gob.cl/publicaciones/2024/12/13/44023/01/2583630.pdf.
+El precepto distingue ruta con consentimiento/fines sanitarios, supuestos sin
+consentimiento y restricciones según recolección. Las decisiones operativas
+siguientes son fronteras del primer soporte, no afirmaciones de prohibición general.
+
+### 32.1 Contrato independiente propuesto
+
+HealthAssessmentV1 cerrado extra forbid; schema_version Literal[1] = 1.
+Todos los campos documentales permiten null en borrador; listas con default_factory.
+Sin campos approved/result/can_confirm ni normalización nueva del checklist previo.
+
+| Campo | Tipo propuesto | Función |
+| --- | --- | --- |
+| purpose_description | str nullable | Finalidad RAT |
+| health_data_description | str nullable | Metadata de datos de salud/perfil biológico |
+| processing_operations | str nullable | Operaciones cubiertas |
+| scope | SpecialScopeV1 nullable | Categorías/grupos declarados |
+| route | Literal consentimiento_expreso nullable | Primera ruta soportada |
+| sanitary_law_references | list HealthLegalReferenceV1 | Fundamento sanitario especial |
+| sanitary_purpose_analysis | str nullable | Aplicación de norma/finalidad al alcance |
+| sanitary_purpose_covered | ContractResponseV1 nullable | Respuesta fundada de cobertura |
+| collection_contexts | list HealthCollectionContextV1 | Contextos declarados expresamente |
+| collection_context_analysis | str nullable | Cómo se determinaron los contextos |
+| restricted_context_legal_references | list HealthLegalReferenceV1 | Autorización específica documentada, si corresponde |
+| restricted_context_analysis | str nullable | Análisis específico de contexto restringido |
+| restricted_context_authorization_documented | ContractResponseV1 nullable | Declaración fundada; no aprueba automáticamente |
+| includes_data_cession | ContractResponseV1 nullable | Hecho si/no/pendiente |
+| cession_description | str nullable | Operaciones/destinatarios por metadata |
+| includes_identifiable_biological_samples | ContractResponseV1 nullable | Hecho si/no/pendiente |
+| biological_samples_analysis | str nullable | Relación con persona identificada/identificable y operaciones, sin muestras |
+| evidence | list ContractEvidenceV1 | Referencias de prueba documental |
+| notes | str nullable | Observaciones |
+
+HealthLegalReferenceV1: extra forbid, norm_name/provision/official_source_url/
+applicability_analysis str nullable en borrador; completeness requiere texto no
+vacío en los cuatro. URL se valida estructuralmente como http/https, sin consulta
+a red ni whitelist que confunda acceso con vigencia. Identificar norma/artículo;
+no autocompletar una norma sanitaria ni interpretar una URL como autorización.
+
+HealthCollectionContextV1 Literal laboral, educativo, deportivo, social, seguros,
+seguridad, identificacion, otro. Lista vacía significa sin resolver; duplicados
+exactos rechazados por schema. Otro requiere explicación, no constituye por sí
+solo contexto aprobado. Se permiten varios contextos y no se infieren desde M2.
+
+El primer route no admite excepciones. No modificar SpecialConditionV1 para
+permitir sensitive_condition_id en salud: ese ID sigue exclusivo de sensibles.
+Vínculo salud: regime salud_perfil_biologico_art16bis, authorization_route
+consentimiento y uses_consent_assessment true. Debe coexistir condición
+sensibles_art16/consentimiento_expreso_art16 y su expediente preparados.
+
+### 32.2 Matriz de completitud y aplicabilidad
+
+| Control | Aplicabilidad | Ausencia/pendiente | Negativo/contradicción |
+| --- | --- | --- | --- |
+| Finalidad, descripción, operaciones, scope y route | Siempre | incompleto | Finalidad/rol/ruta/alcance incoherente: revisión |
+| Referencias sanitarias, análisis y sanitary_purpose_covered | Siempre | incompleto | Respuesta no fundada: revisión |
+| Contextos y análisis de recolección | Siempre | Lista vacía/texto vacío: incompleto | Contexto restringido: revisión de primer soporte |
+| Autorización/referencias/análisis de contexto restringido | Algún contexto distinto de otro | Campos vacíos/pendientes: incompleto | No o falta de sustento: revisión; sí completo conserva revisión por ruta no soportada |
+| Campos anteriores en contexto solo otro | No aplicables | No requeridos | Contenido residual: revisión |
+| includes_data_cession | Siempre, como hecho | Ausente/pendiente/fundamento vacío: incompleto | No resuelve no_aplicable; no es desfavorable por sí solo |
+| cession_description | Cesión si | Vacío: incompleto | Texto con cesión no: residual/revisión |
+| includes_identifiable_biological_samples | Siempre, como hecho | Ausente/pendiente/fundamento vacío: incompleto | No resuelve no_aplicable; no es desfavorable por sí solo |
+| biological_samples_analysis | Muestras si | Vacío: incompleto | Texto con muestras no: residual/revisión |
+| Evidence y reference/evidence_type por entrada | Siempre | Vacío/incompleto | No verifica contenido externamente |
+| Checklist y consentimiento sensible preparados | Siempre en primera ruta | Propagar incompleto | Propagar revisión |
+
+Condicional factual sin resolver deja applicability sin_resolver; no exigir el
+texto condicional como si el hecho ya fuera sí. Respuestas ContractResponseV1
+excluyen no_aplica; no aplicable se deriva en servidor. Fechas de evidencia son
+factuales opcionales. Precedencia incompleto > requiere_revision > completo.
+Motivos ordenados por contrato, índices numéricos, sin mutación de entradas.
+
+### 32.3 Coherencia y alcance conservador inicial
+
+Revalidar expediente, snapshot, condiciones, checklist y expediente sensible.
+Propagar motivos de consentimiento sensible con prefijo estable; no consultar
+registros ni afirmar autorización jurídica externa. Rol responsable; finalidad
+por canonización v1. Declaración salud afirmativa con rationale y scope.
+
+Seleccionar categorías sensibles del RAT; validar selectores propios, declaración
+y condición aun sin scope propio, duplicados semánticos y pertenencia M2.
+Para primer soporte: scope salud, declaración y condición coinciden entre sí y
+con scope de consentimiento sensible preparado. Así cubren todas las categorías
+sensibles y todos los grupos del alcance RAT. Si salud es un subconjunto menor,
+requiere revisión hasta diseñar cobertura granular; no afirmar que todos los
+datos sensibles son de salud por su flag ni inferir una matriz categoría/titular.
+Sin categorías sensibles/flag coherente o sin régimen declarado: revisión residual.
+
+Condición genérica conserva legal_reference, documentary_analysis y evidencia.
+Regímenes concurrentes sin validador, representación, EIPD positivo/pendiente y
+asociaciones obsoletas conservan bloqueo. El texto de restricciones no se elude
+mediante consentimiento, base art13 ni referencia genérica al artículo 16 bis.
+
+### 32.4 Persistencia, versiones y pasos siguientes
+
+health_assessment JSONB nullable, none_as_null y check objeto; migración aditiva
+tras d17f9b2e5c86 cuando se implemente. CREATE/PATCH/GET: omisión conserva, objeto
+reemplaza, null borra borrador. Nueva asociación especial v8/EIPD v9 incorpora
+health_assessment final; preservar constructores/comparadores previos. Documento
+no nulo con especiales v1–v7/EIPD v1–v8 requiere asociación de salud no cubierta;
+null mantiene comparación anterior. GET/confirm no reescriben asociaciones.
+
+Aceptación: borradores, campos/enums/versiones inválidos, contextos múltiples/
+duplicados/otro/restringido, referencias vacías/URL inválida, condicionales sin
+resolver/residuales, evidencia, scope parcial/externo/no sensible/discordante,
+checklist y sensible pendientes, rutas/condiciones incoherentes y concurrencias.
+Guardar conjuntamente documentos finales antes de controles; cambios sin reaporte
+obsoletan hashes. Tenant/RLS/SQL null/check objeto/fechas e históricos. Evaluador
+puro, HTTP y rollback/concurrencia antes de habilitar gate.
+
+Próximo paso concreto: schema HealthAssessmentV1 y pruebas de contrato, sin
+persistencia ni habilitación hasta etapa posterior. Diseño documental completado;
+M3-T1 EN PROGRESO, sin commit ni código/migración nuevos.
+
+
+## 33. Implementación del contrato HealthAssessmentV1
+
+Implementado §32 como schema independiente, sin persistencia/gate. Incluye
+HealthLegalReferenceV1 y HealthCollectionContextV1. Referencia official_source_url
+usa HttpUrl nullable: valida esquema http/https y serializa a texto en JSON,
+sin consultar red ni decidir legitimidad jurídica. Contextos múltiples conservan
+orden y rechazan duplicados exactos; completitud/condicionales se difieren al
+evaluador, permitiendo borradores parciales. No altera contratos anteriores.
+
+Verificación focalizada 107 passed: 49 pruebas nuevas y schemas de licitud,
+geolocalización y consentimiento sensible. Cubren listas independientes, campos/
+versiones/rutas desconocidos, respuestas, contextos, scopes inválidos, evidencia,
+URLs y fechas factuales. Formato/lint/whitespace correctos. Última suite completa
+anterior 1217 passed; sin repetición para contrato aislado.
+
+Salud continúa bloqueada. Sin nuevas migraciones ni commit. M3-T1 EN PROGRESO.
+Siguiente: columna/exposición HTTP y asociaciones especiales v8/EIPD v9, antes
+de evaluador/readiness e integración del gate.
+
+
+## 34. Persistencia de salud y asociaciones compatibles
+
+Implementada etapa de persistencia/exposición de §32.4: health_assessment en
+CREATE/PATCH/GET, JSONB none_as_null, check SQL NULL/objeto y migración aditiva
+e28a0c3f6d97 tras d17f9b2e5c86, aplicada localmente. Omisión conserva, objeto
+reemplaza y null borra borrador; serialización HttpUrl y fechas preservada.
+
+Nuevos guardados especiales v8/EIPD v9 incorporan documento final. Constructores
+y comparadores previos conservados: salud no nula con versiones especiales v1–v7
+/EIPD v1–v8 informa asociacion_salud_no_cubierta; null conserva comparación.
+Cambios sin reaporte obsoletan asociaciones, GET/confirm no las reescriben.
+Expediente sin régimen detectado informa expediente_salud_residual y bloquea.
+Régimen salud declarado mantiene validador_no_implementado; ninguna habilitación
+ni evaluador/readiness específico de salud en esta etapa.
+
+Suite completa 1287 passed, incluidos nueve casos HTTP nuevos. Salud declarada
+junto a sensible sin expediente rechaza 400 por incompletitud, conservando
+borrador: no cambiar esa precedencia para exigir 409. Formato/lint/whitespace
+correctos. M3-T1 EN PROGRESO, sin commit. Próximo paso: evaluador puro de salud
+más preparación en readiness, antes de gate.
+
+
+## 35. Evaluador puro y preparación de salud en readiness
+
+Implementado evaluate_health_assessment_v1 según §32, recibe expediente,
+snapshot, condiciones, checklist y consentimiento sensible. Revalida instancias
+y diccionarios; propaga motivos/applicabilidad de dependencias con prefijos,
+conserva question_id. Precedencia incompleto > requiere_revision > completo,
+orden determinista con índices numéricos y sin modificar entradas.
+
+Referencias sanitarias requieren norma/artículo/URL/análisis; finalidad,
+operaciones/contexto y prueba completos. Campos restringidos aplican ante contexto
+distinto de otro; sin contexto su aplicabilidad queda sin_resolver. Contextos
+restringidos completos siguen requiere_revision por límite de primer soporte.
+Cesión/muestras son hechos: no no es desfavorable; sí requiere descripción;
+pendiente deja sin_resolver, textos residuales ante no producen revisión.
+
+Selectores de expediente, declaración y condición se validan independientemente,
+con canonización y pertenencia/cobertura RAT y coincidencia con consentimiento
+sensible. Falta de declaración o condición informa motivo específico, incluso
+cuando ambas faltan. Rol/finalidad/representación y sensibilidad dependen también
+del evaluador sensible. No se infiere clasificación sanitaria desde el RAT.
+
+Readiness health nullable cuando existe expediente o régimen detectado; agrega
+salud_no_preparada si no completo. Resultado completo orientativo no habilita
+POST: salud mantiene validador_no_implementado, EIPD/asociaciones conservados.
+
+Suite completa 1354 passed; 65 pruebas puras y dos HTTP nuevas (completo y
+restringido; rechazo conserva borrador, pendiente/obsolescencia/borrado).
+Ajuste final de motivo de condición ausente validado con 65 pruebas puras después
+de suite general. Formato/lint/whitespace correctos. Sin migración ni commit.
+M3-T1 EN PROGRESO. Próximo: integración de la ruta de salud preparada, manteniendo
+contextos restringidos y rutas/regímenes no soportados bloqueados.
+
+
+## 36. Gate transversal de salud por consentimiento preparado
+
+Integrada ruta salud_perfil_biologico_art16bis por consentimiento con evaluador
+completo. Detector conserva salud, sensible y otros regímenes; motivos de salud
+se propagan sin borrar dependencias. Otras rutas mantienen validador_no_implementado.
+Contextos restringidos conservan revisión aun documentados; consentimiento sensible
+preparado sigue obligatorio y no evita las condiciones sanitarias propias.
+
+EIPD contrasta propuesta de salud: preparación no completa mantiene
+ruta_especial_pendiente, sin deducir excepción desde art13. Gate compartido agrega
+salud_no_preparada con 400 incompleto/409 revisión; otras barreras pueden elevar
+rechazo. GET/POST usan el mismo evaluador; relectura tras lock antes de estados.
+Asociaciones vigentes y screening negativo siguen necesarios.
+
+Suite completa 1407 passed. HTTP seis bases y contextos otro/laboral, obsolescencia,
+EIPD positivo, rechazo conserva vigente, reparación/reemplazo y protección de
+confirmado. Transversal puro: salud/sensible/geolocalización simultáneos y otros
+regímenes pendientes. Pruebas reales PostgreSQL/app_user/RLS con RAT simulado:
+rollback/fallo de flush y concurrencia de salud para seis bases, incluido cambio
+pendiente durante espera. Mantener distinción RAT simulado frente a HTTP RAT real.
+
+Formato/lint/whitespace correctos. Sin migraciones nuevas ni commit. M3-T1 EN
+PROGRESO. Próxima brecha: evidencia HTTP de tres regímenes preparados juntos y
+concurrencia específica de salud con constructor RAT real.
+
+
+## 37. Evidencia conjunta de salud, sensible y geolocalización
+
+Seis casos HTTP nuevos con los tres regímenes preparados por consentimiento:
+respuestas no/pendiente en cada expediente, asociaciones obsoletas, rechazo,
+conservación del vigente, reparación, bloqueo EIPD positivo, reemplazo y protección
+del confirmado. GET y POST conservan los motivos de preparación y EIPD.
+
+Doce casos concurrentes nuevos con constructor RAT real y PostgreSQL/app_user/RLS:
+confirmación con commit/rollback, cambio de cada expediente y cambio del RAT
+mientras otra confirmación espera el bloqueo. La segunda sesión precarga el
+borrador para comprobar la relectura; se conserva un único confirmado y su historia.
+Alcance: base consentimiento_art12, salud en contexto otro. Las otras cinco bases
+mantienen la evidencia previa de concurrencia con constructor RAT simulado.
+
+Validación focalizada: módulo de concurrencia 25 passed y HTTP conjunto 10 passed,
+18 casos nuevos. Última suite completa anterior: 1407 passed; no se reejecutó en
+este paso de pruebas/documentación. Black/Ruff/whitespace correctos. Sin cambios
+de implementación, migración nueva ni commit. M3-T1 EN PROGRESO.
+Próximo: revisar alcance de representación sensible y criterios de cierre.
+
+
+## 38. Representación sensible y criterios de cierre revisados
+
+Revisión de alcance de producto, sin ampliar las autorizaciones implementadas.
+Se mantiene §24.3: given_by titular puede preparar la ruta sensible;
+representante_legal y mandatario conservan el expediente y requieren revisión
+con representacion_no_preparada. Salud depende de esa preparación sensible.
+No se deduce una prohibición jurídica ni se habilita infancia/adolescencia.
+El soporte de representación queda pendiente de diseño de acreditación, vínculo,
+alcance, vigencia, completitud y asociaciones; no basta con cambiar given_by.
+Cobertura parcial categoría/grupo sigue pendiente de una matriz explícita en RAT.
+
+Evidencia existente: test_sensitive_representation_review cubre ambos valores;
+test_sensitive_transversal_blockers cubre representante_legal;
+test_health_coherence_dependency comprueba dependencia para representante_legal.
+No se encontró prueba HTTP específica de representación en la ruta sensible.
+Próximo paso concreto: ambos valores por HTTP, con y sin salud; GET/POST coherentes,
+asociaciones reaportadas, rechazo que preserve borrador y confirmado anterior,
+y reparación a titular que permita el reemplazo. Es verificar el límite actual,
+no implementar ni autorizar la representación.
+
+Criterios de cierre, derivados de §13.2 y de los límites actuales:
+
+| Criterio | Situación y condición pendiente |
+| --- | --- |
+| Persistencia, constraints, índices, migraciones y RLS | Implementados; revisar diff final y cadena Alembic antes del cierre |
+| Snapshot M2, canonización/hash y compatibilidad | Implementados; mantener asociaciones especiales v8/EIPD v9 y lectura histórica |
+| Seis bases ordinarias, sensible titular, geolocalización y salud del primer alcance | Implementados; no extrapolar a rutas bloqueadas |
+| Confirmación/reemplazo, bloqueo y conservación histórica | Evidencia existente; añadir HTTP específico de representación |
+| Regímenes/rutas pendientes y alcance parcial | Mantener revisión explícita; no declarar todos los regímenes implementados |
+| Evidencia final de integración | Reejecutar suite completa después del siguiente cambio; 1407 es la última ejecución completa anterior |
+| Delimitación de entrega y revisión final | Revisar cambios y pendientes explícitos antes de declarar DONE; no cerrar por conteo de pruebas |
+
+La revisión de criterios no equivale a satisfacerlos. Regímenes especiales
+restantes siguen pendientes funcionales; su eventual diferimiento para cierre
+requiere una decisión explícita de alcance, no una reclasificación silenciosa.
+Workflow completo EIPD sigue diferido; frontend no se agrega como requisito por
+esta revisión. Metadata documental no verifica externamente evidencia.
+Este paso solo actualiza documentación; no reejecuta pruebas ni crea migración
+ni commit. M3-T1 EN PROGRESO.
+
+
+## 39. Representación sensible verificada por HTTP
+
+Cuatro casos de test_api_sensitive_representation_preserves_confirmed:
+representante_legal/mandatario, cada uno con y sin salud, junto a geolocalización.
+RAT real y PostgreSQL/app_user/RLS. Mandatario aporta facultad expresa en checklist
+para aislar el límite de representación sensible, que sigue requiriendo revisión.
+GET informa representacion_no_preparada; POST rechaza con los mismos motivos
+especiales/EIPD. Rechazo conserva íntegros borrador y confirmado anterior.
+
+Cambiar given_by vuelve obsoleta la asociación especial; el hash EIPD no incluye
+el checklist general y permanece vigente. Reaportar controles no habilita la
+representación. Reparar a titular permite reemplazo con screening negativo;
+EIPD positivo mantiene bloqueo. El nuevo confirmado rechaza PATCH posterior.
+No se amplía soporte de representación ni se modifica implementación.
+
+Validación: cuatro casos focalizados y suite completa 1429 passed en 140.16s.
+Black/Ruff/whitespace correctos. Sin migración nueva ni commit.
+M3-T1 EN PROGRESO. Próximo: revisar diff final y cadena de migraciones, y dejar
+explícita la decisión de alcance de regímenes pendientes antes de declarar DONE.
+
+
+## 40. Revisión de cambios y cadena de migraciones
+
+Rama feature/m3-t1-licitud-persistencia, HEAD 2fd8881; cambios sin commit.
+Revisión de router/API, modelos, confirmación y transacción runtime:
+permisos view/edit y suscripción en servidor; sesión runtime app_database_url;
+confirmación bloquea serie, relee borrador con populate_existing, valida contexto
+M2 y preparación antes de reemplazo, libera índice parcial con flush y deja
+commit/rollback al caller. get_db hace rollback ante excepción.
+Esta revisión focalizada no constituye auditoría exhaustiva de seguridad.
+
+Alembic heads/current: único head e28a0c3f6d97, aplicado localmente.
+Cadena lineal 5997a757f17b -> 7c9e1a3b5d20 -> 8d2f4a6c9e31 ->
+9e3b5d7f1a42 -> ae4c6e8b2f53 -> bf5d7f9c3a64 -> c06e8a1d4b75 ->
+d17f9b2e5c86 -> e28a0c3f6d97. Migraciones nuevas agregan columnas JSONB
+nullable/check objeto y downgrade elimina check/columna. No se ejecutó downgrade
+ni upgrade de ensayo; no se alteraron migraciones aplicadas.
+
+Black --check y Ruff: 46 archivos Python nuevos/modificados aprobados.
+git diff --check correcto. Última suite integral: 1429 passed (§39), no repetida.
+Inventario incluye archivos sin seguimiento: git diff --stat por sí solo no
+representa la totalidad de la entrega.
+
+Hallazgo abierto: alembic check global falla por diferencias fuera de las tablas
+M3 (índices presentes en DB y ausentes en metadata, y nombre de unique constraint
+DiagnosticAnswer). Comparación autogenerate limitada a legal_assessment_series y
+legal_assessments devuelve cero diferencias. Esto no verifica políticas RLS ni
+compara exhaustivamente check constraints; su evidencia proviene de migraciones
+y pruebas existentes. No generar una migración que elimine índices a partir de
+este resultado. Procedencia y corrección del drift global quedan por investigar;
+no se atribuye automáticamente a este trabajo ni se declara preexistencia probada
+para todas las diferencias.
+
+Próximo paso: inventariar y contrastar drift global contra migraciones/metadata
+para decidir una corrección concreta sin perder índices. Luego queda la decisión
+explícita de alcance de regímenes pendientes. M3-T1 EN PROGRESO; sin commit.
+
+
+## 41. Drift global de metadata corregido
+
+Inventario: 31 operaciones propuestas por autogenerate; 29 eliminaciones de
+índices y remove/add de una unique por diferencia de nombre. Procedencia
+contrastada con migraciones 0001_initial_schema (tenant y HNSW),
+0002_modulo1_cuestionario_config (activa/unique), 0005_diagnostico_api
+(reference_documents) y 0010_modulo2_rat_persistencia (tenant/relaciones).
+
+Modelos declaran ahora los 29 índices históricos en __table_args__: organization_id,
+relaciones M2, ux_config_versiones_activa unique con predicado activa, y
+knowledge_chunks_embedding_idx con HNSW/vector_cosine_ops. DiagnosticAnswer usa
+nombre explícito uq_diagnostic_answers_diagnostic_id_pregunta_id. No cambia
+la restricción de unicidad, las columnas ni las reglas funcionales.
+
+Alembic check global aprobado: No new upgrade operations detected.
+No se genera migración, no se ejecuta DDL ni se eliminan índices. Se corrige
+metadata para reflejar la base creada por migraciones. Esta comparación no
+constituye auditoría exhaustiva de checks/RLS ni ensayo de downgrade.
+
+Black/Ruff y git diff --check correctos. Suite integral posterior:
+1429 passed en 140.69s. Sin commit. M3-T1 EN PROGRESO.
+Próximo: consolidar la propuesta concreta de alcance de entrega y los regímenes
+pendientes, para resolver explícitamente los criterios de cierre sin declarar
+soportadas las rutas que mantienen revisión.
+
+
+## 42. Propuesta concreta de alcance de entrega
+
+m3-t1-propuesta-entrega.md consolida alcance backend ya soportado, límites y
+pendientes funcionales, evidencia y condiciones de cierre. Recomienda entrega
+inicial de seis bases ordinarias, sensible titular, geolocalización y primer
+soporte de salud; no marca diferidos los regímenes pendientes automáticamente.
+Decisión pendiente: aceptar esa delimitación o continuar alcance integral.
+M3-T1 EN PROGRESO; propuesta no equivale a DONE ni autorización de publicación.
+Solo documentación; última suite 1429 passed y Alembic check aprobado (§41).
+Sin pruebas reejecutadas, cambios de código, migraciones ni commit.
+
+
+## 43. Decisión de alcance integral y siguiente régimen
+
+Decisión explícita del usuario, 2026-10-06: continuar con el alcance integral.
+La propuesta de entrega inicial de §42 no se acepta como recorte para cierre.
+Representación, excepciones sensibles/salud, contextos restringidos, biometría,
+infancia/adolescencia, investigación y cobertura granular continúan pendientes
+funcionales; no se convierten en diferidos por esa propuesta. Workflow completo
+EIPD conserva su diferimiento anterior. M3-T1 EN PROGRESO.
+
+Siguiente régimen priorizado: biometricos_art16ter, ya declarado mediante
+biometricos_identificacion_unica. Implementación incremental dentro del alcance
+integral: empezar por ruta consentimiento expreso, sin dar por resueltas las
+excepciones ni los regímenes concurrentes.
+
+Fuente consultada: Ley 21.719, artículo 16 ter, texto oficial BCN:
+https://www.bcn.cl/leychile/navegar?idNorma=1209272
+El artículo vincula la ruta al inciso primero del art16 y exige informar sistema,
+finalidad, período de uso y ejercicio de derechos. Sin consentimiento remite al
+inciso segundo del art16bis; no reutilizar automáticamente el expediente sanitario
+ni inferir excepción por elegir una base art13.
+
+Decisiones de producto para diseñar el contrato siguiente: expediente biométrico
+independiente, metadata del sistema y operaciones, alcance coincidente con RAT,
+finalidad y período de uso documentados, canal/procedimiento para derechos,
+constancia de información al titular y evidencia referenciada. Reutilizar
+checklist/consentimiento sensible preparados en la primera ruta. No almacenar
+plantillas biométricas, imágenes, huellas o grabaciones en este expediente.
+Declaración específica explícita; el indicador sensible de M2 no identifica por
+sí solo biometría. Infancia, salud y otros regímenes conservan sus propias barreras.
+
+Próximo paso: contrato BiometricAssessmentV1 y matriz de completitud/aplicabilidad,
+con campos cerrados/versionados, parciales en borrador, respuestas fundadas,
+residualidad y asociaciones. Después schema/pruebas, persistencia/asociaciones,
+evaluador/readiness, gate y evidencia HTTP/concurrencia. No habilitar gate antes
+de esa secuencia. Excepciones biométricas seguirán pendientes dentro del alcance
+integral hasta diseñar sus rutas propias; este primer bloque no las difiere.
+
+Solo decisión/diseño preliminar; sin cambios de código, migraciones ni commit.
+Última suite 1429 passed, Alembic check aprobado (§41), no reejecutados aquí.
+
+
+## 44. Contrato y matriz de preparación biométrica
+
+Diseño documental, 2026-10-06; no implementa schema ni habilita confirmación.
+Fuente: artículo 16 ter completo en texto oficial BCN,
+https://www.bcn.cl/leychile/navegar?idNorma=1209272 . Información específica:
+sistema, finalidad, período de utilización y ejercicio de derechos; primera
+ruta vinculada a consentimiento expreso. Los mecanismos documentales siguientes
+son decisiones de producto para acreditar preparación, no requisitos textuales
+adicionales atribuidos a la ley. Excepciones siguen pendientes dentro del alcance
+integral y requieren diseño propio; no se importan desde salud automáticamente.
+
+### 44.1 Contratos cerrados y borradores parciales
+
+BiometricAssessmentV1: extra forbid; schema_version Literal[1] = 1.
+Textos/respuestas/scope/route nullable; listas default_factory; no campos
+approved, result, can_confirm ni no_aplica aportados por cliente.
+
+| Campo | Tipo | Función |
+| --- | --- | --- |
+| purpose_description | str nullable | Finalidad evaluada en RAT |
+| biometric_data_description | str nullable | Descripción de categorías, sin valores biométricos |
+| processing_operations | str nullable | Operaciones cubiertas |
+| scope | SpecialScopeV1 nullable | Categorías/grupos del alcance |
+| route | Literal consentimiento_expreso nullable | Primera ruta implementable |
+| unique_identification_analysis | str nullable | Tratamiento técnico y relación con identificación única |
+| unique_identification_confirmed | ContractResponseV1 nullable | Declaración fundada de pertenencia al régimen |
+| systems | list BiometricSystemV1 | Información específica por sistema utilizado |
+| systems_coverage_analysis | str nullable | Cómo se cubren los sistemas de las operaciones declaradas |
+| all_systems_documented | ContractResponseV1 nullable | Declaración de cobertura, no inferida por servidor |
+| evidence | list ContractEvidenceV1 | Referencias generales documentales |
+| notes | str nullable | Observaciones |
+
+BiometricSystemV1: extra forbid; todos los textos/respuestas nullable y listas
+vacías permitidas en borrador. Un registro agrupa la información de un sistema;
+no duplicar globalmente los cuatro requisitos perdiendo su vínculo por sistema.
+
+| Campo | Tipo | Función |
+| --- | --- | --- |
+| system_reference | str nullable | Identificador documental estable, no UUID M2 obligatorio |
+| system_name | str nullable | Identificación comprensible del sistema |
+| system_description | str nullable | Sistema y modalidad de uso, sin imágenes/plantillas |
+| specific_purpose | str nullable | Finalidad específica de este sistema |
+| purpose_alignment_analysis | str nullable | Relación de finalidad específica con finalidad RAT |
+| use_period_description | str nullable | Período de utilización, incluyendo evento/criterio si corresponde |
+| retention_alignment_analysis | str nullable | Coherencia documentada con conservación RAT |
+| rights_exercise_description | str nullable | Procedimiento para ejercer derechos |
+| rights_contact_channel | str nullable | Canal documentado; sin comprobar disponibilidad externa |
+| information_reference | str nullable | Referencia al aviso/información proporcionada |
+| system_identification_disclosed | ContractResponseV1 nullable | Identificación informada |
+| purpose_disclosed | ContractResponseV1 nullable | Finalidad específica informada |
+| use_period_disclosed | ContractResponseV1 nullable | Período informado |
+| rights_exercise_disclosed | ContractResponseV1 nullable | Forma de ejercicio informada |
+| evidence | list ContractEvidenceV1 | Referencias de información por sistema |
+
+No fechas normativas inferidas, límites de duración por defecto, consulta de
+registros ni datos biométricos crudos. evidence_date opcional factual se reutiliza
+del tipo existente. No resolver coherencia de períodos comparando prosa como si
+fuera una regla temporal ejecutable. Finalidad general compara canonización v1;
+finalidad específica puede ser más concreta y se vincula mediante análisis,
+no se exige igualdad literal con RAT. system_reference no vacío en preparación;
+duplicados no vacíos por canonización v1 producen revisión, no deduplicación
+silenciosa. M2/snapshot v1 no aporta inventario operativo de sistemas: cobertura
+es documental; no afirmar exhaustividad verificada mediante all_systems_documented.
+
+### 44.2 Matriz de completitud y aplicabilidad
+
+| Control | Aplicabilidad | Ausente/pendiente/sin fundamento | Negativo/contradicción |
+| --- | --- | --- | --- |
+| Textos generales, scope y route | Siempre | incompleto | Finalidad/rol/ruta/alcance incoherente: revisión |
+| Análisis y respuesta de identificación única | Siempre | incompleto | No fundada: revisión de declaración/clasificación |
+| systems y cobertura | Siempre | Lista vacía, análisis/respuesta ausente: incompleto | all_systems_documented no: revisión |
+| Textos de cada sistema | Cada registro aportado | Campo vacío: incompleto con índice numérico | Referencia duplicada: revisión |
+| Cuatro respuestas informativas por sistema | Cada sistema | Ausente/pendiente/fundamento vacío: incompleto | No fundada: revisión |
+| Evidencia general y por sistema | Siempre/cada sistema | Lista vacía o tipo/referencia vacío: incompleto | Metadata no verifica contenido externamente |
+| Checklist general y sensible expreso | Primera ruta | Propagar incompleto | Propagar revisión, incluida representación |
+| Rutas o regímenes concurrentes sin soporte | Si detectados | Mantener motivos propios | No quedan preparados por este expediente |
+
+Los cuatro requisitos por sistema siempre aplican. No introducir no_aplicable
+por falta de información ni suprimir un requisito por modalidad biométrica.
+El primer contrato no contiene condicionales factuales adicionales: cesión,
+muestras, restricciones de salud y EIPD conservan expedientes/controles propios.
+Motivos estables con field por systems.<índice>.<campo>, question_id conservado
+para dependencias; ordenar índices numéricamente. Precedencia incompleto >
+requiere_revision > completo. No mutar contratos, snapshots ni documentos.
+
+### 44.3 Coherencia, asociación y persistencia previstas
+
+Evaluador puro evaluate_biometric_assessment_v1(document, snapshot, special,
+consent, sensitive_consent), revalidando contratos cerrados. Rol responsable;
+declaración biometricos_identificacion_unica si y condición biometricos_art16ter
+por consentimiento con uses_consent_assessment true. sensitive_condition_id
+permanece exclusivo del régimen sensibles_art16; no extenderlo a biometría.
+Condición sensible consentimiento_expreso_art16 y expediente sensible preparados
+siguen dependencias propias. No inferir biometría desde flags/nombres de categorías.
+
+Scopes biométrico/declaración/condición no vacíos, semánticamente únicos,
+coincidentes y válidos en RAT; categorías seleccionadas sensibles. Primera
+cobertura conservadora: todas las categorías sensibles y todos los grupos del
+alcance evaluado, coherente con consentimiento sensible. Cobertura parcial por
+pares sigue pendiente dentro del alcance integral, sin inferencia desde prosa.
+Documento biométrico sin detección produce revisión residual; declaración y
+expediente sin clasificación sensible coherente no corrigen M2 automáticamente.
+
+Persistencia prevista: biometric_assessment JSONB nullable/none_as_null, check
+objeto, exposición CREATE/PATCH/GET; omisión preserva y null borra solo borrador.
+Objeto reemplazado entero. Migración nueva append-only, head actual e28a0c3f6d97.
+Asociaciones futuras especiales v9 y EIPD v10 incorporarán documento biométrico
+final; mantener versiones históricas y hash RAT. Documento no nulo con asociación
+anterior: asociacion_biometria_no_cubierta. GET nunca reasocia automáticamente.
+
+Readiness biometric nullable; gate futuro biometria_no_preparada 400 incompleto/
+409 revisión, respetando barreras concurrentes. EIPD debe evaluar preparación de
+ruta por consentimiento y conservar positivos/pendientes; nunca deducir excepción
+por base art13. Hasta integración completa, detector mantiene
+validador_no_implementado en biometría, incluso si existe expediente preparado.
+
+### 44.4 Secuencia y aceptación
+
+1. Schema auxiliar/principal y pruebas de contratos, parciales, extra forbid,
+   schema_version, respuestas y alcance; sin persistencia ni gate.
+2. Migración/persistencia/API/asociaciones históricas, SQL NULL y objeto; RLS,
+   exposición cerrada, rechazo de edición de confirmado, obsolescencia/reaporte.
+3. Evaluador puro/readiness: cada campo faltante, respuesta no/pendiente,
+   duplicados, scopes, representación, dependencias y ausencia de mutación.
+4. Gate/EIPD compartido y HTTP: preparado, reparación, positivos EIPD, asociación
+   obsoleta, rechazo que conserva vigente, reemplazo y protección histórica.
+5. Concurrencia/rollback con PostgreSQL y constructor RAT real en alcance
+   explícito; revalidar tras espera. Luego continuar rutas/regímenes pendientes
+   del alcance integral; este bloque no habilita excepciones biométricas.
+
+Solo documentación. Última suite 1429 passed y Alembic check aprobado (§41),
+no reejecutados. Sin migración nueva ni commit. M3-T1 EN PROGRESO.
+Próximo: implementar schemas BiometricSystemV1/BiometricAssessmentV1 y pruebas.
+
+
+## 45. Schemas biométricos y pruebas implementados
+
+Añadidos BiometricSystemV1/BiometricAssessmentV1 cerrados extra forbid según §44,
+route inicial consentimiento_expreso y schema_version 1. Textos/respuestas/scope
+nullable y listas independientes admiten borradores parciales. Se reutilizan
+SpecialScopeV1, ContractResponseV1 y ContractEvidenceV1, sin alterar sus contratos.
+Sistemas conservan orden y referencias tal como aportadas: duplicados semánticos
+quedan para revisión del futuro evaluador, no se eliminan en schema.
+
+53 casos biométricos nuevos: respuestas si/no/pendiente en campos generales y
+por sistema, parciales, listas independientes, serialización/roundtrip/fechas,
+rechazo de campos extra, aprobación calculada, versiones/rutas no soportadas,
+no_aplica, alcance inválido y evidencia inválida. Rechazo de claves template,
+embedding/fingerprint; no equivale a inspeccionar datos crudos incluidos en prosa.
+
+Validación seleccionada con contratos licitud/sensible/salud: 150 passed.
+Black/Ruff/whitespace correctos. Última suite integral anterior: 1429 passed (§41),
+no reejecutada para este cambio aislado de contratos. Sin migración nueva ni commit.
+No se incorpora aún biometric_assessment a CREATE/PATCH/GET ni a asociaciones:
+biometría sigue bloqueada por validador_no_implementado.
+
+M3-T1 EN PROGRESO, alcance integral. Próximo paso: persistencia/exposición del
+expediente biométrico y asociaciones especiales v9/EIPD v10 compatibles;
+mantener bloqueo hasta evaluador/gate y conservar pendientes del alcance integral.
+
+
+## 46. Persistencia biométrica y asociaciones compatibles
+
+biometric_assessment JSONB nullable con none_as_null/check objeto, modelos y
+CREATE/PATCH/GET cerrados. Migración append-only f39b1d4e7a08 desde e28a0c3f6d97,
+aplicada localmente; Alembic check global aprobado. Omisión conserva expediente,
+null borra SQL NULL en borrador, PATCH reemplaza objeto completo.
+
+Escrituras nuevas: especiales v9/EIPD v10 incluyen documento biométrico final.
+Constructores/comparadores históricos especiales v1–v8/EIPD v1–v9 conservados.
+Documento no nulo con asociación anterior: asociacion_biometria_no_cubierta;
+documento ausente permite comparación histórica. GET no reasocia ni reescribe.
+Cambio sin reaporte vuelve ambas asociaciones obsoletas; guardar controles usa
+el estado final de documentos. Hash RAT sin cambios.
+
+Diez casos HTTP nuevos: nueve pares históricos (1/1, 1/2, 2/3, 3/4, 4/5, 5/6,
+6/7, 7/8, 8/9) y régimen biométrico declarado. Serialización/fechas, scopes y
+contratos inválidos 422, organización ajena 403, omisión/preservación, sustitución,
+obsolescencia/reaporte, residual 409, check DB rechaza array y SQL NULL. GET/POST
+coherentes, rechazo conserva borrador. El caso declarado conserva
+validador_no_implementado; dependencia sensible ausente mantiene precedencia
+incompleta/400. Eliminado residual y reaportados controles, confirma ruta ordinaria;
+confirmado rechaza PATCH biométrico tanto objeto como null sin alterar histórico.
+
+Suite integral: 1492 passed en 150.93s. Ampliación final de aserciones de protección
+verificada después con diez casos focalizados aprobados (sin cambios posteriores
+de implementación). Black/Ruff/whitespace correctos. Sin commit.
+M3-T1 EN PROGRESO, alcance integral. Biometría todavía sin evaluador ni gate
+habilitado; persistir no autoriza el régimen. Próximo: evaluador puro y readiness
+biométrico, manteniendo bloqueo hasta integrar confirmación/EIPD.
+
+
+## 47. Evaluador puro y preparación biométrica
+
+Implementado evaluate_biometric_assessment_v1 con resultado incompleto /
+requiere_revision / completo, motivos inmutables y aplicabilidad. Revalida
+contratos, preserva dependencias sensibles/checklist y question_id, verifica
+textos/respuestas/evidencia generales y por sistema, declaración y condición,
+rol/finalidad, alcances coincidentes y cobertura conservadora. Referencias de
+sistema duplicadas por canonización generan revisión; orden numérico de índices.
+Finalidad específica se documenta mediante análisis, sin exigir igualdad literal
+con RAT ni comparar períodos en prosa como una autorización automática.
+
+Readiness agrega biometric nullable cuando hay expediente o régimen detectado.
+Gate compartido agrega biometria_no_preparada si no completo, 400 incompleto/
+409 revisión, respetando otras barreras. Preparación completa no habilita POST:
+detector biométrico conserva validador_no_implementado y EIPD se mantiene sin
+integración biométrica de preparación. No cambia hash ni asociaciones existentes.
+
+73 pruebas puras nuevas: campos generales/por sistema, respuestas no/pendiente,
+fundamento ausente, dependencias, rutas/declaración/alcance/representación,
+evidencia, sistemas múltiples, duplicados semánticos, orden numérico,
+modelos mutados y ausencia de mutación. Un caso HTTP nuevo: completo aún rechaza,
+respuesta pendiente/obsolescencia/reaporte, motivos GET/POST, conservación del
+borrador, reparación y borrado que vuelve preparación incompleta. Diez casos
+HTTP de persistencia anteriores también aprobados en validación integral.
+
+Suite completa posterior: 1566 passed en 154.38s. Black/Ruff/whitespace y Alembic
+check correctos. Sin migración nueva ni commit. M3-T1 EN PROGRESO, alcance integral.
+Próximo: integrar preparación biométrica en detector/gate y EIPD, conservando
+regímenes concurrentes bloqueados, asociaciones y restricciones de primera ruta.
+Luego HTTP/concurrencia con RAT real y las excepciones pendientes del alcance.
+
+
+## 48. Gate biométrico y contraste EIPD integrados
+
+Detector admite biometricos_art16ter por consentimiento cuando el evaluador
+biométrico resulta completo. Motivos generales/por sistema y dependencias se
+propagan conservando question_id; regímenes detectados no se eliminan. Otras
+rutas mantienen validador_no_implementado. Scopes, titular, responsable y
+consentimiento sensible preparado conservan límites del primer soporte.
+
+EIPD contrasta preparación de la propuesta biométrica por consentimiento:
+no completa agrega ruta_especial_pendiente. Excepciones conservan
+excepcion_especial_no_validada; una base art13 no aprueba esa ruta. Positivos/
+pendientes EIPD y asociaciones obsoletas siguen bloqueando. Gate compartido
+biometria_no_preparada permanece, y confirmación relee después de lock.
+
+Diecinueve pruebas transversales nuevas: preparación conjunta sensible/biométrica
+sin mutación, cinco positivos EIPD, expediente ausente/pendiente/obsoleto,
+excepción, sensible/checklist ausente y representación; otros seis indicadores
+especiales no quedan preparados por el expediente biométrico. Módulos biometría/
+salud: 176 passed. Once casos HTTP biométricos aprobados. Caso completo actualizado
+ahora confirma, nuevo borrador pendiente/obsoleto rechaza conservando vigente,
+borrado impide preparación, EIPD positivo impide reemplazo, reparación/reaporte
+con screening negativo permite reemplazo y confirmado rechaza PATCH posterior.
+
+Suite integral posterior: 1585 passed en 155.13s. Black/Ruff/whitespace y Alembic
+check aprobados; head f39b1d4e7a08. Sin migración nueva ni commit.
+M3-T1 EN PROGRESO, alcance integral. Evidencia HTTP biométrica nueva usa base
+consentimiento_art12. Próximo: ampliar HTTP a las seis bases ordinarias y
+concurrencia biométrica con constructor RAT real; no extrapolar esta cobertura.
+Excepciones biométricas y otros pendientes integrales conservan trabajo propio.
+
+
+## 49. Biometría en seis bases y concurrencia con RAT real
+
+Seis casos HTTP nuevos, test_api_biometric_confirmation_six_bases: preparación
+biométrica/sensible por consentimiento y base general correspondiente; las seis
+bases ordinarias conservan su expediente propio. LIA documenta régimen especial
+y fuente titular en M2. Comprueba expediente biométrico pendiente/borrado,
+asociaciones obsoletas y reaporte, EIPD positivo, confirmación/reemplazo,
+protección posterior y rechazo con conservación íntegra de borrador y confirmado.
+Una base art13 no sustituye consentimiento de esta ruta biométrica.
+
+Dieciséis casos nuevos, test_biometric_confirmation_concurrent_real_rat_joint:
+biometría/sensible/salud/geolocalización preparados, consentimiento_art12 y
+constructor RAT real, PostgreSQL/app_user/RLS. Dos conexiones; segunda sesión
+precarga borrador y se observa espera mediante pg_blocking_pids. Commit de primera
+confirmación rechaza segunda; rollback permite segunda. Cambio pendiente de cada
+uno de los cuatro expedientes o cambio de sensibilidad RAT durante espera se
+relee y rechaza. Se conserva un único confirmado y documentos históricos,
+snapshot/hash/fecha, sin reasociarlos ni reemplazarlos al rechazar.
+
+Validación focalizada: módulo de concurrencia 41 passed y HTTP biométrico
+17 passed, 58 verificaciones en total, incluidas 22 nuevas. Black/Ruff/whitespace
+correctos. Este paso solo agrega pruebas/documentación; suite integral anterior
+1585 passed (§48), no reejecutada; no presentar 1607 como suite ejecutada.
+Sin cambios de implementación, migración nueva ni commit.
+
+Límite de evidencia: HTTP con seis bases; concurrencia biométrica con RAT real
+solo consentimiento_art12 y coexistencia preparada de cuatro regímenes. No se
+extrapola concurrencia biométrica de otras cinco bases ni se habilitan excepciones.
+M3-T1 EN PROGRESO, alcance integral. Próximo: priorizar y diseñar la primera ruta
+biométrica sin consentimiento, contrastando la remisión de art16ter a art16bis;
+no reutilizar autorización sanitaria ni inferir excepción desde base general.
+Otros pendientes integrales mantienen trabajo propio.
+
+
+## 50. Primera excepción biométrica: formulación, ejercicio o defensa de derechos
+
+Delimitación dentro del alcance integral, 2026-10-06. Se prioriza el supuesto de
+art16bis inciso segundo letra d, al que remite art16ter para tratamiento biométrico
+sin consentimiento. Fuente oficial revisada: Ley 21.719, artículos 16, 16bis y 16ter,
+https://www.bcn.cl/leychile/navegar?idNorma=1209272 . El supuesto exige necesidad
+para formulación, ejercicio o defensa de un derecho ante tribunal u órgano
+administrativo. No basta elegir defensa_derechos_art13e ni reutilizar una
+referencia sanitaria o una autorización sensible diferente.
+
+### 50.1 Dependencias y límites concretos
+
+Separar tres niveles: base ordinaria, excepción sensible art16d y excepción
+biométrica art16ter por remisión art16bis(d). La excepción sensible de defensa aún
+carece de validador; será dependencia a implementar, no una aprobación implícita.
+No exigir consentimiento sensible/checklist como prerrequisito de esta ruta sin
+consentimiento. Las seis bases mantienen validación propia; primer caso HTTP
+priorizado utilizará defensa_derechos_art13e por coherencia, sin hacerla condición
+jurídica universal ni habilitar otras combinaciones sin evaluar su expediente.
+
+RightsDefenseAssessmentV1 es de base ordinaria y acepta forum_type organo_publico.
+La excepción concreta se delimitará a tribunal_justicia/organo_administrativo;
+no equiparar cualquier órgano público a administrativo ni inferirlo desde nombre.
+Puede reaprovecharse estructura conceptual de necesidad/derecho, pero no tratar
+su resultado completo como validación automática de las excepciones especiales.
+
+Sin consentimiento explícitamente elegido en condición biométrica y sensible:
+authorization_route excepcion_legal, uses_consent_assessment false.
+sensitive_condition_id defensa_derechos_art16d solo en condición sensibles_art16;
+no reutilizar ese campo en biometría. Identificación de la excepción biométrica
+se documentará en su contrato propio/versionado, con remisión concreta a art16bis(d).
+
+Expedientes previstos separados: SensitiveRightsExceptionAssessmentV1 y
+BiometricRightsExceptionAssessmentV1, sin cambiar semántica de
+SensitiveConsentAssessmentV1 ni BiometricAssessmentV1 de consentimiento.
+Contrato/campos/JSONB/asociaciones todavía por fijar en siguiente paso; documento
+consentimiento residual o rutas mezcladas requerirán revisión, sin borrado automático.
+
+El expediente debe cubrir derecho/fundamento/titular por metadata, vínculo con
+datos/operaciones, necesidad, minimización, foro y etapa/referencia, finalidad y
+alcance explícito, identificación biométrica/sistemas, evidencia y principios.
+Cobertura conservadora inicial coincidente con RAT y las declaraciones; soporte
+granular permanece pendiente. Sin plantillas, grabaciones, huellas ni documentos
+procesales íntegros en metadata. Representación, menores, investigación, salud y
+otros regímenes concurrentes conservan validadores/límites propios.
+
+El aviso de sistema/finalidad/período/derechos está implementado para la ruta
+con consentimiento. Antes de diseñar sus condicionales en excepción se delimitará
+expresamente la política de información aplicable; no deducir desde la remisión
+que todos los campos son dispensables, ni presentar una decisión conservadora
+de producto como requisito textual inequívoco de la excepción.
+
+### 50.2 Barrera EIPD y resultado que puede entregarse
+
+El screening existente incluye datos_protegidos_excepcion_consentimiento.
+Declarar una excepción real debe conservar la respuesta correspondiente y los
+motivos de EIPD; no marcar no artificialmente para confirmar. Positivo exige EIPD
+y permanece bloqueado en el flujo actual. Expediente especial documentalmente
+preparado no equivale a screening negativo ni a EIPD aprobada.
+
+Primera implementación podrá preparar y exponer esta excepción, pero no prometer
+confirmación cuando EIPD la bloquea. Workflow completo EIPD mantiene diferimiento
+original; habilitar confirmación tras resolución EIPD necesita diseño de ese
+resultado/flujo y decisión explícita de alcance posterior. No eliminar el bloqueo
+para declarar completado el régimen ni confundir preparado con confirmado.
+
+### 50.3 Secuencia de siguiente trabajo
+
+1. Fijar ambos contratos independientes y matriz: completitud, condicionales de
+   etapa, foro administrativo, principios, información, residualidad, scopes,
+   dependencia sensible y resultado EIPD conservado.
+2. Schema/pruebas, persistencia/asociaciones históricas y evaluadores puros.
+3. Integración de preparación/detección/EIPD; positivos mantienen bloqueo,
+   HTTP demuestra motivos coherentes y conservación íntegra del vigente.
+4. Diseñar la resolución de la dependencia EIPD antes de habilitar confirmación
+   de excepción; no marcar DONE por preparación documental aislada.
+
+Otras excepciones biométricas permanecen pendientes, no diferidas del alcance
+integral. Solo documentación/delimitación: última suite integral anterior
+1585 passed (§48), 58 verificaciones focalizadas posteriores (§49). No pruebas
+reejecutadas, cambios de código, migración ni commit. M3-T1 EN PROGRESO.
+Próximo: contrato/matriz de excepción sensible y biométrica de derechos.
+
+
+## 51. Contratos y matriz de excepciones de derechos
+
+Diseño documental, 2026-10-06. Continúa §50 dentro del alcance integral.
+Fuente oficial: https://www.bcn.cl/leychile/navegar?idNorma=1209272 , arts16(d),
+16bis inciso segundo(d), 16ter y 14ter. La excepción se documenta separadamente
+de base ordinaria y consentimiento. Las estructuras/pruebas y la política
+conservadora de información siguientes son decisiones de producto; no constituyen
+una interpretación automática ni atribuyen al texto una obligación adicional.
+
+### 51.1 Contexto común, sin aprobar una base ordinaria
+
+RightsExceptionContextV1: extra forbid; textos/enums/respuestas nullable;
+evidence list ContractEvidenceV1 con default_factory. No schema propio dentro del
+contexto anidado; el documento raíz tiene schema_version Literal[1] = 1.
+
+| Campo | Tipo | Requisito de preparación |
+| --- | --- | --- |
+| context_reference | str nullable | Referencia documental del caso, sin identificación personal |
+| purpose_description | str nullable | Finalidad RAT por canonización v1 |
+| route | Literal formulacion_derecho / ejercicio_derecho / defensa_derecho nullable | Actividad relativa al derecho |
+| right_description | str nullable | Derecho concreto |
+| right_basis_reference | str nullable | Fundamento del derecho; no exigir que todo derecho nazca de una norma con URL |
+| right_holder | Literal responsable / tercero / ambos nullable | Vinculación documental |
+| holder_connection_analysis | str nullable | Conexión de titulares/datos con derecho |
+| forum_type | Literal tribunal_justicia / organo_administrativo nullable | Foro específico de excepción |
+| forum_description | str nullable | Identificación del foro por metadata |
+| proceeding_stage | Literal preparacion / en_curso / finalizado nullable | Etapa factual |
+| proceeding_reference | str nullable | Referencia documental de actuación/caso, también en preparación |
+| preparatory_actions | str nullable | Condicional de etapa preparacion |
+| processing_operations | str nullable | Operaciones que la excepción cubre |
+| necessity_analysis | str nullable | Necesidad específica para el derecho |
+| data_minimization_analysis | str nullable | Datos/operaciones limitados |
+| safeguards_analysis | str nullable | Medidas/principios aplicados al alcance |
+| related_to_right | ContractResponseV1 nullable | Conexión fundada |
+| necessary_for_route | ContractResponseV1 nullable | Necesidad fundada |
+| within_forum_scope | ContractResponseV1 nullable | Foro fundado, no deducido de su nombre |
+| principles_addressed | ContractResponseV1 nullable | Declaración fundada de medidas/principios, no certificación jurídica |
+| post_proceeding_necessity_analysis | str nullable | Condicional de etapa finalizado |
+| evidence | list ContractEvidenceV1 | Tipo y referencia por entrada |
+
+No convertir organo_publico de RightsDefenseAssessmentV1 a
+organo_administrativo automáticamente. Contexto común no hereda ni modifica el
+contrato ordinario; no marca necesaria una base art13e para toda excepción.
+En preparacion, referencia es documental, no número de expediente judicial
+obligatorio; no inventar plazos procesales ni verificaciones de causas.
+
+### 51.2 Documentos separados
+
+SensitiveRightsExceptionAssessmentV1: extra forbid, schema_version 1; campos:
+
+| Campo | Tipo | Función |
+| --- | --- | --- |
+| exception_basis | Literal defensa_derechos_art16d nullable | Supuesto sensible explícito |
+| context | RightsExceptionContextV1 nullable | Antecedentes de derechos |
+| sensitive_data_description | str nullable | Metadata de categorías sensibles |
+| scope | SpecialScopeV1 nullable | Alcance coincidente declarado |
+| exception_application_analysis | str nullable | Aplicación del supuesto a datos/operaciones |
+| exception_conditions_met | ContractResponseV1 nullable | Declaración fundada; preparación de producto |
+| evidence | list ContractEvidenceV1 | Referencias propias de excepción |
+| notes | str nullable | Observaciones opcionales |
+
+BiometricRightsExceptionAssessmentV1: extra forbid, schema_version 1; campos:
+
+| Campo | Tipo | Función |
+| --- | --- | --- |
+| exception_basis | Literal defensa_derechos_art16bis_d nullable | Remisión biométrica específica |
+| context | RightsExceptionContextV1 nullable | Caso biométrico vinculado al sensible |
+| biometric_data_description | str nullable | Metadata de identificación biométrica |
+| scope | SpecialScopeV1 nullable | Alcance conservador |
+| unique_identification_analysis | str nullable | Relación del tratamiento técnico con identificación única |
+| unique_identification_confirmed | ContractResponseV1 nullable | Declaración fundada del régimen |
+| exception_application_analysis | str nullable | Necesidad biométrica concreta, no solo necesidad genérica de datos |
+| exception_conditions_met | ContractResponseV1 nullable | Declaración fundada del supuesto |
+| sensitive_context_connection_analysis | str nullable | Relación entre ambos expedientes y operaciones |
+| systems | list BiometricSystemV1 | Sistemas e información documental |
+| systems_coverage_analysis | str nullable | Cobertura de sistemas; M2 no verifica inventario |
+| all_systems_documented | ContractResponseV1 nullable | Declaración fundada de cobertura |
+| evidence | list ContractEvidenceV1 | Referencias propias |
+| notes | str nullable | Observaciones opcionales |
+
+Todas las listas default_factory; context/scope/enums/respuestas/textos permiten
+null en borrador. Claves approved/result/can_confirm y no_aplica rechazadas.
+Referencias de evidencia pueden ser parciales en borrador; fechas son opcionales
+factuales. No datos biométricos crudos ni documentos íntegros en metadata.
+
+Política inicial de información: reutilizar BiometricSystemV1 y exigir información
+de sistema, finalidad, período y derechos, con sus cuatro respuestas y evidencia,
+para declarar completo el expediente de excepción. Es frontera conservadora de
+producto; no declarar que el art16ter resuelve inequívocamente todos los supuestos
+de información en excepciones. Una dispensa o información diferida necesita
+contrato/matriz propios posteriores; no se admite no_aplica ni se omiten campos
+para forzar preparación. Art14ter se considera en análisis de transparencia,
+pero no se afirma que este expediente audite por sí solo todos sus deberes.
+
+### 51.3 Matriz de completitud y aplicabilidad
+
+| Control | Aplicabilidad | Falta/pendiente | Negativo/contradicción |
+| --- | --- | --- | --- |
+| Contexto, textos comunes, enums, scope y exception_basis | Siempre | incompleto | Finalidad/rol/ruta/alcance incoherente: revisión |
+| Respuestas contextuales y propias | Siempre | Ausente/pendiente/fundamento vacío: incompleto | No fundada: revisión |
+| preparatory_actions | Etapa preparacion | Vacío: incompleto | Texto en otra etapa: residual/revisión |
+| post_proceeding_necessity_analysis | Etapa finalizado | Vacío: incompleto | Texto en otra etapa: residual/revisión |
+| Etapa ausente | Condicionales sin_resolver | Etapa incompleta; no exigir condicional como si fuera aplicable | No inferir desde referencia/fechas |
+| Evidencia contextual y propia | Siempre | Lista vacía o tipo/referencia vacío: incompleto | No consulta externa |
+| Datos/identificación/sistemas biométricos | Documento biométrico | Campos/respuestas/lista vacíos: incompleto | No/duplicados/discordancia: revisión |
+| Información de cada sistema | Cada sistema | Campos/respuestas/evidencia incompletos | No fundada: revisión; dispensa aún no soportada |
+| Dependencia sensible preparada | Excepción biométrica | Propagar incompleto | Propagar revisión |
+| Datos de consentimiento especial en misma ruta sin consentimiento | Si aportados | No se exigen | Residualidad/mix de rutas: revisión, sin borrar |
+| Otros regímenes detectados | Cuando concurren | Mantener motivos propios | Preparación de excepción no los elimina |
+| EIPD | Siempre transversal | Sin resolver/obsoleto: bloquea | Excepción real/positivo mantiene requiere_eipd y bloqueo |
+
+Precedencia incompleto > requiere_revision > completo. Aplicabilidad derivada,
+motivos ordenados por contrato y por índices numéricos, question_id conservado en
+dependencias, entradas inmutables. Respuestas afirmativas no sustituyen textos
+de necesidad, fundamentos y evidencia; la prosa no se evalúa como sentencia legal.
+
+### 51.4 Vinculación, coherencia y residualidad
+
+Evaluadores futuros: evaluate_sensitive_rights_exception_v1(document, snapshot,
+special) y evaluate_biometric_rights_exception_v1(document, snapshot, special,
+sensitive_exception). No dependencia del checklist ni consentimiento sensible de
+ruta con consentimiento. Validar contratos aunque falte otra dependencia.
+
+Declaraciones datos_sensibles/biometricos_identificacion_unica afirmativas;
+condiciones sensibles_art16 y biometricos_art16ter por excepcion_legal,
+uses_consent_assessment false explícito. sensitive_condition_id
+ defensa_derechos_art16d solo sensible; biometría no agrega ese campo ni lo acepta.
+Condiciones: referencia legal, análisis y evidencia completos; la referencia
+textual no se interpreta como autorización. Otros exception_basis no soportados
+no se aceptan por compartir texto del derecho.
+
+Contextos sensible/biométrico vinculan context_reference, finalidad, route,
+right_holder, forum_type, proceeding_stage y proceeding_reference por comparación
+semántica v1 de textos y exacta de enums. Descripciones/análisis pueden reflejar
+operaciones biométricas más específicas; vínculo exige análisis documentado y no
+igualdad literal de toda prosa/evidencia/notas. Diferencias de vínculo: revisión.
+
+Scopes propios/declaraciones/condiciones coincidentes, no vacíos, válidos en RAT,
+semánticamente únicos; categorías sensibles y todos los grupos del alcance.
+Cobertura parcial por pares sigue pendiente. No inferir biometría desde flag
+sensible ni foro/edad/representación desde nombres. Rol responsable inicial.
+Excepción documental sin régimen/ruta correspondiente: revisión residual.
+
+SensitiveConsentAssessmentV1/BiometricAssessmentV1 no se convierten a excepciones.
+Su presencia cuando se propone la respectiva excepción produce revisión de
+expediente residual; el checklist general puede pertenecer a la base ordinaria y
+no se borra automáticamente. La base ordinaria mantiene su evaluador propio.
+Cuando se propone consentimiento, documentos de excepción residuales también
+producen revisión. No combinar subconjuntos de rutas en este primer soporte.
+
+### 51.5 Persistencia/asociaciones y aceptación prevista
+
+Futuras columnas sensitive_rights_exception_assessment y
+biometric_rights_exception_assessment, JSONB nullable/none_as_null/check objeto;
+CREATE/PATCH/GET, omisión preserva/null borra solo borrador/reemplazo entero.
+Migración append-only desde f39b1d4e7a08. Asociaciones especiales v10/EIPD v11
+incorporan ambos documentos finales conservando todos los comparadores previos;
+documento no cubierto produce motivos específicos por cada expediente.
+No circularidad, no cambio del hash RAT ni reasociación automática durante GET.
+
+Readiness future sensitive_rights_exception/biometric_rights_exception nullable;
+completo documental no garantiza confirmación. EIPD distingue propuesta preparada
+de excepción no validada, conserva respuesta afirmativa y requiere_eipd; no
+inventa resultado aprobada ni aceptación externa. Sin resolución EIPD diseñada
+no se confirma la excepción, aunque estén completos los dos expedientes.
+
+Aceptar mediante pruebas: contratos parciales/cerrados y etapa/foro, todos los
+campos/respuestas/evidencias faltantes, sin_resolver/residualidad de condicionales,
+referencias/vínculos/scopes discordantes, sistemas múltiples/duplicados/índices,
+rutas mezcladas y consentimiento ausente sin dependencia artificial. Persistencia
+SQL NULL/check objeto, exposición/aislamiento, históricos/obsolescencia/reaporte.
+HTTP: completo aún bloqueado por EIPD, no falso negativo para confirmar; conservar
+vigente y borrador en rechazo, proteger confirmado. Resolución de EIPD y
+confirmación de excepción no se declaran entregadas en esta secuencia.
+
+Solo documentación. M3-T1 EN PROGRESO, alcance integral. Última suite integral
+1585 passed (§48) y 58 verificaciones posteriores (§49), no reejecutadas aquí.
+Sin cambios de código, migración ni commit. Próximo: schemas de los tres tipos y
+pruebas de contrato, antes de persistencia o evaluadores.
+
+
+## 52. Schemas de excepciones de derechos implementados
+
+Añadidos RightsExceptionContextV1, SensitiveRightsExceptionAssessmentV1 y
+BiometricRightsExceptionAssessmentV1 según §51. Contratos extra forbid,
+contexto/alcance/textos/enums/respuestas nullable, listas independientes y
+schema_version 1 en documentos raíz. Foro especial admite tribunal_justicia y
+organo_administrativo; no amplía ni convierte RightsDefenseAssessmentV1 ordinario.
+Bases especiales diferenciadas: defensa_derechos_art16d y
+defensa_derechos_art16bis_d. Biometría reutiliza BiometricSystemV1.
+
+102 casos nuevos: parciales, listas independientes, enums, respuestas si/no/
+pendiente, serialización/roundtrip/fechas, contexto anidado, alcance, evidencia,
+campos extra/aprobaciones calculadas/no_aplica, sistemas y separación de rutas.
+Condicionales de etapa y duplicados semánticos se conservan en borrador para el
+futuro evaluador; schema no declara preparación ni aprobación EIPD.
+
+Validación seleccionada de contratos nuevos y licitud/sensible/salud/biometría:
+252 passed. Black/Ruff/whitespace correctos. Última suite integral anterior:
+1585 passed (§48), no reejecutada para este cambio aislado de contratos.
+No persistencia/API/asociaciones, evaluador ni habilitación de excepciones todavía.
+Sin migración nueva ni commit. M3-T1 EN PROGRESO, alcance integral.
+Próximo: persistencia/exposición de ambos expedientes y asociaciones especiales
+v10/EIPD v11 compatibles; mantener positivo EIPD y rutas pendientes bloqueadas.
+
+
+## 53. Persistencia y API de excepciones de derechos
+
+Implementados los dos expedientes nullable en LegalAssessment y CREATE/PATCH/GET.
+JSONB con SQL NULL y constraints de objeto; migracion append-only a40c2e5f8b19
+aplicada desde f39b1d4e7a08. Alembic check sin diferencias nuevas.
+PATCH conserva por omision, reemplaza el documento entero y permite null solo
+sobre borrador; confirmado permanece protegido. Fechas serializadas en JSON.
+
+Tres casos HTTP (sensible, biometrico, ambos) verifican almacenamiento, omision,
+reemplazo, borrado/SQL NULL, contratos invalidos y constraint de objeto,
+aislamiento entre organizaciones y proteccion de confirmado. GET/POST comparten
+asociacion_excepcion_derechos_no_cubierta: cualquier documento presente bloquea
+confirmacion con 409 y preserva integramente borrador y vigente. El caso positivo
+tras borrar documentos valida la ruta ordinaria, no una excepcion.
+
+Las asociaciones siguen especiales v9/EIPD v10: los nuevos expedientes todavia
+no forman parte de sus hashes. La barrera explicita impide confirmar aunque esas
+asociaciones anteriores parezcan vigentes. No hay reasociacion automatica ni
+cambio del hash RAT. Proximo paso: especiales v10/EIPD v11 con ambos documentos
+y comparadores historicos; despues, evaluadores propios de completitud.
+Preparacion documental no habilita excepciones sin resolver la dependencia EIPD.
+
+Black/Ruff/whitespace correctos; tres pruebas focalizadas aprobadas. Regresion
+integral: 1712 passed en 169.95 segundos. M3-T1 EN PROGRESO, alcance integral; sin commit.
+
+
+## 54. Asociaciones de excepciones: especiales v10 y EIPD v11
+
+Los constructores nuevos incorporan sensitive_rights_exception_assessment y
+biometric_rights_exception_assessment al material final de hash. CREATE y PATCH
+con controles aportados usan especiales v10/EIPD v11, despues de aplicar cambios
+al documento; EIPD incluye la asociacion especial final, sin circularidad.
+Hash RAT canonico v1 y migraciones sin cambios. Head local a40c2e5f8b19.
+
+Comparadores anteriores se conservan: especiales v1-v9 y EIPD v1-v10 siguen
+vigentes si ambos documentos estan ausentes y el resto del contexto coincide.
+Un documento presente, incluso {}, produce motivo especifico por expediente
+si la version historica no lo cubre: asociacion_excepcion_sensible_no_cubierta o
+asociacion_excepcion_biometrica_no_cubierta. Ambos motivos aparecen cuando
+corresponde. Las versiones nuevas revalidan los contratos de excepcion.
+
+Alta, edicion y borrado de documentos invalidan asociaciones previas sin
+reescribirlas; GET/readiness no mutan ni reasocian. Reaportar solo condiciones
+especiales no actualiza EIPD: hace falta aportar cada control. Asociacion actual
+no implica completitud ni autorizacion; barrera compartida GET/POST
+excepcion_derechos_no_preparada mantiene 409 por cada documento presente
+mientras faltan evaluadores propios. Se sustituye el motivo provisional §53 de
+falta de cobertura por este motivo de preparacion, sin habilitar excepciones.
+
+96 casos nuevos de servicios: 76 historicos (19 versiones x cuatro presencias),
+cuatro de versiones actuales, catorce mutaciones y dos equivalencias/revalidacion
+Pydantic/JSON. 22 casos HTTP nuevos: 19 historicos y tres de mutacion/reaporte,
+con preservacion integra del borrador y vigente ante rechazo. Tres HTTP de
+persistencia existentes ampliados para borrado obsoleto y reaporte ordinario.
+Respuesta EIPD afirmativa se conserva; sin condicion especial documentada da
+pendiente_revision/excepcion_consentimiento_no_documentada y sigue bloqueada.
+No se acredita que una excepcion real pueda confirmarse ni se altera el screening.
+
+Formato/lint/whitespace verificados. Regresion integral: 1830 passed en 184.29 s.
+Proximo: evaluador de completitud/aplicabilidad de excepcion sensible de derechos,
+seguido del biometrico y sus vinculos. Resolucion EIPD sigue pendiente de diseno.
+M3-T1 EN PROGRESO, alcance integral; sin migracion nueva ni commit.
+
+
+## 55. Evaluador puro de excepcion sensible de derechos
+
+Implementado evaluate_sensitive_rights_exception_v1(document, snapshot, special)
+en backend/app/services/sensitive_rights_exception.py. Resultado inmutable:
+incompleto/requiere_revision/completo, motivos con field/code/category/question_id
+y aplicabilidad aplicable/no_aplicable/sin_resolver. can_confirm significa solo
+preparacion documental, no autorizacion ni superacion de EIPD. No dependencia
+artificial del checklist de consentimiento ni de la base ordinaria art13e.
+Referencia oficial reconsultada: https://www.bcn.cl/leychile/navegar?idNorma=1209272,
+art16(d); controles de producto segun matriz §51, sin certificacion juridica.
+
+Contexto exige textos de derecho/operaciones/necesidad/minimizacion/salvaguardas,
+fundamento del derecho sin URL normativa obligatoria, enums, respuestas fundadas
+y evidencia. preparatory_actions solo en preparacion, analisis posterior solo en
+finalizado; prosa residual en otra etapa requiere revision. Etapa ausente deja
+ambos condicionales sin_resolver, sin inferir desde prosa ni exigirlos como
+aplicables. Declaraciones afirmativas no sustituyen analisis ni evidencia.
+
+Rol responsable inicial, finalidad por canonizacion v1, coherencia sensible del
+RAT. Declaracion datos_sensibles afirmativa/fundada, condicion sensibles_art16 por
+excepcion_legal, ID defensa_derechos_art16d y uses_consent_assessment false
+explicito. Campos ausentes incompletos; rutas/negativos incoherentes revision.
+Referencia/analisis/evidencia de condicion obligatorios, sin consulta externa.
+Scopes propios/declaracion/condicion semanticamente unicos, coincidentes y
+cubriendo todas las categorias sensibles y grupos del RAT. No autoriza cobertura
+parcial por pares ni convierte organo_publico en organo_administrativo.
+
+172 pruebas nuevas aprobadas: rutas/foros/etapas/titulares, textos/enums/respuestas,
+condicionales/residualidad, evidencia, alcance parcial/duplicados/invalido,
+canonizacion/Unicode, ausencias/contradicciones, revalidacion de modelos mutados
+incluso con otra dependencia ausente, equivalencia JSON/fechas, orden numerico,
+prioridad incompleto e inmutabilidad. Dos verificaciones transversales demuestran
+que completo puro conserva bloqueo de excepcion y EIPD con respuesta no o si;
+positivo se conserva y excepcion_especial_no_validada mantiene pendiente_revision.
+Formato/lint/whitespace correctos. Ultima suite integral anterior: 1830 passed
+(§54), no reejecutada para este evaluador aislado todavia no conectado a la API.
+
+No modifica asociaciones/migracion ni habilita confirmacion. Falta exponer su
+readiness e integrar el evaluador en detector/gates compartidos, incluyendo
+residualidad del expediente de consentimiento sensible; despues evaluador
+biometrico y vinculos. Resolucion EIPD sigue pendiente de diseno. M3-T1 EN
+PROGRESO, alcance integral; sin commit.
+
+
+## 56. Integracion de excepcion sensible en readiness y barreras
+
+API readiness expone sensitive_rights_exception nullable: se evalua si hay
+documento o condicion sensible que propone excepcion_legal/defensa_derechos_art16d.
+Una propuesta sin documento produce expediente_ausente; un contexto sensible sin
+propuesta de excepcion no crea un expediente por inferencia. Resultado de lectura
+orientativo, inmutable; no reasocia ni modifica documentos/estado.
+
+Detector especial integra el evaluador para sensibles_art16/excepcion_legal/
+defensa_derechos_art16d y propaga field/code/category/question_id, conservando
+rutas restantes como no implementadas. Completo documental puede dar
+regimenes_preparados, sin aprobar la excepcion juridica ni habilitar confirmacion.
+La barrera compartida GET/POST usa excepcion_derechos_no_preparada para faltas
+sensibles: 400 incompleto, 409 revision. Otros controles pueden elevar el rechazo
+a 409; EIPD real sigue en pendiente_revision por excepcion_especial_no_validada.
+El expediente biometrico conserva la barrera provisional hasta su evaluador.
+
+Consentimiento sensible presente con ruta excepcion_legal produce
+expediente_consentimiento_sensible_residual. Expediente de excepcion sensible
+sin regimen o ruta correspondiente produce expediente_excepcion_sensible_residual,
+incluida propuesta por consentimiento. No se borran ni convierten documentos;
+checklist general puede pertenecer a la base ordinaria y conserva evaluador propio.
+Asociaciones especiales v10/EIPD v11 y hash RAT sin cambios.
+
+Doce pruebas nuevas: seis de barrera/propagacion en servicios y seis HTTP sobre
+las bases ordinarias con RAT real. HTTP verifica complete/incomplete/ausente,
+lectura nullable, aislamiento, motivos compartidos, documento obsoleto/reaporte,
+residualidad en ambos sentidos, positivo EIPD conservado, falso negativo
+excepcion_consentimiento_discordante, revalidacion del RAT y preservacion integra
+de borrador/vigente ante rechazo. No confirma una excepcion ni extrapola
+concurrencia a esta nueva ruta. 209 verificaciones focalizadas aprobadas, mas
+seis HTTP reejecutadas con escenarios de residualidad inversa/EIPD discordante.
+
+Formato/lint/whitespace correctos. Regresion integral: 2014 passed en 199.23 s.
+Proximo: evaluador puro biometrico de derechos y vinculos con el sensible,
+seguido de integracion propia. Resolucion EIPD permanece pendiente de diseno;
+no alterar screening para eludirla. Head local a40c2e5f8b19, sin migracion nueva
+ni commit. M3-T1 EN PROGRESO, alcance integral.
+
+
+## 57. Evaluador puro biometrico de derechos y vinculos sensibles
+
+Implementado evaluate_biometric_rights_exception_v1(document, snapshot, special,
+sensitive_exception) en backend/app/services/biometric_rights_exception.py.
+Resultado inmutable incompleto/requiere_revision/completo, motivos ordenados por
+contrato/indices numericos y aplicabilidad derivada. can_confirm significa solo
+preparacion documental; no habilita tratamiento ni supera controles EIPD.
+Sin dependencia artificial de consentimiento ni de una base ordinaria art13e.
+
+Propaga preparacion sensible con field/code/category/question_id y aplicabilidad,
+con prefijo sensible donde corresponde. Valida contratos aun cuando otra
+dependencia falte. Contexto biometrico exige derecho/operaciones/necesidad,
+minimizacion/salvaguardas, foro y etapa, evidencia y respuestas fundadas; mismos
+condicionales de preparacion/finalizado, etapa ausente sin_resolver y textos
+residuales en otra etapa requieren revision. Vincula context_reference,
+purpose_description y proceeding_reference por canonizacion v1; route,
+right_holder, forum_type y proceeding_stage por igualdad de enums. No compara
+toda prosa ni evidencia literalmente: analisis biometrico puede ser especifico.
+Analisis de conexion entre ambos expedientes obligatorio.
+
+Declaracion biometricos_identificacion_unica afirmativa/fundada; condicion
+biometricos_art16ter por excepcion_legal y uses_consent_assessment false explicito.
+Documento exception_basis defensa_derechos_art16bis_d; no agrega ID sensible a
+condicion biometrica. Referencia/analisis/evidencia de condicion requeridos.
+Scope completo de categorias sensibles y grupos del RAT, coincidente con
+expediente/declaracion/condicion y sensible; cobertura parcial por pares pendiente.
+
+Exige identificacion unica documentada, descripcion biometrica, aplicacion de la
+excepcion, lista de sistemas, declaracion/analisis de cobertura y evidencia.
+Cada sistema requiere diez textos, cuatro respuestas fundadas y evidencia;
+referencias de sistema duplicadas semanticamente producen revision. Inventario
+M2 no se verifica automaticamente. Politica conservadora de informacion de §51:
+no implica afirmar una obligacion universal ni soporta dispensa/no_aplica.
+
+208 pruebas nuevas aprobadas: campos/respuestas/enums/etapas, siete vinculos,
+canonizacion/Unicode/prosa especifica, dependencia sensible/motivos/aplicabilidad,
+evidencia, scopes completos/invalidos/duplicados/discordantes, condicion/declaracion,
+sistemas multiples y numeracion, revalidacion de modelos mutados incluso con
+otra dependencia ausente, equivalencia JSON/fechas e inmutabilidad/preferencia
+incompleto. Dos verificaciones transversales acreditan que completo puro sigue
+bloqueado por detector/gates actuales y EIPD; positivo permanece afirmativo.
+
+Formato/lint/whitespace correctos. Ultima suite integral anterior: 2014 passed
+(§56), no reejecutada para este evaluador aislado todavia no conectado a la API.
+Sin cambios de contratos/asociaciones/migraciones ni habilitacion de confirmacion.
+Proximo: readiness nullable e integracion biometrica en detector/gates con
+residualidad de consentimiento/excepcion, manteniendo evaluador de cada ruta y
+barrera EIPD. M3-T1 EN PROGRESO, alcance integral; sin commit.
+
+
+## 58. Integracion biometrica de derechos en readiness y barreras
+
+API readiness expone biometric_rights_exception nullable: evalua documento
+presente o propuesta biometricos_art16ter/excepcion_legal, incluso sin documento.
+Detector integra el evaluador biometrico y propaga motivos propios y dependencia
+sensible con field/code/category/question_id. Campos faltantes producen barrera
+compartida excepcion_derechos_no_preparada (400 incompleto, 409 revision).
+GET y POST usan las mismas reglas; lectura no escribe, confirma ni reasocia.
+
+Seleccion explicita de rutas: biometric_assessment por consentimiento se evalua
+cuando se aporta o cuando el regimen detectado no propone excepcion_legal;
+la excepcion sin documento de consentimiento no adquiere dependencia artificial.
+Un documento de consentimiento aportado en ruta excepcion genera
+expediente_biometria_residual; documento de excepcion en otra ruta/sin regimen
+genera expediente_excepcion_biometrica_residual. No se convierten ni borran datos.
+Rutas restantes y otros regimenes conservan evaluadores/barreras propios.
+
+Ambas excepciones documentalmente completas pueden dar regimenes_preparados.
+EIPD conserva pendiente_revision/excepcion_especial_no_validada: asociaciones
+actuales y documentos completos no autorizan la excepcion ni habilitan
+confirmacion. Positivo no se cambia, negativo discordante tampoco elimina bloqueo.
+Especiales v10/EIPD v11, hash RAT y head local a40c2e5f8b19 sin cambios.
+
+Doce casos nuevos: seis de categorias/propagacion en servicios y seis HTTP sobre
+bases ordinarias con RAT real. HTTP verifica readiness nullable, preparacion
+completa sin consentimiento especial, documento ausente/pendiente/obsoleto,
+reaporte, dependencia sensible null/parcial, discordancia de caso, segundo
+sistema incompleto, residualidad en ambos sentidos, EIPD positivo/negativo
+discordante, cambio de RAT y aislamiento. Todos los rechazos conservan integro
+borrador y vigente; ninguna excepcion confirmada. No extrapolar concurrencia.
+251 verificaciones focalizadas aprobadas, incluidos escenarios anteriores de
+excepciones/asociaciones. Formato/lint/whitespace correctos.
+
+Regresion integral: 2234 passed en 218.12 s. Proximo: definir diseno/alcance de
+resolucion EIPD para estas excepciones, con evidencia y decision trazable antes
+de habilitar confirmacion; workflow completo sigue diferido segun diseno previo,
+sin bypass ni aprobacion implicita. Mantener los demas pendientes funcionales del
+alcance integral. Sin migracion nueva ni commit; M3-T1 EN PROGRESO.
+
+
+## 59. Resolucion EIPD acotada: evaluacion externa y revision trazable
+
+Paso documental, 2026-10-06. Continua §58 dentro del alcance integral, sin
+habilitar confirmaciones. Fuente primaria reconsultada:
+https://www.bcn.cl/leychile/navegar?idNorma=1209272, art15ter: EIPD previa al
+tratamiento en supuestos obligatorios, incluida excepcion de consentimiento en
+datos sensibles/especialmente protegidos. Sus criterios incluyen operaciones,
+finalidad, necesidad/proporcionalidad, riesgos y mitigacion. La consulta a la
+Agencia para obtener recomendaciones es una posibilidad prevista en ese articulo.
+La revision interna de producto descrita aqui no es una aprobacion regulatoria.
+
+### 59.1 Frontera del primer soporte
+
+Registrar metadata de una EIPD realizada y conservada por la organizacion fuera
+de CumpleIA, su analisis estructurado y una revision humana autenticada. No basta
+una referencia generica ni una casilla approved. Workflow completo de autoria,
+custodia de anexos, inventario exhaustivo e intercambio con la Agencia permanece
+diferido; esta secuencia implementara solo registro/revision y decision de gate.
+No enviar comunicaciones externas ni usar LLM para aprobar contenido juridico.
+
+Primera continuacion soportada: sensible art16(d), sola o junto con biometria por
+art16ter/art16bis(d), con ambos evaluadores pertinentes completos, asociaciones
+actuales, rol responsable, alcance integral del contexto y sin rutas mezcladas.
+El screening exige datos_protegidos_excepcion_consentimiento=si fundada y las
+otras cuatro respuestas no fundadas, completas y coherentes con RAT/LIA.
+Otro positivo, pendiente, regimen no soportado o contradiccion conserva bloqueo;
+ampliar despues con contrato/aceptacion propios, sin recortar pendientes integrales.
+
+### 59.2 Contenido y contrato a concretar antes de codigo
+
+EipdResolutionAssessmentV1: documento cerrado/partial en borrador, schema_version
+1; null/textos/enums/respuestas opcionales hasta evaluacion, listas independientes.
+Metadata, referencias y analisis solamente; sin datos personales/biometricos crudos.
+
+| Seccion | Preparacion requerida |
+| --- | --- |
+| Referencia de EIPD | Identificador documental, version, fecha de finalizacion, referencia a informe y responsable de su elaboracion |
+| Alcance y operaciones | Finalidad coincidente con RAT, categorias/grupos completos de la evaluacion, operaciones/contexto/tecnologia y analisis de cobertura de ambas excepciones |
+| Necesidad/proporcionalidad | Analisis propios de finalidad, minimizacion y medidas; respuestas fundadas y evidencia |
+| Evaluacion previa | Declaracion documentada de realizacion antes del tratamiento, con fundamento/evidencia; no inferirla de fecha de subida o confirmacion |
+| Riesgos | Lista de riesgos referenciados, descripcion/impacto, valoracion inicial/residual fundada y evidencia; IDs semanticamente unicos |
+| Medidas | Referencia de medida y riesgos que cubre, descripcion/eficacia/implantacion y evidencia; referencias coherentes; plan pendiente no equivale a medida implantada |
+| Conclusion | Sintesis de riesgo residual, declaracion no_alto/alto/sin_resolver fundada, limites y seguimiento; no calcular umbral legal ni puntaje propio |
+| Fuentes oficiales | Revision de listas/orientaciones, fuentes consultadas, fecha, referencias y analisis de aplicabilidad; estado identificado/no_identificado/pendiente documentado |
+| Consulta a Agencia | Estado no_solicitada/en_curso/concluida, analisis y referencias condicionales; recomendaciones son antecedentes de revision |
+| Evidencia general | Tipo y referencia completos; fechas opcionales factuales aparte de las fechas de revision/finalizacion requeridas |
+
+Fechas/enums/condicionales exactos se fijaran en el siguiente contrato/matriz.
+Sin_resolver/faltas son incompleto; negacion/discordancia son revision. Etapas y
+condicionales no se deducen desde nombres o prosa. Scope EIPD cubre todas las
+categorias/grupos del RAT de esta evaluacion, incluidos los no sensibles; las
+excepciones mantienen sus scopes sensibles, contenidos en ese alcance, sin
+forzar igualdad entre scopes de diferente funcion.
+
+Riesgo residual alto mantiene bloqueo como frontera conservadora de producto;
+no se atribuye al articulo una prohibicion general ni consulta obligatoria.
+Consulta en_curso mantiene revision; concluida exige analizar antecedentes y
+actualizar evaluacion/medidas cuando corresponda, sin convertir recomendaciones
+en autorizacion automatica. No_solicitada no omite evaluacion ni riesgo residual.
+No declarar completo solo por aportar informe o marcar todos los controles si.
+
+### 59.3 Revision humana separada del payload
+
+Eventos append-only EipdResolutionReview: tenant y assessment, decision
+continuar/requiere_cambios/no_continuar, fundamento/referencia de revision,
+hash del documento revisado y hash de contexto, actor y fecha de servidor.
+Actor/fecha/tenant/hashes/estado de revision no son campos editables por el cliente.
+Permiso edit_content y suscripcion vigente, coherentes con M3; permiso de app no
+certifica titulacion ni juicio juridico. La revision expresa una decision humana
+interna documentada y no se genera desde una conclusion LIA ni desde el LLM.
+
+Registro de continuar exige documento completo, contexto vigente, riesgo residual
+no_alto fundado y todos los controles de esta frontera superados. Requiere_cambios
+/no_continuar mantienen bloqueo. Eventos historicos no se sobrescriben: editar
+la EIPD o su contexto invalida la revision anterior aunque quede visible en el
+historial. Confirmado/reemplazado siguen inmutables; revision nueva solo en borrador.
+
+### 59.4 Asociaciones y transaccion
+
+Sin cambiar hash RAT v1 ni constructores/comparadores especiales v1-v10 y EIPD
+v1-v11. Context binding de resolucion v1 incluye snapshot completo, legal_basis,
+consentimiento y todos los expedientes ordinarios/especiales finales, condiciones
+especiales y screening finales. No incluye el propio documento de resolucion ni
+sus eventos. Hash documental separado de la resolucion normalizada incluye su
+context_binding y contenido, excluyendo estados/actor/historial de revision.
+Revision vincula ambos hashes. No circularidad ni actualizacion automatica en GET.
+
+Orden de escritura: aplicar borrador/documentos; asociar condiciones especiales;
+asociar screening; asociar resolucion al contexto final; revision humana sobre
+version/hashes concretos. Cambios en cualquiera de esas entradas vuelven obsoleto
+el evento previo; reaporte documental no reproduce la decision humana.
+
+Propuesta fisica a concretar: columna JSONB nullable/check objeto para resolucion
+y tabla de eventos con organization_id, FK compuesta y RLS desde su migracion
+append-only inicial. CREATE/PATCH/GET de metadata; accion separada para registrar
+revision con campos de servidor. PATCH omite/preserva, null borra solo borrador,
+reemplazo entero; historial permanece. Accion de revision y confirmacion bloquean
+la misma serie, releen populate_existing y recomponen RAT/contexto antes de
+cualquier cambio. Rechazo/rollback conserva vigente, borrador y eventos previos.
+
+### 59.5 Screening y gate sin borrar el positivo
+
+Mantener cuestionario/contratos/hash actuales. Evaluacion versionada v2 prevista:
+solo cuando todas las excepciones declaradas pertenezcan a esta frontera y esten
+preparadas, distinguir propuesta documental preparada de ruta no soportada.
+La deteccion conserva requiere_eipd y sus motivos; no depende del resultado de
+la revision ni se convierte en sin_supuestos_declarados. La version v1 permanece
+como comparador/evaluador historico; no borrar sus motivos de snapshots anteriores.
+
+Gate separado combina screening vigente, resolucion completa, revision humana
+continuar actual y controles ordinarios/especiales. Permite continuar solo dentro
+de esta frontera, con EIPD aun requerida pero documentada y revisada; nunca filtra
+arbitrariamente blockers por codigo. Sin documento/revision/contexto vigente,
+misma barrera actual. Residualidad: resolucion sin necesidad/propuesta soportada
+requiere revision y no aprueba otras rutas. GET ofrece ambos resultados y motivos,
+POST revalida iguales reglas despues del lock, antes de reemplazar confirmado.
+
+### 59.6 Fuentes pendientes y aceptacion previa al desbloqueo
+
+Busqueda acotada de listas/orientaciones en fuentes oficiales, 2026-10-06: se
+verifico el texto legal; no se verifico una publicacion especifica de orientaciones
+aplicables. Esto no acredita inexistencia. Registro de fuentes/estado queda
+pendiente; antes de habilitar confirmacion deben verificarse las fuentes vigentes
+y registrar su aplicabilidad/version, segun §18.21. No inventar listado ni plazo.
+El contrato permite conservar esta tarea pendiente sin forzar un no negativo.
+
+Aceptar mediante pruebas de contratos cerrados/parciales, todos los faltantes,
+IDs/medidas/riesgos discordantes, etapas/fuentes/consulta sin_resolver y residualidad,
+preparacion y decision separadas, campos de servidor no falsificables, hashes y
+revisiones obsoletos por cada documento/RAT, aislamiento/RLS, historial inmutable,
+GET sin escritura, seis bases ordinarias, positivo EIPD persistente, unsupported
+positivo bloqueado, dos sesiones con RAT real y rollback sin reemplazo parcial.
+Solo despues de esa evidencia y revision de fuentes habilitar la frontera concreta.
+
+Este paso solo fija diseno; no codigo/schema/API/migracion ni habilitacion de gates.
+Ultima suite integral 2234 passed (§58), no reejecutada para documentacion.
+Proximo: contrato fisico/matriz de resolucion y eventos, antes de schemas.
+M3-T1 EN PROGRESO, alcance integral; sin commit.
+
+
+## 60. Contratos y matriz de resolucion EIPD v1
+
+Paso documental, 2026-10-06; concreta §59 sin modificar codigo ni habilitar gates.
+Los requisitos siguientes son controles del producto dentro de esa frontera.
+No agregan umbrales legales ni sustituyen verificacion de fuentes oficiales.
+
+### 60.1 Convenciones y documento editable
+
+Todos los modelos son cerrados (extra=forbid). schema_version Literal[1]=1.
+Campos textuales, fechas, enums, respuestas y objetos anidados nullable/default
+None permiten guardar borrador parcial; listas default_factory=list independientes.
+Reutilizar ContractResponseV1 (si/no/pendiente, rationale), ContractEvidenceV1
+(evidence_type obligatorio al aportar objeto, reference, obtained_on date,
+mechanism, notes) y SpecialScopeV1. Sin no_aplica ni campos de aprobacion.
+Fechas documentales date; fecha de evento datetime UTC generada por servidor.
+Campo obligatorio para completitud no implica obligatorio para guardar borrador.
+
+EipdResolutionAssessmentV1:
+
+| Campo | Tipo |
+| --- | --- |
+| schema_version | Literal[1] |
+| document_reference, document_version, report_reference, prepared_by | str nullable |
+| completed_on | date nullable |
+| purpose_description, processing_operations, processing_context, technologies_description, exceptions_coverage_analysis | str nullable |
+| scope | SpecialScopeV1 nullable |
+| necessity_analysis, proportionality_analysis, minimization_analysis | str nullable |
+| necessary_for_purpose, proportionate_processing, minimization_addressed, performed_before_processing | ContractResponseV1 nullable |
+| prior_assessment_analysis | str nullable |
+| risks | list[EipdRiskV1] |
+| measures | list[EipdMeasureV1] |
+| residual_risk_summary, residual_risk_rationale, limitations_analysis, follow_up_plan | str nullable |
+| residual_risk_level | Literal[no_alto, alto, sin_resolver] nullable |
+| official_sources | EipdOfficialSourcesV1 nullable |
+| agency_consultation | EipdAgencyConsultationV1 nullable |
+| evidence | list[ContractEvidenceV1] |
+| notes | str nullable |
+| context_binding | Asociacion calculada por servidor, separada de contenido de entrada |
+
+context_binding no es un campo libre del contrato editable: el servicio lo produce
+al asociar explicitamente el documento al contexto final, como §59.4. La forma
+persistida/salida incorpora binding_version=1 y context_hash SHA-256 hexadecimal
+(64 caracteres). El hash documental incluye esta asociacion. CREATE/PATCH no
+aceptan actor, tenant, hashes, decisiones ni revision_status. Definir una entrada
+cerrada y una salida/persistencia cerrada diferenciadas al implementar schemas;
+no usar un mismo modelo que permita falsificar metadata del servidor.
+
+EipdRiskV1: risk_id, description, impact_analysis, initial_assessment_analysis,
+residual_assessment_analysis str nullable; evidence list[ContractEvidenceV1].
+No puntuacion ni escala numerica inferida. EipdMeasureV1: measure_id, description,
+effectiveness_analysis, implementation_analysis str nullable; risk_ids list[str];
+implemented ContractResponseV1 nullable; evidence list[ContractEvidenceV1].
+
+EipdOfficialSourcesV1: status Literal[identificado,no_identificado,pendiente]
+nullable; checked_on date nullable; sources list[EipdOfficialSourceV1];
+applicability_analysis str nullable; evidence list[ContractEvidenceV1].
+EipdOfficialSourceV1: source_reference, publication_version, review_analysis str
+nullable; applicability Literal[aplicable,no_aplicable,pendiente] nullable.
+Una fuente consultada puede no tener publicacion/version identificada; su analisis
+debe explicar el resultado. no_identificado registra una busqueda documentada,
+no acredita inexistencia ni desbloquea por si solo el requisito global de §59.6.
+
+EipdAgencyConsultationV1: status Literal[no_solicitada,en_curso,concluida]
+nullable; analysis, consultation_reference, response_reference,
+recommendations_analysis, reassessment_analysis str nullable;
+recommendations_addressed ContractResponseV1 nullable;
+evidence list[ContractEvidenceV1]. Referencias son metadata, no carga de anexos.
+
+### 60.2 Completitud y aplicabilidad deterministas
+
+Todo texto exigido debe contener contenido no blanco; cada respuesta exigida
+requiere rationale no blanco. Evidencia exigida significa lista no vacia con tipo
+no blanco y referencia no blanca por elemento; obtained_on es opcional factual.
+IDs se comparan tras canonizacion coherente con servicios existentes; duplicados
+semanticos y referencias desconocidas requieren revision, no se deduplican.
+Acumular todos los motivos: requiere_revision prevalece sobre incompleto cuando
+coexisten; completo solo sin faltantes ni discordancias. Mostrar aplicabilidad
+explicita de condicionales y rutas, sin inferir hechos desde texto libre.
+
+| Bloque | Requisito para preparacion | Incompleto | Requiere revision |
+| --- | --- | --- | --- |
+| Informe | Cuatro referencias/textos iniciales y completed_on; fecha no futura | Campo ausente/blanco | Fecha futura |
+| Alcance | purpose_description coincidente con RAT canonizado; scope cubre exactamente categorias/grupos de la evaluacion; operaciones/contexto/tecnologia y cobertura de excepciones fundadas | Campo o alcance faltante | Diferencia de finalidad/scope; excepcion fuera del alcance |
+| Necesidad | Tres analisis y tres respuestas si fundadas | Ausente/pendiente/sin fundamento | Respuesta no |
+| Evaluacion previa | performed_before_processing si fundada, prior_assessment_analysis y evidencia general | Ausente/pendiente | No; no inferir si desde completed_on |
+| Riesgos | Al menos un riesgo, todos sus textos, ID unico y evidencia propia | Lista vacia/campo/evidencia faltante | IDs repetidos |
+| Medidas | Al menos una medida; textos, ID unico, risk_ids no vacios, implemented si fundada y evidencia propia; todos los riesgos cubiertos | Campo/lista/evidencia faltante; riesgo sin cobertura | IDs repetidos/desconocidos; implemented no |
+| Conclusion | Sintesis, rationale, limites, seguimiento y residual_risk_level no_alto | Ausente/sin_resolver | alto; bloqueo conservador de producto |
+| Fuentes | Estado, fecha no futura, fuentes consultadas no vacias, referencias/analisis y analisis general/evidencia | Ausente/pendiente; fuente con applicability pendiente | Fecha futura; contradiccion con estado declarado |
+| Fuentes identificadas | identificado exige al menos una publicacion con version y analisis de aplicabilidad resuelto; no_identificado exige explicar busqueda y resultados en todas las fuentes | Version/analisis requerido faltante | no_identificado junto con publicacion aplicable identificada |
+| Consulta | Estado y analisis siempre requeridos | Ausente | en_curso |
+| Consulta no_solicitada | Analisis de decision; campos de respuesta/recomendaciones no aplicables | Analisis ausente | Referencias/respuestas residuales de consulta aportadas |
+| Consulta en_curso | consultation_reference y evidencia; respuesta/recomendaciones no aplicables hasta conclusion | Referencia/evidencia faltante | Estado en_curso mantiene revision; respuesta concluida residual |
+| Consulta concluida | Ambas referencias, recomendaciones/reassessment analizados, recommendations_addressed si fundada y evidencia | Ausente/pendiente | recommendations_addressed no |
+| Asociacion | Binding v1 y hash del contexto final vigentes | Asociacion ausente | Contexto obsoleto o version no soportada |
+| Frontera | §59.1: excepciones pertinentes preparadas; screening positivo esperado y cuatro no fundados; controles ordinarios/especiales actuales | Documento/control faltante | Otra ruta/positivo, contradiccion o expediente residual |
+
+publication_version solo es exigida para una publicacion identificada; no exigir
+version ficticia a un sitio consultado sin resultado. No generar conclusiones de
+riesgo mediante aritmetica ni validar la veracidad externa del informe por metadata.
+Fuentes documentadas completas no satisfacen automaticamente la verificacion
+normativa global pendiente: mantener barrera separada hasta resolver §59.6.
+
+### 60.3 Entrada de revision, salida y evento persistido
+
+EipdResolutionReviewIn cerrado: decision obligatorio Literal[continuar,
+requiere_cambios,no_continuar]; rationale y review_reference str obligatorios
+no blancos. Sin defaults de decision. El cliente expresa su decision humana;
+no puede aportar hashes/actor/fecha/organization_id ni estado de vigencia.
+
+Evento EipdResolutionReviewOut cerrado: id UUID, organization_id UUID,
+assessment_id UUID, decision/rationale/review_reference, document_hash,
+context_hash (SHA-256 hex), created_by UUID, created_at datetime UTC. Servidor
+resuelve estos campos autenticando usuario y releyendo contexto bajo lock.
+Persistir mismos datos, FK compuesta assessment/tenant y actor referenciado;
+RLS tenant desde migracion inicial. El runtime no modifica/elimina eventos.
+Probar esta inmutabilidad tambien por acceso SQL app_user, no solo ausencia de PATCH.
+
+Lectura deriva review_status Literal[sin_revision,vigente,obsoleta] y latest_review
+nullable del ultimo evento de ese assessment, con orden estable created_at/id.
+No elegir un continuar antiguo cuando el ultimo evento requiere cambios.
+Vigente describe igualdad de ambos hashes, no aprobacion: requiere_cambios y
+no_continuar siguen bloqueando. Historial preservado aun al borrar documento.
+Sin documento con historial: obsoleta; sin eventos: sin_revision.
+
+continuar exige preparacion completa y frontera/fuentes verificadas actuales;
+las otras decisiones admiten documento parcial presente con binding vigente para
+registrar rechazo concreto, conservando bloqueo. Documento ausente, binding
+obsoleto, assessment no borrador o permiso/suscripcion insuficientes rechazan
+cualquier evento. Rechazo no escribe ni modifica historial. Revision no confirma.
+
+### 60.4 Plan de implementacion y aceptacion
+
+1. Schemas separados editable/persistido/revision/salida y pruebas de cierre,
+   borradores parciales, enums/fechas/listas y metadata no falsificable.
+2. Asociacion/hash puros; persistencia JSONB nullable con CHECK objeto y eventos
+   append-only/RLS; API documental/revision sin abrir confirmacion.
+3. Evaluador puro de matriz y motivos/aplicabilidad; readiness de preparacion y
+   vigencia separado de decision y de deteccion EIPD versionada.
+4. Fuentes verificadas y gates compartidos GET/POST dentro de §59.1; probar seis
+   bases, screening positivo preservado, toda invalidacion, residuos, aislamiento,
+   historial, dos sesiones app_user con RAT real y rollback sin reemplazo parcial.
+
+Son criterios pendientes, no evidencia ya ejecutada. En este paso se revisa diff
+/whitespace documental; ultima suite integral 2234 passed (§58), no reejecutada.
+Proximo paso: schemas y pruebas de contrato. M3-T1 EN PROGRESO integral, sin commit.
+
+
+## 61. Schemas de resolucion EIPD y revision humana
+
+2026-10-06. Implementados contratos de §60 en schemas/licitud.py: riesgos,
+medidas, fuentes oficiales, consulta y EipdResolutionAssessmentV1 editable parcial.
+EipdResolutionAssessmentStoredV1 separado agrega context_binding nullable;
+binding v1 cerrado/hash SHA-256 hexadecimal. No incorporar esta forma interna
+como entrada CREATE/PATCH en la futura integracion.
+
+EipdResolutionReviewIn exige decision explicita, fundamento y referencia no
+blancos; rechaza metadata del servidor. ReviewOut agrega UUIDs, hashes y fecha
+UTC con zona; ReviewStateOut expone estado/ultimo evento como contrato de lectura.
+Schemas no autentican al actor ni producen hashes/fechas: eso corresponde al
+servicio futuro bajo lock. Tampoco calculan vigencia/decision ni persistencia.
+
+Borradores aceptan parciales/negativos/pendientes y condicionales residuales;
+completitud, IDs semanticos, cobertura y contradicciones pertenecen al evaluador
+pendiente, sin rechazar borrador ni asumir aprobacion. Contratos cerrados anidados,
+listas independientes, fechas factuales y enums explicitos; no_aplica rechazado.
+
+111 pruebas nuevas: metadata no falsificable, enums/fechas/hash, cierre anidado,
+listas/borradores, respuestas parciales, condicionales diferidos y JSON roundtrip.
+231 focalizadas aprobadas; todos los schemas: 419 passed. Black/Ruff y diff
+whitespace correctos. Ultima suite integral 2234 passed (§58), no reejecutada
+para contratos aislados; no sumar parciales como evidencia de suite completa.
+
+Sin integracion API/DB, migracion, evaluador ni habilitacion de gates. Fuentes
+oficiales siguen pendientes; EN PROGRESO integral, sin commit. Proximo: asociacion
+/hash de resolucion v1, preservando comparadores especiales v1-v10/EIPD v1-v11;
+despues persistencia/eventos/RLS/API, matriz y gate segun §60.4.
+
+
+## 62. Asociacion y hash de resolucion EIPD v1
+
+2026-10-06. Nuevo servicio puro eipd_resolution.py, sin dependencias DB/API.
+EipdResolutionContextV1 interno cerrado exige explicitamente snapshot RAT completo,
+legal_basis y todos los documentos ordinarios/especiales, consentimiento incluido,
+condiciones especiales y screening finales. Entradas nullable deben aportarse
+explicitamente; no usar defaults que permitan omitir accidentalmente un expediente.
+Contexto excluye resolucion/eventos y rechaza campos extra, evitando circularidad.
+
+build_eipd_resolution_context_hash_v1 revalida material y genera SHA-256 de JSON
+normalizado (claves ordenadas, UTF-8, nulls/defaults explicitos, listas preservadas)
+con binding_version=1. Incluye tambien campos del snapshot fuera del hash RAT
+canonico: ese hash RAT y comparadores especiales v1-v10/EIPD v1-v11 no cambian.
+
+bind_eipd_resolution_v1 acepta solo documento editable y devuelve forma interna
+con binding de servidor. Reaporte exige entrada editable explicita; documento
+almacenado/binding aportado como entrada se rechaza. No reutiliza decision humana.
+build_eipd_resolution_document_hash_v1 incluye documento completo y su binding,
+rechaza metadata de revision; eipd_resolution_context_is_current_v1 compara sin
+mutar/asociar. Sin binding devuelve false. Schemas invalidos lanzan ValidationError;
+la futura integracion debera tratarlos sin convertirlos en aprobacion.
+
+89 pruebas nuevas: alta/baja/modificacion de cada expediente, base ordinaria,
+snapshot completo, todos los inputs obligatorios, modelos/JSON/defaults/orden de
+claves, contenido propio separado de contexto, lectura sin escritura, metadata
+ajena/circular rechazada y revalidacion de instancias/nested modificadas.
+296 focalizadas aprobadas, incluyendo 96 asociaciones historicas de excepciones
+y 111 schemas EIPD. Black/Ruff y whitespace correctos. Ultima suite integral
+2234 passed (§58), no reejecutada para funciones puras aisladas; no sumar este
+checkpoint como nueva suite integral ni extrapolar a concurrencia/API.
+
+Pendiente consumir estos hashes desde persistencia/revision bajo lock con RAT
+real. Ninguna revision/gate habilitada; fuentes oficiales pendientes.
+Proximo: persistencia JSONB y eventos append-only con RLS desde migracion inicial;
+despues exposicion documental/API, evaluador y revision segun §60.4.
+M3-T1 EN PROGRESO integral, sin migracion nueva ni commit en este paso.
+
+
+## 63. Persistencia de resolucion EIPD e historial protegido
+
+2026-10-06. Migracion append-only b51d3f6a9c20 posterior a a40c2e5f8b19,
+aplicada en PostgreSQL local. Alembic check sin operaciones nuevas.
+LegalAssessment.eipd_resolution_assessment JSONB nullable/none_as_null=True,
+CHECK objeto: null SQL admitido, null JSON/listas/escalares rechazados.
+UQ adicional (id, organization_id) soporta FK compuesta del historial.
+
+EipdResolutionReview persiste UUID, tenant/assessment, decision, fundamento,
+referencia, hashes SHA-256, actor FK profiles y fecha timezone con clock_timestamp.
+CHECKs para decision, textos no blancos (incluidos tab/newline) y hashes; indices
+por tenant y orden historico assessment/created_at/id. No relaciones ORM que
+eliminen eventos por cascade. FK a assessment/tenant y organization sin ON DELETE
+CASCADE: no borrar el padre para eliminar indirectamente el historial.
+
+RLS desde creacion: SELECT solo organizaciones autenticadas; INSERT ademas exige
+actor del auth.uid() y assessment propio borrador con documento presente.
+No politicas UPDATE/DELETE. Revocados UPDATE/DELETE/TRUNCATE de app_user y permisos
+PUBLIC; solo SELECT/INSERT de runtime. Privilegios administrativos siguen disponibles
+para mantenimiento autorizado, sin presentarlos como capacidad de usuario.
+Limpieza de fixtures usa propietario exclusivamente para eventos de tenants de test,
+antes de borrar organizaciones; sesiones runtime se revierten antes de limpiar.
+
+36 pruebas PostgreSQL/app_user sin BYPASSRLS: aislamiento/lectura sin auth, insercion
+valida, identidad suplantada/tenant/parent rechazados, documento/borrador requerido,
+permisos reales, UPDATE/DELETE/TRUNCATE denegados, padre protegido, FK cross-tenant
+incluso propietario, CHECKs/JSONB y fecha generada. Vaciar documento preserva evento.
+No verifica contenido juridico, hashes contra RAT ni permisos/suscripcion de API;
+estos controles corresponden a servicios futuros bajo lock, no al CHECK de tabla.
+
+Regresion integral 2470 passed en 221.64 s (3:41), incluidas pruebas anteriores de
+schemas/asociaciones. Black/Ruff/Alembic check/whitespace correctos. La suite completa
+reemplaza el total anterior como evidencia de regresion, no acredita cierre integral.
+No ampliar esta evidencia de persistencia a concurrencia/revision funcional futura.
+
+Sin exposicion API/documental ni accion de revision: sigue pendiente binding final
+con RAT actual, evaluador, estados derivados, permisos y relectura transaccional.
+Gates/positivo EIPD se conservan; no confirmacion excepcional habilitada. Fuentes
+oficiales pendientes. Proximo: CREATE/PATCH/GET documental de resolucion y binding,
+con semantica omitir/preservar, null/vaciar, reemplazo entero, inmutabilidad de
+confirmados/reemplazados y conservacion del historial; despues revision/evaluador.
+M3-T1 EN PROGRESO integral; sin commit.
+
+
+## 64. API documental de resolucion EIPD y asociacion final
+
+2026-10-06. CREATE/PATCH reciben eipd_resolution_assessment nullable con contrato
+editable EipdResolutionAssessmentV1; GET/salida devuelve forma interna con binding.
+Hash/actor/decision/estado aportados dentro del documento se rechazan (422).
+Sin endpoint de revision humana ni estados derivados de historial en este paso.
+
+Servicio construye contexto con todos los expedientes y snapshot finales. Orden:
+aplicar documentos/cambios y RAT; asociar especiales v10; asociar screening v11;
+asociar resolucion v1. PATCH mantiene lock de serie y relectura populate_existing;
+solo borrador editable. Omitir preserva documento/binding; null vacia JSONB como
+NULL SQL; objeto sustituye entero y asocia explicitamente. Cambios en contexto
+sin reaporte no actualizan binding. GET/readiness no asocian ni escriben.
+No cambiar hashes RAT ni comparadores historicos. No generar/sobrescribir eventos.
+
+Presencia de resolucion agrega barrera provisional compartida
+resolucion_eipd_no_validada (409) en readiness/confirmacion, hasta evaluador/revision
+funcionales. No altera motivos/positivo de screening ni habilita excepciones.
+Retirar documento no elimina historial; ruta ordinaria preparada y sin EIPD requerida
+conserva flujo previo. Confirmados/reemplazados rechazan cualquier PATCH.
+
+25 escenarios HTTP nuevos con RAT real/PostgreSQL/app_user: documento parcial,
+omision/null/reemplazo, historial previo intacto, lectura sin escritura, invalidacion
+por alta/cambio/baja de todos los documentos, orden simultaneo y cambio RAT real,
+reaporte explicito, metadata/enums/fechas cerrados, aislamiento por cabecera,
+viewer y suscripcion suspendida. Seis bases ordinarias verifican igualdad de barrera
+GET/POST y rechazo conservando borrador/vigente; retirar documento restaura ruta
+ordinaria y reemplazo/inmutabilidad. No confirmar excepcion ni extrapolar concurrencia.
+
+225 focalizadas aprobadas; regresion integral 2495 passed en 233.70 s (3:53).
+Ajuste posterior exclusivamente de redaccion de mensaje al usuario: los 25 HTTP
+revalidados (11.07 s). Black/Ruff/whitespace correctos; head local b51d3f6a9c20
+sin migracion nueva. Este total no certifica cierre funcional integral.
+
+Proximo: evaluador puro de completitud/aplicabilidad de resolucion segun §60;
+despues readiness/vigencia, accion humana autenticada, concurrencia/relectura y
+screening versionado/gate separado con fuentes verificadas antes de desbloqueo.
+Fuentes y demas pendientes integrales permanecen abiertos. EN PROGRESO; sin commit.
