@@ -1,6 +1,7 @@
 # M3-T1 — Registro de verificacion de fuentes EIPD
 
-Consulta: 2026-10-06. Registro documental, sin autorizacion de tratamiento.
+Ultima consulta: 2026-10-08 (§107). Consultas anteriores conservadas abajo.
+Registro documental, sin autorizacion de tratamiento.
 Estado de verificacion global de listas/orientaciones: PENDIENTE.
 
 ## Fuentes comprobadas
@@ -87,3 +88,40 @@ La ley sigue siendo base fija del producto por decision §70, independiente de
 vigencia temporal. Fuentes complementarias pendientes no desactivan desarrollo;
 fuentes_oficiales_no_verificadas/gate_eipd_no_habilitado y barrera positiva §67
 siguen vigentes. No contactar autoridades ni crear seguimiento automatico.
+
+## Revalidacion §107 — 2026-10-08
+
+Base Git limpia: 97d4fd29920e98a7b0a94714b04ae43e7cb5d010 (§106).
+URL anterior BCN devolvio tres lineas, sin texto util. Se verifico F1 mediante
+[portal nuevo BCN](https://nuevo.leychile.cl/navegar?idNorma=1209272), texto
+recuperado y apartado art15ter localizado. Corrobora exigencia previa por probable
+alto riesgo, cuatro supuestos y atribucion de listas/orientaciones a la Agencia.
+La consulta del responsable para recomendaciones es facultativa en el texto;
+no se convierte en requisito legal universal del producto.
+F4 reabierto: PDF Diario Oficial CVE 2583630, 34 paginas, texto recuperado.
+No se certifica vigencia temporal exhaustiva ni se revisan visualmente todas las
+paginas; la ley reformada sigue base fija por decision del usuario.
+
+Busqueda acotada reproducible:
+
+- "Agencia de Proteccion de Datos Personales" "evaluacion de impacto" orientaciones, site:gob.cl.
+- "proteccion de datos" "lista orientativa", site:diariooficial.interior.gob.cl.
+- "Agencia de Proteccion de Datos Personales" "orientaciones minimas", site:economia.gob.cl.
+- "Agencia de Proteccion de Datos Personales" "evaluacion de impacto" "resolucion", site:diariooficial.interior.gob.cl.
+- "Agencia de Proteccion de Datos Personales" "lista", site:gob.cl.
+- Busqueda de sitio oficial de Agencia Chile, sin restringir dominio.
+
+No se localizo/verifico instrumento complementario especifico con emisor Agencia,
+referencia, fecha/version y aplicabilidad a las rutas protegidas. Busqueda no
+exhaustiva: no prueba inexistencia ni estado constitutivo de la Agencia.
+Resultados agenciadatos.cl/agpdchile.cl no se acreditan como portal institucional;
+no se adoptan como autoridad por su nombre. Guias de Gobierno Digital/otras
+entidades y anuncios de institucionalidad tampoco sustituyen instrumento Agencia.
+No se asigna version ni verified_by inventados. Estado global PENDIENTE.
+
+Fuentes legales comprobadas y fuentes complementarias verificadas son requisitos
+distintos. No cambiar sources_status/acceptance_status/activation en una politica
+real a partir de esta revision; no crear publicacion/seleccion ni contactar terceros.
+Siguiente trabajo independiente: procedimiento verificable de provision operativa
+con politica deshabilitada y expediente de aceptacion tecnica; habilitacion real
+requiere completar fuentes y decision trazable aun pendientes.

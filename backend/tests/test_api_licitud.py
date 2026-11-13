@@ -20,6 +20,9 @@ from app.db.models import (
     UserRole,
 )
 from app.services.eipd import build_eipd_context_binding_hash_v11
+from tests.eipd_selected_policy_fixtures import (
+    explicit_review_policy as explicit_review_policy,
+)
 
 
 @pytest.fixture

@@ -126,6 +126,17 @@ def confirmation(monkeypatch, complete_payload, negative_controls):
         confirmed_at=datetime.now(UTC),
         confirmed_by=actor,
     )
+    # Dobles de unidad; locks y politica real se prueban con PostgreSQL/HTTP.
+    monkeypatch.setattr(
+        licitud, "lock_eipd_policy_selector_v1", AsyncMock(return_value=False)
+    )
+    from app.services.eipd_policy import resolve_eipd_gate_policy_v1
+
+    monkeypatch.setattr(
+        licitud,
+        "_selected_disabled_eipd_policy_v1",
+        AsyncMock(return_value=resolve_eipd_gate_policy_v1()),
+    )
     db = AsyncMock()
     db.scalar.return_value = None  # Sin historial EIPD en este doble.
     results = []

@@ -7572,3 +7572,1431 @@ Proximo: actualizar aceptacion con evidencia §§80-81 y delimitar contrato de
 habilitacion del servidor, incluyendo transicion de diagnostico historico v1 sin
 filtrado de codigos y verificacion complementaria auditable. Mantener bloqueos
 mientras faltan fuentes/aceptacion; el alcance integral restante sigue pendiente.
+
+
+## 82. Aceptacion actualizada y contrato de habilitacion del servidor
+
+2026-10-07. HEAD revisado 91a71cd26ca3ab9e2960d0c4f1ffb3f28de973fc, limpio.
+Paso de diseno/documentacion; no autoriza habilitacion ni afirma verificacion de
+fuentes distinta de §79. Ley como base fija §70, sin fecha de activacion normativa.
+
+### 82.1 Aceptacion de evidencia y pendientes
+
+| Criterio §79 | Actualizacion comprobada | Alcance y pendiente |
+| --- | --- | --- |
+| HTTP protegido completo | §80: cuatro casos, dos rutas con/sin negativa; preparation_result preparado y solo barreras globales en review_blockers | Cubierto con contrato ordinario; no seis bases protegidas ni habilitacion |
+| Concurrencia protegida preparada | §81: ocho casos, dos rutas x revision/confirmacion x commit/rollback, dos app_user y RAT real | Cubierto para retiro de dependencia sensible y ultima negativa; no cambio concurrente de politica ni confirmacion exitosa |
+| Bases ordinarias y confirmado anterior | §78: seis bases ordinarias, rechazo conserva confirmado | No extrapolar a bases que excluyen sensibles |
+| Instrumento complementario aplicable/versionado | §79 no verificado | PENDIENTE; busqueda acotada no acredita inexistencia |
+| Decision versionada de habilitacion/compatibilidad | Controles actuales §67/§75 y transversal v1 incondicionales | PENDIENTE implementacion/pruebas; no retirar codigos por lista |
+| Revision positiva y confirmacion exitosa | Ninguna autorizada por producto actual | PENDIENTE evidencia tecnica, fuentes y aceptacion explicita de frontera |
+
+Se cierra el pendiente de evidencia HTTP/concurrencia preparada del escenario
+acotado, no la aceptacion final de habilitacion. Ultima suite integral 3012 passed
+§78; §§80-81: 97 HTTP focalizadas, no nuevo total integral. M3-T1 EN PROGRESO.
+
+### 82.2 Contrato interno propuesto EipdGatePolicyV1
+
+Entrada exclusivamente del servidor, cerrada/revalidada e inmutable tras evaluar.
+No forma parte de Create/PATCH/ReviewIn; rechazar campos approved/can_confirm,
+policy, flags de fuentes/aceptacion y fechas de activacion enviados por cliente.
+Resolver inicialmente devuelve politica deshabilitada; ninguna variable de entorno
+booleana, texto del tenant, fecha legal o busqueda sin resultados la habilita.
+
+Campos requeridos (nullable explicitos donde corresponda):
+
+- policy_version: StrictInt literal 1; policy_reference: identificador de revision
+  controlada del servidor, no referencia libre de usuario.
+- routes: conjunto cerrado de sensible_derechos/sensible_biometrica_derechos,
+  sin rutas repetidas; no habilitacion global de excepciones por comodin.
+- sources_status: pendiente/verificadas; source_records: instrumentos con emisor,
+  referencia/URL primaria, version/fecha y analisis de aplicabilidad a cada ruta,
+  junto a evidencia de verificacion y responsable del registro del servidor.
+- acceptance_status: pendiente/aceptada; acceptance_reference y validation_commit:
+  evidencia de revision tecnica de esta frontera/version, no total de pruebas solo.
+- activation: deshabilitada/habilitada; cambios versionados/auditables de politica.
+
+Combinaciones contradictorias o incompletas son errores de contrato, nunca permiso.
+Fuentes verificadas exige instrumentos y trazabilidad comprobados del servidor;
+aceptada exige referencia/commit/evidencia para las rutas seleccionadas. Habilitada
+exige ambas condiciones y al menos una ruta. Pendiente/deshabilitada es valido y
+conserva barreras. No inventar instrumento ni declarar verificadas por ausencia
+inferida de busqueda. No incorporar en este contrato una obligacion legal general
+de aprobacion de Agencia: consulta y limites de riesgo mantienen contrato §59/§65.
+
+Hash canonico policy_hash cubre version/referencia, rutas, fuentes/aplicabilidad,
+aceptacion y activation; calcular del objeto validado en servidor. Cualquier cambio
+relevante produce otra identidad de politica. La evidencia real se registra/revisa
+antes de aceptar fuentes, no se acredita porque un objeto interno diga verificadas.
+
+### 82.3 Composicion y decision versionadas, sin circularidad
+
+Nueva composicion v2 prevista recibe contexto §74 y politica interna explicita;
+v1 y todos los bindings documentales/RAT conservan contratos actuales. Diagnostico
+v1 entero permanece visible. Version de politica (1), composicion/gate (2), deteccion
+(2) y bindings actuales son conceptos distintos; no aceptar version desde cliente.
+
+Motivos documentales/frontier/ordinarios se calculan aun con politica deshabilitada.
+Etapa sources depende de evidencia de politica; activation exige ruta incluida y
+aceptacion/habilitacion. Resultado documental preparado sigue sin otorgar permiso.
+review_blockers nunca exige ultima revision positiva; negativas siguen contrato
+parcial §67/§68. confirmation_blockers agrega ultima continuar vigente, misma
+organizacion/assessment y hashes documento/contexto/politica actuales.
+
+Prerrequisitos de revision positivos v2 componen controles en vez de sumar barreras
+fijas §67 despues de composicion habilitada. V1 conserva su comportamiento entero.
+Sin politica resuelta/valida, ruta fuera de alcance, fuentes o aceptacion pendientes:
+continuar y confirmacion excepcional siguen rechazados. Faltantes/revision se
+reportan por etapa, sin ocultar positivos ni convertir requiere_eipd en negativo.
+
+### 82.4 Transicion de controles transversales
+
+Confirmacion v2 futura debe construir decision semantica propia compartiendo los
+validadores actuales: base ordinaria, rol/RAT/vigencia, especiales, dependencias,
+residuos, deteccion v2, resolucion, politica y revision. No llamar v1 y sustraer
+screening_eipd_no_preparado/resolucion_eipd_no_validada u otros codigos. No reutilizar
+un can_continue de deteccion como permiso de confirmacion. Motivos historicos v1
+quedan como diagnostico con version explicita, separados de decision activa v2.
+
+Fuera de primera frontera/politica habilitada, conservar el rechazo ordinario y
+transversal correspondiente, incluidas rutas mixtas, otros positivos, contextos
+incompletos y bases incompatibles. Antes de conectar decision activa: pruebas de
+equivalencia del flujo ordinario y de cada rechazo historico, no solo caso feliz.
+GET consulta sin escribir/reescribir bindings, mismas entradas que operaciones.
+
+### 82.5 Vigencia humana y atomicidad de politica
+
+Revision positiva futura registra tambien policy_reference/version/hash actuales
+como metadatos de servidor. Requiere contrato/persistencia append-only nuevo y
+migracion propia antes de conexion: no reescribir eventos ni migraciones antiguas.
+Eventos negativos existentes permanecen legibles. Evento positivo sin identidad
+de politica no acredita gate v2 aunque documento/contexto coincidan; una nueva
+politica requiere nueva revision humana, no promover evento viejo automaticamente.
+
+Bajo lock de serie: releer borrador/RAT/ultimo evento y resolver politica actual
+antes de insertar/reemplazar/flush. Politica debe permanecer estable hasta commit:
+si es artefacto inmutable del proceso, impedir cambio durante transaccion; si se
+persiste, adoptar revision/lock compatible con actualizacion de politica y probar
+concurrencia/revocacion. No basta comparar un hash antes de esperar lock. Caller
+maneja rollback. No introducir segundo orden de locks sin diseño de no-deadlock.
+
+### 82.6 Implementacion secuenciada y validacion
+
+Siguiente paso: schema/evaluador puro de politica y composicion v2, sin resolver
+habilitada en produccion ni migracion/API/gates nuevos. Pruebas: cierres/StrictInt,
+modelos mutados, rutas/dependencias, estados contradictorios, trazabilidad ausente,
+hash estable/sensible a cambios, fuentes pendientes, habilitacion limitada a ruta,
+revision ausente/negativa/politica vieja y cero circularidad. Mantener v1 sin cambios.
+
+Luego persistencia de metadatos de politica en eventos y resolver/auditoria;
+prerrequisitos/decision transversal v2 compartidos; HTTP/concurrencia real de cambio
+de politica y dependencias, confirmado previo, tenant/roles/suscripcion y hashes.
+Resolver real queda deshabilitado mientras fuentes/aceptacion faltan. Cubrir exitos
+con politica sintetica de test no autoriza habilitar politica real. Ultima suite
+completa y revision tecnica requeridas antes de cualquier habilitacion efectiva.
+
+Paso documental, diff --check correcto; no reejecutar pruebas por diseno sin codigo.
+Sin migracion, nuevo commit ni push; frontera no habilitada y M3-T1 EN PROGRESO integral.
+
+
+## 83. Politica pura y composicion v2 implementadas
+
+2026-10-07. eipd_policy.py implementa EipdGatePolicyV1, SourceRecordV1 y
+EipdReviewPolicyIdentityV1 exclusivos del servidor; no se agregan a API/input del
+tenant ni se implementa resolver real. Schema cerrado, StrictInt version 1 y
+revalidate_instances always en politica/fuentes/identidad; normaliza textos y exige
+referencias, URL HTTP(S), fecha/version, cobertura de rutas, responsables y evidencia.
+URL valida no acredita emisor/autenticidad: verificacion real pendiente en resolver.
+
+Rechaza rutas/instrumentos duplicados, rutas desconocidas, habilitacion sin rutas,
+fuentes verificadas sin instrumentos/cobertura y aceptacion sin referencia, commit
+Git completo, evidencia/responsable. Fuentes pendientes/aceptacion pendiente y
+activacion deshabilitada siguen estados validos. No introduce fecha de vigencia
+legal; fecha explicita date permite detectar publicaciones futuras, sin reloj interno.
+
+build_eipd_policy_hash_v1 SHA256 canonico de todos los datos validados, ordenando
+rutas/instrumentos y rutas de aplicabilidad; cambios de evidencia/aceptacion/emisor
+responsable/activacion producen otra identidad. evaluate_eipd_policy_v1 devuelve
+snapshot congelado y motivos sources/activation ordenados/deduplicados. Politica
+None conserva fuentes/gate pendientes y politica_no_disponible; ruta fuera de
+politica no queda habilitada. Politicas sinteticas de test no autorizan el producto.
+
+EipdControlCompositionInputV2 agrega assessment v1, politica nullable explicita y
+ultima identidad humana nullable; identidad sin evento rechazada. Salida congelada
+EipdControlCompositionV2 version 2 agrega politica y review_policy_status, separado
+de review_state documental. Mismo nucleo privado compone documentacion y etapas
+para v1/v2; v1 mantiene barreras constantes sin cambio de firma/resultados.
+V2 calcula etapas de politica durante evaluacion, sin filtrar motivos de v1.
+
+review_blockers no exige evento humano previo. confirmation_blockers agrega
+identidad de politica de ultimo evento: id de evento, version, referencia y hash
+actuales; sin identidad/otra revision/hash previo bloquean. Vigencia documental
+se conserva separada: politica coincidente no elimina obsolescencia del documento,
+contexto, otro tenant/assessment ni decision negativa. Deteccion requiere_eipd y
+screening v1 entero permanecen. Sin can_confirm ni permiso externo de evaluadores.
+
+104 pruebas nuevas: estados/campos/tipos/cobertura/tipos URL, hashes canonicos y
+cambios relevantes, rutas limitadas, politica ausente/deshabilitada/futura, fecha
+explicita, entradas/ReviewIn cerrados, ambas rutas preparadas sin circularidad,
+tres decisiones, politica anterior/otro evento/documento/tenant, faltantes comunes,
+inmutabilidad y modelos anidados modificados revalidados. Se corrigio durante
+pruebas la aceptacion por defecto de instancia anidada ya validada pero mutada;
+revalidacion always evita confiar en ese estado. No se altera modelo cliente v1.
+184 pruebas puras aprobadas (104 nuevas + 80 composicion v1). Suite completa: 3128 passed en 276.34 s, incluyendo §§80-81 y nuevas pruebas
+de politica; Black/Ruff/diff --check correctos.
+
+API/readiness/acciones/confirmacion siguen en v1 y barreras actuales. Sin persistir
+metadatos ni activar resolver/gate v2. Fuentes complementarias/aceptacion pendientes;
+M3-T1 EN PROGRESO integral y ley fija. Sin migracion, nuevo commit ni push.
+Proximo: contrato/persistencia append-only de identidad de politica en eventos,
+compatibilidad con historicos y RLS antes de resolver/auditoria/accion v2. Politica
+real permanece deshabilitada mientras faltan fuentes/aceptacion y evidencia final.
+
+
+## 84. Identidad de politica persistible en eventos EIPD
+
+2026-10-07. Nueva migracion append-only c62e407bad31 sobre b51d3f6a9c20;
+EipdResolutionReview incorpora policy_version Integer, policy_reference Text y
+policy_hash Text, todos nullable y sin defaults/backfill. Restriccion CHECK exige
+los tres NULL para historia sin identidad, o todos NOT NULL con version 1,
+referencia no vacia y hash hexadecimal minusculo de 64 caracteres. NOT NULL
+explicitos en rama completa impiden aceptar identidad parcial por logica SQL NULL.
+Convencion de nombres del repo se conserva, incluido nombre generado/truncado;
+pruebas identifican el constraint real desde catalogo PostgreSQL.
+
+No modifica RLS SELECT/INSERT, FK compuesta tenant/assessment, actor autenticado,
+requisito de borrador/documento, ni prohibicion UPDATE/DELETE/TRUNCATE app_user.
+Eventos antiguos no se reescriben ni reciben una politica supuesta. Continuar
+historico sin identidad sigue legible y no acredita composicion v2. No se exige
+identidad a negativas antiguas ni se inventa autorizacion para nuevos positivos.
+
+EipdResolutionReviewWithPolicyOut agrega lectura cerrada/nullable con version
+estricta y coherencia de los tres campos, heredando UTC y metadatos de servidor.
+No sustituye respuesta API v1 en este paso. ReviewIn sigue rechazando los tres
+campos; caller no puede aportar hashes/version/referencia de politica.
+
+build_eipd_review_policy_metadata_v1 calcula campos desde politica interna validada;
+no autoriza insercion positiva ni verifica fuente externa. derive_eipd_review_policy_identity_v1
+mapea id del evento persistido junto a identidad validada; historicos todos NULL
+producen None. Metadatos parciales, version/hash invalidos o identidad sin id se rechazan, sin
+promover revisiones viejas a politica actual. No resolver habilitado ni conexion de
+acciones v2; POST actual conserva barreras y eventos sin identidad.
+
+35 pruebas nuevas: insercion/lectura runtime con identidad, legacy intacto y mapper,
+12 parciales/formatos invalidos rechazados por CHECK real, spoof tenant/actor/parent/
+sin auth rechazado por RLS, UPDATE de identidad prohibido, tres decisiones legacy
+sin promocion, salida cerrada/tipos estrictos, ReviewIn rechaza metadatos y mapper
+rechaza identidad incompleta. 71 pruebas de persistencia/contratos aprobadas,
+incluyendo 36 anteriores. Alembic check: No new upgrade operations detected.
+Migracion aplicada localmente; comparacion de contenido anterior a/post upgrade
+sobre 0 eventos existentes (no constituye prueba de conversion de historial poblado).
+Fixtures de eventos sin politica verifican compatibilidad nullable y lectura.
+Suite completa: 3163 passed en 277.43 s; Black/Ruff/diff --check correctos.
+
+Proximo: resolver de servidor deshabilitado y lectura de composicion/identidad v2,
+antes de auditoria/politica real y acciones v2. Habilitacion efectiva aun requiere
+fuentes complementarias/aceptacion, decision transversal v2 sin filtrar v1 y
+concurrencia de politica. Ley fija; M3-T1 EN PROGRESO integral; gates bloqueados.
+Sin nuevo commit ni push; ninguna migracion historica reescrita o downgrade ejecutado.
+
+
+## 85. Resolver deshabilitado y lectura de composicion v2
+
+2026-10-07. resolve_eipd_gate_policy_v1 devuelve instancia nueva/revalidada de
+artefacto fijo m3-t1-eipd-deshabilitada-v1, version 1, ambas rutas delimitadas,
+fuentes/aceptacion pendientes, sin instrumentos/evidencia supuestos y activacion
+deshabilitada. Sin parametro de cliente, flags/env, reloj normativo, red o DB;
+no acredita auditoria de politicas habilitadas ni permite cambios de politica en
+produccion. Una instancia mutada no altera la siguiente resolucion.
+
+LegalAssessmentReadinessOut agrega eipd_controls_v2 nullable junto a v1 conservado.
+Salida cerrada/version 2 incluye policy, review_policy_status y latest_review_policy
+nullable (id del evento + version/referencia/hash). Policy snapshot valida identidad
+completa, estados de activacion coherentes y rutas sin duplicados; tipos/versiones
+estrictos, campos extra rechazados. Deteccion anidada version 2 y politica version 1
+permanecen conceptos separados. No incluye can_confirm ni permiso de tratamiento.
+
+Readiness construye ambas composiciones con mismo contexto RAT actual, vigencia,
+fecha explicita y ultimo evento. Constructor de entrada comun evita drift. Consulta
+unica de historial obtiene payload legacy e identidad desde la misma fila filtrada
+por tenant/assessment y ordenada created_at/id; acciones v1 reutilizan wrapper legacy.
+No busca evento anterior si ultimo carece de politica o es negativo. Ambito de
+exposicion igual a §76: EIPD/documento/excepcion/historia; flujo ordinario sin estos
+antecedentes mantiene ambas composiciones null.
+
+GET no escribe ni reasocia; retirar documento conserva historial y separa vigencia
+documental obsoleta de identidad de politica coincidente/anterior. Politica vigente
+no elimina negativa ni bloqueos globales. Metadatos guardados no verifican fuentes
+reales; datos editables del tenant tampoco. Root v1/confirmation_blockers permanecen
+intactos y POST continuar/confirmar siguen rechazados por reglas v1. No conecta
+composicion v2 a autorizacion o accion mutadora, ni activa gates por politica de test.
+
+26 pruebas nuevas: resolver fijo/instancias independientes/env ignorada, contratos
+cerrados y versiones/coherencia (ambas rutas), HTTP preparado con una sola consulta
+real de historial, GET repetido/parametros ignorados, aislamiento tenant, acciones
+bloqueadas y borrador/historial intactos. Historia positiva se crea solo como fixture:
+sin identidad/current/anterior; politica actual deshabilitada impide usarla para
+confirmar. Retiro documental conserva identidad/evento; ultima negativa legacy
+prevalece sobre positiva anterior con identidad. Flujo ordinario null verificado.
+26 pruebas aprobadas; 29 HTTP previas aprobadas en validacion inicial.
+Suite completa: 3189 passed en 279.29 s; Black/Ruff/diff --check correctos.
+
+Proximo: prerequisitos puros versionados v2 de revision, separando negativos
+parciales de positivos con composicion/politica actual; luego accion y decision
+transversal v2 sin filtrar codigos v1, auditoria/politica real y concurrencia de
+politica antes de habilitar. Fuentes complementarias/aceptacion siguen pendientes.
+Ley fija; M3-T1 EN PROGRESO integral. Sin nueva migracion, commit ni push.
+
+
+## §86 — Prerrequisitos puros de revision EIPD v2
+
+2026-10-07. eipd_review_v2 implementa evaluador puro versionado con entrada
+interna cerrada y revalidacion de modelos anidados mutados. Resultado inmutable:
+decision, motivos ordenados/deduplicados y composicion opcional. Sin DB, permisos,
+accion, resolver activo ni can_confirm.
+
+Nucleo parcial compartido con v1 valida fecha explicita, request cerrado, borrador,
+documento/contexto presentes y asociacion vigente. V1 conserva motivos, orden y
+bloqueos fijos de positivos. requiere_cambios/no_continuar usan estos requisitos
+parciales y no ejecutan composicion completa: faltantes ordinarios/documentales,
+alto riesgo o politica deshabilitada no impiden registrar una negativa valida.
+
+continuar compone v2 y conserva todos sus review_blockers, incluida politica,
+fuentes, aceptacion, ruta, versiones y preparacion documental. No usa
+confirmation_blockers ni exige revision positiva anterior: evita circularidad;
+una negativa anterior o identidad de politica obsoleta no sustituye ni impide
+por si sola la nueva revision. Confirmacion conserva sus controles propios.
+
+110 pruebas nuevas cubren ambas rutas, negativos parciales, condiciones comunes,
+positivos incompletos/deshabilitados, politica sintetica preparada, ausencia de
+revision previa, historia negativa/obsoleta, contratos cerrados/modelos mutados,
+fecha explicita e inmutabilidad. 148 pruebas focalizadas aprobadas, incluidas 38
+v1; suite completa 3299 passed en 281.10 s. Black/Ruff/diff --check correctos.
+Politica sintetica preparada solo prueba el evaluador; no activa producto real.
+
+Proximo: integrar revision autenticada v2 con relectura bajo lock y politica
+exclusiva de servidor deshabilitada, preservando negativos y metadatos; despues
+decision transversal v2, auditoria/politica real y concurrencia de politica.
+Fuentes complementarias/aceptacion pendientes; acciones/gates reales siguen v1
+bloqueados en este paso. Ley fija; M3-T1 EN PROGRESO integral.
+Sin nueva migracion, commit ni push.
+
+
+## §87 — Revision autenticada con prerrequisitos v2 y politica de servidor
+
+2026-10-07. La accion existente record_eipd_resolution_review_v1 conserva endpoint,
+autenticacion/permiso edit_content, suscripcion, tenant y transaccion; usa ahora
+prerrequisitos v2 para decidir. Bajo FOR UPDATE de serie relee borrador/versiones,
+contexto actual desde M2 y documento antes de resolver politica fija deshabilitada.
+Una consulta obtiene ultimo evento e identidad; fecha explicita comun. Los controles
+v1 permanecen diagnosticos sin filtrar sus codigos; no determinan la nueva decision.
+
+Negativas conservan requisitos parciales y pueden registrarse aun con documentos
+incompletos o politica deshabilitada. Eventos nuevos guardan version/referencia/hash
+de politica desde el servidor, junto a actor y hashes documentales existentes.
+Identidad vigente no convierte una negativa en aprobacion ni habilita confirmacion.
+Eventos historicos sin politica permanecen sin identidad; no backfill ni fallback.
+Salida publica de evento conserva contrato previo; readiness expone su identidad v2.
+
+continuar exige review_blockers v2 y sigue rechazado por fuentes/aceptacion pendientes
+y activacion deshabilitada. Error 409 conserva issues/eipd_controls legacy y agrega
+evaluation_version 2, issues_v2 y eipd_controls_v2. No exige positiva previa y no
+escribe evento/documento al rechazar. Confirmacion y decision transversal siguen v1.
+Cliente no aporta politica ni activa servidor mediante query o payload.
+
+Diez pruebas HTTP nuevas: negativas parciales con identidad/actor de servidor,
+ambas rutas preparadas con/sin negativa previa, composicion identica a readiness,
+una consulta de historial, preservacion y cuatro rechazos de politica de cliente.
+Prueba historica legacy conserva evento negativo sin identidad mediante fixture;
+concurrencia real preparada ampliada con contexto/ultimo evento/identidad v2 tras
+commit o rollback. 71 focalizadas aprobadas antes de ampliar aserciones concurrentes.
+Suite completa: 3309 passed en 290.08 s, incluidas las aserciones concurrentes
+ampliadas. Black/Ruff/diff --check correctos.
+
+Proximo: decision transversal/confirmacion v2 bajo lock sin filtrar reglas v1;
+auditoria/politica real, exitos y concurrencia de politica antes de habilitar.
+Fuentes complementarias/aceptacion siguen pendientes. Ley fija; M3-T1 EN PROGRESO
+integral. Sin nueva migracion, commit ni push.
+
+
+## §88 — Decision transversal de confirmacion v2 bajo lock
+
+2026-10-07. confirm_legal_assessment_v1 conserva endpoint/permisos/suscripcion,
+FOR UPDATE de serie, relectura del borrador/versiones, justificacion, alcance,
+vigencia RAT y validadores propios de las seis bases ordinarias. Antes de consultar
+o reemplazar confirmado previo obtiene ultimo evento/identidad en una consulta y
+construye composiciones v1/v2 con mismo contexto actual y fecha explicita.
+
+Dentro del ambito EIPD (resolucion actual, detector positivo/revision o excepciones
+de derechos), confirmation_blockers de v2 determinan la
+decision. La composicion valida la frontera delimitada y rechaza las restantes;
+no borra ni filtra codigos v1. Fuera de ese ambito las barreras transversales v1
+siguen decidiendo. Validadores ordinarios y contexto RAT se ejecutan antes del gate.
+Diagnosticos legacy special/eipd/confirmation_blockers/eipd_controls permanecen;
+error agrega evaluation_version 2 y eipd_controls_v2. Politica exclusivamente del
+resolver fijo deshabilitado; query del cliente no activa gates.
+
+Identidad vigente por si sola no acredita decision positiva ni documentacion actual.
+Eventos positivos historicos con identidad actual/anterior o sin identidad no
+superan fuentes/aceptacion/activacion pendientes. Negativas conservan decision;
+retirar documento mantiene historial y readiness v2 obsoleta/incompleta. El historial
+por si solo no amplia el gate ordinario cuando no hay supuestos EIPD actuales.
+Rechazo ocurre antes de escrituras/reemplazo del confirmado previo; sin migracion.
+
+Once pruebas HTTP nuevas cubren ambas rutas y cinco historias (ausente, positiva
+legacy, positiva con politica actual/anterior y negativa), coincidencia con readiness,
+una consulta, query ignorada y preservacion de borrador/historial; caso ordinario
+con historial y sin documento confirma sin ampliar el gate. La suite inicial
+detecto seis regresiones de ese alcance y se corrigieron conservando el flujo previo. Concurrencia real preparada amplia aserciones v2 tambien
+para confirmar tras commit/rollback, manteniendo confirmado previo y negativa.
+61 pruebas previas aprobadas; 23 focalizadas posteriores aprobadas, once nuevas.
+Tras corregir alcance/fixture: 54 focalizadas aprobadas. Suite completa final:
+3320 passed en 287.70 s; Black/Ruff/diff --check correctos.
+
+Proximo: contrato/auditoria de politica real y atomicidad de cambios de politica,
+con evidencia de fuentes complementarias y aceptacion antes de habilitar. Resolver
+continua deshabilitado; exitos de frontera habilitada y concurrencia de politica
+siguen pendientes. Ley fija; M3-T1 EN PROGRESO integral. Sin commit ni push.
+
+
+## §89 — Contrato de auditoria y seleccion transaccional de politica real
+
+2026-10-07. Contrato detallado en m3-t1-eipd-politica-auditoria.md (DISENO).
+Publicaciones inmutables con referencia unica/hash de servidor; selector global
+revisionado y eventos append-only atomicos. Schema version 1 distinto de revision
+del selector; publicar no selecciona. Reseleccion/revocacion requieren nueva
+publicacion/referencia, sin promover revisiones historicas ni seleccionar vieja
+politica habilitada. Canal administrativo separado del runtime/tenant.
+
+Orden futuro selector FOR SHARE -> serie FOR UPDATE -> relecturas; seleccion usa
+FOR UPDATE del selector sin locks de serie. Politica permanece estable hasta
+commit/rollback. Requiere modificar uniformemente el orden actual antes de conectar
+resolver real; §87/88 todavia usan artefacto fijo y lock de serie solamente.
+Readiness orientativo coherente; integridad desconocida falla cerrado en ambito EIPD.
+Historia sola no amplia gate ordinario. Negativas parciales admitidas con politica
+valida deshabilitada, sin inventar identidad ante corrupcion del resolver.
+
+Evidencia append-only de confirmacion excepcional futura asocia tenant/assessment,
+evento humano, publicacion/revision/seleccion y hashes, atomicamente con reemplazo;
+requiere contrato/migracion y RLS propios antes de habilitar exitos. Revocacion
+conserva evidencia historica y bloquea acciones nuevas, sin mutar confirmados previos.
+Matriz incluye privilegios, conflictos de revision, commit/rollback, cambios y
+revocacion concurrentes, ambos sentidos de espera, tenants y ambas rutas.
+
+Proximo: contratos/evaluadores puros de publicacion/seleccion/evidencia; despues
+persistencia, privilegios/RLS, resolver/orden de locks y concurrencia/exitos antes
+de fuentes/aceptacion y habilitacion real. Paso documental; diff --check correcto.
+No se reejecuta suite por diseno sin codigo; ultima completa §88: 3320 passed.
+Resolver deshabilitado. Ley fija; M3-T1 EN PROGRESO integral.
+Sin nueva migracion, commit ni push.
+
+
+## §90 — Contratos y evaluadores puros de auditoria de politica
+
+2026-10-07. eipd_policy_audit.py implementa contratos internos cerrados/revalidados:
+publicacion, evento de seleccion, selector, snapshot de auditoria, solicitud/plan
+y evidencia de confirmacion. Modelos frozen, revisiones StrictInt y fechas con zona
+normalizadas a UTC; constructores reciben id/actor/fecha explicitos de servidor.
+Politica anidada conserva contrato §83; hash canonico calculado/comprobado, referencias
+de publicacion unicas. Revalidacion desde python detecta modelos anidados mutados.
+
+Snapshot valida publicaciones/eventos sin duplicados, cadena completa ordenada desde
+bootstrap revision 1, hashes/identidad anterior, tiempos y selector igual al ultimo
+evento. Sin eventos admite selector null solo como estado previo a bootstrap; no
+es politica disponible para confirmar. Constructor de seleccion compara revision
+esperada, exige publicacion registrada y no seleccionada previamente, genera evento
+con revision consecutiva/identidad previa y selector coherente sin mutar entradas.
+Publicar no selecciona; plan no escribe ni acredita permiso administrativo.
+
+Evidencia pura exige selector coherente y recompone controles v2 con politica de la
+publicacion actual, assessment/revision humana e identidad revalidados. Sin motivos
+de confirmacion y sin tiempos invertidos, construye evidencia con tenant/assessment,
+evento humano, publicacion/revision/seleccion, politica, hashes, actor y fecha.
+Identidad sola o documento preparado no eluden negativos, obsolescencia, faltantes
+ordinarios, politica deshabilitada ni otro tenant/assessment. Exito sintetico prueba
+contrato; no confirma assessment real ni persiste evidencia.
+
+65 pruebas nuevas: bootstrap/revocacion puros, contratos cerrados/hash/versiones,
+StrictInt, falta de zona, duplicados/modelos mutados, revision esperada obsoleta,
+publicacion desconocida/reseleccion, cadenas multiples/corrupcion/tiempos/plan,
+evidencia de ambas rutas y rechazo de controles incompletos/historia impropia.
+169 focalizadas aprobadas junto a 104 de politica/composicion §83.
+Suite completa: 3385 passed en 293.55 s; Black/Ruff/diff --check correctos.
+
+Pendiente persistencia/privilegios/RLS, autenticacion administrativa, historia completa
+obtenida de DB, locks/atomicidad y resolver real. Modelos frozen no convierten objetos
+anidados en almacenamiento inmutable; revalidacion protege fronteras puras, DB debera
+impedir UPDATE/DELETE. Next: migracion append-only de control global y evidencia tenant
+con pruebas PostgreSQL/RLS antes de servicios/resolver y cambio de orden de locks.
+Fuentes/aceptacion pendientes, resolver fijo deshabilitado. Ley fija;
+M3-T1 EN PROGRESO integral. Sin migracion, commit ni push.
+
+
+## §91 — Persistencia y privilegios de auditoria global EIPD
+
+2026-10-07. Migracion append-only d73f518cbe42 sobre c62e407bad31 aplicada localmente:
+eipd_policy_publications, eipd_policy_selections y eipd_policy_selector. Modelos ORM
+alineados. Son controles globales, no datos de organizacion: sin tenant ficticio;
+eventos humanos conservan sus tablas/RLS. Sin bootstrap ni politica activa insertada.
+
+Publicacion almacena payload JSONB, version/referencia/hash, actor/fecha y evidencia.
+Referencia unica; CHECK identidad/version/formato/textos y objeto JSONB con identidad
+explicita. DB no recompone hash canonico ni verifica fuentes: futuro canal servidor
+debe usar contratos puros §90 para validar payload completo/hash/fechas/autoridad.
+FK de seleccion exige publicacion/hash registrados; revision unica/consecutiva,
+identidad anterior completa y FK propia a revision/publicacion/hash anteriores.
+Publicacion solo puede seleccionarse una vez. Selector singleton exige triple
+revision/publicacion/evento coherente. Triggers de constraint diferidos comparan
+selector con ultimo evento al finalizar transaccion: evento sin selector actualizado
+falla al commit y rollback conserva estado anterior.
+
+Rol eipd_policy_admin NOLOGIN/NOSUPERUSER/NOBYPASSRLS/NOCREATEROLE/NOCREATEDB,
+separado y no asumible por app_user; sin concesion de membresia runtime. Migracion
+rechaza rol preexistente incompatible o membresia runtime. Admin SELECT/INSERT en
+control y UPDATE solo selector; sin UPDATE/DELETE/TRUNCATE de publicaciones/eventos.
+RLS explicito de administracion y lectura autenticada global; app_user SELECT solo,
+sin escritura/TRUNCATE. PUBLIC sin privilegios. Owner de migracion sigue privilegiado
+para mantenimiento; append-only se exige a runtime/canal administrativo, no al owner.
+Downgrade de esta migracion elimina tablas/triggers/funcion, conserva rol NOLOGIN
+porque puede pertenecer a gestion de despliegue externa. No se reescriben migraciones
+historicas ni eventos tenant. Rol no se expone como canal/API administrativa.
+
+44 pruebas nuevas PostgreSQL: privilegios/flags/RLS, lectura sin/con autenticacion
+y otro tenant, escrituras runtime y SET ROLE denegados, admin append-only y seleccion
+atomica con rollback, trece corrupciones de publicacion/cadena/selector, fallo real
+al commit por selector pendiente e inexistencia de publicacion tras rollback.
+Fixtures solo datos sinteticos; limpieza owner elimina esos ids, no datos ajenos.
+44 aprobadas en 2.98 s; Alembic check sin operaciones nuevas.
+Suite completa: 3429 passed en 297.19 s; Black/Ruff/diff --check correctos.
+
+Paso acotado al control global. Evidencia por tenant requiere siguiente migracion,
+FK compuestas al assessment/evento humano/publicacion/seleccion y RLS/append-only;
+no habilitar confirmacion excepcional antes de esa evidencia atomica. Resolver,
+servicio administrativo, relectura/orden de locks y concurrencia de politica quedan
+pendientes. Actualmente solo artefacto fijo deshabilitado, sin fuentes/aceptacion
+verificadas. Ley fija; M3-T1 EN PROGRESO integral. Sin commit ni push.
+
+
+## §92 — Persistencia append-only de evidencia de confirmacion tenant
+
+2026-10-07. Migracion e84a629dcf53 sobre d73f518cbe42 aplicada localmente, sin editar
+migraciones anteriores ni rellenar historicos. EipdConfirmationEvidence almacena
+identidades tenant/assessment/review/publication/selection, revision del selector,
+politica, hashes documento/contexto, actor y fecha. Una evidencia por assessment.
+review_decision interno constante continuar permite FK a decision humana positiva;
+no es input publico ni modifica el contrato puro §90.
+
+Nuevas UNIQUE de soporte en publicaciones/eventos humanos y FK compuestas exigen:
+assessment del tenant, review del mismo tenant/assessment con politica/hashes exactos
+y decision continuar, publicacion con version/referencia/hash coincidentes y triple
+revision/publicacion/evento de seleccion auditado. Metadatos legacy null o revision
+negativa no pueden acreditar evidencia; claves no reescriben eventos existentes.
+CHECK version/revision/referencia/hashes; FK sin cascadas conservan procedencia.
+
+RLS SELECT tenant via auth_org_ids. app_user SELECT/INSERT, sin UPDATE/DELETE/TRUNCATE;
+PUBLIC y eipd_policy_admin sin privilegios sobre evidencia. INSERT exige actor JWT,
+tenant accesible, assessment borrador con documento, ultima revision humana y
+selector actual con publicacion declarada habilitada. Actor de publicacion no recibe
+por ello acceso a evidencia tenant. Lectura historica no depende del selector actual:
+revocacion conserva evidencia original. Owner de mantenimiento permanece privilegiado.
+
+Estas barreras de DB no recomponen controles documentales/hash ni verifican fuentes,
+roles de API o atomicidad de la seleccion durante espera. Servicio futuro debe usar
+constructor puro §90, permisos, relecturas y orden de locks §89; no existe endpoint
+para insertar evidencia ni conexion de confirmacion real en este paso. Fixtures
+siembran politica/positivas sinteticas mediante owner, no mediante accion continuar.
+Sin evidencia atomica integrada y fuentes/aceptacion, resolver fijo deshabilitado.
+
+29 PostgreSQL nuevas: lectura/escritura runtime y tenant cruzado, UTC, append-only,
+actor suplantado, borrador/documento/revision posterior/anonimo, trece enlaces falsos,
+unicidad, rollback conjunto de evidencia/estado y revocacion con historia intacta.
+Negativas/legacy fallan FK incluso usando owner sin RLS. Ajuste de limpieza de
+fixtures elimina evidencia antes de reviews y controles sinteticos TEST de actores
+de prueba antes de perfiles; scope asíncrono y campos lifecycle alineados.
+105 focalizadas aprobadas antes de los tres casos finales; 29 nuevas finales
+aprobadas en 3.70 s. Alembic check sin operaciones nuevas.
+Suite completa: 3458 passed en 302.51 s; Black/Ruff/diff --check correctos.
+
+Proximo: servicio administrativo de publicacion/seleccion y resolver de lectura
+validada, aun sin politica real habilitada; despues locks compartidos/orden uniforme
+y evidencia atomica en confirmacion, concurrencia/exitos y fuentes/aceptacion.
+Ley fija; M3-T1 EN PROGRESO integral. Sin commit ni push.
+
+
+## §93 — Servicios internos de publicacion/seleccion y lectura auditada
+
+2026-10-07. eipd_policy_store.py implementa publish_eipd_policy_v1,
+select_eipd_policy_v1, read_eipd_policy_audit_snapshot_v1 y
+read_selected_eipd_policy_v1. Sin endpoint administrativo, migracion nueva ni
+conexion al resolver de acciones/readiness actuales. Solo canal DB current_user
+exacto eipd_policy_admin escribe mediante estos servicios; app_user y owner normal
+rechazados en la frontera del servicio. Ese rol acredita canal, no identidad personal:
+caller administrativo futuro debe autenticar actor de plataforma y gestionar
+commit/rollback. Actor explicito validado por contrato/FK, no tomado del tenant.
+
+Publicar genera UUID/fecha de servidor (clock_timestamp), hash canonico y payload
+cerrado via §90; referencia repetida rechazada antes de escritura. No selecciona.
+Seleccionar valida solicitud cerrada/revision esperada, adquiere advisory lock
+transaccional 719093 y luego FOR UPDATE del selector, relee auditoria, genera plan,
+inserta evento y cambia selector en la misma transaccion. No commit interno ni locks
+de serie. Advisory serializa tambien bootstrap cuando fila de selector no existe;
+siempre precede selector en este canal. Error/rollback no deja evento parcial.
+
+Lectura usa una sola sentencia SQL con aggregates del catalogo completo, cadena
+ordenada y selector, bajo snapshot MVCC comun; mapea columnas explicitas a contratos
+§90 y comprueba identidad/payload/hash/cadena/tiempos. Datos corruptos, selector
+faltante o lectura runtime sin autenticacion no generan fallback habilitado.
+Publicacion sin selector es estado de bootstrap, no politica disponible. Leer no
+escribe/cachea ni garantiza estabilidad posterior hasta commit. No usar esta lectura
+orientativa como resolver transaccional de confirmacion sin locks compatibles.
+
+El canal de publicacion/seleccion admite exclusivamente activacion deshabilitada;
+objetos sinteticos habilitados rechazados aun si cumplen schema/evidencia declarada.
+No comprueba fuentes reales ni interpreta fechas como activacion. Artefacto fijo
+resolve_eipd_gate_policy_v1 permanece intacto/deshabilitado en acciones actuales.
+
+24 PostgreSQL nuevas: publicacion/bootstrap y campos servidor, permisos de canal,
+una consulta y autenticacion, extra/StrictInt/target desconocido/revision obsoleta/
+reseleccion/referencia repetida/activacion, corrupcion catalogo/hash/payload/tiempos/
+selector, rollback y cuatro concurrencias reales con pg_blocking_pids: bootstrap y
+seleccion existentes, commit y rollback. Segundo escritor relee revision despues de
+espera; commit hace solicitud obsoleta, rollback permite plan sucesor. Fixtures
+limpian controles TEST del actor sintetico por prueba, ademas de limpieza de sesion.
+24 aprobadas en 2.37 s; Black/Ruff correctos.
+Suite completa: 3482 passed en 315.74 s; Black/Ruff/diff --check correctos.
+
+Proximo: resolver transaccional de lectura con bloqueo compartido seguro y orden
+selector -> serie en acciones, manteniendo politica deshabilitada; integrar evidencia
+atomica despues y validar concurrencia/exitos antes de fuentes/aceptacion/activacion.
+Privilegios runtime solo SELECT se conservan: resolver con lock requiere mecanismo
+limitado compatible con esos privilegios, no conceder UPDATE global al runtime.
+Ley fija; M3-T1 EN PROGRESO integral. Sin migracion, commit ni push.
+
+
+## §94 — Resolver transaccional con bloqueo compartido limitado
+
+2026-10-07. Migracion append-only f95b73aed064 sobre e84a629dcf53 aplicada localmente.
+Funcion public.lock_eipd_policy_selector_v1() sin argumentos, SECURITY DEFINER,
+search_path fijo pg_catalog y objetos de dominio calificados. Comprueba JWT auth.uid
+con perfil registrado antes de bloquear; advisory xact lock compartido 719093 y
+selector singleton FOR SHARE. Devuelve solo existencia; no escribe/publica/selecciona
+ni revela datos tenant. EXECUTE solo app_user, retirado de PUBLIC/admin; runtime
+conserva SELECT y no recibe UPDATE, INSERT de control ni BYPASSRLS.
+
+Helper lock_eipd_policy_selector_v1 exige READ COMMITTED, invoca funcion y rechaza
+selector ausente sin fallback/bootstrap. resolve_eipd_policy_snapshot_for_transaction_v1
+lee y revalida auditoria despues de esperar, manteniendo locks hasta commit/rollback
+del caller. Sin cache ni commits internos. READINESS orientativo §93 sigue separado.
+Advisory compartido serializa tambien frente al bootstrap administrativo exclusivo;
+lectores de distintos tenants pueden coexistir. Orden previsto de acciones pasa a
+advisory compartido -> selector compartido -> serie exclusiva. Canal administrativo
+§93 advisory exclusivo -> selector exclusivo, sin series; PATCH solo serie.
+
+Garantia frente al canal administrativo que respeta ese protocolo y publicaciones
+append-only; owner de mantenimiento permanece privilegiado. Actor registrado solo
+acredita acceso a bloqueo global, no permisos de accion/tenant ni revision humana.
+Resolver transaccional aun no conectado a acciones; estas siguen con artefacto fijo
+deshabilitado y lock de serie actual. No introducir lock de selector despues de serie:
+conexion siguiente debera cambiar orden uniformemente y releer controles/contexto.
+
+15 PostgreSQL nuevas: atributos/permisos de funcion, anonimo/UUID sin perfil, selector
+ausente, aislamiento no admitido, lectores compartidos entre tenants, dos variantes
+admin esperando a lector y cuatro lector esperando a admin (bootstrap/seleccion,
+commit/rollback), corrupción de hash/payload sin fallback. pg_blocking_pids demuestra
+espera real; commit/rollback libera locks y relectura coincide con seleccion nueva/
+anterior o ausencia. 39 focalizadas aprobadas con 24 del servicio §93 en 3.66 s.
+Alembic check sin operaciones nuevas; Black/Ruff correctos.
+Suite completa: 3497 passed en 309.60 s; Black/Ruff/diff --check correctos.
+
+Proximo: integrar orden de locks y snapshot auditado en revision/confirmacion,
+con selector deshabilitado explicitamente registrado y errores cerrados si falta;
+evidencia atomica, concurrencia de acciones, autoridad administrativa personal y
+fuentes/aceptacion antes de habilitar. No bootstrap supuesto ni promocion de historia.
+Ley fija; M3-T1 EN PROGRESO integral. Sin commit ni push.
+
+
+## §95 — Revision humana conectada al selector auditado deshabilitado
+
+2026-10-07. POST eipd-resolution/reviews adquiere advisory compartido y selector
+FOR SHARE mediante §94 antes del lock FOR UPDATE de serie. Despues de ambos locks
+relee borrador, contexto M2 y auditoria completa, y evalua v2 con la publicacion
+seleccionada. Historial y diagnostico v1 conservados. Evento negativo guarda version,
+referencia y hash de esa publicacion; nunca politica del cliente ni identidad fija
+como fallback. Permisos/tenant/suscripcion siguen en dependencias autenticadas.
+Locks permanecen hasta commit/rollback del caller; no commits internos.
+
+Selector ausente o auditoria/hash/payload incoherentes devuelve 409 con codigo
+politica_eipd_no_disponible, sin evento ni cambio de borrador. Publicacion habilitada
+rechazada explicitamente (politica_eipd_habilitada_no_admitida): este paso no habilita
+positivas ni excepciones. Runtime no publica/selecciona ni hace bootstrap. Para usar
+revision se requiere selector deshabilitado registrado por canal autorizado; ninguna
+migracion o accion tenant crea ese selector automaticamente.
+
+Nueve pruebas nuevas con PostgreSQL/app_user: dos decisiones negativas/identidad real,
+orden SQL selector antes de serie y lectura posterior, tres fallos cerrados, cuatro
+concurrencias reales observadas por pg_blocking_pids: revision espera seleccion
+administrativa commit/rollback y registra nueva/anterior identidad; administrador
+espera fin de transaccion de revision commit/rollback, con evento persistido/revertido.
+Fixtures HTTP existentes registran explicitamente artefacto deshabilitado conocido
+por canal interno de test y limpian solo su publicacion/selector; no simulan fallback
+ni credenciales administrativas de produccion. 33 HTTP anteriores y nueve nuevas
+aprobadas focalmente. Suite completa: 3506 passed en 313.64 s; Black/Ruff/Alembic check/diff correctos.
+
+Alcance de este checkpoint: revision humana exclusivamente. Confirmacion y readiness
+v2 aun usan artefacto fijo deshabilitado; cuando selector tiene identidad diferente,
+readiness puede mostrar revision obsoleta respecto de su politica fija. Esa consulta
+es orientativa y no acredita vigencia contra selector real hasta siguiente integracion.
+No cierre del control global ni activacion. Proximo: conectar readiness y confirmacion
+al mismo selector con orden compatible, preservando ordinario sin EIPD/historia sola;
+luego evidencia atomica, autoridad personal, matriz de exitos y fuentes/aceptacion.
+Ley fija; M3-T1 EN PROGRESO integral. Sin migracion, commit ni push.
+
+
+## §96 — Preparacion y confirmacion con el mismo selector auditado
+
+2026-10-07. Readiness v2 lee publicacion seleccionada mediante snapshot SQL completo
+validado y sin locks/escrituras. Ya no compone con artefacto fijo: politica, hash y
+estado de identidad humana corresponden al selector real. Es consulta orientativa,
+no garantiza estabilidad hasta una accion. Selector ausente/corrupto en su ambito
+EIPD devuelve 409 politica_eipd_no_disponible, sin fallback ni bootstrap.
+
+Confirmacion adquiere advisory compartido -> selector FOR SHARE si existe -> serie
+FOR UPDATE, antes de releer borrador/contexto M2/controles. Helper exige READ COMMITTED;
+require_selector=False solo permite adquirir advisory aun sin fila para conservar
+ordinarios sin EIPD. Ambito de gate revalidado bajo serie conserva §88: documento,
+deteccion requiere EIPD/revision o expedientes de excepcion; historia sola no amplía
+ambito de confirmacion. Si entra al ambito, exige snapshot seleccionado validado
+tras ambos locks; ausencia/incoherencia bloquea antes de reemplazar confirmado.
+Bootstrap/seleccion administrativos esperan advisory; PATCH solo serie, sin inversion.
+
+Revisiones, readiness y confirmacion usan helper compartido que admite unicamente
+activacion deshabilitada. Politica habilitada aun rechazada con codigo
+politica_eipd_habilitada_no_admitida, aunque una fixture privilegiada la insertase.
+Sin politica client-side, nueva migracion, seed productivo ni commits internos.
+Todavia no se conecta escritura de evidencia de confirmacion EIPD: ninguna ruta
+excepcional se habilita en este checkpoint. No promociona revisiones historicas.
+
+Trece PostgreSQL/app_user nuevas: ambas rutas coinciden entre revision/consulta/error
+de confirmacion; reseleccion cambia hash y vuelve obsoleta revision; seis casos de
+selector ausente/hash/extra en preparacion/confirmacion conservan borrador/eventos;
+ordinario sin selector confirma y no crea selector/evidencia; cuatro concurrencias
+reales observadas con pg_blocking_pids, confirmacion esperando admin commit/rollback
+y admin esperando fin de transaccion de confirmacion bloqueada commit/rollback.
+13 aprobadas en 5.68 s; 221 focalizadas de confirmacion/preparacion aprobadas en
+20.40 s. Dobles unitarios de confirmacion declaran politica/lock simulados, mientras
+HTTP y PostgreSQL verifican comportamiento real. API Licitud historica tambien
+registra selector explicito; 53 regresiones verificadas en 76.42 s. Suite completa: 3519 passed en 329.62 s; Black/Ruff/Alembic check/diff correctos.
+
+Proximo: conectar evidencia de confirmacion atomica y validar fallos/reemplazo y
+exitos sinteticos antes de habilitar; autoridad administrativa personal, fuentes
+complementarias y aceptacion tecnica trazable pendientes. Ley fija; EN PROGRESO
+integral. Sin commit ni push. §95 tambien sigue pendiente de commit.
+
+
+## §97 — Evidencia de confirmacion conectada a la transaccion
+
+2026-10-07. Servicio interno eipd_confirmation.record_eipd_confirmation_evidence_v1
+relee snapshot auditado, recompone controles con constructor puro §90 y genera UUID
+y fecha UTC de servidor (clock_timestamp). Inserta EipdConfirmationEvidence y flush,
+sin commit, endpoint ni parametros de evidencia del cliente. Caller conserva locks
+selector -> serie y arma contexto actual; DB §92 verifica tenant/JWT/borrador/ultima
+revision positiva y FK exactas de politica/documento/contexto/seleccion.
+
+Confirmacion llama servicio solo tras aprobar controles v2 en ambito EIPD y antes
+de leer/modificar confirmado anterior. Borrador debe seguir borrador al insertar
+por RLS; evidencia, reemplazo y confirmacion quedan en misma transaccion del caller.
+ValueError/contrato no preparado devuelve 409 evidencia_eipd_no_preparada; errores
+DB/flush propagan para rollback. Si cualquier paso falla, no conserva evidencia ni
+reemplazo parcial. Ordinario fuera de EIPD no inserta evidencia. No commits internos.
+
+Guardia §96 se conserva: politica habilitada rechazada en la aplicacion. Exitos
+excepcionales solo se ejercitan en pytest con politica/positiva sinteticas insertadas
+por owner de fixtures y override local de _selected_disabled_eipd_policy_v1. No flag,
+variable de entorno, endpoint o bypass de produccion. Constructor/relectura/gates,
+RLS y persistencia real no se simulan; ninguna fuente de fixture acredita verificacion
+real ni aceptacion tecnica de politica productiva.
+
+Doce pruebas PostgreSQL/app_user nuevas: dos guardias reales rechazan habilitada sin
+evidencia; cuatro exitos sinteticos (ambas rutas, con/sin confirmado previo) conservan
+identidad exacta/actor/fecha y evidencia unica, segundo intento no duplica; cuatro
+fallos con anterior confirmado revierten evidencia/borrador/anterior (FK real de
+insercion, fallo tras evidencia, tras reemplazo y tras flush final); dos controles
+fallidos (negativa/identidad obsoleta) prueban que no se intenta insertar evidencia.
+12 aprobadas en 4.59 s. Fixtures limpian evidencia antes de revision/politica y RAT.
+Suite completa: 3531 passed en 334.47 s; Black/Ruff/Alembic check/diff correctos.
+
+Proximo: concurrencia de confirmaciones exitosas y revocacion tras exito con evidencia
+historica preservada, dos series/tenants, y autoridad administrativa personal antes
+de fuentes complementarias/aceptacion/activacion. M3-T1 EN PROGRESO integral, ley fija.
+Sin migracion, commit ni push; §§95–97 pendientes de commit.
+
+
+## §98 — Concurrencia exitosa y revocacion con evidencia preservada
+
+2026-10-07. Se amplía matriz PostgreSQL/app_user; sin cambio de comportamiento ni
+activacion productiva. Reutiliza politica/positiva owner sinteticas y override local
+de guardia de pytest de §97. Servicios de confirmacion, constructor, RLS/FK, locks,
+seleccion administrativa deshabilitada y commits/rollbacks son reales.
+
+Doce pruebas nuevas, ambas rutas sensible/sensible-biometrica, con pg_blocking_pids
+para demostrar espera efectiva y timeout acotado, no inferir bloqueo por sleep:
+
+- Dos confirmaciones de misma evaluacion/serie con anterior confirmado: primer commit
+  deja segunda en 409 al releer status; primer rollback permite exito de segunda.
+  En ambos casos queda una evidencia exacta y un reemplazo, sin duplicacion. Evidencia
+  no es visible desde otra transaccion antes de commit.
+- Administrador intenta seleccionar nueva politica deshabilitada mientras confirmacion
+  exitosa conserva locks: espera hasta commit/rollback. Tras commit evidencia original
+  se conserva campo por campo y confirmado mantiene status; tras rollback no queda
+  evidencia. Seleccion deshabilitada posterior bloquea accion siguiente con identidad
+  humana obsoleta y gate_eipd_no_habilitado. Sucesor/positiva historica de test no se
+  promocionan ni reemplazan confirmado tras revocacion.
+- Confirmacion comienza mientras revocacion tiene lock exclusivo: tras commit revalida
+  politica deshabilitada y rechaza sin evidencia/status; tras rollback usa seleccion
+  original habilitada sintetica y confirma con evidencia de revision 1.
+
+12 aprobadas en 5.78 s. Fixtures restauran selector previo solo mediante owner para
+limpieza tras aserciones, borran publicacion/evento sucesor de test y luego limpian
+estado original. Esa restauracion no es canal de rollback/reseleccion productivo:
+contrato real sigue exigiendo publicacion nueva. Sin flags/env/endpoints nuevos.
+Suite completa: 3543 passed en 343.50 s; Black/Ruff/Alembic check/diff correctos.
+
+Proximo: ampliar exitos concurrentes a series independientes/tenants y PATCH, despues
+resolver autoridad personal administrativa; fuentes complementarias y aceptacion
+tecnica trazable pendientes antes de habilitar. M3-T1 EN PROGRESO integral; ley fija.
+Sin migracion ni cambio de servicios, commit o push; §§95–98 pendientes de commit.
+
+
+## §99 — Exitos de series/tenants independientes y PATCH concurrente
+
+2026-10-07. Ampliacion de pruebas PostgreSQL/app_user, sin cambios de servicios,
+privilegios, migraciones ni activacion. Politica/positivas sinteticas y override
+pytest local de guardia §97 conservados. Fixture owner prepara segundo RAT real
+(tratamiento/finalidad/categorias/titulares), serie y borrador documental equivalentes
+en misma organizacion o en organizacion B; contexto se valida con constructor M2 real,
+no sustitucion de builder/gates/RLS. IDs/actores/revisiones diferentes por serie.
+
+Doce nuevas, ambas rutas sensible/sensible-biometrica:
+
+- Cuatro exitos de series independientes (misma org/dos orgs): segunda confirma antes
+  de terminar transaccion de primera, ambas conservan locks compartidos de selector.
+  Evidencia de cada una invisible antes de commit; despues existe una por evaluacion,
+  con actor correspondiente. RLS muestra ambas al mismo tenant o solo propia entre
+  tenants, y servicio cruzado devuelve 404 sin acceso.
+- Ocho PATCH/confirmacion (misma org/dos orgs, commit/rollback): PATCH parcial toma
+  serie A; confirmacion A espera realmente (pg_blocking_pids) manteniendo selector
+  compartido. Confirmacion B avanza y hace commit mientras A sigue esperando. Commit
+  de PATCH invalida controles revalidados de A y bloquea sin evidencia; rollback
+  permite exito de A con evidencia. No se revierte ni sobrescribe evidencia de B.
+
+12 aprobadas en 6.64 s; timeout acotado para detectar espera indebida. Fixtures limpian
+primero evidencia/revision y despues borrador/serie/RAT B antes de limpiar politica A.
+Clonado owner es preparacion sintetica de pruebas, no via nueva de producto ni
+promocion de positivos historicos. Guardia de habilitadas en aplicacion conservada.
+Suite completa: 3555 passed en 345.51 s; Black/Ruff/Alembic check/diff correctos.
+
+Proximo: definir/implementar autoridad personal del canal administrativo de politica,
+con permisos separados de roles tenant; fuentes complementarias y aceptacion tecnica
+trazable antes de habilitar. No cierre integral ni validacion juridica por total de
+pruebas. M3-T1 EN PROGRESO integral; ley fija. Sin commit ni push.
+
+
+## §100 — Contrato de autoridad personal administrativa
+
+2026-10-07. Paso documental previo a implementar autorizacion personal. ADR 0001
+establece profiles.is_superadmin como autoridad global, independiente de membresias.
+get_current_profile valida JWT mediante extract_auth_identity, establece sub local y
+aprovisiona perfil sin promoverlo; require_superadmin comprueba bandera. Canal EIPD
+actual _require_admin solo verifica current_user=eipd_policy_admin; actor_id recibido
+por servicios internos no acredita por si mismo identidad personal autenticada.
+
+Contrato elegido: exigir simultaneamente identidad JWT verificada por servidor,
+perfil global superadmin vigente y conexion administrativa separada. Actor de auditoria
+se deriva del perfil autorizado; nunca de actor_id/client payload, accepted_by,
+verified_by, X-Organization-Id ni roles owner/admin/editor de organizacion. app_user
+no recibe membresia del rol administrativo ni credenciales owner. JIT no promueve;
+sin identidad, perfil, permiso o canal adecuado, rechazar antes de publicar/seleccionar.
+No crear API administrativa operativa hasta completar barreras y pruebas.
+
+Precondicion descubierta en codigo: migracion 0001 otorga CRUD de todas las tablas
+public a app_user y no incluye profiles en lista RLS; 0002 agrega is_superadmin.
+Las migraciones revisadas no acreditan proteccion suficiente de columnas de identidad/
+autoridad. Esto es hallazgo de codigo, no prueba de explotacion ni comprobacion de
+privilegios efectivos en despliegues. Proximo paso debe auditar privilegios reales y
+proteger auth_user_id/id/is_superadmin frente a insercion/actualizacion suplantada,
+promocion y borrado runtime. Mantener JIT legitimo y cambios de datos de perfil
+permitidos; no conceder promocion por rol tenant. Migracion nueva append-only.
+
+Orden administrativo previsto: autoridad personal estabilizada (lectura protegida de
+perfil) -> advisory exclusivo -> selector exclusivo; nunca serie. Revocacion personal
+concurrente debe tener resultado definido: aplicada antes de autorizar rechaza, o
+espera fin de operacion ya autorizada bajo lock. No confiar solo en objeto ORM/cache
+anterior a espera. Funcion DB limitada, si se utiliza, exige canal administrativo,
+search_path seguro y permisos minimos; no autentica criptograficamente JWT por si sola.
+Caller debe propagar sub verificado a conexion administrativa en transaccion local,
+sin fuga de identidad entre conexiones de pool. Actor/fecha/hash siempre servidor.
+
+Matriz obligatoria: anonimo/JWT invalido/perfil ausente; tenant owner/admin sin bandera;
+actor suplantado; superadmin autenticado por canal incorrecto; canal correcto sin
+identidad; JIT sin autopromocion; SQL runtime no altera autoridad/identidad; revocacion
+personal commit/rollback antes/durante espera; aislamiento del contexto local del pool;
+auditoria exacta del actor; rollback sin publicacion/seleccion parcial. Superadmin
+legitimo sin membresia tenant puede administrar solo por canal separado autorizado.
+
+Sin cambio de servicios, permisos, migraciones, pruebas ejecutables ni activacion en
+este checkpoint. Ultima suite ejecutada: 3555 passed §99; no se presenta como prueba
+del contrato nuevo. Autoridad personal todavia NO implementada. Fuentes/aceptacion
+pendientes; ley fija; M3-T1 EN PROGRESO integral. Sin commit ni push.
+
+
+## §101 — Proteccion de identidad y autoridad de perfiles
+
+2026-10-07. Auditoria local efectiva antes del cambio con conexion app_user confirma
+INSERT/UPDATE/DELETE de profiles y UPDATE de is_superadmin permitidos. Hallazgo §100
+confirmado para base local; no se extrapola a despliegues externos. Migracion nueva
+append-only a06c84bf175e sobre f95b73aed064 aplicada localmente.
+
+Revoca INSERT/UPDATE/DELETE/TRUNCATE de tabla profiles para app_user; conserva SELECT
+existente y concede INSERT solo auth_user_id/email/full_name, UPDATE solo email/
+full_name/updated_at. ID por default DB y is_superadmin=false por default; no INSERT
+explicito de ID/autoridad ni UPDATE identidad/autoridad. Sin concesiones al canal EIPD.
+Trigger SECURITY INVOKER/search_path pg_catalog exige auth.uid() no nulo y matching
+NEW.auth_user_id para runtime; UPDATE ademas acredita identidad OLD y rechaza cambio
+de ID/auth_user_id/is_superadmin. Cambios basicos de perfil ajeno rechazados. Funcion
+no obtiene privilegios elevados; EXECUTE retirado de PUBLIC/app_user/eipd_policy_admin,
+trigger realiza validacion. Owner de mantenimiento conserva atribuciones explicitas.
+
+JIT get_current_profile conserva INSERT de columnas permitidas/ON CONFLICT DO NOTHING,
+perfil nuevo sin promocion y RETURNING/SELECT. No cambia API/autenticacion/JWT ni
+activa canal administrativo. Proteccion no representa RLS completo de perfiles:
+SELECT anterior se conserva y administracion personal EIPD aun pendiente. Downgrade
+restaura grants anteriores de CRUD y retira trigger/permisos de columna nuevos;
+es reversion de seguridad, no necesaria para operar upgrade.
+
+Doce PostgreSQL/app_user nuevas: privilegios efectivos, JIT idempotente y update basico
+propio, cuatro INSERT forjados (anonimo/otra identidad/promocion/ID explicito), seis
+mutaciones denegadas (promocion/auth_user_id/ID/borrado/truncate/datos ajenos).
+22 focalizadas con autenticacion aprobadas en 0.51 s. No datos reales alterados por
+pruebas; insercion/actualizacion propia de test revertida por rollback.
+Suite completa: 3567 passed en 431.30 s; Black/Ruff/Alembic check/diff correctos.
+
+Proximo: implementar autorizacion personal transaccional del canal EIPD (JWT verificado,
+perfil superadmin vigente, actor derivado y rol separado), locks/revocacion/pool y
+pruebas; fuentes/aceptacion antes de activar. Ley fija; EN PROGRESO integral.
+Sin commit ni push; §100 documental tambien pendiente de commit.
+
+
+## §102 — Barrera personal transaccional limitada
+
+2026-10-08. Migracion append-only b17d95c0286f sobre a06c84bf175e aplicada localmente.
+public.lock_eipd_personal_authority_v1() sin argumentos retorna UUID de perfil derivado
+de auth.uid(); exige perfil existente con is_superadmin=true. SELECT perfil FOR SHARE
+antes de evaluar autoridad; retiene lock hasta commit/rollback. Funcion SECURITY
+DEFINER con search_path pg_catalog y referencias calificadas, EXECUTE solo rol
+administrativo EIPD (owner mantenimiento privilegiado); app_user sin EXECUTE, canal
+administrativo sin UPDATE de perfiles ni elevacion nueva. No publica ni selecciona.
+
+Helper authorize_eipd_personal_actor_v1 exige current_user=eipd_policy_admin y
+READ COMMITTED; invoca funcion, sin actor del cliente/cache/commit. Sub debe provenir
+de JWT verificado por caller y propagarse localmente a conexion separada. Funcion SQL
+no verifica criptografia del JWT. Orden previsto perfil -> advisory -> selector,
+sin series. No endpoints, configuracion de pool/credenciales ni bootstrap nuevos.
+
+Nueve PostgreSQL nuevas: anonimo/perfil desconocido/owner tenant rechazados; superadmin
+por canal runtime rechazado incluso al invocar funcion directamente; atributos,
+privilegios y actor exacto derivados; sub local desaparece tras rollback. Cuatro
+concurrencias con pg_blocking_pids: revocacion previa commit rechaza tras esperar,
+rollback permite autorizacion; revocacion posterior espera fin de transaccion personal
+(commit/rollback). Actor global dedicado sintetico sin membresia tenant, limpiado
+por owner; no se promueven perfiles de usuarios reales. 45 focalizadas con proteccion
+de perfiles/servicios de politica aprobadas en 3.37 s; Black/Ruff/Alembic check correctos.
+Ultima suite completa sigue 3567 §101; no se registra total nuevo sin ejecutarla.
+
+Limite: barrera todavia NO conectada a publish/select ni a API/canal autenticado.
+Servicios internos conservan contrato confiable anterior actor_id; rol DB solo aun
+no acredita persona para escritores. Proximo: integrar barrera antes de locks/global
+writes, actor derivado y rechazo de suplantacion, ajustar fixtures y suite completa;
+despues transporte autenticado/pool y fuentes/aceptacion antes de habilitar.
+Ley fija; EN PROGRESO integral. Sin commit ni push.
+
+
+## §103 — Escritores con entrada personal y actor derivado
+
+2026-10-08. publish_eipd_policy_v1/select_eipd_policy_v1 ya no aceptan actor_id.
+Invocan authorize_eipd_personal_actor_v1 antes de escribir/adquirir locks globales;
+actor auditable se deriva de perfil superadmin bloqueado. Seleccion: perfil FOR SHARE
+-> advisory exclusivo -> selector FOR UPDATE, sin serie ni commit interno. Solicitud
+sin identidad/canal/autoridad falla antes de mutaciones; actor forjado no es argumento
+admitido. Politicas habilitadas siguen rechazadas por el canal de publicacion/seleccion.
+
+Primitivas anteriores se renombran _publish_eipd_policy_v1/_select_eipd_policy_v1,
+privadas de persistencia para caller confiable. No endpoints ni entrada personal;
+DB rol sigue canal privilegiado y no valida criptograficamente sub por si solo.
+Fixtures antiguas usan explicitamente primitivas privadas para preparar politica/
+metadatos sinteticos, sin promover perfiles tenant ni simular nuevas barreras. Las
+pruebas nuevas ejercitan entradas personales reales y actor global dedicado sin
+membresia tenant. Transporte futuro debe usar exclusivamente entradas personales y
+propagar sub de JWT verificado, con conexion separada y contexto local del pool.
+
+Once PostgreSQL nuevas: publicacion/seleccion exactas con actor derivado, seis rechazos
+(anonimo/desconocido/tenant para ambos escritores) conservan catalogo, superadmin por
+runtime rechazado, dos argumentos actor_id forjados rechazados sin escritura, rollback
+conjunto de publicacion/evento/selector. 44 focalizadas con autoridad personal y
+servicios de persistencia aprobadas en 4.41 s.
+Suite completa: 3587 passed en 348.04 s; Black/Ruff/Alembic check/diff correctos.
+
+Sin nueva migracion sobre b17d95c0286f. No API administrativa operativa, pool/config/
+credenciales nuevas ni activacion real. Proximo: transporte administrativo autenticado
+con canal DB separado/contexto transaccional local y pruebas de permiso/revocacion/
+pool; despues fuentes complementarias y aceptacion tecnica trazable. Ley fija;
+EN PROGRESO integral. Sin commit ni push; §102 tambien pendiente de commit.
+
+## §104 — Pool separado y dependencia autenticada EIPD (2026-10-08)
+
+Se incorpora `EIPD_ADMIN_DATABASE_URL` opcional y secreta, sin valor por defecto ni
+fallback a DATABASE_URL/APP_DATABASE_URL. El pool se crea de forma diferida,
+READ COMMITTED, sin echo y con parametros ocultos. No se cambia .env ni se
+provisionan credenciales reales: el login debe provisionarse por mantenimiento.
+
+`get_eipd_admin_db` valida el bearer con extract_auth_user_id (JWT existente)
+antes de obtener el pool. Requiere login dedicado LOGIN/NOINHERIT, sin superuser,
+BYPASSRLS, CREATEDB, CREATEROLE, REPLICATION, propiedad de relaciones ni membresias
+directas adicionales; miembro de eipd_policy_admin. Rechaza owner y app_user.
+SET LOCAL ROLE eipd_policy_admin y sub parametrizado/local preceden la barrera
+personal FOR SHARE. No usa JIT, organizacion del header ni actor del payload.
+La dependencia gestiona commit/rollback; el lock personal dura la transaccion.
+
+17 pruebas nuevas, con login/password sinteticos efimeros y pool real de una
+conexion: JWT ausente/invalido antes de pool, configuracion ausente/invalida,
+identidad derivada, reutilizacion del mismo backend tras commit/rollback sin
+sub/rol residual, tenant/desconocido/revocado rechazados, owner/app_user rechazados,
+y privilegios excesivos bloqueados. Las pruebas de JWT del modulo existente y
+las barreras/escritores anteriores se ejecutan juntas: 47 passed en 3.18 s.
+Suite completa: 3604 passed en 352.09 s; Black/Ruff/Alembic check/diff correctos.
+
+No nueva migracion, rutas administrativas ni activacion operativa. La validacion
+criptografica se reutiliza; los tests de pool inyectan la identidad extraida y
+no acreditan una ruta HTTP integrada. Pendiente conectar endpoints publicacion/
+seleccion a esta dependencia, validar HTTP/JWT real y concurrencia de revocacion
+por transporte; luego fuentes/aceptacion y despliegue/provision controlados.
+Ley 21.719/19.628 reformada sigue base fija; M3-T1 EN PROGRESO integral y
+activacion excepcional bloqueada. Sin commit/push en este paso.
+
+## §105 — Rutas administrativas EIPD con JWT/pool real (2026-10-08)
+
+Se registran POST /admin/eipd/publications y POST /admin/eipd/selections en la API.
+PublicationRequest exige policy/rationale/evidence_reference; SelectionRequest exige
+publication_id/expected_revision/rationale/evidence_reference. Esquemas cerrados,
+revision StrictInt; actor/UUID/reloj/hash/evento se generan o derivan en servidor.
+Se reutilizan entradas personales §103 y dependencia §104, nunca primitivas privadas
+ni require_superadmin/JIT/DB tenant. Organizacion del header no concede autoridad.
+
+201 devuelve publicacion o plan evento/selector; cada request tiene su propia
+transaccion. Publicar no selecciona automaticamente. 401 token ausente/invalido;
+403 identidad verificada sin perfil superadmin vigente; 503 JWKS/pool ausente o
+canal inapropiado. 422 cuerpo/campos adicionales; 409 rechazo de dominio/revision
+obsoleta/referencia repetida. Unique violation de publicacion tambien se traduce
+a 409 para la carrera potencial, sin exponer mensajes SQL. Esa carrera concurrente
+queda pendiente de matriz HTTP del siguiente paso; no acreditada por test secuencial.
+
+38 pruebas HTTP nuevas usan app registrada, JWT ES256 real con par de claves y
+JWKS sintetico, y pool PostgreSQL/login limitado reales. Cubren publicacion seguida
+de seleccion y visibilidad de commit con actor derivado, pool limpio, seis formas
+de token invalido por ambas rutas antes de pool, tenant/desconocido/revocado,
+campos auditables de cliente rechazados, duplicado/revision obsoleta/desconocido,
+publicacion habilitada bloqueada, fallo de commit con rollback sin respuesta exitosa,
+JWKS caido, configuracion ausente y owner/app_user rechazados. Sin reemplazar
+extract_auth_user_id ni dependencias de autoridad/escritores en pruebas HTTP.
+85 focalizadas con pool/autoridad/escritores/autenticacion anteriores: 9.03 s.
+Suite completa: 3642 passed en 355.96 s; Black/Ruff/Alembic check/diff correctos.
+
+No migracion nueva ni provision/despliegue con credenciales reales. Ambas operaciones
+conservan guardias de habilitadas; sin activacion excepcional. Pendiente concurrencia
+HTTP de revocacion/seleccion/publicacion y fallos transaccionales adicionales,
+fuentes oficiales/aceptacion y provision operativa controlada. Ley 21.719/19.628
+reformada base fija; M3-T1 EN PROGRESO integral. Sin commit/push en este paso.
+
+## §106 — Concurrencia administrativa por HTTP (2026-10-08)
+
+Doce pruebas nuevas, sin cambios en rutas/servicios/migraciones. App registrada,
+JWT ES256 firmado con JWKS sintetico, login/pools PostgreSQL restringidos reales.
+Las pausas de test controlan flush/commit; no reemplazan SQL, barrera personal,
+validacion JWT, escritores ni rollback. Se observan bloqueos efectivos mediante
+pg_blocking_pids; pg_stat_clear_snapshot evita cache de pg_stat_activity en el
+observador transaccional. Timeouts acotados y limpieza de tasks/pools/roles/perfiles.
+
+Cuatro casos (publicacion/seleccion x commit/rollback de revocacion previa):
+peticion HTTP espera UPDATE del perfil; revocacion confirmada -> 403 sin escrituras;
+revocacion revertida -> 201. Se relee autoridad despues de esperar.
+Seis casos (ambas rutas x commit/rollback/cancelacion de la peticion autorizada):
+UPDATE de revocacion espera FOR SHARE hasta cierre. Commit -> 201/cambio persistido;
+fallo de commit -> 500/rollback sin cambio; cancelacion -> rollback sin cambio.
+Despues de confirmar revocacion, siguiente peticion -> 403; pool sin sub/rol residual.
+
+Seleccion concurrente: dos conexiones esperando advisory, publicaciones diferentes
+con expected_revision=0 -> un 201 y un 409; exactamente un evento/selector revision 1.
+Publicacion duplicada concurrente: ambas pasan precheck y se encuentran en flush;
+se observa espera real por unicidad mientras ganador retiene commit. Un 201 y un
+409 (SQLSTATE 23505), una sola publicacion y ningun evento/selector. Esto acredita
+la traduccion de conflicto de DB implementada en §105, antes solo secuencial.
+
+Doce nuevas aprobadas en 2.98 s; 97 focalizadas con API/pool/autoridad/escritores/auth
+aprobadas en 11.73 s. Suite completa: 3654 passed en 369.30 s; Black/Ruff/Alembic check/diff correctos.
+No migracion ni datos/credenciales reales alterados; fixtures usan identidades y
+roles temporales propios. Sin habilitacion excepcional ni despliegue operativo.
+
+Proximo: revisar fuentes oficiales y trazabilidad de aceptacion tecnica para el
+control EIPD, sin habilitar mientras falten requisitos; registrar/probar provision
+operativa por separado. Ley 21.719/19.628 reformada base fija independiente del
+calendario; M3-T1 sigue EN PROGRESO integral. Sin commit/push en este paso.
+
+## §107 — Revalidacion de fuentes y trazabilidad tecnica (2026-10-08)
+
+Base Git limpia/sincronizada: 97d4fd29920e98a7b0a94714b04ae43e7cb5d010 (§106).
+Registro m3-t1-eipd-fuentes.md actualizado: BCN por portal nuevo, art15ter localizado;
+Diario Oficial CVE 2583630 PDF abierto. Busqueda acotada no verifica instrumento
+complementario especifico de Agencia; no acredita inexistencia. Ley reformada
+base fija independiente del calendario; no reinterpretar consulta facultativa como
+aprobacion juridica universal. No version/autoridad/aceptacion inventadas.
+
+| Criterio actual | Evidencia trazable | Estado |
+| --- | --- | --- |
+| Autoridad y escritores personales | 07bc7dd8ad06a16f5e32efc17ac67efa1036e356, §§102–103 | Implementado/probado |
+| Pool separado y JWT/sub local | 01d27b0c44cec33dd2dfa2f160f0e6e3f3dc3257, §104 | Implementado/probado local |
+| Rutas HTTP administrativas | 56dba76a0052eccb766f77ac91ba59c62d1f922d, §105 | Implementado/probado local |
+| Revocacion/carreras/rollback/cancelacion HTTP | 97d4fd29920e98a7b0a94714b04ae43e7cb5d010, §106 | Doce nuevas; 97 focalizadas, 11.73 s |
+| Suite completa del contenido §106 | Checkpoint §106; pruebas antes del commit, contenido luego versionado | 3654 passed, 369.30 s |
+| Head local de migraciones | alembic current consultado §107 | b17d95c0286f (head) |
+| Fuentes legales base | Registro F1/F4 y revalidacion §107 | Texto consultado, sin certificacion exhaustiva de vigencia |
+| Instrumentos complementarios Agencia | Registro §107 | PENDIENTE; sin instrumento/version verificados |
+| Decision de aceptacion real con responsable/evidencia | Sin aceptacion trazable registrada | PENDIENTE; pruebas no equivalen a accepted_by |
+| Provision/validacion operativa real | Solo roles/credenciales sinteticos de tests | PENDIENTE; sin despliegue acreditado |
+| Activacion excepcional real | Guardias productivas conservadas | BLOQUEADA |
+
+La matriz inicial de este documento y checkpoints anteriores son historicos;
+para autoridad/pool/transporte/head actual prevalece esta evidencia. No se declara
+aceptacion integral ni se genera objeto de politica con fuentes verificadas,
+accepted_by, validation_commit o activation habilitada. Este inventario asocia
+pruebas a commits; no reemplaza decision de aceptacion ni validacion operativa.
+
+Solo documentacion en §107: diff --check correcto; no nueva suite ni migracion.
+Ultima suite completa conserva 3654 §106. Proximo paso independiente: procedimiento
+verificable de provision operativa del canal con politica deshabilitada, sin
+credenciales reales ni activacion. Completar fuentes/aceptacion antes de habilitar.
+M3-T1 EN PROGRESO integral. Sin commit/push en este paso.
+
+## §108 — Procedimiento operativo deshabilitado preparado (2026-10-09)
+
+Base c963e75c2caa0936e04fdeac01ebad4f903ae911. Se agrega
+m3-t1-eipd-provision-operativa.md: expediente de entorno/commit/head/login/staff/
+secreto por referencia/selector, provision del login separada del grupo NOLOGIN,
+comprobaciones de rol local y permisos, pruebas HTTP negativas/positivas con politica
+deshabilitada, verificacion de auditoria, revocacion/retirada/rotacion con drenaje.
+Reconoce ausencia de GET snapshot; lectura coherente por herramienta de mantenimiento.
+Sin retry ciego, borrado de auditoria, downgrade ni aceptacion/fuentes inventadas.
+
+Plantillas no ejecutadas; no se provisionan roles/credenciales/perfiles ni se envia
+trafico a un entorno operativo. JSON de publicacion validado contra PublicationRequest;
+diff --check correcto. No cambios de codigo ni nueva suite completa: 3654 §106.
+Provision real, instrumento complementario y decision de aceptacion permanecen
+PENDIENTES. Proximo: preparar preflight verificable de solo lectura del canal,
+sin reemplazar JWT/autoridad ni emitir publicacion/seleccion. Activacion bloqueada;
+ley reformada base fija; M3-T1 EN PROGRESO integral. Sin commit/push.
+
+## §109 — Preflight administrativo de solo lectura (2026-10-09)
+
+Se agrega backend/scripts/eipd_admin_preflight.py, ejecutable desde backend con
+python -m scripts.eipd_admin_preflight. Usa solo EIPD_ADMIN_DATABASE_URL/pool §104;
+transaccion READ ONLY, chequeo de login/rol, identidad residual vacia, READ COMMITTED,
+EXECUTE de barrera y ausencia de UPDATE de perfiles/is_superadmin. Lee y valida
+snapshot completo; rechaza politicas habilitadas incluso no seleccionadas.
+Siempre rollback. No setea sub ni llama a barrera FOR SHARE ni publica/selecciona.
+
+Salida JSON limitada: ok (exit 0) si canal y selector deshabilitado coherentes;
+pending_selector (exit 2) si canal/auditoria validos sin selector; failed (exit 1)
+ante fallo, sin excepcion/URL/secretos. Informe indica expresamente autenticacion
+personal no verificada y activacion no autorizada. No acredita provision integral,
+JWT HTTP, grupo/permisos completos ni aceptacion real; completar runbook §108.
+
+Seis pruebas nuevas: ausencia de selector sin bootstrap, seleccion deshabilitada
+sin cambios y pool limpio, owner/tenant rechazados, escritura accidental bloqueada
+por PostgreSQL READ ONLY (25006), error CLI sin divulgar texto sensible. 23 focalizadas
+con canal/pool aprobadas en 1.84 s; Black/Ruff/diff correctos. Sin nueva suite completa;
+ultima 3654 §106. No migracion/configuracion/roles/credenciales reales modificados.
+No preflight ejecutado contra entorno operativo; pruebas usan login/roles sinteticos.
+Proximo: ampliar diagnostico de permisos de grupo/dominio y evidencia de entorno
+sin secretos; ejecutar provision solo sobre destino/identidad acreditados. Fuentes/
+aceptacion real pendientes, activacion bloqueada, ley fija, M3-T1 EN PROGRESO.
+Sin commit/push.
+
+## §110 — Permisos efectivos y limites de evidencia del preflight (2026-10-09)
+
+Base f0f5224118886cb21a5c8024ccfd1728bce66391. Preflight readonly amplía catalogo:
+grupo NOLOGIN/NOINHERIT sin privilegios amplios, membresias superiores ni propiedad
+de relaciones; app_user sin membresia administrativa; login sin ADMIN OPTION;
+login/grupo sin CREATE sobre public. Tres tablas globales con RLS y SELECT/INSERT,
+UPDATE solo selector; sin DELETE/TRUNCATE/REFERENCES/TRIGGER ni UPDATE por columna
+en publicaciones/eventos. Rechaza permisos efectivos de login sobre relaciones
+public y del grupo fuera de las tres admitidas, incluidos grants PUBLIC/por columna.
+No consulta filas del dominio tenant. No repara permisos ni modifica configuracion.
+
+Informe versionado report_version=1, permissions_verified=true con alcance explicito
+public_relations_and_role_flags solo al completar chequeos. environment_identity_verified
+/migration_head_verified/personal_authentication_verified/activation_authorized=false:
+no acredita destino, head operativo, JWT ni decision de activacion. No cubre todo
+privilegio de funciones/secuencias/otros schemas ni equivalencia del cuerpo de RLS;
+requiere revisar migraciones/config/entorno y ejecutar matriz HTTP por separado.
+
+Ocho PostgreSQL nuevas: grants efectivos SELECT tabla/columna al grupo/login/PUBLIC
+sobre tabla temporal vacia, ADMIN OPTION del login temporal y CREATE public del login.
+Rechazos observados y objetos/grants eliminados por cleanup; canal normal vuelve a
+superar chequeos. 31 focalizadas con canal y preflight anteriores: 3.26 s; formato/
+diff correctos. No nueva suite completa; ultima 3654 §106. Sin migracion/grants
+persistentes/credenciales reales ni ejecucion contra entorno operativo acreditado.
+
+Proximo: completar expediente de destino/commit/head/login/staff/responsable y
+registrar resultados del preflight/HTTP en entorno acordado. No ampliar privilegios
+para hacer pasar el informe; corregir provision conforme contrato. Fuentes oficiales
+complementarias/aceptacion real aun pendientes, activacion bloqueada. Ley reformada
+base fija; M3-T1 EN PROGRESO integral. Sin commit/push.
+
+## §111 — Expediente inicial y comprobacion de configuracion (2026-10-09)
+
+Base limpia d57b2206b2ae432ae93e6a278e24483d4db1ece9. Se agrega
+m3-t1-eipd-expediente-operativo.md con evidencia ejecutada: environment development,
+hosts configurados loopback (sin inferir ubicacion fisica), EIPD_ADMIN_DATABASE_URL
+ausente, preflight CLI exit 1/failed sin canal inicializado y head local b17d95c0286f
+via mantenimiento readonly. No URLs/JWT/passwords impresos ni datos tenant consultados.
+No provision de roles/perfiles/secreto/politica; sin fallback owner ni .env modificado.
+
+Destino operativo solicitado al usuario, pendiente. Continuar provision depende
+de destino acreditado y del expediente; no crear actor staff ni credenciales ficticias
+para simular resultado operativo. No nueva suite; ultima completa 3654 §106,
+focalizadas 31 §110. Diff correcto. Fuentes/aceptacion/provision pendientes;
+activacion bloqueada, ley fija, M3-T1 EN PROGRESO. Sin commit/push.
+
+## §112 — Seleccion de desarrollo local y accion de provision pendiente
+
+Fecha 2026-10-09. Usuario elige local. Comprobaciones readonly: head b17d95c0286f,
+canal EIPD ausente, eipd_backend_local inexistente; un superadmin contado sin identificar
+ni modificar. Identidad staff solicitada sin secretos, pendiente. Accion concreta
+preparada para login limitado y archivo privado externo al repo; revision automatica
+la rechaza antes de ejecucion por falta de autorizacion explicita de persistencia.
+No roles/secreto/archivo nuevos ni configuracion/politica modificados. Se pide
+aprobacion de provision exacta, sin reintentar por alternativa. Solo documentacion;
+ultima suite completa 3654 §106, focalizadas 31 §110. EN PROGRESO; activacion bloqueada.
+
+## §113 — Canal tecnico local provisionado y preflight ejecutado
+
+Fecha 2026-10-09. Autorizacion explicita del usuario tras §112. Login
+ eipd_backend_local limitado, miembro solo eipd_policy_admin; credencial nueva
+fuera del repo en ~/.config/cumpleia-local-eipd/admin.env 0600, sin valor impreso.
+.env habitual/perfiles/politicas intactos. Carga solo en proceso de diagnostico.
+Preflight local pending_selector, codigo logico 2 confirmado: canal/permisos/auditoria
+coherentes, selector ausente, sin bootstrap. No acredita backend HTTP/JWT personal
+ni provision integral. Staff solicitado pendiente; proximo vincular identidad real
+y validar proceso HTTP configurado. Sin nueva suite; ultima 3654 §106, focalizadas
+31 §110. Ley fija, EN PROGRESO, activacion bloqueada. Sin commit/push.
+
+## §114 — Staff indicado y verificacion pendiente (2026-10-09)
+
+Usuario informa correo de staff (no se reproduce PII en evidencia versionada).
+Consulta parametrizada readonly: exactamente un perfil local, auth_user_id presente,
+is_superadmin=false. No se modifica ni promueve perfil. Configuracion de autenticacion
+presente; GET administrativo readonly del usuario por ID no se completa: ConnectError
+en etapa auth_request. No respuesta de Supabase ni identidad externa/JWT acreditados.
+Metodo GET consultado en fuente primaria de Supabase auth-js GoTrueAdminApi.
+No secretos/URL/JWT/respuestas privadas impresos, ni mensajes enviados al usuario.
+
+Pendientes: identificador de Supabase aportado por usuario para contrastar el vinculo,
+autorizacion explicita de superadmin global del perfil local indicado, y humo JWT/HTTP
+con proceso configurado. Permiso global permite acceso a organizaciones del entorno
+local; elegir staff/correo no se interpreta como promocion autorizada. Canal tecnico
+§113 disponible, selector ausente; sin nuevas politicas ni activacion. Sin nueva suite;
+ultima 3654 §106/focalizadas 31 §110. EN PROGRESO; sin commit/push.
+
+## §115 — Superadmin local explicitamente autorizado (2026-10-09)
+
+Usuario autoriza superadmin global en base local para el perfil del correo indicado.
+Mantenimiento verifica entorno development/host loopback, exactamente un perfil y
+vinculo auth_user_id presente, toma FOR UPDATE y cambia solo is_superadmin=true
+por id/auth_user_id existentes. Commit realizado y lectura posterior confirma true.
+No se crea usuario, cambia email/sub ni modifica Supabase. PII/IDs no se imprimen
+ni se incorporan a evidencia versionada. Alcance: organizaciones de base local.
+
+Autoridad local provisionada por autorizacion humana; identidad externa de Supabase
+/JWT personal sigue sin verificar (ConnectError previo; User UID aun pendiente).
+No declarar humo HTTP aprobado ni sources_status/aceptacion/activacion habilitadas.
+Canal tecnico §113 permanece; selector/politica sin cambios. No nueva suite ni
+migracion; ultima 3654 §106, focalizadas 31 §110. Proximo contrastar User UID y
+completar autenticacion/proceso HTTP configurado. EN PROGRESO; sin commit/push.
+
+## §116 — UID contrastado y rechazo HTTP anonimo (2026-10-09)
+
+Usuario aporta User UID de Supabase; consulta local readonly confirma un perfil
+unico por correo, auth_user_id coincide exactamente con UID aportado y superadmin=true.
+No se reproduce PII/UID en evidencia versionada. Este contraste usa dato aportado
+por usuario y base local; no acredita respuesta externa de Supabase ni JWT firmado.
+
+Backend local 127.0.0.1:8000 responde health 200; OpenAPI 200 registra POST
+/admin/eipd/publications y /admin/eipd/selections. Ambas solicitudes sin token
+(cuerpo vacio) -> 401. No filas/identidad/canal de DB mutados. Prueba negativa
+real acreditada; no acredita SHA del proceso, carga del secreto EIPD o prueba positiva.
+
+Pendiente proceso HTTP configurado con secreto privado del canal y solicitud
+personal JWT validada por issuer/JWKS, seguida de publicacion/seleccion deshabilitada
+y auditoria/retirada. No solicitar tokens/passwords por chat; usar inicio de sesion
+local y canal seguro. ConnectError previo en consulta de autenticacion externa
+no se considera resuelto por el contraste UID. Canal tecnico y autoridad local
+estan provisionados; selector ausente. Fuentes/aceptacion pendientes, activacion
+bloqueada; EN PROGRESO. Sin nueva suite ni commit/push.
+
+## §117 — Proceso local configurado e identidad externa verificada (2026-10-09)
+
+Base limpia 6474873b2cd0eb0a9e941322cbca04bb9e59d365. Archivo privado externo
+presente, modo 0600 validado; carga solo en memoria de nuevo proceso local,
+DEBUG=false, access_log=false, uvicorn en 127.0.0.1:8001. Proceso de validacion
+separado del backend existente 8000; .env habitual sin cambios y secreto no impreso.
+Sesión de herramienta que mantiene proceso: 30969 (referencia efimera, no garantiza
+persistencia tras cierre/reinicio de herramienta). No despliegue remoto ni servicio
+persistente del sistema; verificar salud antes de cada paso.
+
+DNS de proyecto de autenticacion accesible y JWKS publico GET 200. Reintento GET
+administrativo readonly de usuario Supabase -> 200; id/correo coinciden con perfil
+local y dato humano aportado, email confirmado, superadmin local true. ConnectError
+anterior ya no se reproduce en estas consultas. No se exponen PII/claves/respuestas.
+Esto acredita identidad externa por consulta administrativa, no JWT de sesion personal.
+
+Proceso nuevo health 200; POST ambas rutas EIPD sin token -> 401. No se publica ni
+selecciona politica ni modifica perfil. Credencial privada del canal cargada por
+proceso iniciado; pool inicializacion diferida, prueba readonly del canal acreditada
+§113. No inferir solicitud autenticada por salud o rechazo anonimo.
+
+Se intento inspeccion de navegador mediante herramienta CUA; inicializacion falla
+por helper/setup refresh, sin estado de navegador disponible. Habilidad instalada
+leida (computer-use 26.1002.52244); ruta anterior del catalogo ausente, encontrada
+mediante busqueda local. No bypass de automatizacion ni extraccion de tokens.
+Pendiente sesion autentica del usuario por canal local seguro. No pedir contrasena/
+JWT por chat ni generar token sintetico como evidencia operacional.
+
+Proximo: solicitud autenticada con JWT real del staff contra proceso configurado,
+politica deshabilitada y auditoria; requiere acceso a sesion del usuario. Fuentes/
+aceptacion/provision integral siguen pendientes; activacion bloqueada. Sin nueva
+suite, ultima completa 3654 §106 y focalizadas 31 §110. M3-T1 EN PROGRESO.
+Sin commit/push.
+
+## 2026-10-09 — M3-T1 §118: comprobacion local de acceso personal preparada
+
+Se incorpora GET /admin/eipd/status, protegido por el canal administrativo y la
+autoridad personal existentes. Devuelve solo un resumen de acceso y presencia de
+selector; activation_authorized permanece false. No publica, selecciona ni crea
+politicas. La pantalla de desarrollo /admin/eipd-validation utiliza la sesion
+Supabase del navegador sin mostrar ni persistir el token y consulta el backend
+local 127.0.0.1:8001.
+
+Validacion: 40 pruebas focalizadas de API aprobadas; Black/Ruff, type-check y lint
+del frontend aprobados. HTTP real sin sesion: pantalla redirige al login (307),
+GET de estado rechaza sin token (401). Esto no acredita JWT personal real: queda
+pendiente iniciar sesion, abrir la pantalla y pulsar Comprobar acceso. Los procesos
+locales son efimeros; backend anterior 8000 permanece. No cambios de credenciales,
+perfil ni politicas. Ultima suite completa: 3654 pruebas (§106).
+
+La Ley 21.719 / 19.628 reformada permanece como base fija. Fuentes complementarias,
+aceptacion y validacion operacional integral pendientes. M3-T1 EN PROGRESO;
+activacion excepcional bloqueada. Sin commit/push en este paso.
+
+## 2026-10-09 — M3-T1 §119: consulta personal del registro operativo
+
+Se incorpora GET /admin/eipd/audit con AdminDb y el contrato cerrado de snapshot
+validado. La lectura conserva la comprobacion JWT, autoridad global y canal
+restringido; errores de coherencia devuelven 409. No crea ni modifica politicas.
+La pantalla local incorpora Consultar registro y muestra revision vigente,
+numero de publicaciones/selecciones y referencias/estado de las politicas.
+Sin selector la revision mostrada es cero; no se inventa una seleccion inicial.
+
+Pruebas API y concurrencia: 54 aprobadas en 12.91 s. Nuevos casos cubren lectura
+sin escrituras antes/despues de publicar y seleccionar, rechazo sin JWT y rechazo
+tenant. Black/Ruff y type-check/lint frontend aprobados. Backend de validacion
+reiniciado; GET real /audit sin token devuelve 401. No se acredita consulta real
+con sesion personal hasta el resultado aportado por el usuario. La comprobacion
+de acceso personal §118 ya fue confirmada mediante captura.
+
+Proximo: consultar el registro con la sesion personal; luego preparar publicacion
+y seleccion deshabilitadas con revision vigente y evidencia operacional.
+No hubo publicaciones/selecciones operacionales en este paso. Ley fija, fuentes
+complementarias/aceptacion pendientes; M3-T1 EN PROGRESO y activacion bloqueada.
+Sin commit/push.
+
+## 2026-10-09 — M3-T1 §120: publicacion local deshabilitada preparada
+
+GET /admin/eipd/publication-draft protegido por AdminDb devuelve la propuesta fija
+resolve_eipd_gate_policy_v1, sin escrituras ni aceptacion: fuentes pendientes,
+aceptacion pendiente, sin responsables/evidencia de aceptacion inventados y
+activacion deshabilitada. Motivo operacional y referencia documental explicitos.
+
+La pantalla de desarrollo prepara la propuesta tras consultar el snapshot actual,
+evita ofrecer publicacion si su referencia ya existe y muestra que el registro
+local es permanente. Solo Publicar politica deshabilitada solicita POST existente
+con JWT personal. Tras 201 consulta nuevamente la auditoria y contrasta ID/hash y
+estado deshabilitado. No selecciona ni activa; no hay reintentos automaticos.
+Ante resultado incierto requiere consultar el registro, sin repetir a ciegas.
+
+56 pruebas API/concurrencia aprobadas en 13.27 s; casos nuevos cubren propuesta
+readonly, JWT/autoridad, publicacion seguida de auditoria, selector ausente y
+rechazo de duplicados sin cambios. Black/Ruff y type-check/lint frontend aprobados.
+Proceso local 8001 actualizado; GET propuesta sin token devuelve 401. La publicacion
+operacional con sesion personal sigue pendiente: no se ejecuta ni se acredita por
+estas pruebas. No se cambian credenciales, perfiles ni el backend previo 8000.
+
+Proximo: usuario prepara/revisa/publica politica deshabilitada en pantalla y aporta
+resultado; luego verificar auditoria y preparar seleccion con revision vigente.
+Ley 21.719 / 19.628 reformada fija; fuentes complementarias/aceptacion pendientes.
+M3-T1 EN PROGRESO; activacion EIPD bloqueada. Sin commit/push.
+
+## 2026-10-09 — M3-T1 §121: seleccion local deshabilitada preparada
+
+La pantalla prepara la seleccion tras consultar GET /audit, toma publication_id,
+hash y revision vigentes y muestra referencia/revision antes del boton explicito.
+Solo admite la publicacion fija deshabilitada y no ofrece reseleccion de una
+publicacion ya presente en eventos. POST /selections existente mantiene autoridad,
+control optimista de revision y rechazo de politica habilitada. Tras 201 se consulta
+el snapshot y se contrastan evento, hash, revision y selector, conservando estado
+deshabilitado. No hay reintentos automaticos ante 409 o respuesta incierta.
+La seleccion operacional personal sigue pendiente; no se ejecuta por este paso.
+
+Type-check/lint frontend y formato aprobados. La primera suite en base operacional
+produjo 52 aprobadas/4 fallidas porque los casos esperan registro vacio y ya existe
+la publicacion personal. Se creo cumpleia_eipd_tests_20261009 vacia, solo esquema
+migrado a head, funciones auth y permisos app_user equivalentes; sin copiar datos
+personales ni cambiar URLs persistentes. Suite focalizada API/concurrencia en esa
+base: 56 aprobadas en 12.15 s. Usar esa base aislada en siguientes suites; no ejecutar
+pruebas de escritura contra el registro operacional. La base de pruebas queda local.
+
+Comprobacion readonly posterior del snapshot operacional: 1 publicacion deshabilitada,
+0 selecciones y sin selector (revision 0); registro personal preservado. No infiere
+solicitud HTTP personal de esta consulta tecnica. Fuentes complementarias y aceptacion
+integral pendientes; ley fija, M3-T1 EN PROGRESO y activacion bloqueada.
+Sin commit/push.
+
+## 2026-10-09 — M3-T1 §122: cierre delimitado de validacion local
+
+La secuencia acceso personal -> consulta -> publicacion -> seleccion deshabilitada
+queda documentada por capturas aportadas por el usuario (§118–121), y snapshot
+tecnico posterior readonly coherente. Este cierre solo cubre esa secuencia local;
+no marca DONE del modulo ni aceptacion juridica ni puesta en produccion.
+
+Nuevo preflight readonly real: status ok, salida 0, channel_verified y
+permissions_verified true, audit_coherent true, selector_present true y revision 1;
+activation_authorized false. Las banderas de identidad del entorno/head/autenticacion
+personal del CLI permanecen false por alcance limitado de esa herramienta, sin
+sustituir la evidencia personal previa. Head comprobado separadamente por lectura
+de alembic_version: b17d95c0286f. Sin escrituras ni nueva suite en este checkpoint;
+ultima focalizada: 56 aprobadas en base aislada §121, ultima completa: 3654 §106.
+
+Pendientes separados: (1) asegurar ejecucion de futuras suites solo en base aislada,
+(2) probar rotacion/retiro del canal y recuperacion local preservando auditoria,
+(3) verificar fuentes complementarias y registrar aceptacion real con responsables,
+(4) resolver regimenes especiales/representacion y criterios del alcance integral.
+No se identifica una fuente nueva ni se cambia una regla legal en esta revision.
+Ley 21.719/19.628 reformada fija. M3-T1 EN PROGRESO; activacion EIPD bloqueada.
+Sin commit/push.
