@@ -245,3 +245,60 @@ Ruff/Black correctos. Primera corrida detecto fixture transversal obsoleto al
 cambiar consentimiento; reaporte de controles ficticios corrigio preparacion sin
 relajar gates. Sin cambios de servicio, migraciones, politica ni datos operativos.
 M3-T1 EN PROGRESO; pruebas ficticias hasta MVP; confirmacion EIPD bloqueada.
+
+## 2026-10-14 — M3-T1 §249: regresion OpenAPI detectada por CI
+
+CI de d5a1986 (run 38611120420) fallo en test_openapi_research_contracts por
+KeyError LegalAssessmentDraftCreate: el endpoint ya publica el contrato sucesor de
+representacion. Prueba corregida para resolver el ref real de requestBody POST/PATCH,
+sin depender del nombre interno de clase. Conserva checks de ResearchAssessmentV1,
+extras rechazados y binding solo de salida; no cambia contrato ni servicio.
+
+33 pruebas API investigacion/contratos representacion aprobadas en 4.05 s en base
+fija aislada verificada; Ruff/Black correctos. Validacion integral remota del nuevo
+commit pendiente, no se declara CI completa aprobada. M3-T1 EN PROGRESO; datos
+ficticios hasta MVP; confirmacion/activacion EIPD bloqueadas.
+
+## 2026-10-14 — M3-T1 §250: binding EIPD V3 de representacion
+
+Contexto V3 extiende V2 con envelope representacion requerido incluso si null;
+contrato interno cerrado, binding/documento StoredV3 separados, dominios de hash
+nuevos. Cambios de cuerpo, hashes de asociacion, retiro, investigacion, RAT o
+consentimiento invalidan identidad sin repararla. V1/V2 no aceptan documentos V3;
+null explicito no comparte hash V2. Funciones puras, sin dispatch/API/metadata/eventos
+nuevos ni cambio de gates; cobertura operativa de representacion sigue pendiente.
+
+10 casos nuevos y regresiones de bindings/evaluador historicos: 206 aprobadas en
+0.61 s con entorno aislado verificado; Ruff/Black correctos. Sin migracion o datos
+operativos. Proximo: contrato sucesor de metadata y composicion compatible antes
+de conectar writer/API. M3-T1 EN PROGRESO; datos ficticios hasta MVP; EIPD bloqueada.
+
+## 2026-10-14 — M3-T1 §251: metadata V2 para contexto EIPD V3
+
+Nuevo contrato interno cerrado exige versiones metadata2/binding3/context3,
+cobertura research/representacion contexto_v3 y hashes de material nullable
+explicitos. Builder puro solo acepta resolucion V3 asociada al contexto vigente;
+rechaza contexto obsoleto, no convierte historia ni atribuye facultades. Metadatos
+V1 y lectores/eventos actuales intactos. Integracion writer/lectores/UI aun pendiente;
+representacion operativa sigue con cobertura pendiente y gates bloqueados.
+
+12 pruebas nuevas; 47 de metadata/bindings nuevos e historicos aprobadas en 0.36 s;
+cuatro guardas de runner aprobadas en 0.02 s. Runner aislado incluye suites nuevas.
+Ruff/Black correctos. Sin migracion, nuevas rutas o datos operativos. M3-T1 EN
+PROGRESO; pruebas ficticias hasta MVP. Autorizacion permanente de usuario para
+implementar/validar/commit/push en rama actual; sin merge/despliegue/activar EIPD.
+
+## 2026-10-14 — M3-T1 §252: lectura compatible de metadata sucesora
+
+Lector interno V2 conserva null historico y distingue estrictamente metadata1/2;
+rechaza versiones desconocidas/bool/texto y hashes discordantes con evento. Contrato
+OutV3 preparado admite identidad V1/V2 sin convertirla, mantiene campos originales
+y valida hashes. Ningun endpoint cambia aun; schema SQL actual solo admite metadata1.
+Proximo bloque necesario: migracion append-only/constraint para metadata2, pruebas
+RLS/append-only y actualizacion de entorno aislado antes de conectar escritura.
+
+Siete casos nuevos; 64 pruebas lector nuevo/historico, contratos representacion y
+API investigacion aprobadas en 4.54 s con base fija aislada verificada. Ruff/Black
+correctos. Sin migracion, alteracion de historia, politica ni datos operativos.
+Objetivo autonomo activo por solicitud explicita del usuario, con commit/push de
+bloques validados; sin merge/despliegue ni activar EIPD. M3-T1 EN PROGRESO.

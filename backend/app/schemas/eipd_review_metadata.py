@@ -37,3 +37,30 @@ class EipdReviewContextMetadataV1(BaseModel):
         if self.context_schema_version == 1 and self.research_material_hash is not None:
             raise ValueError("Contexto V1 no acredita material research")
         return self
+
+
+class EipdReviewContextMetadataV2(BaseModel):
+    """Identidad V3 de material, sin decision ni facultad autorizante."""
+
+    model_config = ConfigDict(extra="forbid", revalidate_instances="always")
+    metadata_schema_version: Literal[2]
+    resolution_binding_version: Literal[3]
+    context_schema_version: Literal[3]
+    research_coverage: Literal["contexto_v3"]
+    representation_coverage: Literal["contexto_v3"]
+    document_hash: str = Field(pattern=r"^[0-9a-f]{64}$")
+    context_hash: str = Field(pattern=r"^[0-9a-f]{64}$")
+    research_material_hash: str | None = Field(pattern=r"^[0-9a-f]{64}$")
+    representation_material_hash: str | None = Field(pattern=r"^[0-9a-f]{64}$")
+
+    @field_validator(
+        "metadata_schema_version",
+        "resolution_binding_version",
+        "context_schema_version",
+        mode="before",
+    )
+    @classmethod
+    def strict_version(cls, value):
+        if type(value) is not int:
+            raise ValueError("Version exige entero estricto")
+        return value
