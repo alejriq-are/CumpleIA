@@ -119,6 +119,9 @@ from app.services.research_binding import (
 )
 from app.services.rights_defense import evaluate_rights_defense_assessment_v1
 from app.services.sensitive_consent import evaluate_sensitive_consent_assessment_v1
+from app.services.sensitive_representation_binding import (
+    bind_sensitive_representation_v1,
+)
 from app.services.sensitive_rights_exception import (
     evaluate_sensitive_rights_exception_v1,
 )
@@ -1098,6 +1101,19 @@ def build_eipd_resolution_context_from_assessment_v2(assessment, snapshot):
     )
 
 
+def _sensitive_representation_context_v1(assessment):
+    """Material actual de servidor, sin recomponer identidad historica."""
+    return {
+        "organization_id": assessment.organization_id,
+        "treatment_id": assessment.treatment_id,
+        "assessment_id": assessment.id,
+        "rat_context_snapshot": assessment.rat_context_snapshot,
+        "legal_basis": assessment.legal_basis,
+        "consent_assessment": assessment.consent_assessment,
+        "sensitive_consent_assessment": assessment.sensitive_consent_assessment,
+    }
+
+
 async def update_legal_assessment_draft_v1(
     db: AsyncSession,
     organization_id: uuid.UUID,
@@ -1116,6 +1132,10 @@ async def update_legal_assessment_draft_v1(
     )
 
     changes = payload.model_dump(mode="json", exclude_unset=True)
+    representation_was_provided = (
+        "sensitive_representation_assessment" in payload.model_fields_set
+    )
+    representation_input = changes.pop("sensitive_representation_assessment", None)
     research_was_provided = "research_assessment" in payload.model_fields_set
     research_input = changes.pop("research_assessment", None)
     scope_was_provided = "scope" in changes
@@ -1176,6 +1196,14 @@ async def update_legal_assessment_draft_v1(
     assessment.purpose_snapshot = bundle.snapshot.purpose
     assessment.rat_context_hash = build_rat_context_hash_v1(bundle.canonical)
     assessment.rat_context_snapshot = bundle.snapshot.model_dump(mode="json")
+    if representation_was_provided:
+        assessment.sensitive_representation_assessment = (
+            bind_sensitive_representation_v1(
+                representation_input, _sensitive_representation_context_v1(assessment)
+            ).model_dump(mode="json")
+            if representation_input is not None
+            else None
+        )
     if research_was_provided:
         assessment.research_assessment = (
             bind_research_assessment_v1(
@@ -1312,6 +1340,7 @@ async def create_legal_assessment_draft_v1(
     series.updated_by = profile_id
 
     assessment = LegalAssessment(
+        id=uuid.uuid4(),
         organization_id=organization_id,
         series_id=series.id,
         treatment_id=treatment_id,
@@ -1398,6 +1427,13 @@ async def create_legal_assessment_draft_v1(
         created_by=profile_id,
         updated_by=profile_id,
     )
+    representation_input = getattr(payload, "sensitive_representation_assessment", None)
+    if representation_input is not None:
+        assessment.sensitive_representation_assessment = (
+            bind_sensitive_representation_v1(
+                representation_input, _sensitive_representation_context_v1(assessment)
+            ).model_dump(mode="json")
+        )
     if payload.special_conditions is not None:
         try:
             assessment.special_conditions = bind_special_conditions_v11(
@@ -2091,6 +2127,10 @@ async def confirm_legal_assessment_v1(
         raise _not_found("Evaluación jurídica no encontrada")
     if draft.status != "borrador":
         raise _conflict("La evaluación jurídica ya no está en estado borrador")
+    if getattr(draft, "sensitive_representation_assessment", None) is not None:
+        raise HTTPException(
+            status_code=409, detail={"code": "representacion_confirmacion_bloqueada"}
+        )
     if draft.schema_version != 1 or draft.rat_context_schema_version != 1:
         raise _conflict("Versión de evaluación o contexto RAT no admitida")
     if draft.legal_basis not in CONFIRMABLE_ORDINARY_BASES:
@@ -2328,6 +2368,12 @@ async def get_legal_assessment_readiness_v1(
     assessment = await get_legal_assessment_v1(
         db, organization_id, treatment_id, assessment_id
     )
+    # La metadata EIPD anterior no cubre representacion: no presentar vigencia global.
+    if getattr(assessment, "sensitive_representation_assessment", None) is not None:
+        raise HTTPException(
+            status_code=409,
+            detail={"code": "representacion_readiness_integracion_pendiente"},
+        )
     blockers: list[dict] = []
 
     def block(field, code, message):
@@ -2797,6 +2843,11 @@ async def record_eipd_resolution_review_v1(
         raise _not_found("Evaluacion juridica no encontrada")
     if draft.status != "borrador":
         raise _conflict("La evaluacion juridica ya no esta en estado borrador")
+    if getattr(draft, "sensitive_representation_assessment", None) is not None:
+        raise HTTPException(
+            status_code=409,
+            detail={"code": "resolucion_eipd_representacion_asociacion_pendiente"},
+        )
     if draft.schema_version != 1 or draft.rat_context_schema_version != 1:
         raise _conflict("Version de evaluacion o contexto RAT no admitida")
     if _resolution_uses_context_v2(draft):

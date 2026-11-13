@@ -1,0 +1,270 @@
+"""CRUD ficticio bajo permisos/RLS, con gates conservadores."""
+
+from copy import deepcopy
+from uuid import UUID, uuid4
+
+import pytest
+from httpx import ASGITransport, AsyncClient
+from sqlalchemy import text
+
+from app.services.sensitive_representation_binding import (
+    evaluate_sensitive_representation_association_v1,
+)
+from tests import test_api_licitud as api
+
+rat_m3 = api.rat_m3
+complete_payload = api.complete_payload
+explicit_review_policy = api.explicit_review_policy
+pytestmark = pytest.mark.asyncio(loop_scope="session")
+DOCUMENT = {
+    "representation_kind": "mandatario",
+    "authority_document_reference": "PRUEBA: documento ficticio",
+}
+
+
+@pytest.fixture
+async def saved(client_a, rat_m3, org_a_id):
+    tid, payload = rat_m3
+    async with AsyncClient(
+        transport=ASGITransport(app=client_a),
+        base_url="http://test",
+        headers={"X-Organization-Id": str(org_a_id)},
+    ) as client:
+        response = await client.post(
+            f"/licitud/treatments/{tid}/assessments",
+            json={**payload, "sensitive_representation_assessment": DOCUMENT},
+        )
+        assert response.status_code == 201, response.text
+    return tid, response.json(), client_a, org_a_id
+
+
+async def test_create_get_binding_uses_server_identity(saved, _session_factory):
+    tid, out, app, org = saved
+    bound = out["sensitive_representation_assessment"]
+    assert bound["assessment"]["authority_document_reference"].startswith("PRUEBA")
+    context = {
+        "organization_id": org,
+        "treatment_id": tid,
+        "assessment_id": out["id"],
+        "rat_context_snapshot": out["rat_context_snapshot"],
+        "legal_basis": out["legal_basis"],
+        "consent_assessment": out["consent_assessment"],
+        "sensitive_consent_assessment": out["sensitive_consent_assessment"],
+    }
+    assert (
+        evaluate_sensitive_representation_association_v1(bound, context).result
+        == "vigente"
+    )
+    async with AsyncClient(
+        transport=ASGITransport(app=app),
+        base_url="http://test",
+        headers={"X-Organization-Id": str(org)},
+    ) as client:
+        result = await client.get(f"/licitud/treatments/{tid}/assessments/{out['id']}")
+        assert (
+            result.status_code == 200
+            and result.json()["sensitive_representation_assessment"] == bound
+        )
+    async with _session_factory() as db:
+        assert (
+            await db.scalar(
+                text(
+                    "SELECT sensitive_representation_assessment FROM legal_assessments WHERE id=:id"
+                ),
+                {"id": UUID(out["id"])},
+            )
+            == bound
+        )
+
+
+async def test_patch_omission_stale_reaporte_and_null(saved, _session_factory):
+    tid, out, app, org = saved
+    original = deepcopy(out["sensitive_representation_assessment"])
+    url = f"/licitud/treatments/{tid}/assessments/{out['id']}"
+    async with AsyncClient(
+        transport=ASGITransport(app=app),
+        base_url="http://test",
+        headers={"X-Organization-Id": str(org)},
+    ) as client:
+        changed = await client.patch(
+            url,
+            json={
+                "consent_assessment": {
+                    "given_by": "mandatario",
+                    "notes": "PRUEBA: cambio de contexto",
+                }
+            },
+        )
+        assert changed.status_code == 200, changed.text
+        assert changed.json()["sensitive_representation_assessment"] == original
+        current = changed.json()
+        context = {
+            "organization_id": org,
+            "treatment_id": tid,
+            "assessment_id": out["id"],
+            "rat_context_snapshot": current["rat_context_snapshot"],
+            "legal_basis": current["legal_basis"],
+            "consent_assessment": current["consent_assessment"],
+            "sensitive_consent_assessment": current["sensitive_consent_assessment"],
+        }
+        assert evaluate_sensitive_representation_association_v1(
+            original, context
+        ).issues == ("asociacion_contexto_obsoleta",)
+
+        fresh = await client.patch(
+            url, json={"sensitive_representation_assessment": DOCUMENT}
+        )
+        assert fresh.status_code == 200, fresh.text
+        assert (
+            fresh.json()["sensitive_representation_assessment"]["context_binding"][
+                "context_hash"
+            ]
+            != original["context_binding"]["context_hash"]
+        )
+        removed = await client.patch(
+            url, json={"sensitive_representation_assessment": None}
+        )
+        assert (
+            removed.status_code == 200
+            and removed.json()["sensitive_representation_assessment"] is None
+        )
+        # Un documento retirado no prepara por si solo el consentimiento incompleto.
+        assert (await client.post(url + "/confirm")).status_code != 200
+    async with _session_factory() as db:
+        assert await db.scalar(
+            text(
+                "SELECT sensitive_representation_assessment IS NULL FROM legal_assessments WHERE id=:id"
+            ),
+            {"id": UUID(out["id"])},
+        )
+
+
+@pytest.mark.parametrize(
+    "field", ["context_binding", "context_hash", "created_by", "can_confirm"]
+)
+async def test_injection_rejected_without_changing_document(saved, field):
+    tid, out, app, org = saved
+    url = f"/licitud/treatments/{tid}/assessments/{out['id']}"
+    async with AsyncClient(
+        transport=ASGITransport(app=app),
+        base_url="http://test",
+        headers={"X-Organization-Id": str(org)},
+    ) as client:
+        rejected = await client.patch(
+            url, json={"sensitive_representation_assessment": {field: "PRUEBA"}}
+        )
+        assert rejected.status_code == 422
+        assert (await client.get(url)).json()[
+            "sensitive_representation_assessment"
+        ] == out["sensitive_representation_assessment"]
+
+
+async def test_confirmation_readiness_and_review_fail_closed(saved):
+    tid, out, app, org = saved
+    url = f"/licitud/treatments/{tid}/assessments/{out['id']}"
+    async with AsyncClient(
+        transport=ASGITransport(app=app),
+        base_url="http://test",
+        headers={"X-Organization-Id": str(org)},
+    ) as client:
+        for suffix, code in [
+            ("/confirm", "representacion_confirmacion_bloqueada"),
+            (
+                "/eipd-resolution/reviews/v2",
+                "resolucion_eipd_representacion_asociacion_pendiente",
+            ),
+        ]:
+            kwargs = (
+                {
+                    "json": {
+                        "decision": "requiere_cambios",
+                        "rationale": "PRUEBA",
+                        "review_reference": "PRUEBA",
+                    }
+                }
+                if "reviews" in suffix
+                else {}
+            )
+            result = await client.post(url + suffix, **kwargs)
+            assert result.status_code == 409, result.text
+            assert result.json()["detail"]["code"] == code
+        result = await client.get(url + "/readiness")
+        assert result.status_code == 409
+        assert (
+            result.json()["detail"]["code"]
+            == "representacion_readiness_integracion_pendiente"
+        )
+        assert (await client.get(url)).json()["status"] == "borrador"
+
+
+async def test_other_tenant_and_wrong_parent_cannot_read_material(
+    saved, client_b, org_b_id
+):
+    tid, out, app, org = saved
+    async with AsyncClient(
+        transport=ASGITransport(app=client_b),
+        base_url="http://test",
+        headers={"X-Organization-Id": str(org_b_id)},
+    ) as client:
+        url = f"/licitud/treatments/{tid}/assessments/{out['id']}"
+        assert (await client.get(url)).status_code == 404
+        assert (
+            await client.patch(url, json={"sensitive_representation_assessment": None})
+        ).status_code == 404
+
+
+async def test_wrong_parent_cannot_read_material(saved):
+    tid, out, app, org = saved
+    async with AsyncClient(
+        transport=ASGITransport(app=app),
+        base_url="http://test",
+        headers={"X-Organization-Id": str(org)},
+    ) as client:
+        assert (
+            await client.get(f"/licitud/treatments/{uuid4()}/assessments/{out['id']}")
+        ).status_code == 404
+
+
+async def test_existing_confirmed_history_cannot_receive_material(
+    client_a, rat_m3, complete_payload, org_a_id
+):
+    tid, payload = rat_m3
+    async with AsyncClient(
+        transport=ASGITransport(app=client_a),
+        base_url="http://test",
+        headers={"X-Organization-Id": str(org_a_id)},
+    ) as client:
+        created = await client.post(
+            f"/licitud/treatments/{tid}/assessments",
+            json={**payload, "consent_assessment": complete_payload},
+        )
+        assert created.status_code == 201, created.text
+        url = f"/licitud/treatments/{tid}/assessments/{created.json()['id']}"
+        assert (await client.post(url + "/confirm")).status_code == 200
+        old = (await client.get(url)).json()
+        assert (
+            await client.patch(
+                url, json={"sensitive_representation_assessment": DOCUMENT}
+            )
+        ).status_code == 409
+        assert (await client.get(url)).json() == old
+
+
+async def test_unknown_root_fields_do_not_apply_partial_change(saved):
+    tid, out, app, org = saved
+    url = f"/licitud/treatments/{tid}/assessments/{out['id']}"
+    async with AsyncClient(
+        transport=ASGITransport(app=app),
+        base_url="http://test",
+        headers={"X-Organization-Id": str(org)},
+    ) as client:
+        before = (await client.get(url)).json()
+        response = await client.patch(
+            url,
+            json={
+                "justification": "PRUEBA: cambio no autorizado",
+                "created_by": str(uuid4()),
+            },
+        )
+        assert response.status_code == 422
+        assert (await client.get(url)).json() == before

@@ -13,10 +13,16 @@ from app.schemas.licitud import (
     EipdResolutionReviewIn,
     EipdResolutionReviewOut,
     EipdResolutionReviewOutV2,
-    LegalAssessmentDraftCreate,
-    LegalAssessmentDraftUpdate,
-    LegalAssessmentOut,
     LegalAssessmentReadinessOut,
+)
+from app.schemas.licitud import (
+    LegalAssessmentRepresentationDraftCreateV1 as LegalAssessmentDraftCreate,
+)
+from app.schemas.licitud import (
+    LegalAssessmentRepresentationDraftUpdateV1 as LegalAssessmentDraftUpdate,
+)
+from app.schemas.licitud import (
+    LegalAssessmentRepresentationOutV1 as LegalAssessmentOut,
 )
 from app.services import licitud as service
 from app.services.authorization import Permission
