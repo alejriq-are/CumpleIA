@@ -9,6 +9,9 @@ from sqlalchemy import update
 from app.db.models import TreatmentDataCategory
 from tests import test_api_eipd_resolution as api_fixtures
 from tests import test_services_eipd_resolution as resolution_fixtures
+from tests.eipd_selected_policy_fixtures import (
+    explicit_review_policy as explicit_review_policy,
+)
 from tests.test_api_eipd_resolution_reviews import events, review
 
 rat_m3 = api_fixtures.rat_m3
@@ -278,6 +281,22 @@ async def test_protected_preparation_reread_after_dependency_lock(
                     await asyncio.wait_for(task, timeout=5)
                 assert exc.value.status_code == 409
                 controls = exc.value.detail["eipd_controls"]
+                if operation in ("review", "confirm"):
+                    controls_v2 = exc.value.detail["eipd_controls_v2"]
+                    assert exc.value.detail["evaluation_version"] == 2
+                    assert controls_v2["policy"]["activation"] == "deshabilitada"
+                    assert controls_v2["resolution"]["context_current"] is (
+                        not commit_change
+                    )
+                    assert (
+                        controls_v2["review_state"]["latest_review"]["id"]
+                        == negative.json()["id"]
+                    )
+                    assert (
+                        controls_v2["latest_review_policy"]["review_id"]
+                        == negative.json()["id"]
+                    )
+                    assert controls_v2["review_policy_status"] == "vigente"
                 if commit_change:
                     assert controls["preparation_result"] != "preparado"
                     assert any(

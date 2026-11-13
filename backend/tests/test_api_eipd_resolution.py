@@ -24,6 +24,9 @@ from app.services.eipd_resolution import (
     eipd_resolution_context_is_current_v1,
 )
 from tests import test_api_licitud as api_fixtures
+from tests.eipd_selected_policy_fixtures import (
+    explicit_review_policy as explicit_review_policy,
+)
 
 rat_m3 = api_fixtures.rat_m3
 complete_payload = api_fixtures.complete_payload

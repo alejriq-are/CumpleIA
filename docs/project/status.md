@@ -1,3 +1,566 @@
+## 2026-10-09 — M3-T1 §122: cierre delimitado de validacion local
+
+La secuencia acceso personal -> consulta -> publicacion -> seleccion deshabilitada
+queda documentada por capturas aportadas por el usuario (§118–121), y snapshot
+tecnico posterior readonly coherente. Este cierre solo cubre esa secuencia local;
+no marca DONE del modulo ni aceptacion juridica ni puesta en produccion.
+
+Nuevo preflight readonly real: status ok, salida 0, channel_verified y
+permissions_verified true, audit_coherent true, selector_present true y revision 1;
+activation_authorized false. Las banderas de identidad del entorno/head/autenticacion
+personal del CLI permanecen false por alcance limitado de esa herramienta, sin
+sustituir la evidencia personal previa. Head comprobado separadamente por lectura
+de alembic_version: b17d95c0286f. Sin escrituras ni nueva suite en este checkpoint;
+ultima focalizada: 56 aprobadas en base aislada §121, ultima completa: 3654 §106.
+
+Pendientes separados: (1) asegurar ejecucion de futuras suites solo en base aislada,
+(2) probar rotacion/retiro del canal y recuperacion local preservando auditoria,
+(3) verificar fuentes complementarias y registrar aceptacion real con responsables,
+(4) resolver regimenes especiales/representacion y criterios del alcance integral.
+No se identifica una fuente nueva ni se cambia una regla legal en esta revision.
+Ley 21.719/19.628 reformada fija. M3-T1 EN PROGRESO; activacion EIPD bloqueada.
+Sin commit/push.
+
+## 2026-10-09 — M3-T1 §121: seleccion personal y registro confirmados
+
+El usuario aporta dos capturas: revision 1, publicaciones 1, selecciones 1,
+referencia m3-t1-eipd-deshabilitada-v1 deshabilitada y seleccionada. La segunda
+muestra rechazo preventivo de reseleccion: publicacion ya seleccionada, sin
+ofrecer otra seleccion. Se registra como evidencia visual del usuario; no como
+inspeccion independiente del JWT o de la solicitud HTTP original.
+
+Comprobacion tecnica readonly posterior mediante canal dedicado: snapshot validado,
+1 publicacion, 1 evento y selector revision 1; identidades publicacion/evento/selector
+y hash coinciden, actor de publicacion/seleccion consistente, fuentes/aceptacion
+pendientes y activacion deshabilitada. Sin nuevas escrituras ni datos personales,
+claves, tokens o capturas incorporados al repositorio.
+
+Queda confirmada la seleccion operacional deshabilitada y su persistencia coherente.
+No constituye aceptacion juridica ni habilitacion. Proximo: revisar el cierre de la
+validacion operacional y pendientes de provision/rotacion/retiro y aceptacion,
+manteniendo la ley fija. M3-T1 EN PROGRESO; activacion EIPD bloqueada.
+Sin commit/push.
+
+## 2026-10-09 — M3-T1 §121: seleccion local deshabilitada preparada
+
+La pantalla prepara la seleccion tras consultar GET /audit, toma publication_id,
+hash y revision vigentes y muestra referencia/revision antes del boton explicito.
+Solo admite la publicacion fija deshabilitada y no ofrece reseleccion de una
+publicacion ya presente en eventos. POST /selections existente mantiene autoridad,
+control optimista de revision y rechazo de politica habilitada. Tras 201 se consulta
+el snapshot y se contrastan evento, hash, revision y selector, conservando estado
+deshabilitado. No hay reintentos automaticos ante 409 o respuesta incierta.
+La seleccion operacional personal sigue pendiente; no se ejecuta por este paso.
+
+Type-check/lint frontend y formato aprobados. La primera suite en base operacional
+produjo 52 aprobadas/4 fallidas porque los casos esperan registro vacio y ya existe
+la publicacion personal. Se creo cumpleia_eipd_tests_20261009 vacia, solo esquema
+migrado a head, funciones auth y permisos app_user equivalentes; sin copiar datos
+personales ni cambiar URLs persistentes. Suite focalizada API/concurrencia en esa
+base: 56 aprobadas en 12.15 s. Usar esa base aislada en siguientes suites; no ejecutar
+pruebas de escritura contra el registro operacional. La base de pruebas queda local.
+
+Comprobacion readonly posterior del snapshot operacional: 1 publicacion deshabilitada,
+0 selecciones y sin selector (revision 0); registro personal preservado. No infiere
+solicitud HTTP personal de esta consulta tecnica. Fuentes complementarias y aceptacion
+integral pendientes; ley fija, M3-T1 EN PROGRESO y activacion bloqueada.
+Sin commit/push.
+
+## 2026-10-09 — M3-T1 §120: publicacion personal confirmada por captura
+
+El usuario aporta captura posterior a Publicar politica deshabilitada. Muestra
+revision actual 0, publicaciones 1, selecciones 0, ninguna politica seleccionada,
+referencia m3-t1-eipd-deshabilitada-v1 en estado deshabilitada y mensaje de
+publicacion confirmada en el registro; activacion EIPD bloqueada.
+Se registra como evidencia visual aportada por el usuario de la publicacion con
+su sesion personal y comprobacion posterior de la pantalla, sin afirmar una
+inspeccion independiente de la solicitud HTTP o de los campos de auditoria.
+No se incorporan imagenes, PII, claves ni tokens al repositorio.
+
+La publicacion operacional queda confirmada por esta evidencia. No acredita
+seleccion ni aceptacion juridica. Proximo: preparar seleccion explicita de la
+publicacion deshabilitada con revision vigente y comprobar evento/selector en
+la auditoria. Fuentes complementarias y aceptacion integral siguen pendientes;
+ley fija, M3-T1 EN PROGRESO y activacion bloqueada. Sin commit/push.
+
+## 2026-10-09 — M3-T1 §120: publicacion local deshabilitada preparada
+
+GET /admin/eipd/publication-draft protegido por AdminDb devuelve la propuesta fija
+resolve_eipd_gate_policy_v1, sin escrituras ni aceptacion: fuentes pendientes,
+aceptacion pendiente, sin responsables/evidencia de aceptacion inventados y
+activacion deshabilitada. Motivo operacional y referencia documental explicitos.
+
+La pantalla de desarrollo prepara la propuesta tras consultar el snapshot actual,
+evita ofrecer publicacion si su referencia ya existe y muestra que el registro
+local es permanente. Solo Publicar politica deshabilitada solicita POST existente
+con JWT personal. Tras 201 consulta nuevamente la auditoria y contrasta ID/hash y
+estado deshabilitado. No selecciona ni activa; no hay reintentos automaticos.
+Ante resultado incierto requiere consultar el registro, sin repetir a ciegas.
+
+56 pruebas API/concurrencia aprobadas en 13.27 s; casos nuevos cubren propuesta
+readonly, JWT/autoridad, publicacion seguida de auditoria, selector ausente y
+rechazo de duplicados sin cambios. Black/Ruff y type-check/lint frontend aprobados.
+Proceso local 8001 actualizado; GET propuesta sin token devuelve 401. La publicacion
+operacional con sesion personal sigue pendiente: no se ejecuta ni se acredita por
+estas pruebas. No se cambian credenciales, perfiles ni el backend previo 8000.
+
+Proximo: usuario prepara/revisa/publica politica deshabilitada en pantalla y aporta
+resultado; luego verificar auditoria y preparar seleccion con revision vigente.
+Ley 21.719 / 19.628 reformada fija; fuentes complementarias/aceptacion pendientes.
+M3-T1 EN PROGRESO; activacion EIPD bloqueada. Sin commit/push.
+
+## 2026-10-09 — M3-T1 §119: consulta del registro confirmada por el usuario
+
+El usuario aporta dos capturas de la pantalla local: entrada y resultado de
+Consultar registro. La segunda muestra revision actual 0, publicaciones 0,
+selecciones 0, ninguna politica seleccionada y activacion EIPD bloqueada.
+Se registra como evidencia visual aportada por el usuario de la consulta con su
+sesion personal; no como inspeccion independiente de la solicitud HTTP.
+No se incorporan imagenes, datos personales, claves ni tokens al repositorio.
+
+La consulta personal del registro queda confirmada. No hubo publicaciones ni
+selecciones operacionales en este paso. Proximo: preparar la publicacion de una
+politica deshabilitada y verificar su persistencia/auditoria; posteriormente,
+seleccionarla con revision vigente. Ley fija, fuentes complementarias y aceptacion
+integral pendientes. M3-T1 EN PROGRESO; activacion bloqueada. Sin commit/push.
+
+## 2026-10-09 — M3-T1 §119: consulta personal del registro operativo
+
+Se incorpora GET /admin/eipd/audit con AdminDb y el contrato cerrado de snapshot
+validado. La lectura conserva la comprobacion JWT, autoridad global y canal
+restringido; errores de coherencia devuelven 409. No crea ni modifica politicas.
+La pantalla local incorpora Consultar registro y muestra revision vigente,
+numero de publicaciones/selecciones y referencias/estado de las politicas.
+Sin selector la revision mostrada es cero; no se inventa una seleccion inicial.
+
+Pruebas API y concurrencia: 54 aprobadas en 12.91 s. Nuevos casos cubren lectura
+sin escrituras antes/despues de publicar y seleccionar, rechazo sin JWT y rechazo
+tenant. Black/Ruff y type-check/lint frontend aprobados. Backend de validacion
+reiniciado; GET real /audit sin token devuelve 401. No se acredita consulta real
+con sesion personal hasta el resultado aportado por el usuario. La comprobacion
+de acceso personal §118 ya fue confirmada mediante captura.
+
+Proximo: consultar el registro con la sesion personal; luego preparar publicacion
+y seleccion deshabilitadas con revision vigente y evidencia operacional.
+No hubo publicaciones/selecciones operacionales en este paso. Ley fija, fuentes
+complementarias/aceptacion pendientes; M3-T1 EN PROGRESO y activacion bloqueada.
+Sin commit/push.
+
+## 2026-10-09 — M3-T1 §118: comprobacion personal confirmada por el usuario
+
+El usuario aporta captura de /admin/eipd-validation con el resultado:
+«Acceso administrativo confirmado. La activacion EIPD permanece bloqueada».
+Se registra como evidencia visual aportada por el usuario de la comprobacion con
+su sesion real, posterior al cierre y nuevo inicio de sesion. No se capturan ni
+persisten tokens, credenciales o datos personales; no se incorpora la imagen al
+repositorio. No se afirma una inspeccion independiente de la solicitud HTTP.
+
+La comprobacion de acceso queda satisfecha con esta evidencia. No publica ni
+selecciona politicas y no habilita activacion. Proximo paso: preparar la validacion
+operacional de publicacion/seleccion de politica deshabilitada y auditoria con
+sesion personal. Fuentes complementarias y aceptacion integral siguen pendientes.
+M3-T1 EN PROGRESO. Sin commit/push.
+
+## 2026-10-09 — M3-T1 §118: comprobacion local de acceso personal preparada
+
+Se incorpora GET /admin/eipd/status, protegido por el canal administrativo y la
+autoridad personal existentes. Devuelve solo un resumen de acceso y presencia de
+selector; activation_authorized permanece false. No publica, selecciona ni crea
+politicas. La pantalla de desarrollo /admin/eipd-validation utiliza la sesion
+Supabase del navegador sin mostrar ni persistir el token y consulta el backend
+local 127.0.0.1:8001.
+
+Validacion: 40 pruebas focalizadas de API aprobadas; Black/Ruff, type-check y lint
+del frontend aprobados. HTTP real sin sesion: pantalla redirige al login (307),
+GET de estado rechaza sin token (401). Esto no acredita JWT personal real: queda
+pendiente iniciar sesion, abrir la pantalla y pulsar Comprobar acceso. Los procesos
+locales son efimeros; backend anterior 8000 permanece. No cambios de credenciales,
+perfil ni politicas. Ultima suite completa: 3654 pruebas (§106).
+
+La Ley 21.719 / 19.628 reformada permanece como base fija. Fuentes complementarias,
+aceptacion y validacion operacional integral pendientes. M3-T1 EN PROGRESO;
+activacion excepcional bloqueada. Sin commit/push en este paso.
+
+## 2026-10-09 — M3-T1: backend local configurado y Supabase verificado
+
+§117 proceso separado 127.0.0.1:8001, secreto externo en memoria/logs limitados,
+health 200 y ambas rutas 401 sin token. DNS/JWKS 200 y consulta admin Supabase 200:
+vinculo/correo/confirmacion coinciden con staff local autorizado. No acredita JWT
+personal. CUA navegador no inicia (helper/setup refresh); sesion real pendiente.
+Sin politicas nuevas ni .env habitual cambiado. EN PROGRESO, activacion bloqueada.
+Sin nueva suite ni commit/push.
+
+## 2026-10-09 — M3-T1: UID contrastado y HTTP anonimo probado
+
+§116 UID aportado coincide con perfil local unico/superadmin=true. Backend local
+health/OpenAPI 200, ambas rutas EIPD registradas y 401 sin token. No acredita JWT
+personal ni carga de secreto/SHA del proceso. Proximo configurar proceso y validar
+solicitud autenticada sin compartir tokens por chat; consulta Supabase previa
+ConnectError aun no resuelta. Sin nuevas escrituras/politicas/suite. EN PROGRESO,
+activacion bloqueada. Sin commit/push.
+
+## 2026-10-09 — M3-T1: autoridad global local autorizada
+
+§115 usuario autoriza; perfil local unico/vinculado, is_superadmin=true confirmado
+tras commit de mantenimiento. Sin usuario nuevo ni cambios Supabase/politicas.
+Identidad externa/JWT/HTTP siguen pendientes; User UID solicitado. Canal tecnico
+§113 permanece, sin selector. Sin nueva suite, EN PROGRESO, activacion bloqueada.
+Sin commit/push.
+
+## 2026-10-09 — M3-T1: perfil staff local sin autoridad global
+
+§114 correo staff indicado coincide con un perfil local vinculado, superadmin=false.
+Consulta externa readonly Supabase falla ConnectError; no verifica identidad externa.
+Perfil sin cambios. Pendientes ID Supabase/contraste y autorizacion concreta de
+superadmin global local; luego JWT/HTTP configurado. Canal tecnico §113 listo sin
+selector. Sin nueva suite; EN PROGRESO, activacion bloqueada. Sin commit/push.
+
+## 2026-10-09 — M3-T1: canal tecnico local provisionado
+
+§113 autorizacion explicita; eipd_backend_local creado limitado y credencial nueva
+externa privada 0600. Preflight local: canal/permisos/auditoria validos, pending_selector
+codigo 2, sin selector/bootstrap. Solo diagnostico carga secreto; .env/backend HTTP
+no cambiados. Identidad staff pendiente; proximo vincular staff y validar HTTP
+configurado con politica deshabilitada. Sin nueva suite. Fuentes/aceptacion pendientes,
+ley fija, EN PROGRESO; activacion bloqueada. Sin commit/push.
+
+## 2026-10-09 — M3-T1: destino local elegido, provision pendiente
+
+§112 usuario selecciona desarrollo local; canal/login dedicados ausentes, head
+b17d95c0286f. Identidad staff solicitada, pendiente. Revision automatica bloquea
+creacion persistente de login/membresia/credencial; se solicita aprobacion concreta.
+No ejecucion ni secretos/roles/archivos nuevos. Expediente actualizado; ultima suite
+3654 §106/focalizadas 31 §110. EN PROGRESO, activacion bloqueada. Sin commit/push.
+
+## 2026-10-09 — M3-T1: expediente inicial de entorno
+
+§111 configuracion observada development/hosts loopback; canal EIPD no configurado.
+CLI preflight ejecutado: exit 1/failed, sin conexion dedicada; head local b17d95c0286f
+readonly. Expediente con resultados y campos pendientes; destino solicitado al usuario.
+Sin provision/secreto/actor/politica real, sin nueva suite. Proximo depende de destino
+acreditado para provision deshabilitada y humo JWT/HTTP. Fuentes/aceptacion pendientes;
+ley fija, EN PROGRESO integral, activacion bloqueada. Sin commit/push.
+
+## 2026-10-09 — M3-T1: permisos efectivos de preflight
+
+§110 grupo/login/RLS/privilegios de tres tablas y acceso fuera de alcance public,
+columnas/PUBLIC incluidos. Informe v1 con limites de identidad/head/JWT/activacion.
+Ocho nuevas con objetos/grants temporales; 31 focalizadas aprobadas en 3.26 s.
+Sin nueva suite completa, ultima 3654 §106; sin ejecucion operativa acreditada.
+Proximo expediente de entorno/destino/identidad/responsable y resultados preflight/
+HTTP acordados. Fuentes/aceptacion pendientes, ley fija, EN PROGRESO, activacion
+bloqueada. Sin commit/push.
+
+## 2026-10-09 — M3-T1: preflight administrativo readonly
+
+§109 script de diagnostico limitado READ ONLY/rollback, login/rol/perfiles y snapshot
+validados, sin sub/JWT/barrera personal ni escrituras. JSON ok/pending_selector/failed
+sin secretos; no acredita activacion/provision integral. Seis nuevas y 23 focalizadas
+aprobadas en 1.84 s; ultima completa 3654 §106. Sin ejecucion operativa real. Proximo
+ampliar diagnostico de permisos/evidencia de entorno. Fuentes/aceptacion pendientes;
+ley fija, EN PROGRESO, activacion bloqueada. Sin commit/push.
+
+## 2026-10-09 — M3-T1: procedimiento de provision deshabilitada
+
+§108 runbook operativo preparado con expediente, login/pool/staff separados,
+verificacion local de roles, JWT/HTTP/auditoria, retirada/rotacion y revocacion.
+Solo documentacion; JSON ejemplo validado, sin ejecucion/provision real ni nueva
+suite; ultima 3654 §106. Fuentes/aceptacion/provision real pendientes. Proximo
+preflight verificable de solo lectura del canal. Ley fija, EN PROGRESO integral;
+activacion bloqueada. Sin commit/push.
+
+## 2026-10-08 — M3-T1: fuentes y trazabilidad de aceptacion
+
+§107 revision documental sobre HEAD 97d4fd29920e98a7b0a94714b04ae43e7cb5d010 limpio.
+BCN/Diario Oficial reabiertos; instrumento complementario Agencia no verificado en
+busqueda acotada (sin afirmar inexistencia). Matriz actualizada con commits §§103–106,
+head local b17d95c0286f y ultima suite 3654 §106; sin nueva suite ni cambio de gates.
+Aceptacion real/fuentes complementarias/provision operativa pendientes. Proximo:
+procedimiento verificable de provision con politica deshabilitada. Ley fija,
+EN PROGRESO integral; activacion bloqueada. Sin commit/push.
+
+## 2026-10-08 — M3-T1: concurrencia administrativa HTTP
+
+§106 doce pruebas reales de revocacion previa/posterior, commit/rollback/cancelacion,
+selecciones competidoras y referencia duplicada concurrente. Sin cambios productivos;
+locks observados en PostgreSQL, JWT ES256/JWKS sintetico, pools limitados reales.
+97 focalizadas aprobadas en 11.73 s. Suite completa: 3654 passed en 369.30 s; Black/Ruff/Alembic check/diff correctos.
+Proximo fuentes oficiales/trazabilidad de aceptacion y provision operativa separada;
+Ley fija, EN PROGRESO, activacion bloqueada. Sin commit/push.
+
+## 2026-10-08 — M3-T1: API administrativa EIPD autenticada
+
+§105 POST /admin/eipd/publications y /selections conectados a JWT verificado/pool
+separado/barrera personal; actor derivado, esquemas cerrados, errores controlados,
+solo politicas deshabilitadas. 38 HTTP nuevas con ES256/JWKS sintetico y PostgreSQL
+real, 85 focalizadas aprobadas en 9.03 s. Suite completa: 3642 passed en 355.96 s; Black/Ruff/Alembic check/diff correctos.
+Proximo matriz concurrente HTTP/revocacion y fallos, luego fuentes/aceptacion y
+provision operativa. Ley fija, EN PROGRESO; activacion bloqueada. Sin commit/push.
+
+## 2026-10-08 — M3-T1: pool administrativo y dependencia autenticada
+
+§104 configuracion EIPD separada opcional/secreta, sin fallback owner/runtime;
+JWT antes del pool, login dedicado limitado, rol/sub locales y barrera personal
+hasta commit/rollback. Sin rutas ni provision de credenciales reales. 17 nuevas,
+47 focalizadas aprobadas en 3.18 s. Suite completa: 3604 passed en 352.09 s; Black/Ruff/Alembic check/diff correctos.
+Proximo: endpoints administrativos y matriz HTTP/JWT/revocacion; luego fuentes/
+aceptacion. Ley fija, EN PROGRESO; activacion bloqueada. Sin commit/push.
+
+## 2026-10-08 — M3-T1: escritores con autoridad personal
+
+§103 entradas personales de publicacion/seleccion derivan actor, rechazan actor_id
+cliente y requieren perfil superadmin/canal separado antes de escribir. Orden
+perfil -> advisory -> selector, sin serie; guardia de habilitadas conservada.
+Primitivas privadas solo setup/caller interno confiable; fixtures existentes explicitas.
+11 PostgreSQL nuevas, 44 focalizadas aprobadas. Suite completa: 3587 passed en 348.04 s; Black/Ruff/Alembic check/diff correctos.
+Transporte autenticado/pool aun pendiente; proximo conectar canal verificado/local,
+fuentes/aceptacion antes de activar. Ley fija; EN PROGRESO. Sin commit/push.
+
+## 2026-10-08 — M3-T1: barrera personal transaccional limitada
+
+§102 funcion de autoridad personal, migracion b17d95c0286f aplicada: UUID derivado
+sub/perfil superadmin, FOR SHARE hasta commit/rollback, EXECUTE solo canal admin;
+helper exige rol y READ COMMITTED. Nueve PostgreSQL nuevas (cuatro concurrencias),
+45 focalizadas aprobadas; formato/esquema correctos. Ultima suite completa 3567 §101.
+NO conectada a escritores ni transporte/pool autenticado. Proximo integrar en
+publish/select con actor derivado y rechazo de suplantacion; luego canal/pool y
+fuentes/aceptacion. Ley fija; EN PROGRESO integral. Sin commit ni push.
+
+## 2026-10-07 — M3-T1: identidad/autoridad de perfiles protegidas
+
+§101 auditoria local confirma permisos amplios; migracion a06c84bf175e aplicada.
+app_user INSERT/UPDATE limitados por columnas; identidad/autoridad/DELETE/TRUNCATE
+protegidos, trigger exige identidad propia autenticada. SELECT anterior conservado,
+JIT idempotente sin promocion y update basico propio funcionando; owner mantenimiento
+separado. 12 PostgreSQL nuevas, 22 focalizadas con auth aprobadas.
+Suite completa: 3567 passed en 431.30 s; Black/Ruff/Alembic check/diff correctos.
+Proximo: autorizacion personal transaccional EIPD/revocacion/pool, luego fuentes y
+aceptacion. Canal personal aun pendiente; ley fija, EN PROGRESO. Sin commit/push.
+
+## 2026-10-07 — M3-T1: contrato de autoridad personal administrativa
+
+§100 fija identidad JWT verificada + superadmin global + canal DB separado;
+actor auditado derivado de perfil, sin permisos tenant ni identidad de payload.
+Hallazgo de codigo: grants amplios de profiles requieren auditoria de privilegios
+reales/proteccion de identidad y bandera antes de usarla en canal EIPD. No se afirma
+explotacion ni estado efectivo de despliegues. Proximo: endurecimiento append-only,
+JIT conservado y pruebas; luego revalidacion/locks personales y canal autenticado.
+Solo documentacion; autoridad personal aun no implementada. Ultima suite 3555 §99,
+no evidencia del contrato nuevo. Ley fija; EN PROGRESO integral. Sin commit/push.
+
+## 2026-10-07 — M3-T1: series/tenants independientes y PATCH
+
+§99 agrega 12 PostgreSQL reales: series de misma/diferente org confirman sin espera
+mutua, evidencia/actor aislados por RLS y lectura cruzada denegada; PATCH de A bloquea
+solo serie A, B confirma mientras A espera con selector compartido; commit/rollback
+del PATCH invalida/permite confirmacion A despues de releer, ambas rutas.
+12 aprobadas en 6.64 s. Suite completa: 3555 passed en 345.51 s; Black/Ruff/Alembic check/diff correctos.
+Exitos exclusivamente sinteticos/override pytest; guardia productiva conservada.
+Proximo: autoridad personal administrativa separada de tenant; fuentes/aceptacion
+antes de activar. Ley fija; EN PROGRESO integral. Sin commit ni push.
+
+## 2026-10-07 — M3-T1: concurrencia exitosa y revocacion con evidencia
+
+§98 agrega 12 PostgreSQL reales (ambas rutas, pg_blocking_pids): confirmaciones de
+misma serie commit/rollback dejan una evidencia; revocacion espera fin de transaccion,
+conserva evidencia exacta tras commit y bloquea accion futura; confirmacion que espera
+revocacion relee nueva politica tras commit o anterior tras rollback.
+Exitos solo sinteticos con override pytest §97; guardia productiva conservada.
+12 aprobadas en 5.78 s. Suite completa: 3543 passed en 343.50 s; Black/Ruff/Alembic check/diff correctos.
+Proximo: series/tenants independientes y PATCH concurrentes; autoridad personal,
+fuentes/aceptacion antes de activar. Ley fija; EN PROGRESO integral. Sin commit/push.
+
+## 2026-10-07 — M3-T1: evidencia atomica de confirmacion conectada
+
+§97 inserta evidencia solo tras controles v2 y antes de reemplazar confirmado;
+relectura auditada/recomposicion pura, UUID/fecha servidor, FK/RLS y misma transaccion.
+Guardia de habilitadas conservada; exitos exclusivamente sinteticos en pytest con
+override local de guardia, sin bypass/configuracion/endpoint de produccion.
+12 PostgreSQL nuevas aprobadas: ambas rutas, reemplazo, cuatro fallos/rollback,
+identidad exacta y ausencia de evidencia ante guardia/controles fallidos.
+Suite completa: 3531 passed en 334.47 s; Black/Ruff/Alembic check/diff correctos.
+Proximo: concurrencia de exitos/revocacion/tenants; autoridad personal, fuentes y
+aceptacion antes de activar. Ley fija; EN PROGRESO integral. Sin commit ni push.
+
+## 2026-10-07 — M3-T1: preparacion/confirmacion con selector auditado
+
+§96 unifica politica de revision, readiness y confirmacion. Consulta orientativa sin
+locks; accion advisory compartido -> selector compartido -> serie, relectura M2 y
+politica auditada. Ausencia/incoherencia bloquea EIPD sin fallback. Ordinario sin
+EIPD no exige selector ni crea bootstrap; historia sola conserva ambito §88.
+Solo politicas deshabilitadas admitidas; evidencia atomica aun no conectada.
+13 PostgreSQL nuevas aprobadas, cuatro concurrencias reales; 221 focalizadas.
+Suite completa: 3519 passed en 329.62 s; Black/Ruff/Alembic check/diff correctos.
+Proximo: evidencia atomica/fallos/exitos sinteticos, autoridad personal/fuentes/
+aceptacion antes de habilitar. Ley fija; EN PROGRESO integral. Sin commit ni push.
+
+## 2026-10-07 — M3-T1: revision humana con selector auditado
+
+§95 conecta POST revision EIPD: advisory compartido -> selector FOR SHARE -> serie,
+relectura de contexto y politica tras locks. Negativas guardan identidad seleccionada;
+selector ausente/incoherente falla 409 sin escrituras/fallback/bootstrap. Habilitadas
+rechazadas; permisos tenant/suscripcion y diagnostico v1 conservados.
+Nueve PostgreSQL nuevas, cuatro concurrencias reales; 33 HTTP previas aprobadas.
+Suite completa: 3506 passed en 313.64 s; Black/Ruff/Alembic check/diff correctos.
+Confirmacion/readiness aun fijas deshabilitadas: siguiente integrar mismo selector
+preservando ordinario sin EIPD; luego evidencia atomica/exitos/autoridad personal.
+Fuentes/aceptacion pendientes, ley fija; EN PROGRESO integral. Sin commit ni push.
+
+## 2026-10-07 — M3-T1: resolver transaccional de politica con lock compartido
+
+§94 agrega funcion limitada de bloqueo, migracion f95b73aed064 aplicada localmente.
+JWT/perfil, search_path seguro, advisory compartido -> selector FOR SHARE sin
+UPDATE/BYPASSRLS runtime. Helper READ COMMITTED y snapshot revalidado tras espera;
+locks hasta commit/rollback, sin fallback/bootstrap ni conexion a acciones actuales.
+15 PostgreSQL nuevas (seis concurrencias reales), 39 focalizadas aprobadas;
+suite completa 3497 passed en 309.60 s; Alembic check/Black/Ruff/diff correctos.
+Proximo: integrar orden selector -> serie y snapshot auditado en revision/confirmacion,
+con selector deshabilitado explicito; luego evidencia atomica/concurrencia/exitos.
+Autoridad personal/fuentes/aceptacion pendientes. Resolver fijo de acciones conservado.
+Ley fija; M3-T1 EN PROGRESO integral. Sin commit ni push.
+
+## 2026-10-07 — M3-T1: servicios internos de politica auditada
+
+§93 implementa publicacion/seleccion deshabilitada y lectura coherente validada.
+Canal DB separado; ids/fecha/hash servidor, advisory -> selector exclusivo,
+bootstrap serializado y relectura tras espera. Sin commit interno ni endpoint.
+24 PostgreSQL nuevas (cuatro concurrencias reales); suite completa 3482 passed
+en 315.74 s; Black/Ruff/diff correctos. Resolver actual fijo conservado.
+Proximo: resolver transaccional con bloqueo compartido compatible con runtime
+SELECT y orden selector -> serie; luego evidencia atomica/concurrencia/exitos.
+Autoridad personal administrativa, fuentes/aceptacion y activacion real pendientes.
+Ley fija; M3-T1 EN PROGRESO integral. Sin migracion, commit ni push.
+
+## 2026-10-07 — M3-T1: persistencia de evidencia de confirmacion tenant
+
+§92 agrega evidencia append-only tenant, migracion e84a629dcf53 aplicada localmente.
+FK compuestas vinculan assessment/revision positiva/politica/seleccion/hashes;
+RLS limita lectura tenant e insercion actor JWT/borrador/ultima revision/selector
+actual habilitado. Sin endpoint ni integracion de evidencia en confirmacion real.
+29 PostgreSQL nuevas; 105 focalizadas previas y suite completa 3458 passed en 302.51 s.
+Alembic check sin operaciones nuevas; Black/Ruff/diff correctos. Fixtures ajustadas
+al orden FK y ciclo asíncrono, sin reescribir migraciones/eventos historicos.
+Proximo: servicio administrativo de publicacion/seleccion y resolver validado;
+luego locks/evidencia atomica/concurrencia antes de fuentes/aceptacion y habilitacion.
+Resolver fijo deshabilitado. Ley fija; M3-T1 EN PROGRESO integral.
+Sin commit ni push.
+
+## 2026-10-07 — M3-T1: persistencia de auditoria global de politica
+
+§91 agrega publicaciones/selecciones/selector globales, migracion d73f518cbe42
+aplicada localmente; rol administrativo NOLOGIN separado, runtime lectura autenticada
+sin escritura, RLS y constraints de cadena/selector. Consistencia diferida al commit.
+44 PostgreSQL nuevas aprobadas; suite completa 3429 passed en 297.19 s.
+Alembic check sin operaciones nuevas; Black/Ruff/diff correctos.
+Proximo: persistencia append-only de evidencia tenant con FK compuestas/RLS;
+luego servicios/resolver y locks. Sin bootstrap/activacion ni API administrativa.
+Fuentes/aceptacion pendientes; resolver fijo deshabilitado. Ley fija;
+M3-T1 EN PROGRESO integral. Sin commit ni push.
+
+## 2026-10-07 — M3-T1: contratos/evaluadores puros de auditoria
+
+§90 implementa publicacion, cadena/selector revisionados, plan de seleccion y
+constructor de evidencia que recompone controles v2. Cerrados/revalidados, hashes,
+StrictInt y fechas UTC; no DB, autorizacion, locks ni resolver activo.
+65 pruebas nuevas, 169 focalizadas; suite completa 3385 passed en 293.55 s.
+Black/Ruff/diff correctos. Proximo: migracion append-only de control global y
+evidencia tenant, privilegios/RLS; luego resolver/servicios y orden de locks.
+Fuentes/aceptacion y concurrencia/exitos reales pendientes; resolver deshabilitado.
+Ley fija; M3-T1 EN PROGRESO integral. Sin migracion, commit ni push.
+
+## 2026-10-07 — M3-T1: contrato de auditoria de politica real
+
+§89 define publicacion inmutable, selector revisionado y auditoria atomica;
+orden futuro selector compartido -> serie exclusiva, revocacion y evidencia tenant
+de confirmacion. Contrato: m3-t1-eipd-politica-auditoria.md; aun sin implementacion.
+Proximo: contratos/evaluadores puros de publicacion/seleccion/evidencia, luego
+migraciones/RLS, resolver/locks y concurrencia/exitos antes de habilitar.
+Fuentes/aceptacion pendientes; resolver fijo deshabilitado. Solo documentacion,
+diff correcto; ultima suite §88: 3320 passed, no reejecutada.
+Ley fija; M3-T1 EN PROGRESO integral. Sin migracion, commit ni push.
+
+## 2026-10-07 — M3-T1: decision transversal de confirmacion v2
+
+§88 integra confirmation_blockers v2 bajo lock para el ambito EIPD actual.
+Validadores ordinarios/RAT previos y diagnosticos v1 conservados; politica fija
+sigue deshabilitada. Una consulta de ultimo evento/identidad y fecha/contexto comunes.
+Historia sola no amplia gate ordinario: seis regresiones detectadas/corregidas.
+Once HTTP nuevos y concurrencia protegida ampliada; 54 focalizadas aprobadas.
+Suite completa final 3320 passed en 287.70 s; Black/Ruff/diff correctos.
+Proximo: contrato/auditoria y atomicidad de cambios de politica real; exitos de
+frontera habilitada, concurrencia de politica y fuentes/aceptacion pendientes.
+Ley fija; M3-T1 EN PROGRESO integral. Sin migracion, commit ni push.
+
+## 2026-10-07 — M3-T1: revision autenticada con prerrequisitos v2
+
+§87 integra decision v2 bajo lock de serie y relectura de contexto M2/documento.
+Politica fija de servidor deshabilitada; negativos parciales guardan identidad de
+politica sin activar confirmacion. Diagnosticos v1 conservados y error v2 agregado;
+una consulta de ultimo evento/identidad, contratos publicos previos preservados.
+Diez HTTP nuevos, 71 focalizados aprobados; suite completa 3309 passed en 290.08 s,
+incluida concurrencia protegida con aserciones v2 ampliadas. Black/Ruff/diff correctos.
+Proximo: decision transversal/confirmacion v2 bajo lock; auditoria/politica real,
+exitos/concurrencia de politica y fuentes/aceptacion antes de habilitar.
+Ley fija; M3-T1 EN PROGRESO integral. Sin nueva migracion, commit ni push.
+
+## 2026-10-07 — M3-T1: prerrequisitos puros de revision v2
+
+§86 comparte requisitos parciales con v1 y conserva su comportamiento.
+Negativas admiten documentacion parcial con asociacion vigente; continuar exige
+review_blockers de composicion/politica v2 sin requerir revision positiva previa.
+110 pruebas nuevas; 148 focalizadas y suite completa 3299 passed en 281.10 s.
+Black/Ruff/diff correctos. Acciones/gates reales siguen v1 bloqueados.
+Proximo: revision autenticada v2 bajo lock con politica de servidor deshabilitada;
+luego decision transversal, auditoria/politica real, concurrencia y fuentes/aceptacion.
+Ley fija; M3-T1 EN PROGRESO integral. Sin nueva migracion, commit ni push.
+
+## 2026-10-07 — M3-T1: readiness de politica/composicion v2
+
+§85 agrega eipd_controls_v2 versionado/cerrado junto a v1. Resolver de servidor fijo
+con fuentes/aceptacion pendientes y activacion deshabilitada; sin flags de cliente/env.
+Una consulta obtiene ultimo evento/identidad del tenant, sin fallback a positivos
+anteriores. GET conserva documentos/historial; vigencia documental/politica separadas.
+26 pruebas nuevas; suite completa 3189 passed en 279.29 s, Black/Ruff/diff correctos.
+Acciones/gates siguen v1/bloqueados. Proximo: prerequisitos puros de revision v2,
+luego acciones/decision/auditoria/politica real y fuentes/aceptacion antes de habilitar.
+Ley fija; M3-T1 EN PROGRESO integral. Sin nueva migracion, commit ni push.
+
+## 2026-10-07 — M3-T1: identidad de politica en eventos
+
+§84 agrega policy_version/reference/hash opcionales y CHECK todo NULL o identidad
+completa valida; migracion append-only c62e407bad31 aplicada localmente.
+Contratos/mapper historicos no promueven eventos sin politica; RLS/permisos intactos.
+35 pruebas nuevas, 71 focalizadas y suite completa 3163 passed en 277.43 s.
+Alembic check aprobado; Black/Ruff/diff correctos. Comparacion de migracion sobre
+0 eventos locales previos, compatibilidad historica cubierta con fixtures.
+Proximo: resolver deshabilitado y lectura v2 de composicion/identidad antes de
+politica real/auditoria/acciones v2. API/gates siguen v1/bloqueados; fuentes/aceptacion
+pendientes. Ley fija; M3-T1 EN PROGRESO integral. Sin nuevo commit ni push.
+
+## 2026-10-07 — M3-T1: politica pura y composicion v2
+
+§83 implementa politica interna cerrada/revalidada, fuentes/aceptacion/rutas,
+hash canonico y metadatos de ultimo evento. Composicion v2 comparte nucleo v1,
+separa vigencia documental/politica y conserva positivos/faltantes/decisiones.
+104 pruebas nuevas; 184 puras aprobadas; suite completa 3128 passed en 276.34 s.
+Black/Ruff/diff --check correctos. API/gates reales permanecen v1/bloqueados;
+no resolver habilitado ni verificacion real de fuentes en estos evaluadores puros.
+Proximo: contrato/persistencia append-only de identidad de politica en eventos,
+historicos/RLS antes de resolver/auditoria/acciones v2. Fuentes/aceptacion pendientes.
+Ley fija; M3-T1 EN PROGRESO integral. Sin migracion, nuevo commit ni push.
+
+## 2026-10-07 — M3-T1: aceptacion y politica de habilitacion
+
+§82 actualiza evidencia §§80-81: HTTP/concurrencia preparada cubiertos en dos rutas
+con contrato ordinario; habilitacion final sigue pendiente. Define politica cerrada
+exclusiva de servidor, fuentes/aceptacion trazables, rutas y hash; composicion/gate
+v2 futuro sin filtrar codigos v1, identidad de politica en revision y atomicidad.
+Proximo: schemas/evaluador puro de politica y composicion v2 sin activar resolver
+ni gates. Fuentes complementarias, persistencia/versiones y exitos/concurrencia de
+politica siguen pendientes. Ley fija; M3-T1 EN PROGRESO integral.
+Paso documental; ultima suite 3012 passed (§78), 97 HTTP focalizadas (§81), no
+reejecutadas. Diff correcto; sin codigo, migracion, nuevo commit ni push.
+
 ## 2026-10-07 — M3-T1: concurrencia protegida preparada
 
 §81 cubre ambas rutas x revision positiva/confirmacion x commit/rollback: ocho
@@ -2524,3 +3087,12 @@ Pruebas realizadas:
 La ubicación del workspace no es controlable por la configuración de corrida; será determinada exclusivamente por el harness trusted.
 
 Siguiente etapa: F1.19B — workspace reproducible y aislamiento del repositorio canónico.
+
+### §118 — correccion del arranque local
+
+El primer arranque del frontend sobreescribia en memoria la clave publica de
+.env.local con un valor de ejemplo del backend y causaba Invalid API key.
+Se detuvo ese proceso y se reinicio Next usando su .env.local existente, sin
+editar credenciales. La clave publica del frontend responde 200 en auth/v1/settings;
+/login responde 200. Sesion personal y comprobacion administrativa aun pendientes.
+No se registran claves ni tokens. Sin commit/push.

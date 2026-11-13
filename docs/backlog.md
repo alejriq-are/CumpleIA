@@ -270,4 +270,71 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] M3-T1 §79: revision de aceptacion acotada y revalidacion registrada de fuentes; frontera no habilitada, instrumento complementario no verificado.
 - [x] M3-T1 §80: HTTP preparado de ambas rutas protegidas con/sin negativa previa; cuatro casos nuevos y barreras conservadas.
 - [x] M3-T1 §81: concurrencia real de ambas rutas protegidas preparadas, revision/confirmacion y commit/rollback; ocho casos nuevos.
-- [ ] M3-T1: actualizar aceptacion §§80-81 y contrato de habilitacion del servidor; fuentes complementarias y alcance integral pendientes.
+- [x] M3-T1 §82: aceptacion §§80-81 actualizada y contrato de politica/gate v2 exclusivo de servidor, sin habilitar.
+- [x] M3-T1 §83: politica pura y composicion v2 con contratos cerrados, identidad de evento/politica y 104 pruebas nuevas; v1 conservado.
+- [x] M3-T1 §84: identidad de politica nullable en eventos, migracion c62e407bad31, contratos/mapper y 35 pruebas nuevas; historicos/RLS conservados.
+- [x] M3-T1 §85: resolver fijo deshabilitado y readiness v2/identidad; una consulta de historial y 26 pruebas nuevas, gates v1 conservados.
+- [x] M3-T1 §86: prerequisitos puros de revision v2, negativos parciales y positivos con composicion/politica; 110 pruebas nuevas y suite completa 3299 passed.
+- [x] M3-T1 §87: revision autenticada v2 bajo lock con politica deshabilitada/metadatos de servidor; diez HTTP nuevos y suite completa 3309 passed.
+- [x] M3-T1 §88: decision transversal/confirmacion v2 bajo lock, alcance ordinario conservado; once HTTP nuevos, concurrencia ampliada y suite completa 3320 passed.
+- [x] M3-T1 §89: contrato de publicacion inmutable/selector auditado, orden de locks, revocacion y evidencia atomica de confirmacion; solo diseno.
+- [x] M3-T1 §90: contratos/evaluadores puros de publicacion/seleccion/evidencia, coherencia/hash y 65 pruebas nuevas; suite completa 3385 passed.
+- [x] M3-T1 §91: persistencia de control global, migracion d73f518cbe42, privilegios/RLS y consistencia diferida; 44 PostgreSQL nuevas y suite completa 3429 passed.
+- [x] M3-T1 §92: evidencia append-only tenant, migracion e84a629dcf53, FK/RLS y 29 PostgreSQL nuevas; suite completa 3458 passed.
+- [x] M3-T1 §93: servicios internos de publicacion/seleccion deshabilitada y lectura validada, bootstrap/seleccion concurrentes; 24 PostgreSQL nuevas y suite completa 3482 passed.
+- [x] M3-T1 §94: resolver transaccional/bloqueo compartido limitado, migracion f95b73aed064; 15 PostgreSQL nuevas y suite completa 3497 passed.
+- [x] M3-T1 §95: revision humana con selector auditado deshabilitado, identidad real y nueve PostgreSQL nuevas (cuatro concurrencias); Suite completa: 3506 passed en 313.64 s; Black/Ruff/Alembic check/diff correctos.
+- [x] M3-T1 §96: readiness/confirmacion con selector auditado y orden compatible, ordinario sin selector conservado; 13 PostgreSQL nuevas; Suite completa: 3519 passed en 329.62 s; Black/Ruff/Alembic check/diff correctos.
+- [x] M3-T1 §97: evidencia atomica conectada antes de reemplazo, guardia productiva conservada y 12 PostgreSQL nuevas de exitos sinteticos/fallos; Suite completa: 3531 passed en 334.47 s; Black/Ruff/Alembic check/diff correctos.
+- [x] M3-T1 §98: confirmaciones exitosas concurrentes y revocacion conservan evidencia; 12 PostgreSQL nuevas; Suite completa: 3543 passed en 343.50 s; Black/Ruff/Alembic check/diff correctos.
+- [x] M3-T1 §99: exitos independientes/aislamiento y PATCH concurrente; 12 PostgreSQL nuevas; Suite completa: 3555 passed en 345.51 s; Black/Ruff/Alembic check/diff correctos.
+- [x] M3-T1 §100: contrato de autoridad personal (JWT/superadmin/canal separado), precondicion de proteger perfiles y matriz; solo documentacion.
+- [x] M3-T1 §101: auditoria efectiva local y proteccion de identidad/autoridad de perfiles, migracion a06c84bf175e; 12 PostgreSQL nuevas; Suite completa: 3567 passed en 431.30 s; Black/Ruff/Alembic check/diff correctos.
+- [x] M3-T1 §102: barrera personal limitada perfil/rol/lock, migracion b17d95c0286f y nueve PostgreSQL nuevas; 45 focalizadas aprobadas, sin conexion a escritores.
+- [x] M3-T1 §103: escritores personales con actor derivado y 11 PostgreSQL nuevas; 44 focalizadas aprobadas; Suite completa: 3587 passed en 348.04 s; Black/Ruff/Alembic check/diff correctos.
+- [x] M3-T1 §104: pool separado y dependencia JWT/sub local/autoridad, 17 pruebas nuevas; 47 focalizadas aprobadas. Suite completa: 3604 passed en 352.09 s; Black/Ruff/Alembic check/diff correctos.
+- [x] M3-T1 §105: endpoints administrativos con JWT verificado/pool real, 38 HTTP nuevas; 85 focalizadas aprobadas. Suite completa: 3642 passed en 355.96 s; Black/Ruff/Alembic check/diff correctos.
+- [x] M3-T1 §106: doce HTTP concurrentes (revocacion/rollback/cancelacion/seleccion/unicidad); 97 focalizadas aprobadas. Suite completa: 3654 passed en 369.30 s; Black/Ruff/Alembic check/diff correctos.
+- [x] M3-T1 §107: revalidacion documental de fuentes base/busqueda complementaria y matriz de trazabilidad a commits; sin cambio de gates ni nueva suite.
+- [x] M3-T1 §108: procedimiento de provision deshabilitada preparado, JSON de ejemplo validado; sin provision real ni cambios de gates.
+- [x] M3-T1 §109: preflight readonly limitado y seis pruebas nuevas; 23 focalizadas aprobadas, sin escrituras/provision operativa.
+- [x] M3-T1 §110: permisos efectivos de grupo/login/public/RLS en preflight e informe v1; ocho nuevas, 31 focalizadas aprobadas.
+- [x] M3-T1 §111: expediente inicial con configuracion ausente/preflight failed esperado y head local comprobados; sin provision real.
+- [x] M3-T1 §112: usuario selecciona local; inspeccion readonly y accion de provision concreta preparada, sin ejecutar tras rechazo automatico.
+- [x] M3-T1 §113: provision tecnica local explicitamente autorizada, login limitado/credencial privada; preflight pending_selector (2), sin bootstrap.
+- [x] M3-T1 §115: superadmin global local explicitamente autorizado y confirmado en perfil existente; sin cambios Supabase/politicas.
+- [x] M3-T1 §116: UID aportado contrastado con perfil local autorizado; backend/rutas registrados, rechazo anonimo 401 probado.
+- [x] M3-T1 §117: proceso local separado con secreto en memoria, health/401 y Supabase/JWKS 200; vinculo staff externo verificado por consulta admin.
+- [ ] M3-T1: sesion/JWT personal real y humo autenticado, publicacion/seleccion deshabilitada y validacion/retirada operativas; fuentes/aceptacion pendientes.
+
+## M3-T1 §118 — acceso personal local (2026-10-09)
+
+- [x] Endpoint administrativo de lectura y pantalla local de comprobacion; 40 pruebas API y checks frontend aprobados.
+- [x] Comprobar acceso con sesion personal real: resultado confirmado en captura aportada por el usuario (2026-10-09).
+- [ ] Validar publicacion/seleccion de politica deshabilitada y auditoria con sesion personal.
+- [ ] Completar fuentes complementarias, aceptacion y validacion operacional integral; activacion excepcional bloqueada.
+
+## M3-T1 §119 — registro operacional
+
+- [x] Consulta administrativa autenticada del snapshot validado y pantalla de revision; 54 pruebas focalizadas aprobadas.
+- [x] Consulta con sesion personal confirmada por captura: revision 0, publicaciones 0, selecciones 0 (2026-10-09).
+- [ ] Preparar publicacion deshabilitada y comprobar persistencia/auditoria; luego seleccionar con revision vigente.
+
+## M3-T1 §120 — publicacion local deshabilitada
+
+- [x] Propuesta fija autenticada, vista revisable y publicacion explicita con comprobacion posterior; 56 pruebas focalizadas aprobadas.
+- [x] Publicacion con sesion personal confirmada por captura: 1 publicacion deshabilitada, 0 selecciones, revision 0 (2026-10-09).
+- [ ] Preparar seleccion explicita con revision vigente y verificar evento/selector en la auditoria.
+
+## M3-T1 §121 — seleccion deshabilitada
+
+- [x] Preparar seleccion con revision vigente y comprobar evento/hash/selector; checks frontend y 56 pruebas API aisladas aprobadas.
+- [x] Seleccion personal confirmada por capturas y snapshot tecnico readonly coherente: revision 1, 1 publicacion y 1 seleccion deshabilitada (2026-10-09).
+- [ ] Revisar cierre operacional y pendientes de provision/rotacion/retiro y aceptacion integral; activacion bloqueada.
+
+## M3-T1 §122 — cierre delimitado de validacion local
+
+- [x] Consolidar secuencia personal deshabilitada, coherencia persistida y preflight posterior ok; head verificado.
+- [x] Separar pendientes operacionales y juridicos en docs/project/m3-t1-eipd-cierre-validacion-local.md.
+- [ ] Preparar ejecutor de pruebas que exija base aislada antes de nuevas suites de escritura.
+- [ ] Validar rotacion/retiro y recuperacion, fuentes/aceptacion y alcance integral; M3-T1 EN PROGRESO.

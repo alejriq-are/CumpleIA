@@ -1,11 +1,11 @@
 """Composicion pura §74: diagnostico compartido, sin habilitar gates."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, fields
 from datetime import date, datetime
 from typing import Literal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, StrictBool, StrictInt
+from pydantic import BaseModel, ConfigDict, StrictBool, StrictInt, model_validator
 
 from app.schemas.licitud import (
     EipdResolutionAssessmentStoredV1,
@@ -18,6 +18,12 @@ from app.services.consentimiento import evaluate_consent_assessment_v1
 from app.services.contract import evaluate_contract_assessment_v1
 from app.services.economic_obligations import (
     evaluate_economic_obligations_assessment_v1,
+)
+from app.services.eipd_policy import (
+    EipdGatePolicyV1,
+    EipdPolicyReadinessV1,
+    EipdReviewPolicyIdentityV1,
+    evaluate_eipd_policy_v1,
 )
 from app.services.eipd_resolution import (
     EipdResolutionApplicabilityV1,
@@ -98,6 +104,49 @@ class EipdControlCompositionV1:
     confirmation_blockers: tuple[EipdCompositionIssueV1, ...]
 
 
+class EipdControlCompositionInputV2(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    assessment: EipdControlCompositionInputV1
+    policy: EipdGatePolicyV1 | None
+    latest_review_policy: EipdReviewPolicyIdentityV1 | None
+
+    @model_validator(mode="after")
+    def metadata_requires_review(self):
+        if (
+            self.latest_review_policy is not None
+            and self.assessment.latest_review is None
+        ):
+            raise ValueError("Identidad de politica sin evento humano")
+        return self
+
+
+@dataclass(frozen=True)
+class EipdControlCompositionV2(EipdControlCompositionV1):
+    policy: EipdPolicyReadinessV1
+    review_policy_status: Literal[
+        "sin_revision", "sin_identidad", "vigente", "obsoleta"
+    ]
+
+    @property
+    def evaluation_version(self):
+        return 2
+
+
+def compose_eipd_controls_v2(value, *, evaluated_on: date):
+    raw = value.model_dump(mode="python") if isinstance(value, BaseModel) else value
+    data = EipdControlCompositionInputV2.model_validate(raw)
+    base, policy, status = _compose_eipd_controls(
+        data.assessment,
+        evaluated_on=evaluated_on,
+        policy_context=(data.policy, data.latest_review_policy),
+    )
+    return EipdControlCompositionV2(
+        **{f.name: getattr(base, f.name) for f in fields(base)},
+        policy=policy,
+        review_policy_status=status,
+    )
+
+
 ORDINARY_EVALUATORS = {
     "consentimiento_art12": ("consent_assessment", evaluate_consent_assessment_v1),
     "contrato_precontractual_art13c": (
@@ -138,6 +187,10 @@ def compose_eipd_controls_v1(value, *, evaluated_on: date) -> EipdControlComposi
     negativo conserva prerequisitos propios §67; no usar esta composicion para
     exigirle preparacion completa. Revision positiva no exige evento positivo previo.
     """
+    return _compose_eipd_controls(value, evaluated_on=evaluated_on)[0]
+
+
+def _compose_eipd_controls(value, *, evaluated_on: date, policy_context=None):
     if type(evaluated_on) is not date:
         raise ValueError("evaluated_on exige date explicita")
     # Modo python conserva bool invalidos en StrictInt: JSON los serializa como 1.
@@ -236,13 +289,22 @@ def compose_eipd_controls_v1(value, *, evaluated_on: date) -> EipdControlComposi
         if any(i.category == "requiere_revision" for i in prepared_issues)
         else "incompleto" if prepared_issues else "preparado"
     )
-    issue(
-        "sources",
-        "official_sources",
-        "fuentes_oficiales_no_verificadas",
-        "requiere_revision",
-    )
-    issue("activation", "eipd_gate", "gate_eipd_no_habilitado", "requiere_revision")
+    policy = None
+    review_policy_status = "sin_revision"
+    if policy_context is None:
+        issue(
+            "sources",
+            "official_sources",
+            "fuentes_oficiales_no_verificadas",
+            "requiere_revision",
+        )
+        issue("activation", "eipd_gate", "gate_eipd_no_habilitado", "requiere_revision")
+    else:
+        policy = evaluate_eipd_policy_v1(
+            policy_context[0], route=detection.frontier.route, evaluated_on=evaluated_on
+        )
+        for item in policy.issues:
+            issue(item.stage, item.field, item.code, item.category)
     common = tuple(
         sorted(
             set(issues),
@@ -278,6 +340,32 @@ def compose_eipd_controls_v1(value, *, evaluated_on: date) -> EipdControlComposi
                 "decision_no_continuar",
                 "requiere_revision",
             )
+    if policy_context is not None and data.latest_review is not None:
+        identity = policy_context[1]
+        if identity is None:
+            review_policy_status = "sin_identidad"
+            issue(
+                "review",
+                "latest_review.policy",
+                "revision_sin_politica",
+                "requiere_revision",
+            )
+        elif (
+            identity.review_id != data.latest_review.id
+            or identity.policy_version != policy.policy_version
+            or identity.policy_reference != policy.policy_reference
+            or identity.policy_hash != policy.policy_hash
+        ):
+            review_policy_status = "obsoleta"
+            issue(
+                "review",
+                "latest_review.policy",
+                "politica_revision_obsoleta",
+                "requiere_revision",
+            )
+        else:
+            review_policy_status = "vigente"
+        # Estado documental se conserva separado de vigencia de politica.
     confirmation = tuple(
         sorted(
             set(issues),
@@ -292,7 +380,7 @@ def compose_eipd_controls_v1(value, *, evaluated_on: date) -> EipdControlComposi
             else None
         ),
     )
-    return EipdControlCompositionV1(
+    result = EipdControlCompositionV1(
         preparation,
         ordinary,
         detection,
@@ -302,3 +390,4 @@ def compose_eipd_controls_v1(value, *, evaluated_on: date) -> EipdControlComposi
         common,
         confirmation,
     )
+    return result, policy, review_policy_status
