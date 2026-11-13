@@ -11,6 +11,8 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl, model_validator
 
+from app.schemas.eipd_review_metadata import EipdReviewContextMetadataV1
+
 LegalBasis = Literal[
     "consentimiento_art12",
     "obligaciones_economicas_art13a",
@@ -442,6 +444,10 @@ class EipdContextBindingV11(EipdContextBindingV1):
     schema_version: Literal[11] = 11
 
 
+class EipdContextBindingV12(EipdContextBindingV1):
+    schema_version: Literal[12] = 12
+
+
 class EipdScreeningDraftIn(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -470,6 +476,7 @@ class EipdScreeningV1(EipdScreeningDraftIn):
         | EipdContextBindingV9
         | EipdContextBindingV10
         | EipdContextBindingV11
+        | EipdContextBindingV12
     )
 
 
@@ -611,6 +618,18 @@ class EipdResolutionAssessmentStoredV1(EipdResolutionAssessmentV1):
     context_binding: EipdResolutionContextBindingV1 | None = None
 
 
+class EipdResolutionContextBindingV2(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    binding_version: Literal[2] = 2
+    context_hash: str = Field(pattern=r"^[0-9a-f]{64}$")
+
+
+class EipdResolutionAssessmentStoredV2(EipdResolutionAssessmentV1):
+    """Asociacion sucesora separada; no es entrada HTTP."""
+
+    context_binding: EipdResolutionContextBindingV2
+
+
 EipdResolutionReviewDecision = Literal["continuar", "requiere_cambios", "no_continuar"]
 
 
@@ -664,6 +683,23 @@ class EipdResolutionReviewWithPolicyOut(EipdResolutionReviewOut):
                 raise ValueError(
                     "Identidad de politica exige version, referencia y hash"
                 )
+        return self
+
+
+class EipdResolutionReviewOutV2(EipdResolutionReviewWithPolicyOut):
+    """Representacion auditada del evento; version de salida no es la del binding."""
+
+    response_schema_version: Literal[2]
+    review_context_metadata: EipdReviewContextMetadataV1 | None
+
+    @model_validator(mode="after")
+    def validar_hashes_metadatos_evento(self):
+        metadata = self.review_context_metadata
+        if metadata is not None and (
+            metadata.document_hash != self.document_hash
+            or metadata.context_hash != self.context_hash
+        ):
+            raise ValueError("Metadata discordante con hashes del evento")
         return self
 
 
@@ -956,6 +992,10 @@ class SpecialContextBindingV10(SpecialContextBindingV1):
     schema_version: Literal[10] = 10
 
 
+class SpecialContextBindingV11(SpecialContextBindingV1):
+    schema_version: Literal[11] = 11
+
+
 class SpecialConditionsDraftIn(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -987,6 +1027,7 @@ class SpecialConditionsV1(SpecialConditionsDraftIn):
         | SpecialContextBindingV8
         | SpecialContextBindingV9
         | SpecialContextBindingV10
+        | SpecialContextBindingV11
     )
 
 
@@ -1305,7 +1346,9 @@ class LegalAssessmentOut(BaseModel):
     biometric_assessment: BiometricAssessmentV1 | None
     economic_obligations_assessment: EconomicObligationsAssessmentV1 | None
     rights_defense_assessment: RightsDefenseAssessmentV1 | None
-    eipd_resolution_assessment: EipdResolutionAssessmentStoredV1 | None = None
+    eipd_resolution_assessment: (
+        EipdResolutionAssessmentStoredV1 | EipdResolutionAssessmentStoredV2 | None
+    ) = None
     eipd_screening: EipdScreeningV1 | None
     schema_version: int
     rat_context_schema_version: int
@@ -1496,6 +1539,98 @@ class EipdControlCompositionV2Out(EipdControlCompositionOut):
     latest_review_policy: EipdReviewPolicyIdentityOut | None
 
 
+class ResearchAssociationReadinessOut(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    result: Literal["vigente", "requiere_revision"]
+    issues: list[str]
+
+
+class EipdFrontierReadinessV2Out(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    result: Literal["incompleto", "requiere_revision"]
+    route: Literal["investigacion_no_sensible_adultos", "sin_resolver"]
+    issues: list[ReadinessIssueOut]
+    research: DocumentaryReadinessOut | None
+    research_association: ResearchAssociationReadinessOut | None
+    special: SpecialReadinessOut | None
+    screening: EipdReadinessOut | None
+    is_frontier_prepared: Literal[False]
+    can_confirm: Literal[False]
+
+
+class EipdReadinessV3Out(EipdReadinessOut):
+    model_config = ConfigDict(extra="forbid")
+    evaluation_version: Literal[3]
+    frontier: EipdFrontierReadinessV2Out
+    can_continue: Literal[False]
+    can_confirm: Literal[False]
+
+
+class EipdCompositionIssueV3Out(ReadinessIssueOut):
+    model_config = ConfigDict(extra="forbid")
+    stage: Literal[
+        "state",
+        "rat",
+        "ordinary",
+        "research",
+        "frontier",
+        "detection",
+        "resolution",
+        "sources",
+        "activation",
+        "review",
+    ]
+
+
+class EipdResolutionDocumentVersionedOut(EipdResolutionDocumentReadinessOut):
+    binding_version: int | None = Field(strict=True, ge=1, le=2)
+    can_confirm: Literal[False]
+
+
+class EipdReviewDecisionPrerequisitesV3Out(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    prerequisites_met: bool
+    context_metadata: EipdReviewContextMetadataV1 | None
+    issues: list[EipdCompositionIssueV3Out]
+
+
+class EipdReviewPrerequisitesByDecisionV3Out(BaseModel):
+    """Diagnostico puro: no valida permisos, locks ni disponibilidad de la accion."""
+
+    model_config = ConfigDict(extra="forbid")
+    evaluation_version: Literal[3]
+    evaluation_scope: Literal["requisitos_documentales"]
+    authorizes_action: Literal[False]
+    can_confirm: Literal[False]
+    continuar: EipdReviewDecisionPrerequisitesV3Out
+    requiere_cambios: EipdReviewDecisionPrerequisitesV3Out
+    no_continuar: EipdReviewDecisionPrerequisitesV3Out
+
+
+class EipdControlCompositionV3Out(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    evaluation_version: Literal[3]
+    preparation_result: Literal["requiere_revision", "incompleto"]
+    ordinary: EipdOrdinaryControlOut | None
+    detection_v3: EipdReadinessV3Out
+    resolution: EipdResolutionDocumentVersionedOut
+    review_state: EipdResolutionReviewStateOut
+    preparation_issues: list[EipdCompositionIssueV3Out]
+    review_blockers: list[EipdCompositionIssueV3Out]
+    confirmation_blockers: list[EipdCompositionIssueV3Out]
+    policy: EipdPolicyReadinessOut
+    review_policy_status: Literal[
+        "sin_revision", "sin_identidad", "vigente", "obsoleta"
+    ]
+    latest_review_policy: EipdReviewPolicyIdentityOut | None
+    latest_review_context_metadata: EipdReviewContextMetadataV1 | None
+    review_prerequisites_v3: EipdReviewPrerequisitesByDecisionV3Out
+    review_context_metadata_status: Literal[
+        "sin_revision", "sin_metadatos", "vigente", "obsoleta"
+    ]
+    can_confirm: Literal[False]
+
+
 class ConfirmationBlockerOut(BaseModel):
     field: str
     code: str
@@ -1532,6 +1667,7 @@ class LegalAssessmentReadinessOut(BaseModel):
     eipd_v2: EipdReadinessV2Out | None = None
     eipd_controls: EipdControlCompositionOut | None = None
     eipd_controls_v2: EipdControlCompositionV2Out | None = None
+    eipd_controls_v3: EipdControlCompositionV3Out | None = None
     special: SpecialReadinessOut
     confirmation_blockers: list[ConfirmationBlockerOut]
     pending_controls: list[str]

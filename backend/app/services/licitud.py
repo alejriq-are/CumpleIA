@@ -31,6 +31,7 @@ from app.schemas.licitud import (
     BoundResearchAssessmentV1,
     EipdControlCompositionOut,
     EipdControlCompositionV2Out,
+    EipdControlCompositionV3Out,
     EipdResolutionReviewIn,
     LegalAssessmentDraftCreate,
     LegalAssessmentDraftUpdate,
@@ -66,30 +67,46 @@ from app.services.contract import evaluate_contract_assessment_v1
 from app.services.economic_obligations import (
     evaluate_economic_obligations_assessment_v1,
 )
-from app.services.eipd import bind_eipd_screening_v11, evaluate_eipd_screening_v1
+from app.services.eipd import bind_eipd_screening_v12, evaluate_eipd_screening_v1
 from app.services.eipd_confirmation import record_eipd_confirmation_evidence_v1
 from app.services.eipd_controls import (
     compose_eipd_controls_v1,
     compose_eipd_controls_v2,
 )
+from app.services.eipd_controls_v3 import compose_eipd_controls_v3
 from app.services.eipd_policy import (
     build_eipd_review_policy_metadata_v1,
     derive_eipd_review_policy_identity_v1,
 )
 from app.services.eipd_policy_store import (
     lock_eipd_policy_selector_v1,
+    read_eipd_policy_audit_snapshot_v1,
     read_selected_eipd_policy_v1,
     resolve_eipd_policy_snapshot_for_transaction_v1,
 )
 from app.services.eipd_resolution import (
     EipdResolutionContextV1,
-    bind_eipd_resolution_v1,
     build_eipd_resolution_document_hash_v1,
     derive_eipd_resolution_review_state_v1,
     evaluate_eipd_resolution_document_v1,
     evaluate_eipd_resolution_review_prerequisites_v1,
 )
+from app.services.eipd_resolution_binding_v2 import EipdResolutionContextV2
+from app.services.eipd_resolution_readiness_v2 import (
+    derive_eipd_resolution_review_state_versioned,
+    evaluate_eipd_resolution_document_versioned,
+)
+from app.services.eipd_resolution_writer import bind_eipd_resolution_for_context
+from app.services.eipd_review_metadata import (
+    eipd_review_metadata_is_current_v1,
+    read_eipd_review_context_metadata_v1,
+)
+from app.services.eipd_review_response_v2 import serialize_eipd_resolution_review_v2
 from app.services.eipd_review_v2 import evaluate_eipd_resolution_review_prerequisites_v2
+from app.services.eipd_review_v3 import (
+    evaluate_eipd_resolution_review_prerequisites_v3,
+    evaluate_eipd_review_decision_prerequisites_v3,
+)
 from app.services.eipd_screening_v2 import evaluate_eipd_screening_v2
 from app.services.geolocation import evaluate_geolocation_assessment_v1
 from app.services.health import evaluate_health_assessment_v1
@@ -106,7 +123,7 @@ from app.services.sensitive_rights_exception import (
     evaluate_sensitive_rights_exception_v1,
 )
 from app.services.special_conditions import (
-    bind_special_conditions_v10,
+    bind_special_conditions_v11,
     evaluate_special_conditions_v1,
 )
 
@@ -1061,6 +1078,26 @@ def build_eipd_resolution_context_from_assessment_v1(assessment, snapshot):
     )
 
 
+def _resolution_uses_context_v2(assessment):
+    document = assessment.eipd_resolution_assessment
+    return (
+        document is not None
+        and (document.get("context_binding") or {}).get("binding_version") == 2
+    )
+
+
+def build_eipd_resolution_context_from_assessment_v2(assessment, snapshot):
+    """Lectura del material persistido actual; nunca repara asociaciones."""
+    legacy = build_eipd_resolution_context_from_assessment_v1(assessment, snapshot)
+    return EipdResolutionContextV2.model_validate(
+        {
+            **legacy.model_dump(mode="python"),
+            "context_schema_version": 2,
+            "research_assessment": assessment.research_assessment,
+        }
+    )
+
+
 async def update_legal_assessment_draft_v1(
     db: AsyncSession,
     organization_id: uuid.UUID,
@@ -1153,7 +1190,7 @@ async def update_legal_assessment_draft_v1(
     if special_was_provided:
         try:
             assessment.special_conditions = (
-                bind_special_conditions_v10(
+                bind_special_conditions_v11(
                     special_input,
                     bundle.snapshot,
                     assessment.legal_basis,
@@ -1169,6 +1206,7 @@ async def update_legal_assessment_draft_v1(
                     getattr(assessment, "biometric_assessment", None),
                     getattr(assessment, "sensitive_rights_exception_assessment", None),
                     getattr(assessment, "biometric_rights_exception_assessment", None),
+                    research=assessment.research_assessment,
                 ).model_dump(mode="json")
                 if special_input is not None
                 else None
@@ -1179,7 +1217,7 @@ async def update_legal_assessment_draft_v1(
             ) from None
     if screening_was_provided:
         assessment.eipd_screening = (
-            bind_eipd_screening_v11(
+            bind_eipd_screening_v12(
                 screening_input,
                 bundle.snapshot,
                 assessment.lia_assessment,
@@ -1194,6 +1232,8 @@ async def update_legal_assessment_draft_v1(
                 getattr(assessment, "biometric_assessment", None),
                 getattr(assessment, "sensitive_rights_exception_assessment", None),
                 getattr(assessment, "biometric_rights_exception_assessment", None),
+                research=assessment.research_assessment,
+                legal_basis=assessment.legal_basis,
             ).model_dump(mode="json")
             if screening_input is not None
             else None
@@ -1201,11 +1241,12 @@ async def update_legal_assessment_draft_v1(
     if resolution_was_provided:
         try:
             assessment.eipd_resolution_assessment = (
-                bind_eipd_resolution_v1(
+                bind_eipd_resolution_for_context(
                     resolution_input,
-                    build_eipd_resolution_context_from_assessment_v1(
+                    build_eipd_resolution_context_from_assessment_v2(
                         assessment, bundle.snapshot
                     ),
+                    previous=assessment.eipd_resolution_assessment,
                 ).model_dump(mode="json")
                 if resolution_input is not None
                 else None
@@ -1359,7 +1400,7 @@ async def create_legal_assessment_draft_v1(
     )
     if payload.special_conditions is not None:
         try:
-            assessment.special_conditions = bind_special_conditions_v10(
+            assessment.special_conditions = bind_special_conditions_v11(
                 payload.special_conditions,
                 bundle.snapshot,
                 assessment.legal_basis,
@@ -1375,13 +1416,14 @@ async def create_legal_assessment_draft_v1(
                 getattr(assessment, "biometric_assessment", None),
                 getattr(assessment, "sensitive_rights_exception_assessment", None),
                 getattr(assessment, "biometric_rights_exception_assessment", None),
+                research=assessment.research_assessment,
             ).model_dump(mode="json")
         except ValueError:
             raise _bad_request(
                 "Contrato o alcance de condiciones especiales inválido"
             ) from None
     if payload.eipd_screening is not None:
-        assessment.eipd_screening = bind_eipd_screening_v11(
+        assessment.eipd_screening = bind_eipd_screening_v12(
             payload.eipd_screening,
             bundle.snapshot,
             assessment.lia_assessment,
@@ -1396,12 +1438,14 @@ async def create_legal_assessment_draft_v1(
             getattr(assessment, "biometric_assessment", None),
             getattr(assessment, "sensitive_rights_exception_assessment", None),
             getattr(assessment, "biometric_rights_exception_assessment", None),
+            research=assessment.research_assessment,
+            legal_basis=assessment.legal_basis,
         ).model_dump(mode="json")
     if payload.eipd_resolution_assessment is not None:
         try:
-            assessment.eipd_resolution_assessment = bind_eipd_resolution_v1(
+            assessment.eipd_resolution_assessment = bind_eipd_resolution_for_context(
                 payload.eipd_resolution_assessment,
-                build_eipd_resolution_context_from_assessment_v1(
+                build_eipd_resolution_context_from_assessment_v2(
                     assessment, bundle.snapshot
                 ),
             ).model_dump(mode="json")
@@ -1591,6 +1635,7 @@ def evaluate_transversal_readiness_v1(assessment, snapshot):
         getattr(assessment, "biometric_assessment", None),
         getattr(assessment, "sensitive_rights_exception_assessment", None),
         getattr(assessment, "biometric_rights_exception_assessment", None),
+        research=getattr(assessment, "research_assessment", None),
     )
     eipd = evaluate_eipd_screening_v1(
         assessment.eipd_screening,
@@ -1608,6 +1653,8 @@ def evaluate_transversal_readiness_v1(assessment, snapshot):
         getattr(assessment, "biometric_assessment", None),
         getattr(assessment, "sensitive_rights_exception_assessment", None),
         getattr(assessment, "biometric_rights_exception_assessment", None),
+        legal_basis=assessment.legal_basis,
+        research=getattr(assessment, "research_assessment", None),
     )
     blockers = []
     if (
@@ -1755,7 +1802,9 @@ def evaluate_transversal_readiness_v1(assessment, snapshot):
     return special, eipd, blockers
 
 
-async def _latest_eipd_review_snapshot_v1(db, organization_id, assessment_id):
+async def _latest_eipd_review_snapshot_with_metadata_v1(
+    db, organization_id, assessment_id
+):
     """Lee ultimo evento del tenant; operaciones mutadoras llaman bajo lock."""
     latest_review = await db.scalar(
         select(EipdResolutionReview)
@@ -1790,7 +1839,17 @@ async def _latest_eipd_review_snapshot_v1(db, organization_id, assessment_id):
     identity = (
         derive_eipd_review_policy_identity_v1(latest_review) if latest_review else None
     )
-    return review_payload, identity
+    metadata = (
+        read_eipd_review_context_metadata_v1(latest_review) if latest_review else None
+    )
+    return review_payload, identity, metadata
+
+
+async def _latest_eipd_review_snapshot_v1(db, organization_id, assessment_id):
+    payload, identity, _ = await _latest_eipd_review_snapshot_with_metadata_v1(
+        db, organization_id, assessment_id
+    )
+    return payload, identity
 
 
 async def _latest_eipd_review_payload_v1(db, organization_id, assessment_id):
@@ -1885,6 +1944,103 @@ def _compose_assessment_eipd_controls_v2(
             ),
         }
     ).model_dump(mode="json")
+
+
+def _compose_assessment_eipd_controls_v3(
+    assessment,
+    organization_id,
+    context,
+    rat_current,
+    latest_review,
+    identity,
+    evaluated_on,
+    policy,
+    context_metadata=None,
+):
+    composition_input = {
+        "assessment": _assessment_eipd_composition_input_v1(
+            assessment, organization_id, context, rat_current, latest_review
+        ),
+        "policy": policy,
+        "latest_review_policy": identity,
+    }
+    result = compose_eipd_controls_v3(composition_input, evaluated_on=evaluated_on)
+    data = asdict(result)
+    data.update(
+        evaluation_version=3,
+        can_confirm=result.can_confirm,
+        latest_review_policy=identity.model_dump(mode="json") if identity else None,
+    )
+    prerequisites = dict(
+        evaluation_version=3,
+        evaluation_scope="requisitos_documentales",
+        authorizes_action=False,
+        can_confirm=False,
+    )
+    for decision in ("continuar", "requiere_cambios", "no_continuar"):
+        diagnostic = evaluate_eipd_review_decision_prerequisites_v3(
+            composition_input, decision, evaluated_on=evaluated_on
+        )
+        prerequisites[decision] = {
+            "prerequisites_met": diagnostic.prerequisites_met,
+            "context_metadata": (
+                diagnostic.context_metadata.model_dump(mode="json")
+                if diagnostic.context_metadata
+                else None
+            ),
+            "issues": [asdict(i) for i in diagnostic.issues],
+        }
+    data["review_prerequisites_v3"] = prerequisites
+    metadata_status = (
+        "sin_revision"
+        if latest_review is None
+        else (
+            "sin_metadatos"
+            if context_metadata is None
+            else (
+                "vigente"
+                if eipd_review_metadata_is_current_v1(
+                    context_metadata,
+                    assessment.eipd_resolution_assessment,
+                    context,
+                    latest_review,
+                )
+                else "obsoleta"
+            )
+        )
+    )
+    data.update(
+        latest_review_context_metadata=(
+            context_metadata.model_dump(mode="json") if context_metadata else None
+        ),
+        review_context_metadata_status=metadata_status,
+    )
+    if metadata_status in ("sin_metadatos", "obsoleta"):
+        data["confirmation_blockers"] = list(data["confirmation_blockers"]) + [
+            {
+                "stage": "review",
+                "field": "latest_review.context_metadata",
+                "code": (
+                    "revision_sin_metadatos_contexto"
+                    if metadata_status == "sin_metadatos"
+                    else "metadatos_revision_obsoletos"
+                ),
+                "category": "requiere_revision",
+                "question_id": None,
+            }
+        ]
+    detection = data["detection_v3"]
+    detection.update(
+        evaluation_version=3,
+        can_continue=result.detection_v3.can_continue,
+        can_confirm=result.detection_v3.can_confirm,
+    )
+    detection["frontier"].update(
+        is_frontier_prepared=result.detection_v3.frontier.is_frontier_prepared,
+        can_confirm=result.detection_v3.frontier.can_confirm,
+    )
+    data["resolution"]["can_confirm"] = result.resolution.can_confirm
+    return EipdControlCompositionV3Out.model_validate(data).model_dump(mode="json")
 
 
 async def confirm_legal_assessment_v1(
@@ -2041,6 +2197,17 @@ async def confirm_legal_assessment_v1(
         )
     except ValidationError:
         raise _bad_request("Contrato documental transversal inválido") from None
+    if _resolution_uses_context_v2(draft):
+        raise HTTPException(
+            status_code=409,
+            detail={
+                "code": "resolucion_eipd_v2_revision_pendiente",
+                "confirmation_blockers": [
+                    {k: v for k, v in item.items() if k != "status_code"}
+                    for item in blockers
+                ],
+            },
+        )
     eipd_controls = None
     eipd_controls_v2 = None
     evaluated_on = datetime.now(UTC).date()
@@ -2259,6 +2426,7 @@ async def get_legal_assessment_readiness_v1(
     eipd_resolution = None
     eipd_controls = None
     eipd_controls_v2 = None
+    eipd_controls_v3 = None
     evaluated_on = datetime.now(UTC).date()
     try:
         if assessment.legal_basis == "consentimiento_art12":
@@ -2436,6 +2604,14 @@ async def get_legal_assessment_readiness_v1(
             if current_snapshot is not None
             else None
         )
+        use_v3 = research is not None or _resolution_uses_context_v2(assessment)
+        versioned_context = (
+            build_eipd_resolution_context_from_assessment_v2(
+                assessment, current_snapshot
+            )
+            if current_snapshot is not None and use_v3
+            else resolution_context
+        )
         detection_v2 = evaluate_eipd_screening_v2(resolution_context)
         eipd_v2 = {
             **asdict(detection_v2),
@@ -2447,23 +2623,33 @@ async def get_legal_assessment_readiness_v1(
             or any(i.category == "supuesto_declarado" for i in eipd.issues)
         ):
             eipd_resolution = asdict(
-                evaluate_eipd_resolution_document_v1(
+                (
+                    evaluate_eipd_resolution_document_versioned
+                    if use_v3
+                    else evaluate_eipd_resolution_document_v1
+                )(
                     resolution_document,
-                    resolution_context,
+                    versioned_context,
                     evaluated_on=evaluated_on,
                 )
             )
-        review_payload, review_identity = await _latest_eipd_review_snapshot_v1(
-            db, organization_id, assessment.id
+            if use_v3:
+                eipd_resolution.pop("binding_version")
+        review_payload, review_identity, context_metadata = (
+            await _latest_eipd_review_snapshot_with_metadata_v1(
+                db, organization_id, assessment.id
+            )
         )
-        eipd_resolution_review = derive_eipd_resolution_review_state_v1(
-            resolution_document, resolution_context, review_payload
-        )
+        eipd_resolution_review = (
+            derive_eipd_resolution_review_state_versioned
+            if use_v3
+            else derive_eipd_resolution_review_state_v1
+        )(resolution_document, versioned_context, review_payload)
         proposed_exception = any(
             c.get("authorization_route") == "excepcion_legal"
             for c in (assessment.special_conditions or {}).get("conditions", [])
         )
-        if (
+        if not use_v3 and (
             eipd_resolution is not None
             or review_payload is not None
             or proposed_exception
@@ -2489,6 +2675,39 @@ async def get_legal_assessment_readiness_v1(
                 review_identity,
                 evaluated_on,
                 await _selected_disabled_eipd_policy_v1(db),
+            )
+        if use_v3:
+            try:
+                policy_state = await read_eipd_policy_audit_snapshot_v1(db)
+            except ValueError:
+                raise HTTPException(
+                    status_code=409, detail={"code": "politica_eipd_no_disponible"}
+                ) from None
+            publication = next(
+                (
+                    p
+                    for p in policy_state.publications
+                    if policy_state.selector is not None
+                    and p.id == policy_state.selector.publication_id
+                ),
+                None,
+            )
+            eipd_controls_v3 = _compose_assessment_eipd_controls_v3(
+                assessment,
+                organization_id,
+                (
+                    build_eipd_resolution_context_from_assessment_v2(
+                        assessment, current_snapshot
+                    )
+                    if current_snapshot is not None
+                    else None
+                ),
+                rat_current,
+                review_payload,
+                review_identity,
+                evaluated_on,
+                publication.policy if publication else None,
+                context_metadata,
             )
         blockers.extend(
             {k: v for k, v in item.items() if k != "status_code"}
@@ -2521,6 +2740,7 @@ async def get_legal_assessment_readiness_v1(
             "eipd_v2": eipd_v2,
             "eipd_controls": eipd_controls,
             "eipd_controls_v2": eipd_controls_v2,
+            "eipd_controls_v3": eipd_controls_v3,
             "special": asdict(special),
             "confirmation_blockers": blockers,
             "pending_controls": [
@@ -2579,6 +2799,15 @@ async def record_eipd_resolution_review_v1(
         raise _conflict("La evaluacion juridica ya no esta en estado borrador")
     if draft.schema_version != 1 or draft.rat_context_schema_version != 1:
         raise _conflict("Version de evaluacion o contexto RAT no admitida")
+    if _resolution_uses_context_v2(draft):
+        if payload.decision == "continuar":
+            raise HTTPException(
+                status_code=409,
+                detail={"code": "resolucion_eipd_v2_revision_pendiente"},
+            )
+        return await _record_eipd_negative_review_v2_locked(
+            db, organization_id, treatment_id, profile_id, draft, series, payload
+        )
     try:
         scope = _scope_from_snapshot_v1(draft.rat_context_snapshot)
         bundle = await build_rat_context_bundle_from_m2_v1(
@@ -2692,3 +2921,85 @@ async def record_eipd_resolution_review_v1(
     db.add(event)
     await db.flush()
     return event
+
+
+async def _record_eipd_negative_review_v2_locked(
+    db, organization_id, treatment_id, profile_id, draft, series, payload
+):
+    """Caller mantiene locks globales/serie y transaccion autenticada hasta commit."""
+    try:
+        scope = _scope_from_snapshot_v1(draft.rat_context_snapshot)
+        bundle = await build_rat_context_bundle_from_m2_v1(
+            db,
+            organization_id,
+            treatment_id,
+            purpose_key=series.purpose_key,
+            scope=scope,
+        )
+        context = build_eipd_resolution_context_from_assessment_v2(
+            draft, bundle.snapshot
+        )
+        policy = await _selected_disabled_eipd_policy_v1(db)
+        latest_review, identity = await _latest_eipd_review_snapshot_v1(
+            db, organization_id, draft.id
+        )
+        result = evaluate_eipd_resolution_review_prerequisites_v3(
+            {
+                "assessment": _assessment_eipd_composition_input_v1(
+                    draft,
+                    organization_id,
+                    context,
+                    build_rat_context_hash_v1(bundle.canonical)
+                    == draft.rat_context_hash,
+                    latest_review,
+                ),
+                "policy": policy,
+                "latest_review_policy": identity,
+            },
+            payload,
+            evaluated_on=datetime.now(UTC).date(),
+        )
+    except ValidationError:
+        raise _bad_request("Contrato documental de revision EIPD invalido") from None
+    if not result.prerequisites_met:
+        raise HTTPException(
+            status_code=409,
+            detail={
+                "code": "revision_eipd_no_preparada",
+                "evaluation_version": 3,
+                "issues_v3": [asdict(i) for i in result.issues],
+            },
+        )
+    metadata = result.context_metadata
+    event = EipdResolutionReview(
+        organization_id=organization_id,
+        assessment_id=draft.id,
+        decision=result.decision,
+        rationale=payload.rationale,
+        review_reference=payload.review_reference,
+        document_hash=metadata.document_hash,
+        context_hash=metadata.context_hash,
+        review_context_metadata=metadata.model_dump(mode="json"),
+        created_by=profile_id,
+        **build_eipd_review_policy_metadata_v1(policy),
+    )
+    db.add(event)
+    await db.flush()
+    return event
+
+
+async def get_eipd_resolution_review_v2(
+    db, organization_id, treatment_id, assessment_id, review_id
+):
+    """Lectura por padre y tenant autenticados; no compara con contexto actual."""
+    await get_legal_assessment_v1(db, organization_id, treatment_id, assessment_id)
+    event = await db.scalar(
+        select(EipdResolutionReview).where(
+            EipdResolutionReview.id == review_id,
+            EipdResolutionReview.assessment_id == assessment_id,
+            EipdResolutionReview.organization_id == organization_id,
+        )
+    )
+    if event is None:
+        raise _not_found("Revision EIPD no encontrada")
+    return serialize_eipd_resolution_review_v2(event)

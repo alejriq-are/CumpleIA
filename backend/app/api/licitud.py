@@ -12,6 +12,7 @@ from app.db.session import get_db
 from app.schemas.licitud import (
     EipdResolutionReviewIn,
     EipdResolutionReviewOut,
+    EipdResolutionReviewOutV2,
     LegalAssessmentDraftCreate,
     LegalAssessmentDraftUpdate,
     LegalAssessmentOut,
@@ -124,4 +125,40 @@ async def registrar_revision_eipd(
 ):
     return await service.record_eipd_resolution_review_v1(
         db, x_organization_id, treatment_id, assessment_id, profile.id, payload
+    )
+
+
+@router.post(
+    "/treatments/{treatment_id}/assessments/{assessment_id}/eipd-resolution/reviews/v2",
+    response_model=EipdResolutionReviewOutV2,
+    status_code=status.HTTP_201_CREATED,
+)
+async def registrar_revision_eipd_salida_v2(
+    treatment_id: uuid.UUID,
+    assessment_id: uuid.UUID,
+    payload: EipdResolutionReviewIn,
+    x_organization_id: Annotated[uuid.UUID, Header()],
+    profile: Profile = Depends(require_permission(Permission.edit_content)),
+    db: AsyncSession = Depends(get_db),
+):
+    event = await service.record_eipd_resolution_review_v1(
+        db, x_organization_id, treatment_id, assessment_id, profile.id, payload
+    )
+    return service.serialize_eipd_resolution_review_v2(event)
+
+
+@router.get(
+    "/treatments/{treatment_id}/assessments/{assessment_id}/eipd-resolution/reviews/{review_id}/v2",
+    response_model=EipdResolutionReviewOutV2,
+)
+async def leer_revision_eipd_salida_v2(
+    treatment_id: uuid.UUID,
+    assessment_id: uuid.UUID,
+    review_id: uuid.UUID,
+    x_organization_id: Annotated[uuid.UUID, Header()],
+    _profile: Profile = Depends(require_permission(Permission.view_content)),
+    db: AsyncSession = Depends(get_db),
+):
+    return await service.get_eipd_resolution_review_v2(
+        db, x_organization_id, treatment_id, assessment_id, review_id
     )
