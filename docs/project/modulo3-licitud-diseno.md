@@ -9871,3 +9871,59 @@ Sin migracion ni datos operacionales modificados. Interfaz no ampliada en este p
 Proximo: preparar consumidor frontend tipado de requisitos y eventos versionados,
 conservando bloqueos y sin habilitar modulo incompleto. Ley fija; M3-T1 EN PROGRESO,
 fuentes/aceptacion pendientes. Sin commit/push.
+
+
+## 2026-10-09 — M3-T1 §159: consumidor frontend tipado
+
+Nuevo lib/api/eipd-review.ts define contratos de metadata V1, requisitos por decision
+V3 y evento/identidad de politica V2. Cliente usa apiFetch compartido con token y
+X-Organization-Id, valida alcance UUID y consultas sin cache. preparation retorna
+proyeccion de requisitos (null fuera de V3); event lee identidad persistida; recordNegative
+solo admite requiere_cambios/no_continuar, fundamento y referencia, sin campos auditados.
+No ofrece continuar/confirmar/activar ni habilita navegacion del modulo.
+
+Comprueba versiones, flags false, motivos estructurados, cobertura/hashes, identidad
+de tenant/expediente/evento y politica nullable coherente. Historia null permanece null.
+Rechaza datos incompatibles e inyeccion antes de envio; no reintenta mutaciones.
+ApiError conserva detail estructurado y mensaje de errores textuales existente;
+apiFetch exportado agrega cache opcional sin cambiar cache de consumidores previos.
+
+Once pruebas frontend sin navegador/servicios/red real, fetch simulado: headers/paths,
+cache, proyeccion sin autoridad, identidad historica, motivos malformados, POST minimo,
+positivos/inyeccion/identificadores invalidos sin peticion, errores 401/402/403/409 y
+compatibilidad de mensaje textual. npm run test:eipd-client: 11 aprobadas en 464 ms.
+Type-check y lint completos frontend aprobados; Prettier archivos nuevos y diff check.
+Backend sin cambios: ultima regresion §158 621 aprobadas; no repetida en este paso.
+Sin migracion, datos operacionales ni prueba de sesion personal en navegador.
+
+Proximo: integrar consulta solo lectura en pantalla interna de validacion de licitud,
+con seleccion explicita de organizacion/expediente y estados de carga/error claros.
+Ley fija; M3-T1 EN PROGRESO, fuentes/aceptacion pendientes; confirmacion/activacion
+bloqueadas. Sin commit/push.
+
+
+## 2026-10-09 — M3-T1 §160: pantalla interna solo lectura
+
+Nueva ruta frontend /admin/licitud-validation bajo layout superadmin existente.
+Usa sesion actual por consulta y cliente tipado; exige organizacion/tratamiento/
+evaluacion explicitos por UUID, sin persistir tokens o inferir tenant. Consultas
+separadas de requisitos y evento por identificador. No ofrece registrar decisiones,
+confirmar o activar ni cambia tarjeta/navegacion del modulo publico incompleto.
+
+Componente muestra requisitos por decision como diagnostico sin autoridad y eventos
+como identidad historica; null no se reconstruye. Estados de carga/error accesibles,
+campos/botones bloqueados durante espera, datos anteriores borrados antes de consulta
+y al cambiar alcance; mensajes diferenciados para sesion/suscripcion/permisos/ausencia.
+Eventos exhiben fundamento/referencia/fecha/politica registrada sin acreditar vigencia.
+
+Cuatro pruebas de interaccion Chromium sobre componente real compilado temporalmente,
+callbacks sinteticos sin red/base/sesion personal: consulta/contexto, carga sin duplicados,
+error sin datos anteriores y evento historico sin metadata. 4 aprobadas en 2.2 s;
+11 regresiones del cliente aprobadas en 386 ms. Type-check/lint frontend aprobados.
+Pruebas no verifican autenticacion del layout ni conectividad con backend real;
+validacion de sesion personal y expediente real sigue pendiente. Backend sin cambios,
+ultima regresion §158 621 aprobadas no repetida. Sin migracion/datos operacionales.
+
+Proximo: validar flujo real de consulta con sesion y expediente autorizado y ajustar
+presentacion de motivos si corresponde. Ley fija; M3-T1 EN PROGRESO, fuentes/aceptacion
+pendientes; positivos/confirmacion/activacion bloqueados. Sin commit/push.

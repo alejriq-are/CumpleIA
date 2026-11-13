@@ -516,3 +516,152 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] POST/GET de representacion V2 con identidad persistida; contrato historico intacto y null sin inferir.
 - [x] Lectura por tenant/padre/estado, permisos/suscripcion y 621 pruebas aisladas aprobadas.
 - [ ] Consumidor frontend tipado y aceptacion; positivos/confirmacion/activacion bloqueados.
+
+### M3-T1 §159 — Cliente frontend de revisiones
+
+- [x] Tipos/cliente de requisitos y eventos auditados; negativos sin inyeccion ni autoridad derivada.
+- [x] 11 pruebas de red simulada y type-check/lint frontend aprobados; backend sin cambios.
+- [ ] Pantalla interna solo lectura y aceptacion; modulo/confirmacion/activacion bloqueados.
+
+### M3-T1 §160 — Consulta interna solo lectura
+
+- [x] Ruta bajo layout administrativo con sesion/contexto explicitos, requisitos y evento historico sin autoridad.
+- [x] 4 interacciones Chromium aisladas + 11 regresiones del cliente, type-check/lint aprobados.
+- [ ] Validacion real de sesion/expediente y aceptacion; modulo/confirmacion/activacion bloqueados.
+
+### M3-T1 §163 — Presentacion de motivos de consulta
+
+- [x] Etapas, campos y preguntas visibles; duplicados exactos con cantidad y detalle original.
+- [x] 5 pruebas de interaccion, tipos y lint frontend aprobados.
+- [x] Inspeccion visual con sesion y expediente ficticio local: etapas, campos y detalle original.
+- [ ] Ampliar traducciones de campos; prueba directa de API entre cuentas pendiente.
+
+### M3-T1 §164 — Etiquetas documentales
+
+- [x] Ampliar traducciones de campos manteniendo identidad original en detalle.
+- [x] Tipos y lint frontend aprobados.
+- [x] Inspeccion manual: uso exclusivo y controles en español; detalle original preservado.
+- [ ] Traducir rutas restantes (conclusion/balancing_summary/decision); API entre cuentas pendiente.
+
+### M3-T1 §165 — Etiquetas de interes legitimo
+
+- [x] Traducir secciones/campos LIA v1 y conservar identificadores del detalle.
+- [x] Tipos y lint frontend aprobados.
+- [ ] Inspeccion visual de rutas LIA en expediente ficticio; API entre cuentas pendiente.
+
+### M3-T1 §166 — Diagnostico visible en español
+
+- [x] Traducir detalle, etapas, categorias y campos; fallback desconocido en español.
+- [x] 5 interacciones Chromium, tipos y lint aprobados.
+- [x] Captura manual confirma detalle de justificacion en español (§167).
+- [ ] API entre cuentas y cobertura de otras rutas pendientes.
+
+### M3-T1 §168 — Navegacion por temas
+
+- [x] Desplegables con cantidad de motivos distintos y total de ocurrencias conservado.
+- [x] 6 interacciones Chromium, tipos y lint aprobados.
+- [ ] Inspeccion manual con expediente ficticio; API entre cuentas pendiente.
+
+### M3-T1 §169 — Amplitud y detalle
+
+- [x] Decisiones a ancho completo, motivos separados y detalle con etiquetas destacadas.
+- [x] Tipos/lint y 6 interacciones aprobados.
+- [x] Captura de escritorio confirma ancho y detalle de justificacion/investigacion.
+- [ ] Vista movil y otros temas; API entre cuentas pendiente.
+
+### M3-T1 §173 — Estado documental de ultima revision
+
+- [x] Proyeccion validada del estado existente y aviso sin autoridad separado de requisitos/historia.
+- [x] 12 cliente, 7 interacciones, tipos y lint aprobados.
+- [x] Captura del expediente ficticio: vinculo vigente, aviso sin autoridad y Continuar pendiente.
+- [x] Captura historica: evento anterior intacto, aviso historico y bloque actual ausente.
+- [ ] Prueba directa API entre cuentas y otros estados reales pendientes.
+
+### M3-T1 §174 — Vista a ancho reducido
+
+- [x] Capturas de vista general e Investigacion: ajuste de texto y detalle apilado legible.
+- [ ] Dispositivo movil, otras anchuras/temas y medicion de overflow pendientes.
+- [ ] Prueba directa API entre cuentas pendiente.
+
+### M3-T1 §175 — Emulacion de 390 pixeles
+
+- [x] Captura Edge Responsive 390 x 749: detalle de Investigacion legible y textos ajustados.
+- [ ] Medicion de overflow, formularios, otros temas y dispositivo fisico pendientes.
+- [ ] Mensajes de consola no inspeccionados; API entre cuentas pendiente.
+
+### M3-T1 §176 — Medicion a 390 pixeles
+
+- [x] Comparacion scrollWidth > clientWidth retorna false con Investigacion/detalle abiertos.
+- [ ] Otros estados/anchuras, overflow interno y dispositivo fisico pendientes.
+
+### M3-T1 §177 — Cabecera movil
+
+- [x] Titulo, cuenta y cierre apilados bajo sm; correo largo ajustable.
+- [x] Captura posterior a 390 pixeles confirma cabecera apilada y titulo legible.
+- [ ] Accion de botones y otros anchos pendientes.
+
+### M3-T1 §178 — Consulta movil
+
+- [x] Resultado manual a 390 pixeles: borrador, vinculo vigente y Continuar pendiente.
+- [ ] Consulta historica y cierre de sesion en vista movil pendientes.
+
+### M3-T1 §179 — Historia movil
+
+- [x] Captura a 390: evento original legible, aviso historico y bloque actual ausente.
+- [ ] Cierre de sesion movil y API entre cuentas pendientes.
+
+### M3-T1 §180 — Cierre de sesion movil
+
+- [x] Captura /login tras cierre y reporte de redireccion al reabrir consulta sin sesion.
+- [ ] Prueba directa API entre cuentas y revocacion no acreditadas por navegacion.
+
+### M3-T1 §181 — Reingreso movil
+
+- [x] Captura tras reingreso: panel y cuenta visibles, tres campos de expediente vacios.
+- [x] Segunda captura del final: Revision vacia y resultados anteriores ausentes.
+
+### M3-T1 §182 — Campo Organizacion requerido
+
+- [x] Captura a 390: aviso nativo en Organizacion vacia y sin resultados visibles.
+- [ ] Otros campos y validacion directa backend no acreditados por esta captura.
+
+### M3-T1 §183 — Campos de expediente requeridos
+
+- [x] Capturas a 390: aviso nativo en Tratamiento y Evaluacion vacios, sin resultados visibles.
+- [ ] Validacion directa backend no acreditada por estas capturas.
+
+### M3-T1 §184 — Revision requerida
+
+- [x] Captura a 390: Revision vacia exige completar campo con expediente identificado.
+- [ ] Validacion directa backend no acreditada por esta captura.
+
+### M3-T1 §185 — Formato de Revision
+
+- [x] Captura a 390: prueba rechazada por formato nativo, sin revision visible.
+- [ ] Peticiones de red y validacion directa backend no acreditadas por esta captura.
+
+### M3-T1 §186 — Recuperacion de consulta
+
+- [x] Captura a 390: formato corregido recupera evento original sin aviso de formato.
+- [ ] Prueba directa API entre cuentas pendiente.
+
+### M3-T1 §187 — Limpieza al cambiar Organizacion
+
+- [x] Captura a 390: Revision y resultado historico limpiados al cambiar organizacion.
+- [ ] Rechazo API y aislamiento entre cuentas no acreditados por esta captura.
+
+### M3-T1 §188 — Consulta con organizacion distinta
+
+- [x] Captura a 390: mensaje no encontrado, sin datos historicos; GET 404 visible.
+- [ ] Sesion de segunda cuenta y cobertura directa de API/RLS pendientes.
+
+### M3-T1 §189 — Recuperacion tras rechazo por organizacion
+
+- [x] Captura a 390: evento original recuperado y mensaje no encontrado ausente.
+- [ ] Prueba directa API entre cuentas pendiente.
+
+### M3-T1 §190 — Panel general adaptable
+
+- [x] Cabecera movil apilada y textos Inventario/proceso/evaluacion aclarados; tipos/lint aprobados.
+- [x] Captura posterior a 390 confirma cabecera apilada y textos actualizados legibles.
+- [ ] Acciones de enlaces, medicion nueva de overflow y API entre cuentas pendientes.
