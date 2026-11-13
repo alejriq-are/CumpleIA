@@ -382,3 +382,65 @@ test("cobertura pendiente sin diagnostico no se acepta", async () => {
     }
   );
 });
+
+function representationV4Readiness() {
+  const issue = {
+    stage: "activation",
+    field: "policy.routes",
+    code: "politica_representacion_no_implementada",
+    category: "requiere_revision",
+    question_id: null,
+  };
+  const decision = { prerequisites_met: false, context_metadata: null, issues: [issue] };
+  return {
+    ...readiness(),
+    eipd_controls_v3: null,
+    eipd_controls_v4: {
+      evaluation_version: 4,
+      evaluation_scope: "requisitos_documentales",
+      authorizes_action: false,
+      can_confirm: false,
+      policy: readiness().eipd_controls_v3.policy,
+      review_prerequisites_v4: {
+        evaluation_version: 4,
+        evaluation_scope: "requisitos_documentales",
+        authorizes_action: false,
+        can_confirm: false,
+        continuar: decision,
+        requiere_cambios: decision,
+        no_continuar: decision,
+      },
+    },
+  };
+}
+
+test("V4 conserva politica sin convertir requisitos o identidad en version historica", async () => {
+  await withFetch(representationV4Readiness(), async () => {
+    const result = await eipdReviewApi.preparation(scope);
+    expect(result.policy_status?.activation).toBe("deshabilitada");
+    expect(result.review_prerequisites_v3).toBeNull();
+    expect(result.latest_review_context_status).toBeNull();
+  });
+});
+
+for (const change of [
+  "authority",
+  "action_context",
+  "prerequisites",
+  "enabled",
+  "both_versions",
+] as const) {
+  test(`V4 rechaza salida incompatible ${change}`, async () => {
+    const raw = JSON.parse(JSON.stringify(representationV4Readiness()));
+    if (change === "authority") raw.eipd_controls_v4.authorizes_action = true;
+    if (change === "action_context")
+      raw.eipd_controls_v4.review_prerequisites_v4.continuar.context_metadata = metadata;
+    if (change === "prerequisites")
+      raw.eipd_controls_v4.review_prerequisites_v4.continuar.prerequisites_met = true;
+    if (change === "enabled") raw.eipd_controls_v4.policy.activation = "habilitada";
+    if (change === "both_versions") raw.eipd_controls_v3 = readiness().eipd_controls_v3;
+    await withFetch(raw, async () => {
+      await expect(eipdReviewApi.preparation(scope)).rejects.toThrow();
+    });
+  });
+}

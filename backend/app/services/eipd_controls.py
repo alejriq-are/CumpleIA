@@ -190,12 +190,21 @@ def compose_eipd_controls_v1(value, *, evaluated_on: date) -> EipdControlComposi
     return _compose_eipd_controls(value, evaluated_on=evaluated_on)[0]
 
 
-def _compose_eipd_controls(value, *, evaluated_on: date, policy_context=None):
+def _compose_eipd_controls(
+    value,
+    *,
+    evaluated_on: date,
+    policy_context=None,
+    input_model=EipdControlCompositionInputV1,
+    screening_context=None,
+    resolution_evaluator=evaluate_eipd_resolution_document_v1,
+    review_deriver=derive_eipd_resolution_review_state_v1,
+):
     if type(evaluated_on) is not date:
         raise ValueError("evaluated_on exige date explicita")
     # Modo python conserva bool invalidos en StrictInt: JSON los serializa como 1.
     raw = value.model_dump(mode="python") if isinstance(value, BaseModel) else value
-    data = EipdControlCompositionInputV1.model_validate(raw)
+    data = input_model.model_validate(raw)
     issues = []
 
     def issue(stage, field, code, category="incompleto", question_id=None):
@@ -261,7 +270,9 @@ def _compose_eipd_controls(value, *, evaluated_on: date, policy_context=None):
                 ),
             )
             add("ordinary", ordinary.issues, field + ".")
-    detection = evaluate_eipd_screening_v2(ctx)
+    detection = evaluate_eipd_screening_v2(
+        screening_context if screening_context is not None else ctx
+    )
     add("frontier", detection.frontier.issues)
     if detection.result != "requiere_eipd":
         issue(
@@ -274,9 +285,7 @@ def _compose_eipd_controls(value, *, evaluated_on: date, policy_context=None):
                 else "incompleto"
             ),
         )
-    resolution = evaluate_eipd_resolution_document_v1(
-        data.resolution, ctx, evaluated_on=evaluated_on
-    )
+    resolution = resolution_evaluator(data.resolution, ctx, evaluated_on=evaluated_on)
     add("resolution", resolution.issues)
     prepared_issues = tuple(
         sorted(
@@ -311,9 +320,7 @@ def _compose_eipd_controls(value, *, evaluated_on: date, policy_context=None):
             key=lambda i: (STAGES.index(i.stage), i.field, i.code, i.question_id or ""),
         )
     )
-    state = derive_eipd_resolution_review_state_v1(
-        data.resolution, ctx, data.latest_review
-    )
+    state = review_deriver(data.resolution, ctx, data.latest_review)
     if data.latest_review is None:
         issue("review", "latest_review", "revision_ausente")
     else:

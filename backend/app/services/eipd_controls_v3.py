@@ -110,12 +110,21 @@ def compose_eipd_controls_v3(value, *, evaluated_on: date) -> EipdControlComposi
     )[0]
 
 
-def _compose_v3(value, *, evaluated_on: date, policy_context):
+def _compose_v3(
+    value,
+    *,
+    evaluated_on: date,
+    policy_context,
+    input_model=EipdAssessmentInputV3,
+    screening_context=None,
+    resolution_evaluator=evaluate_eipd_resolution_document_versioned,
+    review_deriver=derive_eipd_resolution_review_state_versioned,
+):
     if type(evaluated_on) is not date:
         raise ValueError("evaluated_on exige date explicita")
     # Modo python conserva bool invalidos en StrictInt: JSON los serializa como 1.
     raw = value.model_dump(mode="python") if isinstance(value, BaseModel) else value
-    data = EipdAssessmentInputV3.model_validate(raw)
+    data = input_model.model_validate(raw)
     issues = []
 
     def issue(stage, field, code, category="incompleto", question_id=None):
@@ -185,7 +194,9 @@ def _compose_v3(value, *, evaluated_on: date, policy_context):
                 ),
             )
             add("ordinary", ordinary.issues, field + ".")
-    detection = evaluate_eipd_screening_v3(ctx)
+    detection = evaluate_eipd_screening_v3(
+        screening_context if screening_context is not None else ctx
+    )
     add("frontier", detection.frontier.issues)
     frontier = detection.frontier
     if frontier.research is not None:
@@ -217,9 +228,7 @@ def _compose_v3(value, *, evaluated_on: date, policy_context):
                 else "incompleto"
             ),
         )
-    resolution = evaluate_eipd_resolution_document_versioned(
-        data.resolution, ctx, evaluated_on=evaluated_on
-    )
+    resolution = resolution_evaluator(data.resolution, ctx, evaluated_on=evaluated_on)
     add("resolution", resolution.issues)
     prepared_issues = tuple(
         sorted(
@@ -263,9 +272,7 @@ def _compose_v3(value, *, evaluated_on: date, policy_context):
             ),
         )
     )
-    state = derive_eipd_resolution_review_state_versioned(
-        data.resolution, ctx, data.latest_review
-    )
+    state = review_deriver(data.resolution, ctx, data.latest_review)
     if data.latest_review is None:
         issue("review", "latest_review", "revision_ausente")
     else:

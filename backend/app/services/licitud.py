@@ -57,7 +57,7 @@ from app.schemas.licitud import (
     RatSnapshotThirdPartyV1,
 )
 from app.schemas.licitud import (
-    LegalAssessmentRepresentationReadinessOutV1 as LegalAssessmentReadinessOut,
+    LegalAssessmentRepresentationReadinessOutV2 as LegalAssessmentReadinessOut,
 )
 from app.services import rat as rat_service
 from app.services.biometric import evaluate_biometric_assessment_v1
@@ -76,6 +76,7 @@ from app.services.eipd_controls import (
     compose_eipd_controls_v2,
 )
 from app.services.eipd_controls_v3 import compose_eipd_controls_v3
+from app.services.eipd_controls_v4_output import build_eipd_controls_v4_output
 from app.services.eipd_policy import (
     build_eipd_review_policy_metadata_v1,
     derive_eipd_review_policy_identity_v1,
@@ -94,6 +95,7 @@ from app.services.eipd_resolution import (
     evaluate_eipd_resolution_review_prerequisites_v1,
 )
 from app.services.eipd_resolution_binding_v2 import EipdResolutionContextV2
+from app.services.eipd_resolution_binding_v3 import EipdResolutionContextV3
 from app.services.eipd_resolution_readiness_v2 import (
     derive_eipd_resolution_review_state_versioned,
     evaluate_eipd_resolution_document_versioned,
@@ -1104,6 +1106,37 @@ def build_eipd_resolution_context_from_assessment_v2(assessment, snapshot):
     )
 
 
+def _resolution_uses_context_v3(assessment):
+    document = assessment.eipd_resolution_assessment
+    return (
+        document is not None
+        and (document.get("context_binding") or {}).get("binding_version") == 3
+    )
+
+
+def build_eipd_resolution_context_from_assessment_v3(assessment, snapshot):
+    previous = build_eipd_resolution_context_from_assessment_v2(assessment, snapshot)
+    return EipdResolutionContextV3.model_validate(
+        {
+            **previous.model_dump(mode="python"),
+            "context_schema_version": 3,
+            "sensitive_representation_assessment": getattr(
+                assessment, "sensitive_representation_assessment", None
+            ),
+        }
+    )
+
+
+def _eipd_resolution_context_for_write(assessment, snapshot):
+    builder = (
+        build_eipd_resolution_context_from_assessment_v3
+        if getattr(assessment, "sensitive_representation_assessment", None) is not None
+        or _resolution_uses_context_v3(assessment)
+        else build_eipd_resolution_context_from_assessment_v2
+    )
+    return builder(assessment, snapshot)
+
+
 def _sensitive_representation_context_v1(assessment):
     """Material actual de servidor, sin recomponer identidad historica."""
     return {
@@ -1274,9 +1307,7 @@ async def update_legal_assessment_draft_v1(
             assessment.eipd_resolution_assessment = (
                 bind_eipd_resolution_for_context(
                     resolution_input,
-                    build_eipd_resolution_context_from_assessment_v2(
-                        assessment, bundle.snapshot
-                    ),
+                    _eipd_resolution_context_for_write(assessment, bundle.snapshot),
                     previous=assessment.eipd_resolution_assessment,
                 ).model_dump(mode="json")
                 if resolution_input is not None
@@ -1484,9 +1515,7 @@ async def create_legal_assessment_draft_v1(
         try:
             assessment.eipd_resolution_assessment = bind_eipd_resolution_for_context(
                 payload.eipd_resolution_assessment,
-                build_eipd_resolution_context_from_assessment_v2(
-                    assessment, bundle.snapshot
-                ),
+                _eipd_resolution_context_for_write(assessment, bundle.snapshot),
             ).model_dump(mode="json")
         except ValidationError:
             raise _bad_request(
@@ -2130,7 +2159,9 @@ async def confirm_legal_assessment_v1(
         raise _not_found("Evaluación jurídica no encontrada")
     if draft.status != "borrador":
         raise _conflict("La evaluación jurídica ya no está en estado borrador")
-    if getattr(draft, "sensitive_representation_assessment", None) is not None:
+    if getattr(
+        draft, "sensitive_representation_assessment", None
+    ) is not None or _resolution_uses_context_v3(draft):
         raise HTTPException(
             status_code=409, detail={"code": "representacion_confirmacion_bloqueada"}
         )
@@ -2517,6 +2548,7 @@ async def get_legal_assessment_readiness_v1(
     eipd_controls = None
     eipd_controls_v2 = None
     eipd_controls_v3 = None
+    eipd_controls_v4 = None
     evaluated_on = datetime.now(UTC).date()
     try:
         if assessment.legal_basis == "consentimiento_art12":
@@ -2695,12 +2727,19 @@ async def get_legal_assessment_readiness_v1(
             else None
         )
         use_v3 = research is not None or _resolution_uses_context_v2(assessment)
+        use_v4 = representation is not None or _resolution_uses_context_v3(assessment)
         versioned_context = (
-            build_eipd_resolution_context_from_assessment_v2(
+            build_eipd_resolution_context_from_assessment_v3(
                 assessment, current_snapshot
             )
-            if current_snapshot is not None and use_v3
-            else resolution_context
+            if current_snapshot is not None and use_v4
+            else (
+                build_eipd_resolution_context_from_assessment_v2(
+                    assessment, current_snapshot
+                )
+                if current_snapshot is not None and use_v3
+                else resolution_context
+            )
         )
         detection_v2 = evaluate_eipd_screening_v2(resolution_context)
         eipd_v2 = {
@@ -2715,7 +2754,7 @@ async def get_legal_assessment_readiness_v1(
             eipd_resolution = asdict(
                 (
                     evaluate_eipd_resolution_document_versioned
-                    if use_v3
+                    if use_v3 or use_v4
                     else evaluate_eipd_resolution_document_v1
                 )(
                     resolution_document,
@@ -2723,7 +2762,7 @@ async def get_legal_assessment_readiness_v1(
                     evaluated_on=evaluated_on,
                 )
             )
-            if use_v3:
+            if use_v3 or use_v4:
                 eipd_resolution.pop("binding_version")
         review_payload, review_identity, context_metadata = (
             await _latest_eipd_review_snapshot_with_metadata_v1(
@@ -2732,14 +2771,14 @@ async def get_legal_assessment_readiness_v1(
         )
         eipd_resolution_review = (
             derive_eipd_resolution_review_state_versioned
-            if use_v3
+            if use_v3 or use_v4
             else derive_eipd_resolution_review_state_v1
         )(resolution_document, versioned_context, review_payload)
         proposed_exception = any(
             c.get("authorization_route") == "excepcion_legal"
             for c in (assessment.special_conditions or {}).get("conditions", [])
         )
-        if not use_v3 and (
+        if not (use_v3 or use_v4) and (
             eipd_resolution is not None
             or review_payload is not None
             or proposed_exception
@@ -2766,7 +2805,31 @@ async def get_legal_assessment_readiness_v1(
                 evaluated_on,
                 await _selected_disabled_eipd_policy_v1(db),
             )
-        if use_v3:
+        if use_v4:
+            composition_input = {
+                "assessment": {
+                    **_assessment_eipd_composition_input_v1(
+                        assessment,
+                        organization_id,
+                        versioned_context,
+                        rat_current,
+                        review_payload,
+                    ),
+                    "treatment_id": treatment_id,
+                },
+                "policy": await _selected_disabled_eipd_policy_v1(db),
+                "latest_review_policy": review_identity,
+            }
+            eipd_controls_v4 = build_eipd_controls_v4_output(
+                composition_input, evaluated_on=evaluated_on
+            ).model_dump(mode="json")
+            if representation is None:
+                block(
+                    "eipd_resolution_assessment",
+                    "representacion_confirmacion_bloqueada",
+                    "La resolucion V3 mantiene bloqueada la confirmacion",
+                )
+        if use_v3 and not use_v4:
             try:
                 policy_state = await read_eipd_policy_audit_snapshot_v1(db)
             except ValueError:
@@ -2850,6 +2913,7 @@ async def get_legal_assessment_readiness_v1(
             "eipd_controls": eipd_controls,
             "eipd_controls_v2": eipd_controls_v2,
             "eipd_controls_v3": eipd_controls_v3,
+            "eipd_controls_v4": eipd_controls_v4,
             "special": asdict(special),
             "confirmation_blockers": blockers,
             "pending_controls": [
@@ -2906,7 +2970,9 @@ async def record_eipd_resolution_review_v1(
         raise _not_found("Evaluacion juridica no encontrada")
     if draft.status != "borrador":
         raise _conflict("La evaluacion juridica ya no esta en estado borrador")
-    if getattr(draft, "sensitive_representation_assessment", None) is not None:
+    if getattr(
+        draft, "sensitive_representation_assessment", None
+    ) is not None or _resolution_uses_context_v3(draft):
         raise HTTPException(
             status_code=409,
             detail={"code": "resolucion_eipd_representacion_asociacion_pendiente"},
