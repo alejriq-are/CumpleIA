@@ -426,3 +426,90 @@ def test_policy_issue_order_deterministic(policy):
     assert (
         evaluate_eipd_policy_v1(policy, route=ROUTES[0], evaluated_on=TODAY) == before
     )
+
+
+@pytest.mark.parametrize(
+    "field",
+    [
+        "acceptance_reference",
+        "validation_commit",
+        "acceptance_evidence_reference",
+        "accepted_by",
+    ],
+)
+@pytest.mark.parametrize("activation", ["deshabilitada", "habilitada"])
+def test_accepted_policy_requires_each_acceptance_record_even_when_disabled(
+    policy, field, activation
+):
+    policy["activation"] = activation
+    assert EipdGatePolicyV1.model_validate(policy).acceptance_status == "aceptada"
+    policy[field] = None
+    before = deepcopy(policy)
+    with pytest.raises(
+        ValidationError, match="Aceptacion exige evidencia y responsable"
+    ):
+        EipdGatePolicyV1.model_validate(policy)
+    assert policy == before
+
+
+@pytest.mark.parametrize(
+    "field",
+    [
+        "emitter",
+        "instrument_reference",
+        "primary_url",
+        "publication_version",
+        "publication_date",
+        "applicability_analysis",
+        "applicable_routes",
+        "verification_reference",
+        "verified_by",
+    ],
+)
+def test_second_policy_source_requires_its_own_verification_record(policy, field):
+    first = deepcopy(policy["source_records"][0])
+    second = deepcopy(first)
+    second["instrument_reference"] = "TEST: segundo instrumento"
+    policy["source_records"].append(second)
+    assert EipdGatePolicyV1.model_validate(policy).sources_status == "verificadas"
+    del second[field]
+    before = deepcopy(policy)
+    with pytest.raises(ValidationError) as error:
+        EipdGatePolicyV1.model_validate(policy)
+    assert any(
+        item["loc"] == ("source_records", 1, field) and item["type"] == "missing"
+        for item in error.value.errors()
+    )
+    assert policy["source_records"][0] == first
+    assert policy == before
+
+
+@pytest.mark.parametrize("decision", ["requiere_cambios", "no_continuar"])
+def test_fictitious_development_review_preserves_pending_disabled_policy(
+    policy, prepared_controls, decision
+):
+    policy.update(
+        policy_reference="PRUEBA: revision ficticia de desarrollo",
+        sources_status="pendiente",
+        source_records=[],
+        acceptance_status="pendiente",
+        acceptance_reference=None,
+        validation_commit=None,
+        acceptance_evidence_reference=None,
+        accepted_by=None,
+        activation="deshabilitada",
+    )
+    identity = add_review(prepared_controls, policy, decision)
+    before_policy = deepcopy(policy)
+    before_assessment = deepcopy(prepared_controls)
+    result = compose(prepared_controls, policy, identity)
+    assert result.review_policy_status == "vigente"
+    assert result.policy.sources_status == "pendiente"
+    assert result.policy.acceptance_status == "pendiente"
+    assert result.policy.activation == "deshabilitada"
+    assert {"fuentes_oficiales_no_verificadas", "gate_eipd_no_habilitado"} <= codes(
+        result.confirmation_blockers
+    )
+    assert "decision_no_continuar" in codes(result.confirmation_blockers)
+    assert policy == before_policy
+    assert prepared_controls == before_assessment

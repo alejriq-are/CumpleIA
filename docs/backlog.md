@@ -665,3 +665,150 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] Cabecera movil apilada y textos Inventario/proceso/evaluacion aclarados; tipos/lint aprobados.
 - [x] Captura posterior a 390 confirma cabecera apilada y textos actualizados legibles.
 - [ ] Acciones de enlaces, medicion nueva de overflow y API entre cuentas pendientes.
+
+### M3-T1 §191 — Redireccion segunda cuenta
+
+- [x] Reporte y captura /dashboard: segunda cuenta no accede a consulta interna.
+- [ ] Rechazo directo de API EIPD con segunda cuenta pendiente.
+
+### M3-T1 §192 — Lectura RAT segunda cuenta
+
+- [x] Captura segunda cuenta: tratamiento ajeno no encontrado, campos visibles vacios y GET RAT 404.
+- [ ] Acceso directo API EIPD y cobertura integral RLS pendientes.
+
+### M3-T1 §193 — GET historico EIPD segunda sesion
+
+- [x] Network Console: GET historico v2 correcto retorna 404 y Evaluacion juridica no encontrada.
+- [ ] Otros endpoints, escritura, reciprocidad y cobertura integral RLS pendientes.
+
+### M3-T1 §194 — GET requisitos segunda sesion
+
+- [x] Capturas readiness: GET 404 y Evaluacion juridica no encontrada, sin requisitos.
+- [x] Intento previo 401 Token expirado distinguido del ensayo de acceso.
+- [ ] Escritura, reciprocidad y cobertura integral RLS pendientes.
+
+### M3-T1 §195 — Acceso original recuperado
+
+- [x] Captura: readiness fetch 200, borrador/vinculo vigente y requisitos pendientes recuperados.
+- [ ] Reciprocidad completa y otros endpoints pendientes.
+
+### M3-T1 §196 — GET historico original 200
+
+- [x] General/Response: GET v2 200, decision original y respuesta esquema 2.
+- [ ] Escritura, reciprocidad y cobertura integral entre tenants pendientes.
+
+### M3-T1 §197 — Regresion escritura aislada
+
+- [x] 14 pruebas existentes de API negativa/writer v2 aprobadas en base aislada verificada.
+- [ ] Suite completa y escritura manual entre cuentas no cubiertas por esta corrida.
+
+### M3-T1 §198 — Permisos y confirmacion aislados
+
+- [x] 45 pruebas existentes de permisos/reviews/readiness/confirmacion aprobadas en base aislada.
+- [ ] Suite completa y escritura/reciprocidad manual entre cuentas pendientes.
+
+### M3-T1 §199 — Concurrencia aislada
+
+- [x] 26 pruebas existentes de concurrencia negativa/administrativa aprobadas en base aislada.
+- [ ] Ensayo de usuarios reales concurrentes y suite completa no cubiertos por esta corrida.
+
+### M3-T1 §200 — Balance de validacion
+
+- [x] Evidencia reciente y limites consolidados en docs/project/m3-t1-balance-validacion.md.
+- [ ] Inventario de fuentes oficiales/brechas de habilitacion excepcional; sin activar politica.
+
+### M3-T1 §201 — Inventario fuentes EIPD
+
+- [x] Fuente BCN/PDF art. 15 ter localizada; matriz contrato/brechas documentada.
+- [ ] Instrumentos Agencia, revision por rutas y aceptacion pendientes; sin habilitacion.
+
+### M3-T1 §202 — Contraste de rutas
+
+- [x] Cadena normativa sensible/biometrica contrastada con frontera tecnica.
+- [ ] Evidencias por ruta, instrumentos Agencia y aceptacion juridica pendientes.
+
+### M3-T1 §203 — Evidencia por ruta
+
+- [x] Lista revisable basada en contrato real, con resultados pendientes y limites.
+- [ ] Ensayo de fixture dedicado admitido y aceptacion documental pendientes.
+
+### M3-T1 §204 — Ensayo sintetico de frontera
+
+- [x] 60 pruebas existentes de frontier HTTP/v2/requisitos aprobadas en base aislada.
+- [x] Lista de evidencia enlaza grupos ensayados y distingue aceptacion pendiente.
+- [ ] Trazabilidad por campo y aceptacion documental pendientes.
+
+### M3-T1 §205 — Trazabilidad de campos
+
+- [x] Campos de excepciones vinculados a pruebas especificas localizadas (revision estatica).
+- [ ] Verificar/ampliar omisiones individuales en segundo sistema biometrico.
+- [ ] Trazabilidad de documento/fuentes/politica y aceptacion pendientes.
+
+### M3-T1 §206 — Omisiones segundo sistema
+
+- [x] 15 casos nuevos; modulo biometrico 229 aprobadas en base aislada, Black/Ruff correctos.
+- [ ] Respuestas no/pendiente, fundamento y evidencia parcial posteriores no cubiertos por nuevos casos.
+- [ ] Aceptacion documental pendiente.
+
+### M3-T1 §207 — Respuestas/evidencia segundo sistema
+
+- [x] 14 casos nuevos; modulo 243 aprobadas en base aislada; formato/lint correctos.
+- [ ] Combinaciones adicionales y aceptacion documental pendientes.
+
+### M3-T1 §208 — Segunda fuente documental
+
+- [x] Cinco casos nuevos; modulo 164 aprobadas en base aislada; formato/lint correctos.
+- [ ] Variantes adicionales y trazabilidad de politica/aceptacion pendientes.
+
+### M3-T1 §209 — Registros de aceptacion
+
+- [x] Ocho casos nuevos; modulo de politica 112 aprobadas en base aislada; formato/lint correctos.
+- [ ] Matriz detallada SourceRecordV1 y aceptacion real pendientes.
+
+### M3-T1 §210 — SourceRecordV1
+
+- [x] Matriz de campos y nueve casos nuevos; modulo politica 121 aprobadas en base aislada.
+- [ ] Verificacion externa y aceptacion real pendientes.
+
+### M3-T1 §211 — Regresion conjunta
+
+- [x] 545 pruebas en una corrida focalizada aislada tras ampliaciones; 8.39 s.
+- [ ] Expediente de revision de aceptacion y fuentes externas pendientes.
+
+### M3-T1 §212 — Expediente revisable
+
+- [x] Paquete de revision preparado con evidencia/limites y registro de decision pendiente.
+- [ ] Designacion de revisor, verificacion externa y aceptacion autentica pendientes.
+
+### M3-T1 §213 — Revision ficticia de desarrollo
+
+- [x] Alcance ficticio hasta MVP incorporado; aceptacion real diferida.
+- [x] Cuatro casos nuevos; modulo politica 125 aprobadas en base aislada; formato/lint correctos.
+- [ ] Validacion con empresa/revisor reales posterior a MVP.
+
+### M3-T1 §214 — Estado de politica en consulta
+
+- [x] Proyeccion validada y vista sin autoridad; 13 cliente/8 interacciones/tipos/lint aprobados.
+- [ ] Inspeccion manual con expediente ficticio pendiente.
+
+### M3-T1 §215 — Politica visible validada
+
+- [x] Captura a 480: fuentes/aceptacion pendientes, deshabilitada, aviso y readiness 200.
+- [ ] Alternancia historica manual del bloque nuevo y otros estados reales pendientes.
+
+### M3-T1 §216 — Politica/historia separadas
+
+- [x] Captura a 390: evento historico, dos bloques actuales ausentes y /v2 fetch 200.
+- [ ] Otros estados reales no cubiertos por esta captura.
+
+### M3-T1 §217 — Estados simulados UI
+
+- [x] Tres combinaciones de politica simuladas sin autoridad; 9 interacciones/tipos/lint aprobados.
+- [ ] Sin politica operativa habilitada ni validacion real inferida de mocks.
+
+- [x] M3-T1 §218: aviso visible de uso exclusivo de datos ficticios hasta MVP en consulta interna; conserva bloqueos operativos. No detecta datos reales automaticamente.
+
+- [x] M3-T1 §219: enlace de inicio de sesion ante 401 en consulta EIPD; limpieza y recuperacion comprobadas con fixtures ficticios.
+
+- [x] M3-T1 §220: compilacion de produccion frontend en copia temporal con configuracion ficticia; 23 pruebas cliente/interaccion aprobadas.
+- [ ] Validar runtime Node 22 o superior para frontend: build §220 informa deprecacion de Node 20 por Supabase; comprobar compatibilidad antes de cambiar runtime.

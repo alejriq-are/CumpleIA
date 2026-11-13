@@ -41,6 +41,37 @@ export function PreparationView({ value }: { value: EipdReviewPreparationOut }) 
       <p className="text-sm text-gray-600">
         Cumplir estos requisitos documentales no concede permiso ni registra una decisión.
       </p>
+      {value.policy_status !== null && (
+        <section aria-labelledby="policy-status-heading" className="rounded-lg border bg-white p-4">
+          <h3 id="policy-status-heading" className="font-semibold">
+            Estado de la política EIPD
+          </h3>
+          <dl className="mt-3 grid grid-cols-1 gap-2 text-sm sm:grid-cols-[9rem_1fr]">
+            <dt className="font-semibold">Fuentes oficiales</dt>
+            <dd>
+              {value.policy_status.sources_status === "pendiente"
+                ? "Pendientes de verificación"
+                : "Verificadas según el registro"}
+            </dd>
+            <dt className="font-semibold">Aceptación</dt>
+            <dd>
+              {value.policy_status.acceptance_status === "pendiente"
+                ? "Pendiente"
+                : "Aceptada según el registro"}
+            </dd>
+            <dt className="font-semibold">Habilitación</dt>
+            <dd>
+              {value.policy_status.activation === "deshabilitada"
+                ? "Deshabilitada"
+                : "Habilitada según el registro"}
+            </dd>
+          </dl>
+          <p className="mt-3 text-sm text-gray-600">
+            Este estado corresponde a la política actual. No aprueba el expediente ni autoriza por
+            sí solo continuar, confirmar o activar.
+          </p>
+        </section>
+      )}
       {value.latest_review_context_status !== null && (
         <section
           aria-labelledby="latest-review-heading"
@@ -150,6 +181,7 @@ export function EipdReviewConsultation({ loadPreparation, loadEvent }: Props) {
   const [reviewId, setReviewId] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [sessionExpired, setSessionExpired] = useState(false);
   const [preparation, setPreparation] = useState<EipdReviewPreparationOut | null>(null);
   const [event, setEvent] = useState<EipdResolutionReviewOutV2 | null>(null);
   function changeScope(field: keyof Scope, value: string) {
@@ -158,12 +190,14 @@ export function EipdReviewConsultation({ loadPreparation, loadEvent }: Props) {
     setEvent(null);
     setReviewId("");
     setError("");
+    setSessionExpired(false);
   }
   async function consult(e: FormEvent, kind: "preparation" | "event") {
     e.preventDefault();
     if (busy) return;
     setBusy(true);
     setError("");
+    setSessionExpired(false);
     setPreparation(null);
     setEvent(null);
     try {
@@ -171,6 +205,7 @@ export function EipdReviewConsultation({ loadPreparation, loadEvent }: Props) {
       else setEvent(await loadEvent(scope, reviewId));
     } catch (failure) {
       setError(consultationError(failure));
+      setSessionExpired(failure instanceof ApiError && failure.status === 401);
     } finally {
       setBusy(false);
     }
@@ -182,6 +217,7 @@ export function EipdReviewConsultation({ loadPreparation, loadEvent }: Props) {
         Selecciona el expediente mediante sus identificadores. Esta pantalla solo consulta datos.
       </p>
       <p className="rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm">
+        Pruebas de desarrollo: utiliza únicamente datos ficticios hasta disponer de la versión MVP.
         M3-T1 en progreso. La confirmación y la activación EIPD permanecen bloqueadas.
       </p>
       <form
@@ -239,6 +275,7 @@ export function EipdReviewConsultation({ loadPreparation, loadEvent }: Props) {
                 setReviewId(e.target.value);
                 setEvent(null);
                 setError("");
+                setSessionExpired(false);
               }}
               className="mt-1 block w-full rounded border p-2 font-normal"
               autoComplete="off"
@@ -256,6 +293,11 @@ export function EipdReviewConsultation({ loadPreparation, loadEvent }: Props) {
       {error && (
         <p role="alert" className="rounded border border-red-200 bg-red-50 p-4 text-red-800">
           {error}
+          {sessionExpired && (
+            <a href="/login" className="mt-2 block font-medium underline">
+              Volver a iniciar sesión
+            </a>
+          )}
         </p>
       )}
       {preparation && <PreparationView value={preparation} />}

@@ -1,3 +1,354 @@
+## 2026-10-13 — M3-T1 §220: compilacion de produccion y regresion frontend
+
+Comprobado commit d300a6c: 13 pruebas cliente (427 ms) y 10 interacciones Chromium
+(3.9 s), todas aprobadas. next build completo: compilacion, tipos/lint, paginas y
+trazas correctos; incluye /admin/licitud-validation y /login. Copia temporal de
+fuentes sin .env ni artefactos previos, dependencias instaladas enlazadas y valores
+publicos ficticios; copia retirada al finalizar. No alteracion de .next del servidor
+de desarrollo, politica, datos o permisos; no despliegue ni prueba de login real.
+
+Build informa aviso de Supabase sobre Node 20 y recomendacion de Node 22 o superior;
+pendiente validar actualizacion del runtime, sin cambiar dependencias en esta etapa.
+Avisos de cache webpack sin fallo de compilacion. La compilacion no acredita MVP
+completo ni aceptacion juridica. Pruebas ficticias hasta MVP; M3-T1 EN PROGRESO y
+confirmacion/activacion bloqueadas.
+
+## 2026-10-13 — M3-T1 §219: recuperacion visible de sesion
+
+Consulta interna muestra enlace Volver a iniciar sesion a /login ante ApiError 401.
+Se limpian resultados anteriores y el enlace al cambiar identificadores o iniciar
+otra consulta. Otros errores no ofrecen este enlace. No redireccion automatica,
+renovacion de token ni persistencia de identificadores/credenciales. Permisos y
+politica operativos sin cambios; pruebas ficticias hasta MVP.
+
+10 interacciones Chromium aprobadas (4.1 s), tipos/lint correctos. Nueva prueba
+simula 401 tras resultado, comprueba enlace y retirada/recuperacion; prueba 403
+existente confirma ausencia del enlace. Mock del componente, no login integrado.
+Confirmacion y activacion siguen bloqueadas; M3-T1 EN PROGRESO.
+
+## 2026-10-13 — M3-T1 §218: aviso visible de pruebas ficticias
+
+La consulta interna recuerda utilizar unicamente datos ficticios hasta disponer de
+la version MVP, conforme al acuerdo de desarrollo del usuario. Mantiene el aviso
+M3-T1 en progreso y confirmacion/activacion bloqueadas. Es una instruccion visible,
+no un detector automatico de datos reales ni una nueva barrera de servidor.
+Sin cambios de politica, permisos, datos o endpoints. Comprobacion de visibilidad
+incluida en la interaccion existente de consulta; 9 interacciones Chromium aprobadas
+(3.9 s), tipos y lint correctos. No comprobacion de CSS real ni sesion integrada.
+
+## 2026-10-13 — M3-T1 §217: estados ficticios de politica en interfaz
+
+Nueva interaccion con tres combinaciones sinteticas: fuentes verificadas/aceptacion
+pendiente/deshabilitada; verificadas/aceptada/deshabilitada; verificadas/aceptada/
+habilitada. Labels segun registro, aviso sin autoridad, requisitos pendientes y
+sin botones de confirmar/activar/aprobar en todos los casos. Mock del componente;
+no politica publicada ni cambio de registro operativo. 9 interacciones Chromium
+aprobadas (3.7 s), tipos/lint correctos. Cliente/backend sin cambios; tests/docs solo.
+No captura CSS real ni aceptacion juridica. M3-T1 EN PROGRESO;
+revisiones ficticias hasta MVP; confirmacion/activacion operativas bloqueadas.
+
+## 2026-10-13 — M3-T1 §216: estado actual separado de historia
+
+Captura usuario Edge Responsive 390 x 749 tras Consultar revision: evento historico
+Requiere cambios, referencia/fundamento/fecha originales y aviso historico visibles.
+Entre formulario y evento no aparecen Estado de politica ni Vinculo ultima revision.
+Network /v2 tipo fetch 200 visible. Politica registrada del evento conserva su
+referencia; no se interpreta como estado actual. Textos ajustados en area capturada.
+
+Completa alternancia manual del bloque nuevo §§214-215. No estados habilitados reales
+ni nueva medicion de overflow. Solo registro documental; tests previos no repetidos;
+codigo/datos/permisos sin cambios. M3-T1 EN PROGRESO;
+revisiones ficticias hasta MVP; confirmacion/activacion bloqueadas.
+
+## 2026-10-13 — M3-T1 §215: comprobacion visual de estado de politica
+
+Captura usuario Edge Responsive 480 x 749: Estado de la politica EIPD muestra fuentes
+pendientes de verificacion, aceptacion pendiente y habilitacion deshabilitada, con
+aviso sin autoridad. Vinculo ultima revision vigente separado; Continuar mantiene
+requisitos pendientes (252 motivos). Network readiness 200 visible; no headers
+inspeccionados. Textos ajustados en area capturada, sin medicion nueva de overflow.
+
+Comprobacion manual con expediente ficticio; no pruebas de otros estados reales ni
+alternancia historica del bloque nuevo en esta captura. Sin cambios de codigo/datos;
+tests previos no repetidos. M3-T1 EN PROGRESO; revisiones ficticias hasta MVP;
+confirmacion/activacion bloqueadas.
+
+## 2026-10-13 — M3-T1 §214: estado actual de politica visible en consulta
+
+Cliente readiness V3 proyecta sources_status/acceptance_status/activation existentes
+como policy_status, null fuera de V3. Enum cerrado y coherencia de habilitada con
+fuentes verificadas/aceptacion aceptada; no inferencia ni escritura. Vista Estado de
+la politica EIPD con etiquetas españolas y aviso sin autoridad; separada de historia.
+Consulta de evento limpia bloque. Estado registrado no verifica externamente fuentes.
+
+13 pruebas cliente (510 ms), 8 interacciones Chromium (3.4 s), tipos/lint aprobados.
+Casos nuevos: estados pendientes/habilitados sinteticos, valores desconocidos,
+incoherencia y null; bloque visible y retirada al consultar historia. Fixtures
+mockeados, no sesion real/CSS completa. Inspeccion manual pendiente. Backend,
+politica/datos/permisos sin cambios. M3-T1 EN PROGRESO;
+confirmacion/activacion bloqueadas; revisiones ficticias hasta MVP.
+
+## 2026-10-13 — M3-T1 §213: simulacion ficticia de revision de desarrollo
+
+Incorporada aclaracion del usuario: revisiones/pruebas ficticias hasta MVP; empresa
+real posterior, sin revisor real requerido ahora. Expediente pasa a simulacion, campos
+de aceptacion autentica diferidos. Cuatro casos nuevos para dos decisiones negativas
+con politica pendiente/deshabilitada e identidad vigente: barreras preservadas e
+inputs inmutables. Modulo politica 125 aprobadas (0.74 s), base aislada verificada;
+Black/Ruff correctos. Solo tests/docs; politica/expediente operativos sin cambios.
+M3-T1 EN PROGRESO; confirmacion/activacion bloqueadas.
+
+## 2026-10-13 — M3-T1 §212: expediente de revision de aceptacion
+
+Preparado [expediente revisable](m3-t1-expediente-revision.md) con commit tecnico
+verificado, referencias de balance/fuentes/trazabilidad y registro pendiente de
+responsable/decision/evidencia. No UUID o aceptaciones inventadas. Define condiciones
+previas a propuesta de habilitacion; no modifica politica/expediente/permisos.
+Solo documentacion; tests no repetidos. M3-T1 EN PROGRESO;
+fuentes/aceptacion pendientes; confirmacion/activacion bloqueadas.
+
+## 2026-10-13 — M3-T1 §211: regresion conjunta tras ampliacion de cobertura
+
+545 pruebas aprobadas en 8.39 s, una misma corrida de servicios biometrico, documento
+EIPD y politica ampliados, mas API controls v3 readiness, response v2 y negativas v2.
+Base aislada/head/registro vacio/runtime restringido verificados antes de pytest.
+No suite completa del repositorio ni nuevas pruebas de fuentes externas.
+
+Comprobacion conjunta de cambios §§206-210 con controles/lecturas/escritura negativa.
+Codigo operativo, politica y expedientes sin cambios. No nuevos tests en esta etapa;
+solo registro de regresion. Proximo avance: preparar expediente de revision de
+aceptacion con referencias, campos pendientes y responsable por designar; no seguir
+ampliando combinaciones sin brecha concreta. M3-T1 EN PROGRESO;
+fuentes/aceptacion pendientes; confirmacion/activacion bloqueadas.
+
+## 2026-10-13 — M3-T1 §210: registros individuales de fuentes de politica
+
+Matriz SourceRecordV1 documentada; nueve casos nuevos de campos omitidos en segundo
+registro. Primera fuente completa no compensa, errores de indice/campo precisos e
+input inmutable. Modulo politica 121 aprobadas (0.69 s), base aislada verificada;
+Black/Ruff correctos. No verificacion externa por pasar schema. Solo tests/docs;
+politica/expediente sin cambios. M3-T1 EN PROGRESO;
+aceptacion pendiente; confirmacion/activacion bloqueadas.
+
+## 2026-10-13 — M3-T1 §209: evidencia obligatoria de aceptacion de politica
+
+Ocho casos nuevos: cuatro registros de aceptacion omitidos individualmente con
+activation habilitada/deshabilitada. Contrato rechaza etiqueta aceptada incompleta
+sin mutar input. Modulo de politica 112 aprobadas (0.68 s), base aislada verificada;
+Black/Ruff correctos. Solo tests/documentacion; politica/expediente operativos sin
+cambios. M3-T1 EN PROGRESO; aceptacion pendiente; confirmacion/activacion bloqueadas.
+
+## 2026-10-13 — M3-T1 §208: segunda fuente documental EIPD
+
+Revisada trazabilidad del bloque de fuentes y añadidos cinco casos para segunda fuente
+incompleta. Diagnostico indice/campo correcto, documento no preparado e inmutabilidad.
+Modulo EIPD completo 164 aprobadas en 0.39 s, base aislada verificada; Black/Ruff
+correctos. Solo tests/documentacion; fuentes reales/politica/expediente sin cambios.
+M3-T1 EN PROGRESO; aceptacion pendiente; confirmacion/activacion bloqueadas.
+
+## 2026-10-13 — M3-T1 §207: respuestas y evidencia parcial multisistema
+
+14 casos nuevos sobre segundo sistema: negativas/pendientes, fundamento vacio y
+evidencia parcial. Diagnostico y categoria precisos, bloqueo e inmutabilidad.
+Modulo completo 243 aprobadas en base aislada verificada; Black/Ruff correctos.
+Solo tests/documentacion; evaluador/politica/expediente sin cambios.
+M3-T1 EN PROGRESO; aceptacion pendiente; confirmacion/activacion bloqueadas.
+
+## 2026-10-13 — M3-T1 §206: omisiones en segundo sistema biometrico
+
+15 casos nuevos parametrizados: textos, respuestas y evidencia del segundo sistema
+no aprovechan completitud del primero. Aserciones de indice/campo/categoria,
+can_confirm falso e inmutabilidad. Modulo completo 229 aprobadas (0.59 s), base
+aislada verificada antes de pytest; Black/Ruff aprobados. [Trazabilidad](m3-t1-evidencias-rutas-eipd.md)
+actualizada con limites. Solo tests/documentacion; evaluador/politica/expediente sin
+cambios. M3-T1 EN PROGRESO; aceptacion pendiente; confirmacion/activacion bloqueadas.
+
+## 2026-10-13 — M3-T1 §205: trazabilidad estatica de campos de excepciones
+
+[Lista de evidencias](m3-t1-evidencias-rutas-eipd.md) ampliada con campos y pruebas
+especificas localizadas. Revision de codigo de tests, no ejecucion nueva ni cobertura
+integral medida. Caso multisistema localizado omite solo canal de derechos del segundo
+sistema: pendiente verificar/ampliar omision individual de otros campos posteriores.
+Documento/fuentes/politica requieren trazabilidad propia. Solo documentacion;
+M3-T1 EN PROGRESO; aceptacion pendiente; confirmacion/activacion bloqueadas.
+
+## 2026-10-13 — M3-T1 §204: ensayo sintetico de frontera y requisitos
+
+60 pruebas existentes aprobadas en 9.23 s: prepared frontier HTTP, frontier v2 y
+requisitos de revision. Base aislada/head/registro vacio/runtime verificados antes de
+pytest. Ensayo sensible/biometrico, material parcial/obsoleto y barreras globales;
+fixture investigacion completo conserva bloqueo. [Lista de evidencia](m3-t1-evidencias-rutas-eipd.md)
+ampliada con trazabilidad por grupo y limites. No acredita cada campo ni aceptacion
+juridica. Expediente/politica operativos sin cambios. M3-T1 EN PROGRESO;
+fuentes/aceptacion pendientes; confirmacion/activacion bloqueadas.
+
+## 2026-10-13 — M3-T1 §203: lista revisable de evidencias por ruta
+
+Creada [lista de evidencias](m3-t1-evidencias-rutas-eipd.md), basada en schemas reales:
+contexto/derecho/foro/necesidad/resguardos, sensible, biometrica/sistemas, documento
+EIPD y politica. Todas las filas pendientes; evidencia candidata no acredita hechos
+ni aceptacion. No inventar revisores o documentos. Proximo ensayo en fixture dedicado
+admitido de base aislada; expediente de investigacion operativo sin cambios.
+Solo documentacion, tests no repetidos. M3-T1 EN PROGRESO;
+fuentes/aceptacion pendientes; confirmacion/activacion bloqueadas.
+
+## 2026-10-13 — M3-T1 §202: contraste normativo por ruta excepcional
+
+Ampliado [inventario EIPD](m3-t1-fuentes-eipd.md): sensible_derechos relacionado con
+16 d; biometrica con cadena 16 ter / 16 bis inciso segundo d; impacto con 15 ter.
+Separadas condiciones legales y fronteras tecnicas de eipd_frontier.py. Lectura
+inicial, no aceptacion juridica ni fuente declarada verificada. Fixture de investigacion
+no se fuerza a frontera excepcional. Solo documentacion; politica/expediente sin cambios.
+M3-T1 EN PROGRESO; fuentes/aceptacion pendientes; confirmacion/activacion bloqueadas.
+
+## 2026-10-13 — M3-T1 §201: inventario inicial de fuentes EIPD
+
+[Inventario y brechas](m3-t1-fuentes-eipd.md): fuente BCN/PDF articulo 15 ter localizada,
+version y fechas identificadas; contraste con campos documentales y politica interna.
+Lista/orientaciones especificas de Agencia no identificadas en busqueda limitada;
+no se afirma inexistencia ni se marca fuentes verificadas. Aceptacion juridica y por
+ruta pendientes. Baseline reformado fijo; politica/expediente sin cambios.
+Solo documentacion, sin nuevos tests. M3-T1 EN PROGRESO;
+confirmacion/activacion bloqueadas.
+
+## 2026-10-13 — M3-T1 §200: balance de evidencia y siguientes criterios
+
+Consolidado [balance de validacion](m3-t1-balance-validacion.md) con evidencias de
+vista movil, sesiones, lecturas, historia y corridas aisladas §§197-199. No suma
+conteos como cobertura integral. Explicita pendientes de fuentes/aceptacion, politica
+operativa deshabilitada, escritura/reciprocidad y alcance de regimenes.
+Proximo: inventario de referencias oficiales y brechas para habilitacion excepcional,
+sin activar politica ni expediente. Solo documentacion; tests no repetidos.
+M3-T1 EN PROGRESO; confirmacion/activacion bloqueadas.
+
+## 2026-10-13 — M3-T1 §199: regresion focalizada de concurrencia
+
+Suites existentes test_eipd_negative_review_v2_concurrency y
+test_api_eipd_admin_concurrency: 26 aprobadas en 8.18 s. build_environment y
+verify_destination comprueban base aislada/head/registro vacio y runtime restringido
+antes de pytest; no cambios de politica o expedientes operativos.
+
+Casos de espera y recarga de material/politica, commit/rollback, revisiones negativas
+simultaneas sin eventos parciales/perdidos, cancelacion y reintento; revocacion de
+facultades administrativas y conflictos de seleccion/publicacion. Fixtures sinteticas,
+no ensayo de usuarios concurrentes reales ni suite completa. Registro documental;
+codigo y permisos sin cambios. M3-T1 EN PROGRESO; fuentes/aceptacion pendientes;
+confirmacion/activacion bloqueadas.
+
+## 2026-10-13 — M3-T1 §198: regresion focalizada de permisos y confirmacion
+
+Ejecutadas suites existentes test_api_eipd_resolution_reviews,
+test_api_eipd_review_response_v2, test_api_eipd_review_prerequisites_v3 y
+test_api_eipd_confirmation_v2: 45 aprobadas en 18.24 s. build_environment y
+verify_destination verifican base aislada fija/head/registro vacio y runtime
+app_user restringido antes de pytest. Expedientes operativos sin cambios.
+
+Casos incluyen rechazo de organizacion ajena, permiso de escritura, lectura y
+respuesta historica v2, diagnosticos por decision y barreras/identidad de confirmacion.
+Fixtures sinteticas de politicas y autenticacion: resultados no habilitan politica
+operativa, confirmacion o activacion del expediente real de prueba. No suite completa
+ni nueva prueba manual de escritura/reciprocidad entre cuentas. Codigo y permisos
+sin cambios; registro documental. M3-T1 EN PROGRESO; fuentes/aceptacion pendientes;
+confirmacion/activacion bloqueadas.
+
+## 2026-10-13 — M3-T1 §197: regresion focalizada de escritura EIPD
+
+Ejecutadas suites existentes test_api_eipd_negative_review_v2 y
+test_api_eipd_resolution_writer_v2: 14 aprobadas en 6.91 s. Antes de pytest se aplican
+build_environment y verify_destination del ejecutor: base aislada fija, head previsto,
+registro global vacio y runtime app_user sin bypass/superuser verificados. No pytest
+sobre base operativa. Fixtures sinteticas y autenticacion de tests; no sesiones reales.
+
+Cobertura focal: persistencia negativa/metadata y barreras, material rechazado sin
+evento, rollback tras fallo, vinculo final/omision/reaporte, rechazo de vinculacion
+inyectada por cliente y bloqueo de patch de confirmado. No suite completa ni nueva
+prueba manual de escritura entre cuentas. Expediente operativo sin cambios.
+Registro documental; codigo y permisos sin cambios. M3-T1 EN PROGRESO;
+fuentes/aceptacion pendientes; confirmacion/activacion bloqueadas.
+
+## 2026-10-13 — M3-T1 §196: lectura historica recuperada en sesion original
+
+Dos capturas Edge Responsive 390 x 749 tras consulta con sesion original del ensayo:
+General muestra URL historica v2 exacta, GET y 200 OK; Response muestra decision
+requiere_cambios y response_schema_version 2, metadata historica. UI conserva
+fundamento y referencia PRUEBA-REVISION-LECTURA-20261010 originales. Headers de
+solicitud contraidos; no credenciales registradas. Identidad fuera de area capturada,
+cuenta por secuencia del ensayo. Contrasta con GET historico 404 de segunda sesion
+§193 y complementa contraste readiness §194-§195. No cobertura integral entre tenants.
+
+Sin cambios de codigo, datos o permisos; registro documental, tests no repetidos.
+M3-T1 EN PROGRESO; fuentes/aceptacion y cobertura restante pendientes;
+confirmacion/activacion bloqueadas.
+
+## 2026-10-13 — M3-T1 §195: requisitos recuperados en sesion original
+
+Tras instruccion de cerrar segunda cuenta y reingresar con cuenta original, captura
+Edge Responsive 390 x 749 muestra borrador, vinculo documental vigente, aviso sin
+autoridad y Continuar pendiente con 252 motivos. Network muestra readiness tipo
+fetch 200 (distinto de preflight tambien 200). Identidad y campos fuera del area
+capturada: secuencia de cuenta por contexto del ensayo, sin inspeccion de headers.
+Contrasta con rechazo 404 de segunda sesion §194; no demuestra reciprocidad completa
+ni acceso a todos los endpoints. No aprobacion, confirmacion o activacion.
+
+Sin cambios de codigo, datos o permisos; registro documental, tests no repetidos.
+M3-T1 EN PROGRESO; fuentes/aceptacion y cobertura restante pendientes.
+
+## 2026-10-13 — M3-T1 §194: requisitos EIPD rechazados con segunda sesion
+
+Capturas del usuario con segunda cuenta visible muestran URL readiness correcta,
+metodo GET, estado 404 Not Found y respuesta detail Evaluacion juridica no encontrada.
+No requisitos del expediente original expuestos. Usuario reutiliza peticion RAT
+reciente mediante Edit and Resend y cambia solo URL; cabeceras contraidas, sin copiar
+credenciales al registro. Comprobacion manual directa del endpoint de requisitos.
+
+Intento previo con copia antigua devolvio 401 Token expirado: acredita rechazo de
+credencial vencida, no aislamiento entre organizaciones. Repeticion posterior retorna
+404 descrito arriba. No inspeccion de headers, prueba de escritura, reciprocidad ni
+cobertura integral RLS. Complementa lectura historica §193 y rechazo RAT §192.
+Sin cambios de codigo, datos o permisos; tests no repetidos por evidencia manual.
+M3-T1 EN PROGRESO; fuentes/aceptacion y cobertura restante pendientes;
+confirmacion/activacion bloqueadas.
+
+## 2026-10-12 — M3-T1 §193: lectura historica EIPD con segunda sesion
+
+Usuario reutiliza peticion GET RAT capturada con segunda cuenta personal mediante
+Edge Network Console, cambia solo URL a endpoint de lectura historica EIPD v2 del
+expediente original y envia. Captura muestra URL calculada correcta, GET, estado
+404 Not Found y cuerpo detail Evaluacion juridica no encontrada; sin datos del evento.
+Identidad de segunda cuenta visible en pagina. Headers/auth conservados por instruccion,
+no expuestos ni inspeccionados en captura. No contrasenas ni tokens copiados al registro.
+
+Prueba manual directa de ese endpoint de lectura desde segunda sesion, complementa
+rechazo RAT y redireccion UI. No acredita todos los endpoints, escritura, reciprocidad,
+contenido exacto de headers ni cobertura integral RLS. No se modifican permisos ni
+expediente. Tests no repetidos: registro de evidencia manual. M3-T1 EN PROGRESO;
+fuentes/aceptacion y cobertura restante pendientes; confirmacion/activacion bloqueadas.
+
+## 2026-10-12 — M3-T1 §192: segunda cuenta consulta tratamiento ajeno
+
+Captura Edge Responsive 390 x 749 muestra segunda cuenta personal y URL del
+tratamiento original con organizacion original. Mensaje Actividad de tratamiento
+no encontrada; nombre y descripcion visibles vacios. Consola muestra GET RAT al
+tratamiento con 404. No contenido del tratamiento original visible. Comprobacion
+manual de rechazo de lectura RAT desde segunda sesion, sin inspeccion de headers,
+respuesta completa o evidencia de cobertura integral RLS. API EIPD aun pendiente.
+
+Sin cambios de codigo, permisos o datos; no completar ni guardar formulario vacio.
+Registro documental; tests no repetidos. M3-T1 EN PROGRESO; fuentes/aceptacion
+pendientes; confirmacion/activacion bloqueadas.
+
+## 2026-10-12 — M3-T1 §191: segunda cuenta redirigida desde consulta interna
+
+Usuario informa redireccion al panel al abrir consulta interna con segunda cuenta
+personal. Captura Edge Responsive 390 x 749 muestra /dashboard, identidad de segunda
+cuenta y panel general; consulta interna y expediente no visibles. Comprobacion
+manual de barrera de navegacion administrativa, complementando §190.
+No acredita rechazo de endpoints EIPD con token de segunda cuenta ni aislamiento
+integral RLS/API. Sin cambios de permisos, sesiones, codigo o datos.
+
+Registro documental; tests no repetidos. M3-T1 EN PROGRESO; fuentes/aceptacion y
+prueba directa API entre cuentas pendientes; confirmacion/activacion bloqueadas.
+
 ## 2026-10-12 — M3-T1 §190: cabecera y textos del panel general
 
 Captura de segunda cuenta muestra /dashboard, cabecera comprimida a 390 pixeles.
