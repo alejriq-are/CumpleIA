@@ -1769,3 +1769,47 @@ class LegalAssessmentRepresentationOutV1(LegalAssessmentOut):
     """Salida persistente; el binding solo aparece en forma de servidor."""
 
     sensitive_representation_assessment: BoundSensitiveRepresentationV1 | None = None
+
+
+class SensitiveRepresentationIssueOutV1(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    field: str
+    code: str
+    category: Literal["incompleto", "requiere_revision"]
+
+
+class SensitiveRepresentationReadinessOutV1(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    evaluation_version: Literal[1] = 1
+    evaluation_scope: Literal["requisitos_documentales"] = "requisitos_documentales"
+    authorizes_action: Literal[False] = False
+    can_confirm: Literal[False] = False
+    result: Literal["no_aplicable", "incompleto", "requiere_revision", "completo"]
+    issues: list[SensitiveRepresentationIssueOutV1]
+
+    @model_validator(mode="after")
+    def require_consistent_result(self):
+        expected = (
+            "requiere_revision"
+            if any(issue.category == "requiere_revision" for issue in self.issues)
+            else "incompleto" if self.issues else "completo"
+        )
+        if self.result != expected and not (
+            self.result == "no_aplicable" and not self.issues
+        ):
+            raise ValueError("Resultado documental incoherente")
+        return self
+
+
+class LegalAssessmentRepresentationReadinessOutV1(LegalAssessmentReadinessOut):
+    sensitive_representation: SensitiveRepresentationReadinessOutV1 | None = None
+    representation_context_coverage: Literal["no_aplica", "pendiente"] = "no_aplica"
+
+    @model_validator(mode="after")
+    def require_explicit_coverage(self):
+        expected = (
+            "pendiente" if self.sensitive_representation is not None else "no_aplica"
+        )
+        if self.representation_context_coverage != expected:
+            raise ValueError("Cobertura de representacion incoherente")
+        return self

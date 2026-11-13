@@ -1,8 +1,9 @@
 # M3-T1 — Integracion persistente de representacion sensible
 
 Estado: plan tecnico de implementacion, 2026-10-14 (§240).
-Storage/migracion aplicados (§242) y CRUD conectado (§243); readiness de
-representacion pendiente con bloqueo controlado; confirmacion bloqueada.
+Storage/migracion aplicados (§242), CRUD conectado (§243) y diagnostico
+readiness/interfaz integrado (§244); cobertura EIPD de representacion pendiente
+y confirmacion bloqueada.
 Contratos/binding/evaluador puros existentes: §§237–239.
 
 ## Almacenamiento y compatibilidad
@@ -166,3 +167,81 @@ Runner incorpora CRUD. Ruff/Black correctos; sin migracion adicional.
 Proximo: diagnostico versionado readiness de representacion y cobertura EIPD
 conservadora, manteniendo can_confirm=false. M3-T1 EN PROGRESO, pruebas ficticias
 hasta MVP; confirmacion/activacion bloqueadas.
+
+
+## 2026-10-14 — M3-T1 §244: diagnostico de representacion en readiness/interfaz
+
+Contrato de salida versionado con result/motivos, flags false y cobertura pendiente
+cuando hay diagnostico. Backend evalua contra RAT actual; motivos de obsolescencia,
+material/alcance/fechas y contexto no disponible. Exige representacion ausente para
+consentimiento representado sensible; documento completo solo comprueba datos.
+Gate de confirmacion conservado. Readiness vuelve a 200 con bloque propio en vez
+de 409 temporal. Sin documento/representacion sensible, salida null/no_aplica.
+
+Con diagnostico pendiente, proyeccion V3 marca las tres decisiones no preparadas,
+metadata de accion null y motivo de asociacion pendiente. No toca eventos, hashes
+historicos ni habilita nuevas revisiones. Estado de metadata interno anterior
+sigue referido al contexto de su version; campo cobertura explicito lo delimita.
+Cliente valida diagnostico/coherencia/flags y suprime vigencia global/prerrequisitos
+que no cubren representacion. Pantalla muestra bloque, motivos españoles y aviso
+sin facultad/autenticidad; consulta historica retira el bloque actual. Sin botones
+nuevos de escritura o confirmacion. Compatible con respuesta legacy sin bloque.
+
+132 pruebas backend focalizadas aprobadas (5.45 s), entorno aislado verificado;
+20 cliente y 11 interacciones Chromium frontend aprobadas (31, 4.5 s), tipos/lint
+correctos. Incluye actualizacion test OpenAPI al contrato sucesor sin retirar V3,
+rechazo de flags/resultados incoherentes, contexto obsoleto/retiro, tres decisiones
+pendientes y UI/historia. Ruff/Black/Prettier correctos. No suite integral nueva,
+prueba visual con sesion real del bloque nuevo ni cambio de fixture operativo.
+M3-T1 EN PROGRESO; pruebas ficticias hasta MVP; confirmacion/activacion bloqueadas.
+
+
+## 2026-10-14 — M3-T1 §245: representacion ausente y RAT actual en API
+
+Cuatro casos HTTP ficticios adicionales: representante legal/mandatario, con RAT
+sensible antes de crear o cambiado despues. Readiness detecta documento ausente,
+conserva flags false y cobertura pendiente; el cambio posterior informa tambien
+contexto RAT desactualizado. Consulta no modifica snapshot/envelope persistidos y
+confirmacion no resulta exitosa. 17 pruebas API de representacion aprobadas en
+5.29 s con base fija aislada verificada; Ruff/Black correctos. Sin cambio de reglas,
+fixture operativo ni politica. M3-T1 EN PROGRESO; pruebas ficticias hasta MVP.
+
+## 2026-10-14 — M3-T1 §246: contexto RAT ausente no descarta representacion
+
+Corregido readiness: con consentimiento de representante legal/mandatario y RAT
+actual no disponible, el bloque indica requiere_revision/cobertura pendiente aunque
+no exista documento. No inferir no_aplica de un contexto que no puede recomponerse.
+Cuatro regresiones HTTP ficticias con/sin material y ambos otorgantes; dos casos
+sin documento reprodujeron el fallo antes del cambio. Consulta conserva expediente
+persistido, flags false y confirmacion bloqueada.
+
+198 pruebas de API representacion, licitud previa y controles V3 aprobadas en
+205.51 s con base fija aislada verificada. Ruff/Black y diff-check correctos.
+Sin migracion, cambio de politica o datos operativos. M3-T1 EN PROGRESO; pruebas
+ficticias hasta MVP; cobertura EIPD de representacion sigue pendiente.
+
+## 2026-10-14 — M3-T1 §247: documento completo y alcances en API
+
+Tres casos HTTP ficticios comprueban documento completo compatible, alcance RAT
+incompatible y alcance de consentimiento sensible incompatible. Completo conserva
+can_confirm/authorizes_action false y cobertura pendiente; los alcances incompatibles
+informan requiere_revision y motivo especifico. En los tres casos confirmacion y
+nueva revision EIPD devuelven 409 con codigo explicito, sin modificar expediente.
+24 pruebas API de representacion aprobadas en 7.47 s, base fija aislada verificada;
+Ruff/Black correctos. No reglas nuevas, migracion, cambios operativos ni habilitacion.
+M3-T1 EN PROGRESO; pruebas ficticias hasta MVP.
+
+## 2026-10-14 — M3-T1 §248: concurrencia representacion/confirmacion
+
+Cuatro casos con PostgreSQL real y app_user prueban ambos ordenes: aporte de
+representacion primero o confirmacion ordinaria primero, con commit/rollback del
+holder. Espera comprobada por pg_blocking_pids, no por retraso supuesto. Tras commit
+el waiter relee y rechaza 409; tras rollback prosigue la otra operacion. Estado
+final exclusivo: borrador con material o confirmado sin material. No se permite
+confirmado con representacion. Confirmacion ordinaria ficticia no activa EIPD.
+
+28 pruebas API/representacion aprobadas en 8.65 s en base fija aislada verificada;
+Ruff/Black correctos. Primera corrida detecto fixture transversal obsoleto al
+cambiar consentimiento; reaporte de controles ficticios corrigio preparacion sin
+relajar gates. Sin cambios de servicio, migraciones, politica ni datos operativos.
+M3-T1 EN PROGRESO; pruebas ficticias hasta MVP; confirmacion EIPD bloqueada.

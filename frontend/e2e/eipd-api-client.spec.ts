@@ -302,3 +302,83 @@ test("politica proyecta estados sin autoridad y rechaza enum o habilitacion inco
     }
   );
 });
+
+test("representacion proyecta diagnostico sin autoridad y oculta vigencia EIPD incompleta", async () => {
+  const raw = {
+    ...readiness(),
+    sensitive_representation: {
+      evaluation_version: 1,
+      evaluation_scope: "requisitos_documentales",
+      authorizes_action: false,
+      can_confirm: false,
+      result: "incompleto",
+      issues: [
+        {
+          field: "authority_document_reference",
+          code: "representacion_material_pendiente",
+          category: "incompleto",
+        },
+      ],
+    },
+    representation_context_coverage: "pendiente",
+  };
+  await withFetch(raw, async () => {
+    const result = await eipdReviewApi.preparation(scope);
+    expect(result.sensitive_representation?.can_confirm).toBe(false);
+    expect(result.sensitive_representation?.issues[0].stage).toBe("representation");
+    expect(result.representation_context_coverage).toBe("pendiente");
+    expect(result.latest_review_context_status).toBeNull();
+    expect(result.review_prerequisites_v3).toBeNull();
+  });
+  await withFetch(
+    {
+      ...raw,
+      sensitive_representation: { ...raw.sensitive_representation, result: "completo", issues: [] },
+    },
+    async () => {
+      expect((await eipdReviewApi.preparation(scope)).sensitive_representation?.can_confirm).toBe(
+        false
+      );
+    }
+  );
+});
+
+for (const change of [
+  { authorizes_action: true },
+  { can_confirm: true },
+  { evaluation_version: 2 },
+  { result: "completo" },
+  { issues: [{ field: "PRUEBA", code: "PRUEBA", category: "aprobado" }] },
+]) {
+  test(`diagnostico representacion incompatible rechazado ${JSON.stringify(change)}`, async () => {
+    const raw = {
+      ...readiness(),
+      representation_context_coverage: "pendiente",
+      sensitive_representation: {
+        evaluation_version: 1,
+        evaluation_scope: "requisitos_documentales",
+        authorizes_action: false,
+        can_confirm: false,
+        result: "incompleto",
+        issues: [{ field: "PRUEBA", code: "PRUEBA", category: "incompleto" }],
+        ...change,
+      },
+    };
+    await withFetch(raw, async () => {
+      await expect(eipdReviewApi.preparation(scope)).rejects.toThrow("incompatible");
+    });
+  });
+}
+
+test("cobertura pendiente sin diagnostico no se acepta", async () => {
+  await withFetch(
+    {
+      ...readiness(),
+      representation_context_coverage: "pendiente",
+      sensitive_representation: null,
+    },
+    async () => {
+      await expect(eipdReviewApi.preparation(scope)).rejects.toThrow("incompatible");
+    }
+  );
+});
