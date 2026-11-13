@@ -1,3 +1,150 @@
+## 2026-10-01 — M3-T1 Bases de Licitud: contexto RAT v1 canónico + snapshot documental
+
+M3-T1 permanece **EN PROGRESO**. No debe considerarse cerrado.
+
+Sobre la persistencia base previamente comprometida en `fde0b4f`, quedó
+implementado y validado el siguiente bloque de aplicación:
+
+- schemas Pydantic v1 para el contexto RAT canónico y el snapshot documental;
+- canonización textual v1 y construcción determinista de `purpose_key`;
+- serialización determinista y cálculo SHA-256 de `rat_context_hash`;
+- composición tenant-aware del contexto M2→M3 para finalidad, categorías,
+  titulares, fuentes, sistemas, terceros y transferencias internacionales;
+- selección explícita de categorías y titulares para la finalidad evaluada;
+- derivación estructurada de regímenes especiales, sin inferencias desde texto
+  libre, nombres u otros campos fuera del alcance definido;
+- objeto canónico de 11 bloques, manteniendo `systems = []` en hash v1;
+- snapshot documental v1 con valores factuales de M2 y sin UUIDs operacionales,
+  timestamps ni campos de auditoría;
+- conservación documental de sistemas y de metadatos de trazabilidad de
+  terceros y transferencias que no participan en el hash;
+- resolución documental de `recipient_name` desde `Vendor.name` cuando la
+  transferencia no contiene nombre directo y sí referencia a un Vendor del
+  mismo tenant;
+- ordenación documental determinista sin canonizar los valores factuales y sin
+  deduplicar filas;
+- composición conjunta mediante `RatContextBundleV1`, de modo que objeto
+  canónico y snapshot se construyen desde los mismos objetos M2 cargados en una
+  misma composición lógica. Esto no implica aislamiento de snapshot de base de
+  datos bajo PostgreSQL `READ COMMITTED`.
+
+El contrato y las decisiones anteriores quedaron documentados en
+`modulo3-licitud-diseno.md`, incluida la definición del objeto canónico,
+serialización/hash y snapshot documental v1.
+
+Validación del checkpoint:
+
+- `test_schemas_licitud.py` + `test_services_licitud.py`: **70 passed**;
+- suite completa backend: **247 passed**;
+- Black: **PASS**;
+- Ruff: **PASS**;
+- `git diff --check`: sin errores de whitespace.
+
+La persistencia estructural, migración, modelos ORM, integridad tenant-aware y
+RLS continúan respaldados por el checkpoint `fde0b4f`. El `alembic check`
+global mantiene drift histórico preexistente ajeno a M3; no debe declararse
+como limpio.
+
+Pendiente para continuar M3-T1:
+
+1. integrar contexto canónico, hash y snapshot documental con el guardado
+   transaccional de evaluaciones;
+2. implementar asignación segura de `next_version` bajo concurrencia y resolver
+   la creación/obtención concurrente de series sin hacer `commit` o `rollback`
+   dentro del service layer;
+3. implementar ciclo de borrador, confirmación, reemplazo y revalidación del
+   contexto RAT cuando corresponda;
+4. completar validaciones programáticas específicas por base jurídica;
+5. definir e implementar los contratos de consentimiento, LIA y condiciones
+   especiales;
+6. ampliar pruebas de persistencia, concurrencia, lifecycle y reglas jurídicas
+   antes de cerrar M3-T1.
+
+**Punto de reanudación:** contexto RAT v1 canónico y snapshot documental
+implementados y validados; continuar por integración transaccional con la
+persistencia ya existente, sin modificar el contrato de hash v1 salvo decisión
+de diseño explícita.
+
+No actualizar todavía `modules-roadmap.md` ni declarar M3-T1 como DONE.
+
+## 2026-09-23 — M3-T1 Bases de Licitud: checkpoint de diseño canónico RAT v1
+
+M3-T1 permanece **EN PROGRESO**. No debe considerarse cerrado.
+
+La persistencia base del módulo quedó previamente implementada y comprometida
+en `fde0b4f` (`feat(m3): add legal basis assessment persistence and RLS`),
+incluyendo migración, modelos ORM, integridad tenant-aware, RLS y tests.
+
+En la jornada actual se avanzó en el contrato de aplicación y quedó definido
+en `modulo3-licitud-diseno.md` el contexto RAT canónico v1 utilizado por M3:
+
+- `purpose_key` derivado mediante canonización textual v1 y SHA-256;
+- canonización textual NFC, trim, colapso de whitespace Unicode y `casefold()`;
+- tratamiento determinista de textos opcionales vacíos como `null`;
+- separación explícita entre `rat_context_snapshot` documental y el objeto
+  canónico utilizado para `rat_context_hash`;
+- estructura canónica de 11 bloques: finalidad, rol de la organización,
+  categorías de datos, titulares, fuentes, conservación, decisiones
+  automatizadas, sistemas, terceros, transferencias internacionales y
+  regímenes especiales;
+- `systems` vacío en el objeto canónico v1, sin inferencias desde nombres,
+  proveedores o texto libre;
+- `special_regimes` derivado exclusivamente de indicadores estructurados del
+  alcance seleccionado;
+- serialización JSON determinista con claves ordenadas, separadores compactos,
+  Unicode sin escape ASCII, UTF-8 y SHA-256 sobre los bytes exactos;
+- claves de ordenación deterministas por bloque y tratamiento explícito de
+  textos opcionales nulos;
+- preservación de multiplicidad: la canonización no deduplica elementos.
+
+`git diff --check -- ../docs/project/modulo3-licitud-diseno.md` finalizó sin
+salida.
+
+El trabajo de aplicación todavía no comprometido incluye schemas del contexto
+RAT v1, canonización y hash, carga batch tenant-aware de Vendor y proyección
+de terceros, resolución de finalidad por `purpose_key`, y selección canónica
+de categorías y titulares con rechazo de duplicidad, inexistencia y ambigüedad.
+La línea base de schemas y servicios se reprodujo: **39 passed in 0.17s**.
+
+Continuación de integración M2→M3:
+
+- proyección de `TreatmentDataSource` y `InternationalTransfer` al contrato
+  canónico existente, preservando multiplicidad y excluyendo UUID/auditoría
+  y metadatos administrativos;
+- rechazo HTTP 400 de transferencias con país de destino vacío;
+- `build_rat_context_from_m2_v1` compone los 11 bloques mediante las lecturas
+  tenant-aware de M2 y los resolutores ya validados;
+- categorías y titulares se limitan al alcance elegido; fuentes, terceros y
+  transferencias provienen de la actividad completa porque M2 no dispone de
+  selección por finalidad para esos bloques;
+- no hay escritura de M2, persistencia del snapshot ni confirmación en este
+  constructor; los errores de lectura se propagan;
+- pruebas de equivalencia semántica, cambios por cada campo, multiplicidad,
+  ausencia de bloques opcionales y filtros por tenant/tratamiento en las
+  consultas reales del servicio M2 con sesión simulada. Estas últimas no
+  sustituyen las pruebas RLS contra PostgreSQL.
+
+Validación de esta continuación: **79 passed in 0.58s** en schemas y
+servicios M2/M3 (`test_schemas_licitud.py`, `test_services_licitud.py`,
+`test_schemas_rat.py`, `test_services_rat.py`), incluidos los 39 tests M3
+previos y 25 casos nuevos. Ruff y Black pasan en los dos archivos Python
+modificados. No se ejecutó la suite completa ni las pruebas RLS en esta
+continuación; no se modificaron migraciones ni contratos Pydantic.
+
+Pendiente para continuar M3-T1:
+
+1. definir e implementar la composición exacta del snapshot documental;
+2. integrar contexto/hash y snapshot en el guardado de borradores y la
+   confirmación transaccional con revalidación del RAT;
+3. continuar con validaciones por base jurídica, consentimiento, LIA,
+   condiciones especiales y service layer;
+4. ejecutar suite completa y pruebas RLS antes de cualquier cierre.
+
+**Punto de reanudación:** constructor de contexto M2→M3 implementado;
+continuar por snapshot documental y persistencia sin modificar el hash v1.
+
+No actualizar todavía `modules-roadmap.md` ni declarar M3-T1 como DONE.
+
 ## M2-T3.8 — infraestructura E2E autenticada del RAT
 
 Playwright/Chromium incorporado al frontend con login real de Supabase, fixture
