@@ -378,3 +378,141 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] Completitud, aplicabilidad y asociacion vigentes/obsoletas expuestas sin escrituras; bloqueo compartido de confirmacion incluso con expediente completo.
 - [x] 303 pruebas ampliadas aisladas aprobadas; Black/Ruff aprobados.
 - [ ] Nuevas versiones de binding especial/EIPD e integracion posterior; M3-T1 EN PROGRESO y activacion bloqueada.
+
+### M3-T1 §136 — Asociaciones para investigacion
+
+- [x] Delimitar versiones sucesoras especiales V11/EIPD V12, material, compatibilidad y orden PATCH.
+- [x] Implementar contratos/funciones puras nuevos con pruebas de hashes historicos intactos §137; 145 focalizadas aprobadas.
+- [ ] Dispatch y servicio/API, luego contexto de resolucion/revision y aceptacion. Confirmacion investigacion/EIPD bloqueadas.
+
+### M3-T1 §137 — Asociaciones puras sucesoras
+
+- [x] Contratos cerrados especiales V11/EIPD V12 y hash/bind de expediente completo sin reparar bindings research.
+- [x] 16 casos nuevos y 145 focalizados aprobados; funciones historicas verificadas intactas, Black/Ruff aprobados.
+- [x] Dispatch evaluador y falta de cobertura historica §138; escritura API pendiente. Gates siguen bloqueados.
+
+### M3-T1 §138 — Evaluacion versionada de investigacion
+
+- [x] Dispatch especiales V11/screening V12 y falta de cobertura independiente para versiones anteriores con investigacion.
+- [x] 8 casos nuevos; suite ampliada aislada 327 aprobadas, Black/Ruff aprobados.
+- [x] Generacion API de asociaciones sucesoras y pruebas de orden PATCH §139. Confirmacion investigacion/EIPD bloqueadas.
+
+### M3-T1 §139 — API de asociaciones sucesoras
+
+- [x] Create/PATCH especiales V11/screening V12 con valores finales y conservacion de asociaciones omitidas.
+- [x] Dos casos HTTP nuevos; 329 ampliadas y 162 regresiones frontera/screening V2 aprobadas.
+- [ ] Revisar cobertura versionada del contexto de resolucion/revision EIPD de investigacion; gates bloqueados.
+
+### M3-T1 §140 — Resolucion/revision EIPD de investigacion
+
+- [x] Revisar cobertura V1 y delimitar contratos V2, compatibilidad historica y frontera de revision/eventos.
+- [x] Implementar contexto/binding/Stored V2 y funciones puras con pruebas V1 intactas §141.
+- [ ] Dispatch, frontera/composicion, metadatos de eventos y escritura API posteriores; gates bloqueados.
+
+### M3-T1 §141 — Asociacion pura de resolucion V2
+
+- [x] Contexto cerrado con investigacion explicitamente nullable, binding/Stored V2 separados y hashes nuevos sin reparacion.
+- [x] 323 focalizadas aisladas aprobadas (9 nuevas y regresiones V1); Black/Ruff aprobados.
+- [x] Dispatch documental/readiness/revision puro de investigacion §142; frontera/composicion/escritor pendientes. Gates bloqueados.
+
+### M3-T1 §142 — Resolucion/revision evaluadas por version
+
+- [x] Dispatch puro V1/V2 y cobertura research explicita; evento historico visible sin autoridad sintetica.
+- [x] 327 focalizadas y 272 regresiones de frontera/screening/revision aprobadas; Black/Ruff aprobados.
+- [ ] Frontera/composicion research y posterior lectura/escritura API V2; gates bloqueados.
+
+### M3-T1 §143 — Frontera/composicion investigacion
+
+- [x] Delimitar FrontierV2/ScreeningV3/CompositionV3 y cobertura ContextV2 sin reinterpretar historicos.
+- [x] Implementar frontera V2 pura y pruebas con bloqueo conservador §144; 337 focalizadas aprobadas.
+- [ ] Screening/composicion, luego API/metadatos de eventos y aceptacion revisada. Gates bloqueados.
+
+### M3-T1 §144 — Frontera pura investigacion V2
+
+- [x] Evaluacion documental/asociacion y motivos especiales/screening completos; discordancias y falta de cobertura historica detectadas.
+- [x] 10 casos nuevos y 337 focalizados aislados aprobados; Black/Ruff aprobados.
+- [ ] Screening/composicion V3 y luego API/metadatos de eventos/aceptacion. Gates bloqueados.
+
+### M3-T1 §145 — Screening V3 conservador
+
+- [x] Screening sobre ContextV2/frontera V2 conserva todos los motivos y bloquea continuacion/confirmacion.
+- [x] Contratos historicos separados; once casos nuevos.
+- [ ] Composicion V3 y posterior API/metadatos de eventos/aceptacion.
+
+### M3-T1 §146 — Composicion V3 de investigacion
+
+- [x] Contratos cerrados y composicion pura con ContextV2, screening V3 y resolucion versionada.
+- [x] Motivos completos, vigencias separadas, revision ajena/obsoleta visible y confirmacion bloqueada.
+- [ ] Lectura API versionada, escritor/metadatos de eventos y aceptacion revisada.
+
+### M3-T1 §147 — Lectura API V3 de investigacion
+
+- [x] Readiness V3 con RAT actual/research persistido y politica real o ausencia explicita.
+- [x] Contratos de salida cerrados, lectura sin escritura y bloqueo conservador.
+- [ ] Escritor de resolucion versionado, metadatos auditables de eventos y aceptacion.
+
+### M3-T1 §148 — Escritor puro versionado
+
+- [x] Seleccion V1/V2 por contexto final y antecedente persistido, sin downgrade V2.
+- [x] Research declarado sin documento conserva cobertura V2; ordinario mantiene binding V1.
+- [ ] Integrar POST/PATCH y consumidores, metadatos auditables y aceptacion.
+
+### M3-T1 §149 — Escritor API versionado
+
+- [x] POST/PATCH con contexto final, antecedente persistido, omision/null/reaporte y salida V1/V2.
+- [x] Readiness por version sin aplicar composiciones historicas a V2; acciones V2 bloqueadas sin eventos.
+- [ ] Metadatos auditables/prerequisitos versionados de revision y aceptacion.
+
+### M3-T1 §150 — Metadatos auditables puros
+
+- [x] Contrato cerrado/versiones estrictas y generador/comparador de identidad de material V1/V2.
+- [x] Ausencia historica conservada; cobertura research explicita sin autoridad ni proyeccion.
+- [ ] Persistencia append-only/lectura de metadata, prerequisitos V2 y aceptacion.
+
+### M3-T1 §151 — Almacenamiento de metadata
+
+- [x] Columna nullable sin backfill, contrato/hashes comprobados y lectura ORM/pura conservadora.
+- [x] Migracion aislada/local verificada, historia intacta y 445 pruebas aprobadas.
+- [ ] Visibilidad API, prerequisitos de eventos V2 y aceptacion; acciones bloqueadas.
+
+### M3-T1 §152 — Metadata visible en readiness V3
+
+- [x] Lectura actual/historica separada por identidad, una consulta y sin fallback ni escrituras.
+- [x] 465 pruebas aprobadas; metadata vigente no levanta bloques de revision/confirmacion.
+- [ ] Prerequisitos puros versionados de revision, registro controlado y aceptacion.
+
+### M3-T1 §153 — Prerequisitos puros V3
+
+- [x] Identidad V2/cobertura explicita generada desde servidor; negativas parciales y positivos con controles comunes.
+- [x] 560 pruebas aisladas aprobadas; sin eventos ni activacion y contratos historicos intactos.
+- [ ] Registro controlado de negativas V2 con metadata, locks/aislamiento y aceptacion; positivos bloqueados.
+
+### M3-T1 §154 — Negativas HTTP V2 con metadata
+
+- [x] Registro autenticado bajo locks/relectura con hashes y metadata de servidor atomicos.
+- [x] 578 pruebas aisladas aprobadas: negativas, tenant, obsolescencia, rollback y regresiones historicas.
+- [ ] Concurrencia especifica V2/cambio de politica, consumidores y aceptacion; positivos bloqueados.
+
+### M3-T1 §155 — Concurrencia negativa V2
+
+- [x] Relectura tras PATCH/selector, commit/rollback e historia intacta con bloqueos PostgreSQL observados.
+- [x] 603 pruebas aisladas aprobadas; escritor existente conserva garantias sin cambio productivo.
+- [ ] Negativas simultaneas/cancelacion, consumidores y aceptacion; positivos/confirmacion bloqueados.
+
+### M3-T1 §156 — Simultaneidad y cancelacion V2
+
+- [x] Negativas independientes serializadas, commit/rollback y ultimo evento con identidad exacta.
+- [x] Cancelacion libera locks sin evento parcial; reintento vigente. 607 pruebas aisladas aprobadas.
+- [ ] Lectura de prerequisitos por decision en readiness y aceptacion; positivos/confirmacion bloqueados.
+
+### M3-T1 §157 — Diagnostico documental por decision
+
+- [x] Readiness V3 expone prerequisitos y metadata actual por decision; sin autoridad ni eventos ficticios.
+- [x] Kernel compartido con validacion humana preservada; 615 pruebas aisladas aprobadas.
+- [ ] Salida versionada de eventos V2, consumidores y aceptacion; positivos/confirmacion bloqueados.
+
+### M3-T1 §158 — Respuesta auditada versionada
+
+- [x] POST/GET de representacion V2 con identidad persistida; contrato historico intacto y null sin inferir.
+- [x] Lectura por tenant/padre/estado, permisos/suscripcion y 621 pruebas aisladas aprobadas.
+- [ ] Consumidor frontend tipado y aceptacion; positivos/confirmacion/activacion bloqueados.
