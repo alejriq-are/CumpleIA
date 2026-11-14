@@ -4,11 +4,15 @@ from uuid import uuid4
 
 import pytest
 from httpx import ASGITransport, AsyncClient
-from sqlalchemy import event
+from sqlalchemy import delete, event
 
+from tests import test_api_sensitive_representation as representations
 from tests import test_eipd_review_metadata_storage as old
 from tests import test_eipd_review_metadata_v2_storage as successor
 
+explicit_review_policy = representations.explicit_review_policy
+rat_m3 = representations.rat_m3
+saved = representations.saved
 app_role_session = old.app_role_session
 licitud_base_data = old.licitud_base_data
 review_data = old.review_data
@@ -81,3 +85,58 @@ async def test_v3_reads_original_identity_and_preserves_v2_contract(
         else:
             assert legacy.status_code == 200, legacy.text
             assert {**legacy.json(), "response_schema_version": 3} == body
+
+
+async def test_latest_metadata2_can_be_consulted_without_reconstructing_event(
+    saved, _app_session_factory, _session_factory, auth_a_id, profile_a_id
+):
+    from uuid import UUID
+
+    from app.db.models import EipdResolutionReview
+
+    tid, out, app, org = saved
+    url = f"/licitud/treatments/{tid}/assessments/{out['id']}"
+    async with AsyncClient(
+        transport=ASGITransport(app=app),
+        base_url="http://test",
+        headers={"X-Organization-Id": str(org)},
+    ) as client:
+        response = await client.patch(url, json={"eipd_resolution_assessment": {}})
+        assert response.status_code == 200, response.text
+        readiness = await client.get(url + "/readiness")
+        assert readiness.status_code == 200, readiness.text
+        metadata = readiness.json()["eipd_controls_v4"]["context_metadata"]
+        async with _app_session_factory() as db:
+            await old.cases._set_auth_user(db, auth_a_id)
+            event = EipdResolutionReview(
+                organization_id=org,
+                assessment_id=UUID(out["id"]),
+                created_by=profile_a_id,
+                decision="requiere_cambios",
+                rationale="PRUEBA: evento sintetico de compatibilidad",
+                review_reference="PRUEBA",
+                document_hash=metadata["document_hash"],
+                context_hash=metadata["context_hash"],
+                review_context_metadata=metadata,
+            )
+            db.add(event)
+            await db.commit()
+            rid = event.id
+        try:
+            event_url = url + f"/eipd-resolution/reviews/{rid}/v3"
+            historical = (await client.get(event_url)).json()
+            assert historical["review_context_metadata"] == metadata
+            after = await client.get(url + "/readiness")
+            assert after.status_code == 200, after.text
+            assert after.json()["eipd_controls_v4"]["review_state"]["latest_review"][
+                "id"
+            ] == str(rid)
+            assert after.json()["eipd_controls_v4"]["can_confirm"] is False
+            assert (await client.get(event_url)).json() == historical
+        finally:
+            # Limpieza de fixture por owner aislado; runtime conserva append-only.
+            async with _session_factory() as cleanup:
+                await cleanup.execute(
+                    delete(EipdResolutionReview).where(EipdResolutionReview.id == rid)
+                )
+                await cleanup.commit()
