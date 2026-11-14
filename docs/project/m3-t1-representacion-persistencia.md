@@ -533,3 +533,21 @@ interrupcion se retiro una publicacion temporal identificada por actor/referenci
 exactas de fixture, solo en base aislada con nombre/head verificados; runner
 revalido registro vacio antes de repetir. Ningun dato operativo modificado.
 M3-T1 EN PROGRESO; pruebas ficticias hasta MVP; activacion EIPD bloqueada.
+
+## 2026-10-14 — M3-T1 §265: requisitos documentales negativos sucesores puros
+
+Nuevo evaluador interno V4 separa documentary_prerequisites_met de la accion:
+prerequisites_met/authorizes_action/can_confirm siempre false. Negativas requieren
+borrador/versiones/RAT actual, binding3, metadata2 disponible y asociacion de
+representacion coherente; no exigen completar el contenido que motiva el rechazo.
+Continuar incorpora todos los bloqueos transversales. Metadata actual es diagnostico,
+no contexto de accion. Solicitud humana cerrada rechaza actor/hashes/metadata.
+No API nueva, escritura, permiso ni cambio del contrato readiness V4.
+
+51 pruebas focalizadas aprobadas (14 nuevas), con decisiones negativas/positiva,
+RAT/contexto ausente, otro tenant/tratamiento/evaluacion, historico e inyeccion de
+campos de servidor. Caso de padre distinto detecto necesidad de comprobar tambien
+asociacion del material representado: corregido antes de validar. Runner ampliado.
+Ruff/Black correctos. Solo fixtures ficticios; sin datos operativos modificados.
+Proximo: definir adaptador transaccional y contrato de accion negativo sucesor antes
+de publicar POST V3; mantener barrera positiva y de activacion. M3-T1 EN PROGRESO.
