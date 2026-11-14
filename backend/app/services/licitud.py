@@ -106,6 +106,7 @@ from app.services.eipd_review_metadata import (
     read_eipd_review_context_metadata_v1,
 )
 from app.services.eipd_review_response_v2 import serialize_eipd_resolution_review_v2
+from app.services.eipd_review_response_v3 import serialize_eipd_resolution_review_v3
 from app.services.eipd_review_v2 import evaluate_eipd_resolution_review_prerequisites_v2
 from app.services.eipd_review_v3 import (
     evaluate_eipd_resolution_review_prerequisites_v3,
@@ -3168,7 +3169,7 @@ async def _record_eipd_negative_review_v2_locked(
     return event
 
 
-async def get_eipd_resolution_review_v2(
+async def _get_eipd_resolution_review_event(
     db, organization_id, treatment_id, assessment_id, review_id
 ):
     """Lectura por padre y tenant autenticados; no compara con contexto actual."""
@@ -3182,4 +3183,30 @@ async def get_eipd_resolution_review_v2(
     )
     if event is None:
         raise _not_found("Revision EIPD no encontrada")
+    return event
+
+
+async def get_eipd_resolution_review_v2(
+    db, organization_id, treatment_id, assessment_id, review_id
+):
+    event = await _get_eipd_resolution_review_event(
+        db, organization_id, treatment_id, assessment_id, review_id
+    )
+    if (
+        event.review_context_metadata is not None
+        and event.review_context_metadata.get("metadata_schema_version") == 2
+    ):
+        raise HTTPException(
+            status_code=409,
+            detail={"code": "revision_eipd_metadata_v2_requiere_salida_v3"},
+        )
     return serialize_eipd_resolution_review_v2(event)
+
+
+async def get_eipd_resolution_review_v3(
+    db, organization_id, treatment_id, assessment_id, review_id
+):
+    event = await _get_eipd_resolution_review_event(
+        db, organization_id, treatment_id, assessment_id, review_id
+    )
+    return serialize_eipd_resolution_review_v3(event)
