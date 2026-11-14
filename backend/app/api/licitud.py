@@ -13,6 +13,7 @@ from app.schemas.licitud import (
     EipdResolutionReviewIn,
     EipdResolutionReviewOut,
     EipdResolutionReviewOutV2,
+    EipdResolutionReviewOutV3,
 )
 from app.schemas.licitud import (
     LegalAssessmentRepresentationDraftCreateV1 as LegalAssessmentDraftCreate,
@@ -168,5 +169,22 @@ async def leer_revision_eipd_salida_v2(
     db: AsyncSession = Depends(get_db),
 ):
     return await service.get_eipd_resolution_review_v2(
+        db, x_organization_id, treatment_id, assessment_id, review_id
+    )
+
+
+@router.get(
+    "/treatments/{treatment_id}/assessments/{assessment_id}/eipd-resolution/reviews/{review_id}/v3",
+    response_model=EipdResolutionReviewOutV3,
+)
+async def leer_revision_eipd_salida_v3(
+    treatment_id: uuid.UUID,
+    assessment_id: uuid.UUID,
+    review_id: uuid.UUID,
+    x_organization_id: Annotated[uuid.UUID, Header()],
+    _profile: Profile = Depends(require_permission(Permission.view_content)),
+    db: AsyncSession = Depends(get_db),
+):
+    return await service.get_eipd_resolution_review_v3(
         db, x_organization_id, treatment_id, assessment_id, review_id
     )
