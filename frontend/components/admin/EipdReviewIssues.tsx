@@ -52,10 +52,15 @@ const messages: Record<string, string> = {
     "El documento está vinculado a un contexto anterior. Revisa su vinculación.",
   gate_eipd_no_habilitado: "La habilitación EIPD está pendiente.",
   fuentes_oficiales_no_verificadas: "La verificación de fuentes oficiales está pendiente.",
+  politica_representacion_no_implementada:
+    "La política para representación sigue pendiente; no se permite confirmar o registrar una revisión.",
+  asociacion_representacion_no_cubierta:
+    "El documento EIPD guardado no incluye la representación actual.",
   politica_investigacion_no_implementada:
     "La política para investigación sigue pendiente de implementación.",
 };
 const fields: Record<string, string> = {
+  sensitive_representation_assessment: "Evaluación de representación",
   representation_assessment: "Documento de representación",
   representation_kind: "Clase de representación",
   representative_reference: "Referencia del representante",
