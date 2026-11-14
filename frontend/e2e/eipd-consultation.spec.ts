@@ -34,7 +34,7 @@ test.beforeAll(async () => {
       if(window.demo.mode==="wait")return new Promise(resolve=>{window.demo.release=()=>resolve(preparation(scope));});
       return preparation(scope);
     }
-    async function loadEvent(scope,id){window.demo.calls.push({kind:"event",scope,id});return {decision:"no_continuar",rationale:"TEST: revisar",review_reference:"TEST: REV160",created_at:"2026-10-09T00:00:00Z",policy_reference:null,review_context_metadata:null};}
+    async function loadEvent(scope,id){window.demo.calls.push({kind:"event",scope,id});return {decision:"no_continuar",rationale:"TEST: revisar",review_reference:"TEST: REV160",created_at:"2026-10-09T00:00:00Z",policy_reference:null,review_context_metadata:window.demo.eventMetadata??null};}
     createRoot(document.getElementById("root")).render(React.createElement(EipdReviewConsultation,{loadPreparation,loadEvent}));
   `
   );
@@ -491,4 +491,37 @@ test("V4 muestra motivos completos y decisiones bloqueadas sin mezclar historia"
   await page.getByRole("button", { name: "Consultar revisión" }).click();
   await expect(page.getByRole("heading", { name: "Revisión guardada" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Motivos del expediente actual" })).toHaveCount(0);
+});
+
+test("historia sucesora muestra cobertura guardada sin acreditar vigencia actual", async ({
+  page,
+}) => {
+  await scopeForm(page);
+  await page.evaluate(() => {
+    Object.assign((window as unknown as { demo: object }).demo, {
+      eventMetadata: {
+        metadata_schema_version: 2,
+        resolution_binding_version: 3,
+        context_schema_version: 3,
+        research_coverage: "contexto_v3",
+        representation_coverage: "contexto_v3",
+        document_hash: "a".repeat(64),
+        context_hash: "b".repeat(64),
+        research_material_hash: null,
+        representation_material_hash: "d".repeat(64),
+      },
+    });
+  });
+  await page.getByLabel("Revisión (identificador)", { exact: true }).fill(ids[3]);
+  await page.getByRole("button", { name: "Consultar revisión" }).click();
+  await expect(
+    page.getByText(
+      "Contexto versión 3. Cobertura: contexto de investigación y representación. Material de representación: identidad registrada.",
+      { exact: true }
+    )
+  ).toBeVisible();
+  await expect(
+    page.getByText("Su consulta no acredita vigencia del expediente actual.", { exact: false })
+  ).toBeVisible();
+  await expect(page.getByRole("button", { name: /confirmar|activar|registrar/i })).toHaveCount(0);
 });

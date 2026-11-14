@@ -18,9 +18,9 @@ const metadata = {
   context_hash: "b".repeat(64),
   research_material_hash: null,
 };
-function eventBody() {
+function eventBody(version: 2 | 3 = 2) {
   return {
-    response_schema_version: 2,
+    response_schema_version: version,
     id: rid,
     organization_id: scope.organizationId,
     assessment_id: scope.assessmentId,
@@ -128,12 +128,12 @@ test("respuestas con autoridad o metadata incoherente se rechazan", async () => 
     await expect(eipdReviewApi.preparation(scope)).rejects.toThrow("incompatible");
   });
   await withFetch(
-    { ...eventBody(), review_context_metadata: { ...metadata, context_hash: "c".repeat(64) } },
+    { ...eventBody(3), review_context_metadata: { ...metadata, context_hash: "c".repeat(64) } },
     async () => {
       await expect(eipdReviewApi.event(scope, rid)).rejects.toThrow("incompatible");
     }
   );
-  await withFetch({ ...eventBody(), organization_id: scope.treatmentId }, async () => {
+  await withFetch({ ...eventBody(3), organization_id: scope.treatmentId }, async () => {
     await expect(eipdReviewApi.event(scope, rid)).rejects.toThrow("incompatible");
   });
 });
@@ -148,7 +148,7 @@ test("motivos malformados se rechazan antes de presentarlos", async () => {
 
 test("lectura historica conserva ausencia sin inferir identidad", async () => {
   const value = {
-    ...eventBody(),
+    ...eventBody(3),
     review_context_metadata: null,
     policy_version: null,
     policy_reference: null,
@@ -158,7 +158,7 @@ test("lectura historica conserva ausencia sin inferir identidad", async () => {
     const result = await eipdReviewApi.event(scope, rid);
     expect(result.review_context_metadata).toBeNull();
     expect(result.policy_hash).toBeNull();
-    expect(calls[0].url).toContain(`/eipd-resolution/reviews/${rid}/v2`);
+    expect(calls[0].url).toContain(`/eipd-resolution/reviews/${rid}/v3`);
     expect(calls[0].options.cache).toBe("no-store");
   });
 });
@@ -457,3 +457,42 @@ test("V4 rechaza motivos actuales malformados antes de mostrarlos", async () => 
     await expect(eipdReviewApi.preparation(scope)).rejects.toThrow();
   });
 });
+
+const successorMetadata = {
+  metadata_schema_version: 2,
+  resolution_binding_version: 3,
+  context_schema_version: 3,
+  research_coverage: "contexto_v3",
+  representation_coverage: "contexto_v3",
+  document_hash: "a".repeat(64),
+  context_hash: "b".repeat(64),
+  research_material_hash: null,
+  representation_material_hash: "d".repeat(64),
+};
+
+test("lectura V3 conserva metadata2 sin inferir vigencia y usa ruta sucesora", async () => {
+  const raw = { ...eventBody(3), review_context_metadata: successorMetadata };
+  await withFetch(raw, async (calls) => {
+    const result = await eipdReviewApi.event(scope, rid);
+    expect(result.response_schema_version).toBe(3);
+    expect(result.review_context_metadata).toEqual(successorMetadata);
+    expect(calls[0].url).toContain(`/reviews/${rid}/v3`);
+    expect(calls[0].options.method ?? "GET").toBe("GET");
+  });
+});
+
+for (const change of ["coverage", "hash", "authority", "extra_metadata", "old_response"] as const) {
+  test(`lectura V3 rechaza metadata o version incompatible ${change}`, async () => {
+    const raw = JSON.parse(
+      JSON.stringify({ ...eventBody(3), review_context_metadata: successorMetadata })
+    );
+    if (change === "coverage") raw.review_context_metadata.representation_coverage = "no_cubierta";
+    if (change === "hash") raw.review_context_metadata.document_hash = "f".repeat(64);
+    if (change === "authority") raw.can_confirm = true;
+    if (change === "extra_metadata") raw.review_context_metadata.approved = true;
+    if (change === "old_response") raw.response_schema_version = 2;
+    await withFetch(raw, async () => {
+      await expect(eipdReviewApi.event(scope, rid)).rejects.toThrow("incompatible");
+    });
+  });
+}

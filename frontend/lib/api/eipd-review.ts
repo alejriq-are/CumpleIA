@@ -112,6 +112,25 @@ export type EipdResolutionReviewOutV2 = {
   | { policy_version: null; policy_reference: null; policy_hash: null }
   | { policy_version: 1; policy_reference: string; policy_hash: string }
 );
+export type EipdReviewContextMetadataV2 = {
+  metadata_schema_version: 2;
+  resolution_binding_version: 3;
+  context_schema_version: 3;
+  research_coverage: "contexto_v3";
+  representation_coverage: "contexto_v3";
+  document_hash: string;
+  context_hash: string;
+  research_material_hash: string | null;
+  representation_material_hash: string | null;
+};
+export type EipdResolutionReviewOutV3 = Omit<
+  EipdResolutionReviewOutV2,
+  "response_schema_version" | "review_context_metadata"
+> & {
+  response_schema_version: 3;
+  review_context_metadata: EipdReviewContextMetadataV1 | EipdReviewContextMetadataV2 | null;
+};
+export type EipdResolutionReviewReadOut = EipdResolutionReviewOutV2 | EipdResolutionReviewOutV3;
 export type EipdReviewScope = {
   token: string;
   organizationId: string;
@@ -141,6 +160,51 @@ function metadataValid(value: EipdReviewContextMetadataV1 | null): boolean {
         (value.research_material_hash === null || hash.test(value.research_material_hash))))
   );
 }
+function successorMetadataValid(
+  value: EipdResolutionReviewReadOut["review_context_metadata"]
+): boolean {
+  if (value === null) return true;
+  if (
+    !value ||
+    !Object.keys(value).every((key) =>
+      [
+        "metadata_schema_version",
+        "resolution_binding_version",
+        "context_schema_version",
+        "research_coverage",
+        "representation_coverage",
+        "document_hash",
+        "context_hash",
+        "research_material_hash",
+        "representation_material_hash",
+      ].includes(key)
+    )
+  )
+    return false;
+  if (value.metadata_schema_version === 1)
+    return (
+      !("representation_coverage" in value) &&
+      !("representation_material_hash" in value) &&
+      metadataValid(value)
+    );
+  return (
+    value.metadata_schema_version === 2 &&
+    value.resolution_binding_version === 3 &&
+    value.context_schema_version === 3 &&
+    value.research_coverage === "contexto_v3" &&
+    value.representation_coverage === "contexto_v3" &&
+    typeof value.document_hash === "string" &&
+    hash.test(value.document_hash) &&
+    typeof value.context_hash === "string" &&
+    hash.test(value.context_hash) &&
+    (value.research_material_hash === null ||
+      (typeof value.research_material_hash === "string" &&
+        hash.test(value.research_material_hash))) &&
+    (value.representation_material_hash === null ||
+      (typeof value.representation_material_hash === "string" &&
+        hash.test(value.representation_material_hash)))
+  );
+}
 function assessmentPath(scope: EipdReviewScope): string {
   if (
     !scope.token.trim() ||
@@ -149,14 +213,15 @@ function assessmentPath(scope: EipdReviewScope): string {
     throw new Error("Sesión y organización/expediente válidos requeridos.");
   return `/licitud/treatments/${scope.treatmentId}/assessments/${scope.assessmentId}`;
 }
-function eventResponse(
-  value: EipdResolutionReviewOutV2,
+function eventResponse<T extends EipdResolutionReviewReadOut>(
+  value: T,
   scope: EipdReviewScope,
-  reviewId?: string
-): EipdResolutionReviewOutV2 {
+  reviewId?: string,
+  expectedVersion: 2 | 3 = 2
+): T {
   requireContract(
     value &&
-      value.response_schema_version === 2 &&
+      value.response_schema_version === expectedVersion &&
       uuid.test(value.id) &&
       uuid.test(value.created_by) &&
       typeof value.organization_id === "string" &&
@@ -164,6 +229,28 @@ function eventResponse(
       typeof value.assessment_id === "string" &&
       value.assessment_id.toLowerCase() === scope.assessmentId.toLowerCase()
   );
+  if (expectedVersion === 3)
+    requireContract(
+      Object.keys(value).every((key) =>
+        [
+          "response_schema_version",
+          "id",
+          "organization_id",
+          "assessment_id",
+          "created_by",
+          "decision",
+          "rationale",
+          "review_reference",
+          "document_hash",
+          "context_hash",
+          "created_at",
+          "review_context_metadata",
+          "policy_version",
+          "policy_reference",
+          "policy_hash",
+        ].includes(key)
+      )
+    );
   requireContract(!reviewId || value.id.toLowerCase() === reviewId.toLowerCase());
   requireContract(
     ["continuar", "requiere_cambios", "no_continuar"].includes(value.decision) &&
@@ -179,7 +266,11 @@ function eventResponse(
       /(?:Z|\+00:00)$/.test(value.created_at) &&
       !Number.isNaN(Date.parse(value.created_at))
   );
-  requireContract(metadataValid(value.review_context_metadata));
+  requireContract(
+    expectedVersion === 3
+      ? successorMetadataValid(value.review_context_metadata)
+      : metadataValid(value.review_context_metadata as EipdReviewContextMetadataV1 | null)
+  );
   if (value.review_context_metadata !== null)
     requireContract(
       value.review_context_metadata.document_hash === value.document_hash &&
@@ -464,14 +555,14 @@ export const eipdReviewApi = {
           : controls.review_context_metadata_status,
     };
   },
-  async event(scope: EipdReviewScope, reviewId: string): Promise<EipdResolutionReviewOutV2> {
+  async event(scope: EipdReviewScope, reviewId: string): Promise<EipdResolutionReviewOutV3> {
     const path = assessmentPath(scope);
     if (!uuid.test(reviewId)) throw new Error("Identificador de revisión inválido.");
-    const value = await apiFetch<EipdResolutionReviewOutV2>(
-      `${path}/eipd-resolution/reviews/${reviewId}/v2`,
+    const value = await apiFetch<EipdResolutionReviewOutV3>(
+      `${path}/eipd-resolution/reviews/${reviewId}/v3`,
       { token: scope.token, organizationId: scope.organizationId, cache: "no-store" }
     );
-    return eventResponse(value, scope, reviewId);
+    return eventResponse(value, scope, reviewId, 3);
   },
   async recordNegative(
     scope: EipdReviewScope,
