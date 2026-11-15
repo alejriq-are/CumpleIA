@@ -98,3 +98,73 @@ def test_date_and_decision_are_explicit(value):
         evaluate(value, "no_continuar", evaluated_on=datetime(2026, 10, 14))
     with pytest.raises(ValidationError):
         evaluate(value, "aprobar", evaluated_on=DAY)
+
+
+@pytest.fixture
+def rejection():
+    return dict(
+        code="resolucion_eipd_representacion_asociacion_pendiente",
+        evaluation_version=4,
+        documentary_prerequisites_met=True,
+        prerequisites_met=False,
+        authorizes_action=False,
+        can_confirm=False,
+        documentary_issues_v4=[],
+        issues_v4=[
+            dict(
+                stage="review",
+                field="policy",
+                code="politica_representacion_no_implementada",
+                category="requiere_revision",
+                question_id=None,
+            )
+        ],
+    )
+
+
+def test_rejection_roundtrip_preserves_documentary_identity_without_permission(
+    rejection,
+):
+    from app.schemas.licitud import EipdRepresentedReviewRejectionV4Out as Out
+
+    parsed = Out.model_validate(rejection)
+    assert Out.model_validate_json(parsed.model_dump_json()) == parsed
+    assert parsed.documentary_prerequisites_met and not parsed.prerequisites_met
+
+
+@pytest.mark.parametrize(
+    "field", ["prerequisites_met", "authorizes_action", "can_confirm"]
+)
+def test_rejection_cannot_promote_to_permission(rejection, field):
+    from app.schemas.licitud import EipdRepresentedReviewRejectionV4Out as Out
+
+    rejection[field] = True
+    with pytest.raises(ValidationError):
+        Out.model_validate(rejection)
+
+
+@pytest.mark.parametrize("field", ["context_metadata", "document_hash", "created_by"])
+def test_rejection_rejects_action_identity(rejection, field):
+    from app.schemas.licitud import EipdRepresentedReviewRejectionV4Out as Out
+
+    rejection[field] = "PRUEBA"
+    with pytest.raises(ValidationError):
+        Out.model_validate(rejection)
+
+
+@pytest.mark.parametrize(
+    "mutation", ["empty_blockers", "contradiction", "loose_bool", "old_version"]
+)
+def test_rejection_rejects_incoherent_states(rejection, mutation):
+    from app.schemas.licitud import EipdRepresentedReviewRejectionV4Out as Out
+
+    if mutation == "empty_blockers":
+        rejection["issues_v4"] = []
+    elif mutation == "contradiction":
+        rejection["documentary_prerequisites_met"] = False
+    elif mutation == "loose_bool":
+        rejection["documentary_prerequisites_met"] = 1
+    else:
+        rejection["evaluation_version"] = 3
+    with pytest.raises(ValidationError):
+        Out.model_validate(rejection)

@@ -361,6 +361,13 @@ async def test_representation_marks_all_v4_review_decisions_pending(
         assert response.json()["detail"]["code"] == (
             "resolucion_eipd_representacion_asociacion_pendiente"
         )
+        detail = response.json()["detail"]
+        assert detail["evaluation_version"] == 4
+        assert detail["prerequisites_met"] is False
+        assert detail["authorizes_action"] is False
+        assert detail["can_confirm"] is False
+        assert detail["documentary_prerequisites_met"] is False
+        assert detail["issues_v4"]
         assert (await client.get(url)).json() == before
     async with _session_factory() as db:
         count = await db.scalar(
@@ -747,6 +754,17 @@ async def test_resolution_v3_roundtrip_reaporte_withdrawal_and_actions(
             review.json()["detail"]["code"]
             == "resolucion_eipd_representacion_asociacion_pendiente"
         )
+        diagnostic = review.json()["detail"]
+        assert diagnostic["evaluation_version"] == 4
+        assert diagnostic["documentary_prerequisites_met"] is True
+        assert diagnostic["prerequisites_met"] is False
+        assert diagnostic["authorizes_action"] is False
+        assert diagnostic["can_confirm"] is False
+        assert diagnostic["documentary_issues_v4"] == []
+        assert any(
+            i["code"] == "politica_representacion_no_implementada"
+            for i in diagnostic["issues_v4"]
+        )
         final_ready = await client.get(url + "/readiness")
         assert final_ready.status_code == 200, final_ready.text
         assert any(
@@ -794,3 +812,41 @@ async def test_create_with_representation_and_resolution_binds_final_context(
         )
         assert ready.status_code == 200, ready.text
         assert ready.json()["eipd_controls_v4"]["resolution"]["context_current"] is True
+
+
+async def test_review_diagnostic_invalid_context_is_closed_and_atomic(
+    saved, monkeypatch
+):
+    tid, out, app, org = saved
+    url = f"/licitud/treatments/{tid}/assessments/{out['id']}"
+
+    def invalid_context(*args, **kwargs):
+        raise ValueError("PRUEBA: contexto ficticio invalido")
+
+    monkeypatch.setattr(
+        licitud, "build_eipd_resolution_context_from_assessment_v3", invalid_context
+    )
+    async with AsyncClient(
+        transport=ASGITransport(app=app),
+        base_url="http://test",
+        headers={"X-Organization-Id": str(org)},
+    ) as client:
+        before = (await client.get(url)).json()
+        response = await client.post(
+            url + "/eipd-resolution/reviews/v2",
+            json={
+                "decision": "no_continuar",
+                "rationale": "PRUEBA",
+                "review_reference": "PRUEBA-CONTEXTO-INVALIDO",
+            },
+        )
+        assert response.status_code == 409, response.text
+        detail = response.json()["detail"]
+        assert detail["documentary_prerequisites_met"] is False
+        assert detail["documentary_issues_v4"]
+        assert detail["issues_v4"]
+        assert detail["prerequisites_met"] is False
+        assert detail["authorizes_action"] is False
+        assert detail["can_confirm"] is False
+        assert "context_metadata" not in detail
+        assert (await client.get(url)).json() == before
