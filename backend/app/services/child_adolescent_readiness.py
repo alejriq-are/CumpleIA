@@ -9,6 +9,7 @@ from app.services.child_adolescent_binding import (
     ChildAdolescentContextV1,
     evaluate_child_adolescent_association_v1,
 )
+from app.services.child_adolescent_related import evaluate_child_adolescent_related_v1
 from app.services.research_binding import validated
 
 
@@ -25,6 +26,11 @@ def build_child_adolescent_readiness_v1(bound, context):
     issues = [
         dict(field=i.field, code=i.code, category=i.category) for i in diagnostic.issues
     ]
+    if document is not None:
+        issues.extend(
+            dict(field=i.field, code=i.code, category=i.category)
+            for i in evaluate_child_adolescent_related_v1(document.assessment, ctx)
+        )
     association_status = "no_aplicable"
     if document is not None or diagnostic.result != "no_aplicable":
         association = evaluate_child_adolescent_association_v1(document, ctx)

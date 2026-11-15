@@ -1,6 +1,6 @@
 # M3-T1 — Infancia y adolescencia: primer contrato documental
 
-Estado: contrato, evaluador documental e identidad propios §§274–277, 2026-10-14. M3-T1 EN PROGRESO.
+Estado: contrato, evaluador documental e identidad propios §§274–278, 2026-10-14. M3-T1 EN PROGRESO.
 No campo API, persistencia, evaluador positivo ni cambio del fallback especial.
 Solo pruebas ficticias hasta MVP; confirmacion/activacion EIPD bloqueadas.
 
@@ -115,3 +115,46 @@ Black correctos. Sin API/migracion/CRUD ni datos operativos nuevos. Pendiente co
 semantico con declaraciones especiales/consentimientos relacionados antes de conectar
 persistencia; la identidad cubre esos materiales pero no prueba su coherencia legal.
 M3-T1 EN PROGRESO; confirmacion/activacion EIPD bloqueadas.
+
+## 2026-10-14 — M3-T1 §278: coherencia documental relacionada de infancia
+
+Nuevo evaluador puro contrasta documento con consentimiento declarado y proyeccion
+especial: ausencia/otorgante pendiente, discrepancia de otorgante, tres declaraciones
+edad/cruce y su fundamento, scope comparable, condicion infancia y ruta consentimiento.
+Padre/madre o cuidado personal no se equiparan automaticamente a los tres valores
+del contrato consentimiento actual; relacion no comparable pide revision. Material
+sensible exige presencia del consentimiento sensible relacionado, sin afirmar que
+esa presencia satisfaga sus reglas propias. Declaracion especial no crea un cruce
+sensible menor16 sin flags/scope correspondientes. Sin inferir edad ni facultades.
+
+Composicion agrega estos motivos aunque documento completo y asociacionvigente;
+identidad no encubre incoherencia. 71 pruebas infancia aprobadas en0.31s;11 nuevas.
+Fixtures del compositor ahora aportan relaciones coherentes explicitas para aislar
+los casos previos. Ruff global y Black271 archivos correctos. Sin API/CRUD/migracion
+ni datos operativos nuevos; conserva fallback y gates. Siguiente contratos de
+persistencia y matriz transaccional antes de integrar almacenamiento como conjunto.
+M3-T1 EN PROGRESO; confirmacion/activacion EIPD bloqueadas.
+
+## Contratos futuros y matriz transaccional §279
+
+Contratos separados child_adolescent_api: Create/Update reciben documento crudo o
+null, Out recibe envelope servidor. API activa conserva modelos anteriores;
+OpenAPI comprobado sin campo nuevo. PATCH serializa con exclude_unset para no
+convertir omisiones en null. No importar estos contratos en rutas antes de storage.
+
+| Operacion | Orden/invariante requerido | Verificacion pendiente de implementacion |
+| --- | --- | --- |
+| Crear | UUID servidor y contexto RAT final antes de bind; documento y fila en misma transaccion | Roundtrip y rollback total tras error posterior |
+| PATCH omitido | Conservar envelope/hash originales | Igualdad JSON antes/despues, sin rebind |
+| PATCH null | Retirar solo borrador; reevaluar todos los gates | No habilitar positivo por ausencia de material; confirmado inmutable |
+| PATCH reaporte | Releer bajo lock de serie y componer contexto final de todos los campos relacionados | Cambios simultaneos de consentimiento/especiales/representacion capturados por hash |
+| Cambio relacionado sin reaporte | Conservar documento; diagnosticar asociacion obsoleta | Contexto/parent/documento viejo no promovido |
+| Confirmacion/revision EIPD | Relectura con orden global/selector/serie existente; rechazar cobertura infancia no integrada | Espera real commit/rollback, cero eventos ante rechazo |
+| Tenant/permisos | organization_id servidor, FK/RLS existentes, runtime app_user sin BYPASSRLS | Otro tenant/padre,viewer/suscripcion y SQL directo |
+| Migracion | Columna JSONB nullable none_as_null, envelope objeto; constraint material no confirmado | Upgrade aislado desde head anterior, sin backfill; ORM/Alembic coherentes |
+| Historia | Lectura de confirmado/reemplazado sin mutar; nuevos contextos versionados | Hashes y revisiones anteriores identicos; no presentar V3 como cobertura nueva |
+
+La columna propuesta child_adolescent_assessment no existe aun. Integrar modelo,
+migracion/contratos/CRUD/gates como bloque; no aceptar y descartar atributos Python
+no persistidos. No nueva tabla ni cambio de privilegios inferido por agregar columna.
+El plan no agrega autoridad positiva ni supone verificacion de documentos reales.
