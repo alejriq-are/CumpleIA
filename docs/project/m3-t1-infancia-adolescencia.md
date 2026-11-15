@@ -1,6 +1,6 @@
 # M3-T1 — Infancia y adolescencia: primer contrato documental
 
-Estado: diseño y contrato interno §274, 2026-10-14. M3-T1 EN PROGRESO.
+Estado: contrato, evaluador documental e identidad propios §§274–277, 2026-10-14. M3-T1 EN PROGRESO.
 No campo API, persistencia, evaluador positivo ni cambio del fallback especial.
 Solo pruebas ficticias hasta MVP; confirmacion/activacion EIPD bloqueadas.
 
@@ -78,4 +78,40 @@ RAT ausente/resumen incoherente, ausencia/noaplicable, scope, declaracion residu
 grupo mixto, ruta legal, otorgante y cruce no inferido. Ruff/Black correctos. Sin
 API/almacenamiento/binding nuevo, sin cambiar fallback ni gates actuales. Solo
 fixtures ficticios. Siguiente asociacion versionada propia antes de persistencia.
+M3-T1 EN PROGRESO; confirmacion/activacion EIPD bloqueadas.
+
+## 2026-10-14 — M3-T1 §276: identidad propia de infancia/adolescencia
+
+BoundChildAdolescentAssessmentV1 y contexto interno cerrado con UUID servidor de
+org/tratamiento/evaluacion, RAT/base/consentimientos, documento de declaraciones
+especiales y representacion asociada. Campos nullable requeridos explicitamente.
+Dominios SHA256 propios de documento/contexto; helper valida y canoniza sin mutar.
+Especiales usa proyeccion documental explicita sin binding para evitar ciclo; un
+envelope accidental se rechaza, no se ignora silenciosamente. No se alteran hashes
+historicos ni contexto EIPD V3. Asociacion ausente/documento cambiado/contexto
+cambiado requieren revision; vigente no acredita facultades ni permite confirmar.
+
+75 pruebas focalizadas aprobadas en0.31s;17 nuevas de identidad. Cubren parent/tenant,
+RAT/base/consentimientos/especiales/representacion, cambio de documento, roundtrip,
+reaporte explicito, contratos/version/hash/extra/nullables y contexto invalido sin
+documento. Ruff/Black correctos. Sin API/migracion/persistencia nuevas, sin datos
+operativos ni cambios a gates. Siguiente componer asociacion con diagnostico antes
+de contratos CRUD/almacenamiento. M3-T1 EN PROGRESO; EIPD bloqueada.
+
+## 2026-10-14 — M3-T1 §277: diagnostico de infancia con identidad
+
+build_child_adolescent_readiness_v1 compone evaluador documental y asociacion sin
+rebind ni mutacion. Expone resultado documental separado de association_status;
+contenido completo con hash/contexto obsoleto requiere revision, identidad vigente
+no completa contenido faltante, ausencia y noaplicabilidad quedan diferenciadas.
+Salida interna cerrada/versionada exige coherencia de motivos/resultado, asociacion
+vigente para completo y flags authorizes_action/can_confirm false. No interpreta
+identidad como facultades ni habilita operaciones positivas.
+
+60 pruebas focalizadas de infancia aprobadas en0.30s;14 nuevas: separacion identidad/
+completitud, documento/contexto/padre cambiados, ausencia/noaplicable, roundtrip,
+inmutabilidad, contexto invalido y salidas incoherentes/autoridad inyectada. Ruff/
+Black correctos. Sin API/migracion/CRUD ni datos operativos nuevos. Pendiente contraste
+semantico con declaraciones especiales/consentimientos relacionados antes de conectar
+persistencia; la identidad cubre esos materiales pero no prueba su coherencia legal.
 M3-T1 EN PROGRESO; confirmacion/activacion EIPD bloqueadas.
