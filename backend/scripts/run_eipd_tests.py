@@ -42,6 +42,7 @@ TARGETS = (
     "tests/test_eipd_review_metadata_v2_storage.py",
     "tests/test_api_eipd_review_metadata_readiness.py",
     "tests/test_api_eipd_negative_review_v2.py",
+    "tests/test_api_eipd_negative_review_v3.py",
     "tests/test_api_eipd_review_prerequisites_v3.py",
     "tests/test_api_eipd_review_response_v2.py",
     "tests/test_api_eipd_review_response_v3.py",
