@@ -1,4 +1,4 @@
-"""Entradas futuras cerradas; API activa conserva contrato anterior."""
+"""Entradas cerradas; API publica el documento y conserva contratos historicos."""
 
 import pytest
 from pydantic import ValidationError
@@ -79,7 +79,7 @@ def test_server_envelope_not_accepted_as_document(model):
         )
 
 
-def test_active_contracts_and_published_openapi_do_not_accept_new_field():
+def test_historical_contracts_unchanged_and_openapi_publishes_new_field():
     from app.main import app
 
     for model in (
@@ -91,7 +91,9 @@ def test_active_contracts_and_published_openapi_do_not_accept_new_field():
     assert "child_adolescent_assessment" in Out.model_fields
     spec = app.openapi()
     for path, operations in spec["paths"].items():
-        if path.startswith("/licitud/treatments/"):
+        if path.startswith("/licitud/treatments/") and (
+            path.endswith("/assessments") or path.endswith("/{assessment_id}")
+        ):
             for method in ("post", "patch"):
                 operation = operations.get(method)
                 if not operation or "requestBody" not in operation:
@@ -101,6 +103,4 @@ def test_active_contracts_and_published_openapi_do_not_accept_new_field():
                 ].get("$ref")
                 if ref:
                     schema = spec["components"]["schemas"][ref.rsplit("/", 1)[1]]
-                    assert "child_adolescent_assessment" not in schema.get(
-                        "properties", {}
-                    )
+                    assert "child_adolescent_assessment" in schema.get("properties", {})
