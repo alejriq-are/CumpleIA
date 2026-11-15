@@ -1,14 +1,22 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 import { EipdReviewIssues } from "./EipdReviewIssues";
 import { ApiError } from "@/lib/api/client";
-import type { EipdReviewPreparationOut, EipdResolutionReviewReadOut } from "@/lib/api/eipd-review";
+import type {
+  EipdReviewPreparationOut,
+  EipdResolutionReviewReadOut,
+  EipdNegativeReviewIn,
+} from "@/lib/api/eipd-review";
 
 type Scope = { organizationId: string; treatmentId: string; assessmentId: string };
 type Props = {
   loadPreparation: (scope: Scope) => Promise<EipdReviewPreparationOut>;
   loadEvent: (scope: Scope, reviewId: string) => Promise<EipdResolutionReviewReadOut>;
+  recordNegative?: (
+    scope: Scope,
+    request: EipdNegativeReviewIn
+  ) => Promise<EipdResolutionReviewReadOut>;
 };
 const labels = {
   continuar: "Continuar",
@@ -30,7 +38,13 @@ export function consultationError(error: unknown): string {
   return "No se pudo consultar el expediente. Revisa los identificadores y la conexión.";
 }
 
-export function PreparationView({ value }: { value: EipdReviewPreparationOut }) {
+export function PreparationView({
+  value,
+  negativeRecordingAvailable = false,
+}: {
+  value: EipdReviewPreparationOut;
+  negativeRecordingAvailable?: boolean;
+}) {
   const current = value.review_prerequisites_v4 ?? null;
   const result =
     current ??
@@ -105,7 +119,9 @@ export function PreparationView({ value }: { value: EipdReviewPreparationOut }) 
       {value.representation_context_coverage === "pendiente" && (
         <p role="status" className="rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm">
           {current !== null
-            ? "El diagnóstico actual incluye la representación. Consultarlo no acredita la vigencia de revisiones guardadas ni permite registrar una nueva revisión EIPD o confirmar."
+            ? negativeRecordingAvailable
+              ? "El diagnóstico actual incluye la representación. La revisión negativa se solicita en el formulario separado; el servidor comprobará la identidad actual. No autoriza continuar, confirmar ni activar."
+              : "El diagnóstico actual incluye la representación. Consultarlo no acredita la vigencia de revisiones guardadas ni permite registrar una nueva revisión EIPD o confirmar."
             : "Las revisiones EIPD anteriores no cubren este material de representación. La integración de esa cobertura está pendiente; no se presenta vigencia global ni se permite registrar una nueva revisión EIPD o confirmar."}
         </p>
       )}
@@ -172,7 +188,9 @@ export function PreparationView({ value }: { value: EipdReviewPreparationOut }) 
                 </p>
                 <p className="mt-2 text-sm">
                   {current !== null
-                    ? "Registro de revisión no habilitado."
+                    ? negativeRecordingAvailable && decision !== "continuar"
+                      ? "El registro negativo se solicita en el formulario separado y requiere validación del servidor."
+                      : "Registro de revisión no habilitado."
                     : diagnostic.context_metadata === null
                       ? "Identidad auditable no disponible."
                       : "Identidad del material actual disponible."}
@@ -233,20 +251,36 @@ export function EventView({ value }: { value: EipdResolutionReviewReadOut }) {
   );
 }
 
-export function EipdReviewConsultation({ loadPreparation, loadEvent }: Props) {
+export function EipdReviewConsultation({ loadPreparation, loadEvent, recordNegative }: Props) {
   const [scope, setScope] = useState<Scope>({
     organizationId: "",
     treatmentId: "",
     assessmentId: "",
   });
   const [reviewId, setReviewId] = useState("");
+  const inFlight = useRef(false);
+  const [decision, setDecision] = useState<EipdNegativeReviewIn["decision"]>("requiere_cambios");
+  const [rationale, setRationale] = useState("");
+  const [reference, setReference] = useState("");
+  const [fictitious, setFictitious] = useState(false);
+  const [recordLocked, setRecordLocked] = useState(false);
+  const [recordMessage, setRecordMessage] = useState("");
+
   const [busy, setBusy] = useState(false);
+  const [writing, setWriting] = useState(false);
   const [error, setError] = useState("");
   const [sessionExpired, setSessionExpired] = useState(false);
   const [preparation, setPreparation] = useState<EipdReviewPreparationOut | null>(null);
   const [event, setEvent] = useState<EipdResolutionReviewReadOut | null>(null);
   function changeScope(field: keyof Scope, value: string) {
+    if (inFlight.current) return;
     setScope({ ...scope, [field]: value });
+    setDecision("requiere_cambios");
+    setRationale("");
+    setReference("");
+    setFictitious(false);
+    setRecordLocked(false);
+    setRecordMessage("");
     setPreparation(null);
     setEvent(null);
     setReviewId("");
@@ -255,7 +289,8 @@ export function EipdReviewConsultation({ loadPreparation, loadEvent }: Props) {
   }
   async function consult(e: FormEvent, kind: "preparation" | "event") {
     e.preventDefault();
-    if (busy) return;
+    if (inFlight.current) return;
+    inFlight.current = true;
     setBusy(true);
     setError("");
     setSessionExpired(false);
@@ -268,14 +303,79 @@ export function EipdReviewConsultation({ loadPreparation, loadEvent }: Props) {
       setError(consultationError(failure));
       setSessionExpired(failure instanceof ApiError && failure.status === 401);
     } finally {
+      inFlight.current = false;
       setBusy(false);
     }
   }
+  async function submitNegative(e: FormEvent) {
+    e.preventDefault();
+    if (
+      inFlight.current ||
+      recordLocked ||
+      !recordNegative ||
+      !fictitious ||
+      !rationale.trim() ||
+      !reference.trim()
+    )
+      return;
+    inFlight.current = true;
+    setBusy(true);
+    setWriting(true);
+    setError("");
+    setSessionExpired(false);
+    setRecordMessage("");
+    try {
+      const saved = await recordNegative(scope, {
+        decision,
+        rationale,
+        review_reference: reference,
+      });
+      setEvent(saved);
+      setReviewId(saved.id);
+      setPreparation(null);
+      setRecordLocked(true);
+      setRationale("");
+      setReference("");
+      setFictitious(false);
+      setRecordMessage(
+        "Revisión negativa guardada. No autoriza continuar, confirmar ni activar EIPD."
+      );
+    } catch (failure) {
+      if (failure instanceof ApiError && [401, 402, 403, 404, 409, 422].includes(failure.status)) {
+        const messages: Record<number, string> = {
+          401: "La sesión venció. Vuelve a iniciar sesión antes de registrar.",
+          402: "La suscripción no permite registrar esta revisión.",
+          403: "No tienes permiso para registrar revisiones en esta organización.",
+          404: "No se encontró el expediente en esta organización.",
+          409: "El material actual no permite registrar la revisión. Consulta de nuevo los requisitos.",
+          422: "Revisa la decisión, el fundamento y la referencia.",
+        };
+        setError(messages[failure.status]);
+        if (failure.status === 409) setPreparation(null);
+        setSessionExpired(failure.status === 401);
+      } else {
+        setRecordLocked(true);
+        setError(
+          "No se pudo verificar si la revisión quedó guardada. No vuelvas a enviarla: verifica el historial con su responsable antes de repetir el registro."
+        );
+      }
+    } finally {
+      inFlight.current = false;
+      setBusy(false);
+      setWriting(false);
+    }
+  }
+  const canOfferNegative =
+    recordNegative &&
+    preparation?.status === "borrador" &&
+    preparation.review_prerequisites_v4 != null &&
+    preparation.policy_status?.activation === "deshabilitada";
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       <h1 className="text-2xl font-bold">Consulta interna de revisiones EIPD</h1>
       <p>
-        Selecciona el expediente mediante sus identificadores. Esta pantalla solo consulta datos.
+        Selecciona el expediente mediante sus identificadores. Las revisiones negativas se registran
+        en un formulario separado cuando está disponible.
       </p>
       <p className="rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm">
         Pruebas de desarrollo: utiliza únicamente datos ficticios hasta disponer de la versión MVP.
@@ -349,7 +449,7 @@ export function EipdReviewConsultation({ loadPreparation, loadEvent }: Props) {
         </fieldset>
       </form>
       <div role="status" aria-live="polite">
-        {busy ? "Consultando…" : ""}
+        {busy ? (writing ? "Guardando revisión…" : "Consultando…") : ""}
       </div>
       {error && (
         <p role="alert" className="rounded border border-red-200 bg-red-50 p-4 text-red-800">
@@ -361,7 +461,79 @@ export function EipdReviewConsultation({ loadPreparation, loadEvent }: Props) {
           )}
         </p>
       )}
-      {preparation && <PreparationView value={preparation} />}
+      {recordMessage && (
+        <p role="status" className="rounded border border-blue-200 bg-blue-50 p-4">
+          {recordMessage}
+        </p>
+      )}
+      {preparation && (
+        <PreparationView
+          value={preparation}
+          negativeRecordingAvailable={Boolean(canOfferNegative)}
+        />
+      )}
+      {canOfferNegative && (
+        <form
+          onSubmit={submitNegative}
+          aria-labelledby="negative-heading"
+          aria-busy={busy}
+          className="space-y-4 rounded-lg border bg-white p-5"
+        >
+          <h2 id="negative-heading" className="text-xl font-semibold">
+            Registrar revisión negativa de prueba
+          </h2>
+          <p className="text-sm">
+            El servidor comprobará la identidad del material actual. Registrar esta decisión no
+            aprueba el expediente ni permite continuar, confirmar o activar EIPD.
+          </p>
+          <fieldset disabled={busy || recordLocked} className="space-y-4">
+            <label className="block">
+              Decisión negativa
+              <select
+                value={decision}
+                onChange={(e) => setDecision(e.target.value as EipdNegativeReviewIn["decision"])}
+                className="mt-1 block w-full rounded border p-2"
+              >
+                <option value="requiere_cambios">Requiere cambios</option>
+                <option value="no_continuar">No continuar</option>
+              </select>
+            </label>
+            <label className="block">
+              Fundamento de la revisión
+              <textarea
+                required
+                value={rationale}
+                onChange={(e) => setRationale(e.target.value)}
+                className="mt-1 block w-full rounded border p-2"
+              />
+            </label>
+            <label className="block">
+              Referencia de la revisión
+              <input
+                required
+                value={reference}
+                onChange={(e) => setReference(e.target.value)}
+                className="mt-1 block w-full rounded border p-2"
+              />
+            </label>
+            <label className="flex items-start gap-2">
+              <input
+                type="checkbox"
+                checked={fictitious}
+                onChange={(e) => setFictitious(e.target.checked)}
+              />
+              Estoy usando únicamente datos ficticios.
+            </label>
+            <button
+              type="submit"
+              disabled={!fictitious || !rationale.trim() || !reference.trim()}
+              className="rounded bg-blue-700 px-4 py-2 text-white disabled:opacity-50"
+            >
+              Guardar revisión negativa
+            </button>
+          </fieldset>
+        </form>
+      )}
       {event && <EventView value={event} />}
     </div>
   );
