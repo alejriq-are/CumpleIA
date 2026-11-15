@@ -2945,6 +2945,8 @@ async def record_eipd_resolution_review_v1(
     assessment_id: uuid.UUID,
     profile_id: uuid.UUID,
     payload: EipdResolutionReviewIn,
+    *,
+    _negative_v3: bool = False,
 ) -> EipdResolutionReview:
     """Registra decision humana bajo lock; caller autentica y maneja transaccion."""
     draft = await get_legal_assessment_draft_v1(
@@ -2984,6 +2986,10 @@ async def record_eipd_resolution_review_v1(
         raise _not_found("Evaluacion juridica no encontrada")
     if draft.status != "borrador":
         raise _conflict("La evaluacion juridica ya no esta en estado borrador")
+    if _negative_v3:
+        return await _record_eipd_negative_review_v3_locked(
+            db, organization_id, treatment_id, profile_id, draft, series, payload
+        )
     if getattr(
         draft, "sensitive_representation_assessment", None
     ) is not None or _resolution_uses_context_v3(draft):
@@ -3125,43 +3131,51 @@ async def record_eipd_resolution_review_v1(
     return event
 
 
+async def _represented_review_evaluation_locked(
+    db, organization_id, treatment_id, draft, series, payload
+):
+    """Reconstruye material servidor bajo locks retenidos por el caller."""
+    scope = _scope_from_snapshot_v1(draft.rat_context_snapshot)
+    bundle = await build_rat_context_bundle_from_m2_v1(
+        db,
+        organization_id,
+        treatment_id,
+        purpose_key=series.purpose_key,
+        scope=scope,
+    )
+    context = build_eipd_resolution_context_from_assessment_v3(draft, bundle.snapshot)
+    latest_review, identity = await _latest_eipd_review_snapshot_v1(
+        db, organization_id, draft.id
+    )
+    result = evaluate_eipd_resolution_review_documentary_prerequisites_v4(
+        {
+            "assessment": {
+                **_assessment_eipd_composition_input_v1(
+                    draft,
+                    organization_id,
+                    context,
+                    build_rat_context_hash_v1(bundle.canonical)
+                    == draft.rat_context_hash,
+                    latest_review,
+                ),
+                "treatment_id": treatment_id,
+            },
+            "policy": await _selected_disabled_eipd_policy_v1(db),
+            "latest_review_policy": identity,
+        },
+        payload,
+        evaluated_on=datetime.now(UTC).date(),
+    )
+    return result
+
+
 async def _represented_review_diagnostic_locked(
     db, organization_id, treatment_id, draft, series, payload
 ):
     """Solo diagnostica bajo locks del caller; no prepara ni agrega un evento."""
     try:
-        scope = _scope_from_snapshot_v1(draft.rat_context_snapshot)
-        bundle = await build_rat_context_bundle_from_m2_v1(
-            db,
-            organization_id,
-            treatment_id,
-            purpose_key=series.purpose_key,
-            scope=scope,
-        )
-        context = build_eipd_resolution_context_from_assessment_v3(
-            draft, bundle.snapshot
-        )
-        latest_review, identity = await _latest_eipd_review_snapshot_v1(
-            db, organization_id, draft.id
-        )
-        result = evaluate_eipd_resolution_review_documentary_prerequisites_v4(
-            {
-                "assessment": {
-                    **_assessment_eipd_composition_input_v1(
-                        draft,
-                        organization_id,
-                        context,
-                        build_rat_context_hash_v1(bundle.canonical)
-                        == draft.rat_context_hash,
-                        latest_review,
-                    ),
-                    "treatment_id": treatment_id,
-                },
-                "policy": await _selected_disabled_eipd_policy_v1(db),
-                "latest_review_policy": identity,
-            },
-            payload,
-            evaluated_on=datetime.now(UTC).date(),
+        result = await _represented_review_evaluation_locked(
+            db, organization_id, treatment_id, draft, series, payload
         )
     except (ValidationError, ValueError):
         return {
@@ -3198,6 +3212,73 @@ async def _represented_review_diagnostic_locked(
         "documentary_issues_v4": [asdict(i) for i in result.documentary_issues],
         "issues_v4": [asdict(i) for i in result.composition.review_blockers],
     }
+
+
+async def record_eipd_negative_review_v3(
+    db, organization_id, treatment_id, assessment_id, profile_id, payload
+):
+    """Ruta negativa explicita; permisos HTTP y transaccion siguen en caller."""
+    from app.schemas.licitud import EipdNegativeResolutionReviewInV3
+
+    request = EipdNegativeResolutionReviewInV3.model_validate(
+        payload.model_dump(mode="python") if hasattr(payload, "model_dump") else payload
+    )
+    return await record_eipd_resolution_review_v1(
+        db,
+        organization_id,
+        treatment_id,
+        assessment_id,
+        profile_id,
+        request,
+        _negative_v3=True,
+    )
+
+
+async def _record_eipd_negative_review_v3_locked(
+    db, organization_id, treatment_id, profile_id, draft, series, payload
+):
+    """Registra solo rechazo humano asociado, nunca permiso o estado confirmado."""
+    if payload.decision not in ("requiere_cambios", "no_continuar"):
+        raise HTTPException(
+            status_code=409, detail={"code": "revision_negativa_requerida"}
+        )
+    try:
+        result = await _represented_review_evaluation_locked(
+            db, organization_id, treatment_id, draft, series, payload
+        )
+    except (ValidationError, ValueError):
+        raise HTTPException(
+            status_code=409, detail={"code": "revision_v3_contexto_invalido"}
+        ) from None
+    if (
+        not result.documentary_prerequisites_met
+        or result.current_context_metadata is None
+    ):
+        raise HTTPException(
+            status_code=409,
+            detail={
+                "code": "revision_v3_identidad_no_preparada",
+                "evaluation_version": 4,
+                "documentary_issues_v4": [asdict(i) for i in result.documentary_issues],
+            },
+        )
+    policy = await _selected_disabled_eipd_policy_v1(db)
+    metadata = result.current_context_metadata
+    event = EipdResolutionReview(
+        organization_id=organization_id,
+        assessment_id=draft.id,
+        decision=payload.decision,
+        rationale=payload.rationale,
+        review_reference=payload.review_reference,
+        document_hash=metadata.document_hash,
+        context_hash=metadata.context_hash,
+        review_context_metadata=metadata.model_dump(mode="json"),
+        created_by=profile_id,
+        **build_eipd_review_policy_metadata_v1(policy),
+    )
+    db.add(event)
+    await db.flush()
+    return event
 
 
 async def _record_eipd_negative_review_v2_locked(
