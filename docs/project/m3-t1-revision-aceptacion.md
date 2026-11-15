@@ -5380,3 +5380,7 @@ pendiente validar actualizacion del runtime, sin cambiar dependencias en esta et
 Avisos de cache webpack sin fallo de compilacion. La compilacion no acredita MVP
 completo ni aceptacion juridica. Pruebas ficticias hasta MVP; M3-T1 EN PROGRESO y
 confirmacion/activacion bloqueadas.
+
+## Siguiente corte de infancia y adolescencia
+
+El contrato y el diagnóstico documental interno están en [Infancia y adolescencia](m3-t1-infancia-adolescencia.md). El siguiente paso es vincular el documento a su contexto versionado y comprobar su asociación antes de incorporar persistencia y API.
