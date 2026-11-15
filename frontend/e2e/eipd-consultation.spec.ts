@@ -35,7 +35,17 @@ test.beforeAll(async () => {
       return preparation(scope);
     }
     async function loadEvent(scope,id){window.demo.calls.push({kind:"event",scope,id});return {decision:"no_continuar",rationale:"TEST: revisar",review_reference:"TEST: REV160",created_at:"2026-10-09T00:00:00Z",policy_reference:null,review_context_metadata:window.demo.eventMetadata??null};}
-    createRoot(document.getElementById("root")).render(React.createElement(EipdReviewConsultation,{loadPreparation,loadEvent}));
+    async function recordNegative(scope,request){
+      window.demo.calls.push({kind:"record",scope,request});
+      if(window.demo.recordMode==="unknown")throw new Error("PRUEBA: conexion perdida");
+      if(window.demo.recordMode==="denied")throw new ApiError(403,"PRUEBA");
+      if(window.demo.recordMode==="stale")throw new ApiError(409,"PRUEBA");
+      if(window.demo.recordMode==="wait")await new Promise(resolve=>{window.demo.releaseRecord=resolve;});
+      return {id:"a0000000-0000-0000-0000-000000000004",...request,created_at:"2026-10-14T00:00:00Z",policy_reference:"PRUEBA",review_context_metadata:null};
+    }
+    const root=createRoot(document.getElementById("root"));
+    window.enableRecording=()=>root.render(React.createElement(EipdReviewConsultation,{loadPreparation,loadEvent,recordNegative}));
+    root.render(React.createElement(EipdReviewConsultation,{loadPreparation,loadEvent}));
   `
   );
   const runtime = require("next/dist/compiled/webpack/webpack");
@@ -524,4 +534,121 @@ test("historia sucesora muestra cobertura guardada sin acreditar vigencia actual
     page.getByText("Su consulta no acredita vigencia del expediente actual.", { exact: false })
   ).toBeVisible();
   await expect(page.getByRole("button", { name: /confirmar|activar|registrar/i })).toHaveCount(0);
+});
+
+async function negativeForm(page: import("@playwright/test").Page) {
+  await page.evaluate(() => {
+    const w = window as any;
+    const blocked = { prerequisites_met: false, context_metadata: null, issues: [] };
+    w.demo.v4 = {
+      evaluation_version: 4,
+      continuar: blocked,
+      requiere_cambios: blocked,
+      no_continuar: blocked,
+    };
+    w.enableRecording();
+  });
+  await scopeForm(page);
+  await page.getByRole("button", { name: "Consultar requisitos" }).click();
+  await expect(
+    page.getByRole("heading", { name: "Registrar revisión negativa de prueba" })
+  ).toBeVisible();
+  await page
+    .getByLabel("Fundamento de la revisión", { exact: true })
+    .fill("PRUEBA: faltan evidencias ficticias");
+  await page.getByLabel("Referencia de la revisión", { exact: true }).fill("PRUEBA-UI-V3");
+}
+
+test("registro negativo exige datos ficticios y conserva evento sin habilitar positivos", async ({
+  page,
+}) => {
+  await negativeForm(page);
+  const submit = page.getByRole("button", { name: "Guardar revisión negativa" });
+  await expect(submit).toBeDisabled();
+  await page.getByLabel("Estoy usando únicamente datos ficticios.").check();
+  await page.getByLabel("Decisión negativa").selectOption("no_continuar");
+  await submit.click();
+  await expect(page.getByText("Revisión negativa guardada.", { exact: false })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Revisión guardada", exact: true })).toBeVisible();
+  await expect(submit).toHaveCount(0);
+  const calls = await page.evaluate(() =>
+    (window as any).demo.calls.filter((x: any) => x.kind === "record")
+  );
+  expect(calls).toHaveLength(1);
+  expect(calls[0].request).toEqual({
+    decision: "no_continuar",
+    rationale: "PRUEBA: faltan evidencias ficticias",
+    review_reference: "PRUEBA-UI-V3",
+  });
+  await expect(page.getByRole("button", { name: /confirmar|activar|^Continuar$/i })).toHaveCount(0);
+});
+
+test("registro pendiente bloquea cambios y doble envio", async ({ page }) => {
+  await negativeForm(page);
+  await page.evaluate(() => {
+    (window as any).demo.recordMode = "wait";
+  });
+  await page.getByLabel("Estoy usando únicamente datos ficticios.").check();
+  await page.getByRole("button", { name: "Guardar revisión negativa" }).click();
+  await expect(page.getByLabel("Organización (identificador)", { exact: true })).toBeDisabled();
+  await expect(page.getByRole("button", { name: "Guardar revisión negativa" })).toBeDisabled();
+  await page.evaluate(() => (window as any).demo.releaseRecord());
+  await expect(page.getByText("Revisión negativa guardada.", { exact: false })).toBeVisible();
+  expect(
+    await page.evaluate(
+      () => (window as any).demo.calls.filter((x: any) => x.kind === "record").length
+    )
+  ).toBe(1);
+});
+
+test("resultado incierto bloquea repeticion incluso al consultar nuevamente", async ({ page }) => {
+  await negativeForm(page);
+  await page.evaluate(() => {
+    (window as any).demo.recordMode = "unknown";
+  });
+  await page.getByLabel("Estoy usando únicamente datos ficticios.").check();
+  await page.getByRole("button", { name: "Guardar revisión negativa" }).click();
+  await expect(page.getByRole("alert")).toContainText(
+    "No se pudo verificar si la revisión quedó guardada"
+  );
+  await expect(page.getByRole("button", { name: "Guardar revisión negativa" })).toBeDisabled();
+  await page.getByRole("button", { name: "Consultar requisitos" }).click();
+  await expect(page.getByRole("button", { name: "Guardar revisión negativa" })).toBeDisabled();
+  expect(
+    await page.evaluate(
+      () => (window as any).demo.calls.filter((x: any) => x.kind === "record").length
+    )
+  ).toBe(1);
+});
+
+test("cambio de expediente limpia solicitud y permiso denegado no muestra exito", async ({
+  page,
+}) => {
+  await negativeForm(page);
+  await page.evaluate(() => {
+    (window as any).demo.recordMode = "denied";
+  });
+  await page.getByLabel("Estoy usando únicamente datos ficticios.").check();
+  await page.getByRole("button", { name: "Guardar revisión negativa" }).click();
+  await expect(page.getByRole("alert")).toContainText("No tienes permiso para registrar");
+  await expect(page.getByText("Revisión negativa guardada.", { exact: false })).toHaveCount(0);
+  await page.getByLabel("Evaluación (identificador)", { exact: true }).fill(ids[3]);
+  await page.getByRole("button", { name: "Consultar requisitos" }).click();
+  await expect(page.getByLabel("Fundamento de la revisión", { exact: true })).toHaveValue("");
+  await expect(page.getByLabel("Referencia de la revisión", { exact: true })).toHaveValue("");
+  await expect(page.getByLabel("Estoy usando únicamente datos ficticios.")).not.toBeChecked();
+});
+
+test("material cambiado exige nueva consulta y formulario usable en movil", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 749 });
+  await negativeForm(page);
+  await page.evaluate(() => {
+    (window as any).demo.recordMode = "stale";
+  });
+  await page.getByLabel("Estoy usando únicamente datos ficticios.").check();
+  await page.getByRole("button", { name: "Guardar revisión negativa" }).click();
+  await expect(page.getByRole("alert")).toContainText("Consulta de nuevo los requisitos");
+  await expect(page.getByRole("button", { name: "Guardar revisión negativa" })).toHaveCount(0);
+  await page.getByRole("button", { name: "Consultar requisitos" }).click();
+  await expect(page.getByRole("button", { name: "Guardar revisión negativa" })).toBeEnabled();
 });

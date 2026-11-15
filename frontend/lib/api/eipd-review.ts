@@ -289,6 +289,27 @@ function eventResponse<T extends EipdResolutionReviewReadOut>(
   return value;
 }
 
+function negativeReviewBody(request: EipdNegativeReviewIn): EipdNegativeReviewIn {
+  if (!request || typeof request !== "object" || Array.isArray(request))
+    throw new Error("La revisión negativa exige decisión, fundamento y referencia.");
+  if (
+    !["requiere_cambios", "no_continuar"].includes(request.decision) ||
+    Object.keys(request).some(
+      (key) => !["decision", "rationale", "review_reference"].includes(key)
+    ) ||
+    typeof request.rationale !== "string" ||
+    !request.rationale.trim() ||
+    typeof request.review_reference !== "string" ||
+    !request.review_reference.trim()
+  )
+    throw new Error("La revisión negativa exige decisión, fundamento y referencia.");
+  return {
+    decision: request.decision,
+    rationale: request.rationale,
+    review_reference: request.review_reference,
+  };
+}
+
 export const eipdReviewApi = {
   async preparation(scope: EipdReviewScope): Promise<EipdReviewPreparationOut> {
     const path = assessmentPath(scope);
@@ -569,22 +590,7 @@ export const eipdReviewApi = {
     request: EipdNegativeReviewIn
   ): Promise<EipdResolutionReviewOutV2> {
     const path = assessmentPath(scope);
-    if (
-      !["requiere_cambios", "no_continuar"].includes(request.decision) ||
-      Object.keys(request).some(
-        (key) => !["decision", "rationale", "review_reference"].includes(key)
-      ) ||
-      typeof request.rationale !== "string" ||
-      !request.rationale.trim() ||
-      typeof request.review_reference !== "string" ||
-      !request.review_reference.trim()
-    )
-      throw new Error("La revisión negativa exige decisión, fundamento y referencia.");
-    const body = {
-      decision: request.decision,
-      rationale: request.rationale,
-      review_reference: request.review_reference,
-    };
+    const body = negativeReviewBody(request);
     const value = await apiFetch<EipdResolutionReviewOutV2>(path + "/eipd-resolution/reviews/v2", {
       token: scope.token,
       organizationId: scope.organizationId,
@@ -594,5 +600,30 @@ export const eipdReviewApi = {
     });
     requireContract(value && value.decision === request.decision);
     return eventResponse(value, scope);
+  },
+  async recordNegativeV3(
+    scope: EipdReviewScope,
+    request: EipdNegativeReviewIn
+  ): Promise<EipdResolutionReviewOutV3> {
+    const path = assessmentPath(scope);
+    const body = negativeReviewBody(request);
+    const raw = await apiFetch<EipdResolutionReviewOutV3>(path + "/eipd-resolution/reviews/v3", {
+      token: scope.token,
+      organizationId: scope.organizationId,
+      method: "POST",
+      body,
+      cache: "no-store",
+    });
+    const value = eventResponse(raw, scope, undefined, 3);
+    requireContract(
+      value.decision === body.decision &&
+        value.rationale === body.rationale &&
+        value.review_reference === body.review_reference &&
+        value.review_context_metadata?.metadata_schema_version === 2 &&
+        value.policy_version === 1 &&
+        value.policy_hash !== null &&
+        value.policy_reference !== null
+    );
+    return value;
   },
 };

@@ -17,6 +17,9 @@ export default function LicitudValidationPage() {
       loadPreparation={async (scope) =>
         eipdReviewApi.preparation({ ...scope, token: await sessionToken() })
       }
+      recordNegative={async (scope, request) =>
+        eipdReviewApi.recordNegativeV3({ ...scope, token: await sessionToken() }, request)
+      }
       loadEvent={async (scope, reviewId) =>
         eipdReviewApi.event({ ...scope, token: await sessionToken() }, reviewId)
       }
