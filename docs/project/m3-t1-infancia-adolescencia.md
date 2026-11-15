@@ -1,8 +1,24 @@
 # M3-T1 — Infancia y adolescencia: primer contrato documental
 
-Estado: contrato, evaluador documental e identidad propios §§274–278, 2026-10-14. M3-T1 EN PROGRESO.
-No campo API, persistencia, evaluador positivo ni cambio del fallback especial.
-Solo pruebas ficticias hasta MVP; confirmacion/activacion EIPD bloqueadas.
+Estado operativo: persistencia y CRUD de infancia/adolescencia implementados;
+validacion local completada; CI se comprueba tras publicar el bloque. M3-T1 sigue EN PROGRESO.
+
+- Columna JSONB nullable y migracion `a73d8e0c4b21` sobre `f52d6c9b3e10`;
+  sin backfill ni cambios de RLS. Downgrade rechaza documentos existentes.
+- POST/PATCH/GET aceptan documento crudo y devuelven envelope con identidad del
+  servidor. Omision conserva, null retira en borrador y reaporte asocia el contexto
+  final, incluyendo declaraciones especiales y representacion relacionada.
+- Readiness separa completitud de identidad. Contexto RAT actual no disponible
+  nunca presenta una asociacion antigua como vigente. Retirar material no elimina
+  la necesidad documental si el RAT incluye infancia/adolescencia.
+- Confirmacion y nuevas revisiones EIPD con cobertura infancia permanecen
+  bloqueadas. Eventos historicos no se reescriben; su lectura sigue disponible.
+  Las composiciones V1-V4 no se presentan como cobertura de este nuevo documento.
+- Solo pruebas ficticias hasta MVP; activacion EIPD bloqueada.
+
+Pendiente fuera de este bloque: composicion transversal versionada que cubra
+infancia, presentacion/edicion del documento en interfaz y validacion/aceptacion
+explicitas antes de cualquier capacidad positiva. No modificar hashes historicos.
 
 ## Fuente y limite interpretativo
 
@@ -36,7 +52,7 @@ No adoptar automaticamente el mandato general de representacion sensible como
 sustituto de los sujetos previstos para infancia. La coherencia y evidencia de
 cada ruta se evaluaran expresamente antes de cualquier integracion positiva.
 
-## Secuencia restante
+## Secuencia original de referencia
 
 1. Evaluador puro: contraste con flags RAT/declaraciones especiales y scope; ausencia,
    contradiccion o cruce no documentado producen motivos, nunca autorizacion.
@@ -135,9 +151,9 @@ ni datos operativos nuevos; conserva fallback y gates. Siguiente contratos de
 persistencia y matriz transaccional antes de integrar almacenamiento como conjunto.
 M3-T1 EN PROGRESO; confirmacion/activacion EIPD bloqueadas.
 
-## Contratos futuros y matriz transaccional §279
+## Matriz transaccional (propuesta original §279)
 
-Contratos separados child_adolescent_api: Create/Update reciben documento crudo o
+Estado historico previo a almacenamiento. Contratos separados child_adolescent_api: Create/Update reciben documento crudo o
 null, Out recibe envelope servidor. API activa conserva modelos anteriores;
 OpenAPI comprobado sin campo nuevo. PATCH serializa con exclude_unset para no
 convertir omisiones en null. No importar estos contratos en rutas antes de storage.
