@@ -96,6 +96,17 @@ async def rat_m3(_session_factory, org_a_id, negative_controls):
         "justification": "Finalidad documentada",
     }
     async with _session_factory() as db:
+        # Limpieza administrativa explicita, exclusivamente de fixtures ficticias.
+        from app.db.child_eipd import EipdChildResolution, EipdChildReview
+
+        await db.execute(
+            delete(EipdChildReview).where(EipdChildReview.treatment_id == treatment_id)
+        )
+        await db.execute(
+            delete(EipdChildResolution).where(
+                EipdChildResolution.treatment_id == treatment_id
+            )
+        )
         await db.execute(
             delete(LegalAssessment).where(LegalAssessment.treatment_id == treatment_id)
         )

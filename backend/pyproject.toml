@@ -6,6 +6,10 @@ line-length = 88
 select = ["E", "W", "F", "I", "B", "UP"]
 ignore = ["E501", "B008", "UP042"]
 
+[tool.ruff.lint.per-file-ignores]
+# DDL congelado y aplicado: conservar los espacios del SQL compilado.
+"alembic/versions/b84e9f1a5c32_child_eipd_successors.py" = ["W291"]
+
 [tool.ruff.lint.isort]
 known-first-party = ["app"]
 

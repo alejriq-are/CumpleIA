@@ -1,3 +1,16 @@
+# M3-T1 — Balance vigente al 2026-10-15
+
+CI 507aa74 verificada: 4451 backend aprobadas y 1 omitida, 76 frontend,
+1 integrada; todos los trabajos success.
+https://github.com/alejriq-are/CumpleIA/actions/runs/38773784050
+
+Revision H1-H4: 78 pruebas enfocadas y 1 integrada aprobadas localmente;
+migracion c95f0a2b6d43 en base aislada y desarrollo, siete historiales intactos.
+CI de la correccion se verifica contra Git/Actions. EIPD sigue bloqueada.
+
+Los conteos y analisis siguientes son antecedentes historicos. Archivo y
+compactacion documental pendientes como mantenimiento separado.
+
 # M3-T1 — Balance de validacion al 2026-10-13
 
 Estado: EN PROGRESO. Este balance consolida evidencia reciente; no aprueba el

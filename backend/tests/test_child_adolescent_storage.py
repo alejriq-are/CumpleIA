@@ -231,6 +231,24 @@ async def test_empty_downgrade_upgrade_restores_constraints_transactionally(
     spec = importlib.util.spec_from_file_location("child_migration_roundtrip", path)
     migration = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(migration)
+    successor_path = (
+        Path(__file__).parents[1]
+        / "alembic/versions/b84e9f1a5c32_child_eipd_successors.py"
+    )
+    successor_spec = importlib.util.spec_from_file_location(
+        "child_successor_roundtrip", successor_path
+    )
+    successor = importlib.util.module_from_spec(successor_spec)
+    successor_spec.loader.exec_module(successor)
+    restrict_path = (
+        Path(__file__).parents[1]
+        / "alembic/versions/c95f0a2b6d43_restrict_child_eipd_history.py"
+    )
+    restrict_spec = importlib.util.spec_from_file_location(
+        "child_history_restrict_roundtrip", restrict_path
+    )
+    restrict = importlib.util.module_from_spec(restrict_spec)
+    restrict_spec.loader.exec_module(restrict)
     async with _session_factory() as db:
         assert (
             await db.scalar(
@@ -248,6 +266,8 @@ async def test_empty_downgrade_upgrade_restores_constraints_transactionally(
                     sync, opts={"target_metadata": Base.metadata}
                 )
             ):
+                restrict.downgrade()
+                successor.downgrade()
                 migration.downgrade()
                 assert (
                     sync.scalar(
@@ -258,6 +278,8 @@ async def test_empty_downgrade_upgrade_restores_constraints_transactionally(
                     == 0
                 )
                 migration.upgrade()
+                successor.upgrade()
+                restrict.upgrade()
 
         await connection.run_sync(roundtrip)
         assert (

@@ -55,6 +55,8 @@ class Settings(BaseSettings):
     # Backend
     secret_key: str = ""
     environment: str = "development"
+    # Opt-in independiente: nunca habilita decisiones positivas ni activacion.
+    eipd_child_test_writes_enabled: bool = False
     debug: bool = True
     allowed_origins: list[str] = ["http://localhost:3000"]
 
