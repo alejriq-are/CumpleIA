@@ -43,6 +43,13 @@ class Identity:
 class OrganizationAcceptanceAuthority(Identity, Base):
     __tablename__ = "organization_acceptance_authorities"
     __table_args__ = (
+        sa.Index(
+            "ix_organization_acceptance_authorities_history",
+            "organization_id",
+            "assessment_id",
+            "created_at",
+            "id",
+        ),
         sa.ForeignKeyConstraint(
             ["assessment_id", "treatment_id", "organization_id"],
             [
@@ -89,6 +96,13 @@ class OrganizationAcceptanceAuthority(Identity, Base):
 class OrganizationDocumentAcceptance(Identity, Base):
     __tablename__ = "organization_document_acceptances"
     __table_args__ = (
+        sa.Index(
+            "ix_organization_document_acceptances_history",
+            "organization_id",
+            "assessment_id",
+            "created_at",
+            "id",
+        ),
         sa.ForeignKeyConstraint(
             [
                 "authority_id",
