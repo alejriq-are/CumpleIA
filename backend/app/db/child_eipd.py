@@ -79,6 +79,13 @@ def checks():
 class EipdChildResolution(ChildIdentity, Base):
     __tablename__ = "eipd_child_resolutions"
     __table_args__ = (
+        sa.Index(
+            "ix_eipd_child_resolutions_history",
+            "organization_id",
+            "assessment_id",
+            "created_at",
+            "id",
+        ),
         sa.ForeignKeyConstraint(
             ["assessment_id", "treatment_id", "organization_id"],
             [
@@ -117,6 +124,13 @@ class EipdChildResolution(ChildIdentity, Base):
 class EipdChildReview(ChildIdentity, Base):
     __tablename__ = "eipd_child_reviews"
     __table_args__ = (
+        sa.Index(
+            "ix_eipd_child_reviews_history",
+            "organization_id",
+            "assessment_id",
+            "created_at",
+            "id",
+        ),
         sa.ForeignKeyConstraint(
             [
                 "resolution_id",

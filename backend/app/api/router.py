@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 
+from app.api.assessment_support import router as assessment_support_router
 from app.api.cuestionario_config import router as cuestionario_config_router
 from app.api.diagnostico import router as diagnostico_router
 from app.api.eipd_admin import router as eipd_admin_router
@@ -22,3 +23,4 @@ api_router.include_router(rat_router)
 api_router.include_router(licitud_router)
 
 api_router.include_router(eipd_admin_router)
+api_router.include_router(assessment_support_router)

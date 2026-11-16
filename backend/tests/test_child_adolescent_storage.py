@@ -270,6 +270,12 @@ async def test_empty_downgrade_upgrade_restores_constraints_transactionally(
         connection = await db.connection()
 
         def roundtrip(sync):
+            from tests.assessment_support_migrations import (
+                detach_empty_support_parent,
+                restore_support_parent,
+            )
+
+            support_parent = detach_empty_support_parent(sync)
             with Operations.context(
                 MigrationContext.configure(
                     sync, opts={"target_metadata": Base.metadata}
@@ -291,6 +297,7 @@ async def test_empty_downgrade_upgrade_restores_constraints_transactionally(
                 successor.upgrade()
                 restrict.upgrade()
                 acceptance.upgrade()
+            restore_support_parent(sync, support_parent)
 
         await connection.run_sync(roundtrip)
         assert (

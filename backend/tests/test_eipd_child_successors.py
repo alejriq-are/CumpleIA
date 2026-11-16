@@ -529,7 +529,13 @@ async def test_downgrade_guard_and_empty_roundtrip(prepared, _session_factory):
             ):
                 acceptance_migration.downgrade()
 
+        from tests.assessment_support_migrations import (
+            detach_empty_support_parent,
+            restore_support_parent,
+        )
+
         await connection.run_sync(remove_acceptance)
+        support_parent = await connection.run_sync(detach_empty_support_parent)
         await connection.run_sync(downgrade)
 
         def upgrade(sync):
@@ -543,6 +549,9 @@ async def test_downgrade_guard_and_empty_roundtrip(prepared, _session_factory):
                 acceptance_migration.upgrade()
 
         await connection.run_sync(upgrade)
+        await connection.run_sync(
+            lambda sync: restore_support_parent(sync, support_parent)
+        )
         assert await db.scalar(
             text(
                 "SELECT relrowsecurity FROM pg_class WHERE oid='eipd_child_reviews'::regclass"
