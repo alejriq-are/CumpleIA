@@ -249,6 +249,15 @@ async def test_empty_downgrade_upgrade_restores_constraints_transactionally(
     )
     restrict = importlib.util.module_from_spec(restrict_spec)
     restrict_spec.loader.exec_module(restrict)
+    acceptance_path = (
+        Path(__file__).parents[1]
+        / "alembic/versions/d16a3b7c8e52_organization_acceptance.py"
+    )
+    acceptance_spec = importlib.util.spec_from_file_location(
+        "organization_acceptance_roundtrip", acceptance_path
+    )
+    acceptance = importlib.util.module_from_spec(acceptance_spec)
+    acceptance_spec.loader.exec_module(acceptance)
     async with _session_factory() as db:
         assert (
             await db.scalar(
@@ -266,6 +275,7 @@ async def test_empty_downgrade_upgrade_restores_constraints_transactionally(
                     sync, opts={"target_metadata": Base.metadata}
                 )
             ):
+                acceptance.downgrade()
                 restrict.downgrade()
                 successor.downgrade()
                 migration.downgrade()
@@ -280,6 +290,7 @@ async def test_empty_downgrade_upgrade_restores_constraints_transactionally(
                 migration.upgrade()
                 successor.upgrade()
                 restrict.upgrade()
+                acceptance.upgrade()
 
         await connection.run_sync(roundtrip)
         assert (

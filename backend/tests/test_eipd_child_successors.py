@@ -511,6 +511,25 @@ async def test_downgrade_guard_and_empty_roundtrip(prepared, _session_factory):
         # Eliminacion exclusivamente de fixtures ficticias dentro de transaccion revertida.
         await db.execute(text("DELETE FROM eipd_child_reviews"))
         await db.execute(text("DELETE FROM eipd_child_resolutions"))
+        acceptance_path = (
+            Path(__file__).parents[1]
+            / "alembic/versions/d16a3b7c8e52_organization_acceptance.py"
+        )
+        acceptance_spec = importlib.util.spec_from_file_location(
+            "acceptance_migration_roundtrip", acceptance_path
+        )
+        acceptance_migration = importlib.util.module_from_spec(acceptance_spec)
+        acceptance_spec.loader.exec_module(acceptance_migration)
+
+        def remove_acceptance(sync):
+            with Operations.context(
+                MigrationContext.configure(
+                    sync, opts={"target_metadata": Base.metadata}
+                )
+            ):
+                acceptance_migration.downgrade()
+
+        await connection.run_sync(remove_acceptance)
         await connection.run_sync(downgrade)
 
         def upgrade(sync):
@@ -521,6 +540,7 @@ async def test_downgrade_guard_and_empty_roundtrip(prepared, _session_factory):
             ):
                 migration.upgrade()
                 restrict.upgrade()
+                acceptance_migration.upgrade()
 
         await connection.run_sync(upgrade)
         assert await db.scalar(

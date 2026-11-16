@@ -35,8 +35,16 @@ from app.schemas.licitud import (
     EipdResolutionReviewOutV2,
     EipdResolutionReviewOutV3,
 )
+from app.schemas.organization_acceptance import (
+    AcceptanceCreate,
+    AcceptanceOut,
+    AuthorityCreate,
+    AuthorityOut,
+    AuthorityState,
+)
 from app.services import eipd_child_persistence as child_service
 from app.services import licitud as service
+from app.services import organization_acceptance as acceptance_service
 from app.services.authorization import Permission
 
 router = APIRouter(
@@ -346,3 +354,82 @@ async def politica_infancia(
         db, x_organization_id, treatment_id, assessment_id
     )
     return await child_service.selected_policy(db)
+
+
+# Aceptacion documental tenant separada de publicaciones globales.
+
+
+@router.get(
+    "/treatments/{treatment_id}/assessments/{assessment_id}/organization-acceptance/v1/authority",
+    response_model=AuthorityState,
+)
+async def autoridad_aceptacion(
+    treatment_id: uuid.UUID,
+    assessment_id: uuid.UUID,
+    x_organization_id: Annotated[uuid.UUID, Header()],
+    profile: Profile = Depends(require_permission(Permission.view_content)),
+    db: AsyncSession = Depends(get_db),
+):
+    return await acceptance_service.state(
+        db, x_organization_id, treatment_id, assessment_id, profile.id
+    )
+
+
+@router.post(
+    "/treatments/{treatment_id}/assessments/{assessment_id}/organization-acceptance/v1/authority",
+    response_model=AuthorityOut,
+    status_code=201,
+)
+async def designar_aceptacion(
+    treatment_id: uuid.UUID,
+    assessment_id: uuid.UUID,
+    x_organization_id: Annotated[uuid.UUID, Header()],
+    payload: AuthorityCreate,
+    profile: Profile = Depends(require_permission(Permission.manage_members)),
+    db: AsyncSession = Depends(get_db),
+):
+    return await acceptance_service.designate(
+        db, x_organization_id, treatment_id, assessment_id, profile.id, payload
+    )
+
+
+@router.get(
+    "/treatments/{treatment_id}/assessments/{assessment_id}/organization-acceptance/v1/resolutions/{resolution_id}/events",
+    response_model=list[AcceptanceOut],
+)
+async def historial_aceptacion(
+    treatment_id: uuid.UUID,
+    assessment_id: uuid.UUID,
+    resolution_id: uuid.UUID,
+    x_organization_id: Annotated[uuid.UUID, Header()],
+    profile: Profile = Depends(require_permission(Permission.view_content)),
+    db: AsyncSession = Depends(get_db),
+):
+    return await acceptance_service.history(
+        db, x_organization_id, treatment_id, assessment_id, resolution_id
+    )
+
+
+@router.post(
+    "/treatments/{treatment_id}/assessments/{assessment_id}/organization-acceptance/v1/resolutions/{resolution_id}/events",
+    response_model=AcceptanceOut,
+    status_code=201,
+)
+async def registrar_aceptacion(
+    treatment_id: uuid.UUID,
+    assessment_id: uuid.UUID,
+    resolution_id: uuid.UUID,
+    x_organization_id: Annotated[uuid.UUID, Header()],
+    payload: AcceptanceCreate,
+    profile: Profile = Depends(require_permission(Permission.edit_content)),
+    db: AsyncSession = Depends(get_db),
+):
+    return await acceptance_service.record(
+        db,
+        x_organization_id,
+        treatment_id,
+        assessment_id,
+        resolution_id,
+        profile.id,
+        payload,
+    )
