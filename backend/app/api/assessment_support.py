@@ -13,7 +13,9 @@ from app.core.deps import require_active_subscription, require_permission
 from app.db.models import Profile
 from app.db.session import get_db
 from app.schemas.assessment_support import AnnexSave, RiskSave
+from app.schemas.navigation_applicability import ApplicabilitySave
 from app.services import assessment_support as service
+from app.services import navigation_applicability as applicability_service
 from app.services.authorization import Permission
 
 router = APIRouter(
@@ -94,4 +96,31 @@ async def download(
             "Cache-Control": "no-store",
             "Content-Security-Policy": "sandbox",
         },
+    )
+
+
+@router.get("/applicability")
+async def applicability(
+    treatment_id: UUID,
+    assessment_id: UUID,
+    x_organization_id: Annotated[UUID, Header()],
+    profile: Profile = Depends(require_permission(Permission.view_content)),
+    db: AsyncSession = Depends(get_db),
+):
+    return await applicability_service.snapshot(
+        db, x_organization_id, treatment_id, assessment_id
+    )
+
+
+@router.post("/applicability", status_code=201)
+async def save_applicability(
+    treatment_id: UUID,
+    assessment_id: UUID,
+    payload: ApplicabilitySave,
+    x_organization_id: Annotated[UUID, Header()],
+    profile: Profile = Depends(require_permission(Permission.edit_content)),
+    db: AsyncSession = Depends(get_db),
+):
+    return await applicability_service.save(
+        db, x_organization_id, treatment_id, assessment_id, profile.id, payload
     )
