@@ -1,0 +1,1612 @@
+"use client";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import {
+  modules,
+  steps,
+  fields,
+  labels,
+  initialEvaluations,
+  evaluationRecords,
+  evaluationOptions,
+  purposeOptions,
+  type EvaluationId,
+  purpose,
+  seedResolutions,
+  type ModuleId,
+  type TaskId,
+  type Scenario,
+  type Values,
+} from "./prototype-data";
+import { MainModules, ModuleOptions } from "./PrototypeMenus";
+import {
+  moduleNavigation,
+  destinationLabel,
+  actionLabel,
+  destinationHint,
+} from "./prototype-navigation";
+import { usePrototypeNavigation } from "./usePrototypeNavigation";
+import { scopeFrom, applicabilityError } from "./prototype-applicability";
+import { PrototypeContext } from "./PrototypeContext";
+const primary =
+  "rounded-lg bg-blue-800 px-4 py-3 font-semibold text-white hover:bg-blue-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-800 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-600";
+const secondary =
+  "rounded-lg border border-slate-300 bg-white px-4 py-3 font-semibold text-slate-800 hover:border-blue-700 hover:bg-blue-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-800";
+const input =
+  "mt-2 block w-full rounded-lg border border-slate-300 bg-white p-3 font-normal text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-700";
+type Overlay = {
+  kind: "detail" | "copy" | "preview" | "register" | "reset" | "context" | "exit";
+  title: string;
+  text?: string;
+};
+function Card({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+      <h3 className="mb-3 text-lg font-bold text-slate-950">{title}</h3>
+      {children}
+    </section>
+  );
+}
+export function NavigationPrototype() {
+  const [drafts, setDrafts] = useState(initialEvaluations);
+  const [saved, setSaved] = useState(initialEvaluations);
+
+  const {
+    location,
+    evaluationId,
+    go: navigate,
+    selectEvaluation: navigateEvaluation,
+    resume,
+    hasResume,
+    resetNavigation,
+  } = usePrototypeNavigation(evaluationRecords((item) => scopeFrom(saved[item.id])));
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [sectionsOpen, setSectionsOpen] = useState(false);
+  const currentEvaluation = evaluationOptions.find((item) => item.id === evaluationId)!;
+  const scenario = currentEvaluation.treatment;
+  const selectedPurpose = purposeOptions.find((item) => item.id === currentEvaluation.purposeId)!;
+  const [savedSteps, setSavedSteps] = useState(() => evaluationRecords<string[]>(() => []));
+  const [resolutions, setResolutions] = useState(seedResolutions);
+  const [selected, setSelected] = useState(2);
+  const [origin, setOrigin] = useState<string | null>(null);
+  const [overlay, setOverlay] = useState<Overlay | null>(null);
+  const [notice, setNotice] = useState("");
+  const [events, setEvents] = useState(() => evaluationRecords<string[]>(() => []));
+  const [choice, setChoice] = useState("");
+  const [rationale, setRationale] = useState("");
+  const [reference, setReference] = useState("");
+  const [reviews, setReviews] = useState<
+    { version: number; choice: string; text: string; reference: string }[]
+  >([]);
+  const [fictitious, setFictitious] = useState(false);
+  const [files, setFiles] = useState(() => evaluationRecords(() => ({ name: "", error: "" })));
+  const fileName = files[evaluationId].name;
+  const fileError = files[evaluationId].error;
+  function setFileName(name: string) {
+    setFiles((old) => ({ ...old, [evaluationId]: { ...old[evaluationId], name } }));
+  }
+  function setFileError(error: string) {
+    setFiles((old) => ({ ...old, [evaluationId]: { ...old[evaluationId], error } }));
+  }
+  const [fileKey, setFileKey] = useState(0);
+  const [annexes, setAnnexes] = useState(() => evaluationRecords<string[]>(() => []));
+  const contentRef = useRef<HTMLElement>(null);
+  const navigationRef = useRef<HTMLDivElement>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const dialogTrigger = useRef<HTMLElement | null>(null);
+  const first = useRef(true);
+  const { module, task, section } = location;
+  const m = modules.find((v) => v.id === module)!;
+  const scope = scopeFrom(saved[evaluationId]);
+  const available = (mod: ModuleId, t: TaskId) =>
+    moduleNavigation(mod, scenario, scope)
+      .flatMap((group) => group.items)
+      .filter((item) => item.task === t)
+      .map((item) => item.section);
+  const menu = available(module, task);
+  const values = drafts[evaluationId];
+  const stored = saved[evaluationId];
+  const fs = fields[section];
+  const inlineNotice = Boolean(
+    fs && section !== "preparar" && !(module === "licitud" && section === "alcance")
+  );
+  const title =
+    module === "panel" && section === "estado"
+      ? "Panel principal"
+      : destinationLabel(section, module);
+  const row = resolutions.find((r) => r.version === selected)!;
+  function evaluationPending(id: EvaluationId) {
+    return (
+      Object.keys(drafts[id]).some((key) => drafts[id][key] !== saved[id][key]) ||
+      Boolean(files[id].name)
+    );
+  }
+  const sessionChanged =
+    JSON.stringify(drafts) !== JSON.stringify(initialEvaluations()) ||
+    resolutions.length > 2 ||
+    reviews.length > 0 ||
+    Object.values(annexes).some((items) => items.length > 0) ||
+    Object.values(files).some((file) => file.name) ||
+    Boolean(choice || rationale || reference) ||
+    Object.values(savedSteps).some((items) => items.length > 0);
+  const allowExit = useRef(false);
+  useEffect(() => {
+    const warn = (event: BeforeUnloadEvent) => {
+      if (!sessionChanged || allowExit.current) return;
+      event.preventDefault();
+      event.returnValue = "";
+    };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [sessionChanged]);
+  useEffect(() => {
+    const restore = () => {
+      setNotice("");
+      setOverlay(null);
+      dialogRef.current?.close();
+    };
+    window.addEventListener("popstate", restore);
+    window.addEventListener("hashchange", restore);
+    return () => {
+      window.removeEventListener("popstate", restore);
+      window.removeEventListener("hashchange", restore);
+    };
+  }, []);
+  const validAnnex = Boolean(
+    values["anexos.referencia"]?.startsWith("SIMULADA-") &&
+    values["anexos.descripcion"]?.trim() &&
+    fileName &&
+    !fileError &&
+    fictitious
+  );
+  const validPreparation = Boolean(
+    values["preparar.referencia"]?.startsWith("SIMULADA-") &&
+    values["preparar.notas"]?.trim() &&
+    values["preparar.motivo"]?.trim() &&
+    fictitious
+  );
+  useEffect(() => {
+    const node = navigationRef.current;
+    if (!node) return;
+    const update = () =>
+      rootRef.current?.style.setProperty("--navigation-height", `${node.offsetHeight}px`);
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+  useEffect(() => {
+    if (navigationRef.current)
+      rootRef.current?.style.setProperty(
+        "--navigation-height",
+        `${navigationRef.current.offsetHeight}px`
+      );
+    if (first.current) {
+      first.current = false;
+      return;
+    }
+    contentRef.current?.focus({ preventScroll: true });
+    contentRef.current?.scrollIntoView({ block: "start" });
+  }, [location, evaluationId]);
+  useEffect(() => {
+    if (overlay && dialogRef.current && !dialogRef.current.open) {
+      dialogTrigger.current = document.activeElement as HTMLElement;
+      dialogRef.current.showModal();
+    }
+  }, [overlay]);
+  function go(mod: ModuleId, t?: TaskId, s?: string) {
+    setOverlay(null);
+    dialogRef.current?.close();
+    setNotice("");
+    navigate(mod, t, s);
+  }
+  function edit(key: string, value: string) {
+    setDrafts((old) =>
+      key.startsWith("organizacion.")
+        ? evaluationRecords((item) => ({ ...old[item.id], [key]: value }))
+        : { ...old, [evaluationId]: { ...old[evaluationId], [key]: value } }
+    );
+    setNotice("");
+  }
+  useEffect(() => {
+    setFictitious(false);
+    setFileKey((value) => value + 1);
+    setChoice("");
+    setRationale("");
+    setReference("");
+    setNotice("");
+  }, [evaluationId]);
+  function selectEvaluation(id: EvaluationId) {
+    navigateEvaluation(id);
+  }
+  function changeScenario(treatment: Scenario) {
+    selectEvaluation(evaluationOptions.find((item) => item.treatment === treatment)!.id);
+  }
+  function close() {
+    dialogRef.current?.close();
+    setOverlay(null);
+    requestAnimationFrame(() => dialogTrigger.current?.focus());
+  }
+  function detail(title: string, text: string) {
+    setOverlay({ kind: "detail", title, text });
+  }
+  function stepDirty(item: string) {
+    return (
+      fields[item]?.some((field) => (values[field.key] ?? "") !== (stored[field.key] ?? "")) ??
+      false
+    );
+  }
+  function save() {
+    if (
+      !fs ||
+      (section === "anexos" && !validAnnex) ||
+      (section === "aplicabilidad" && applicabilityError(values, scenario))
+    )
+      return;
+    const next = { ...stored };
+    for (const f of fs) next[f.key] = values[f.key] ?? "";
+    const organizationChanges = Object.fromEntries(
+      fs.map((field) => [field.key, values[field.key] ?? ""])
+    );
+    setSaved((old) =>
+      section === "organizacion"
+        ? evaluationRecords((item) => ({ ...old[item.id], ...organizationChanges }))
+        : { ...old, [evaluationId]: next }
+    );
+    setSavedSteps((old) =>
+      section === "organizacion"
+        ? evaluationRecords((item) => Array.from(new Set([...old[item.id], section])))
+        : { ...old, [evaluationId]: Array.from(new Set([...old[evaluationId], section])) }
+    );
+    if (section === "anexos") {
+      setAnnexes((old) => ({
+        ...old,
+        [evaluationId]: [
+          ...old[evaluationId],
+          `${values["anexos.referencia"]} · ${values["anexos.seccion"]} · ${fileName}`,
+        ],
+      }));
+      setFileName("");
+      setFileKey((v) => v + 1);
+      setFictitious(false);
+    }
+    setEvents((old) => ({
+      ...old,
+      [evaluationId]: [
+        `${currentEvaluation.label} · ${title}: guardado simulado.`,
+        ...old[evaluationId],
+      ],
+    }));
+    setNotice("Guardado en la maqueta.");
+  }
+  function download() {
+    const blob = new Blob(
+      [
+        JSON.stringify(
+          {
+            type: "maqueta_sin_valor_juridico",
+            scenario,
+            treatment: scenario,
+            purposeId: currentEvaluation.purposeId,
+            evaluation: {
+              id: evaluationId,
+              version: currentEvaluation.version,
+              label: currentEvaluation.label,
+            },
+            values: stored,
+            applicability: {
+              eipd: {
+                state: stored["aplicabilidad.eipd"],
+                reason: stored["aplicabilidad.eipd_fundamento"],
+              },
+              infancia: {
+                state: stored["aplicabilidad.infancia"],
+                reason: stored["aplicabilidad.infancia_fundamento"],
+              },
+            },
+            resolutions: scenario === "infancia" ? resolutions : [],
+            annexes: annexes[evaluationId],
+            can_confirm: false,
+            activation: "deshabilitada",
+          },
+          null,
+          2
+        ),
+      ],
+      { type: "application/json" }
+    );
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `maqueta-cumpleia-${evaluationId}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    setNotice("Descargaste el ejemplo guardado. No incluye cambios pendientes.");
+  }
+  function form() {
+    const readOnly = module === "licitud" && section === "alcance";
+    return (
+      <>
+        {section === "aplicabilidad" && (
+          <>
+            <p className="rounded-lg border border-sky-200 bg-sky-50 p-4">
+              Registra por separado si corresponde EIPD e infancia. Al guardar, aparecerán los
+              accesos para completar cada bloque.
+            </p>
+            <div className="grid grid-cols-2 gap-3" aria-label="Aplicabilidad guardada">
+              <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm">
+                <strong>EIPD</strong>
+                <p>{stored["aplicabilidad.eipd"]}</p>
+              </div>
+              <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm">
+                <strong>Infancia y adolescencia</strong>
+                <p>{stored["aplicabilidad.infancia"]}</p>
+              </div>
+            </div>
+            <details className="rounded-lg border border-slate-200 bg-white p-3 text-sm">
+              <summary className="cursor-pointer font-semibold text-blue-800">
+                ¿Cómo determinarlo?
+              </summary>
+              <p className="mt-2">
+                EIPD: revisa si el tratamiento puede producir alto riesgo para los derechos de las
+                personas y los casos previstos en el artículo 15 ter.
+              </p>
+              <p className="mt-2">
+                Infancia y adolescencia: revisa si los datos conciernen a niños, niñas o
+                adolescentes y el alcance declarado en el RAT, conforme al artículo 16 quáter. Son
+                análisis independientes.
+              </p>
+              <a
+                className="mt-2 inline-block text-blue-800 underline"
+                href="https://www.bcn.cl/leychile/Navegar?idNorma=1209272&idVersion=2026-12-01"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Consultar Ley 21.719 · texto con vigencia desde el 1 de diciembre de 2026
+              </a>
+            </details>
+          </>
+        )}
+        {section === "organizacion" && (
+          <p className="text-sm text-slate-600">
+            Esta información aparece en el encabezado de los informes exportados. En la maqueta, los
+            cambios se guardan solo durante esta visita.
+          </p>
+        )}
+        {readOnly && (
+          <p className="rounded-lg border border-sky-200 bg-sky-50 p-4">
+            Información del RAT de ejemplo. Aquí solo se consulta; el acceso inferior abre su
+            edición en el inventario.
+          </p>
+        )}
+        {section === "base" && (
+          <p className="rounded-lg bg-amber-50 p-4">
+            Consentimiento y LIA: formularios completos pendientes de desarrollo. Aquí se prueba su
+            acceso propuesto.
+          </p>
+        )}
+        {section === "preparar" && (
+          <p className="rounded-lg bg-sky-50 p-4">
+            Origen: {origin ?? "Preparación nueva"}. Copiar prepara un formulario temporal;
+            registrar agrega una versión al ejemplo.
+          </p>
+        )}
+        {module === "rat" && section === "alcance" && (
+          <p className="text-sm text-slate-600">
+            El tratamiento y la finalidad se eligen en Cambiar contexto.
+          </p>
+        )}
+        {fs.map((f) => (
+          <label key={f.key} className="block font-semibold text-slate-800">
+            {f.label}
+            {f.options ? (
+              <select
+                className={input}
+                aria-label={f.label}
+                value={values[f.key] ?? f.options[0]}
+                disabled={readOnly}
+                onChange={(e) => edit(f.key, e.target.value)}
+              >
+                {f.options.map((v) => (
+                  <option key={v}>{v}</option>
+                ))}
+              </select>
+            ) : f.singleLine ? (
+              <input
+                type="text"
+                aria-label={f.label}
+                className={input}
+                value={values[f.key] ?? ""}
+                onChange={(e) => edit(f.key, e.target.value)}
+              />
+            ) : (
+              <textarea
+                rows={f.key.endsWith("notas") ? 4 : 3}
+                aria-label={f.label}
+                className={input}
+                value={values[f.key] ?? ""}
+                readOnly={readOnly || ["rat.nombre", "rat.finalidad"].includes(f.key)}
+                onChange={(e) => edit(f.key, e.target.value)}
+              />
+            )}{" "}
+            {f.hint && (
+              <span className="mt-1 block text-sm font-normal text-slate-600">{f.hint}</span>
+            )}
+          </label>
+        ))}
+        {section === "base" &&
+          ["Consentimiento", "Interés legítimo"].includes(values["base.tipo"]) && (
+            <button
+              className={secondary}
+              onClick={() =>
+                detail(
+                  `Formulario previsto de ${values["base.tipo"]}`,
+                  "Propuesta: preguntas por requisito, fundamento y referencias de evidencia. Respuestas sin declarar por defecto. El desarrollo LIC-FORM-001 sigue pendiente; esta ventana no valida consentimiento ni LIA."
+                )
+              }
+            >
+              Abrir información del formulario previsto
+            </button>
+          )}
+        {section === "anexos" && (
+          <>
+            <label className="block font-semibold">
+              Archivo PDF o TXT de ejemplo
+              <input
+                key={fileKey}
+                className={input}
+                type="file"
+                accept=".pdf,.txt"
+                aria-invalid={Boolean(fileError)}
+                aria-describedby="file-help"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  setFileName(f?.name ?? "");
+                  setFileError(
+                    !f
+                      ? ""
+                      : !/\.(pdf|txt)$/i.test(f.name)
+                        ? "Formato no admitido. Selecciona PDF o TXT."
+                        : !f.size
+                          ? "El archivo está vacío."
+                          : f.size > 2 * 1024 * 1024
+                            ? "El archivo supera 2 MiB."
+                            : ""
+                  );
+                }}
+              />
+            </label>
+            <p
+              id="file-help"
+              role={fileError ? "alert" : undefined}
+              className={
+                fileError
+                  ? "rounded-lg border border-red-300 bg-red-50 p-3 text-red-800"
+                  : "text-sm text-slate-600"
+              }
+            >
+              {fileError ||
+                "Hasta 2 MiB. El archivo no se carga a ningún servidor; la maqueta solo conserva su nombre."}
+            </p>
+          </>
+        )}
+        {section === "anexos" && fileName && (
+          <p className="text-sm text-slate-600">
+            Archivo de ejemplo seleccionado: {fileName}. Solo se conserva su nombre.
+          </p>
+        )}
+        {["anexos", "preparar"].includes(section) && (
+          <label className="flex items-start gap-3">
+            <input
+              type="checkbox"
+              className="mt-1 h-5 w-5 shrink-0"
+              checked={fictitious}
+              onChange={(e) => setFictitious(e.target.checked)}
+            />
+            Declaro que este ejemplo usa únicamente datos ficticios.
+          </label>
+        )}
+        {section === "aplicabilidad" && (scope.eipd || scope.infancia) && (
+          <div className="flex flex-wrap gap-3" aria-label="Documentación que corresponde">
+            {scope.eipd && (
+              <button className={secondary} onClick={() => go("licitud", "completar", "eipd")}>
+                Completar EIPD →
+              </button>
+            )}
+            {scope.infancia && (
+              <button className={secondary} onClick={() => go("licitud", "completar", "infancia")}>
+                Completar infancia y adolescencia →
+              </button>
+            )}
+          </div>
+        )}
+        {readOnly ? (
+          <button className={secondary} onClick={() => go("rat", "completar", "alcance")}>
+            Abrir edición en Inventario RAT →
+          </button>
+        ) : (
+          <div className="space-y-3 rounded-xl border border-blue-200 bg-blue-50 p-4">
+            <p>
+              {section === "preparar"
+                ? "Borrador temporal: abrir la vista previa no registra nada. Puedes cerrarla y seguir editando."
+                : stepDirty(section)
+                  ? "Cambios sin guardar. Se conservan al navegar; guarda antes de consultar."
+                  : savedSteps[evaluationId].includes(section)
+                    ? "Sin cambios pendientes."
+                    : "Puedes guardar el ejemplo cuando termines."}
+            </p>
+            {section === "aplicabilidad" && applicabilityError(values, scenario) && (
+              <p
+                id="applicability-help"
+                role="alert"
+                className="rounded-lg border border-amber-300 bg-amber-50 p-3"
+              >
+                {applicabilityError(values, scenario)}
+              </p>
+            )}
+            {section === "aplicabilidad" && (
+              <p className="text-sm text-slate-600">
+                Determinación de prueba: no es un dictamen automático ni una autorización. Cambiar
+                aplicabilidad conserva los antecedentes previos.
+              </p>
+            )}
+            {section === "anexos" && !validAnnex && (
+              <p id="save-help">
+                Para guardar: referencia SIMULADA-, descripción, PDF/TXT válido y declaración
+                ficticia.
+              </p>
+            )}
+            {section === "preparar" && (
+              <p id="prepare-help">
+                Para revisar: referencia SIMULADA-, notas, motivo del cambio y declaración ficticia.
+              </p>
+            )}
+            {notice && inlineNotice && (
+              <p
+                role="status"
+                className="rounded-lg border border-teal-300 bg-teal-50 p-4 text-teal-950"
+              >
+                {notice}
+              </p>
+            )}
+            <div className="flex flex-wrap gap-3">
+              <button
+                className={primary}
+                disabled={
+                  (section === "aplicabilidad" && Boolean(applicabilityError(values, scenario))) ||
+                  (section === "anexos" && !validAnnex) ||
+                  (section === "preparar" && !validPreparation)
+                }
+                aria-describedby={
+                  section === "aplicabilidad" && applicabilityError(values, scenario)
+                    ? "applicability-help"
+                    : section === "anexos"
+                      ? "save-help"
+                      : section === "preparar"
+                        ? "prepare-help"
+                        : undefined
+                }
+                onClick={() =>
+                  section === "preparar"
+                    ? setOverlay({
+                        kind: "preview",
+                        title: "Revisar nueva resolución antes de registrarla",
+                      })
+                    : save()
+                }
+              >
+                {section === "preparar"
+                  ? "Abrir vista previa de la resolución →"
+                  : section === "aplicabilidad"
+                    ? "Guardar determinación en la maqueta"
+                    : section === "organizacion"
+                      ? "Guardar cambios"
+                      : "Guardar cambios en la maqueta"}
+              </button>
+              {menu.indexOf(section) < menu.length - 1 && (
+                <button
+                  className={secondary}
+                  onClick={() => go(module, task, menu[menu.indexOf(section) + 1])}
+                >
+                  Siguiente: {labels[menu[menu.indexOf(section) + 1]]} →
+                </button>
+              )}
+              {menu.indexOf(section) > 0 && (
+                <button
+                  className={secondary}
+                  onClick={() => go(module, task, menu[menu.indexOf(section) - 1])}
+                >
+                  ← Anterior
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+      </>
+    );
+  }
+
+  function resolutionView() {
+    return (
+      <>
+        <div className="flex flex-wrap gap-3" role="group" aria-label="Elegir resolución">
+          {resolutions.map((r) => (
+            <button
+              key={r.version}
+              aria-pressed={r.version === selected}
+              className={r.version === selected ? primary : secondary}
+              onClick={() => {
+                setSelected(r.version);
+                setChoice("");
+                setRationale("");
+                setReference("");
+              }}
+            >
+              Consultar resolución {r.version}
+            </button>
+          ))}
+        </div>
+        <Card title={`Resolución ${selected} · ${row.reference}`}>
+          <p className="whitespace-pre-wrap">{row.notes}</p>
+          {row.origin && <p className="mt-3">Origen: {row.origin}</p>}
+          {row.reason && (
+            <p className="mt-3 whitespace-pre-wrap">Motivo del cambio: {row.reason}</p>
+          )}
+          <button
+            className={`${secondary} mt-4`}
+            onClick={() =>
+              scope.infancia
+                ? setOverlay({ kind: "copy", title: "Preparar una copia de esta resolución" })
+                : go("licitud", "completar", "aplicabilidad")
+            }
+          >
+            {scope.infancia
+              ? "Preparar sucesor desde esta resolución →"
+              : "Determinar aplicabilidad antes de preparar →"}
+          </button>
+        </Card>
+        {section === "resoluciones" && (
+          <div className="flex flex-wrap gap-3">
+            <button className={secondary} onClick={() => go("licitud", "revisar", "revisiones")}>
+              Abrir revisión de esta resolución →
+            </button>
+            <button className={secondary} onClick={() => go("licitud", "revisar", "decisiones")}>
+              Abrir decisión de organización →
+            </button>
+          </div>
+        )}
+        {section === "revisiones" && (
+          <Card title="Revisión del documento">
+            <p className="mb-4">
+              Objetivo: resolución {selected}. Registra observaciones; no modifica el original ni
+              expresa una decisión de organización.
+            </p>
+            <label className="block font-semibold">
+              Resultado de revisión
+              <select className={input} value={choice} onChange={(e) => setChoice(e.target.value)}>
+                <option value="">Selecciona un resultado</option>
+                <option>Requiere cambios</option>
+                <option>No continuar</option>
+              </select>
+            </label>
+            <label className="mt-4 block font-semibold">
+              Fundamento de la revisión
+              <textarea
+                className={input}
+                value={rationale}
+                onChange={(e) => setRationale(e.target.value)}
+              />
+            </label>
+            <label className="mt-4 block font-semibold">
+              Referencia de revisión ficticia
+              <input
+                className={input}
+                value={reference}
+                onChange={(e) => setReference(e.target.value)}
+              />
+            </label>
+            <p className="my-3">
+              Completa resultado, fundamento y referencia SIMULADA- para registrar en la maqueta.
+            </p>
+            <button
+              className={primary}
+              disabled={!choice || !rationale.trim() || !reference.startsWith("SIMULADA-")}
+              onClick={() => {
+                setReviews((old) => [
+                  ...old,
+                  { version: selected, choice, text: rationale, reference },
+                ]);
+                setChoice("");
+                setRationale("");
+                setReference("");
+                setNotice("Revisión registrada solo en la maqueta; original conservado.");
+              }}
+            >
+              Registrar revisión simulada
+            </button>
+            <h4 className="mt-5 font-bold">Revisiones de esta resolución</h4>
+            {selected <= 2 ? (
+              <p className="mt-2 rounded-lg bg-slate-50 p-3">
+                {selected === 1 ? "Requiere cambios" : "No continuar"} · Revisión ficticia previa.
+              </p>
+            ) : (
+              <p className="mt-2">Sin revisiones previas para esta nueva versión.</p>
+            )}
+            {reviews
+              .filter((r) => r.version === selected)
+              .map((r, i) => (
+                <p key={i} className="mt-2 rounded-lg bg-slate-50 p-3">
+                  {r.choice} · {r.text} · {r.reference}
+                </p>
+              ))}
+          </Card>
+        )}
+        {section === "decisiones" && (
+          <Card title="Decisión de la organización">
+            <p className="rounded-lg border border-amber-300 bg-amber-50 p-4 font-semibold">
+              No puedes registrar una decisión: la facultad de la persona de ejemplo está revocada.
+            </p>
+            <p className="my-4">
+              La decisión histórica permanece consultable. El ejemplo no acredita vigencia ni
+              autorización.
+            </p>
+            <button className={primary} disabled>
+              Registrar decisión de organización
+            </button>
+            <button
+              className={`${secondary} mt-4 block`}
+              onClick={() => go("licitud", "revisar", "facultades")}
+            >
+              Consultar historial de facultades →
+            </button>
+            <p className="mt-4">
+              {selected <= 2
+                ? "Decisión previa del ejemplo: Requiere cambios. Es distinta de la revisión documental."
+                : "Sin decisiones previas para esta nueva resolución del ejemplo."}
+            </p>
+          </Card>
+        )}
+      </>
+    );
+  }
+  function content() {
+    if (module === "rat" && section === "estado")
+      return (
+        <Card title="Catálogo de tratamientos de ejemplo">
+          <p className="mb-5 text-slate-600">
+            Elige un tratamiento para abrir su actividad. Son ejemplos ficticios independientes.
+          </p>
+          <div className="grid gap-4 lg:grid-cols-2">
+            {(["adultos", "infancia"] as Scenario[]).map((item) => (
+              <div key={item} className="rounded-xl border border-slate-200 p-4">
+                <h4 className="font-bold text-slate-950">{drafts[item]["rat.nombre"]}</h4>
+                <p className="mt-2 text-sm text-slate-600">{purpose[item]}</p>
+                <button
+                  className={`${primary} mt-4`}
+                  onClick={() => {
+                    changeScenario(item);
+                    go("rat", "completar", "alcance");
+                  }}
+                >
+                  Abrir actividad de{" "}
+                  {item === "adultos" ? "clientes adultos" : "programa con menores"} →
+                </button>
+              </div>
+            ))}
+          </div>
+        </Card>
+      );
+    if (section === "estado")
+      return module === "panel" ? (
+        <>
+          <div className="rounded-xl bg-slate-900 p-6 text-white">
+            <p className="text-sm font-semibold text-sky-200">TU ESPACIO DE TRABAJO</p>
+            <h3 className="mt-2 text-2xl font-bold">
+              {hasResume ? "Continúa donde lo dejaste" : "Siguiente tarea sugerida"}
+            </h3>
+            <p className="mt-2 text-slate-200">
+              {currentEvaluation.label} · {selectedPurpose.label}
+            </p>
+            <button
+              className="mt-5 rounded-lg bg-white px-4 py-3 font-bold text-blue-900 hover:bg-blue-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-300"
+              onClick={() => go(resume.module, resume.task, resume.section)}
+            >
+              Continuar en {destinationLabel(resume.section, resume.module)} →
+            </button>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {modules
+              .filter((v) => v.id !== "panel")
+              .map((v) => (
+                <button
+                  key={v.id}
+                  aria-disabled={v.upcoming || undefined}
+                  className="rounded-xl border border-slate-200 bg-white p-5 text-left shadow-sm transition hover:border-blue-600 hover:shadow-md disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-500 disabled:hover:border-slate-200 disabled:hover:shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-800"
+                  onClick={() =>
+                    v.upcoming
+                      ? setNotice(`${v.title}: próximamente. Aún no está disponible.`)
+                      : go(v.id)
+                  }
+                >
+                  <span className="text-lg font-bold text-slate-950">{v.title}</span>
+                  <p className="mt-2 text-slate-600">{v.description}</p>
+                  <span className="mt-4 inline-block font-semibold text-blue-800">
+                    {v.upcoming ? "Próximamente" : "Abrir módulo →"}
+                  </span>
+                </button>
+              ))}
+          </div>
+        </>
+      ) : (
+        <>
+          <Card title="Tu siguiente paso">
+            <p>
+              Revisa el alcance y completa los antecedentes pendientes. Los estados indican avance
+              del ejemplo, no aprobación.
+            </p>
+            <button className={`${primary} mt-4`} onClick={() => go(module, "completar")}>
+              Ir a completar datos →
+            </button>
+          </Card>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Card title="Avance documental">
+              <p className="text-3xl font-bold text-blue-900">
+                {
+                  available(module, "completar").filter((item) =>
+                    savedSteps[evaluationId].includes(item)
+                  ).length
+                }{" "}
+                / {available(module, "completar").filter((item) => item !== "preparar").length}{" "}
+                secciones
+              </p>
+              <p className="mt-2">guardadas en este módulo. No indica aprobación.</p>
+            </Card>
+            <Card title="Revisión pendiente">
+              <p>
+                Una persona responsable debe revisar fundamentos y evidencias. Confirmación y
+                activación EIPD bloqueadas.
+              </p>
+              <button className={`${secondary} mt-4`} onClick={() => go(module, "revisar")}>
+                Abrir documentos y revisiones →
+              </button>
+            </Card>
+          </div>
+        </>
+      );
+    if (section === "ayuda")
+      return (
+        <Card title="Un recorrido para probar">
+          <ol className="list-inside list-decimal space-y-3">
+            <li>Abre un módulo desde el menú principal de la izquierda.</li>
+            <li>Elige una opción superior. La flecha indica que contiene un submenú.</li>
+            <li>Edita y guarda un ejemplo; cambia de sección para comprobar su conservación.</li>
+            <li>Consulta lo guardado y prueba abrir y cerrar detalles.</li>
+          </ol>
+          <p className="mt-5">
+            Los cambios duran esta visita. Recargar reinicia los ejemplos. No se envían datos a tus
+            expedientes.
+          </p>
+        </Card>
+      );
+    if (
+      ["resoluciones", "revisiones", "decisiones"].includes(section) &&
+      module === "licitud" &&
+      scenario === "infancia"
+    )
+      return resolutionView();
+    if (section === "facultades")
+      return (
+        <Card title="Historial de facultades">
+          <p className="rounded-lg border border-amber-300 bg-amber-50 p-4">
+            Facultad actual del ejemplo: revocada. Consultar el historial no concede permisos.
+          </p>
+          <ol className="mt-5 space-y-4">
+            <li>
+              <strong>1. Otorgamiento ficticio</strong>
+              <p>SIMULADA-MAQUETA-FAC-001 · Persona responsable del ejemplo.</p>
+            </li>
+            <li>
+              <strong>2. Revocación ficticia</strong>
+              <p>SIMULADA-MAQUETA-REVOCACION-002 · La decisión anterior se conserva.</p>
+            </li>
+          </ol>
+        </Card>
+      );
+    if (section === "versiones")
+      return (
+        <Card title="Versiones del ejemplo">
+          {module === "licitud" && scenario === "infancia" ? (
+            resolutions.map((r) => (
+              <div
+                key={r.version}
+                className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 py-4"
+              >
+                <div>
+                  <p className="font-bold">Resolución {r.version}</p>
+                  <p className="break-all">{r.reference}</p>
+                </div>
+                <button
+                  className={secondary}
+                  onClick={() => {
+                    setSelected(r.version);
+                    go("licitud", "revisar", "resoluciones");
+                  }}
+                >
+                  Abrir versión {r.version} →
+                </button>
+              </div>
+            ))
+          ) : (
+            <p>{currentEvaluation.label}. No hay registros reales en esta maqueta.</p>
+          )}
+        </Card>
+      );
+    if (section === "eventos")
+      return (
+        <Card title="Actividad de esta visita">
+          {events[evaluationId].length ? (
+            <ol className="space-y-3">
+              {events[evaluationId].map((e, i) => (
+                <li key={i} className="rounded-lg bg-slate-50 p-3">
+                  {e}
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <p>Aún no hay actividad nueva en la maqueta.</p>
+          )}
+        </Card>
+      );
+    if (section === "descargas")
+      return (
+        <Card title="Descargar el ejemplo guardado">
+          <p>
+            Incluye campos guardados en la maqueta, versiones ficticias y referencias de anexos. No
+            es un expediente jurídico ni una exportación del servidor.
+          </p>
+          <button className={`${primary} mt-5`} onClick={download}>
+            Descargar JSON de demostración ↓
+          </button>
+        </Card>
+      );
+    if (section === "equipo")
+      return (
+        <Card title="Equipo de ejemplo">
+          <p>Persona responsable · Usuario ficticio.</p>
+          <p className="mt-3">
+            No se envían invitaciones ni se modifican permisos en esta maqueta.
+          </p>
+          <button
+            className={`${secondary} mt-5`}
+            onClick={() => go("organizacion", "revisar", "facultades")}
+          >
+            Consultar facultades del ejemplo →
+          </button>
+        </Card>
+      );
+    if (section === "informe")
+      return (
+        <Card title="Estructura del informe de autodiagnóstico">
+          <p>
+            Vista ilustrativa del informe: antecedentes de la organización, respuestas por sección,
+            resultados y próximas tareas.
+          </p>
+          <p className="mt-3">
+            El cuestionario completo de 50 preguntas y sus resultados se incorporarán desde el
+            servidor. Esta maqueta no calcula ni exporta un diagnóstico real.
+          </p>
+          <button
+            className={`${secondary} mt-4`}
+            onClick={() => go("diagnostico", "revisar", "resultados")}
+          >
+            Ver resultados del ejemplo
+          </button>
+        </Card>
+      );
+    if (["resultados", "informe"].includes(section))
+      return (
+        <Card title="Diagnóstico de demostración">
+          <p>
+            Resultado ilustrativo. No se calcula una puntuación jurídica a partir de estas
+            respuestas.
+          </p>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            <div className="rounded-lg bg-amber-50 p-4">
+              <strong>Alcance por revisar</strong>
+              <p>Confirmar tratamientos y finalidad.</p>
+            </div>
+            <div className="rounded-lg bg-blue-50 p-4">
+              <strong>Siguiente tarea</strong>
+              <p>Documentar base y fundamento.</p>
+            </div>
+          </div>
+          <button className={`${primary} mt-5`} onClick={() => go("rat", "completar", "alcance")}>
+            Abrir alcance en el inventario →
+          </button>
+        </Card>
+      );
+    if (["documentos", "biblioteca", "respaldos"].includes(section))
+      return (
+        <>
+          <Card title="Aplicabilidad guardada en la maqueta">
+            <p>EIPD: {stored["aplicabilidad.eipd"]}</p>
+            <p className="mt-2">
+              {stored["aplicabilidad.eipd_fundamento"] || "Sin fundamento registrado."}
+            </p>
+            <p className="mt-3">Infancia y adolescencia: {stored["aplicabilidad.infancia"]}</p>
+            <p className="mt-2">
+              {stored["aplicabilidad.infancia_fundamento"] || "Sin fundamento registrado."}
+            </p>
+            <button
+              className={`${secondary} mt-3`}
+              onClick={() => go("licitud", "completar", "aplicabilidad")}
+            >
+              Revisar aplicabilidad
+            </button>
+          </Card>
+          <Card title="Alcance y base guardados en la maqueta">
+            <p className="font-bold">{stored["rat.finalidad"]}</p>
+            <p className="mt-3">Base: {stored["base.tipo"]}</p>
+            <p className="mt-3 whitespace-pre-wrap">{stored["base.fundamento"]}</p>
+            <p className="mt-3 text-slate-600">
+              Procedencia: datos iniciales y campos guardados en esta visita. Las ediciones
+              pendientes no se incluyen.
+            </p>
+            <button
+              className={`${secondary} mt-4`}
+              onClick={() =>
+                detail(
+                  "Alcance RAT del ejemplo",
+                  `${stored["rat.categorias"]} · ${stored["rat.titulares"]}. Fuente: ${stored["rat.fuentes"]}. Conservación: ${stored["rat.conservacion"]}.`
+                )
+              }
+            >
+              Abrir detalle del alcance
+            </button>
+          </Card>
+          {scenario === "infancia" &&
+            (scope.infancia || savedSteps[evaluationId].includes("infancia")) && (
+              <Card title="Documento de infancia guardado en la maqueta">
+                {!scope.infancia && (
+                  <p className="mb-3 rounded-lg bg-amber-50 p-3">
+                    Antecedente previo conservado. La determinación actual no habilita completar
+                    infancia.
+                  </p>
+                )}
+                <p>{stored["infancia.edad"]}</p>
+                <p className="mt-3 whitespace-pre-wrap">{stored["infancia.notas"]}</p>
+                <button
+                  className={`${secondary} mt-4`}
+                  onClick={() =>
+                    go("licitud", "completar", scope.infancia ? "infancia" : "aplicabilidad")
+                  }
+                >
+                  {scope.infancia ? "Abrir editor de infancia →" : "Revisar aplicabilidad →"}
+                </button>
+              </Card>
+            )}
+          {["eipd", "proporcionalidad"].some((item) => savedSteps[evaluationId].includes(item)) && (
+            <Card title="Documento EIPD guardado en la maqueta">
+              {!scope.eipd && (
+                <p className="mb-3 rounded-lg bg-amber-50 p-3">
+                  Antecedente previo conservado. La determinación actual no habilita completar la
+                  EIPD.
+                </p>
+              )}
+              <p className="font-bold">{stored["eipd.referencia"]}</p>
+              <p className="mt-3 whitespace-pre-wrap">{stored["eipd.analisis"]}</p>
+              <p className="mt-3 whitespace-pre-wrap">
+                {stored["eipd.seguimiento"] || "Seguimiento pendiente de completar."}
+              </p>
+            </Card>
+          )}
+          {scope.eipd && (
+            <Card title="Riesgo y medida que lo sustenta">
+              <p className="text-sm font-bold text-slate-600">
+                EJEMPLO DE LECTURA FIJO · NO RECALCULADO
+              </p>
+              <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                <div className="rounded-lg bg-slate-50 p-4">
+                  <p className="font-bold">R1 · Residual del ejemplo: Medio</p>
+                  <p>Baja probabilidad · Impacto grave</p>
+                </div>
+                <div className="rounded-lg bg-slate-50 p-4">
+                  <p className="font-bold">M1 · Restricción de acceso</p>
+                  <p>Probabilidad · Eficacia parcial · Verificación sintética</p>
+                </div>
+              </div>
+              <p className="mt-3">
+                Ilustración independiente de los campos editables. No acredita controles reales.
+              </p>
+              <button
+                className={`${secondary} mt-4`}
+                onClick={() =>
+                  detail(
+                    "Evidencia vinculada a R1 y M1",
+                    "SIMULADA-MAQUETA-EVIDENCIA-001 · Versión 1 · Sección Medidas. Acta sintética con casos predefinidos de acceso. No representa pruebas ejecutadas ni un archivo del expediente real."
+                  )
+                }
+              >
+                Consultar evidencia y versión
+              </button>
+            </Card>
+          )}
+          {scenario === "infancia" && (
+            <button className={primary} onClick={() => go("licitud", "revisar", "resoluciones")}>
+              Abrir resoluciones de infancia →
+            </button>
+          )}
+          <Card title="Anexos guardados del ejemplo">
+            {annexes[evaluationId].length ? (
+              annexes[evaluationId].map((a, i) => (
+                <p key={i} className="mb-3 rounded-lg bg-slate-50 p-3">
+                  {a} · Solo nombre; archivo no almacenado.
+                </p>
+              ))
+            ) : (
+              <p>Sin anexos añadidos durante esta visita.</p>
+            )}
+            <button
+              className={`${secondary} mt-4`}
+              onClick={() => go("licitud", "completar", "anexos")}
+            >
+              Abrir formulario de anexo →
+            </button>
+          </Card>
+        </>
+      );
+    if (fs) return form();
+    return (
+      <Card title="Revisión documental">
+        <p>
+          El flujo formal de revisión de RAT/LIA requiere desarrollo posterior. Aquí puedes probar
+          su ubicación.
+        </p>
+        <button
+          className={`${secondary} mt-4`}
+          onClick={() =>
+            detail(
+              "Revisión de adultos · acceso previsto",
+              "Propuesta de navegación. No registra una aprobación ni habilita un flujo formal del producto."
+            )
+          }
+        >
+          Abrir alcance de revisión previsto
+        </button>
+      </Card>
+    );
+  }
+
+  return (
+    <div
+      ref={rootRef}
+      data-evaluation-id={evaluationId}
+      data-treatment={scenario}
+      data-eipd-applicable={String(scope.eipd)}
+      data-infancia-applicable={String(scope.infancia)}
+      className="prototype-app text-base leading-relaxed text-slate-800 [overflow-wrap:anywhere]"
+    >
+      <a
+        href="#prototype-content"
+        className="prototype-skip"
+        onClick={(event) => {
+          event.preventDefault();
+          contentRef.current?.focus();
+          contentRef.current?.scrollIntoView();
+        }}
+      >
+        Saltar al contenido de la maqueta
+      </a>
+      <a
+        href="#prototype-module-options"
+        className="prototype-skip"
+        onClick={(event) => {
+          event.preventDefault();
+          setSectionsOpen(true);
+          requestAnimationFrame(() =>
+            document.querySelector<HTMLButtonElement>("#prototype-module-options button")?.focus()
+          );
+        }}
+      >
+        Saltar a las secciones
+      </a>
+      <div className="prototype-demo">
+        <span>
+          <strong>Maqueta integral · Datos ficticios.</strong> Recargar reinicia. Sin conexión a
+          expedientes. Confirmación y activación EIPD bloqueadas.
+        </span>
+        <div>
+          <button
+            onClick={() =>
+              setOverlay({ kind: "reset", title: "Reiniciar los ejemplos de la maqueta" })
+            }
+          >
+            Reiniciar ejemplos
+          </button>
+          <a
+            href="/dashboard"
+            onClick={(event) => {
+              if (sessionChanged) {
+                event.preventDefault();
+                setOverlay({ kind: "exit", title: "Salir de la maqueta" });
+              }
+            }}
+          >
+            Salir de la maqueta
+          </a>
+        </div>
+      </div>
+      <div className="prototype-layout">
+        <MainModules
+          module={module}
+          go={(mod) => go(mod)}
+          expanded={menuOpen}
+          setExpanded={setMenuOpen}
+          notify={setNotice}
+        />
+        <div className="min-w-0">
+          <div ref={navigationRef} className="prototype-top" aria-label="Navegación del módulo">
+            <div className="prototype-mobile-bar">
+              <button
+                id="prototype-menu-trigger"
+                aria-label="Abrir menú"
+                aria-expanded={menuOpen}
+                aria-controls="prototype-global-menu"
+                onClick={() => {
+                  setSectionsOpen(false);
+                  setMenuOpen(true);
+                }}
+              >
+                ☰ Menú
+              </button>
+              <button
+                id="prototype-sections-trigger"
+                aria-label="Opciones del módulo"
+                aria-expanded={sectionsOpen}
+                aria-controls="prototype-module-options"
+                onClick={() => {
+                  setMenuOpen(false);
+                  setSectionsOpen(true);
+                }}
+                aria-haspopup="dialog"
+              >
+                Secciones
+              </button>
+              <span title={`${m.title} › ${title}`}>
+                {m.title} › {title}
+              </span>
+            </div>
+            <div className="prototype-context-row">
+              <nav aria-label="Ubicación" className="prototype-crumbs">
+                <a
+                  href="#/panel/resumen/estado"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    go("panel", "resumen", "estado");
+                  }}
+                >
+                  Inicio
+                </a>
+                {module !== "panel" && (
+                  <>
+                    <span aria-hidden="true">›</span>
+                    <a
+                      href={`#/${module}`}
+                      onClick={(event) => {
+                        event.preventDefault();
+                        const target = moduleNavigation(module, scenario, scope)[0].items[0];
+                        go(target.module, target.task, target.section);
+                      }}
+                    >
+                      {m.title}
+                    </a>
+                  </>
+                )}
+                <span aria-hidden="true">›</span>
+                <span aria-current="page">{title}</span>
+              </nav>
+              {module !== "organizacion" && (
+                <button
+                  className="prototype-context"
+                  aria-label="Cambiar contexto de trabajo"
+                  aria-haspopup="dialog"
+                  title={`${stored["organizacion.nombre"]} · ${values["rat.nombre"]} · ${selectedPurpose.label} · ${currentEvaluation.label}`}
+                  onClick={() => setOverlay({ kind: "context", title: "Contexto de trabajo" })}
+                >
+                  <span>
+                    <b>{values["rat.nombre"].replace("[FICTICIA] ", "")}</b> ·{" "}
+                    {selectedPurpose.id === "citas"
+                      ? "Citas"
+                      : selectedPurpose.id === "comercial"
+                        ? "Seguimiento comercial"
+                        : "Programa con menores"}
+                  </span>
+                  <span className="prototype-evaluation" title={currentEvaluation.label}>
+                    v{currentEvaluation.version} · Borrador
+                  </span>
+                  {evaluationPending(evaluationId) && (
+                    <span
+                      className="prototype-dot"
+                      aria-label="Esta evaluación tiene cambios pendientes"
+                    />
+                  )}
+                  <strong>Cambiar</strong>
+                </button>
+              )}
+            </div>
+            <ModuleOptions
+              scope={scope}
+              location={location}
+              scenario={scenario}
+              go={go}
+              mobileExpanded={sectionsOpen}
+              setMobileExpanded={setSectionsOpen}
+              status={(item) =>
+                stepDirty(item)
+                  ? item === "preparar"
+                    ? "Borrador temporal"
+                    : "Cambios sin guardar"
+                  : savedSteps[evaluationId].includes(item)
+                    ? "Guardado en maqueta"
+                    : ""
+              }
+            />
+          </div>
+          <section
+            ref={contentRef}
+            id="prototype-content"
+            style={{ scrollMarginTop: "calc(var(--navigation-height, 120px) + 12px)" }}
+            tabIndex={-1}
+            aria-labelledby="prototype-section-title"
+            className="prototype-work focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-700"
+          >
+            <header className="prototype-content-heading">
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 id="prototype-section-title">{title}</h1>
+                <span className="prototype-verb">{actionLabel(location, scenario)}</span>
+              </div>
+              <p>{destinationHint(location, scenario)}</p>
+              {module === "diagnostico" && task === "completar" && (
+                <p className="mt-2 rounded-lg bg-amber-50 p-3">
+                  Campos ilustrativos para probar la navegación. El formulario definitivo tendrá las
+                  50 preguntas del cuestionario del servidor.
+                </p>
+              )}
+            </header>
+            {notice && !inlineNotice && (
+              <p
+                role="status"
+                className="mb-5 rounded-lg border border-teal-300 bg-teal-50 p-4 text-teal-950"
+              >
+                {notice}
+              </p>
+            )}
+            <div className="space-y-5">{content()}</div>
+          </section>
+        </div>
+      </div>
+      {overlay && (
+        <dialog
+          ref={dialogRef}
+          aria-labelledby="prototype-dialog-title"
+          onCancel={(event) => {
+            event.preventDefault();
+            close();
+          }}
+          onClose={() => setOverlay(null)}
+          className={`m-auto max-h-[90dvh] w-[calc(100%-2rem)] max-w-xl overflow-y-auto rounded-2xl border border-slate-200 bg-white p-6 text-slate-900 shadow-2xl backdrop:bg-slate-950/40 ${overlay.kind === "detail" ? "md:fixed md:inset-y-0 md:left-auto md:right-0 md:m-0 md:h-dvh md:max-h-dvh md:rounded-r-none" : ""}`}
+        >
+          <div className="mb-5 flex items-start justify-between gap-4">
+            <h2 id="prototype-dialog-title" className="text-xl font-bold">
+              {overlay.title}
+            </h2>
+            <button autoFocus className={secondary} onClick={close}>
+              Cerrar
+            </button>
+          </div>
+          {overlay.kind === "context" && (
+            <PrototypeContext
+              id={evaluationId}
+              organization={stored["organizacion.nombre"]}
+              pending={evaluationPending}
+              cancel={close}
+              apply={(id) => {
+                dialogRef.current?.close();
+                setOverlay(null);
+                selectEvaluation(id);
+              }}
+            />
+          )}
+          {overlay.kind === "exit" && (
+            <>
+              <p>
+                Al salir se perderán los borradores y guardados de esta visita. Si quieres conservar
+                una copia de lo guardado, cancela y usa Historial y descargas.
+              </p>
+              <div className="mt-5 flex flex-wrap gap-3">
+                <button className={secondary} onClick={close}>
+                  Seguir en la maqueta
+                </button>
+                <button
+                  className={primary}
+                  onClick={() => {
+                    allowExit.current = true;
+                    window.location.assign("/dashboard");
+                  }}
+                >
+                  Salir y descartar esta visita
+                </button>
+              </div>
+            </>
+          )}
+          {overlay.kind === "detail" && <p className="whitespace-pre-wrap">{overlay.text}</p>}
+          {overlay.kind === "copy" && (
+            <>
+              <p>
+                Se copiará {row.reference} al formulario temporal. Reemplazará lo que estés
+                preparando. El original y las versiones registradas se conservan.
+              </p>
+              <div className="mt-5 flex flex-wrap gap-3">
+                <button
+                  className={primary}
+                  onClick={() => {
+                    setDrafts((old) => ({
+                      ...old,
+                      infancia: {
+                        ...old.infancia,
+                        "preparar.referencia": `${row.reference}-COPIA`,
+                        "preparar.notas": row.notes,
+                        "preparar.motivo": "",
+                      },
+                    }));
+                    setOrigin(row.reference);
+                    setFictitious(false);
+                    setOverlay(null);
+                    go("licitud", "completar", "preparar");
+                    setNotice(
+                      "Copia temporal preparada. Completa el motivo antes de revisarla. El original permanece intacto."
+                    );
+                  }}
+                >
+                  Reemplazar y copiar a preparación
+                </button>
+                <button className={secondary} onClick={close}>
+                  Cancelar y conservar mi borrador
+                </button>
+              </div>
+            </>
+          )}
+          {overlay.kind === "preview" && (
+            <>
+              <p className="mb-4 rounded-lg bg-amber-50 p-3">
+                Vista previa ficticia. Todavía no se creó otra resolución.
+              </p>
+              <dl className="space-y-3">
+                <dt className="font-bold">Referencia</dt>
+                <dd>{values["preparar.referencia"]}</dd>
+                <dt className="font-bold">Notas</dt>
+                <dd className="whitespace-pre-wrap">{values["preparar.notas"]}</dd>
+                <dt className="font-bold">Motivo del cambio</dt>
+                <dd>{values["preparar.motivo"]}</dd>
+              </dl>
+              <p className="my-4">
+                Análisis y evidencias pendientes. Registrar no confirma ni activa EIPD.
+              </p>
+              <button
+                className={primary}
+                onClick={() =>
+                  setOverlay({ kind: "register", title: "Confirmar registro simulado" })
+                }
+              >
+                Continuar al registro de ejemplo →
+              </button>
+            </>
+          )}
+          {overlay.kind === "register" && (
+            <>
+              <p>
+                Se agregará una resolución a la memoria de esta maqueta. Las anteriores no cambian.
+                Recargar reinicia el ejemplo.
+              </p>
+              <div className="mt-5 flex flex-wrap gap-3">
+                <button
+                  className={primary}
+                  onClick={() => {
+                    const version = Math.max(...resolutions.map((r) => r.version)) + 1;
+                    setResolutions((old) => [
+                      ...old,
+                      {
+                        version,
+                        reference: values["preparar.referencia"],
+                        notes: values["preparar.notas"],
+                        reason: values["preparar.motivo"],
+                        origin: origin ?? undefined,
+                      },
+                    ]);
+                    setSelected(version);
+                    setFictitious(false);
+                    setOverlay(null);
+                    setDrafts((old) => ({
+                      ...old,
+                      infancia: {
+                        ...old.infancia,
+                        "preparar.referencia": "",
+                        "preparar.notas": "",
+                        "preparar.motivo": "",
+                      },
+                    }));
+                    // Clear only the completed preparation baseline; other edits stay pending.
+                    setSaved((old) => ({
+                      ...old,
+                      infancia: {
+                        ...old.infancia,
+                        "preparar.referencia": "",
+                        "preparar.notas": "",
+                        "preparar.motivo": "",
+                      },
+                    }));
+                    setOrigin(null);
+                    setEvents((old) => ({
+                      ...old,
+                      infancia: [
+                        `Infancia · Resolución ${version} registrada en la maqueta.`,
+                        ...old.infancia,
+                      ],
+                    }));
+                    go("licitud", "revisar", "resoluciones");
+                    setNotice(
+                      `Resolución ${version} agregada solo al ejemplo. Las anteriores se conservan.`
+                    );
+                  }}
+                >
+                  Registrar resolución solo en maqueta
+                </button>
+                <button className={secondary} onClick={close}>
+                  Volver sin registrar
+                </button>
+              </div>
+            </>
+          )}
+          {overlay.kind === "reset" && (
+            <>
+              <p>
+                Se descartarán los cambios de las cuatro evaluaciones de la maqueta. Los expedientes
+                de CumpleIA no se modifican.
+              </p>
+              <div className="mt-5 flex flex-wrap gap-3">
+                <button
+                  className={primary}
+                  onClick={() => {
+                    setDrafts(initialEvaluations());
+                    setSaved(initialEvaluations());
+                    setSavedSteps(evaluationRecords(() => []));
+                    setAnnexes(evaluationRecords(() => []));
+                    setResolutions(seedResolutions());
+                    setSelected(2);
+                    setOrigin(null);
+                    setReviews([]);
+                    setEvents(evaluationRecords(() => []));
+                    setFictitious(false);
+                    setFiles(evaluationRecords(() => ({ name: "", error: "" })));
+                    setFileKey((v) => v + 1);
+                    setChoice("");
+                    setRationale("");
+                    setReference("");
+                    setOverlay(null);
+                    resetNavigation();
+                    setNotice("Ejemplos reiniciados.");
+                  }}
+                >
+                  Reiniciar maqueta
+                </button>
+                <button className={secondary} onClick={close}>
+                  Conservar esta visita
+                </button>
+              </div>
+            </>
+          )}
+        </dialog>
+      )}
+    </div>
+  );
+}
