@@ -8,6 +8,7 @@ DEPENDENT_TABLES = (
     "eipd_document_versions",
     "eipd_review_authority_events",
     "eipd_decision_authority_events",
+    "base_fundamento_versions",
 )
 
 
