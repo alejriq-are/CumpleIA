@@ -34,6 +34,7 @@ async def prepare(env):
                 "a52c910be604",
                 "bf5d10a26c41",
                 "d51ba5e1a702",
+                "e7638d2c904a",
             ):
                 raise ValueError("Destino aislado no admitido")
             for table in (
