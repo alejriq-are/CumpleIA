@@ -4,7 +4,11 @@ from sqlalchemy import inspect, text
 
 # Tablas posteriores cuyas FK hacia legal_assessments bloquean la bajada de las
 # migraciones ancestro. Cada migración nueva con tabla propia se añade aquí.
-DEPENDENT_TABLES = ("eipd_document_versions", "eipd_review_authority_events")
+DEPENDENT_TABLES = (
+    "eipd_document_versions",
+    "eipd_review_authority_events",
+    "eipd_decision_authority_events",
+)
 
 
 def _detach_dependents(connection):
