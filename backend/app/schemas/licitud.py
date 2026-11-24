@@ -1402,6 +1402,18 @@ class DocumentaryReadinessOut(BaseModel):
     applicability: list[ReadinessApplicabilityOut]
 
 
+class SavedBasisDiagnosticsOut(BaseModel):
+    """Read-only diagnostics paired with the exact saved inputs evaluated."""
+
+    assessment_id: uuid.UUID
+    legal_basis: str | None
+    purpose_snapshot: str
+    consent_document: ConsentAssessmentV1 | None
+    lia_document: LiaAssessmentV1 | None
+    consent: DocumentaryReadinessOut
+    lia: DocumentaryReadinessOut
+
+
 class ResearchDocumentReadinessOut(DocumentaryReadinessOut):
     """Completitud y asociacion independientes de autoridad para confirmar."""
 

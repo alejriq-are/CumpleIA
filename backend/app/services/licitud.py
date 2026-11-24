@@ -2493,6 +2493,45 @@ async def confirm_legal_assessment_v1(
     return draft
 
 
+async def get_saved_basis_diagnostics_v1(
+    db: AsyncSession,
+    organization_id: uuid.UUID,
+    treatment_id: uuid.UUID,
+    assessment_id: uuid.UUID,
+):
+    """Evaluate both saved forms in one scoped read, without changing the draft.
+
+    LIA is evaluated against the assessment's saved RAT snapshot. This is
+    documentary feedback, not the current-context readiness/confirmation gate.
+    """
+    assessment = await get_legal_assessment_v1(
+        db, organization_id, treatment_id, assessment_id
+    )
+    consent = evaluate_consent_assessment_v1(assessment.consent_assessment)
+    lia = evaluate_lia_assessment_v1(
+        assessment.lia_assessment, assessment.rat_context_snapshot
+    )
+    return {
+        "assessment_id": assessment.id,
+        "legal_basis": assessment.legal_basis,
+        "purpose_snapshot": assessment.purpose_snapshot,
+        "consent_document": assessment.consent_assessment,
+        "lia_document": assessment.lia_assessment,
+        "consent": {
+            "result": consent.result,
+            "issues": [asdict(issue) for issue in consent.issues],
+            "applicability": [
+                {
+                    "field": "answers." + item.question_id,
+                    "applicability": item.applicability,
+                }
+                for item in consent.applicability
+            ],
+        },
+        "lia": asdict(lia),
+    }
+
+
 async def get_legal_assessment_readiness_v1(
     db: AsyncSession,
     organization_id: uuid.UUID,
