@@ -48,6 +48,8 @@ async def review_case(
     finally:
         async with _session_factory() as db:
             for table in (
+                "base_fundamento_decisions",
+                "base_fundamento_decision_authorities",
                 "base_fundamento_reviews",
                 "base_fundamento_review_authorities",
                 "eipd_review_authority_events",

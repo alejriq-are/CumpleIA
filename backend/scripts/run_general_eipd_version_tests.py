@@ -77,6 +77,7 @@ def main():
             "tests/test_base_fundamento_catalog.py",
             "tests/test_base_fundamento_versions.py",
             "tests/test_base_fundamento_reviews.py",
+            "tests/test_base_fundamento_decisions.py",
             "tests/test_eipd_child_successors.py",
             "tests/test_eipd_test_runner.py",
         ],

@@ -11,6 +11,8 @@ DEPENDENT_TABLES = (
     "base_fundamento_versions",
     "base_fundamento_review_authorities",
     "base_fundamento_reviews",
+    "base_fundamento_decision_authorities",
+    "base_fundamento_decisions",
 )
 
 
