@@ -1,0 +1,30 @@
+name: Handoff protocol
+on:
+  push:
+    paths:
+      - 'scripts/handoff.py'
+      - 'scripts/deepseek_run.py'
+      - 'scripts/deepseek_validate.py'
+      - 'scripts/tests/**'
+      - 'docs/ai/**'
+      - 'docs/HANDOFF.md'
+      - '.github/workflows/handoff.yml'
+  pull_request:
+    paths:
+      - 'scripts/handoff.py'
+      - 'scripts/deepseek_run.py'
+      - 'scripts/deepseek_validate.py'
+      - 'scripts/tests/**'
+      - 'docs/ai/**'
+      - 'docs/HANDOFF.md'
+      - '.github/workflows/handoff.yml'
+jobs:
+  protocol:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Ensayo aislado del protocolo (sin base del producto ni API keys)
+        run: python -m unittest discover -s scripts/tests -v

@@ -1,0 +1,47 @@
+{
+  "id": "DS-003",
+  "objective": "Bloque funcional: cobertura UI de composicion del borrador infancia, con tres tareas coherentes y solo datos ficticios.",
+  "tasks": [
+    {
+      "id": "A",
+      "acceptance": "Nueva prueba: añadir evidencia 2, editar tipo/referencia, guardar y verificar PATCH contiene dos evidencias, conserva evidencia 1 y valores editados de evidencia 2; una sola llamada PATCH."
+    },
+    {
+      "id": "B",
+      "acceptance": "Nueva prueba: quitar evidencia 1, guardar, verificar evidence [] y una sola llamada PATCH; el guardado no activa/confirma EIPD."
+    },
+    {
+      "id": "C",
+      "acceptance": "Nueva prueba: marcar Adolescentes y desmarcar Niños y niñas, guardar y verificar declared_groups [adolescentes], conservando evidencia ficticia existente y una sola llamada PATCH."
+    }
+  ],
+  "allowed_files": [
+    "frontend/e2e/child-adolescent-editor.spec.ts"
+  ],
+  "context_files": [
+    "frontend/e2e/child-adolescent-editor.spec.ts",
+    "frontend/components/licitud/ChildAdolescentEditor.tsx"
+  ],
+  "constraints": [
+    "No modificar pruebas existentes ni harness, solo insertar tres pruebas antes de retiro envia null y no habilita acciones",
+    "Sin imports/dependencias nuevas ni cambios a producto, reglas, permisos, datos, migraciones",
+    "Usar locators exactos y esperar status Documento guardado.",
+    "EIPD bloqueada, no commit/push/merge/deploy por Deepseek",
+    "Entrega cambios textuales con old literal unico y new; no comandos ni afirmaciones de tests ejecutados"
+  ],
+  "checks": [
+    "playwright archivo UI",
+    "type-check",
+    "lint",
+    "prettier"
+  ],
+  "acceptance": [
+    "Nueva prueba: añadir evidencia 2, editar tipo/referencia, guardar y verificar PATCH contiene dos evidencias, conserva evidencia 1 y valores editados de evidencia 2; una sola llamada PATCH.",
+    "Nueva prueba: quitar evidencia 1, guardar, verificar evidence [] y una sola llamada PATCH; el guardado no activa/confirma EIPD.",
+    "Nueva prueba: marcar Adolescentes y desmarcar Niños y niñas, guardar y verificar declared_groups [adolescentes], conservando evidencia ficticia existente y una sola llamada PATCH."
+  ],
+  "pilot_budget": {
+    "maximum_reference_usd": "0.20",
+    "maximum_iterations": 3
+  }
+}

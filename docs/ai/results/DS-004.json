@@ -1,0 +1,70 @@
+{
+  "task_id": "DS-004",
+  "base_head": "3a24ec974f1fa28b1792befd500ab2623b73380c",
+  "calls": 2,
+  "budget_reference_usd": "0.20",
+  "estimated_peak_usd": "0.0048741",
+  "estimated_off_peak_usd": "0.00243705",
+  "usage_by_call": [
+    {
+      "prompt_tokens": 9056,
+      "completion_tokens": 1300,
+      "total_tokens": 10356,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      },
+      "prompt_cache_hit_tokens": 0,
+      "prompt_cache_miss_tokens": 9056
+    },
+    {
+      "prompt_tokens": 1415,
+      "completion_tokens": 144,
+      "total_tokens": 1559,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      },
+      "prompt_cache_hit_tokens": 0,
+      "prompt_cache_miss_tokens": 1415
+    }
+  ],
+  "checks": {
+    "repaired-green": 0,
+    "type-check": 0,
+    "eslint": 0,
+    "prettier": 0
+  },
+  "controlled_failure_reproduced": true,
+  "repair_author": "Deepseek",
+  "repair_scope": "one expected literal; no test/fixture removed",
+  "elapsed_loop_seconds": 17.01,
+  "executor": "fixed local commands; model receives logs, no arbitrary shell",
+  "manual_code_corrections": 0,
+  "balance_deltas": [
+    {
+      "CNY": "0.00",
+      "USD": "0.00"
+    },
+    {
+      "CNY": "0.00",
+      "USD": "0.00"
+    }
+  ],
+  "controlled_red": {
+    "failed": 1,
+    "passed": 15,
+    "expected": "PRUEBA: FALLO_CONTROLADO_DS004",
+    "received": "PRUEBA: evidencia"
+  },
+  "final_ui_passed": 16,
+  "code_sha256": "3bd91eb45936dbc5df07da947e298d4dde71343c3becd0eab99ca9861acddc59",
+  "original_tests_preserved": true,
+  "metadata_shape_adjustment": "checks object accepted as declared no_ejecutado; no code repair",
+  "repair": {
+    "task_id": "DS-004",
+    "base_head": "3a24ec974f1fa28b1792befd500ab2623b73380c",
+    "old_expected": "PRUEBA: FALLO_CONTROLADO_DS004",
+    "new_expected": "PRUEBA: evidencia",
+    "reason": "El log muestra que la prueba 6 falla porque el valor esperado literal 'PRUEBA: FALLO_CONTROLADO_DS004' no coincide con el valor realmente recibido 'PRUEBA: evidencia' en evidence[0].reference. Se corrige únicamente el valor esperado de referencia manteniendo toBe y el resto de la prueba."
+  },
+  "general_arbitrary_bug_fixing_validated": false
+}

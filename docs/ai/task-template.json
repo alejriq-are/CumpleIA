@@ -1,0 +1,38 @@
+{
+  "id": "TASK-ID",
+  "objective": "Reemplazar por un bloque funcional concreto, no una mejora minima",
+  "acceptance": [
+    "Criterios observables del bloque",
+    "Mantener fixtures y assertions independientes",
+    "EIPD bloqueada y datos ficticios"
+  ],
+  "allowed_files": [
+    "frontend/components/licitud/ChildAdolescentEditor.tsx",
+    "frontend/e2e/child-adolescent-editor.spec.ts"
+  ],
+  "context_files": [
+    "frontend/components/licitud/ChildAdolescentEditor.tsx",
+    "frontend/e2e/child-adolescent-editor.spec.ts"
+  ],
+  "checks": [
+    "Prettier automatico",
+    "Playwright archivos explicitos",
+    "type-check",
+    "lint"
+  ],
+  "validation": {
+    "test_files": [
+      "frontend/e2e/child-adolescent-editor.spec.ts",
+      "frontend/e2e/child-adolescent-order.acceptance.spec.ts"
+    ],
+    "timeout_seconds": 60
+  },
+  "permissions": {
+    "commit": false,
+    "push": false,
+    "merge": false,
+    "deploy": false,
+    "activate_eipd": false
+  },
+  "note": "Plantilla fuera de tasks: adaptar, revisar y versionar un nuevo contrato; presupuesto/iteraciones se autorizan caso a caso."
+}
