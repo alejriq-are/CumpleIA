@@ -13,9 +13,12 @@ from app.core.deps import require_active_subscription, require_permission
 from app.db.models import Profile
 from app.db.session import get_db
 from app.schemas.assessment_support import AnnexSave, RiskSave
+from app.schemas.child_adolescent_api import LegalAssessmentChildOutV1
 from app.schemas.navigation_applicability import ApplicabilitySave
+from app.schemas.scope_review import ScopeApply, ScopePreview
 from app.services import assessment_support as service
 from app.services import navigation_applicability as applicability_service
+from app.services import scope_review
 from app.services.authorization import Permission
 
 router = APIRouter(
@@ -122,5 +125,33 @@ async def save_applicability(
     db: AsyncSession = Depends(get_db),
 ):
     return await applicability_service.save(
+        db, x_organization_id, treatment_id, assessment_id, profile.id, payload
+    )
+
+
+@router.post("/scope-review/preview")
+async def preview_scope(
+    treatment_id: UUID,
+    assessment_id: UUID,
+    payload: ScopePreview,
+    x_organization_id: Annotated[UUID, Header()],
+    profile: Profile = Depends(require_permission(Permission.view_content)),
+    db: AsyncSession = Depends(get_db),
+):
+    return await scope_review.preview(
+        db, x_organization_id, treatment_id, assessment_id, payload
+    )
+
+
+@router.post("/scope-review", response_model=LegalAssessmentChildOutV1)
+async def apply_scope(
+    treatment_id: UUID,
+    assessment_id: UUID,
+    payload: ScopeApply,
+    x_organization_id: Annotated[UUID, Header()],
+    profile: Profile = Depends(require_permission(Permission.edit_content)),
+    db: AsyncSession = Depends(get_db),
+):
+    return await scope_review.apply(
         db, x_organization_id, treatment_id, assessment_id, profile.id, payload
     )
