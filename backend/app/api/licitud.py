@@ -36,6 +36,7 @@ from app.schemas.licitud import (
     EipdResolutionReviewOutV3,
     LegalAssessmentSummaryOut,
 )
+from app.schemas.mvp_dossier import MvpDossierOut
 from app.schemas.organization_acceptance import (
     AcceptanceCreate,
     AcceptanceOut,
@@ -45,6 +46,7 @@ from app.schemas.organization_acceptance import (
 )
 from app.services import eipd_child_persistence as child_service
 from app.services import licitud as service
+from app.services import mvp_dossier
 from app.services import organization_acceptance as acceptance_service
 from app.services.authorization import Permission
 
@@ -451,3 +453,17 @@ async def registrar_aceptacion(
         profile.id,
         payload,
     )
+
+
+@router.get(
+    "/treatments/{treatment_id}/assessments/{assessment_id}/mvp-dossier/v1",
+    response_model=MvpDossierOut,
+)
+async def consultar_expediente_mvp(
+    treatment_id: uuid.UUID,
+    assessment_id: uuid.UUID,
+    x_organization_id: Annotated[uuid.UUID, Header()],
+    profile: Profile = Depends(require_permission(Permission.view_content)),
+    db: AsyncSession = Depends(get_db),
+):
+    return await mvp_dossier.build(db, x_organization_id, treatment_id, assessment_id)
