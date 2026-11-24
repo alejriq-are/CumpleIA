@@ -4,6 +4,7 @@ from app.api.assessment_support import router as assessment_support_router
 from app.api.cuestionario_config import router as cuestionario_config_router
 from app.api.diagnostico import router as diagnostico_router
 from app.api.eipd_admin import router as eipd_admin_router
+from app.api.eipd_document_versions import router as eipd_versions_router
 from app.api.health import router as health_router
 from app.api.licitud import router as licitud_router
 from app.api.me import router as me_router
@@ -24,3 +25,5 @@ api_router.include_router(licitud_router)
 
 api_router.include_router(eipd_admin_router)
 api_router.include_router(assessment_support_router)
+
+api_router.include_router(eipd_versions_router)
