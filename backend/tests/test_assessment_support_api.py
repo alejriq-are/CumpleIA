@@ -108,8 +108,15 @@ async def test_roundtrip_versioning_stale_and_export(saved):
                 path + "/risk-evaluations", json={**payload, "request_id": str(uuid4())}
             )
         ).status_code == 409
-        # La exportación del soporte dentro del expediente MVP se verifica
-        # cuando se integre ese expediente (campo support de mvp-dossier).
+        dossier = await http.get(path + "/mvp-dossier/v1")
+        assert dossier.status_code == 200, dossier.text
+        exported = dossier.json()
+        assert (
+            exported["support"]["risk_evaluation"]["analysis"]["risks"][0]["risk_id"]
+            == "R1"
+        )
+        assert len(exported["support"]["annexes"]) == 2
+        assert "content_base64" not in str(exported)
         changed = document()
         changed["risks"][0]["description"] = "PRUEBA contexto cambiado"
         assert (
