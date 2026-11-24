@@ -9,8 +9,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.deps import require_active_subscription, require_permission
 from app.db.models import Profile
 from app.db.session import get_db
-from app.schemas.eipd_document_versions import EipdVersionRegister
+from app.schemas.eipd_document_versions import (
+    EipdReviewAuthority,
+    EipdReviewRegister,
+    EipdVersionRegister,
+)
 from app.services import eipd_document_versions as service
+from app.services import eipd_version_reviews as reviews_service
 from app.services.authorization import Permission
 
 router = APIRouter(
@@ -94,3 +99,100 @@ async def detail(
     if row is None:
         raise HTTPException(404, detail="Versión documental no encontrada")
     return service.output(row)
+
+
+@router.get("/review-authorities/history")
+async def review_authorities(
+    treatment_id: UUID,
+    assessment_id: UUID,
+    x_organization_id: Annotated[UUID, Header()],
+    profile: Profile = Depends(require_permission(Permission.view_content)),
+    db: AsyncSession = Depends(get_db),
+):
+    return await reviews_service.authorities(
+        db, x_organization_id, treatment_id, assessment_id
+    )
+
+
+@router.post("/review-authorities", status_code=201)
+async def designate_reviewer(
+    treatment_id: UUID,
+    assessment_id: UUID,
+    payload: EipdReviewAuthority,
+    x_organization_id: Annotated[UUID, Header()],
+    profile: Profile = Depends(require_permission(Permission.manage_members)),
+    db: AsyncSession = Depends(get_db),
+):
+    return await reviews_service.designate(
+        db, x_organization_id, treatment_id, assessment_id, profile.id, payload
+    )
+
+
+@router.get("/{version_id}/reviews")
+async def reviews(
+    treatment_id: UUID,
+    assessment_id: UUID,
+    version_id: UUID,
+    x_organization_id: Annotated[UUID, Header()],
+    profile: Profile = Depends(require_permission(Permission.view_content)),
+    db: AsyncSession = Depends(get_db),
+):
+    return await reviews_service.history(
+        db, x_organization_id, treatment_id, assessment_id, version_id
+    )
+
+
+@router.get("/{version_id}/review-state")
+async def review_state(
+    treatment_id: UUID,
+    assessment_id: UUID,
+    version_id: UUID,
+    x_organization_id: Annotated[UUID, Header()],
+    profile: Profile = Depends(require_permission(Permission.view_content)),
+    db: AsyncSession = Depends(get_db),
+):
+    return await reviews_service.state(
+        db, x_organization_id, treatment_id, assessment_id, version_id, profile.id
+    )
+
+
+@router.post("/{version_id}/reviews", status_code=201)
+async def record_review(
+    treatment_id: UUID,
+    assessment_id: UUID,
+    version_id: UUID,
+    payload: EipdReviewRegister,
+    x_organization_id: Annotated[UUID, Header()],
+    profile: Profile = Depends(require_permission(Permission.view_content)),
+    db: AsyncSession = Depends(get_db),
+):
+    return await reviews_service.record(
+        db,
+        x_organization_id,
+        treatment_id,
+        assessment_id,
+        version_id,
+        profile.id,
+        payload,
+    )
+
+
+@router.get("/{version_id}/review-requests/{request_id}")
+async def review_request(
+    treatment_id: UUID,
+    assessment_id: UUID,
+    version_id: UUID,
+    request_id: UUID,
+    x_organization_id: Annotated[UUID, Header()],
+    profile: Profile = Depends(require_permission(Permission.view_content)),
+    db: AsyncSession = Depends(get_db),
+):
+    return await reviews_service.lookup(
+        db,
+        x_organization_id,
+        treatment_id,
+        assessment_id,
+        version_id,
+        profile.id,
+        request_id,
+    )
