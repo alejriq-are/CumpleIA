@@ -1,0 +1,78 @@
+{
+  "task_id": "DS-005",
+  "base_head": "9d893cccbe11e2bb0fdf2206993d9286eda1dbd5",
+  "calls": 3,
+  "budget_reference_usd": "0.20",
+  "estimated_peak_usd": "0.013161372",
+  "estimated_off_peak_usd": "0.006580686",
+  "usage_by_call": [
+    {
+      "prompt_tokens": 10099,
+      "completion_tokens": 1641,
+      "total_tokens": 11740,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      },
+      "prompt_cache_hit_tokens": 0,
+      "prompt_cache_miss_tokens": 10099
+    },
+    {
+      "prompt_tokens": 11940,
+      "completion_tokens": 1651,
+      "total_tokens": 13591,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      },
+      "prompt_cache_hit_tokens": 0,
+      "prompt_cache_miss_tokens": 11940
+    },
+    {
+      "prompt_tokens": 11950,
+      "completion_tokens": 1656,
+      "total_tokens": 13606,
+      "prompt_tokens_details": {
+        "cached_tokens": 10112
+      },
+      "prompt_cache_hit_tokens": 10112,
+      "prompt_cache_miss_tokens": 1838
+    }
+  ],
+  "autonomous_loop_result": "stopped_at_max_calls_due_to_format",
+  "per_iteration": {
+    "ui": 25,
+    "types": "passed",
+    "lint": "passed",
+    "format": "failed"
+  },
+  "final_after_codex_formatter": {
+    "ui": 25,
+    "types": "passed",
+    "lint": "passed",
+    "format": "passed"
+  },
+  "independent_cases": 7,
+  "independent_acceptance_sha256": "079bfb823bffe65f74e56e12a61fd0e154860814eddc913fe59a1ba3daa71782",
+  "baseline_independent_test_failed": true,
+  "seeded_fault": false,
+  "codex_adjustments": [
+    "Prettier deterministic formatting only",
+    "two own test titles narrowed to actually tested scenarios; assertions unchanged"
+  ],
+  "existing_tests_preserved": true,
+  "acceptance_modified_by_deepseek": false,
+  "balance_deltas": [
+    {
+      "USD": "0.00",
+      "CNY": "0.00"
+    },
+    {
+      "CNY": "0.00",
+      "USD": "0.00"
+    },
+    {
+      "USD": "0.00",
+      "CNY": "0.00"
+    }
+  ],
+  "permission_result": "no escalation; EIPD blocked; no merge/deploy"
+}

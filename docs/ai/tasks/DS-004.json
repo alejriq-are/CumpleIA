@@ -1,0 +1,47 @@
+{
+  "id": "DS-004",
+  "objective": "Tres pruebas UI: normalizar notas vacias, añadir/quitar evidencia temporal, recuperar guardado 403 conservando cambios.",
+  "tasks": [
+    {
+      "id": "A",
+      "acceptance": "Vaciar Notas, guardar, esperar Documento guardado., verificar notes null y exactamente una PATCH."
+    },
+    {
+      "id": "B",
+      "acceptance": "Añadir evidencia 2 y quitarla antes de guardar. Una PATCH, evidence length 1, assertion explicita evidence[0].reference.toBe(\"PRUEBA: evidencia\"), obtained_on conservado."
+    },
+    {
+      "id": "C",
+      "acceptance": "Editar Notas a PRUEBA: reintento, modo denied, guardar; alerta sin status y cambios conservados. Cambiar modo ok, guardar; status exito, alerta ausente, exactamente dos PATCH ambas con mismas notas y EIPD bloqueada."
+    }
+  ],
+  "allowed_files": [
+    "frontend/e2e/child-adolescent-editor.spec.ts"
+  ],
+  "context_files": [
+    "frontend/e2e/child-adolescent-editor.spec.ts",
+    "frontend/components/licitud/ChildAdolescentEditor.tsx"
+  ],
+  "constraints": [
+    "Solo insertar tres tests antes de test retiro envia null y no habilita acciones; preservar imports/harness/pruebas existentes",
+    "Sin producto/backend/politicas/dependencias; datos ficticios",
+    "Sin comandos ni terminal; checks no_ejecutado; ejecutor retorna logs para correccion acotada",
+    "Sin commit/push/merge/deploy por Deepseek; EIPD bloqueada"
+  ],
+  "budget": {
+    "reference_usd": "0.20",
+    "max_calls": 3,
+    "controlled_fault": true
+  },
+  "acceptance": [
+    "Vaciar Notas, guardar, esperar Documento guardado., verificar notes null y exactamente una PATCH.",
+    "Añadir evidencia 2 y quitarla antes de guardar. Una PATCH, evidence length 1, assertion explicita evidence[0].reference.toBe(\"PRUEBA: evidencia\"), obtained_on conservado.",
+    "Editar Notas a PRUEBA: reintento, modo denied, guardar; alerta sin status y cambios conservados. Cambiar modo ok, guardar; status exito, alerta ausente, exactamente dos PATCH ambas con mismas notas y EIPD bloqueada."
+  ],
+  "checks": [
+    "cd frontend && npx playwright test e2e/child-adolescent-editor.spec.ts",
+    "cd frontend && npm run type-check",
+    "cd frontend && npm run lint",
+    "cd frontend && npx prettier --check e2e/child-adolescent-editor.spec.ts"
+  ]
+}

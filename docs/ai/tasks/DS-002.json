@@ -1,0 +1,35 @@
+{
+  "id": "DS-002",
+  "objective": "Ampliar SOLO el test parametrizado existente solo lectura (readOnly y confirmed) para verificar que Notas, checkbox Niños y niñas y Retirar documento del borrador estan deshabilitados. No crear tests adicionales.",
+  "acceptance": [
+    "En ambas variantes comprobar Notas disabled usando getByLabel exact true",
+    "En ambas variantes comprobar checkbox Niños y niñas disabled usando getByRole checkbox exact true",
+    "En ambas variantes comprobar boton Retirar documento del borrador disabled",
+    "Conservar comprobacion de Guardar documento disabled y cero PATCH",
+    "Reutilizar fixtures ficticias; sin modificar harness ni producto; solo ampliar test existente"
+  ],
+  "allowed_files": [
+    "frontend/e2e/child-adolescent-editor.spec.ts"
+  ],
+  "context_files": [
+    "frontend/e2e/child-adolescent-editor.spec.ts"
+  ],
+  "checks": [
+    "cd frontend && npx playwright test e2e/child-adolescent-editor.spec.ts",
+    "cd frontend && npm run type-check",
+    "cd frontend && npm run lint",
+    "cd frontend && npx prettier --check e2e/child-adolescent-editor.spec.ts"
+  ],
+  "stop_conditions": [
+    "No coincide base",
+    "Requiere modificar producto o dependencias"
+  ],
+  "permissions": {
+    "implement_patch": true,
+    "commit": false,
+    "push": false,
+    "merge": false,
+    "deploy": false,
+    "activate_eipd": false
+  }
+}
