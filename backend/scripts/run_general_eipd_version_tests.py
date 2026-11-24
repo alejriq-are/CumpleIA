@@ -28,6 +28,7 @@ async def prepare(env):
                 "a84f6e2c9103",
                 "b95e7f3d1204",
                 "c53e19d8a621",
+                "a52c910be604",
             ):
                 raise ValueError("Destino aislado no admitido")
             for table in (
@@ -70,6 +71,7 @@ def main():
             "--tb=short",
             "tests/test_eipd_document_versions.py",
             "tests/test_eipd_version_reviews.py",
+            "tests/test_eipd_version_decisions.py",
             "tests/test_eipd_child_successors.py",
             "tests/test_eipd_test_runner.py",
         ],
