@@ -1,7 +1,7 @@
 """Tests de app/services/authorization.py (ADR 0001).
 
 `role_has_permission` es una función pura (sin DB): se prueba como matriz de
-los 4 roles × 4 permisos. `has_permission` sí toca la base (resuelve la
+los 4 roles × 5 permisos. `has_permission` sí toca la base (resuelve la
 membresía real) y corre contra el rol admin (`_session_factory`) — es lógica
 de negocio, no una política RLS; el aislamiento por organización ya está
 cubierto en test_rls_isolation.py / test_rls_isolation_diagnosticos.py.
@@ -19,13 +19,18 @@ from app.services.authorization import Permission, has_permission, role_has_perm
 _ALL_PERMISSIONS = {
     Permission.view_content,
     Permission.edit_content,
+    Permission.register_document,
     Permission.manage_members,
     Permission.manage_organization,
 }
 
 _EXPECTED_BY_ROLE = {
     UserRole.viewer: {Permission.view_content},
-    UserRole.editor: {Permission.view_content, Permission.edit_content},
+    UserRole.editor: {
+        Permission.view_content,
+        Permission.edit_content,
+        Permission.register_document,
+    },
     UserRole.admin: _ALL_PERMISSIONS,
     UserRole.owner: _ALL_PERMISSIONS,
 }
