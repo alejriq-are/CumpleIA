@@ -1,3 +1,63 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Shared readable hierarchy for the Bases de Licitud workspace only. */
+.licitud-ui {
+  font-size: 1rem;
+  line-height: 1.6;
+}
+.licitud-ui :is(.text-sm, .text-xs) {
+  font-size: 1rem;
+  line-height: 1.6;
+}
+.licitud-ui label {
+  color: #172554;
+  font-weight: 600;
+}
+.licitud-ui :is(input, textarea, select) {
+  color: #0f172a;
+  font-weight: 400;
+  margin-top: 0.35rem;
+}
+.licitud-ui label > span {
+  font-weight: 400;
+}
+.licitud-ui label:has(input[type="checkbox"]) {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  font-weight: 400;
+}
+.licitud-ui input[type="checkbox"] {
+  flex-shrink: 0;
+  margin-top: 0.4rem;
+}
+.licitud-ui legend {
+  color: #172554;
+  font-weight: 600;
+  padding: 0.35rem 0.6rem;
+  background: #eff6ff;
+  border-radius: 0.25rem;
+}
+.licitud-ui summary {
+  cursor: pointer;
+  color: #172554;
+  font-weight: 600;
+}
+.licitud-ui h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+.licitud-ui h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+.licitud-ui button {
+  border-radius: 0.25rem;
+  border-width: 1px;
+  padding: 0.5rem 0.75rem;
+}
+.licitud-ui button:disabled {
+  opacity: 0.5;
+}
