@@ -215,7 +215,9 @@ test("motivos distinguen campos y preguntas, agrupan duplicados y presentan moti
   await card.getByText("Documento EIPD — 2 motivos distintos", { exact: true }).click();
   await card.getByText("Investigación — 1 motivo distinto", { exact: true }).click();
   await expect(card.getByText("Campo: Documento EIPD › Referencia del documento")).toBeVisible();
-  await expect(card.getByText("Campo: Documento EIPD › Versión del documento")).toBeVisible();
+  await expect(
+    card.getByText("Campo: Documento EIPD › Nombre de la edición (texto libre)")
+  ).toBeVisible();
   await expect(card.getByText("Informado 2 veces por el diagnóstico.")).toBeVisible();
   await expect(card.getByText("Pregunta: Pregunta pendiente de identificar")).toBeVisible();
   await card.locator("li").last().getByText("Detalle del diagnóstico").click();

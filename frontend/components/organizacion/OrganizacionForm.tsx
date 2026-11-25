@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { api, type OrganizationMembershipOut } from "@/lib/api/client";
 
@@ -19,8 +19,10 @@ const TAMANOS = [
 // (no existe todavía un selector/contexto global de organización activa).
 export function OrganizacionForm({
   organizacion,
+  onPending,
 }: {
   organizacion: OrganizationMembershipOut | null;
+  onPending?: (dirty: boolean) => void;
 }) {
   const router = useRouter();
   const [name, setName] = useState(organizacion?.name ?? "");
@@ -31,6 +33,10 @@ export function OrganizacionForm({
   const [error, setError] = useState<string | null>(null);
   const [exito, setExito] = useState<string | null>(null);
 
+  const fingerprint = JSON.stringify([name, rut, industry, size]);
+  const [baseline, setBaseline] = useState(fingerprint);
+  const pending = fingerprint !== baseline;
+  useEffect(() => onPending?.(pending), [pending, onPending]);
   async function handleGuardar() {
     if (!name.trim()) {
       setError("El nombre de la organización es obligatorio.");
@@ -63,6 +69,7 @@ export function OrganizacionForm({
         await api.organizations.create(session.access_token, body);
         setExito("Organización creada.");
       }
+      setBaseline(fingerprint);
       router.refresh();
     } catch (e) {
       setError(e instanceof Error ? e.message : "No se pudieron guardar los cambios.");

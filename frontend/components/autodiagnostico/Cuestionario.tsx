@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import {
   api,
@@ -19,11 +19,15 @@ export function Cuestionario({
   respuestasIniciales,
   organizationId,
   onCompletado,
+  navigation,
+  onPending,
 }: {
   cuestionario: CuestionarioOut;
   respuestasIniciales: DiagnosticoActualOut["respuestas"];
   organizationId: string;
   onCompletado: (actual: DiagnosticoActualOut) => void;
+  navigation?: { section: string; go: (id: string) => void };
+  onPending?: (dirty: boolean) => void;
 }) {
   const secciones = useMemo(
     () => [...cuestionario.secciones].sort((a, b) => a.orden - b.orden),
@@ -44,19 +48,47 @@ export function Cuestionario({
   const [respuestas, setRespuestas] = useState<Record<string, RespuestaState>>(() =>
     Object.fromEntries(
       respuestasIniciales
-        .filter((r) => r.answer !== null)
+        .filter(
+          (r) =>
+            cuestionario.preguntas.some((p) => p.id === r.pregunta_id) &&
+            OPCIONES.includes(r.answer as OpcionRespuesta)
+        )
         .map((r) => [r.pregunta_id, { answer: r.answer as OpcionRespuesta, notes: r.notes ?? "" }])
     )
   );
-  const [paso, setPaso] = useState(0);
+  const [baseline, setBaseline] = useState(respuestas);
+  const canonical = (value: Record<string, RespuestaState>) =>
+    JSON.stringify(
+      Object.keys(value)
+        .sort()
+        .map((key) => [key, value[key]])
+    );
+  const hasPending = canonical(respuestas) !== canonical(baseline);
+  useEffect(() => onPending?.(hasPending), [hasPending, onPending]);
+  const [localPaso, setLocalPaso] = useState(0);
+  const paso = navigation
+    ? Math.max(
+        0,
+        secciones.findIndex((v) => v.id === navigation.section)
+      )
+    : localPaso;
+  function setPaso(update: (value: number) => number) {
+    const next = update(paso);
+    if (navigation) navigation.go(secciones[next].id);
+    else setLocalPaso(next);
+  }
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const seccionActual = secciones[paso];
   const preguntasSeccion = preguntasPorSeccion[seccionActual.id] ?? [];
   const totalPreguntas = cuestionario.preguntas.length;
-  const totalRespondidas = Object.values(respuestas).filter((r) => r.answer !== null).length;
-  const seccionCompleta = preguntasSeccion.every((p) => respuestas[p.id]?.answer);
+  const totalRespondidas = cuestionario.preguntas.filter((p) =>
+    OPCIONES.includes(respuestas[p.id]?.answer as OpcionRespuesta)
+  ).length;
+  const seccionCompleta = preguntasSeccion.every((p) =>
+    OPCIONES.includes(respuestas[p.id]?.answer as OpcionRespuesta)
+  );
   const esUltimaSeccion = paso === secciones.length - 1;
 
   function actualizarRespuesta(preguntaId: string, cambios: Partial<RespuestaState>) {
@@ -81,7 +113,16 @@ export function Cuestionario({
       notes: respuestas[p.id].notes.trim() || undefined,
     }));
 
-    return api.diagnostico.guardarRespuestas(session.access_token, organizationId, payload);
+    const saved = await api.diagnostico.guardarRespuestas(
+      session.access_token,
+      organizationId,
+      payload
+    );
+    setBaseline((prev) => ({
+      ...prev,
+      ...Object.fromEntries(preguntasSeccion.map((p) => [p.id, respuestas[p.id]])),
+    }));
+    return saved;
   }
 
   async function handleSiguiente() {
@@ -114,13 +155,25 @@ export function Cuestionario({
             {totalRespondidas} / {totalPreguntas} preguntas respondidas
           </span>
         </div>
-        <div className="mt-2 h-2 overflow-hidden rounded-full bg-gray-200">
+        <div
+          role="progressbar"
+          aria-label="Preguntas respondidas del cuestionario actual"
+          aria-valuemin={0}
+          aria-valuemax={totalPreguntas}
+          aria-valuenow={totalRespondidas}
+          className="mt-2 h-2 overflow-hidden rounded-full bg-gray-200"
+        >
           <div
             className="h-full bg-blue-700 transition-all"
-            style={{ width: `${(totalRespondidas / totalPreguntas) * 100}%` }}
+            style={{ width: `${totalPreguntas ? (totalRespondidas / totalPreguntas) * 100 : 0}%` }}
           />
         </div>
       </div>
+
+      <p className="text-sm text-gray-600">
+        El avance cuenta respuestas del cuestionario actual, incluidas N/A. No indica cumplimiento
+        legal ni confirma el guardado de los cambios pendientes.
+      </p>
 
       <div className="space-y-4 rounded-xl border border-gray-200 bg-white p-6">
         {preguntasSeccion.map((p) => (
