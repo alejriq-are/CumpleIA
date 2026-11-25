@@ -1,6 +1,7 @@
 """Chromium -> cliente real -> HTTP/API -> PostgreSQL aislado, solo opt-in local."""
 
 import asyncio
+import json
 import os
 import socket
 from pathlib import Path
@@ -10,6 +11,7 @@ import uvicorn
 from fastapi.responses import HTMLResponse
 from sqlalchemy import text
 
+from app.schemas.licitud import EipdResolutionAssessmentV1
 from scripts.run_eipd_tests import EXPECTED_HEAD, TEST_DATABASE
 from tests import test_api_eipd_negative_review_v3 as cases
 
@@ -62,6 +64,9 @@ async def test_real_client_form_records_isolated_negative_event(
         assert server.started
         env = dict(os.environ)
         env.update(
+            CUMPLEIA_UI_DOCUMENT_SCHEMA=json.dumps(
+                EipdResolutionAssessmentV1.model_json_schema()
+            ),
             CUMPLEIA_UI_API=f"http://127.0.0.1:{port}",
             CUMPLEIA_UI_ORG=str(prepared[3]),
             CUMPLEIA_UI_TREATMENT=str(prepared[0]),
@@ -108,6 +113,40 @@ async def test_real_client_form_records_isolated_negative_event(
                 profile_a_id,
             )
 
+            acceptances = (
+                await db.execute(
+                    text(
+                        "SELECT decision,actor_id,created_by,evidence_reference FROM organization_document_acceptances WHERE assessment_id=:id"
+                    ),
+                    {"id": prepared[1]["id"]},
+                )
+            ).all()
+            assert len(acceptances) == 1
+            assert tuple(acceptances[0]) == (
+                "acepta",
+                profile_a_id,
+                profile_a_id,
+                "PRUEBA-ACTA-INTEGRADA",
+            )
+            assert (
+                await db.scalar(
+                    text(
+                        "SELECT count(*) FROM organization_acceptance_authorities WHERE assessment_id=:id AND action='otorgar'"
+                    ),
+                    {"id": prepared[1]["id"]},
+                )
+                == 1
+            )
+
+            assert (
+                await db.scalar(
+                    text(
+                        "SELECT child_adolescent_assessment->'assessment'->>'notes' FROM legal_assessments WHERE id=:id"
+                    ),
+                    {"id": prepared[1]["id"]},
+                )
+                == "PRUEBA: editor Chromium con API real aislada"
+            )
             assert (
                 await db.scalar(
                     text("SELECT status::text FROM legal_assessments WHERE id=:id"),
