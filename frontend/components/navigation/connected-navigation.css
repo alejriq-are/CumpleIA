@@ -1,0 +1,279 @@
+.connected-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border-bottom: 1px solid #e2e8f0;
+}
+.connected-toolbar button {
+  padding: 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.connected-menu-trigger {
+  display: none;
+}
+.connected-desktop-sections {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: flex-end;
+  padding: 0 16px 8px;
+}
+.connected-desktop-sections details {
+  position: relative;
+}
+.connected-desktop-sections summary {
+  cursor: pointer;
+  padding: 10px;
+  font-weight: 600;
+}
+.connected-desktop-sections details > div {
+  position: absolute;
+  z-index: 30;
+  top: 100%;
+  left: 0;
+  background: white;
+  box-shadow: 0 6px 20px #0f172a30;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  min-width: 240px;
+  max-width: min(360px, 80vw);
+  max-height: 60vh;
+  overflow-y: auto;
+}
+.connected-desktop-sections button,
+.connected-sections button {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  text-align: left;
+}
+.connected-desktop-sections button:hover,
+.connected-sections button:hover {
+  background: #eff6ff;
+}
+.connected-sections h3 {
+  font-weight: 700;
+  padding: 16px 8px 4px;
+}
+.connected-sections button[aria-current="page"] {
+  background: #dbeafe;
+  font-weight: 700;
+}
+.connected-app [hidden] {
+  display: none !important;
+}
+.connected-app .prototype-work {
+  scroll-margin-top: 150px;
+}
+.connected-app .prototype-work > div {
+  min-width: 0;
+}
+.prototype-sections-drawer {
+  width: min(92vw, 440px);
+  padding: 16px;
+  overflow-y: auto;
+  background: white;
+  color: #0f172a;
+}
+@media (max-width: 767px) {
+  .connected-menu-trigger {
+    display: block;
+  }
+  .connected-desktop-sections {
+    display: none;
+  }
+  .connected-toolbar {
+    flex-wrap: wrap;
+    padding: 8px;
+  }
+  .connected-toolbar > span {
+    order: 2;
+    flex-basis: 100%;
+    font-size: 13px;
+  }
+  .connected-toolbar button {
+    font-size: 13px;
+    padding: 8px;
+  }
+  .connected-toolbar button:last-child {
+    margin-left: auto;
+  }
+}
+
+.connected-direct-group {
+  display: flex;
+  flex-direction: column;
+}
+.connected-group-label {
+  padding: 4px 10px 0;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.4;
+  color: #0f172a;
+}
+.connected-document-group {
+  display: flex;
+  align-items: stretch;
+}
+.connected-document-group summary {
+  list-style: none;
+}
+.connected-document-group summary::-webkit-details-marker {
+  display: none;
+}
+
+.connected-document-group > a,
+.connected-direct-group > a {
+  display: block;
+  padding: 10px;
+  border-bottom: 3px solid transparent;
+  font-weight: 600;
+}
+.connected-document-group > a:hover,
+.connected-direct-group > a:hover {
+  background: #eff6ff;
+}
+.connected-document-group > a[aria-current="page"],
+.connected-direct-group > a[aria-current="page"],
+.connected-desktop-sections details[data-current-group] > summary {
+  border-bottom: 3px solid #1d4ed8;
+  background: #eff6ff;
+  font-weight: 700;
+}
+.connected-desktop-sections summary {
+  border-bottom: 3px solid transparent;
+}
+.connected-desktop-sections button[aria-current="page"],
+.connected-sections button[aria-current="page"] {
+  border-left: 4px solid #1d4ed8;
+  background: #dbeafe;
+  font-weight: 700;
+}
+
+.connected-availability-reason {
+  margin: 8px;
+  padding: 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  color: #334155;
+  background: #f8fafc;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+.connected-availability-reason button {
+  margin-top: 8px;
+  text-decoration: underline;
+  font-weight: 600;
+}
+
+/* 8A: one compact context, with full names available by keyboard and touch. */
+.connected-context-strip {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0;
+}
+.connected-context-brief {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.connected-context-names {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+.connected-context-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 500;
+}
+.connected-evaluation-badge {
+  flex-shrink: 0;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: #eff6ff;
+  color: #1e3a8a;
+}
+.connected-context-strip > button {
+  flex-shrink: 0;
+  border: 1px solid #94a3b8;
+  border-radius: 6px;
+  padding: 6px 8px;
+  color: #1e40af;
+  background: white;
+  font-weight: 600;
+}
+.connected-context-detail {
+  overflow-wrap: anywhere;
+}
+.connected-context-detail h2 {
+  margin: 16px 0;
+  font-weight: 700;
+  font-size: 1.125rem;
+}
+.connected-context-detail p {
+  margin: 12px 0;
+}
+.connected-context-detail dt {
+  font-weight: 700;
+  margin-top: 16px;
+}
+.connected-context-detail dd {
+  margin-top: 4px;
+}
+@media (max-width: 767px) {
+  .connected-context-strip {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .connected-context-brief {
+    display: contents;
+  }
+  .connected-context-names {
+    flex-basis: 100%;
+  }
+}
+
+/* 8B: the toolbar is the desktop pathway; use the sections drawer on smaller viewports. */
+@media (min-width: 1200px) {
+  #connected-sections-trigger {
+    display: none;
+  }
+}
+@media (min-width: 768px) and (max-width: 1199px) {
+  .connected-desktop-sections {
+    display: none;
+  }
+}
+.connected-app nav[aria-label="Cambiar paso EIPD"] button {
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  border: 1px solid #94a3b8;
+  border-radius: 6px;
+  padding: 10px 12px;
+  background: white;
+  color: #1e40af;
+}
+
+/* Keep the pending row's message present at zero and above; allow natural wrapping. */
+.connected-pending-trigger {
+  min-inline-size: 11rem;
+  max-inline-size: 100%;
+  font-variant-numeric: tabular-nums;
+}
+.connected-pending-summary {
+  overflow-wrap: anywhere;
+}
