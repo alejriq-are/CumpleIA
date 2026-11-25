@@ -1,3 +1,4 @@
+import { documentLabels } from "@/lib/licitud/document-labels";
 import type { EipdReviewIssueV3 } from "@/lib/api/eipd-review";
 
 const stages: Record<EipdReviewIssueV3["stage"], string> = {
@@ -84,7 +85,7 @@ const fields: Record<string, string> = {
   eipd_screening: "Detección EIPD",
   special_conditions: "Condiciones especiales",
   document_reference: "Referencia del documento",
-  document_version: "Versión del documento",
+  document_version: documentLabels.edition,
   prepared_by: "Responsable de preparación",
   completed_on: "Fecha de elaboración",
   purpose_description: "Descripción de la finalidad",

@@ -15,13 +15,33 @@ type Modo = "cuestionario" | "resultados";
 
 export function AutodiagnosticoWorkspace({
   organizaciones,
+  navigation,
+  onPending,
 }: {
   organizaciones: OrganizationMembershipOut[];
+  onPending?: (dirty: boolean) => void;
+  navigation?: {
+    section: string;
+    go: (id: string) => void;
+    onSections: (items: { id: string; label: string }[]) => void;
+  };
 }) {
   const [orgId, setOrgId] = useState(organizaciones[0].id);
   const [cuestionario, setCuestionario] = useState<CuestionarioOut | null>(null);
   const [actual, setActual] = useState<DiagnosticoActualOut | null>(null);
-  const [modo, setModo] = useState<Modo>("cuestionario");
+  const [localModo, setLocalModo] = useState<Modo>("cuestionario");
+  const modo: Modo = navigation
+    ? ["resultados", "informe"].includes(navigation.section)
+      ? "resultados"
+      : "cuestionario"
+    : localModo;
+  function setModo(value: Modo) {
+    if (navigation)
+      navigation.go(
+        value === "resultados" ? value : (cuestionario?.secciones[0]?.id ?? "cuestionario")
+      );
+    else setLocalModo(value);
+  }
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -48,7 +68,7 @@ export function AutodiagnosticoWorkspace({
         if (!vigente) return;
         setCuestionario(cuestionarioData);
         setActual(actualData);
-        setModo(actualData?.status === "completado" ? "resultados" : "cuestionario");
+        setLocalModo(actualData?.status === "completado" ? "resultados" : "cuestionario");
       } catch (e) {
         if (vigente) {
           setError(e instanceof Error ? e.message : "No se pudo cargar el autodiagnóstico.");
@@ -62,6 +82,16 @@ export function AutodiagnosticoWorkspace({
       vigente = false;
     };
   }, [orgId]);
+
+  const onSections = navigation?.onSections;
+  useEffect(() => {
+    if (cuestionario)
+      onSections?.(
+        [...cuestionario.secciones]
+          .sort((a, b) => a.orden - b.orden)
+          .map((v) => ({ id: v.id, label: `${v.numero_romano}. ${v.nombre}` }))
+      );
+  }, [cuestionario, onSections]);
 
   if (loading) {
     return <p className="text-sm text-gray-500">Cargando autodiagnóstico…</p>;
@@ -92,8 +122,10 @@ export function AutodiagnosticoWorkspace({
         </label>
       )}
 
-      {modo === "cuestionario" ? (
+      <div hidden={modo !== "cuestionario"}>
         <Cuestionario
+          navigation={navigation}
+          onPending={onPending}
           cuestionario={cuestionario}
           respuestasIniciales={actual?.respuestas ?? []}
           organizationId={orgId}
@@ -102,8 +134,9 @@ export function AutodiagnosticoWorkspace({
             setModo("resultados");
           }}
         />
-      ) : (
-        actual && (
+      </div>
+      <div hidden={modo !== "resultados"}>
+        {actual ? (
           <ResultadosDashboard
             actual={actual}
             organizationId={orgId}
@@ -111,8 +144,13 @@ export function AutodiagnosticoWorkspace({
             onEditar={() => setModo("cuestionario")}
             onActualizar={setActual}
           />
-        )
-      )}
+        ) : (
+          <p>
+            No hay un diagnóstico guardado. Completa el cuestionario del servidor para obtener
+            resultados.
+          </p>
+        )}
+      </div>
     </div>
   );
 }
