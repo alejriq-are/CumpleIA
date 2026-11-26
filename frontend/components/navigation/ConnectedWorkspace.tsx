@@ -198,6 +198,11 @@ export function ConnectedWorkspace({
         content.current.style.scrollMarginTop = `${(header?.getBoundingClientRect().height ?? 140) + 8}px`;
         content.current.focus({ preventScroll: true });
         content.current.scrollIntoView({ block: "start" });
+        const node = content.current;
+        window.setTimeout(() => {
+          if (node.isConnected && document.activeElement === document.body)
+            node.focus({ preventScroll: true });
+        }, 60);
       });
     },
     [organizations]
