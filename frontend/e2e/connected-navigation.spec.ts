@@ -1649,6 +1649,29 @@ for (const width of [390, 320]) {
   });
 }
 
+test("6A Borrador EIPD guardado sin borrador explica el estado vacío sin escrituras", async ({
+  page,
+}) => {
+  await legal(page);
+  const header = page.locator("header");
+  await header.getByRole("link", { name: "Documentos guardados", exact: true }).click();
+  const options = header.locator('summary[aria-label="Opciones de Documentos guardados"]');
+  await options.focus();
+  await options.press("Space");
+  await options
+    .locator("..")
+    .getByRole("button", { name: "Borrador EIPD guardado", exact: true })
+    .click();
+  await expect(
+    main(page).getByText("No hay un borrador EIPD guardado en esta evaluación.", { exact: true })
+  ).toBeVisible();
+  await expect(
+    main(page).getByRole("region", { name: "Borrador EIPD guardado para consulta", exact: true })
+  ).toHaveCount(0);
+  expect(calls.filter((call) => call.method !== "GET")).toEqual([]);
+  expect(errors).toEqual([]);
+});
+
 test("6A enlace anterior conserva IDs y nombre único del inventario", async ({ page }) => {
   const hash = `#/licitud/revisar?organizationId=${org}&treatmentId=${tid}&assessmentId=${aid}`;
   await visit(page, hash);
