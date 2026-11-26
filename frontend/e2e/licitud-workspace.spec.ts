@@ -326,6 +326,10 @@ test("crea borrador, abre y guarda LIA y recupera el historial sin activar EIPD"
       .click();
     expect((await download).suggestedFilename()).toBe("matriz-ensayo.txt");
     await page.getByRole("tab", { name: "Revisar documentos", exact: true }).click();
+    await page
+      .getByRole("region", { name: "Borrador EIPD guardado para consulta", exact: true })
+      .getByText("Consultar borrador EIPD guardado", { exact: true })
+      .click();
     await page.getByText("Contenido del documento EIPD guardado", { exact: true }).first().click();
     await expect(
       page
@@ -979,6 +983,7 @@ test("11B no precarga un identificador ausente del inventario autorizado", async
 test("formularios v1 conservan respuestas estructuradas, medidas y referencias al reabrir", async ({
   page,
 }) => {
+  test.skip(integrated, "Escenario de interfaz con fixtures ficticios");
   await draft(page);
   await page.evaluate((id) => (window as any).editor(id), treatment);
   await page.getByLabel("¿Contribuye a la finalidad?", { exact: true }).selectOption("si");
@@ -1033,6 +1038,7 @@ test("formularios v1 conservan respuestas estructuradas, medidas y referencias a
 test("guardar otra base no marca como guardadas las ediciones del formulario inactivo", async ({
   page,
 }) => {
+  test.skip(integrated, "Escenario de interfaz con fixtures ficticios");
   await draft(page);
   await page.evaluate((id) => (window as any).editor(id), treatment);
   await page
@@ -1057,6 +1063,7 @@ test("guardar otra base no marca como guardadas las ediciones del formulario ina
 test("No aplica sigue el diagnóstico de LIA y las condiciones del borrador de Consentimiento", async ({
   page,
 }) => {
+  test.skip(integrated, "Escenario de interfaz con fixtures ficticios");
   await draft(page);
   await page.evaluate((id) => (window as any).editor(id), treatment);
   const direct = page.getByLabel("¿Se informó al recoger directamente los datos?", { exact: true });
@@ -1101,6 +1108,7 @@ test("No aplica sigue el diagnóstico de LIA y las condiciones del borrador de C
 test("diagnóstico consulta cada formulario guardado sin guardar ni sustituir ediciones pendientes", async ({
   page,
 }) => {
+  test.skip(integrated, "Escenario de interfaz con fixtures ficticios");
   await draft(page);
   await page.evaluate((id) => (window as any).editor(id), treatment);
   await page
@@ -1156,6 +1164,7 @@ test("diagnóstico consulta cada formulario guardado sin guardar ni sustituir ed
 test("resumen de base y fundamento conserva lo guardado mientras se edita y se actualiza al guardar", async ({
   page,
 }) => {
+  test.skip(integrated, "Escenario de interfaz con fixtures ficticios");
   await draft(page);
   await page.evaluate((id) => (window as any).editor(id), treatment);
   const summary = page.getByRole("region", {
