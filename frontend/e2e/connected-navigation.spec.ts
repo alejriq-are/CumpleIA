@@ -1904,10 +1904,6 @@ for (const width of [390, 320]) {
   test(`7A paneles con teclado, fondo, foco y borrador conservado a ${width}px`, async ({
     page,
   }) => {
-    test.fixme(
-      true,
-      "Pendiente: agota el tiempo de 30 s a 320 px con CPU limitada; revisar el presupuesto del test."
-    );
     await page.setViewportSize({ width, height: 844 });
     await legal(page);
     await enable(page);
