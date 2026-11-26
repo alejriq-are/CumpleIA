@@ -1,12 +1,13 @@
 # M3-T1 — Revisión de aceptación
 
-Estado consolidado al 2026-10-14 (§272): M3-T1 EN PROGRESO.
+Estado consolidado al 2026-10-14 (§273): M3-T1 EN PROGRESO.
 Ver [estado de trabajo](status.md) y [representacion persistente](m3-t1-representacion-persistencia.md).
 El alcance integral no se reemplaza por los limites de entregas anteriores.
 
 Evidencia reciente: catalogo EIPD ampliado942 aprobado (§268),66 pruebas frontend
 (§271) y recorrido Chromium/cliente/API/PostgreSQL aislado aprobado (§271).
-Estos conteos no equivalen a suite integral actual ni validacion juridica externa.
+CI38652738904 de dbe1080:4277 backend aprobadas/1omitida, frontend e integrada
+aprobados. Esta evidencia tecnica no equivale a validacion juridica externa.
 No sesion Supabase personal verificada en el recorrido integrado; usa actor sintetico.
 Checkpoints inferiores conservan fecha y contexto historicos.
 
@@ -59,13 +60,34 @@ sigue produciendo revisión. No se declara ilícita una ruta por faltar su valid
 | Revision negativa sucesora | POST V3, lectura V3, cliente estricto, formulario y recorrido real aislado | Login/sesion personal y revision final del alcance integral |
 | EIPD positiva | Bloqueos en servidor y sin botones de confirmacion/activacion | Politica, fuentes y aceptacion no habilitadas; no inferir autorizacion de metadata |
 | Regimenes especiales | special_conditions mantiene fallback validador_no_implementado y condiciones residuales | Inventariar rutas no soportadas contra catalogo y diseno antes de elegir siguiente implementacion |
-| Cobertura de pruebas | Suite focal942,frontend66 e integrada aislada | No declarar suite integral actual aprobada sin resultado CI del HEAD |
-| Automatizacion integrada | Trabajo CI separado con PostgreSQL exclusivo y runner fijo | Resultado remoto del nuevo trabajo aun pendiente de su primera ejecucion |
+| Cobertura de pruebas | Suite focal942,frontend66 e integrada aislada | CI integral de dbe1080 aprobado; siguiente commit requiere su propia comprobacion |
+| Automatizacion integrada | Trabajo CI separado con PostgreSQL exclusivo y runner fijo | Trabajo remoto integrado aprobado en CI38652738904 |
 
 La persistencia/documentacion de representacion no sustituye el gate conservador
 representacion_no_preparada de sensitive_consent. Debe evaluarse con el conjunto
 de controles antes de cualquier ampliacion positiva. No se difieren silenciosamente
 regimenes especiales pendientes ni se marca DONE por disponer del formulario.
+
+## Inventario de rutas especiales §273
+
+Inventario de codigo, no interpretacion juridica ni declaracion de licitud.
+Catalogo SpecialRegimeIdV1 y dispatch de evaluate_special_conditions_v1 contrastados
+con health.py, sensitive_consent.py y eipd_controls_v4.py.
+
+| Regimen del catalogo | Rama documental conectada en evaluador especial | Limite que sigue bloqueado |
+| --- | --- | --- |
+| sensibles_art16 | Consentimiento sensible; excepcion mediante evaluador de derechos | Representacion conserva representacion_no_preparada para confirmar; no extrapolar evaluador de derechos a todas las excepciones del catalogo |
+| salud_perfil_biologico_art16bis | Consentimiento y expediente de salud | Otros authorization_route pasan al fallback; contextos distintos de otro mantienen contexto_restringido_no_preparado |
+| biometricos_art16ter | Consentimiento; excepcion mediante evaluador de derechos biometrico | No extrapolar expediente de derechos a otras excepciones o bases |
+| infancia_adolescencia_art16quater | Deteccion/consistencia de edad y alcance | Sin rama de preparacion especial en dispatch; conserva validador_no_implementado |
+| investigacion_art16quinquies | Deteccion especial y composicion de investigacion/EIPD por ruta separada | Dispatch especial general conserva fallback; diagnostico separado no habilita confirmacion |
+| geolocalizacion_art16sexies | Evaluador de geolocalizacion | Requiere material/coherencia/alcance actuales; rama conectada no implica que todo expediente este preparado |
+
+Todas las condiciones residuales detectadas fuera de su regimen conservan revision
+y validador_no_implementado. No eliminar ese fallback para obtener un resultado
+positivo. Proxima delimitacion tecnica: contrastar infancia y contextos restringidos
+con diseno/fuentes antes de introducir validadores. La tabla no define requisitos
+legales nuevos ni cambia el alcance integral aceptado.
 
 ## Brechas y siguiente orden propuesto
 
@@ -5381,6 +5403,235 @@ Avisos de cache webpack sin fallo de compilacion. La compilacion no acredita MVP
 completo ni aceptacion juridica. Pruebas ficticias hasta MVP; M3-T1 EN PROGRESO y
 confirmacion/activacion bloqueadas.
 
-## Siguiente corte de infancia y adolescencia
+## 2026-10-13 — M3-T1 §221: runtime frontend Node 22
 
-El contrato y el diagnóstico documental interno están en [Infancia y adolescencia](m3-t1-infancia-adolescencia.md). El siguiente paso es vincular el documento a su contexto versionado y comprobar su asociación antes de incorporar persistencia y API.
+Node 22 instalado en paralelo y validado (22.23.3, npm 10.9.9). Frontend .nvmrc fija
+major 22; CI setup-node usa ese archivo como unica referencia. No cambios de
+paquetes/lockfiles, servidor activo ni backend. Para nuevos procesos locales usar
+nvm install/use desde frontend; no se modifica el alias global de Node.
+
+13 pruebas cliente (371 ms), 10 interacciones Chromium (3.9 s), tipos/lint y build
+completo correctos con Node 22. Compilacion en copia temporal sin .env, con valores
+ficticios y dependencias instaladas enlazadas. Aviso Supabase Node 20 ausente;
+avisos webpack de cache permanecen sin fallo. No corrida remota de CI ni prueba
+instalacion limpia de dependencias; no login integrado o despliegue. M3-T1 EN
+PROGRESO, pruebas ficticias hasta MVP; confirmacion/activacion bloqueadas.
+
+## 2026-10-13 — M3-T1 §222: instalacion limpia y reproducible
+
+Node 22.23.3: npm ci instala 387 paquetes desde lockfile en copia temporal sin .env
+ni node_modules enlazados. Tipos/lint, 13 pruebas cliente (457 ms), 10 interacciones
+Chromium (3.8 s) y build completo aprobados con configuracion ficticia. Copia
+retirada al finalizar; servidor/datos/permisos/politica sin cambios. CI cambia npm
+install por npm ci y cache usa package-lock.json. Paquetes/lockfile sin cambios.
+
+GitHub no registra runs ni PR abierto para esta rama: workflow solo push main/master
+y pull_request a esas ramas. No se declara CI remoto aprobado. No login integrado
+ni despliegue. M3-T1 EN PROGRESO; pruebas ficticias hasta MVP; activacion bloqueada.
+
+Instalacion informa deprecaciones existentes de tooling y aviso de seguridad de
+Next.js 15.0.0. Aviso oficial contrastado: https://nextjs.org/blog/CVE-2025-66478
+Actualizacion a release corregida y validacion de compatibilidad quedan pendientes
+prioritarios; compilacion exitosa no elimina ese aviso ni acredita seguridad global.
+
+## 2026-10-13 — M3-T1 §223: actualizacion Next.js corregida
+
+Next y eslint-config-next fijados de 15.0.0 a 15.5.27; package-lock actualizado y
+coherencia de versiones raiz/resueltas comprobada. React 18 conservado. Release
+publicada consultada en npm; aviso oficial mayo 2026 requiere >=15.5.18 en Next 15:
+https://vercel.com/changelog/next-js-may-2026-security-release
+No basta antiguo parche 15.0.x para los avisos posteriores.
+
+Instalacion y validacion en copia temporal sin .env ni node_modules previos, con
+Node 22.23.3 y configuracion ficticia: 13 pruebas cliente (436 ms), 10 interacciones
+Chromium (3.8 s), tipos/lint y build completo aprobados. Manifiestos copiados tras
+exito; copia eliminada. Servidor activo/node_modules originales NO actualizados:
+requiere npm ci y reinicio local antes de afirmar aplicacion efectiva de la correccion.
+No despliegue, login integrado o CI remoto. No afirmacion de ausencia global de CVE.
+
+Avisos existentes de tooling/cache y deprecacion next lint permanecen; migracion
+ESLint CLI diferida. Politica/datos/permisos sin cambios. M3-T1 EN PROGRESO;
+pruebas ficticias hasta MVP; confirmacion/activacion bloqueadas.
+
+## 2026-10-13 — M3-T1 §224: actualizacion aplicada al frontend local
+
+Identificados y detenidos solo procesos Next/npm del frontend en puerto 3000,
+version anterior 15.0.0. npm ci desde lockfile instala 386 paquetes; version instalada
+Next 15.5.27 comprobada. Reiniciado npm run dev con Node 22.23.3: Next 15.5.27 listo
+en 1056 ms en localhost:3000. No cambios de .env, credenciales ni backend.
+
+Comprobacion HTTP sin sesion: /login 200; /admin/licitud-validation 307 Location
+/login; backend /health 200. No se atribuye prueba de acceso autenticado ni CSS
+visual; regresion/build aislados aprobados en §223, sin repetir. Dependencias
+locales ya actualizadas; no despliegue externo ni cambios de politica/datos.
+M3-T1 EN PROGRESO; pruebas ficticias hasta MVP; confirmacion/activacion bloqueadas.
+
+## 2026-10-13 — M3-T1 §225: comprobacion visual tras actualizar Next
+
+Dos capturas del usuario en Edge Responsive 390 x 749, consulta interna local tras
+reinicio §224. Primera: Requisitos de revision, expediente borrador y politica con
+fuentes pendientes, aceptacion pendiente, habilitacion deshabilitada. Segunda:
+Revision guardada muestra Requiere cambios, fundamento expresamente ficticio,
+referencia/fecha originales, politica registrada deshabilitada y metadatos contexto
+version 2/cobertura investigacion. Aviso historico visible: no acredita vigencia
+actual. Bloques de requisitos/politica actual no aparecen entre formulario y evento.
+
+Texto legible en area capturada; sin medicion instrumental de overflow. Consola
+muestra errores de extensiones, no un fallo API visible. No status HTTP de fetch
+expuesto en estas capturas; no se declara prueba Network 200 ni ausencia de errores
+ocultos. Aviso superior de datos ficticios fuera de encuadre, no verificado aqui.
+No nueva escritura ni prueba de login/recuperacion 401. Solo registro documental;
+tests previos no repetidos. M3-T1 EN PROGRESO; pruebas ficticias hasta MVP;
+confirmacion/activacion siguen bloqueadas.
+
+## 2026-10-13 — M3-T1 §226: ESLint directo en frontend
+
+npm run lint usa ESLint CLI en archivos js/jsx/ts/tsx de todo frontend; excluye
+.next/test-results/playwright-report, node_modules ignorado por ESLint. Conserva
+next/core-web-vitals y reglas Hooks; incluye e2e/config/middleware ademas del codigo
+habitual. Sin paquetes nuevos ni cambio de reglas. CI consume el mismo script.
+
+Callback Playwright use renombrado provideFixture para evitar falso positivo Hooks;
+misma llamada/ciclo/limpieza del fixture RAT. ESLint sin errores/avisos y tipos
+aprobados. Playwright --list descubre 25 pruebas en 3 archivos: solo descubrimiento,
+no ejecucion de RAT ni nuevas pruebas de login. Regresion §223 no repetida para
+renombre local y comando lint. El aviso de next lint desaparece en npm run lint;
+el chequeo interno del build sigue administrado por Next.
+
+Servidor/politica/datos sin cambios. M3-T1 EN PROGRESO; pruebas ficticias hasta MVP;
+confirmacion/activacion bloqueadas.
+
+## 2026-10-13 — M3-T1 §227: aviso ficticio comprobado en movil
+
+Captura usuario Edge Responsive 390 x 749 en consulta interna local: aviso superior
+completo y legible indica uso exclusivo de datos ficticios hasta version MVP,
+M3-T1 en progreso y confirmacion/activacion EIPD bloqueadas. Titulo y explicacion
+solo consulta visibles. Completa evidencia visual pendiente del aviso §218, fuera
+de encuadre en §225. No se copian email ni identificadores de la captura.
+
+Sin medicion instrumental de overflow, comprobacion HTTP nueva o prueba de 401.
+Errores visibles de extensiones y mensajes Fast Refresh no acreditan fallo API.
+Solo documentacion; codigo/datos/permisos/politica sin cambios, tests no repetidos.
+M3-T1 EN PROGRESO; pruebas ficticias hasta MVP; bloqueos operativos preservados.
+
+## 2026-10-13 — M3-T1 §228: pruebas ficticias EIPD en CI
+
+Job frontend CI instala Chromium con dependencias y ejecuta explicitamente solo
+las suites eipd-api-client y eipd-consultation. Sin rat.spec.ts, servicios reales,
+secrets o fixture autenticado. Nombre job corregido Node.js 22; reglas de disparo
+main/master/PR sin cambios. Verificacion local del comando exacto con CI=true,
+Node 22.23.3 y Next 15.5.27: 23 aprobadas en 3.9 s. YAML parseado y paso verificado.
+
+No corrida remota de GitHub ni nueva instalacion Chromium en runner limpio;
+instalacion Linux a cargo de Playwright en CI. No nueva capacidad operativa.
+Politica/datos/servidor sin cambios; M3-T1 EN PROGRESO y pruebas ficticias hasta MVP;
+confirmacion/activacion siguen bloqueadas.
+
+## 2026-10-13 — M3-T1 §229: control de formato frontend aprobado
+
+Preflight de formato exigido por CI detecto seis archivos de codigo y un artefacto
+generado. Aplicado Prettier solo a esos seis archivos: layouts admin/dashboard,
+consulta EIPD, cliente y dos suites EIPD. .prettierignore excluye test-results y
+playwright-report. Sin cambio de comportamiento, reglas de negocio o dependencias.
+
+Controles completos del job frontend ejecutados localmente con Node 22.23.3 y
+CI=true: Prettier global correcto, ESLint y tipos aprobados, 23 pruebas ficticias
+EIPD aprobadas (4.2 s). No GitHub remoto ni ejecucion RAT autenticado, build no
+repetido para formato. Politica/datos/permisos sin cambios. M3-T1 EN PROGRESO;
+pruebas ficticias hasta MVP; confirmacion/activacion bloqueadas.
+
+## 2026-10-13 — M3-T1 §230: regresion EIPD backend consolidada
+
+Runner seguro scripts.run_eipd_tests ejecutado en commit 321a64c: 642 pruebas
+aprobadas en 234.27 s, 26 suites focalizadas del catalogo TARGETS. Base fija aislada,
+head y app_user sin bypass/superuser verificados antes; misma verificacion posterior
+correcta, registro de politica de pruebas vacio. No creacion/borrado de DB ni uso
+de expediente operativo. Credenciales no copiadas a documentacion.
+
+Cubre investigacion/bindings, frontera/screening/controles, metadatos/requisitos,
+escritura negativa, almacenamiento/lectura, APIs y concurrencia del catalogo.
+No suite completa del backend: otros modulos y servicios fuera de TARGETS no se
+presentan como probados; no nueva validacion externa de fuentes o aceptacion.
+Solo registro documental, codigo/politica/datos operativos sin cambios. M3-T1 EN
+PROGRESO; pruebas ficticias hasta MVP; confirmacion/activacion bloqueadas.
+
+## 2026-10-14 — M3-T1 §231: controles globales backend aprobados
+
+Preflight CI detecto imports seed_e2e y migracion historica, mas formato de seed,
+servicio RAT y test activacion. Ruff ordena imports seed; Black normaliza los tres
+archivos. Comparacion AST confirma codigo identico en servicio/test y cuerpo seed
+identico excluyendo imports ordenados. Seed no ejecutado, ningun dato creado.
+
+Migracion aplicada 5997a757f17b intacta por regla append-only AGENTS.md. Excepcion
+Ruff por archivo exacto limitada a I001 (orden imports); sin exclusion de otras
+reglas o migraciones. Ruff global aprobado; Black global 230 archivos correctos.
+No cambio funcional, tests de regresion §230 no repetidos para formato. No suite
+integral del producto ni CI remoto. Politica/datos/permisos sin cambios; M3-T1 EN
+PROGRESO, pruebas ficticias hasta MVP; confirmacion/activacion bloqueadas.
+
+## 2026-10-14 — M3-T1 §232: CI remoto aprobado en PR borrador
+
+PR #30 creado en borrador sobre main y adjunto al chat:
+https://github.com/alejriq-are/CumpleIA/pull/30
+CI success para commit 7f94bbf1924792a7a11b1a4b6d314d1bdcc35f5d:
+https://github.com/alejriq-are/CumpleIA/actions/runs/38593979233
+Backend: pytest tests/ completo, 3977 passed en 624.62 s; job 11m21s. Lint, Black,
+preparacion DB, migraciones y seed cuestionario correctos en runner GitHub aislado.
+Frontend Node 22: instalacion lockfile, ESLint, tipos, instalacion Chromium,
+23 pruebas ficticias EIPD y Prettier aprobados; job 59 s.
+
+Resultado ligado a ese commit, no garantia de futuros commits. PR sigue draft,
+sin reviewDecision registrado; mergeStateStatus CLEAN no equivale a revision o
+permiso para merge. No fusion ni despliegue. Suite completa backend aprobada en
+CI no prueba login real/frontend RAT autenticado ni valida externamente fuentes.
+
+Pendientes de esta entrega: revision tecnica del alcance/migraciones; desarrollo
+y validacion restantes del MVP. Fuentes/aceptacion operativas pendientes, politica
+deshabilitada; empresa/revision autentica diferidas hasta MVP por acuerdo usuario.
+Pruebas ficticias hasta MVP, M3-T1 EN PROGRESO y confirmacion/activacion bloqueadas.
+Solo registro documental; codigo/politica/datos locales sin cambios.
+
+## 2026-10-14 — M3-T1 §233: revision focal de rutas sensibles
+
+Inspeccion manual de api/licitud.py, api/eipd_admin.py, db/eipd_admin.py y caminos
+de revision/historia/politica seleccionada en services/licitud.py; contexto
+services/eipd_confirmation.py. Lecturas view_content y escrituras edit_content,
+suscripcion requerida y header tenant UUID. Historia valida padre y filtra evento
+por assessment/organization; escritura revalida serie/borrador con filtros tenant
+bajo locks y rechaza continuar con contexto V2. Politica habilitada no admitida en
+canal operativo revisado. Dependencia admin verifica JWT, canal limitado y actor
+personal antes de operar, con commit/rollback transaccional.
+
+No hallazgo accionable nuevo en estos caminos. Revision focal, NO revision completa
+de 198 archivos del PR ni aprobacion independiente/humana/seguridad global. No
+nuevos tests para lectura de codigo; evidencia automatizada §232 referida al commit
+7f94bbf. CI del ultimo commit documental 35cb46f en curso al iniciar esta revision;
+no se presume aprobado por el resultado anterior.
+
+PR #30 draft; sin merge/despliegue/cambio de permisos o politica. M3-T1 EN PROGRESO;
+pruebas ficticias hasta MVP; confirmacion/activacion operativas bloqueadas.
+
+## 2026-10-14 — M3-T1 §234: revision de politica global y limite SQL
+
+Inspeccion servicios eipd_policy_store y migraciones global audit/personal authority:
+entradas personales derivan actor bloqueado, primitivas exigen rol administrativo,
+publicacion/seleccion rechazan activation distinta de deshabilitada; seleccion
+con advisory exclusivo y selector FOR UPDATE, lectura transaccional con locks
+compartidos y READ COMMITTED. SQL limita privilegios, integridad y autoridad.
+
+Precision: payload_identity SQL no exige activation deshabilitada. No afirmar
+bloqueo SQL equivalente al servicio ni proteccion ante escritura SQL de canal
+privilegiado fuera de API. Este limite de confianza no habilita endpoint; no se
+introduce migracion o cambio operativo. Revision focal, no cierre de seguridad.
+
+Corregido docstring obsoleto Sin API administrativa en eipd_policy_store: API
+conectada via entradas personales y gestion transaccional de dependencia; distingue
+primitivas internas y barrera de activation del servicio. Solo comentario/docs,
+funcionalidad sin cambios. Ruff/Black del archivo correctos; sin repeticion de tests.
+M3-T1 EN PROGRESO; pruebas ficticias hasta MVP; confirmacion/activacion bloqueadas.
+
+## Delimitacion §274
+
+Infancia/adolescencia inicia contrato interno y plan de integracion en
+[m3-t1-infancia-adolescencia.md](m3-t1-infancia-adolescencia.md).
+Sin almacenamiento/API/evaluador positivo; conserva fallback y bloqueos.

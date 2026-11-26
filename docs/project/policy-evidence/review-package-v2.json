@@ -1,0 +1,119 @@
+{
+  "package_version": 2,
+  "reference": "m3-t1-politica-juridica-mvp-revision-2",
+  "status": "responsabilidad_definida_flujo_tenant_pendiente",
+  "checked_on": "2026-10-16",
+  "validation_base_commit": "9676dfc5341bab2717d91e4931f3acae0e3706e0",
+  "runtime_policy_reference": "m3-t1-infancia-pruebas-negativas-v1",
+  "runtime_sources_status": "pendiente",
+  "runtime_acceptance_status": "pendiente",
+  "activation": "deshabilitada",
+  "data_kind": "ficticios",
+  "authorizes_action": false,
+  "can_confirm": false,
+  "acceptance": {
+    "status": "pendiente",
+    "accepted_by": null,
+    "accepted_on": null,
+    "acceptance_reference": null,
+    "acceptance_evidence_reference": null,
+    "validation_commit": null
+  },
+  "sources": [
+    {
+      "id": "S1",
+      "type": "publicacion_original",
+      "url": "https://www.diariooficial.interior.gob.cl/publicaciones/2024/12/13/44023/01/2583630.pdf",
+      "publication_date": "2024-12-13",
+      "artifact": "docs/project/policy-evidence/ley-21719-do-2024-12-13.pdf",
+      "sha256": "a760962caa0348d4ad9d7530a42eee12370d5dd74ea968a19ab91f1c86109e2a",
+      "documentary_check": "consultada",
+      "legal_verifier": null
+    },
+    {
+      "id": "S2",
+      "type": "texto_consolidado",
+      "url": "https://www.bcn.cl/leychile/navegar?i=1209272",
+      "documentary_check": "consultada",
+      "snapshot_artifact": null,
+      "legal_verifier": null
+    },
+    {
+      "id": "S3",
+      "type": "anuncio_propuesta_no_norma",
+      "url": "https://www.economia.gob.cl/2026/09/01/gobierno-propone-ampliar-plazo-para-implementar-nueva-ley-de-proteccion-de-datos-y-institucionalidad.htm",
+      "documentary_check": "consultada",
+      "legal_verifier": null
+    },
+    {
+      "id": "S4",
+      "type": "instrumentos_complementarios_agencia",
+      "url": null,
+      "documentary_check": "no_verificados_en_busqueda_acotada",
+      "legal_verifier": null
+    },
+    {
+      "id": "S5",
+      "type": "ejemplo_rat_aportado_por_usuario",
+      "filename": "rat_secretaría_de_gobierno_digital_-_v20112025.pdf",
+      "sha256": "8a57957519ea7eb3ac66c750faec5b7c5ed75a9c037fed5413e81060b35a7f28",
+      "pages": 3,
+      "documentary_check": "columna_roles_pagina_1_leida_y_renderizada",
+      "official_url_verified": false,
+      "artifact_uploaded": false,
+      "supports": "distincion_responsable_encargado_por_actividad",
+      "does_not_prove": "acta_aceptacion_o_facultad_personal"
+    }
+  ],
+  "release_gates": [
+    {
+      "id": "G1-alcance-mvp",
+      "status": "pendiente",
+      "evidence_reference": null
+    },
+    {
+      "id": "G2-revision-juridica",
+      "status": "pendiente",
+      "evidence_reference": null
+    },
+    {
+      "id": "G3-politica-versionada",
+      "status": "pendiente",
+      "evidence_reference": null
+    },
+    {
+      "id": "G4-pruebas-tecnicas",
+      "status": "pendiente",
+      "evidence_reference": null
+    },
+    {
+      "id": "G5-operacion-piloto",
+      "status": "pendiente",
+      "evidence_reference": null
+    },
+    {
+      "id": "G6-datos-reales",
+      "status": "pendiente",
+      "evidence_reference": null
+    },
+    {
+      "id": "G7-activacion-eipd",
+      "status": "pendiente",
+      "evidence_reference": null
+    }
+  ],
+  "review_document": "docs/project/m3-t1-politica-juridica-mvp-v2.md",
+  "review_document_sha256": "b591d4fec9222a51ae6779621a1688e7cd94c660aadc10387dedc43d57560250",
+  "supersedes": "m3-t1-politica-juridica-mvp-revision-1",
+  "organization_acceptance_design": {
+    "responsible": "organizacion_responsable_del_tratamiento",
+    "signing_actor": "persona_facultada_por_la_organizacion",
+    "external_legal_reviewer_required_for_development": false,
+    "operational_platform_identity_required_for_development": false,
+    "real_acceptance_required_for_development": false,
+    "implementation_status": "pendiente",
+    "test_data_kind": "ficticios",
+    "does_not_authorize_global_policy_publication": true,
+    "does_not_activate_eipd": true
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "data_kind": "ficticios",
+  "source_database": "cumpleia_eipd_tests_20261009",
+  "restore_database": "cumpleia_pilot_restore_check_20261016",
+  "tables_checked": 39,
+  "history_rls_and_immutability_checked": 4,
+  "history_rows_restored": 8,
+  "snapshot_fingerprint": "0240c7ec971d294e588c5392556f6430e15703394102cfcd7f29d064ec121e6c",
+  "elapsed_seconds": 1.44,
+  "result": "restauracion_local_aislada_coincidente",
+  "source_unchanged": true,
+  "populated_fixture_verified": true,
+  "restored_api_verified": true,
+  "proves_production_restore": false,
+  "mvp_ready": false,
+  "allows_real_data": false,
+  "can_confirm": false,
+  "activation": "deshabilitada",
+  "temporary_database_removed": true,
+  "scenarios_checked": [
+    "clientes_lia_borrador",
+    "trabajadores_lia_borrador",
+    "infancia_sucesores_negativos"
+  ]
+}

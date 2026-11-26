@@ -7,8 +7,9 @@ sin sesión y un ciclo autenticado del RAT.
 ## Preparación
 
 Desde el repositorio canónico y la rama de trabajo, usar el entorno Node del
-proyecto (Node 22+ recomendado por las dependencias actuales de Supabase;
-el cargador de `.env` requiere como mínimo Node 20.12).
+proyecto: Node 22, fijado en `frontend/.nvmrc` y compartido con CI.
+Con nvm, ejecutar `cd frontend`, `nvm install` y `nvm use` antes de iniciar
+el frontend o las pruebas. La validacion §221 utilizo Node 22.23.3.
 
 1. Mantener `E2E_USER_EMAIL` y `E2E_USER_PASSWORD` exclusivamente en `.env` de la
    raíz. No usar variables `NEXT_PUBLIC_*` para estas credenciales. No copiar
@@ -829,3 +830,293 @@ pendiente validar actualizacion del runtime, sin cambiar dependencias en esta et
 Avisos de cache webpack sin fallo de compilacion. La compilacion no acredita MVP
 completo ni aceptacion juridica. Pruebas ficticias hasta MVP; M3-T1 EN PROGRESO y
 confirmacion/activacion bloqueadas.
+
+## 2026-10-13 — M3-T1 §221: runtime frontend Node 22
+
+Node 22 instalado en paralelo y validado (22.23.3, npm 10.9.9). Frontend .nvmrc fija
+major 22; CI setup-node usa ese archivo como unica referencia. No cambios de
+paquetes/lockfiles, servidor activo ni backend. Para nuevos procesos locales usar
+nvm install/use desde frontend; no se modifica el alias global de Node.
+
+13 pruebas cliente (371 ms), 10 interacciones Chromium (3.9 s), tipos/lint y build
+completo correctos con Node 22. Compilacion en copia temporal sin .env, con valores
+ficticios y dependencias instaladas enlazadas. Aviso Supabase Node 20 ausente;
+avisos webpack de cache permanecen sin fallo. No corrida remota de CI ni prueba
+instalacion limpia de dependencias; no login integrado o despliegue. M3-T1 EN
+PROGRESO, pruebas ficticias hasta MVP; confirmacion/activacion bloqueadas.
+
+## 2026-10-13 — M3-T1 §222: instalacion limpia y reproducible
+
+Node 22.23.3: npm ci instala 387 paquetes desde lockfile en copia temporal sin .env
+ni node_modules enlazados. Tipos/lint, 13 pruebas cliente (457 ms), 10 interacciones
+Chromium (3.8 s) y build completo aprobados con configuracion ficticia. Copia
+retirada al finalizar; servidor/datos/permisos/politica sin cambios. CI cambia npm
+install por npm ci y cache usa package-lock.json. Paquetes/lockfile sin cambios.
+
+GitHub no registra runs ni PR abierto para esta rama: workflow solo push main/master
+y pull_request a esas ramas. No se declara CI remoto aprobado. No login integrado
+ni despliegue. M3-T1 EN PROGRESO; pruebas ficticias hasta MVP; activacion bloqueada.
+
+Instalacion informa deprecaciones existentes de tooling y aviso de seguridad de
+Next.js 15.0.0. Aviso oficial contrastado: https://nextjs.org/blog/CVE-2025-66478
+Actualizacion a release corregida y validacion de compatibilidad quedan pendientes
+prioritarios; compilacion exitosa no elimina ese aviso ni acredita seguridad global.
+
+## 2026-10-13 — M3-T1 §223: actualizacion Next.js corregida
+
+Next y eslint-config-next fijados de 15.0.0 a 15.5.27; package-lock actualizado y
+coherencia de versiones raiz/resueltas comprobada. React 18 conservado. Release
+publicada consultada en npm; aviso oficial mayo 2026 requiere >=15.5.18 en Next 15:
+https://vercel.com/changelog/next-js-may-2026-security-release
+No basta antiguo parche 15.0.x para los avisos posteriores.
+
+Instalacion y validacion en copia temporal sin .env ni node_modules previos, con
+Node 22.23.3 y configuracion ficticia: 13 pruebas cliente (436 ms), 10 interacciones
+Chromium (3.8 s), tipos/lint y build completo aprobados. Manifiestos copiados tras
+exito; copia eliminada. Servidor activo/node_modules originales NO actualizados:
+requiere npm ci y reinicio local antes de afirmar aplicacion efectiva de la correccion.
+No despliegue, login integrado o CI remoto. No afirmacion de ausencia global de CVE.
+
+Avisos existentes de tooling/cache y deprecacion next lint permanecen; migracion
+ESLint CLI diferida. Politica/datos/permisos sin cambios. M3-T1 EN PROGRESO;
+pruebas ficticias hasta MVP; confirmacion/activacion bloqueadas.
+
+## 2026-10-13 — M3-T1 §224: actualizacion aplicada al frontend local
+
+Identificados y detenidos solo procesos Next/npm del frontend en puerto 3000,
+version anterior 15.0.0. npm ci desde lockfile instala 386 paquetes; version instalada
+Next 15.5.27 comprobada. Reiniciado npm run dev con Node 22.23.3: Next 15.5.27 listo
+en 1056 ms en localhost:3000. No cambios de .env, credenciales ni backend.
+
+Comprobacion HTTP sin sesion: /login 200; /admin/licitud-validation 307 Location
+/login; backend /health 200. No se atribuye prueba de acceso autenticado ni CSS
+visual; regresion/build aislados aprobados en §223, sin repetir. Dependencias
+locales ya actualizadas; no despliegue externo ni cambios de politica/datos.
+M3-T1 EN PROGRESO; pruebas ficticias hasta MVP; confirmacion/activacion bloqueadas.
+
+## 2026-10-13 — M3-T1 §225: comprobacion visual tras actualizar Next
+
+Dos capturas del usuario en Edge Responsive 390 x 749, consulta interna local tras
+reinicio §224. Primera: Requisitos de revision, expediente borrador y politica con
+fuentes pendientes, aceptacion pendiente, habilitacion deshabilitada. Segunda:
+Revision guardada muestra Requiere cambios, fundamento expresamente ficticio,
+referencia/fecha originales, politica registrada deshabilitada y metadatos contexto
+version 2/cobertura investigacion. Aviso historico visible: no acredita vigencia
+actual. Bloques de requisitos/politica actual no aparecen entre formulario y evento.
+
+Texto legible en area capturada; sin medicion instrumental de overflow. Consola
+muestra errores de extensiones, no un fallo API visible. No status HTTP de fetch
+expuesto en estas capturas; no se declara prueba Network 200 ni ausencia de errores
+ocultos. Aviso superior de datos ficticios fuera de encuadre, no verificado aqui.
+No nueva escritura ni prueba de login/recuperacion 401. Solo registro documental;
+tests previos no repetidos. M3-T1 EN PROGRESO; pruebas ficticias hasta MVP;
+confirmacion/activacion siguen bloqueadas.
+
+## 2026-10-13 — M3-T1 §226: ESLint directo en frontend
+
+npm run lint usa ESLint CLI en archivos js/jsx/ts/tsx de todo frontend; excluye
+.next/test-results/playwright-report, node_modules ignorado por ESLint. Conserva
+next/core-web-vitals y reglas Hooks; incluye e2e/config/middleware ademas del codigo
+habitual. Sin paquetes nuevos ni cambio de reglas. CI consume el mismo script.
+
+Callback Playwright use renombrado provideFixture para evitar falso positivo Hooks;
+misma llamada/ciclo/limpieza del fixture RAT. ESLint sin errores/avisos y tipos
+aprobados. Playwright --list descubre 25 pruebas en 3 archivos: solo descubrimiento,
+no ejecucion de RAT ni nuevas pruebas de login. Regresion §223 no repetida para
+renombre local y comando lint. El aviso de next lint desaparece en npm run lint;
+el chequeo interno del build sigue administrado por Next.
+
+Servidor/politica/datos sin cambios. M3-T1 EN PROGRESO; pruebas ficticias hasta MVP;
+confirmacion/activacion bloqueadas.
+
+## 2026-10-13 — M3-T1 §227: aviso ficticio comprobado en movil
+
+Captura usuario Edge Responsive 390 x 749 en consulta interna local: aviso superior
+completo y legible indica uso exclusivo de datos ficticios hasta version MVP,
+M3-T1 en progreso y confirmacion/activacion EIPD bloqueadas. Titulo y explicacion
+solo consulta visibles. Completa evidencia visual pendiente del aviso §218, fuera
+de encuadre en §225. No se copian email ni identificadores de la captura.
+
+Sin medicion instrumental de overflow, comprobacion HTTP nueva o prueba de 401.
+Errores visibles de extensiones y mensajes Fast Refresh no acreditan fallo API.
+Solo documentacion; codigo/datos/permisos/politica sin cambios, tests no repetidos.
+M3-T1 EN PROGRESO; pruebas ficticias hasta MVP; bloqueos operativos preservados.
+
+## 2026-10-13 — M3-T1 §228: pruebas ficticias EIPD en CI
+
+Job frontend CI instala Chromium con dependencias y ejecuta explicitamente solo
+las suites eipd-api-client y eipd-consultation. Sin rat.spec.ts, servicios reales,
+secrets o fixture autenticado. Nombre job corregido Node.js 22; reglas de disparo
+main/master/PR sin cambios. Verificacion local del comando exacto con CI=true,
+Node 22.23.3 y Next 15.5.27: 23 aprobadas en 3.9 s. YAML parseado y paso verificado.
+
+No corrida remota de GitHub ni nueva instalacion Chromium en runner limpio;
+instalacion Linux a cargo de Playwright en CI. No nueva capacidad operativa.
+Politica/datos/servidor sin cambios; M3-T1 EN PROGRESO y pruebas ficticias hasta MVP;
+confirmacion/activacion siguen bloqueadas.
+
+## 2026-10-13 — M3-T1 §229: control de formato frontend aprobado
+
+Preflight de formato exigido por CI detecto seis archivos de codigo y un artefacto
+generado. Aplicado Prettier solo a esos seis archivos: layouts admin/dashboard,
+consulta EIPD, cliente y dos suites EIPD. .prettierignore excluye test-results y
+playwright-report. Sin cambio de comportamiento, reglas de negocio o dependencias.
+
+Controles completos del job frontend ejecutados localmente con Node 22.23.3 y
+CI=true: Prettier global correcto, ESLint y tipos aprobados, 23 pruebas ficticias
+EIPD aprobadas (4.2 s). No GitHub remoto ni ejecucion RAT autenticado, build no
+repetido para formato. Politica/datos/permisos sin cambios. M3-T1 EN PROGRESO;
+pruebas ficticias hasta MVP; confirmacion/activacion bloqueadas.
+
+## 2026-10-14 — M3-T1 §244: diagnostico de representacion en readiness/interfaz
+
+Contrato de salida versionado con result/motivos, flags false y cobertura pendiente
+cuando hay diagnostico. Backend evalua contra RAT actual; motivos de obsolescencia,
+material/alcance/fechas y contexto no disponible. Exige representacion ausente para
+consentimiento representado sensible; documento completo solo comprueba datos.
+Gate de confirmacion conservado. Readiness vuelve a 200 con bloque propio en vez
+de 409 temporal. Sin documento/representacion sensible, salida null/no_aplica.
+
+Con diagnostico pendiente, proyeccion V3 marca las tres decisiones no preparadas,
+metadata de accion null y motivo de asociacion pendiente. No toca eventos, hashes
+historicos ni habilita nuevas revisiones. Estado de metadata interno anterior
+sigue referido al contexto de su version; campo cobertura explicito lo delimita.
+Cliente valida diagnostico/coherencia/flags y suprime vigencia global/prerrequisitos
+que no cubren representacion. Pantalla muestra bloque, motivos españoles y aviso
+sin facultad/autenticidad; consulta historica retira el bloque actual. Sin botones
+nuevos de escritura o confirmacion. Compatible con respuesta legacy sin bloque.
+
+132 pruebas backend focalizadas aprobadas (5.45 s), entorno aislado verificado;
+20 cliente y 11 interacciones Chromium frontend aprobadas (31, 4.5 s), tipos/lint
+correctos. Incluye actualizacion test OpenAPI al contrato sucesor sin retirar V3,
+rechazo de flags/resultados incoherentes, contexto obsoleto/retiro, tres decisiones
+pendientes y UI/historia. Ruff/Black/Prettier correctos. No suite integral nueva,
+prueba visual con sesion real del bloque nuevo ni cambio de fixture operativo.
+M3-T1 EN PROGRESO; pruebas ficticias hasta MVP; confirmacion/activacion bloqueadas.
+
+## 2026-10-14 — M3-T1 §261: motivos V4 visibles y requisitos separados
+
+Cliente valida motivos actuales de preparacion/revision/confirmacion y conserva
+prerrequisitos V4 con version propia; no los convierte a V3. Vista muestra conjunto
+completo de motivos agrupados y las tres decisiones bloqueadas, con etiquetas de
+representacion/politica en español. Aviso actual distingue diagnostico integrado
+de vigencia de eventos guardados; identidad documental no se presenta como contexto
+de accion. Vistas V3 anteriores conservadas. Consulta historica limpia motivos V4,
+sin añadir botones de escritura, confirmacion o activacion.
+
+39 pruebas cliente/Chromium aprobadas en 4.6 s; tipos/lint correctos. Caso V4
+revalidado explicitamente a 390x749: 1 aprobado en 1.5 s. Prettier correcto en cinco
+archivos modificados. Nuevos casos: motivos malformados rechazados y recorrido UI
+V4 con grupos/traducciones/decisiones bloqueadas/limpieza al leer historia. Selector
+ambiguo y traducciones duplicadas detectados por checks se corrigieron antes de
+validacion final. No prueba de sesion personal real ni cambio de fixture operativo.
+M3-T1 EN PROGRESO; datos ficticios hasta MVP; activacion EIPD bloqueada.
+
+## 2026-10-14 — M3-T1 §263: consulta historica sucesora integrada
+
+Cliente y vista consultan GET reviews/{id}/v3 y conservan metadata1/2/null sin
+reconstruir historia ni inferir vigencia actual. Metadata2 valida versiones,
+coberturas, campos cerrados y hashes del evento; muestra identidad documental
+registrada de investigacion/representacion sin habilitar decisiones. Escritura
+negativa existente V2 sin cambios. Lector de ultima revision admite metadata2;
+proyeccion antigua no la convierte a metadata1. Readiness V4 conserva bloqueos.
+
+46 pruebas frontend aprobadas; tipos/lint correctos. 13 pruebas backend de lectura
+V3/V2/readiness aprobadas, incluyendo evento sintetico metadata2 y lectura repetida.
+Fixture elimina exclusivamente su evento en finally antes de limpiar el padre;
+sin alterar permisos append-only de ejecucion. Ruff/Black correctos. Solo datos
+ficticios en base aislada; sin eventos operativos nuevos, merge ni despliegue.
+M3-T1 EN PROGRESO; activacion EIPD bloqueada. Proximo: revisar prerrequisitos y
+alcance pendiente del registro negativo V3 antes de ampliar escritura.
+
+## 2026-10-14 — M3-T1 §269: cliente explicito de registro negativo V3
+
+recordNegativeV3 envia solo decision/fundamento/referencia a POST reviews/v3 con
+sesion/tenant y sin cache. Validador compartido rechaza positivos, campos de servidor,
+entradas vacias/null. Escritura exige respuesta3/metadata2/politica registrada,
+identidad tenant/evaluacion y concordancia exacta de solicitud humana. No convierte
+respuesta historica legacy/null en exito de escritura sucesora ni reintenta una
+respuesta incompatible que podria corresponder a evento ya guardado. Metodo V2
+conservado. Sin botones nuevos ni cambio de permisos/confirmacion/activacion.
+
+61 pruebas cliente/Chromium aprobadas en5.1s, incluidas15 nuevas: dos negativas,
+ocho respuestas incompatibles, entradas invalidas y401/402/403/409 sin reintento.
+Type-check, lint y Prettier correctos. Tests sinteticos del cliente, no escritura
+en sesion operativa. Siguiente interfaz de registro negativo con alcance explicito,
+limpieza al cambiar expediente y tratamiento de resultado incierto sin duplicados.
+M3-T1 EN PROGRESO; EIPD bloqueada, sin merge/despliegue.
+
+## 2026-10-14 — M3-T1 §270: formulario negativo V3 de desarrollo
+
+Panel interno conecta recordNegativeV3 mediante sesion actual. Tras consultar
+borrador V4 con politica deshabilitada ofrece formulario separado solo para
+requiere_cambios/no_continuar, fundamento/referencia y casilla de datos ficticios.
+Servidor conserva autorizacion e identidad; diagnostico no se presenta como permiso.
+Mensajes de preparacion distinguen formulario negativo de acciones positivas.
+Ref sincrona impide solicitudes simultaneas; inputs bloqueados durante escritura.
+Exito muestra evento guardado, limpia solicitud y bloquea otro envio en ese alcance.
+Resultado desconocido bloquea repeticion incluso tras nueva consulta; requiere
+verificar historial antes de repetir. Rechazo409 retira formulario hasta reconsulta.
+Cambio de expediente limpia solicitud/resultado/estado, sin arrastrar datos ajenos.
+
+66 pruebas cliente/Chromium aprobadas en6.6s, cinco nuevas de formulario: exito,
+espera/envio unico, resultado incierto,403/limpieza y409/reconsulta en390x749.
+Tipos/lint/Prettier correctos. Pruebas de pantalla usan adaptadores sinteticos;
+conexion de pagina tipada a cliente real, sin escritura en sesion personal ni datos
+operativos. CI331fc83 success. No botones positivos, confirmacion o activacion.
+M3-T1 EN PROGRESO; siguiente validar recorrido integrado aislado/auditar alcance.
+Sin merge ni despliegue; EIPD bloqueada.
+
+## 2026-10-14 — M3-T1 §271: recorrido integrado Chromium/cliente/API/DB aislada
+
+Nuevo ejecutor fijo python -m scripts.run_eipd_browser_test usa build_environment
++ verify_destination de suite EIPD, exige Node/npm local y lanza solo test integrado.
+Pytest crea expediente ficticio y servidor HTTP127.0.0.1 de puerto aleatorio con
+sesion sintetica de fixtures; Chromium390x749 renderiza componente y usa cliente/API
+reales para consultar, registrar negativa y leer evento. Verificacion DB exige un
+solo evento metadata2, actor servidor esperado y statusborrador. Cleanup de fixture
+elimina solo eventos del assessment de prueba, cierra servidor/proceso y shell temporal.
+Shell/servidor comparten origen: primer intento con shell interceptado localhost
+fue bloqueado por proteccion loopback; corregido sin desactivar seguridad del browser
+ni modificar CORS operativo. Ningun dato o sesion personal utilizado.
+
+Recorrido integrado opt-in aprobado en3.09s mediante ejecutor final. 66 pruebas
+frontend habituales aprobadas en6.4s; integrado se omite explicitamente sin servidor
+inyectado. Tipos/lint/Prettier y Ruff/Black global262 archivos correctos. Prueba real
+de componentes/cliente/transporte/API/PostgreSQL, con autenticacion sintetica; no
+prueba de login Supabase ni navegador personal. No funcion nueva del producto.
+M3-T1 EN PROGRESO; auditoria integral y validacion de sesion pendientes. Confirmacion
+y activacion EIPD bloqueadas; sin merge/despliegue.
+
+### Ejecutar recorrido integrado aislado
+
+Con Node/npm disponibles en PATH y desde backend:
+
+```text
+../.venv/bin/python -m scripts.run_eipd_browser_test
+```
+
+El ejecutor fija destino de pruebas, verifica head/roles/registro vacio y no admite
+argumentos. No iniciar el spec integrado directamente contra servicios operativos.
+No exige claves nuevas ni exportar tokens personales. Sin CUMPLEIA_UI_API el spec
+Playwright se omite; el runner la deriva de su servidor temporal. Sin
+CUMPLEIA_UI_INTEGRATION=1 el test pytest integrado se omite en suites ordinarias.
+
+## 2026-10-14 — M3-T1 §272: auditoria vigente y CI integrado aislado
+
+Matriz de aceptacion actualizada contra codigo: representacion ya tiene persistencia,
+CRUD/diagnostico/gates y registro negativo V3; no equivale a facultades reales ni
+confirmacion. Se mantienen pendientes alcance integral, rutas especiales con
+validador_no_implementado, fuentes/aceptacion y validacion de sesion personal.
+No se reclasifican silenciosamente como diferidas ni se declara DONE.
+
+Nuevo trabajo CI separado eipd-integration instala Python/Node/Chromium, inicia
+PostgreSQL exclusivo cumpleia_eipd_tests_20261009, aplica migraciones y ejecuta
+runner fijo integrado. Environmentdevelopment solo para esa DB ficticia/efimera;
+roles separados y secretos dummy. No comparte servicio con pruebas generales ni
+usa tokens personales. YAML parseado y comprobados nombreDB/env/runner; diffcheck
+correcto. Recorrido local real ya validado§271; primera ejecucion remota del nuevo
+job pendiente tras push. CIec5679b frontend success/backend en ejecucion al consultar;
+no se afirma suite integral actual aprobada. Sin cambio de logica del producto.
+Siguiente inventario de rutas especiales residuales contra catalogo/diseno y
+resolucion de fallos CI si aparecen. M3-T1 EN PROGRESO; EIPD bloqueada.

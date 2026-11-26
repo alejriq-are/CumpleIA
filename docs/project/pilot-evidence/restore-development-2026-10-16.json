@@ -1,0 +1,23 @@
+{
+  "activation": "deshabilitada",
+  "allows_real_data": false,
+  "can_confirm": false,
+  "data_kind": "ficticios",
+  "elapsed_seconds": 0.68,
+  "history_rls_and_immutability_checked": 4,
+  "history_rows_restored": 0,
+  "mvp_ready": false,
+  "proves_production_restore": false,
+  "restore_database": "cumpleia_pilot_restore_check_20261016",
+  "result": "restauracion_local_aislada_coincidente",
+  "schema_version": 1,
+  "snapshot_fingerprint": "c5a321c5bf438069699d5bf4a3e868481a09a83f54fc1a1b6053dd30d2d8d3a8",
+  "source_database": "cumpleia_eipd_tests_20261009",
+  "source_unchanged": true,
+  "tables_checked": 39,
+  "temporary_database_removed": true,
+  "negative_checks": {
+    "external_arguments_rejected": 3,
+    "existing_database_preserved": true
+  }
+}
