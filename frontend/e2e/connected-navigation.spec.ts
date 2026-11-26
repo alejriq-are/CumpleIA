@@ -359,6 +359,7 @@ test.beforeEach(async ({ page }) => {
         authorizes_action: false,
         can_confirm: false,
       });
+    if (pathname.endsWith("/eipd-versions/v1") && method === "GET") return result([]);
     if (match && records[id] && pathname.endsWith(id)) {
       if (method === "PATCH") records[id] = { ...records[id], ...body };
       return result(records[id]);
@@ -3489,7 +3490,6 @@ test("12A cambiar pasos EIPD no consulta ni escribe y Atrás conserva las notas"
 
 for (const failure of ["absent", "network", "provider", "api401", "api403", "api503"]) {
   test(`12B clasifica ${failure} y recupera consulta conservando borradores`, async ({ page }) => {
-    test.fixme(true, "Pendiente: spec desfasado respecto de la interfaz de la rama larga.");
     if (failure === "absent") await page.setViewportSize({ width: 390, height: 844 });
     await legal(page);
     await enable(page);
