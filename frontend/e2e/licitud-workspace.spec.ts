@@ -593,10 +593,6 @@ test("documento EIPD incompatible no se reemplaza y consulta no permite guardar"
 
 for (const mode of ["adultos", "infancia", "error"] as const) {
   test(`revision muestra infancia solo si aplica y conserva errores: ${mode}`, async ({ page }) => {
-    test.fixme(
-      mode === "adultos",
-      "Pendiente: spec desfasado respecto de la interfaz de la rama larga."
-    );
     test.skip(integrated, "Variantes de alcance e historial aisladas del servidor");
     await draft(page);
     await expect(page.getByRole("status")).toContainText("Borrador creado");
@@ -624,10 +620,8 @@ for (const mode of ["adultos", "infancia", "error"] as const) {
     });
     if (mode === "adultos") {
       await expect(
-        page.getByText("No hay un borrador EIPD guardado.", {
-          exact: false,
-        })
-      ).toBeVisible();
+        page.getByRole("region", { name: "Borrador EIPD guardado para consulta", exact: true })
+      ).toHaveCount(0);
       await expect(history).toBeHidden();
       await expect(
         page.getByText("Elige una resolución y lee su contenido.", { exact: false })
@@ -645,8 +639,12 @@ for (const mode of ["adultos", "infancia", "error"] as const) {
       await expect(
         page.getByRole("region", { name: "Borrador EIPD guardado para consulta", exact: true })
       ).toBeVisible();
+      await page
+        .getByRole("region", { name: "Borrador EIPD guardado para consulta", exact: true })
+        .getByText("Consultar borrador EIPD guardado", { exact: true })
+        .click();
       await expect(
-        page.getByText("Para emitir una revisión formal, consulta una versión EIPD registrada", {
+        page.getByText("Las revisiones se registran sobre una versión documental registrada", {
           exact: false,
         })
       ).toBeVisible();
