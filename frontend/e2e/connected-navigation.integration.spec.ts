@@ -61,7 +61,7 @@ test("navegación real API/PostgreSQL: guardar, recargar y recuperar contexto y 
   await context.getByRole("button", { name: "Aplicar contexto", exact: true }).click();
   await page.getByRole("button", { name: "Abrir menú", exact: true }).click();
   await page
-    .getByRole("navigation", { name: "Módulos de la maqueta" })
+    .getByRole("navigation", { name: "Módulos del espacio de trabajo" })
     .getByRole("button", { name: "Bases de licitud", exact: true })
     .click();
   const main = page.locator("main.prototype-work");

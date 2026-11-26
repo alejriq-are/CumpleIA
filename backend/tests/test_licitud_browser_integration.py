@@ -14,9 +14,6 @@ from tests import test_eipd_child_successors as cases
 
 rat_m3 = cases.rat_m3
 pytestmark = [
-    pytest.mark.skip(
-        reason="Pendiente: falla también en la rama larga (desfase de spec/interfaz); revisar y reactivar."
-    ),
     pytest.mark.asyncio(loop_scope="session"),
     pytest.mark.skipif(
         os.getenv("CUMPLEIA_UI_INTEGRATION") != "1",
