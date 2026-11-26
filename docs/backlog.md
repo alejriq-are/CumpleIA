@@ -1,6 +1,1230 @@
+## LIC-DOC-001 — 5B.2 aceptado; publicación autorizada, 03/11/2026
+
+Checklist asistido completado por el usuario: registro, consulta, copia, conflicto de origen, recuperación sin duplicados, teclado y ventana estrecha. Antecedentes conservados presentados con etiquetas legibles. Ver `docs/project/eipd-versiones-5b2.md` para evidencia y límites. Commit/push autorizados; sin merge ni despliegue. Lector de pantalla pendiente. Próximo bloque 5C; 5D y FORM-R01–R05 abiertos. Confirmación/activación EIPD bloqueadas. Esta nota supera las menciones inferiores de aceptación pendiente. Excluir `frontend/next-env.d.ts` y `outputs/` preexistentes.
+
+## LIC-DOC-001 — 5B.2: interfaz implementada; aceptación pendiente, 02/11/2026
+
+Rama `feature/eipd-versiones-5b2`, base `e83b706`. Registro explícito desde lo guardado, motivo, historial/detalle de solo lectura, recuperación idempotente y copia confirmada al borrador local. [Contrato, evidencia y checklist](project/eipd-versiones-5b2.md). TypeScript/ESLint aprobados; 32 casos Chromium distintos aprobados con respuestas controladas (una integración opcional omitida). Migración `b95e7f3d1204` aplicada al desarrollo local `cumpleia` con conteos de evaluaciones/soportes conservados; cero versiones creadas. Rutas locales presentes; pendiente registro autenticado y validación visual conjunta. 5C/5D y FORM-R01–R05 abiertos. Confirmación/activación EIPD bloqueadas. Sin commit/push autorizado de 5B.2, merge ni despliegue. Excluir `frontend/next-env.d.ts` y `outputs/` preexistentes. Supera las notas inferiores de interfaz y migración local pendientes.
+
+## LIC-DOC-001 — 5B.1 implementado localmente, 02/11/2026
+
+Servidor de versiones EIPD general separado del borrador: registro inmutable, origen esperado, idempotencia, consulta de historial/solicitud y permisos/RLS. [Contrato técnico y límites](project/eipd-versiones-5b1.md). Migración `b95e7f3d1204` aplicada solo en base aislada; sin interfaz nueva ni cambio operacional. Validación final: 191 pruebas aprobadas en PostgreSQL aislado, incluida concurrencia entre series; Ruff, Black y diferencias verificados. Próximo sublote 5B.2, interfaz y validación conjunta; 5C/5D y FORM-R01 a FORM-R05 abiertos. Commit y push de 5B.1 autorizados por el usuario el 02/11/2026; sin merge ni despliegue. Confirmación/activación EIPD bloqueadas. Excluir `frontend/next-env.d.ts` y `outputs/` preexistentes. Supera las notas inferiores de 5B.1 pendiente de iniciar.
+
+## LIC-DOC-001 — actuaciones y reglas aprobadas, 02/11/2026
+
+V1–V3 y distribución de actuaciones aprobadas por el usuario; [registro y límites](project/circuito-documental-comun.md). 5A completado en su validación funcional explícita; implementación 5B–5D pendiente. Próximo sublote: 5B.1. Precisar separación de autoría/revisión en 5C sin convertirla en aprobación inferida. Mantener LIC-GOV-001 y FORM-R01 a FORM-R05; no alterar infancia ni habilitar EIPD. Las notas inferiores de V1–V3 pendientes quedan superadas.
+
+## LIC-DOC-001 — Paso 5A, contrato común del circuito documental
+
+Propuesta preparada el 02/11/2026, pendiente de validación conjunta de V1–V3. [Contrato, alcance y plan 5B–5D](project/circuito-documental-comun.md). 5B: registro/consulta de versiones EIPD general; 5C: revisión/decisión y facultades; 5D: adopción por Base y fundamento (LIC-GOV-001). Implementación pendiente, sin cambios retroactivos al circuito de infancia. Mantener FORM-R01 a FORM-R05. No habilitar confirmación/activación EIPD.
+
+## Paso 2 — aceptación asistida y publicación autorizada
+
+## Paso 3 — aceptación asistida y publicación autorizada, 31/10/2026
+
+El usuario confirmó «Recorrido OK» para Consultar anexo desde una valoración asociada al documento actual, tras aceptar la consulta histórica y los ajustes de nombres y títulos. Queda aceptado LIC-UX-013 en este alcance: consulta de relaciones guardadas y navegación a la ficha del anexo correspondiente. La evidencia asistida es el resultado comunicado por el usuario; no equivale a auditoría jurídica ni verificación real de controles.
+
+Verificación técnica previa: 83 pruebas Chromium aprobadas con respuestas controladas; tipos, ESLint, formato y diferencias aprobados. La prueba manual con lector de pantalla sigue pendiente. Se mantienen separadas las valoraciones históricas y las relaciones del documento actual; no cambia el cálculo, API ni permisos. Confirmación y activación EIPD permanecen bloqueadas.
+
+Commit y push autorizados en `feature/riesgos-medidas-evidencias`; sin merge ni despliegue. Se excluyen `frontend/next-env.d.ts` y `outputs/` preexistentes. Las notas inferiores sobre aceptación o autorización pendiente quedan superadas para este alcance.
+
+El usuario confirmó los recorridos principales y complementarios del alcance mixto y autorizó commit/push. Quedan aceptados: acceso y retorno a la misma evaluación desde RAT; etiquetas coherentes y orden común en comparación; adopción explícita con motivo; revisión independiente de EIPD/infancia; conservación de borradores, antecedentes y alcance guardado; ventana estrecha, cierre/foco; retirada/restauración de aplicabilidad; cambio del RAT posterior a comparar; error de conexión y recuperación; consulta desde otra pestaña con pendientes independientes. Evidencia asistida reportada por el usuario en este chat; no equivale a auditoría completa ni prueba manual con lector de pantalla.
+
+Rama `feature/alcance-mixto-guiado`, base `8d2cc88`. Publicación del Paso 2 autorizada; sin merge ni despliegue. Confirmación y activación EIPD siguen bloqueadas. Se excluyen los cambios preexistentes de `frontend/next-env.d.ts` y `outputs/`. Contrato y límites: [alcance mixto guiado](project/alcance-mixto-guiado.md). Las notas inferiores sobre validación o autorización pendiente quedan superadas para el alcance aceptado.
+
+## Paso 2 — alcance mixto guiado: implementación local, 30/10/2026
+
+NAV-UX-005 implementado localmente en `feature/alcance-mixto-guiado`; aceptación asistida pendiente. Permite revisar RAT, regresar a la misma evaluación, comparar y adoptar el alcance con motivo y trazabilidad, conservando borradores y antecedentes. Las determinaciones anteriores requieren revisión para el nuevo alcance; EIPD e infancia siguen independientes.
+
+Evidencia: suite aislada EIPD 1.148 aprobadas; ampliación focalizada alcance/anexos 9 aprobadas (con solapamiento); navegador conectado 135 aprobadas con respuestas controladas. Migración `a84f6e2c9103` aplicada en base aislada y desarrollo local verificado. Sin commit/push de este paso, merge ni despliegue; EIPD bloqueada. Contrato, límites y checklist: [alcance mixto guiado](project/alcance-mixto-guiado.md).
+
+## Paso 1 — anexos y acciones: implementación local, 29/10/2026
+
+## Paso 1 — validación asistida y publicación autorizada, 30/10/2026
+
+El usuario confirmó «recorrido OK» tras el ajuste de Espacio en «Vínculos opcionales con riesgos y medidas» y autorizó commit/push. Quedan aceptados el recorrido de archivo inválido → archivo válido con conservación de campos y la apertura/cierre del bloque con teclado. Las notas anteriores de aceptación/autorización pendiente quedan superadas en este alcance.
+
+Verificación técnica: 42 pruebas Chromium aprobadas en assessment-support y licitud-workspace con respuestas controladas y estilos de la aplicación; tipos y ESLint aprobados. LIC-UX-014 queda resuelto en este alcance. LIC-UX-015 conserva pendientes fuera de los dos desplegables del panel. La validación manual con lector de pantalla continúa pendiente; no se atribuye una subida real nueva de anexo a estas pruebas.
+
+Se publica en `feature/anexos-estado-acciones`. Sin merge ni despliegue; confirmación/activación EIPD bloqueadas. Se excluyen los cambios preexistentes de `frontend/next-env.d.ts` y `outputs/`.
+
+Usuario autoriza continuar Paso 1 tras el cierre 13. Rama `feature/anexos-estado-acciones`, base `205f4c9b92ae700bc99efed1447f44d74624ef58`.
+
+LIC-UX-014 implementado localmente: Guardar anexo se deshabilita ante formato no admitido, archivo vacío o mayor de 2 MiB. El motivo queda una sola vez junto al selector, asociado mediante descripción accesible y aviso; junto a Guardar se explica qué corregir sin duplicar el error. Sustituir o quitar el archivo actualiza el estado y conserva los demás campos y la declaración ficticia. La validación del cliente API y del servidor se mantiene; un rechazo de envío conserva foco/aviso y no anuncia éxito.
+
+LIC-UX-015 parcial y acotado al panel de valoración/anexos: metodología y vínculos opcionales usan el patrón compartido de desplegable reconocible con fondo suave, borde y foco. Se corrigió el ancho mínimo del formulario de anexos tras detectar desborde a 320 px. No se declara una auditoría transversal de todos los accesos.
+
+Validación local: 42 pruebas Chromium aprobadas en assessment-support y licitud-workspace, con respuestas controladas; incluye CSV, vacío, sobredimensionado, corrección, conservación de referencia/descripción/sección/vínculos/declaración, retiro de archivo, rechazo de servidor, teclado y anchos 1280/390/320. Inspección visual de captura a 320 px aprobada. No acredita una nueva prueba contra API real ni lector de pantalla manual. Tipos, ESLint, Prettier y diferencias verificados. Una primera ejecución detectó desborde a 320 px; corregido antes de la ejecución final aprobada.
+
+Pendiente: recorrido asistido en `/dashboard/trabajo` → Preparar → Anexos de respaldo: (1) completar metadatos ficticios y elegir CSV, comprobar único error y Guardar bloqueado; (2) reemplazar por TXT válido y confirmar conservación/habilitación según declaración; (3) quitar selección o probar vacío/mayor de 2 MiB, comprobar motivo; (4) abrir/cerrar vínculos con teclado y revisar ventana estrecha. No guardar un anexo nuevo solo para probar presentación. LIC-UX-014 pendiente aceptación asistida; LIC-UX-015 sigue abierto fuera de este panel.
+
+Sin cambios de API, límites, persistencia ni permisos; EIPD bloqueada. No se ejecuta commit/push de este Paso 1 sin autorización específica. Se preservan `frontend/next-env.d.ts` y `outputs/` preexistentes.
+
+## 13 — cierre y publicación autorizados, 29/10/2026
+
+El usuario autoriza commit y push de la documentación del bloque 13 tras los recorridos asistidos aprobados en el alcance del checklist. Se publican guía de tareas, glosario, ciclo documental y resultados con sus límites. La autorización no acredita lectura completa de las guías ni una nueva ejecución de toda la batería.
+
+Se conservan el backlog funcional y la prueba manual con lector de pantalla pendiente. Sesión real conserva evidencia de 12B. Sin cambios de interfaz, merge ni despliegue. Las notas anteriores de autorización pendiente son antecedentes históricos superados por esta autorización.
+
+## 13 — recorridos asistidos consolidados, 29/10/2026
+
+Rama `feature/navegacion-13-guia-cierre`, base funcional publicada `41c561b`.
+Guía, glosario G01–G30, ciclo documental e identidades y checklist único preparados.
+Usuario aprueba los recorridos realizados: conservación y retorno EIPD, vista
+previa/consulta/guardado, aplicabilidad y disponibilidad, consulta de infancia,
+revisión frente a decisión con facultad revocada, copia/previsualización sin
+registro y cancelación de reemplazo, paneles/teclado/zoom 200 %, recuperación de
+red y ámbitos de módulos con localización del formulario de anexos.
+
+Límites: sesión real conserva aceptación anterior de 12B, sin repetirla en 13;
+no se registraron nuevas actuaciones de infancia ni se cargaron anexos en este
+cierre. Lector manual pendiente; backlog funcional preservado. La lectura final
+de las guías y autorización específica de commit/push de 13 quedan pendientes.
+No se modifica interfaz ni contratos en 13. Excluir `frontend/next-env.d.ts` y
+`outputs/` preexistentes; sin merge ni despliegue. Las entradas anteriores de
+13 pendiente de recorridos describen el avance histórico, superado por esta nota.
+
+## 13 — guía y cierre documental preparados, 29/10/2026
+
+Rama `feature/navegacion-13-guia-cierre`, base publicada y verificada
+`41c561b78e7b4d96994d927b86422d7d9efed5d1` (12B).
+Se incorporan guía de tareas, glosario G01–G30, mapa de identidades y actualización
+del ciclo documental, con checklist único de ocho recorridos y remanentes.
+El bloque 13 modifica documentación; no cambia formularios ni contratos.
+
+La validación asistida integral de 13 sigue **No probado**; comenzar con 13-01/13-02.
+No repetir guardados por localizar un editor que ya está habilitado. La evidencia
+anterior conserva sus límites: 185 pruebas aprobadas y una omitida en regresión
+12B, más dos comprobaciones dirigidas del ajuste posterior, sin sumarlas como
+escenarios únicos. Sesión real y recuperación aceptadas por el usuario en 12B.
+Lector de pantalla manual, formularios completos consentimiento/LIA y circuito
+formal EIPD general continúan pendientes. Confirmación/activación EIPD bloqueadas.
+
+Guía: [guia-navegacion-trabajo.md](project/guia-navegacion-trabajo.md).
+Aceptación/remanentes: [cierre-navegacion-checklist.md](project/cierre-navegacion-checklist.md).
+Las notas anteriores de no inicio de 13 o publicación pendiente de 12B son
+históricas: 12B ya está publicado en `41c561b`. Este bloque 13 aún no tiene
+commit/push autorizado. Excluir `frontend/next-env.d.ts` y `outputs/` preexistentes.
+Sin merge, despliegue ni cierre implícito de los pendientes funcionales.
+
+## 12B — cierre y publicación autorizados, 29/10/2026
+
+El usuario autoriza commit y push del bloque 12B validado en
+`feature/navegacion-12b-recuperacion`. Se publica la clasificación de errores,
+recuperación de consultas/contextos y sesión, corrección del aviso vacío,
+pruebas y aceptación asistida. Se conserva la evidencia de comprobaciones ya
+aprobadas; no se repite la batería para el cierre documental.
+Las menciones anteriores a publicación pendiente son antecedentes históricos.
+Excluir `frontend/next-env.d.ts` generado y `outputs/`. Sin inicio de lote 13,
+merge ni despliegue. Verificar el commit publicado contra la rama remota.
+
+## 12B — validación asistida completada, 29/10/2026
+
+El usuario confirma recorrido OK de recuperación de aplicabilidad tras desconexión,
+del selector de contextos tras restablecer la red y de autenticación real.
+La captura de sesión ausente muestra el mensaje específico y el acceso a iniciar
+sesión en otra pestaña, conservando `[FICTICIA] Prueba recuperación 12B` en el
+formulario original. El usuario confirma que, tras iniciar sesión con la misma
+cuenta y reintentar en la pestaña original sin recargar, la consulta se recupera
+y el texto pendiente permanece sin guardar. Se completa la aceptación asistida de 12B.
+
+Durante la prueba del selector se corrigió el aviso contradictorio de lista vacía:
+no se anuncia ausencia de evaluaciones cuando falla la consulta. Dos pruebas
+dirigidas adicionales aprobadas después del ajuste; la regresión previa obtuvo
+185 aprobadas y una captura visual opcional omitida. Controles estáticos aprobados.
+Las menciones anteriores a autenticación real o validación asistida pendientes
+son antecedentes históricos. La prueba manual con lector de pantalla sigue pendiente.
+
+Implementación y validación de 12B completadas; pendiente commit y push, sin
+autorización nueva para publicarlos. No se inicia lote 13, merge ni despliegue.
+Excluir `frontend/next-env.d.ts` generado y `outputs/` de una eventual publicación.
+
+## 12B — recuperación de consultas y sesión, 29/10/2026
+
+Rama `feature/navegacion-12b-recuperacion`, base publicada `ff85ec7`.
+Implementación terminada; validación asistida pendiente. Sin commit ni push de 12B.
+Las entradas anteriores «Sin inicio de 12B» describen el cierre histórico de 12A.
+
+Se confirmó que el acceso compartido de licitud confundía cualquier error del
+proveedor de sesión con una sesión expirada. Ahora distingue sesión ausente o
+respuesta 401, fallo de conexión, servicio de acceso no disponible y otros errores
+HTTP, incluidos 403 y 503. Un error no habilita el editor condicionado.
+La recuperación se ofrece en las consultas de aplicabilidad, apertura de destinos
+y selector de contexto. El reintento de apertura vuelve a consultar aplicabilidad.
+El selector conserva su selección y permite reintentar su lectura sin aplicar contexto.
+
+Solo cuando falta una sesión válida se ofrece «Iniciar sesión en otra pestaña».
+La ayuda pide conservar la pestaña original y regresar a reintentar: la nueva
+pestaña no recupera sus notas sin guardar. Consultar y reintentar no guardan datos,
+no cambian permisos ni confirman o activan EIPD. Los borradores siguen siendo
+memoria de la pestaña; recargar puede perderlos.
+
+Verificación dirigida: ocho escenarios automatizados aprobados, con ausencia de
+sesión, fallo de red, fallo del proveedor y HTTP 401/403/503; incluye recuperación
+del selector de contexto. Comprueban conservación de notas, ausencia de escrituras
+HTTP y de mensajes falsos de guardado. TypeScript, ESLint y formato aprobados.
+Regresión final: 185 pruebas aprobadas y una omitida (captura visual opcional),
+en navegación conectada, maqueta y espacio de licitud.
+Inspección visual de recuperación en ventana de 390 px sin desbordamiento horizontal.
+La restauración de sesión fue simulada: queda pendiente comprobar conjuntamente
+el proveedor real tras iniciar sesión. No se ejecutó un inicio de sesión real ni
+se almacenaron o imprimieron credenciales. Lector de pantalla manual sigue pendiente.
+
+### Recorrido asistido para reanudar 12B
+
+1. En `/dashboard/trabajo`, abrir Bases de licitud → Determinar aplicabilidad.
+2. Añadir `[FICTICIA] Prueba recuperación 12B` al fundamento, sin guardar.
+3. En Red del navegador seleccionar Offline; no recargar la página.
+4. Pulsar Consultar última determinación guardada. Debe explicar un fallo de conexión,
+   conservar el texto y no indicar sesión expirada ni guardado correcto.
+5. Restablecer No throttling y repetir la consulta: debe recuperar la lectura y
+   conservar el fundamento sin guardarlo.
+6. Después validar por separado sesión ausente/401 y recuperación tras autenticación,
+   conservando la pestaña original; registrar el resultado real, sin confundirlo
+   con las pruebas simuladas. Comprobar también el reintento del selector de contexto.
+
+Excluir `frontend/next-env.d.ts` generado y `outputs/` de una eventual publicación.
+No se inicia lote 13, merge ni despliegue.
+
+## 12A — cierre y publicación autorizados, 29/10/2026
+
+El usuario autoriza commit y push del bloque 12A validado, en
+`feature/navegacion-12a-recorridos`. Se incluyen las correcciones de progreso,
+avisos locales e historial, sus pruebas y la aceptación asistida registrada.
+Se conserva la evidencia de pruebas existente; no se repite la batería por este
+cierre documental. Excluir `frontend/next-env.d.ts` generado y `outputs/`.
+Sin inicio de 12B, merge ni despliegue. Las notas anteriores de publicación
+pendiente son antecedentes; el resultado del push se verifica contra la rama remota.
+
+## 12A — validación asistida completada, 29/10/2026
+
+El usuario confirma recorrido OK del avance del autodiagnóstico, los avisos locales
+de Próximamente y el retorno mediante Atrás/Adelante entre pasos EIPD, conservando
+la nota sin guardar al volver a Describir riesgos. Se completa la validación asistida
+del bloque 12A; se conserva la evidencia automatizada registrada en la entrada anterior.
+
+Aclaración comprobada durante el recorrido: N/A es una respuesta válida y aumenta
+el avance. Siguiente permanece deshabilitado mientras queden preguntas pendientes
+en la sección; para visitar otra sección sin completarla se utiliza Cuestionario.
+No se atribuye el bloqueo a N/A ni se cambia esta regla de navegación.
+
+Implementación y validación de 12A completadas, pendiente de commit y push.
+Sin inicio de 12B, merge ni despliegue. La comprobación manual con lector de pantalla
+continúa pendiente. Excluir `frontend/next-env.d.ts` generado y `outputs/`.
+Las menciones anteriores a validación asistida pendiente son antecedentes históricos.
+
+## 12A — implementación y pruebas automáticas, 29/10/2026
+
+Rama `feature/navegacion-12a-recorridos`, base publicada `22f8c74`.
+Se corrigieron dos fallos reproducidos: respuestas ajenas al catálogo o con opciones
+inválidas podían incrementar el avance; Atrás/Adelante disparaba dos consultas del
+mismo tratamiento al recibir popstate y hashchange para un destino.
+El avance cuenta solo respuestas válidas del catálogo activo, incluidas N/A;
+visitar secciones no aumenta el avance ni demuestra guardado o cumplimiento.
+Se conserva el historial por pasos y los borradores. Cambiar pasos EIPD no consulta
+ni escribe; restaurar un destino realiza una validación por contexto.
+Los avisos de Próximamente se muestran junto al control o tarjeta activados.
+En el menú reducido a iconos el aviso dispone de ancho propio para ser legible.
+Describir riesgos y Valorar riesgos se conservan: corresponden a tareas y campos distintos.
+
+Evidencia: 152 pruebas de regresión aprobadas y una captura opcional omitida;
+siete casos dirigidos 12A aprobados, incluidos los diez apartados y las 50 preguntas
+del catálogo JSON de referencia del repositorio, mediante respuestas simuladas.
+Esto no acredita el contenido de la base de datos de la sesión del usuario.
+TypeScript, ESLint, formato y diff comprobados. Capturas revisadas a 390 y 865 px;
+los casos automatizados también cubren 1280 px. Sin cambios de API, puntuación,
+permisos ni habilitación de confirmación/activación EIPD.
+
+Pendiente validación asistida: avance sin responder y con N/A; aviso local de
+Próximamente en escritorio/ventana estrecha; Atrás/Adelante conservando notas.
+No se declara cerrado 12A. Sin commit/push de este bloque ni inicio de 12B.
+Excluir `frontend/next-env.d.ts` generado y `outputs/`. La prueba manual con lector
+de pantalla sigue pendiente. Las entradas anteriores son antecedentes históricos.
+
+## 11B — cierre y publicación autorizados, 29/10/2026
+
+El usuario autoriza commit y push del bloque 11B y de la corrección RAT pendiente.
+RAT quedó separado en `a25d20f91c06b00bb897dd33d60f1257adfa6b07`, rama
+`fix/rat-aviso-guardado`. 11B se publica desde
+`feature/navegacion-11b-seleccion-creacion`, que incluye ese commit como antecedente.
+Recorrido asistido completado en escritorio y ventana estrecha; 141 pruebas automáticas,
+TypeScript, ESLint, Prettier y diff aprobados. No se repite la batería por este cierre
+documental. Las notas inferiores de publicación pendiente son antecedentes.
+Sin inicio de 12A, merge ni despliegue. El lector de pantalla manual continúa pendiente.
+Se excluyen `frontend/next-env.d.ts` generado y `outputs/`.
+
+## Corrección RAT — publicación autorizada, 29/10/2026
+
+El usuario autoriza commit y push de la corrección pendiente del aviso RAT. Se publica
+por separado de 11B en `fix/rat-aviso-guardado`. Recorrido asistido confirmado OK;
+TypeScript, ESLint, formato y diff aprobados. Sin cambios de guardado, API ni permisos.
+Las menciones anteriores a autorización pendiente son antecedentes.
+
+## 11B — validación asistida completada, 29/10/2026
+
+El usuario confirma «recorrido OK» también en ventana estrecha: Cancelar creación y
+Volver a preparar evaluación se leen y pueden activarse; se conservan el fundamento
+y el contexto al cancelar y retomar la preparación, sin recargar ni crear otro borrador.
+Con las comprobaciones anteriores, queda completado el recorrido asistido de 11B.
+Se mantiene la evidencia automatizada de 141 pruebas aprobadas, TypeScript, ESLint,
+Prettier y revisión del diff. No se afirma validación con lector de pantalla ni creación
+real de una evaluación en estas pruebas asistidas.
+
+Bloque 11B validado, pendiente de commit/push. Sin inicio de 12A. La corrección del
+aviso RAT validada se mantiene como cambio separado pendiente de publicación.
+Las entradas anteriores sobre validación pendiente son antecedentes. Excluir
+`frontend/next-env.d.ts` generado y `outputs/`.
+
+## 11B — selección y cancelación validadas por el usuario, 29/10/2026
+
+El usuario confirma «recorrido OK» al distinguir el contexto de «Trabajando en…»
+del formulario de creación, comprobar el tratamiento propuesto y la elección explícita
+de finalidad/categorías/titulares. Confirma que Cancelar creación y Volver a preparar
+conservan el fundamento de prueba y el contexto del programa con menores. La captura
+del selector muestra «Elegir trabajo existente» y que aplicar contexto no crea una
+evaluación; tras cancelar ese panel, el usuario confirma conservación del fundamento
+y del contexto. Estas comprobaciones no registraron una evaluación nueva.
+
+Pendiente: recorrido asistido equivalente en ventana estrecha. Se mantiene la evidencia
+automatizada de 141 pruebas aprobadas y comprobaciones estáticas anteriores. Sin
+commit/push de 11B ni inicio de 12A. La corrección RAT permanece como cambio separado.
+
+## 11B — selección y creación diferenciadas; validación asistida pendiente, 29/10/2026
+
+Rama `feature/navegacion-11b-seleccion-creacion`, base publicada 11A
+`022d15c35e1a4028c9487108dedc860e0f9ee099`. El selector explica que abre trabajo
+existente. Evaluaciones y creación de borrador distingue «Trabajando en…» del
+tratamiento para crear un registro nuevo. Solo se propone el ID del tratamiento si
+figura en el inventario autorizado; no se copian finalidad ni alcance de una evaluación,
+pues pueden conservar un alcance anterior al RAT actual. Se comprueba la identidad
+del tratamiento consultado. Cancelar creación oculta la preparación conservando sus
+campos durante esta visita; volver a preparar los recupera. Cancelar no escribe ni cambia
+el contexto. Crear conserva su acción explícita y explica dónde abrir el resultado.
+
+Verificación: TypeScript, ESLint y Prettier aprobados. 141 pruebas aprobadas: 118 de
+navegación conectada y 23 del workspace, incluidas dos nuevas sobre precarga por ID
+autorizado y cancelación sin escritura con conservación de campos. La batería cubre
+permisos, conflictos y pendientes entre contextos. Falta validación asistida del usuario;
+no se certifica lector de pantalla. Sin cambios de API, permisos ni metodología;
+confirmación y activación EIPD bloqueadas. Sin commit/push de 11B ni inicio de 12A.
+
+La corrección RAT validada permanece en el árbol de trabajo como cambio separado,
+pendiente de publicación; las entradas anteriores que indican «Sin inicio de 11B» son
+antecedentes. Excluir `frontend/next-env.d.ts` generado y `outputs/`.
+
 # Backlog — CumpleIA
 
+## Corrección RAT — recorrido asistido confirmado OK, 29/10/2026
+
+El usuario confirma «recorrido OK» tras probar la reubicación de «Cambios guardados»
+encima de «Guardar cambios» en Información general del RAT y el retiro del aviso al
+volver a editar. Se conserva la evidencia estática registrada anteriormente (formato,
+ESLint, TypeScript y diff). Rama `fix/rat-aviso-guardado`; corrección validada,
+pendiente de commit y autorización de push. Sin inicio de 11B. Las notas anteriores
+de validación pendiente son antecedentes.
+
+## Corrección RAT — confirmación junto a Guardar cambios, 29/10/2026
+
+Observación del usuario posterior al cierre de 11A: Información general del RAT mostraba
+«Cambios guardados» antes del formulario, lejos de su acción. En
+`fix/rat-aviso-guardado`, base publicada `022d15c35e1a4028c9487108dedc860e0f9ee099`,
+se mueve el aviso inmediatamente encima del botón, dentro del bloque de Información
+general. Se añade role=status. Se conserva el retiro del aviso al editar mediante update;
+no se cambia guardado, permisos ni API. TypeScript, ESLint y formato aprobados;
+diff revisado. Validación visual asistida pendiente: guardar una modificación ficticia,
+comprobar proximidad y volver a editar para retirar la confirmación. No se crean pruebas
+que reproduzcan este cambio de presentación. Sin commit/push de esta corrección ni
+inicio de 11B. Excluir next-env.d.ts generado y outputs/.
+
+## 11A — validación asistida completada y publicación autorizada, 29/10/2026
+
+Usuario confirma diferencias entre referencia, nombre de edición y versión, vista previa
+con ediciones pendientes y conservación del texto al navegar. Confirma recorrido final
+de valoración, fundamentos y lectura en ventana estrecha. La captura actualizada muestra
+las ayudas de horizonte temporal y antecedentes de frecuencia/exposición; la captura
+anterior no mostraba esas ayudas y no se atribuye a ella su validación.
+
+11A listo para commit/push expresamente autorizado por el usuario. Rama
+`feature/navegacion-11a-ayudas`, base 10B `741f0423bd37db46cec1912e47a1a13ed68ac22b`.
+Se conserva la evidencia automatizada anterior: 33 casos de soporte/editor de infancia y
+21 del workspace aprobados tras el ajuste de proximidad del aviso; TypeScript, ESLint y
+Prettier aprobados. Esta actualización es documental y no requiere repetir la batería.
+Sin certificación con lector de pantalla (7B pendiente), cambios de servidor, merge,
+despliegue ni inicio de 11B. Excluir `frontend/next-env.d.ts` generado y `outputs/`.
+Las menciones inferiores a validación o autorización pendiente son antecedentes.
+
+## 11A — ayudas localizadas implementadas; validación asistida pendiente, 29/10/2026
+
+Rama `feature/navegacion-11a-ayudas`, base publicada 10B
+`741f0423bd37db46cec1912e47a1a13ed68ac22b`. Se incorporan ayudas breves junto a
+finalidad, operaciones, contexto, tecnologías, códigos del alcance y descripción/análisis
+de riesgos; referencia manual y nombre de edición se distinguen de identidad/secuencia
+del servidor. Valoración explica horizonte temporal, fundamentos y riesgo previo a
+controles; sus ayudas se asocian mediante aria-describedby. Vista previa declara si
+incluye ediciones pendientes y que no escribe. Guardar explica su objeto; el aviso
+permanece junto a la acción y se retira al editar. Sin cambios a validaciones, contratos,
+metodología ni permisos; confirmación/activación EIPD bloqueadas.
+
+Pruebas: 33 escenarios de valoración/anexos y editor de infancia aprobados; tras corregir
+la distancia entre ayuda y botón en móvil, los 21 escenarios del workspace aprobados.
+Dos casos nuevos comprueban ayudas accesibles, vista previa sin escritura y retiro del
+éxito al editar. TypeScript, ESLint y Prettier aprobados. No equivale a prueba con lector
+de pantalla ni a validación asistida del usuario; lector manual de 7B pendiente.
+Sin commit/push de 11A ni inicio de 11B. Excluir `frontend/next-env.d.ts` generado y `outputs/`.
+
+## Publicación autorizada de 10B — 28/10/2026
+
+Usuario solicita commit y autoriza push de feature/navegacion-10b-historial,
+base 10A publicada e3dd155c4a454801efc2c36245afe4cd0b225d43. Incluye accesos internos,
+identidad e historial por versión, origen de copia temporal, estilos de consultas y
+preparación solicitados por el usuario, pruebas y guion asistido con límites documentados.
+174 escenarios Chromium previos y ejecuciones dirigidas posteriores aprobadas según el
+registro detallado; checks estáticos y capturas revisados. La última actualización es
+documental: no se repite batería ni se atribuye CI remota. Excluir next-env.d.ts generado
+y outputs/. Verificar identidad remota tras push. Sin merge, despliegue ni inicio de 11A.
+Lector manual de 7B pendiente. Menciones anteriores a autorización pendiente son antecedentes.
+
+## 10B — guion asistido completado, 28/10/2026
+
+Usuario confirma recorrido final con teclado/ventana estrecha, sumado a revisión,
+versiones, decisiones y estilos aceptados. Copia manual observada con protección de
+preparación existente; origen de copia nueva y escenarios excepcionales mantienen
+cobertura automatizada, sin atribuir prueba manual. Ver límites y evidencia en
+navegacion-servidor.md. 10B listo para commit/push cuando se autorice; sin publicación
+ni inicio de 11A. Lector manual de 7B pendiente. Entradas inferiores son antecedentes.
+
+## 10B — preparar copia destacado, 28/10/2026
+
+Usuario confirma recorrido y muestra confirmación para conservar/reemplazar preparación
+existente. No se atribuye copia nueva ni aviso de origen visto en esa captura.
+Preparar nueva versión a partir de esta recibe estilo azul suave aprobado; cuatro
+pruebas dirigidas y checks estáticos correctos. Pendiente validación visual y recorrido
+estrecho/teclado. Sin commit/push de 10B ni inicio de 11A; lector manual de 7B pendiente.
+Ver navegacion-servidor.md. Entradas inferiores son antecedentes.
+
+## 10B — decisiones e historial confirmados, 28/10/2026
+
+Usuario confirma recorrido de decisión, historial y retorno. Capturas identifican versión
+1 SIMULADA-PILOTO-INFANCIA-RES-001, sin decisiones registradas y facultad otorgada/revocada
+en historial. Eventos de facultades no se presentan como decisiones del documento.
+Pendiente copia temporal/origen y teclado/ventana estrecha. Sin commit/push de 10B
+ni inicio de 11A; lector manual de 7B pendiente. Ver navegacion-servidor.md.
+Entradas inferiores son antecedentes.
+
+## 10B — diseño ampliado aceptado, 28/10/2026
+
+Usuario confirma «OK nuevo diseño» de los accesos de consulta y actualización.
+Recorrido de revisión y alternancia de versiones ya confirmados. Pendiente decisiones,
+origen de preparación y teclado/ventana estrecha. Sin commit/push de 10B ni inicio de 11A.
+Lector manual de 7B pendiente. Ver navegacion-servidor.md; entradas inferiores son antecedentes.
+
+## 10B — versiones confirmadas y estilo de consultas ampliado, 28/10/2026
+
+Usuario confirma alternancia de versiones y retorno. Solicita destacar consulta de
+versiones, actualización de historial, valoración/anexos y equivalentes. Aplicado estilo
+azul suave con borde, foco y estados deshabilitados; desplegables conservan marcador.
+Cuatro pruebas dirigidas más 52 de componentes afectados aprobadas en ejecuciones
+separadas; checks estáticos y capturas 320/1280 correctos. Pendiente validación visual
+ampliada y restantes recorridos de 10B. Sin commit/push ni inicio de 11A.
+Lector manual de 7B pendiente. Ver navegacion-servidor.md; entradas inferiores son antecedentes.
+
+## 10B — diseño de accesos aceptado, 28/10/2026
+
+Usuario confirma «Ok el nuevo diseño». Ajuste visual aceptado; primer recorrido de
+revisión/historial y retorno ya confirmado. Pendiente alternar versiones y restantes
+recorridos asistidos. Sin commit/push de 10B ni inicio de 11A. Lector manual de 7B pendiente.
+Ver evidencia en navegacion-servidor.md. Entradas inferiores son antecedentes.
+
+## 10B — primer recorrido OK y mejora visual aplicada, 28/10/2026
+
+Usuario confirma acceso a revisión/historial y retorno; pide distinguir los botones.
+Se destacan seis accesos internos con fondo azul suave, texto oscuro, borde y foco.
+Cuatro pruebas dirigidas posteriores y checks estáticos aprobados; capturas 320/1280
+inspeccionadas. Pendiente confirmación visual y restantes recorridos asistidos.
+Sin commit/push de 10B ni inicio de 11A. Ver detalle en navegacion-servidor.md.
+Lector manual de 7B pendiente. Entradas inferiores son antecedentes.
+
+## Bloque 10B implementado localmente — 28/10/2026
+
+Rama feature/navegacion-10b-historial, base 10A publicada e3dd155. Accesos internos
+con foco bajo cabecera a revisión, decisiones e historial; número/referencia/fecha
+y conceptos de cada antecedente. Origen de copia temporal explícito; selección,
+formularios y contratos existentes conservados. Sin rutas nuevas ni habilitación EIPD.
+174 escenarios Chromium aprobados; ajuste final de identidad validado con 18 dirigidos
+y un integrado de tres anchos. Tipos/lint/formato y capturas 320/1280 aprobados.
+Guion asistido pendiente en docs/project/navegacion-servidor.md. Sin commit/push
+autorizado de 10B ni inicio de 11A. Lector manual de 7B pendiente. Excluir next-env.d.ts
+generado y outputs/. Entradas inferiores son antecedentes.
+
+## Publicación autorizada de 10A — 28/10/2026
+
+Usuario solicita commit y autoriza push de feature/navegacion-10a-capacidades,
+base 1429f1d. Incluye resumen de acciones y requisitos por documento, sus pruebas
+y el guion asistido completado documentado. Evidencia previa: 223 escenarios Chromium,
+17 dirigidos tras precisar facultad, dos de capturas y checks estáticos aprobados.
+No se repiten pruebas por las últimas entradas documentales ni se atribuye CI remota.
+Excluir frontend/next-env.d.ts generado y outputs/. Verificar identidad remota tras push.
+Sin merge, despliegue ni inicio de 10B. Lector manual de 7B pendiente.
+Las menciones anteriores a autorización pendiente son antecedentes.
+
+## 10A — guion asistido completado, 28/10/2026
+
+Usuario confirma «recorrido OK» al repetir con nota ficticia nueva el retorno desde
+Documentos guardados al borrador EIPD tras haber recargado antes. No se recuperaron
+los pendientes anteriores: se comprobó conservación durante la nueva navegación.
+Consulta de EIPD general guardada también comprobada en otra evaluación.
+Guion asistido acordado completado; escenarios excepcionales mantienen evidencia
+automatizada y lector manual de 7B pendiente. Listo para commit/push al autorizarse;
+sin publicación de 10A ni inicio de 10B. Entradas inferiores son antecedentes.
+
+## 10A — consulta de EIPD general existente comprobada, 28/10/2026
+
+Captura de otra evaluación muestra EIPD PRUEBA-EIPD-LECTURA-20261010, edición PRUEBA-2,
+y las capacidades de consulta esperadas. Se cubre el caso antes pendiente por ausencia
+de documento. Ver evidencia y límites en navegacion-servidor.md. Falta confirmar el
+retorno a la nota pendiente del borrador EIPD original; preparación de infancia ya comprobada.
+Sin commit/push de 10A ni inicio de 10B. Lector manual de 7B pendiente.
+Entradas inferiores son antecedentes.
+
+## 10A — recorridos asistidos disponibles comprobados, 28/10/2026
+
+Capturas muestran capacidades de EIPD general, versión histórica de infancia,
+facultad revocada, requisitos de preparación y conservación del nombre de edición
+al volver en ventana estrecha. Ver registro detallado en navegacion-servidor.md.
+Pendiente consulta asistida de EIPD general guardada: no existe en el contexto probado;
+no crear un documento solo para comprobar el rótulo. Cobertura automatizada previa
+conservada. Sin declaración de aceptación integral, commit/push de 10A ni inicio de 10B.
+Lector manual de 7B pendiente. Entradas inferiores son antecedentes.
+
+## Bloque 10A — acciones y requisitos por documento, 28/10/2026
+
+Implementado localmente en `feature/navegacion-10a-capacidades`, base 9B publicada
+`1429f1d4bc311a707cf48a5b3a6601b4b2842748`. Resume capacidades del borrador EIPD
+general, consulta guardada, versión histórica de infancia, preparación temporal y
+decisión organizacional. Los requisitos reflejan los controles y contratos existentes;
+facultad explícita separada del rol administrador. Datos sin consultar/error no se
+presentan como permisos comprobados. Material histórico cambiado conserva consulta
+y no implica invalidez general. Sin ampliar revisión favorable, confirmación o activación.
+223 escenarios Chromium con fixtures aprobados; ajuste final de facultad validado
+con 17 escenarios dirigidos, tipos/lint/formato y capturas 320/1280 inspeccionadas.
+Pendiente validación asistida de 10A; sin commit/push autorizado ni inicio de 10B.
+Lector manual de 7B pendiente. Entradas inferiores son antecedentes.
+Ver el checklist y evidencia de 10A en `docs/project/navegacion-servidor.md`.
+Excluir `frontend/next-env.d.ts` generado y `outputs/`.
+
+## Publicación autorizada de 9B — 28/10/2026
+
+Usuario solicita commit y autoriza push de `feature/navegacion-9b-destinos`, base
+`650c766`. Incluye destinos validados desde Pendientes, confirmación del cambio de
+contexto, consulta de disponibilidad y conservación de borradores, pruebas y aceptación
+asistida acordada. 200 escenarios Chromium con fixtures y checks estáticos aprobados;
+los últimos cambios documentan los recorridos y esta autorización. No atribuir nueva
+CI remota ni integración backend real. Sin merge/despliegue, lote 10 no iniciado y lector
+manual de 7B pendiente. Excluir `frontend/next-env.d.ts` generado y `outputs/`.
+Las menciones anteriores de autorización pendiente son antecedentes. Verificar identidad
+remota después del push.
+
+## 9B — recorridos asistidos acordados completados, 28/10/2026
+
+Usuario confirma «recorrido OK» al solicitar recarga con cambios pendientes y cancelarla:
+se conservan las dos unidades y la nota EIPD. Se completa el guion asistido acordado,
+sumado al retorno a formularios, cambio de contexto con cancelación/confirmación y
+panel estrecho con cierre y foco ya confirmados. Los casos adicionales de acceso
+condicionado, preparación temporal y errores mantienen cobertura automatizada;
+no se atribuyen como ejecución asistida del usuario. 200 escenarios Chromium con
+fixtures y comprobaciones estáticas previamente aprobados. Sin nueva ejecución de
+pruebas por este registro documental, CI remota ni certificación de accesibilidad.
+9B listo para commit/push cuando el usuario lo autorice; todavía sin publicación.
+Lote 10 no iniciado; lector manual de 7B pendiente. Las entradas anteriores de
+validación pendiente son antecedentes.
+
+## 9B — tres recorridos asistidos confirmados, 28/10/2026
+
+Usuario confirma retorno desde Pendientes a cada formulario con texto conservado,
+cancelación/confirmación entre trabajadores y clientes, y lectura/cierre/foco del panel
+estrecho mediante Escape y fondo exterior. Ver el registro en navegacion-servidor.md.
+Pendiente comprobar advertencia de salida/recarga y cancelarla conservando borradores.
+200 escenarios automatizados previamente aprobados. Sin commit/push nuevo autorizado
+ni inicio de lote 10. Lector manual de 7B pendiente. Entradas inferiores son antecedentes.
+
+## Bloque 9B — destinos de pendientes, 28/10/2026
+
+Implementado localmente en `feature/navegacion-9b-destinos`, sobre 9A publicado
+`650c766a28912f37120a22d7c2c47913e21cdd58`. Ver pendientes permite ir al formulario
+con su contexto validado; anticipa y permite cancelar el cambio de contexto.
+La disponibilidad condicionada se vuelve a consultar antes de mostrar el editor;
+una reubicación conserva el borrador y la preparación temporal. Cambiar contexto
+explica el destino y conserva pendientes de la visita, sin guardar ni sincronizar pestañas.
+[Alcance y checklist asistido](project/navegacion-servidor.md#bloque-9b--destinos-de-pendientes-28102026).
+200 escenarios Chromium con fixtures y tipos/lint aprobados; confirmación visual inspeccionada.
+Pendiente validación conjunta de 9B; sin commit/push autorizado, merge ni despliegue.
+Lote 10 no iniciado. Lector manual de 7B pendiente. Las entradas inferiores son antecedentes.
+Excluir `frontend/next-env.d.ts` generado y `outputs/`.
+
+## Publicación autorizada de 9A — 28/10/2026
+
+Usuario solicita commit y autoriza push de `feature/navegacion-9a-pendientes`, base
+`a1c93c1`. Incluye unidades pendientes, estados UI, panel consultable, pruebas y
+validación asistida acordada. 190 escenarios Chromium y checks estáticos previamente
+aprobados; los últimos cambios solo registran los resultados asistidos y esta autorización.
+No atribuir CI remota ni integración real a las pruebas con fixtures. Sin merge/despliegue,
+9B no iniciado y lector manual de 7B pendiente. Excluir next-env.d.ts generado y outputs/.
+Las entradas inferiores de autorización pendiente son antecedentes. Verificar identidad
+remota después del push.
+
+## 9A — recorridos asistidos acordados completados, 28/10/2026
+
+Usuario confirma recuperación tras Offline con dos pendientes conservados y sin falso
+guardado; capturas distinguen error de conexión de consulta completada. Se suma al
+conteo/contexto, guardado parcial y panel estrecho ya confirmados.
+[Resultado y límites](project/navegacion-servidor.md#9a--recuperación-confirmada-y-recorridos-acordados-completados-28102026).
+190 escenarios automatizados aprobados en el alcance documentado. Listo para commit/push
+cuando se autorice; sin publicación de 9A ni inicio de 9B. Lector manual de 7B pendiente.
+Las entradas inferiores de aceptación pendiente son antecedentes.
+
+## 9A — panel estrecho confirmado OK, 28/10/2026
+
+Usuario confirma lectura completa, Escape y cierre exterior con retorno del foco a
+Ver pendientes (1), sin guardar ni recargar.
+[Registro y siguiente comprobación](project/navegacion-servidor.md#9a--panel-estrecho-y-cierre-confirmados-28102026).
+Pendiente recuperación de consulta con ambos borradores conservados. Sin commit/push
+de 9A ni inicio de 9B; lector manual de 7B pendiente.
+
+## 9A — guardado parcial confirmado OK, 28/10/2026
+
+Usuario confirma que guardar solo la determinación deja un pendiente EIPD y conserva
+su nota, sin guardar ese borrador ni recargar.
+[Registro y siguiente comprobación](project/navegacion-servidor.md#9a--guardado-parcial-y-nota-conservada-confirmados-28102026).
+Pendientes cierre/foco en ventana estrecha y recuperación de consulta. Sin commit/push
+de 9A ni inicio de 9B; lector manual de 7B pendiente.
+
+## 9A — primer recorrido asistido OK, 28/10/2026
+
+Usuario confirma conteo de dos unidades identificadas: determinación y un solo borrador
+EIPD para sus siete pasos, con contexto correcto en la captura.
+[Registro y siguiente comprobación](project/navegacion-servidor.md#9a--conteo-e-identificación-confirmados-28102026).
+Pendiente guardar solo la determinación y comprobar conservación de EIPD; restantes
+recorridos de 9A siguen abiertos. Sin publicación de 9A ni inicio de 9B.
+
+## 9A implementado localmente — 28/10/2026
+
+Rama `feature/navegacion-9a-pendientes`, base 8B `a1c93c1`. Ver pendientes (N)
+identifica formularios y preparación temporal con contexto; siete pasos EIPD cuentan
+una sola unidad. Estados UI distinguen lectura y escritura; guardado parcial y error
+conservan los demás pendientes. Sin autosave/almacenamiento nuevo, navegación de 9B,
+cambios API ni habilitación EIPD. 190 Chromium con fixtures y checks estáticos aprobados.
+[Alcance, evidencia y checklist asistido](project/navegacion-servidor.md#bloque-9a--pendientes-identificables-28102026).
+Pendiente aceptación asistida; sin commit/push autorizado de 9A, merge o despliegue.
+Lector manual de 7B pendiente. Excluir next-env.d.ts generado y outputs/.
+Las entradas inferiores describen antecedentes; lote 9 ahora sí está iniciado.
+
+## Publicación autorizada de 8B — 27/10/2026
+
+Usuario solicita commit y autoriza push de `feature/navegacion-8b-pasos`, base `e04d8d8`.
+Incluye navegación principal EIPD, título/Paso N de 7, Anterior/Siguiente, foco al cambiar
+ancho, pruebas y aceptación asistida. Evidencia: 111 escenarios de regresión más cinco de
+repetición aprobados en ejecuciones separadas; tipos/lint/formato y capturas aprobados.
+Lector manual de 7B pendiente. No atribuir CI remota nueva al push.
+Las menciones inferiores de autorización pendiente son antecedentes. Excluir next-env.d.ts
+generado y outputs/ locales. Lote 9 no iniciado; sin merge/despliegue. Verificar HEAD remoto.
+
+## 8B — recorridos asistidos completados, 27/10/2026
+
+Usuario confirma el último recorrido móvil, nota conservada y cierre exterior/foco.
+8B aceptado en el alcance acordado, incluidos zoom 200 %, Escape repetido, ampliación y
+Atrás/Adelante. [Evidencia y límites](project/navegacion-servidor.md#8b--recorridos-asistidos-completados-27102026).
+111 escenarios de regresión + cinco nuevos de repetición aprobados en ejecuciones separadas.
+Listo para commit/push cuando se autorice; lote 9 no iniciado. Lector manual de 7B pendiente.
+Las entradas inferiores de validación pendiente son antecedentes del proceso.
+
+## 8B — Atrás/Adelante y nota conservada OK, 27/10/2026
+
+Usuario confirma regreso al Paso 4 con Atrás, retorno al Paso 5 con Adelante y nota
+conservada en Describir riesgos, sin guardar ni recargar.
+[Resultado y remanente asistido](project/navegacion-servidor.md#8b--atrásadelante-y-conservación-confirmados-27102026).
+Pendiente secuencia móvil de tres destinos y cierre exterior; sin publicación de 8B.
+
+## 8B — ampliación y foco confirmados OK, 27/10/2026
+
+Usuario confirma cierre de Secciones al maximizar la pestaña actualizada y foco en la
+barra visible. Zoom 200 % y Escape repetido previamente confirmados.
+[Registro y siguiente prueba](project/navegacion-servidor.md#8b--ampliación-y-foco-en-barra-confirmados-27102026).
+Pendiente Atrás/Adelante con conservación de nota; sin commit/push de 8B ni lote 9.
+
+## 8B — zoom del navegador 200 % OK, 27/10/2026
+
+Usuario confirma lectura/selección de pasos mediante Secciones con zoom real 200 %, sin
+recortes ni desplazamiento horizontal de página, y retorno a 100 %.
+[Registro y límites](project/navegacion-servidor.md#8b--zoom-real-200--confirmado-27102026).
+Pendientes ampliación/foco y Atrás/Adelante; sin commit/push de 8B ni inicio de lote 9.
+
+## 8B — Escape repetido confirmado OK, 27/10/2026
+
+Usuario confirma apertura/cierre repetidos de Secciones sin elegir destino, con Escape
+y foco de retorno. Caso anterior aclarado: el panel cerrado no consume Escape como
+atajo global. [Registro y pendientes](project/navegacion-servidor.md#8b--cierre-repetido-de-secciones-confirmado-27102026).
+Continúan pendientes zoom real 200 %, ampliación/foco y navegación histórica; sin publicación de 8B.
+
+## 8B — Escape con panel cerrado aclarado, 27/10/2026
+
+Captura muestra el formulario sin Secciones abierto: Escape no es un atajo global al
+botón. No se reproduce fallo de cierre de un panel abierto. Pendiente repetir apertura
+→ Escape sin elegir destino y confirmar; zoom real 200 % también pendiente.
+[Detalle](project/navegacion-servidor.md#8b--aclaración-de-escape-mediante-captura-27102026).
+Sin cambios adicionales de producto ni publicación de 8B.
+
+## 8B — secuencia y conservación de nota OK, 27/10/2026
+
+Usuario confirma Describir riesgos → Valorar riesgos → Medidas de mitigación,
+Pasos 3/4/5 y nota conservada al volver sin guardar ni recargar.
+[Registro y pendientes](project/navegacion-servidor.md#8b--secuencia-y-borrador-confirmados-27102026).
+Continúan pendientes las comprobaciones de ventana estrecha, zoom y navegación histórica.
+Sin commit/push de 8B ni inicio de lote 9.
+
+## 8B — primer recorrido asistido OK, 27/10/2026
+
+Usuario confirma Describir riesgos, Paso 3 de 7 y ausencia de lista central repetida
+en ventana amplia. Continúan pendientes los siguientes recorridos del guion 8B;
+[registro y límites](project/navegacion-servidor.md#8b--primera-comprobación-asistida-confirmada-27102026).
+Sin commit/push de 8B ni inicio de lote 9.
+
+## Bloque 8B implementado localmente — 27/10/2026
+
+Rama `feature/navegacion-8b-pasos` sobre 8A publicado `e04d8d8`. Navegación EIPD conectada
+sin lista central repetida; título/Paso N de 7 y Anterior/Siguiente después del formulario.
+Barra desde 1200 px, panel Secciones por debajo; foco conservado al cambiar de ancho.
+Editor independiente conserva su navegación. 111 Chromium (91 conectados + 20 independientes),
+tipos/lint/formato y capturas aprobados. [Alcance y guion](project/navegacion-servidor.md#bloque-8b--navegación-principal-y-paso-actual-27102026).
+Pendiente validación asistida, incluido zoom real 200 %. Lector manual de 7B pendiente.
+Sin commit/push de 8B ni inicio de lote 9. Excluir next-env.d.ts generado y outputs/ locales.
+Esta entrada actualiza las menciones anteriores de 8B no iniciado.
+
+## Publicación autorizada de 8A — 27/10/2026
+
+Usuario solicita commit y autoriza push en `feature/navegacion-8a-contexto`, base `15aa273`.
+Se publica el contexto compacto y su detalle accesible, conservación de la cabecera
+independiente, pruebas y resultados asistidos de 8A. 104 Chromium aprobados y checks
+estáticos previos aprobados; no atribuir CI remota al push. Lector manual de 7B pendiente.
+Las entradas inferiores de autorización pendiente describen estados anteriores.
+Excluir `frontend/next-env.d.ts` generado y `outputs/` locales. 8B no iniciado;
+sin merge ni despliegue. Verificar identidad del commit remoto tras publicar.
+
+## 8A — recorridos asistidos completados, 27/10/2026
+
+Usuario confirma ámbito organizacional en Mi organización/Autodiagnóstico y retorno a
+Bases de licitud con su selección recuperada. Sumado a los recorridos anteriores y captura
+histórica, 8A queda aceptado en ese alcance. Ganancia de espacio respaldada por mediciones
+locales; 104 Chromium y comprobaciones estáticas previas aprobados.
+[Resultado y límites](project/navegacion-servidor.md#8a--recorridos-asistidos-completados-27102026).
+Listo para cierre Git cuando sea autorizado; sin commit/push de 8A ni inicio de 8B.
+Lector manual de 7B pendiente. Las entradas inferiores describen estados anteriores.
+
+## 8A — identidad histórica comprobada en captura, 27/10/2026
+
+Cabecera de evaluación versión 1/borrador separada de resolución 1, referencia
+SIMULADA-PILOTO-INFANCIA-RES-001 y edición PRUEBA-1 en Documentos guardados.
+Evidencia visual añadida al [registro de 8A](project/navegacion-servidor.md#8a--evidencia-de-identidad-histórica-27102026).
+No se registraron actuaciones. Conserva los límites de validación documentados;
+sin nueva autorización de commit/push ni inicio de 8B.
+
+## 8A — contexto por módulo confirmado, 27/10/2026
+
+El usuario confirma «recorrido OK» al comprobar Ver contexto completo en Inventario
+(organización/tratamiento), Panel principal (solo organización) y retorno a Bases de
+licitud (finalidad/evaluación y texto pendiente conservados), sin recargar ni guardar.
+Este resultado se suma a las comprobaciones asistidas previas del detalle y ventana estrecha.
+Queda por comprobar la distinción entre evaluación activa y documento histórico consultado;
+Mi organización/Autodiagnóstico conservan cobertura automatizada, sin atribuirles ahora una
+prueba asistida adicional. Lector manual de 7B pendiente. Sin nueva autorización de
+commit/push ni inicio de 8B.
+
+## 8A — ventana estrecha confirmada, 27/10/2026
+
+Usuario confirma «recorrido OK» tras reducir el ancho sin recargar, abrir Ver contexto
+completo, leer sus datos con desplazamiento si es necesario y cerrar sobre el fondo gris
+exterior al panel, con foco de retorno y texto del formulario conservado.
+Se acepta este recorrido acotado; siguen pendientes ámbito por módulo e identidad histórica.
+No atribuir prueba manual con lector de pantalla ni cierre completo de 8A.
+Sin autorización nueva de commit/push; 8B no iniciado.
+
+## 8A — primera comprobación asistida OK, 27/10/2026
+
+El usuario confirma «prueba OK» tras el guion de abrir Ver contexto completo en Bases de
+licitud, comprobar la selección y cerrar con Escape con retorno del foco y conservación del
+formulario. Se registra aceptación de este recorrido, no del conjunto completo de 8A.
+Pendientes: detalle en ventana estrecha/nombres largos y cierre exterior, ámbitos por módulo
+y distinción frente al documento histórico. [Guion y evidencia](project/navegacion-servidor.md#bloque-8a--contexto-compacto-implementado-27102026).
+Sin nueva autorización de commit/push; 8B no iniciado. Lector manual de 7B sigue pendiente.
+
+## Bloque 8A implementado localmente — 27/10/2026
+
+Rama `feature/navegacion-8a-contexto` sobre 7B publicado `15aa273`.
+Cabecera compacta con detalle completo accesible; contexto por módulo; retirada del resumen
+repetido solo en recorrido conectado. Formularios independientes y documento histórico conservados.
+104 Chromium aprobados (84 conectados + 20 independientes), tipos/lint/formato y capturas
+comparables; evidencia y [guion asistido 8A](project/navegacion-servidor.md#bloque-8a--contexto-compacto-implementado-27102026).
+Pendiente validación del usuario; sin commit/push ni inicio de 8B. Lector de pantalla de 7B
+sigue pendiente. Excluir `frontend/next-env.d.ts` generado y `outputs/` locales.
+Las entradas inferiores de «sin inicio de 8A» describen estados anteriores.
+
+## Publicación autorizada de 7B — 27/10/2026
+
+Usuario solicita commit y autoriza push de 7B en feature/navegacion-7b-accesibilidad,
+base 39bca0b. Publicar estructura/nombres/ayudas, pruebas y validación asistida acotada.
+La prueba manual con lector de pantalla permanece pendiente por no disponibilidad del
+usuario; publicar no cierra ese criterio ni acredita accesibilidad integral certificada.
+168 escenarios aprobados y 1 captura opcional omitida según ejecución registrada;
+no atribuir CI remota nueva al push. Los pendientes inferiores de autorización describen
+estados anteriores. Excluir next-env.d.ts generado y outputs/ locales; verificar HEAD
+remoto tras publicar. No iniciar 8A ni ejecutar merge/despliegue en este cierre.
+
+## 7B — recorridos visuales y de teclado confirmados, 27/10/2026
+
+Usuario aporta secuencia de Determinar aplicabilidad a Documentos guardados con título
+de pestaña actualizado; confirma «recorrido OK» al abrir/cerrar Secciones y Contexto
+con retorno del foco; confirma contorno de foco en Consultar última determinación guardada.
+Capturas muestran ayuda de consulta y explicación de Nombre de la edición en preparación
+de infancia. Confirma «recorrido OK» al abrir y cerrar Análisis, riesgos, medidas, fuentes
+y evidencias con Enter, manteniendo foco. Es aceptación de esos recorridos, sin registrar
+nuevos documentos ni actuaciones durante el guion.
+
+Usuario informa que no dispone de Narrador/NVDA. La prueba manual con lector de pantalla
+no se ejecutó y permanece pendiente, junto con cualquier comprobación asistida no cubierta.
+La verificación estructural de main único, nombres, relaciones e IDs sigue respaldada por
+fixtures automatizados; una captura visual no acredita su anuncio por lector. Tampoco se
+atribuye al usuario prueba táctil real, comprobada solo mediante emulación.
+
+168 pruebas aprobadas y 1 captura opcional omitida, según evidencia previa. 7B validado
+parcialmente con este alcance; no dar por completado su criterio de lector ni declarar
+accesibilidad certificada. Sin commit/push de 7B ni inicio de 8A. Rama
+feature/navegacion-7b-accesibilidad sobre 39bca0b. Excluir generados y capturas locales.
+Las menciones inferiores de aceptación asistida totalmente pendiente son antecedentes;
+queda pendiente específicamente la parte no comprobada indicada aquí.
+
+## Bloque 7B — validación pendiente, 27/10/2026
+
+- [ ] **NAV-UX-006 / 7B — Validar nombres, regiones y ayudas.** Main conectado único,
+  menú del espacio de trabajo, título por destino, diálogos relacionados con disparadores,
+  regiones sin referencias a pestañas ocultas, IDs por evaluación y ayudas por causa real.
+  168 pruebas aprobadas con fixtures, 1 captura opcional omitida; tipos/lint/formato y
+  capturas correctos. [Guion y límites](project/navegacion-servidor.md#bloque-7b--nombres-regiones-y-ayudas-accesibles).
+  Pendiente validación del usuario y recorrido con lector de pantalla; no cerrar criterio
+  de lector por éxito automatizado. Sin commit/push de 7B ni inicio de 8A.
+
+## Publicación autorizada de 7A — 27/10/2026
+
+Usuario solicita commit y autoriza push de 7A aceptado, en feature/navegacion-7a-teclado
+sobre 8fec3df. Se reúne navegación de teclado, manejo explícito de Espacio, regresiones
+y aceptación asistida acotada. Los pendientes de publicación inferiores son antecedentes
+anteriores a esta autorización. Mantener los límites de evidencia: pasada completa de 67
+antes del último ajuste y siete escenarios dirigidos después, sin atribuir CI remota.
+Excluir next-env.d.ts generado y outputs/ locales. Comprobar HEAD remoto tras el push.
+No iniciar 7B ni ejecutar merge/despliegue en este cierre.
+
+## Aceptación asistida acotada de 7A — 27/10/2026
+
+Usuario confirma «Todo funciona OPK» tras comprender que el clic exterior se hace sobre
+el fondo gris y no dentro del panel azul. Aceptados los recorridos informados: primera
+secuencia Enter/Tab/Escape; apertura/cierre con Espacio en pestaña nueva con código
+actualizado; avance al siguiente grupo y selección de destino («Todo el recorrido OK»);
+y prueba estrecha de Menú/Secciones, Escape y clic interior/exterior tras aclaración.
+El usuario también comprobó que la pestaña antigua conserva su preparación de infancia;
+la nueva empieza vacía por ser temporal por pestaña, sin registro ni sincronización.
+Esto no acredita copia de borradores entre ventanas ni guardado de una nueva versión.
+
+7A aceptado con este alcance asistido. Retención completa de Tab/Shift+Tab, cambio de
+tamaño con foco y ausencia de escrituras siguen respaldados por escenarios controlados,
+sin atribuir pruebas manuales adicionales. No equivale a certificación de accesibilidad
+ni cierra 7B o NAV-UX-006 globalmente. Evidencia automatizada: pasada completa inicial
+de 67; tras ajuste explícito de Espacio pasaron 7 escenarios dirigidos, tipos y lint.
+No se declara una pasada completa posterior de 68 escenarios.
+
+Rama feature/navegacion-7a-teclado sobre 8fec3df. Sin commit/push de 7A; requiere
+indicación del usuario para publicar. Próximo propuesto: 7B, estructura y ayudas
+accesibles, sin iniciar. Excluir next-env.d.ts generado y outputs/ locales.
+Esta aceptación sustituye los pendientes asistidos anteriores solo con el alcance indicado.
+
+## 7A — observación asistida de Espacio y corrección explícita, 27/10/2026
+
+Usuario confirma la primera secuencia Enter/Tab/Escape («toda la secuencia OK»),
+pero informa que presionar y soltar Espacio no abre/cierra Preparar. La prueba
+Chromium controlada anterior sí activaba el summary nativo; no se atribuye una
+reproducción exacta del navegador del usuario. Se reemplaza solo para Espacio la
+activación implícita por manejo explícito en el summary conectado: cancelar acción
+nativa, alternar una vez por pulsación e ignorar repetición al mantener la tecla.
+Enter mantiene su acción nativa; Tab, Escape y foco conservan sus comportamientos.
+
+Siete escenarios dirigidos 7A aprobados tras el ajuste: los seis existentes y uno
+nuevo que despacha eventos sin activación nativa y comprueba pulsación mantenida,
+liberación, apertura/cierre real sin doble activación, mismo foco/URL y cero escrituras.
+Tipos/lint/formato y diff --check correctos. La pasada completa de 67 escenarios
+corresponde a antes de este ajuste; no se declara una nueva pasada completa de 68.
+Pendiente repetir Espacio con el usuario y continuar aceptación de 7A. Sin commit/push.
+No recargar su pestaña con borradores pendientes; para cargar código actualizado si
+fuera necesario usar pestaña independiente con contexto propio.
+
+## Bloque 7A — pendiente aceptación asistida, 27/10/2026
+
+- [ ] **NAV-UX-006 / 7A — Validar teclado y foco en navegación conectada.**
+  Implementación local sobre 8fec3df: un desplegable abierto, cierre al salir con Tab,
+  Escape localizado con retorno al control, paneles excluyentes y foco visible al pasar
+  a ventana estrecha. Paneles compartidos y foco al área de trabajo conservados.
+  67 pruebas conectadas (6 nuevas), tipos/lint/formato y capturas correctos.
+  [Guion y límites](project/navegacion-servidor.md#bloque-7a--teclado-y-foco-en-navegación-conectada).
+  Sin commit/push ni inicio de 7B; no cierra accesibilidad o NAV-UX-006 globalmente.
+
+## Cierre asistido y publicación autorizada de 6B — 27/10/2026
+
+Usuario solicita commit y autoriza push al terminar las comprobaciones asistidas.
+Rama `feature/navegacion-6b-operaciones`, base d9f859f. Se acepta con el alcance
+observado y confirmado: nombres de edición y pasos EIPD, disponibilidad independiente
+por tema, matriz alineada/coloreada, aviso ante reemplazo de preparación, cambio entre
+revisión documental y decisión de organización («resultado OK»), conservación al volver
+a preparación y regreso desde vista previa con referencia, PRUEBA-1 y notas intactas.
+El usuario guardó expresamente una determinación ficticia de infancia Corresponde en
+el programa con menores, manteniendo EIPD pendiente; capturas confirman su acceso.
+Se encontraron dos versiones históricas; durante el guion no se solicitó registrar
+otra ni emitir revisión/decisión. La vista previa mostró registro deshabilitado sin
+revisión de contenido; volver mantuvo los campos. La preparación conservada no acredita
+una copia nueva ni persistencia después de recargar. No atribuir esos ensayos al usuario.
+
+171 escenarios automatizados distintos aprobados: 157 del bloque y 14 del formulario de
+valoración (3 nuevos de matriz). Tipos/lint/formato correctos; capturas controladas de
+1280/390/320 revisadas. Ausencia de registro, negativas, información insuficiente,
+asociación por revisar y errores/carga conservan evidencia controlada, no nueva aceptación
+manual. La prueba integrada API aislada no se ejecutó. Sin cambios backend ni reglas de
+activación EIPD. NAV-UX-006 permanece abierto para los demás sublotes.
+
+Este cierre sustituye los pendientes de aceptación asistida anteriores solo con ese
+alcance. Commit/push autorizado para estos cambios y documentación; excluir next-env.d.ts
+generado y outputs/ locales. No hacer merge/despliegue ni iniciar 7A en este cierre.
+Siguiente bloque propuesto: 7A, teclado y foco, pendiente de indicación del usuario.
+
+## Observación visual en prueba 6B — 26/10/2026
+
+- [ ] **6B — Validar lectura de matriz Probabilidad / Impacto.** Cabeceras y valores
+  centrados; fondos suaves verde/amarillo/naranja/rojo con texto oscuro y nivel explícito.
+  Cálculo y valores preservados. 14 pruebas dirigidas, tipos/lint y capturas correctos.
+  Pendiente aceptación visual del usuario; sin commit/push nuevo.
+
+## Bloque 6B — pendiente aceptación asistida, 26/10/2026
+
+- [ ] **NAV-UX-006 / 6B — Validar operaciones documentales y disponibilidad.**
+  Implementación local sobre d9f859f: revisión documental frente a decisión de organización;
+  preparación temporal frente a registro de versión de infancia; nombre libre de edición;
+  pasos EIPD coherentes; razones por tema sin editor habilitado ante carga/error/ausencia,
+  pendiente, negativa, información insuficiente o asociación por revisar. Contratos sin cambio.
+  157 escenarios distintos con fixtures, tipos/lint/formato y capturas correctos.
+  [Guion, evidencia y límites](project/navegacion-servidor.md#bloque-6b--operaciones-documentales-y-disponibilidad).
+  No cierra NAV-UX-006 globalmente. Sin commit/push de 6B ni inicio de 7A.
+
+## Publicación autorizada de 6A — 26/10/2026
+
+Usuario autoriza commit/push del bloque 6A aceptado: nombres de destinos, accesos directos,
+estado activo y glosa legible. Se conservan los límites de evidencia asistida y controlada.
+Las anotaciones anteriores de publicación pendiente describen el momento previo al cierre.
+No se cierra NAV-UX-006 globalmente ni se inicia 6B. Excluir generados y capturas locales.
+
+## Aceptación acotada 6A — 26/10/2026
+
+- [x] **6A — Aceptar rótulo Revisar y decidir y recorridos informados.** Usuario confirma
+  «esta OK la glosa» después del ajuste. Acceso/nombres Documentos guardados, Historial y
+  retorno, nota EIPD conservada y funcionamiento de Continuar ya confirmados en conversación.
+  La captura estrecha antigua no acredita nombres nuevos; móvil mantiene evidencia controlada.
+  [Detalle y límites](project/navegacion-servidor.md#aceptación-asistida-del-rótulo-y-cierre-acotado-6a).
+  Sustituye el pendiente de aceptación visual del rótulo, sin cerrar NAV-UX-006 globalmente.
+  Sin commit/push nuevo ni inicio de 6B.
+
+## Observación asistida de legibilidad 6A — 26/10/2026
+
+- [ ] **NAV-UX-006 / 6A — Validar rótulo Revisar y decidir legible en escritorio.**
+  Usuario confirma recorridos de documentos, retorno, nota EIPD y Continuar; detecta rótulo
+  pequeño en escritorio. Ajustado de 12px/peso normal a 1rem/negrita/color principal.
+  Mantiene Documentos guardados como acceso directo. Pendiente comprobar visualmente ajuste;
+  captura móvil de Continuar con nombre anterior no acredita uniformidad del código nuevo.
+  No iniciar 6B ni cerrar globalmente NAV-UX-006. Sin commit/push nuevo.
+
+## Bloque 6A — nombres y accesos, 26/10/2026
+
+- [ ] **NAV-UX-006 / lote 6A — Aceptar nombres coherentes y accesos de un destino.**
+  Implementación local sobre d42b2e9: diccionario acotado de destinos, Documentos guardados
+  en menú/miga/título/Continuar y enlaces relacionados; accesos directos en grupos de un
+  destino, desplegables para varios, destino activo visible y accesible. URLs/IDs, contexto,
+  borradores y reglas preservados; títulos del editor independiente sin cambio.
+  51 escenarios conectados, 20 del flujo independiente y 18 de maqueta aprobados; tipos,
+  lint/formato y capturas revisados. [Guion y límites](project/navegacion-servidor.md#bloque-6a--destinos-coherentes-y-accesos-directos).
+  Pendiente aceptación asistida. No cierra NAV-UX-006 globalmente ni inicia 6B/7/8.
+  Sin commit/push nuevo; no se incluye archivo next-env.d.ts generado ni outputs/.
+
+## Replanificación integral de navegación y terminología — 26/10/2026
+
+- [ ] **NAV-UX-006 — Coherencia de nombres y comprensión de operaciones documentales.**
+  Evaluación de los dos Word de Claude contra 2e3f546, sin implementación nueva.
+  Adoptar nombres por objeto y destino; distinguir preparar copia temporal, guardar borrador,
+  registrar versión, resultado de revisión y decisión de organización. Conservar términos
+  validados del lote 5; no sustituir globalmente Consultar, Revisión, Fundamento ni estados/API.
+  [Decisiones y evidencia](project/evaluacion-propuestas-claude.md).
+  Ejecutar por sublotes del [plan 6–13](project/plan-navegacion-formularios.md), conservando
+  alcance de los lotes 6 (menús), 7 (accesibilidad) y 8 (simplificación), pendientes.
+  Cada sublote exige criterios propios y validación asistida; no cierra NAV-UX-002/003/004
+  globalmente ni los trabajos funcionales NAV-UX-005/LIC-FORM-001/LIC-UX-013/014/015.
+
+Lotes 1–5 conservan sus aceptaciones. Lote 5 publicado en 2e3f546; menciones históricas
+inferiores de publicación pendiente no describen el estado actual. Esta anotación y el
+plan no implementan correcciones ni habilitan EIPD. Siguiente propuesto: solo 6A.
+Usuario autoriza commit y push de esta documentación el 26/10/2026; no se inicia implementación.
+
+## Aceptación asistida del lote 5 C9 — 26/10/2026
+
+- [x] **Lote 5 — Distinguir estado guardado y borrador, aclarar consulta y acercar confirmación.**
+  Usuario confirma etiquetas; consulta/conservación, guardado con revisión incrementada y
+  proximidad del aviso de éxito ya aceptados. Validación asistida acotada registrada en
+  [continuidad](project/navegacion-servidor.md#aceptación-asistida-del-lote-5--etiquetas-confirmadas-26102026).
+  Concurrencia/errores/móvil cubiertos con fixtures, sin nuevos ensayos manuales atribuidos.
+  Sin commit/push del lote 5. No cierra NAV-UX-004 globalmente ni inicia otros lotes.
+
+Este bloque sustituye las menciones anteriores de aceptación del lote 5 pendiente.
+
+## Lote 5 — aceptación del aviso y rótulos comparativos, 26/10/2026
+
+Proximidad de «Determinación guardada en el servidor» aceptada por usuario: OK encima
+de Guardar determinación. Solicitud adicional cbc29124 implementada localmente: conceptos
+«¿Corresponde documentar…?:» y «Fundamento sobre…:» en ambas columnas y para ambos temas.
+Once escenarios dirigidos/tipos/lint/formato y revisión visual correctos. Pendiente aceptación
+asistida de los rótulos; no cerrar globalmente C9/NAV-UX-004 ni otros lotes.
+Este resultado sustituye la mención anterior de proximidad aún pendiente de aceptación.
+
+## Lote 5 — consulta validada asistidamente, 25/10/2026
+
+Usuario aporta capturas ead7a637/fad26d34: consulta conserva el texto de prueba y
+permite distinguir revisión guardada 3 frente al borrador. Comprobación parcial C9
+correcta; pendiente guardado explícito y confirmación junto a Guardar. No se cierran
+los criterios del lote completo ni se atribuyen ensayos manuales de concurrencia/móvil.
+[Continuidad](project/navegacion-servidor.md#validación-asistida-del-lote-5--consulta-y-comparación-correctas).
+
+## Lote 5 C9 implementado localmente — 25/10/2026
+
+- [ ] **C9 / NAV-UX-004 — Validar estado guardado frente al borrador.** Implementado localmente
+  en fix/navegacion-estado-guardado sobre 84ad96a: revisión/fecha Chile/autoría por identificador,
+  comparación de fundamentos y estados, historial tras conflicto y conservación del borrador.
+  46 pruebas conectadas (11 nuevas), tipos/lint/formato y capturas escritorio/390/320 aprobados.
+  Pendiente aceptación asistida según [guion](project/navegacion-servidor.md#lote-5-c9--estado-guardado-y-borrador).
+  Sin commit/push nuevo; no se cierran NAV-UX-004 ni otros lotes globalmente.
+- [ ] **C9 / LIC-UX-015 — Validar consulta reconocible y comprensible.** Botón implementado como
+  «Consultar última determinación guardada», con foco/ayuda y resultado de lectura separado del
+  guardado. No escribe ni sustituye borradores editados. Pendiente validar con usuario nombre y efecto.
+- [x] **C9/C7 / LIC-UX-005 — Validar proximidad del resultado de escritura.** Implementado el aviso
+  de éxito inmediatamente antes de Guardar determinación; se retira al editar, consultar o reintentar
+  guardar. Probados éxito, rechazo, error posterior, recuperación y móvil. Aceptación asistida pendiente.
+- **Límite de autoría:** la consulta entrega identificador, no nombre de persona. Mostrar nombres
+  legibles requeriría definir su obtención autorizada; no se inventan ni se amplía la API en este lote.
+
+Este bloque prevalece sobre las anotaciones anteriores que aún describen estas tres mejoras como
+pendientes de implementación. Los demás pendientes conservan su alcance.
+
+## Aceptación asistida del lote 4 C3/C8 — 25/10/2026
+
+- [x] **Lote 4 — Orientar según aplicabilidad guardada y explicar reubicación.** Resumen positivo/acceso directo, guardado ficticio No corresponde y aviso al volver desde EIPD comprobados con usuario; captura 227db7c3 confirma restauración del acceso y nota sin guardar conservada. Aceptación acotada registrada en [continuidad](project/navegacion-servidor.md), sin commit/push del lote 4. Otros estados/infancia/preparación tienen prueba controlada, no se declaran nuevos ensayos manuales. Pendiente lote 5 y mejora de proximidad del aviso de guardado; NAV-UX-004 no se cierra globalmente.
+
+## Confirmación de guardado próxima a su acción — 25/10/2026
+
+- [ ] **C9/C7 / LIC-UX-005 — Reubicar «Determinación guardada en el servidor» junto a Guardar determinación.** Observación asistida del usuario (captura da0d584a): el aviso está antes del panel Accesos según la determinación guardada, y este bloque lo separa del botón. Mostrar confirmación de escritura inmediatamente antes de Guardar, junto a la ayuda de requisitos y sin duplicarla. Mantener el panel de disponibilidad diferenciado del resultado de escritura; una consulta/reintento no debe emitir éxito de guardado ni borrar borradores. Probar éxito, error posterior, ediciones nuevas y ubicación móvil/teclado. Registrado para lote 5 (estado guardado) / coordinación con lote 8 (simplificación); pendiente implementación, no se cambia interfaz dentro de esta anotación.
+
+## Lote 4 C3/C8 — orientación de aplicabilidad, 25/10/2026
+
+- [ ] **C3/C8 / NAV-UX-004 — Aceptar resultados guardados y reubicación explicada.** Implementación local en fix/navegacion-orientacion-aplicabilidad: accesos directos basados solo en estado guardado/asociado, razones para formularios no habilitados, consulta de antecedentes y aviso al volver a aplicabilidad; borradores conservados. 35 escenarios distintos ejecutados en batería completa de 34 más diez dirigidos finales, tipos/lint/formato y capturas correctos. Validación asistida pendiente; sin commit/push del lote 4. [Alcance y prueba](project/navegacion-servidor.md). Sin cambios de permisos/estado jurídico ni sincronización de ventanas.
+
+Lote 3 publicado en 0340b0a tras autorización. Otros lotes y seguimiento de sesión
+mantienen sus pendientes; no se cierran NAV-UX-003/004 globalmente.
+
+## Aceptación asistida del lote 3 C4 — 25/10/2026
+
+- [x] **Lote 3 — Explicar permisos y requisitos.** Usuario valida ayuda de Guardar (declaración ficticia) y Aplicar contexto (evaluación faltante), cambio de habilitación y Cancelar. Veinticinco pruebas conectadas aprobadas; roles/estado no editable cubiertos con fixtures sin cambiar permisos reales. Aceptación acotada registrada en [continuidad](project/navegacion-servidor.md); sin commit/push del lote 3. No cierra globalmente NAV-UX-003 ni seguimiento de autenticación.
+
+## Lote 3 C4 — motivos de bloqueo, 25/10/2026
+
+- [ ] **C4 / NAV-UX-003 — Aceptar motivos de solo consulta y requisitos de guardado/contexto.** Implementado localmente en fix/navegacion-permisos-requisitos: mensajes de rol/estado del servidor, ayuda dinámica de fundamentos/declaración ficticia y dependencias de selección, con asociaciones accesibles. Mismas restricciones previas. Veinticinco pruebas conectadas aprobadas, cinco nuevas sin escrituras; viewer/editor simulados, no cuentas reales. Tipos/lint/formato y capturas revisados; validación asistida pendiente. [Alcance y guion](project/navegacion-servidor.md). No cierra globalmente NAV-UX-003 ni el seguimiento de sesión.
+
+Lote 2 publicado en 9c8632f tras autorización; lote 3 sin publicación nueva.
+
+## Aceptación asistida C2/C14 — 25/10/2026
+
+- [x] **Lote 2 — Contexto por módulo y Continuar explícito.** Usuario confirma Todo OK y aporta capturas de Panel/Continuar, RAT y retorno a EIPD con notas pendientes conservadas. Aceptación acotada registrada en [continuidad](project/navegacion-servidor.md); sin commit/push del lote 2 todavía. Los estados anteriores de validación pendiente se conservan como antecedentes; NAV-UX-002/003 permanecen abiertos para sus otros criterios.
+
+## Lote 2 C2/C14 — contexto por módulo, 25/10/2026
+
+- [ ] **C2/C14 / NAV-UX-002/003 — Aceptar cabecera por ámbito y Continuar con destino explícito.** Implementados localmente en fix/navegacion-contexto-modulo: módulos organizacionales no presentan evaluación como propia, RAT muestra tratamiento y licitud contexto completo; Continuar identifica sección/contexto/versión aplicables. Veinte pruebas conectadas aprobadas, tipos/lint/formato y capturas revisados; pendiente recorrido asistido del usuario. No altera memoria de selección ni cierra otros lotes.
+
+Lote 1 publicado en commit 465a94c tras autorización expresa. Su seguimiento de
+clasificación de sesión continúa abierto; no se incorpora al lote 2.
+
+## Resultado asistido C1 y seguimiento de sesión — 25/10/2026
+
+- [x] **Lote 1 C1 — Carga/error visibles y recuperación sin perder borrador.** Usuario confirma Reintentar consulta exitoso en pestaña original EIPD, conservando Notas del borrador sin guardar, después de iniciar sesión en otra pestaña. Dieciséis pruebas conectadas aprobadas; detalle en [continuidad](project/navegacion-servidor.md). Implementación local sin publicación nueva; no cierra globalmente NAV-UX-003/004 ni otros lotes.
+- [ ] **Distinguir fallo temporal de autenticación y sesión no disponible en el aviso de recuperación.** Durante la prueba, sessionToken presentó «Tu sesión expiró» tanto ante error como ante ausencia de sesión; no se confirmó desde capturas la causa original. Revisar la clasificación usando errores del proveedor, ofrecer orientación para reautenticar conservando el borrador de la pestaña original y no ocultar permisos ni reutilizar tokens inválidos. Validar desconexión temporal frente a sesión realmente ausente; no leer ni registrar credenciales. Relacionado con C1/C4; seguimiento pendiente, no corrección ya implementada.
+
+
+## Navegación de pasos EIPD duplicada — revisión conectada, 25/10/2026
+
+- [ ] **C7/C5 — Evitar repetir los siete accesos EIPD en el área de trabajo.** Captura asistida 84302033: /dashboard/trabajo, Completar EIPD presenta los mismos siete destinos en desplegable superior y botones centrales de EipdSteps. Hallazgo observado, no solo inferido. Vincular al lote 8 de simplificación visual y NAV-UX-003/LIC-UX-015; el lote 1 de carga/error sigue activo.
+  - En navegación conectada conservar menú superior y panel Secciones; retirar la lista central duplicada, manteniendo título del paso/ubicación, foco y acciones propias del formulario (guardar, anterior/siguiente cuando corresponda).
+  - Conservar EipdSteps en usos del editor que no dispongan de navegación externa. No retirar globalmente el componente compartido ni campos.
+  - Aceptación: siete destinos accesibles en escritorio/móvil y con teclado, sin segunda lista central en modo conectado; paso actual reconocible y borradores conservados; comportamiento independiente anterior sin regresiones. Implementación pendiente.
+
+
+## Aclarar y destacar la consulta de determinación guardada — 25/10/2026
+
+- [ ] **Revisión conectada C9 / LIC-UX-015 — Visibilidad y significado de «Actualizar estado guardado sin descartar el borrador».** Hallazgo observado por el usuario en /dashboard/trabajo, Determinar aplicabilidad (captura c70d9387): el botón se confunde con el contenido y su efecto no se entiende. Relacionado con lote 5 (estado guardado) del checklist de revisión, sin ampliar el lote 1 activo.
+  - Presentarlo como acción secundaria reconocible, con contraste, borde/espaciado y foco visible; evitar confundirlo con Guardar determinación.
+  - Propuesta de nombre para validar: «Consultar última determinación guardada». Ayuda propuesta: «Vuelve a consultar lo guardado en el servidor para esta evaluación. Conserva tus cambios pendientes y no guarda el formulario».
+  - Explicar que lee EIPD/infancia, fundamentos, revisión e historial guardados de la evaluación seleccionada y actualiza los accesos según ese estado. Si no hay ediciones pendientes, carga esos valores en el formulario; si hay borrador editado, lo conserva. No recarga el RAT, no cambia su snapshot ni sincroniza automáticamente ventanas.
+  - Mostrar de forma comprensible qué estado/revisión se recuperó y diferenciarlo del borrador, especialmente ante conflicto. Utilizar solo autoría/fechas disponibles en el contrato, sin inventar nombres.
+  - Aceptación: el usuario identifica la acción y explica su efecto antes de pulsarla; la consulta no envía escrituras ni crea revisiones; conserva textos pendientes; con formulario limpio refleja la determinación leída; falla con mensaje claro y se recupera al reintentar; teclado/móvil legibles. Nombre y presentación pendientes de validación e implementación.
+
+
+## Revisión conectada — lote 1 C1, 25/10/2026
+
+Usuario autoriza corrección acotada del hallazgo C1 contrastado con código. Vinculada
+a NAV-UX-003/004: estados de carga/error visibles, recuperación de lectura y conservación
+de borradores implementados localmente en fix/navegacion-carga-recuperacion.
+15 pruebas conectadas y tipos/lint/formato aprobados; verificación visual escritorio,
+390 y 320 px. Pendiente aceptación asistida; no cierra NAV-UX-003/004 ni otros lotes.
+[Detalle y próximo recorrido](project/navegacion-servidor.md).
+
+## Pausa y próximo bloque — 25/10/2026
+
+Commit/push de navegación conectada autorizado por el usuario al pausar. Integración
+local y pruebas automáticas completas; aceptación asistida conectada y CI remota
+por comprobar. Referencia operativa: [checklist para reanudar](project/navegacion-servidor.md#checklist-para-reanudar).
+NAV-UX-002/003/004 permanecen abiertos hasta validar sus criterios conectados;
+NAV-UX-001 tiene aceptación asistida de la maqueta registrada en `6612076`.
+Prioridad siguiente: documentos/anexos/resoluciones/revisiones/decisiones/facultades,
+historial/descargas, preservando aislamiento y guardados. No iniciar ahora nuevas
+mejoras: NAV-UX-005 (alcance mixto), LIC-FORM-001 (consentimiento/LIA completos),
+LIC-UX-013/014/015 y LIC-DATA-001 mantienen el alcance pendiente de sus entradas.
+La publicación de la rama no cierra esos pendientes ni autoriza merge/despliegue.
+
+## Visibilidad de accesos que abren formularios o información
+
+**Actualización 25/10 — navegación conectada implementada localmente.** NAV-UX-002/003/004 tienen integración sobre API y formularios existentes, selección autorizada, conservación de borradores y aplicabilidad append-only. Migración y pruebas aisladas/recorrido real completados; aceptación asistida de documentos/anexos/resoluciones/historial/descargas y CI remota pendientes; publicación de la rama autorizada al pausar. No se cierran automáticamente todos los criterios de producto por la aceptación de la maqueta. NAV-UX-005 mantiene pendiente la actualización guiada de alcance mixto y LIC-FORM-001 los formularios completos. [Estado y guion](project/navegacion-servidor.md).
+
+
+- [x] **NAV-UX-005 — Actualizar el alcance del RAT para incorporar menores vinculados a clientes adultos y revisar aplicabilidad.** Detectado por el usuario en prueba asistida del 24/10/2026: después de guardar EIPD Corresponde en Gestión de clientes → Citas, registra infancia Corresponde porque se tratan datos de hijos de los clientes; la maqueta bloquea el guardado porque su ejemplo declara solo adultos. Paso 2 implementado y aceptado en los recorridos asistidos del circuito guiado. Se conserva el límite de compatibilidad de PATCH histórico documentado; no se declara auditoría universal. Ver [contrato y límites](project/alcance-mixto-guiado.md). Relacionado con NAV-UX-002 y NAV-UX-004.
+  - Permitir actualizar las categorías de personas, edades cuando corresponda, datos y finalidades del alcance autorizado del RAT. No usar el nombre del tratamiento ni un escenario fijo adultos/infancia como sustituto del alcance real; incluir tratamientos con adultos y menores, sin exigir cambiar a un tratamiento ficticio ajeno al caso.
+  - Si la determinación contradice el alcance registrado, explicar la discrepancia y ofrecer acceso directo a revisarlo; conservar el borrador y regresar al análisis de la evaluación correcta. Aclarar si el cambio modifica el alcance existente o requiere otra finalidad/evaluación, sin crear ni copiar evaluaciones automáticamente.
+  - Al guardar un cambio de alcance, mantener sus versiones, autoría y trazabilidad; marcar las determinaciones afectadas como pendientes de revisión y conservar la EIPD guardada, los fundamentos, borradores, anexos, resoluciones y demás antecedentes históricos. No presentar una determinación anterior como revisada para el nuevo alcance.
+  - Mantener EIPD e infancia como decisiones independientes: permitir completar ambos bloques cuando cada determinación se guarda como Corresponde con fundamento. La incorporación de menores no activa por sí sola EIPD, ni amplía permisos o habilita confirmación/activación.
+  - Aceptación: probar incorporación de hijos de clientes adultos, alcance mixto, revisión posterior y retorno sin pérdida de borradores, coexistencia de ambos accesos y retirada de aplicabilidad sin borrar historia. Comprobar permisos en servidor y aislamiento por organización, tratamiento, finalidad y evaluación. La maqueta conserva sus ejemplos; este circuito nuevo corresponde al espacio conectado y requiere aceptación asistida.
+
+- [ ] **NAV-UX-004 — Integrar determinación de aplicabilidad EIPD/infancia antes de completar.** Solicitado el 24/10 e implementado en maqueta con decisiones independientes, estados pendientes/positivos/negativos/información insuficiente y fundamento obligatorio. Pendiente adopción conectada: alcance estructurado y permisos del servidor, normativa vigente/revisión humana, trazabilidad y versionado de determinaciones, revisión por cambios de alcance y preservación de antecedentes. No inferir obligación EIPD de la sola presencia de menores ni convertir un campo en autorización. Mantener filtros coherentes en navegación, consultas e historial, sin ocultar evidencia previa. [Contrato](project/maqueta-aplicabilidad.md).
+
+
+- [ ] **NAV-UX-003 — Adoptar el marco de navegación validado en el producto conectado.** Propuesta de Claude aprobada por usuario el 24/10 e implementada en la maqueta: menú oscuro agrupado, contexto compacto, historial interno, continuidad y acciones con semántica explícita. Antes de adopción: recorrido de aceptación, reutilización del catálogo real de 50 preguntas y sus secciones/progreso, rutas/contextos autorizados por servidor, recuperación de borradores/guardados tras recarga y comprobaciones de permisos/aislamiento/versionado. Coordinar con NAV-UX-002; no duplicar selección de contexto ni declarar resueltos los formularios LIC-FORM-001. [Resolución y oportunidades](project/maqueta-revision-claude.md). Sin merge, despliegue ni habilitación EIPD.
+
+
+- [ ] **NAV-UX-002 — Adoptar selección explícita de contexto en la navegación conectada.** Usuario solicita durante la prueba seleccionar organización → tratamiento del RAT → finalidad → evaluación. Incorporado ahora únicamente a la maqueta integral con ejemplos separados; pendiente prueba asistida y posterior adopción en el producto. Usar identidades y opciones autorizadas del servidor, filtrar finalidades por tratamiento y evaluaciones por finalidad, mostrar el contexto elegido durante todo el recorrido y no conservar una combinación inválida al cambiar la selección anterior. Separar borradores, guardados, valoraciones, anexos, revisiones y descargas por evaluación; mantener su asociación histórica y no copiar ni heredar decisiones por cambiar de finalidad o versión. Navegar debe conservar los borradores sin presentar cambios pendientes como guardados. La selección de infancia depende del alcance de la evaluación elegida. Validar múltiples finalidades y versiones, cambios con ediciones pendientes, retorno entre módulos, recarga desde servidor, consultas y descarga de la evaluación exacta, permisos/aislamiento por organización y uso en móvil/teclado. No implica crear evaluaciones automáticamente, ampliar permisos ni habilitar EIPD. [Contrato y prueba de maqueta](project/maqueta-navegacion-integral.md).
+
+
+- [ ] **NAV-UX-001 — Maqueta integral con Panel principal y navegación homogénea.** Usuario solicita segunda versión basada en su bosquejo PowerPoint y acepta menú principal fijo a la izquierda, opciones superiores específicas por módulo, submenús por clic y formularios centrales. Se elimina la capa genérica Completar datos. Preparar resolución documental queda en Resoluciones y revisiones. Demostración implementada en `/dashboard/maqueta`, con módulos, escenarios adultos/infancia, borradores en memoria y pruebas dirigidas. Pendientes prueba asistida, ajustes y aceptación antes de adopción en producto conectado. [Alcance, límites y guion](project/maqueta-navegacion-integral.md). LIC-UX-015 sigue abierto: maqueta no equivale a implementación transversal del producto.
+
+- [ ] **LIC-UX-015 — Destacar de forma transversal las acciones de apertura y mostrar claramente su destino.** El usuario informa durante el recorrido de infancia del 23/10/2026 que le costó encontrar «Preparar documento para revisión» y solicita destacar estas opciones para todos los casos. Aplicar un patrón consistente a botones, enlaces y desplegables que abren formularios, nuevas etapas o información adicional del recorrido de licitud; no limitar el ajuste a infancia ni a un único botón. Revisar también su coherencia con el RAT y los componentes compartidos, delimitando cualquier ampliación antes de implementarla.
+
+  **Alcance de diseño:** inventariar accesos en Resumen, Completar datos, Revisar documentos e Historial/descargas, incluidos preparar resolución, preparar sucesor, vista previa/preparar para revisión, consultar resoluciones, añadir anexos/evidencias, contenido guardado, fundamentos y detalles/historial de facultades. Distinguir acciones principales, secundarias y desplegables con borde/fondo, peso, espaciado y texto explícito; incorporar indicador de apertura o expansión cuando ayude. No depender solo del color ni convertir todas las acciones en botones primarios. Separar navegación/consulta de guardar, registrar, retirar o reemplazar contenido.
+
+  **Destino y estados:** al abrir otro paso, mostrar título y ubicación claros, desplazar/focalizar el inicio del nuevo contenido cuando queda fuera de la vista y mantener foco de teclado accesible; al expandir detalles locales, conservar relación con su control y estado abierto/cerrado. Si un botón está deshabilitado, mantenerlo reconocible y explicar cerca qué requisito falta. Las confirmaciones de reemplazo deben conservar sus dos opciones claramente diferenciadas; no saltarlas ni copiar/guardar automáticamente. Mantener borradores y advertencias de cambios pendientes al navegar. Considerar enlace de retorno y acceso al siguiente paso en formularios largos, evitando acciones duplicadas ambiguas.
+
+  **Criterios de aceptación:** (1) recorrido visual y por teclado en adultos e infancia permite localizar las aperturas sin indicaciones externas sobre su posición; (2) escritorio, zoom y móvil conservan jerarquía, foco visible, contraste y áreas de interacción adecuadas; (3) cada acción indica qué abre y el contenido nuevo resulta perceptible; (4) desplegables accesibles con nombre/estado correctos; (5) botones deshabilitados explican el motivo y se actualizan al completar requisitos; (6) no se modifica persistencia, permisos, bloqueos o registro histórico; (7) al preparar sucesor, se distingue copiar a un formulario temporal de crear una resolución, y la confirmación de reemplazo sigue funcionando. Validar con casos dirigidos de interacción y recorrido asistido, no solo cambios de color. Relacionado con LIC-UX-004/006 y LIC-UX-014; pendiente diseño e implementación. Evidencia: captura 14b2c648 y observación explícita del usuario.
+
+## Errata en referencia de revisión histórica de infancia
+
+- [ ] **LIC-DATA-001 — Tratar de forma trazable la referencia histórica IMULADA-PILOTO-INFANCIA-REV-002.** Usuario detecta S inicial ausente en la revisión documental No continuar de resolución 2. Referencia esperada SIMULADA-PILOTO-INFANCIA-REV-002.; captura c5bbcc4b y antecedentes 9674aab9/ad339ee2. ChildEipdHistory muestra directamente event.review_reference, sin recortar; pendiente cotejo de la respuesta específica de revisiones para confirmar el origen almacenado, ya que el expediente JSON exporta eventos de organización y no esta revisión. Antes de corregir, identificar registro exacto y verificar referencia de origen. Conservar registros inmutables: definir fe de erratas o anotación correctiva vinculada con original, motivo, actor y fecha, o usar mecanismo existente si está disponible; no ejecutar UPDATE histórico ni corregir solo en pantalla como si siempre hubiera estado bien. Validar que consulta y exportación de ese canal distingan referencia original/corrección, no cambien hashes de resolución ni reinterpreten una decisión, y mantengan permisos/aislamiento. Si no existe mecanismo correctivo, delimitar contrato antes de implementación. Registro documental pendiente, sin cambios de producto ni de datos históricos.
+
+## Estado de guardado ante archivos rechazados
+
+- [ ] **LIC-UX-014 — Aclarar el estado de Guardar y evitar errores duplicados en anexos.** Ensayo manual del 23/10/2026: con referencia/descripcion/seccion completas, CSV rechazado y confirmacion ficticia marcada, el boton Guardar anexo ficticio permanece habilitado. Al pulsarlo se rechaza el intento y se conservan los campos, pero el mismo mensaje de formato aparece junto al selector y junto al guardado. No se observa un guardado exitoso; el hallazgo es de presentacion, no evidencia de que se admitan CSV. Ajuste posterior: deshabilitar Guardar mientras exista un error conocido del archivo (formato, vacio o tamano), con motivo visible y asociado de forma accesible; mantener la validacion al enviar y la del servidor como defensas independientes. Evitar repetir el mismo error global y local; mantener accesible el aviso junto al campo y un foco/resumen coherente si el rechazo proviene del envio. Conservar referencia, descripcion, seccion, vinculos y confirmacion al corregir el archivo; actualizar el estado tras seleccionar un PDF/TXT valido, sujeto a los demas requisitos. Criterios: CSV, archivo vacio y sobredimensionado no habilitan Guardar; sustitucion por valido retira el error anterior; no hay falsos mensajes de exito ni solicitudes duplicadas; navegacion por teclado y lector de pantalla comprensible; pruebas dirigidas de estado y correccion sin alterar persistencia ni limites. Evidencia: [checklist del recorrido](project/m3-t1-checklist-recorrido-licitud.md), capturas ee6c75a3 y da53ff0a. Pendiente implementacion; mantener datos ficticios y EIPD bloqueada.
+
+## Consulta conjunta del riesgo residual y sus medidas de mitigación
+
+- [x] **LIC-UX-013 — Mostrar las medidas que sustentan el riesgo residual en Consultar valoración y anexos.** Solicitud del usuario durante el recorrido asistido del 23/10/2026. Estado: Paso 3 aceptado por el usuario tras el recorrido de valoración actual y Consultar anexo; publicación autorizada en `feature/riesgos-medidas-evidencias`. Consulta por riesgo con medidas, verificación, evidencias y acceso a la ficha del anexo; usa solo datos guardados y evita asociar valoraciones históricas al documento actual. Evidencia: 83 pruebas Chromium aprobadas con respuestas controladas, tipos/lint/formato aprobados y recorrido asistido reportado OK. Objetivo: comprender el resultado por riesgo junto con sus medidas y respaldos, sin reconstruir las relaciones entre formularios y anexos. Complementa la consulta existente; no cambia el cálculo ni las condiciones de guardado.
+
+  **Presentación requerida:** mantener el resumen general y añadir un detalle por riesgo con código y descripción, residual previsto y residual actual claramente separados, probabilidad, impacto y nivel de cada uno; mostrar «Sin evaluar» cuando corresponda. Junto al resultado, listar todas las medidas vinculadas con código, descripción, dimensión de mitigación (probabilidad, impacto o ambas), eficacia cualitativa, implementación declarada, estado de verificación y fundamento consultable. Mostrar referencias de evidencia y anexos relacionados con referencia, versión y acceso a la descarga autorizada cuando exista un archivo. Distinguir una referencia documental de un archivo adjunto; no ofrecer descargas inexistentes ni presentar una referencia como evidencia verificada por sí sola.
+
+  **Origen y vigencia:** leer el resultado y los atributos del control desde la revisión de valoración consultada. Para descripciones, implementación y respaldos obtenidos del documento o del índice de anexos, identificar su procedencia y comprobar su asociación con esa revisión. No combinar silenciosamente una valoración histórica con descripciones, estados o versiones actuales. Si el contrato disponible no permite recuperar una descripción o respaldo histórico exacto, informar esa limitación y mantener los códigos de la revisión; definir cualquier ampliación del contrato antes de implementarla. No escoger automáticamente la versión más reciente de un anexo para justificar una valoración previa. Los cambios pendientes del formulario no deben aparecer como guardados.
+
+  **Reglas de interpretación:** las medidas se vinculan a riesgos, no directamente a un nivel global agregado. Una medida que actúa sobre probabilidad no debe presentarse como reducción del impacto. Mostrar todas las medidas de un riesgo sin repartir porcentajes ni atribuir una reducción individual no evaluada. Conservar la distinción entre medida propuesta, implementación declarada y verificación registrada; los casos ficticios deben mantener su identificación. Si no hay medidas, referencias o archivos relacionados, indicarlo expresamente. Las referencias no resolubles deben conservarse visibles con su estado, sin inventar respaldos. Mostrar la condición histórica o pendiente del resultado antes del detalle.
+
+  **Ejemplo de aceptación del ensayo:** R1 con residual actual Medio (probabilidad Baja e impacto Grave); M1, restricción de acceso según funciones autorizadas, dimensión Probabilidad, eficacia Parcial y estado Verificada en el escenario ficticio. Referencia SIMULADA-VERIFICACION-M1-001, con la versión de anexo que pueda asociarse de forma comprobable. El ejemplo no acredita implementación o pruebas reales.
+
+  **Criterios de aceptación y validación:** (1) un riesgo con una medida y varios riesgos con varias medidas, incluida una medida compartida; (2) residual previsto frente a actual sin evaluar, medidas propuestas o pendientes y ausencia de vínculos; (3) referencias documentales sin archivo, anexos con varias versiones y referencias no resolubles; (4) consulta vigente frente a histórica sin mezclar revisiones; (5) guardar, recargar y reabrir conserva las relaciones y resultados del servidor; (6) lectura accesible en escritorio y móvil, con etiquetas claras y fundamentos extensos desplegables; (7) permisos y aislamiento por organización conservados en lectura y descarga; (8) comprobaciones dirigidas de presentación y, solo si se amplía el contrato, pruebas de compatibilidad e historial. No mutar revisiones, anexos, cálculos ni campos manuales al consultar.
+
+  **Puntos de entrada para desarrollo:** frontend/components/licitud/AssessmentSupportPanel.tsx, tipos y cliente de soporte, vista de consulta de riesgos y backend/app/services/assessment_support.py si resulta necesaria una ampliación de lectura. Revisar primero el [contrato de riesgos y anexos](project/m3-t1-riesgos-anexos.md). Coordinar con LIC-COH-001 para diferenciar el resumen manual de sección 7 del resultado estructurado, sin sobrescribirlo. Mantener el mensaje de revisión por una persona responsable y los bloqueos vigentes de EIPD/datos reales.
+
+## Coherencia del resumen manual y la valoración de riesgos
+
+- [ ] **LIC-COH-001 — Revisar coherencia entre sección 7 y valoración estructurada.** Hallazgo del ensayo positivo ficticio del 23/10/2026: JSON (5) conserva resumen/fundamento manual pendientes, residual_risk_level sin_resolver, plan de verificar M1 y limitaciones sin anexos; la valoración estructurada revisión 6 actual registra residual Medio, M1 implementada/verificada en escenario sintético y cuatro anexos. Son campos independientes, no pérdida de persistencia. Alcance: revisar explícitamente los textos del ensayo y diseñar ayuda/aviso que identifique fuente, revisión y necesidad de actualizar el resumen documental al cambiar riesgos/controles/anexos. No sobrescribir narrativas ni equiparar automáticamente las escalas (nivel documental no_alto/alto/sin_resolver y matriz de cuatro niveles). La verificación sintética no acredita controles reales. Criterios de aceptación: (1) diferenciar resumen manual de resultado estructurado y señalar su procedencia; (2) mostrar aviso de coherencia por revisar cuando corresponda, sin declarar una contradicción jurídica por comparación de códigos de escalas distintas; (3) conservar texto e historial hasta edición explícita; (4) guardar la edición invalida la asociación anterior y exige nueva valoración conforme al mecanismo existente; (5) reapertura/exportación conserva correcciones y versiones; (6) datos incompletos, valoraciones históricas y anexos nuevos no producen falsos positivos; (7) EIPD/datos reales permanecen bloqueados. Evidencia: [checklist del recorrido](project/m3-t1-checklist-recorrido-licitud.md), ensayo revisión 6 y JSON (5). Pendiente diseño e implementación del aviso y actualización explícita del contenido del ensayo; no modificar automáticamente el expediente del usuario.
+
+
+## Brecha de formularios de consentimiento y LIA
+
+- [ ] **LIC-FORM-001 — Completar los formularios de consentimiento y LIA del recorrido.** Auditoría solicitada por el usuario el 23/10/2026: el servidor ya tiene contratos/evaluadores, pero consentimiento no tiene editor y LIA solo expone nueve textos. Conectar checklist de consentimiento (14 preguntas generales y 2 condicionales), ocho grupos completos de LIA, evidencia/anexos por control, diagnóstico por campo y consulta legible; conservar datos al cambiar de base y en guardado/reapertura/exportación. Reutilizar controles existentes, separar completitud documental de validación jurídica y distinguir normativa vigente/reforma. Originales Excel aportados y cotejados: 19 preguntas de consentimiento y 31 de LIA, más estados/conclusiones. El informe mapea cada celda al contrato y la adaptación requerida; desglose de consentimiento requiere decisión/versionado de conservación, sin copiar borrado universal ni recomendaciones como mandatos. 190 pruebas de servicios/esquemas existentes aprobadas; implementación de la brecha pendiente. Alcance y aceptación: [auditoría de cobertura](project/m3-t1-consentimiento-lia-cobertura.md). Desarrollo posterior detallado en [contrato LIC-FORM-001](project/m3-t1-consentimiento-lia-implementacion.md): campos, condicionales, compatibilidad/versionado, evidencias, paquetes FORM-01 a 05, decisiones pendientes y matriz de aceptación. Solo datos ficticios, EIPD bloqueada; sin merge/despliegue.
+
+  Avance 31/10: entrega inicial local de editores v1, consulta y diagnóstico separado; 39 pruebas Chromium controladas aprobadas. Pendientes desgloses compatibles de consentimiento, evidencias por criterio/versión e integración real aislada; no cerrar el trabajo. [Estado y recorrido Paso 4](project/paso4-consentimiento-lia.md).
+
+
+
 > Primer archivo de backlog trackeado en git. Hasta ahora el seguimiento de tareas vivía en archivos `Claude_*`/`Fase 1`/`Modulo 1` sin trackear (`git status` los marca `??`); este archivo empieza a fijar en el repo los ítems con criterios de aceptación explícitos, empezando por el de este trabajo.
+
+## Experiencia de licitud — propuesta aceptada 18/10/2026
+
+- [ ] **LIC-UX-004 — Flujo guiado y separacion por tareas.** Propuesta aceptada: cuatro pestanas (Resumen y siguientes pasos, Completar datos, Revisar documentos, Historial y descargas), esquema visible, facultades en acceso separado, contexto de version junto a decisiones, controles reconocibles y causas de bloqueo. Primero maqueta navegable con adultos, infancia y facultad revocada; luego implementacion y validacion asistida. Conservar borradores al navegar y refrescar dependencias tras guardar. Documento y criterios: [Experiencia de licitud](project/m3-t1-licitud-experiencia.md). Incluye hallazgos LIC-UX-002/003 y patron RAT-UX-001 segun alcance; RAT-VAL-001 sigue separado. Aceptada no equivale a implementada. Sin ampliacion de permisos, activacion EIPD ni datos reales.
+  - Maqueta V3: `/dashboard/licitud/maqueta`, seleccion RAT/finalidad y cuatro pestanas. Editor simplificado; preparar muestra contenido, pendientes y version con notas opcionales; lectura preparatoria ficticia y registro completo en memoria. Crear desde version seleccionada copia su contenido con origen/motivo obligatorio; confirma reemplazo de cambios pendientes. Emitir revision es independiente. Editar genera otra version sin mutar anteriores. Bloque de maqueta consolidado: usuario confirma copia DEMO-1 a DEMO-3, original intacto, descarga y observaciones separadas por version. Resaltado de descarga coherente y ayudas en los siete desplegables; 18 Chromium del bloque aprobadas. Recorrido integrado al servidor con secciones, guardados coordinados y borrador EIPD guiado; 71 Chromium y 4 API/integracion aislada aprobadas. Pendiente validacion asistida de esta interfaz conectada y contratos de adopcion RAT/LIA, origen/motivo estructurados y revision EIPD general; LIC-UX-004 abierto.
+
+  - Bloque de riesgos/anexos completado: valoración estructurada interna, controles y residual,
+    anexos ficticios versionados, revisión conjunta RAT/licitud-LIA/EIPD y preparación
+    infancia según alcance; autoridad condicional y guardado sin filas totalmente vacías.
+    [Contrato/evidencia](project/m3-t1-riesgos-anexos.md). Resta validación asistida ampliada
+    y contratos de adopción/revisión formal; no se marca LIC-UX-004 integralmente cerrado.
+
+- [x] **LIC-UX-005 — Acercar y destacar el aviso de cambios sin guardar.** Visita guiada V2, 19/10/2026: el usuario confirma que el fundamento se conserva al cambiar de pestana, pero no identifica el aviso situado debajo de las pestanas. Moverlo al formulario activo, cerca de los campos editados y de la accion de guardar, con presentacion visible y accesible. Mantener el significado: cambios pendientes conservados entre pestanas durante la visita; recargar reinicia el ensayo. Criterios: el estado se identifica mientras se edita y antes de guardar, sin buscarlo arriba; no confundir guardado simulado con persistencia en servidor. Aplicado en maqueta V3 y formularios conectados: aviso destacado dentro del formulario activo; pendiente validar ubicacion del recorrido conectado con usuario. Sin cambios en permisos ni activacion EIPD. Aclaración del recorrido asistido del 21/10/2026: en Base y fundamento, ubicar el aviso «Cambios sin guardar» inmediatamente después del campo Fundamento y encima del botón Guardar borrador, no solo al inicio del formulario. Mantener su estilo destacado y retirar el aviso tras guardado confirmado; conservarlo ante rechazo. Posición observada en la captura: encima de las instrucciones y campos, demasiado alejada del botón. Ajuste implementado en el bloque del 22/10; aviso inmediatamente antes de Guardar y conservado ante rechazo.
+
+- [x] **LIC-UX-006 — Jerarquía de títulos y separación de casillas en formularios de licitud.** Recorrido asistido, 21/10/2026: revisión transversal de Crear evaluación, Alcance del RAT, Base y fundamento, Documentar EIPD, Valorar riesgos y Anexos de respaldo. Destacar visualmente títulos de secciones, leyendas y etiquetas de campos con negrita/color o fondo coherente, diferenciándolos de los datos ingresados. Incluye Finalidad, Categorías de datos incluidas, Titulares incluidos, Base de licitud propuesta, Fundamento y los campos de EIPD/riesgos/anexos mostrados en las capturas. Agregar separación visible entre cada casilla y su texto, incluidas declaraciones de datos ficticios. Conservar etiquetas accesibles, selección al pulsar el texto y jerarquía semántica. Implementado y validado en el bloque de presentación del 22/10.
+
+- [x] **LIC-UX-007 — Resultado de creación visible y conflicto de borrador claro.** Recorrido asistido, 21/10/2026: colocar junto a Crear borrador una confirmación destacada y accesible de borrador creado/guardado únicamente tras éxito confirmado del servidor. Si ya existe un borrador para la finalidad, explicar que no se creó otro y ofrecer Abrir borrador existente; no concatenar el consejo de respuesta incierta a un rechazo conocido. Conservar el formulario ante rechazo y no dar por guardados los cambios de ese intento. La captura muestra el rechazo «Ya existe un borrador para esta finalidad», con una sola evaluación versión 1 en el historial; no acredita una creación nueva. Implementado y validado localmente en el bloque del 22/10; revisión asistida posterior pendiente.
+
+- [x] **LIC-UX-008 — Mensaje del resumen comprensible y acorde al alcance.** Recorrido asistido, 21/10/2026: sustituir la frase «La preparación disponible corresponde al contrato documental EIPD de infancia. No crea una versión autónoma de RAT o LIA ni determina que una EIPD sea obligatoria.». El usuario señala que no corresponde al mensaje de esta pantalla. Explicar las acciones disponibles con lenguaje de usuario, sin términos internos como «contrato documental» ni referencias de infancia en el tratamiento de adultos. Ajustar cualquier explicación específica de infancia al alcance aplicable. Propuesta para adultos: «Completa y guarda los datos de esta evaluación. Luego podrás consultar el alcance del RAT, la base de licitud y el documento EIPD guardado, si existe. Guardar no equivale a aprobar la evaluación.». Implementado y validado localmente en el bloque del 22/10; revisión asistida posterior pendiente.
+
+- [x] **LIC-UX-009 — Tamaños de lectura consistentes en todo el flujo de licitud.** Recorrido asistido, 21/10/2026: revisar en conjunto cabecera, Resumen, Alcance del RAT, Base y fundamento, Documentar EIPD, Valorar riesgos y Anexos de respaldo. El texto sobre versiones y otras ayudas se perciben demasiado pequeños respecto del resto. Aplicar una escala coherente de títulos, etiquetas, respuestas y textos explicativos; evitar diferencias arbitrarias o aclaraciones esenciales en letra diminuta. Mantener legibilidad en escritorio/móvil y zoom normal, con el criterio de títulos destacados de LIC-UX-006. La solicitud se amplía con las cinco capturas del usuario. Implementado y validado localmente en el bloque del 22/10; revisión asistida posterior pendiente.
+
+- [x] **LIC-UX-010 — Integrar Valorar riesgos en la navegación interna de EIPD.** Observación expresa del usuario en el recorrido asistido del 21/10/2026: Valorar riesgos debe ser la sección 4 dentro de Documentar EIPD, en lugar de una opción separada al mismo nivel del documento. Orden solicitado: 1. Tratamiento y alcance; 2. Necesidad y proporcionalidad; 3. Riesgos; 4. Valorar riesgos; 5. Medidas; 6. Fuentes y evidencias; conservar Riesgo residual y seguimiento como sección 7. Evitar el acceso duplicado exterior una vez integrado. Conservar los datos al navegar, los guardados y su asociación con el documento guardado, las revisiones/hashes existentes y el bloqueo de activación. Implementado y validado en el bloque del 22/10, conservando los borradores al navegar.
+
+- [x] **LIC-UX-011 — Tabla de riesgos completa y legible.** Hallazgo del recorrido asistido del 22/10/2026: mezcla descripciones largas y resultados cualitativos, dificultando comparar R1/M1. Inspección de EipdRiskTable confirma que no presenta los fundamentos estructurados inherente/previsto/actual, contexto de frecuencia/exposición, horizonte, acción/responsable/fecha ni referencias de evidencia del control en esa tabla; esto no prueba pérdida en persistencia. Propuesta pendiente: por riesgo, descripción y daño en bloque propio; tabla de valoración con filas Inherente, Residual previsto y Residual actual y columnas Probabilidad, Impacto, Nivel y estado de evaluación; tabla de controles con identificador, descripción breve, dimensión de mitigación, eficacia, implementación y verificación claramente diferenciadas. Mostrar fundamentos completos, frecuencia/horizonte, seguimiento y evidencias/anexos vinculados en detalle identificado, sin mezclar análisis narrativos anteriores con fundamentos vigentes ni ocultar que un campo está pendiente. Diferenciar visualmente texto descriptivo de niveles mediante tipografía, fondos y etiquetas además del color; versión y vigencia visibles, adaptable a móvil. Mantener controles múltiples, asociaciones y guardas de actualidad; sin recalcular ni aprobar riesgos. Presentación aprobada e implementada en el bloque del 22/10; pruebas de detalle, asociaciones y vigencia aprobadas.
+
+- [x] **LIC-UX-012 — Validación de anexos visible junto al archivo y al guardado.** Recorrido del 22/10/2026: usuario reporta rechazo de CSV sin explicación visible junto a Guardar; captura conserva referencia, descripción, R1/M1, archivo CSV y declaración ficticia. El cliente tiene validación PDF/TXT de hasta 2 MiB, pero el error del panel se renderiza arriba. Mensaje superior confirmado por captura posterior: «Selecciona un PDF o TXT de hasta 2 MiB»; rechazo de formato en cliente comprobado. Prueba posterior con SIMULADA-ANEXO-EXCEDE-2MiB.txt (2 MiB + 1 byte): usuario reporta rechazo y captura conserva formulario; no muestra aviso junto al botón. Referencia/descripción continuaron con texto de CSV, lo que no cambia la prueba de tamaño del archivo seleccionado. Mostrar motivos diferenciados («Formato no admitido» / «El archivo supera 2 MiB») junto al selector y acción de guardado, con foco/aviso accesible; explicar PDF o TXT UTF-8 hasta 2 MiB por archivo y conservar campos para corregir. Distinguir rechazo de resultado incierto y éxito; no declarar defensa de servidor probada solo por rechazo del cliente. Implementado y validado en bloque UX del 22/10; revisión asistida posterior pendiente.
+
+- [ ] **LIC-AUD-001 — Bitácora de auditoría de acciones de Bases de Licitud.** Observación acordada con el usuario el 22/10/2026. Distinguir el historial append-only de valoraciones/anexos ya existente (actor, fecha del servidor, organización, evaluación, revisión, solicitud y huella del documento) de una bitácora completa de acciones. Revisar cobertura de guardados de licitud/LIA/EIPD, valoraciones y anexos, consultas/descargas y rechazos de validación o autorización; no asumir que cada acción ya genera un evento auditable. Definir eventos, actor servidor, contexto, fecha/hora, resultado y motivo/código, correlación de solicitud y referencias de versión; evitar secretos y contenido personal innecesario en logs. Definir permisos de consulta/exportación, aislamiento por organización, integridad y retención. Coordinar la presentación con Carpeta de Evidencia/Módulo 5 y la política existente, sin ampliar por defecto la exposición al usuario. Validar éxitos y rechazos con datos ficticios, incluyendo rechazo de residual actual sin controles verificados. Pendiente diseño de alcance e implementación; no equivale a certificación de auditoría ni modifica el bloqueo EIPD.
+
+- [ ] **LIC-RISK-001 — Propuesta de criterios configurables y versionados de valoración.** Consulta del usuario durante el recorrido asistido del 21/10/2026: permitir definir el significado de los niveles de probabilidad e impacto. Propuesta funcional pendiente de definir/confirmar, no acordada como implementación automática: configuración de metodología por organización y personas autorizadas, con horizonte, definiciones/criterios observables, ejemplos y fundamentos; impacto centrado en daño a titulares. Mantener una plantilla inicial y mostrar en EIPD la metodología/versión aplicada. Definir expresamente si solo se parametrizan descripciones/umbrales o también matriz, escalas y reglas; estos últimos requieren contrato y validación específicos. Cada valoración debe conservar la versión/copia exacta del método; cambiar criterios no debe recalificar silenciosamente registros previos. Exigir una nueva revisión explícita para reevaluar. Los criterios actuales de CUMPLEIA-CUALITATIVA-1 son fijos. Separar esta propuesta de los ajustes de presentación y mantener activación bloqueada.
+
+### Estado del bloque de ajustes del 22/10/2026
+
+LIC-UX-005 a LIC-UX-012 implementados y validados localmente: tipografía/etiquetas/casillas,
+avisos junto a Guardar con foco de error, conflicto de creación conocido con acceso a borradores,
+mensajes de alcance comprensibles, valoración dentro de EIPD como paso 4 y navegación 1–7,
+tablas por riesgo/etapa y controles con fundamentos, seguimiento y anexos vinculados.
+CSV, archivo vacío y exceso de 2 MiB muestran motivos distintos junto al selector y guardado.
+La confirmación de guardado se conserva si falla únicamente el diagnóstico posterior.
+34 pruebas Chromium y 4 aisladas del recorrido/listado aprobadas; tipos/lint/formato revisados.
+Pendiente revisión visual asistida del bloque actualizado. LIC-UX-004 no se cierra integralmente;
+LIC-RISK-001 y LIC-AUD-001 continúan pendientes de diseño, sin cambios en metodología/API/RLS.
+EIPD bloqueada; solo datos ficticios; sin merge/despliegue.
+
+## Hallazgos de prueba manual RAT — 17/10/2026
+
+- [ ] **RAT-UX-001 — Estado de guardado visible al reabrir secciones.** Prioridad baja; no bloquea el piloto ficticio. En Fuentes de los datos, la confirmacion temporal desaparece al recargar aunque el contenido persiste, lo que genera dudas sobre el guardado. Mostrar estado derivado de datos cargados del servidor (datos guardados/sin registros), cambios sin guardar al editar y confirmacion tras respuesta exitosa. No declarar guardado ante error o respuesta incierta. Criterios: recargar o volver desde otra pagina conserva estado y contenido; editar/agregar/eliminar distingue cambios pendientes; fallo conserva el formulario sin indicar exito. Evaluar el mismo patron en las demas secciones RAT. Sin cambiar completitud documental, permisos ni bloqueo EIPD. Detectado por el usuario en el piloto de infancia.
+
+- [ ] **LIC-UX-002 — Acciones y version consultada identificables.** Hallazgo manual 18/10: registrar resolucion/decision/consulta parece texto corriente; fue dificil localizar el control y se completo un fundamento para resolucion 2 mientras estaba consultada la 1. Mostrar botones reconocibles y referencia/version junto a la decision; conservar foco/contexto al consultar. Criterio: identificar accion y version sin busqueda del navegador; no cambiar permisos ni historiales.
+- [ ] **RAT-VAL-001 — Revisar completitud de fuentes.** Una fila con tipo de fuente y descripcion vacia satisface el requisito actual de fuente registrada; distinguir existencia de fila y descripcion suficiente. Definir contrato de borrador/completitud y alinear servidor, diagnostico y UI, con pruebas de vacio/espacios y persistencia. No asumir completitud juridica ni cambiar activacion EIPD. Hallazgo del piloto, pendiente de implementacion.
+- [ ] **LIC-UX-003 — Explicar coherencia entre RAT e infancia.** Grupos del documento se declaran por separado de las marcas del RAT; no se sincronizan automaticamente. Mostrar origen, diferencias y necesidad de revisar/guardar contexto al cambiar RAT, preservando versiones historicas. Validar escenario sintetico de cambio de titulares sin afirmar actualizacion automatica ni sobrescribir decisiones.
 
 ## Modelo de organizaciones, roles y suscripción
 
@@ -168,7 +1392,7 @@ El anexo de respuestas crudas y, en general, cualquier bitácora de auditoría f
 Matriz de implementación, evidencia y brechas en
 [Revisión de aceptación M3-T1](project/m3-t1-revision-aceptacion.md).
 Diseño y alcance en [Bases de licitud](project/modulo3-licitud-diseno.md).
-Última suite completa registrada: 2234 passed (§58); no acredita cierre integral.
+Suite completa backend de CI: 3977 passed en commit 7f94bbf (§232); no acredita cierre integral ni los commits posteriores.
 
 - [x] Núcleo persistente, alcance por finalidad, snapshot/hash, RLS y lifecycle.
 - [x] Seis bases ordinarias; geolocalización y consentimiento expreso sensible
@@ -811,4 +2035,72 @@ esta tarea mediante esta revisión. Sin cierre DONE ni commit.
 - [x] M3-T1 §219: enlace de inicio de sesion ante 401 en consulta EIPD; limpieza y recuperacion comprobadas con fixtures ficticios.
 
 - [x] M3-T1 §220: compilacion de produccion frontend en copia temporal con configuracion ficticia; 23 pruebas cliente/interaccion aprobadas.
-- [ ] Validar runtime Node 22 o superior para frontend: build §220 informa deprecacion de Node 20 por Supabase; comprobar compatibilidad antes de cambiar runtime.
+- [x] Validar runtime Node 22 para frontend (§221): 23 pruebas, tipos/lint y build aprobados; frontend/.nvmrc compartido con CI. Servidor activo sin reinicio.
+
+- [x] M3-T1 §222: instalacion limpia Node 22 desde lockfile comprobada; CI usa npm ci y cache del lockfile. CI remoto aun no ejecutado para esta rama.
+- [x] §223: Next/eslint-config-next 15.5.27 fijados y validados en copia aislada; 23 pruebas y build aprobados.
+- [x] §224: instalacion/reinicio local aplicados: Next 15.5.27 con Node 22; login 200, admin sin sesion redirige /login, backend health 200.
+
+- [x] M3-T1 §225: usuario comprueba visualmente requisitos y revision ficticia en Edge 390 x 749 tras actualizacion local Next; sin comprobacion nueva de status HTTP o login.
+
+- [x] M3-T1 §226: ESLint CLI sustituye next lint y revisa tambien e2e/config/middleware; falso positivo callback fixture corregido sin desactivar reglas.
+
+- [x] M3-T1 §227: aviso superior de pruebas ficticias hasta MVP y bloqueos visibles completo en captura Edge 390 x 749 del usuario.
+
+- [x] M3-T1 §228: CI frontend incorpora 23 pruebas ficticias EIPD, comando verificado localmente con CI=true; ejecucion remota pendiente de PR.
+
+- [x] M3-T1 §229: formato frontend global, lint, tipos y 23 pruebas EIPD aprobados localmente; artefactos Playwright excluidos de Prettier.
+
+- [x] M3-T1 §230: 642 pruebas de las 26 suites del runner EIPD aprobadas en base aislada; verificacion posterior correcta. No suite integral del producto.
+
+- [x] M3-T1 §231: Ruff/Black global backend aprobados; migracion historica preservada con excepcion I001 exacta; correcciones restantes solo formato/imports.
+
+- [x] M3-T1 §232: PR #30 draft y CI remoto aprobado para 7f94bbf: 3977 pruebas backend y controles frontend con 23 pruebas ficticias. Sin merge/aceptacion juridica; revision tecnica pendiente.
+
+- [x] M3-T1 §233: revision focal de permisos/tenant/canal admin y bloqueos de revisiones; sin hallazgo nuevo en alcance inspeccionado. Revision integral del PR pendiente.
+
+- [x] M3-T1 §234: revision focal control global politica; docstring API actualizado y limite bloqueo servicio/SQL precisado. Sin nueva barrera SQL.
+
+- [x] §235: CI agrupa por workflow/ref y prioriza ultimo commit en PR; cancelacion efectiva pendiente de observar tras publicar configuracion.
+
+
+## Siguiente bloque funcional M3-T1 — §236
+
+Representacion sensible: [diseño preliminar de desarrollo](project/m3-t1-representacion-desarrollo.md).
+No habilitada; pruebas ficticias hasta MVP. Checklist historico no acredita facultad.
+
+- [x] Delimitar campos candidatos y matriz documental conservadora (§236).
+- [x] §237: contrato V1 separado y 39 pruebas ficticias de forma aprobadas; no persistencia, readiness o confirmacion.
+- [ ] Diseñar binding sucesor, persistencia y diagnostico manteniendo historicos/bloqueos.
+- [x] §238: binding independiente de representacion, 19 pruebas nuevas y 69 focalizadas aprobadas; can_confirm=false, sin integracion API.
+- [x] §239: evaluador documental conservador, 30 pruebas nuevas y 88 relacionadas aprobadas; completo no autoriza ni verifica facultades.
+- [ ] Representacion: integracion persistente/binding sucesor en API conservando bloqueos, historicos y limites de diagnostico.
+- [x] §240: [plan persistente de representacion](project/m3-t1-representacion-persistencia.md), semantica PATCH/historicos/tenant y limite de cobertura EIPD; implementacion pendiente.
+- [x] §241: centralizacion sin ciclo y contratos futuros Create/Update/Out, 107 pruebas relacionadas; endpoints activos sin nuevo campo. Persistencia pendiente.
+- [x] §242: migracion/storage nullable de representacion, barrera SQL no confirmado y RLS probados; 116 relacionadas aprobadas, API del campo pendiente.
+- [x] §243: CRUD de representacion conectado y gates conservadores; 127 pruebas del bloque aprobadas, readiness especifico pendiente (409 controlado).
+- [x] §244: diagnostico representacion en readiness/interfaz, cobertura pendiente explicita y vigencia global suprimida; 132 backend y 31 frontend aprobadas. Sin habilitacion.
+
+- [x] M3-T1 §260: CRUD de resolucion V3 y diagnostico V4 conectados en API; 892 pruebas aisladas y 37 frontend aprobadas; metadata2 no autoriza acciones. Migracion local aplicada sin cambios de contenido.
+- [x] M3-T1 §§261–263: motivos V4 completos y lectura historica V3 de metadata1/2/null, sin inferir autoridad.
+- [x] M3-T1 §§268–270: API/cliente/formulario de revisiones negativas V3 con identidad servidor, permisos, concurrencia y proteccion contra duplicados; confirmacion/activacion bloqueadas.
+- [x] M3-T1 §§271–273: recorrido real Chromium/cliente/API/PostgreSQL ficticio y trabajo CI integrado aprobado en dbe1080; autenticacion sintetica, no login personal.
+- [ ] M3-T1: delimitar siguiente ruta especial pendiente contra inventario §273 de [aceptacion](project/m3-t1-revision-aceptacion.md), diseno y fuentes; no retirar fallback sin evaluador y pruebas.
+- [ ] M3-T1: validacion de sesion personal y revision tecnica integral antes de cierre; fuentes/aceptacion juridica pendientes. Pruebas ficticias hasta MVP.
+
+### Seguimiento de teclado del Paso 1 — 30/10/2026
+
+- El usuario validó el recorrido de archivo inválido y sustitución por un archivo válido, conservando los campos del anexo.
+- Informó que la barra espaciadora no abría/cerraba «Vínculos opcionales con riesgos y medidas». La prueba aislada con comportamiento nativo no reproducía el fallo; se añadió activación explícita con Espacio, cancelando la acción nativa para evitar un doble cambio y descartando la repetición al mantener la tecla pulsada.
+- Se amplió la prueba para llegar con Tab desde «Sección relacionada», abrir/cerrar tres veces, mantener Espacio, usar Enter y clic, y conservar el código R1. Comprobado en 1280, 390 y 320 píxeles.
+- Falta la validación manual del usuario en su navegador con este ajuste. No se considera una comprobación con lector de pantalla. Sin commit ni push de este paso todavía.
+
+- [ ] **NAV-UX-005-COMPAT — Unificar actualización histórica de alcance.** Evaluar el contrato PATCH de evaluación que recompone RAT al guardar y su incorporación al circuito explícito de comparación/auditoría. Preservar compatibilidad, bindings documentales, permisos y regresiones; sin adopción silenciosa ni reescritura de historia. Es una tarea separada del recorrido guiado aceptado.
+
+- LIC-FORM-001, corrección local de diagnóstico (31/10/2026): consulta independiente de Consentimiento/LIA previamente guardados, disponible con pendientes, con contenido analizado y aviso de diferencias. Validación automatizada: 40 pruebas Chromium y 172 de servicios. Pendiente aceptación asistida y persistencia real aislada; no cerrar el trabajo por esta corrección.
+
+- [ ] **LIC-GOV-001 — Revisión y aceptación de Base y fundamento.** Diseño aprobado por el usuario el 02/11/2026. Separar propuesta guardada, revisión del delegado/persona habilitada y decisión de la organización con facultad expresa; ninguna se infiere del cargo o de conservar Consentimiento/LIA. Vincular actuaciones al contenido exacto, preservar antecedentes y exigir nueva revisión ante cambios. Implementación pendiente en GOV-01 a GOV-04; no ampliar permisos de infancia ni habilitar EIPD. [Contrato, lotes y comprobaciones](project/revision-aceptacion-base-licitud.md). Complementa LIC-FORM-001 sin cerrar sus remanentes.
+
+### Cierre de entrega Paso 4 — 02/11/2026
+
+Entrega v1 aceptada y cerrada por solicitud del usuario. LIC-FORM-001 sigue abierto por FORM-R01 (desglose versionado), FORM-R02 (evidencia por criterio/versión), FORM-R03 (ayudas/condiciones y enlace al campo), FORM-R04 (exportación, errores y persistencia real aislada con permisos) y FORM-R05 (accesibilidad/adaptación normativa). [Evidencia y detalle](project/paso4-consentimiento-lia.md). No se marcan FORM-01 a FORM-05 completos. Próximo paso acordado: 5A contrato común, 5B versiones EIPD general, 5C revisión/decisión EIPD y 5D Base y fundamento, coordinado con LIC-GOV-001. Sin publicación nueva ni habilitación EIPD.

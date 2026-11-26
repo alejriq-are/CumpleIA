@@ -1,6 +1,9 @@
-"""Servicios internos §93; caller autentica actor y gestiona commit/rollback.
+"""Persistencia auditada de politicas EIPD con canal administrativo separado.
 
-Sin API administrativa. Revision/preparacion/confirmacion conectadas en §§95–96.
+La API administrativa usa entradas personales publish/select; la dependencia
+valida JWT y gestiona commit/rollback. Las primitivas privadas solo admiten callers
+internos confiables. Publicacion/seleccion habilitadas siguen rechazadas aqui;
+las restricciones SQL protegen autoridad e integridad, no sustituyen ese bloqueo.
 """
 
 from uuid import uuid4
