@@ -3046,7 +3046,6 @@ test("9B pendiente de otra evaluación anticipa destino, cancela y confirma sin 
 test("9B Cambiar contexto explica destino antes de Aplicar y cancelar preserva pantalla y texto", async ({
   page,
 }) => {
-  test.fixme(true, "Pendiente: spec desfasado respecto de la interfaz de la rama larga.");
   await legal(page);
   await enable(page);
   await section(page, "Tratamiento y alcance de la EIPD");
@@ -3060,7 +3059,7 @@ test("9B Cambiar contexto explica destino antes de Aplicar y cancelar preserva p
   await dialog.getByLabel("Evaluación", { exact: true }).selectOption(aid2);
   const preview = dialog.getByRole("region", { name: "Antes de aplicar contexto" });
   await expect(preview).toContainText("Destino al aplicar: Determinar aplicabilidad");
-  await expect(preview).toContainText("versión 2");
+  await expect(preview).toContainText("evaluación n.º 2");
   await expect(preview).toContainText("Aplicar no los guarda ni copia sus datos");
   await dialog.getByRole("button", { name: "Cancelar", exact: true }).click();
   expect(page.url()).toBe(before);
