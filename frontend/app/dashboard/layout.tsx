@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { DashboardContent } from "@/components/navigation/DashboardContent";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { SignOutButton } from "@/components/auth/SignOutButton";
@@ -14,7 +15,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="dashboard-shell min-h-screen bg-gray-50">
       <nav className="border-b border-gray-200 bg-white px-6 py-4">
         <div className="mx-auto flex max-w-6xl flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
           <span className="text-xl font-bold text-blue-800">CumpleIA</span>
@@ -30,7 +31,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           </div>
         </div>
       </nav>
-      <main className="mx-auto max-w-6xl px-6 py-8">{children}</main>
+      <DashboardContent>{children}</DashboardContent>
     </div>
   );
 }
