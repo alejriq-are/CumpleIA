@@ -1347,7 +1347,7 @@ test("lote 5: conflicto abre historial y consulta compara sin reemplazar borrado
   await expect(storedDraft(page)).toContainText("Revisión de aplicabilidad 2");
   await expect(storedDraft(page)).toContainText("[FICTICIA] Guardado por otra ventana");
   await expect(storedDraft(page)).toContainText("[FICTICIA] Mi borrador local");
-  await expect(storedDraft(page)).toContainText("Difiere de lo consultado");
+  await expect(storedDraft(page)).toContainText("Cambió el fundamento.");
   await expect(main(page).getByLabel("Fundamento sobre EIPD", { exact: true })).toHaveValue(
     "[FICTICIA] Mi borrador local"
   );

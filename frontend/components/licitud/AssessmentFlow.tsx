@@ -681,6 +681,7 @@ export function AssessmentFlow({
         onSaved={childSaved}
         onDirty={setChildDirty}
         onWorkState={childState}
+        onOpenAssessmentSection={setSection}
         onPreparationState={preparationState}
         preparationBlocked={dirty || supportDirty || !row || !childRelevant}
         onDocumentPending={setDocumentDirty}

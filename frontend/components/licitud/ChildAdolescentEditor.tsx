@@ -12,6 +12,7 @@ type Props = {
   onSaved?: () => void;
   onDirty?: (dirty: boolean) => void;
   onWorkState?: WorkReporter;
+  onOpenAssessmentSection?: (section: "alcance" | "base") => void;
 };
 const textFields = [
   ["age_scope_analysis", "Análisis de edad y alcance"],
@@ -26,6 +27,83 @@ const groups = [
   ["adolescentes", "Adolescentes"],
   ["adolescentes_sensibles_menores_16", "Adolescentes menores de 16 con datos sensibles"],
 ] as const;
+const pendingFields: Record<string, [string, string]> = {
+  age_scope_analysis: ["Edad y alcance", "Falta explicar las edades y el alcance del tratamiento."],
+  best_interests_analysis: [
+    "Interés superior",
+    "Falta explicar cómo se considera el interés superior.",
+  ],
+  progressive_autonomy_analysis: [
+    "Autonomía progresiva",
+    "Falta explicar cómo se considera la autonomía progresiva.",
+  ],
+  authorization_reference: ["Autorizaciones", "Falta indicar la referencia de la autorización."],
+  authorization_analysis: [
+    "Autorizaciones",
+    "Falta explicar el fundamento de la autorización propuesta.",
+  ],
+  declared_groups: ["Edad y alcance", "Falta declarar los grupos de edad incluidos."],
+  data_category_codes: ["Edad y alcance", "Falta seleccionar las categorías de datos incluidas."],
+  data_subject_codes: ["Edad y alcance", "Falta seleccionar los grupos de titulares incluidos."],
+  proposed_authorization_route: ["Autorizaciones", "Falta elegir la vía de autorización propuesta."],
+  declared_consent_giver: ["Autorizaciones", "Falta indicar quién otorgaría el consentimiento."],
+  sensitive_under16: [
+    "Edad y alcance",
+    "Falta aclarar si se tratan datos sensibles de adolescentes menores de 16 años.",
+  ],
+  evidence: ["Evidencias", "Falta incorporar una evidencia con su referencia."],
+  rat_context_snapshot: [
+    "Alcance del RAT",
+    "No se pudo comprobar el alcance del RAT asociado a la evaluación.",
+  ],
+  child_adolescent_assessment: [
+    "Documento de infancia",
+    "Revisa el documento de infancia guardado y su asociación con esta evaluación.",
+  ],
+};
+const pendingReasons: Record<string, string> = {
+  expediente_infancia_ausente:
+    "Todavía no hay un documento de infancia guardado en esta evaluación.",
+  asociacion_ausente: "Falta asociar el documento de infancia a la evaluación.",
+  asociacion_contexto_obsoleta: "La asociación corresponde a un alcance anterior de la evaluación.",
+  asociacion_documento_obsoleta: "La asociación corresponde a un contenido anterior del documento.",
+  codigo_ajeno_al_alcance: "Hay una selección que no pertenece al alcance del RAT guardado.",
+  grupos_rat_incoherentes:
+    "Los grupos de edad declarados no coinciden con el alcance del RAT guardado.",
+  cruce_sensible_edad_incoherente:
+    "La declaración de datos sensibles no coincide con los grupos de edad seleccionados.",
+  subgrupo_edad_incoherente:
+    "El grupo de menores de 16 años con datos sensibles no coincide con lo declarado.",
+  otorgante_requiere_revision:
+    "Revisa si el otorgante declarado corresponde a los grupos incluidos.",
+  autorizacion_legal_infancia_revision_pendiente: "La vía de autorización legal requiere revisión.",
+  grupos_mixtos_revision_pendiente:
+    "Revisa por separado los requisitos de los distintos grupos de edad.",
+  expediente_infancia_residual:
+    "Hay un documento de infancia conservado que requiere revisar su pertinencia para este alcance.",
+  resumen_rat_incoherente: "Los antecedentes de infancia del alcance guardado requieren revisión.",
+  consentimiento_relacionado_pendiente:
+    "Falta indicar quién otorga el consentimiento en Base y fundamento.",
+  relacion_otorgante_no_comparable:
+    "No se pudo comparar el otorgante del documento de infancia con el del consentimiento.",
+  otorgante_documental_incoherente:
+    "El otorgante declarado no coincide con el registrado en Consentimiento.",
+  consentimiento_sensible_relacionado_pendiente:
+    "Revisa el consentimiento relacionado con los datos sensibles de adolescentes menores de 16 años.",
+  declaraciones_especiales_pendientes:
+    "Falta completar las declaraciones sobre condiciones especiales del tratamiento.",
+  condicion_infancia_pendiente:
+    "Falta documentar la condición de infancia en las condiciones especiales.",
+  ruta_especial_pendiente: "Falta indicar la vía de autorización en las condiciones especiales.",
+  ruta_especial_incoherente:
+    "La vía de autorización de las condiciones especiales no coincide con la del documento de infancia.",
+};
+const ageLabels: Record<string, string> = {
+  ninos_ninas: "niños y niñas",
+  adolescentes: "adolescentes",
+  datos_sensibles_adolescentes_menores_16: "datos sensibles de adolescentes menores de 16 años",
+};
+
 export function ChildAdolescentEditor({
   load,
   save,
@@ -35,7 +113,9 @@ export function ChildAdolescentEditor({
   onSaved,
   onDirty,
   onWorkState,
+  onOpenAssessmentSection,
 }: Props) {
+  const formRef = useRef<HTMLFormElement>(null);
   const [row, setRow] = useState<ChildAssessment | null>(null),
     [doc, setDoc] = useState<ChildDocument>({}),
     [ready, setReady] = useState<ChildReadiness | null>(null),
@@ -185,6 +265,7 @@ export function ChildAdolescentEditor({
           </p>
           {(readOnly || row.status !== "borrador") && <p>Consulta de solo lectura.</p>}
           <form
+            ref={formRef}
             onSubmit={(e) => {
               e.preventDefault();
               void persist();
@@ -196,7 +277,7 @@ export function ChildAdolescentEditor({
               className="space-y-4"
             >
               <legend className="font-semibold">Documento de infancia y adolescencia</legend>
-              <fieldset>
+              <fieldset data-pending-field="declared_groups" tabIndex={-1}>
                 <legend>Grupos declarados</legend>
                 {groups.map(([value, label]) => (
                   <label key={value} className="block">
@@ -230,7 +311,7 @@ export function ChildAdolescentEditor({
                   ],
                 ] as const
               ).map(([field, label, items]) => (
-                <fieldset key={field}>
+                <fieldset key={field} data-pending-field={field} tabIndex={-1}>
                   <legend>{label}</legend>
                   {items.map((item) => (
                     <label className="block" key={item.category_code}>
@@ -248,6 +329,7 @@ export function ChildAdolescentEditor({
                 <label className="block" key={field}>
                   {label}
                   <textarea
+                    data-pending-field={field}
                     aria-label={label}
                     className="mt-1 block w-full rounded border p-2"
                     value={doc[field] ?? ""}
@@ -259,6 +341,7 @@ export function ChildAdolescentEditor({
                 Datos sensibles de adolescentes menores de 16
                 <select
                   className="block rounded border p-2"
+                  data-pending-field="sensitive_under16"
                   value={doc.sensitive_under16 ?? ""}
                   onChange={(e) =>
                     setDoc((d) => ({
@@ -275,9 +358,10 @@ export function ChildAdolescentEditor({
                 </select>
               </label>
               <label className="block">
-                Ruta propuesta
+                Autorización propuesta
                 <select
                   className="block rounded border p-2"
+                  data-pending-field="proposed_authorization_route"
                   value={doc.proposed_authorization_route ?? ""}
                   onChange={(e) =>
                     setDoc((d) => ({
@@ -296,6 +380,7 @@ export function ChildAdolescentEditor({
                 Otorgante declarado
                 <select
                   className="block rounded border p-2"
+                  data-pending-field="declared_consent_giver"
                   value={doc.declared_consent_giver ?? ""}
                   onChange={(e) =>
                     setDoc((d) => ({
@@ -378,6 +463,7 @@ export function ChildAdolescentEditor({
               ))}
               <button
                 type="button"
+                data-pending-field="evidence"
                 onClick={() =>
                   setDoc((d) => ({
                     ...d,
@@ -411,11 +497,148 @@ export function ChildAdolescentEditor({
                   : "No se dispone del contexto actual; requiere revisión."}
               </p>
               <p>Las resoluciones anteriores no cubren este documento.</p>
-              <ul className="list-disc pl-5">
-                {ready.eipd_controls_v5.confirmation_blockers.map((i, n) => (
-                  <li key={n}>{i.message}</li>
-                ))}
-              </ul>
+              <p className="mt-2">Los pendientes se basan en el contenido guardado.</p>
+              {(() => {
+                const controls = ready.eipd_controls_v5;
+                const issues = controls.child_adolescent.issues ?? [];
+                const rows = new Map<
+                  string,
+                  { section: string; message: string; target?: string; destination?: "alcance" | "base"; guidance?: string }
+                >();
+                for (const issue of issues) {
+                  const field = pendingFields[issue.field.split(".")[0]];
+                  const age = ageLabels[issue.field.split(".").at(-1) ?? ""];
+                  const ageMessage =
+                    age &&
+                    (
+                      {
+                        declaracion_edad_pendiente: "Falta completar la declaración sobre",
+                        fundamento_declaracion_pendiente:
+                          "Falta explicar el fundamento de la declaración sobre",
+                        alcance_edad_no_comparable:
+                          "No se pudo comparar con el RAT la declaración sobre",
+                        declaracion_edad_incoherente: "No coincide con el RAT la declaración sobre",
+                      } as Record<string, string>
+                    )[issue.code];
+                  const message =
+                    (issue.code === "codigo_ajeno_al_alcance"
+                      ? issue.field === "data_category_codes"
+                        ? "Una categoría de datos seleccionada no pertenece al alcance del RAT guardado."
+                        : "Un grupo de titulares seleccionado no pertenece al alcance del RAT guardado."
+                      : pendingReasons[issue.code]) ??
+                    (ageMessage ? ageMessage + " " + age + "." : undefined) ??
+                    field?.[1] ??
+                    "Revisa los antecedentes relacionados con infancia y adolescencia.";
+                  const section =
+                    field?.[0] ??
+                    (issue.field.startsWith("consent_assessment")
+                      ? "Consentimiento"
+                      : issue.field.startsWith("special_conditions_document")
+                        ? "Condiciones especiales"
+                        : "Documento de infancia");
+                  const target =
+                    field &&
+                    !["rat_context_snapshot", "child_adolescent_assessment"].includes(
+                      issue.field.split(".")[0]
+                    )
+                      ? issue.field
+                      : undefined;
+                  const destination =
+                    issue.field.startsWith("consent_assessment")
+                      ? "base"
+                      : issue.field === "rat_context_snapshot"
+                        ? "alcance"
+                        : undefined;
+                  rows.set(section + message, {
+                    section,
+                    message,
+                    target,
+                    destination,
+                    guidance: section === "Condiciones especiales"
+                      ? "Requiere revisión de las condiciones especiales. Este formulario no permite editarlas."
+                      : undefined,
+                  });
+                }
+                for (const blocker of controls.confirmation_blockers) {
+                  if (issues.some((issue) => issue.code === blocker.code)) continue;
+                  if (blocker.code === "politica_infancia_no_implementada") continue;
+                  const section = "Requisitos de la evaluación";
+                  const message = blocker.message;
+                  const guidance = {
+                    condiciones_especiales_no_preparadas:
+                      "Requiere revisión de las condiciones especiales. Este formulario no permite editarlas.",
+                    screening_eipd_no_preparado:
+                      "Requiere revisar el análisis previo de EIPD. Esta pantalla no permite completarlo.",
+                    infancia_confirmacion_bloqueada:
+                      "La confirmación permanece bloqueada en el piloto.",
+                  }[blocker.code as string];
+                  rows.set(section + message, { section, message, guidance });
+                }
+                return rows.size ? (
+                  <details className="mt-3">
+                    <summary className="cursor-pointer rounded border border-blue-300 bg-blue-50 p-3 font-semibold">
+                      Detalle de pendientes documentales ({rows.size})
+                    </summary>
+                    <table className="mt-2 w-full table-fixed break-words text-left text-sm">
+                      <thead>
+                        <tr>
+                          {["Sección", "Pendiente", "Acción"].map((label) => (
+                            <th key={label} scope="col" className="border bg-blue-50 p-2">
+                              {label}
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {[...rows.entries()].map(([key, { section, message, target, destination, guidance }]) => (
+                          <tr key={key}>
+                            <td className="border p-2 align-top">{section}</td>
+                            <td className="border p-2 align-top">{message}</td>
+                            <td className="border p-2 align-top">
+                              {target &&
+                              !busy &&
+                              !uncertain &&
+                              !readOnly &&
+                              row.status === "borrador" ? (
+                                <button
+                                  type="button"
+                                  className="rounded border border-blue-300 bg-blue-50 p-2 font-semibold text-blue-800"
+                                  onClick={() => {
+                                    const control = formRef.current?.querySelector<HTMLElement>(
+                                      `[data-pending-field="${target}"]`
+                                    );
+                                    const focusTarget =
+                                      control?.querySelector<HTMLElement>("input:enabled") ??
+                                      control;
+                                    focusTarget?.focus({ preventScroll: true });
+                                    focusTarget?.scrollIntoView({ block: "center" });
+                                  }}
+                                >
+                                  Ir al campo
+                                </button>
+                              ) : target ? (
+                                "Consulta de solo lectura o edición no disponible."
+                              ) : destination && onOpenAssessmentSection ? (
+                                <button
+                                  type="button"
+                                  className="rounded border border-blue-300 bg-blue-50 p-2 font-semibold text-blue-800"
+                                  onClick={() => onOpenAssessmentSection(destination)}
+                                >
+                                  {destination === "alcance" ? "Ir a Alcance del RAT" : "Ir a Base y fundamento"}
+                                </button>
+                              ) : (
+                                guidance ?? "Requiere revisión de los antecedentes de la evaluación."
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </details>
+                ) : (
+                  <p>No se informaron pendientes documentales.</p>
+                );
+              })()}
             </section>
           )}
         </>
