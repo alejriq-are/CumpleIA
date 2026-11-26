@@ -876,7 +876,6 @@ test("guardado confirmado permanece visible aunque falle el diagnóstico posteri
 
 for (const basis of [null, "consentimiento_art12", "interes_legitimo_art13d"]) {
   test(`título de consulta menciona LIA solo para interés legítimo: ${basis}`, async ({ page }) => {
-    test.fixme(true, "Pendiente: spec desfasado respecto de la interfaz de la rama larga.");
     test.skip(integrated, "Escenario de interfaz con fixtures ficticios");
     await draft(page);
     await expect(page.getByRole("status")).toContainText("Borrador creado");
@@ -885,13 +884,12 @@ for (const basis of [null, "consentimiento_art12", "interes_legitimo_art13d"]) {
     }, basis);
     await page.evaluate((id) => (window as any).flow(id), treatment);
     await page.getByRole("tab", { name: "Revisar documentos", exact: true }).click();
-    await page.getByText("Antecedentes de la evaluación n.º 1", { exact: true }).click();
     const region = page.getByRole("region", {
       name: "Evaluación de licitud guardada",
       exact: true,
     });
     const active = basis === "interes_legitimo_art13d";
-    await expect(region.getByRole("heading")).toHaveText(
+    await expect(region.getByRole("heading", { level: 3 })).toHaveText(
       `Base de licitud y fundamento${active ? " · LIA" : ""} · evaluación n.º 1`
     );
     await region
@@ -1191,7 +1189,6 @@ for (const width of [1280, 320]) {
   test(`documentos guardados: versiones primero y borrador separado a ${width}px`, async ({
     page,
   }) => {
-    test.fixme(true, "Pendiente: spec desfasado respecto de la interfaz de la rama larga.");
     test.skip(integrated, "Recorrido de orden con respuestas ficticias");
     await page.setViewportSize({ width, height: 900 });
     await draft(page);
@@ -1248,7 +1245,10 @@ for (const width of [1280, 320]) {
       name: "Borrador EIPD guardado para consulta",
       exact: true,
     });
-    const context = page.getByText("Antecedentes de la evaluación n.º 1", { exact: true });
+    const context = page.getByRole("region", {
+      name: "Evaluación de licitud guardada",
+      exact: true,
+    });
     await expect(
       versions.getByRole("heading", { name: "Versiones del documento EIPD guardadas", exact: true })
     ).toBeVisible();
@@ -1260,13 +1260,10 @@ for (const width of [1280, 320]) {
       versions.getByRole("region", { name: "Registrar versión EIPD", exact: true })
     ).toHaveCount(0);
     expect(await savedDraft.locator("details[open]").count()).toBe(0);
-    await expect(
-      page.getByRole("region", { name: "Evaluación de licitud guardada", exact: true })
-    ).toHaveCount(0);
+    await expect(context).toBeVisible();
     await page.screenshot({ path: `/tmp/cumpleia-documents-order-${width}.png`, fullPage: true });
     await savedDraft.getByText("Consultar borrador EIPD guardado", { exact: true }).click();
     await expect(savedDraft.getByText("SIMULADA-ORDEN", { exact: true })).toBeVisible();
-    await context.click();
     const basis = page.getByRole("region", { name: "Evaluación de licitud guardada", exact: true });
     await basis.getByText("Consultar evaluación de licitud y LIA", { exact: true }).click();
     await expect(basis.getByText("Referencia EIPD", { exact: true })).toHaveCount(0);
