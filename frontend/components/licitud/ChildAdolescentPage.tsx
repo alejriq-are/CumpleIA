@@ -34,6 +34,7 @@ export function ChildAdolescentPage({
   onSaved,
   onDirty,
   onWorkState,
+  onOpenAssessmentSection,
   onPreparationState,
   preparationBlocked = false,
   onDocumentPending,
@@ -54,6 +55,7 @@ export function ChildAdolescentPage({
   onSaved?: () => void;
   onDirty?: (dirty: boolean) => void;
   onWorkState?: WorkReporter;
+  onOpenAssessmentSection?: (section: "alcance" | "base") => void;
   onPreparationState?: WorkReporter;
   preparationBlocked?: boolean;
   onDocumentPending?: (pending: boolean) => void;
@@ -138,6 +140,7 @@ export function ChildAdolescentPage({
           onSaved={onSaved}
           onDirty={onDirty}
           onWorkState={onWorkState}
+          onOpenAssessmentSection={onOpenAssessmentSection}
         />
       </div>
       <div

@@ -52,6 +52,7 @@ export type ChildReadiness = {
     child_adolescent: {
       result: string;
       association_status: string;
+      issues?: { field: string; code: string; category: string }[];
       can_confirm: false;
       authorizes_action: false;
     };

@@ -39,7 +39,7 @@ test.beforeAll(async () => {
       }
       if(url.endsWith("/readiness")){
         if(window.demo.mode==="diagnostic-error" && window.demo.calls.some(c=>c.options.method==="PATCH"))return new Response(JSON.stringify({detail:"PRUEBA"}),{status:503});
-        return new Response(JSON.stringify({eipd_controls_v5:v5}),{status:200});
+        return new Response(JSON.stringify({eipd_controls_v5:{...v5,child_adolescent:{...v5.child_adolescent,issues:window.demo.issues||[]}}}),{status:200});
       }
       return new Response(JSON.stringify(row),{status:200});
     };
@@ -48,7 +48,7 @@ test.beforeAll(async () => {
     window.childEditorAccess=childEditorAccess;
     window.readyFixture=()=>JSON.parse(JSON.stringify({eipd_controls_v5:v5}));
     const root=createRoot(document.getElementById("root"));
-    window.mount=(options={})=>{if(options.confirmed)row.status="confirmado";root.render(React.createElement(ChildAdolescentEditor,{load,save,readiness,readOnly:options.readOnly??false}));};
+    window.mount=(options={})=>{if(options.confirmed)row.status="confirmado";root.render(React.createElement(ChildAdolescentEditor,{load,save,readiness,readOnly:options.readOnly??false,onOpenAssessmentSection:section=>{window.demo.opened=section;}}));};
 `
   );
 
@@ -112,6 +112,48 @@ test("edita documento crudo sin enviar identidad y conserva referencias", async 
     "a0000000-0000-0000-0000-000000000001"
   );
   await expect(page.getByText("Confirmación y activación bloqueadas.")).toBeVisible();
+});
+test("tabla de pendientes documentales traduce los códigos y lleva al campo o a la sección", async ({
+  page,
+}) => {
+  await mount(page);
+  await page.evaluate(() => {
+    (window as any).demo.issues = [
+      { field: "age_scope_analysis", code: "declaracion_pendiente", category: "documento" },
+      { field: "rat_context_snapshot", code: "resumen_rat_incoherente", category: "rat" },
+      {
+        field: "consent_assessment.declared_consent_giver",
+        code: "consentimiento_relacionado_pendiente",
+        category: "consentimiento",
+      },
+    ];
+  });
+  await page.getByRole("button", { name: "Guardar documento", exact: true }).click();
+  await expect(page.getByRole("status")).toHaveText("Documento guardado.");
+  await expect(page.getByText("Los pendientes se basan en el contenido guardado.")).toBeVisible();
+  await page.getByText("Detalle de pendientes documentales (3)", { exact: true }).click();
+  const field = page.getByRole("row", {
+    name: /Falta explicar las edades y el alcance del tratamiento\./,
+  });
+  await expect(field).toContainText("Edad y alcance");
+  await field.getByRole("button", { name: "Ir al campo", exact: true }).click();
+  await expect(page.locator('[data-pending-field="age_scope_analysis"]')).toBeFocused();
+  const scope = page.getByRole("row", {
+    name: /Los antecedentes de infancia del alcance guardado requieren revisión\./,
+  });
+  await expect(scope).toContainText("Alcance del RAT");
+  await scope.getByRole("button", { name: "Ir a Alcance del RAT", exact: true }).click();
+  expect(await page.evaluate(() => (window as any).demo.opened)).toBe("alcance");
+  const consent = page.getByRole("row", {
+    name: /Falta indicar quién otorga el consentimiento en Base y fundamento\./,
+  });
+  await expect(consent).toContainText("Consentimiento");
+  await consent.getByRole("button", { name: "Ir a Base y fundamento", exact: true }).click();
+  expect(await page.evaluate(() => (window as any).demo.opened)).toBe("base");
+  const patches = await page.evaluate(() =>
+    (window as any).demo.calls.filter((c: any) => c.options.method === "PATCH")
+  );
+  expect(patches).toHaveLength(1);
 });
 test("anade segunda evidencia, la edita y guarda con un solo PATCH", async ({ page }) => {
   await mount(page);

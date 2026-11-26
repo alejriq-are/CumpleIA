@@ -266,60 +266,71 @@ export function ConnectedApplicability({
               ["eipd", "EIPD", eipd],
               ["infancia", "Infancia y adolescencia", infancia],
             ] as const
-          ).map(([topic, label, draft]) => (
-            <div key={topic} className="space-y-2 border-t border-slate-200 pt-3">
-              <h4 className="font-semibold">{label}</h4>
-              <div className={dirty ? "grid gap-3 md:grid-cols-2" : ""}>
-                <div className="min-w-0 space-y-1 break-words">
-                  <p className="font-semibold">
-                    {saved.revision > 0 ? "Guardado en el servidor" : "Sin guardar en el servidor"}
-                  </p>
-                  <p>
-                    <span className="font-semibold">
-                      ¿Corresponde documentar{" "}
-                      {topic === "eipd" ? "EIPD" : "infancia y adolescencia"}?:{" "}
-                    </span>
-                    {determinationLabels[saved[topic].state]}
-                  </p>
-                  {dirty && (
-                    <div>
-                      <p className="font-semibold">
-                        Fundamento sobre {topic === "eipd" ? "EIPD" : "infancia y adolescencia"}:
-                      </p>
-                      <p className="whitespace-pre-wrap break-words">
-                        {saved[topic].reason || "Sin fundamento registrado."}
-                      </p>
-                    </div>
-                  )}
-                </div>
-                {dirty && (
-                  <div className="min-w-0 space-y-1 rounded border border-amber-300 bg-amber-50 p-3 break-words">
-                    <p className="font-semibold">Tu borrador en el formulario</p>
+          ).map(([topic, label, draft]) => {
+            const changes = [];
+            if (draft.state !== saved[topic].state) {
+              changes.push("Cambió la respuesta de aplicabilidad.");
+            }
+            if ((draft.reason ?? "").trim() !== (saved[topic].reason ?? "").trim()) {
+              changes.push("Cambió el fundamento.");
+            }
+            return (
+              <div key={topic} className="space-y-2 border-t border-slate-200 pt-3">
+                <h4 className="font-semibold">{label}</h4>
+                <div className={dirty ? "grid gap-3 md:grid-cols-2" : ""}>
+                  <div className="min-w-0 space-y-1 break-words">
+                    <p className="font-semibold">
+                      {saved.revision > 0
+                        ? "Guardado en el servidor"
+                        : "Sin guardar en el servidor"}
+                    </p>
                     <p>
                       <span className="font-semibold">
                         ¿Corresponde documentar{" "}
                         {topic === "eipd" ? "EIPD" : "infancia y adolescencia"}?:{" "}
                       </span>
-                      {determinationLabels[draft.state]}
+                      {determinationLabels[saved[topic].state]}
                     </p>
-                    <div>
-                      <p className="font-semibold">
-                        Fundamento sobre {topic === "eipd" ? "EIPD" : "infancia y adolescencia"}:
+                    {dirty && (
+                      <div>
+                        <p className="font-semibold">
+                          Fundamento sobre {topic === "eipd" ? "EIPD" : "infancia y adolescencia"}:
+                        </p>
+                        <p className="whitespace-pre-wrap break-words">
+                          {saved[topic].reason?.trim()
+                            ? saved[topic].reason
+                            : "Sin fundamento escrito."}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                  {dirty && (
+                    <div className="min-w-0 space-y-1 rounded border border-amber-300 bg-amber-50 p-3 break-words">
+                      <p className="font-semibold">Tu borrador en el formulario</p>
+                      <p>
+                        <span className="font-semibold">
+                          ¿Corresponde documentar{" "}
+                          {topic === "eipd" ? "EIPD" : "infancia y adolescencia"}?:{" "}
+                        </span>
+                        {determinationLabels[draft.state]}
                       </p>
-                      <p className="whitespace-pre-wrap break-words">
-                        {draft.reason || "Sin fundamento escrito."}
+                      <div>
+                        <p className="font-semibold">
+                          Fundamento sobre {topic === "eipd" ? "EIPD" : "infancia y adolescencia"}:
+                        </p>
+                        <p className="whitespace-pre-wrap break-words">
+                          {draft.reason?.trim() ? draft.reason : "Sin fundamento escrito."}
+                        </p>
+                      </div>
+                      <p className="text-sm">
+                        {changes.join(" ") || "Sin diferencias en este tema."}
                       </p>
                     </div>
-                    <p className="text-sm">
-                      {JSON.stringify(draft) === JSON.stringify(saved[topic])
-                        ? "Sin diferencias en este tema."
-                        : "Difiere de lo consultado en el servidor."}
-                    </p>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </section>
       )}
       <div className="rounded border border-blue-200 bg-blue-50 p-4">

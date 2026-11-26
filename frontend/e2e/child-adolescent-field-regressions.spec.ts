@@ -187,26 +187,28 @@ test("L2 selector bloqueado en solo lectura sin PATCH", async ({ page }) => {
   ).toBe(0);
 });
 
-test("Ruta propuesta: seleccionar consentimiento y guardar persiste el valor", async ({ page }) => {
+test("Autorización propuesta: seleccionar consentimiento y guardar persiste el valor", async ({
+  page,
+}) => {
   await mount(page);
-  const route = page.getByRole("combobox", { name: /^Ruta propuesta/ });
+  const route = page.getByRole("combobox", { name: /^Autorización propuesta/ });
   await route.selectOption("consentimiento");
   const body = await savedBody(page);
   expect(body.proposed_authorization_route).toBe("consentimiento");
 });
-test("Ruta propuesta: seleccionar consentimiento y luego vaciar persiste null", async ({
+test("Autorización propuesta: seleccionar consentimiento y luego vaciar persiste null", async ({
   page,
 }) => {
   await mount(page);
-  const route = page.getByRole("combobox", { name: /^Ruta propuesta/ });
+  const route = page.getByRole("combobox", { name: /^Autorización propuesta/ });
   await route.selectOption("consentimiento");
   await route.selectOption("");
   const body = await savedBody(page);
   expect(body.proposed_authorization_route).toBeNull();
 });
-test("Ruta propuesta: readOnly desactiva el control y no emite PATCH", async ({ page }) => {
+test("Autorización propuesta: readOnly desactiva el control y no emite PATCH", async ({ page }) => {
   await mount(page, { readOnly: true });
-  const route = page.getByRole("combobox", { name: /^Ruta propuesta/ });
+  const route = page.getByRole("combobox", { name: /^Autorización propuesta/ });
   await expect(route).toBeDisabled();
   const patches = await page.evaluate(() =>
     (window as any).demo.calls.filter((c: any) => c.options.method === "PATCH")
