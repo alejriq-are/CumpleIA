@@ -1906,7 +1906,7 @@ for (const width of [390, 320]) {
   }) => {
     test.fixme(
       true,
-      "Pendiente: inestable con CPU limitada (reproducido con 1 núcleo); posible carrera de foco."
+      "Pendiente: agota el tiempo de 30 s a 320 px con CPU limitada; revisar el presupuesto del test."
     );
     await page.setViewportSize({ width, height: 844 });
     await legal(page);
@@ -2027,10 +2027,6 @@ test("7A selección de escritorio coloca el foco bajo la cabecera y Escape no ro
 test("7A al pasar a estrecho el foco de un desplegable vuelve a Secciones visible", async ({
   page,
 }) => {
-  test.fixme(
-    true,
-    "Pendiente: inestable con CPU limitada (reproducido con 1 núcleo); posible carrera de foco."
-  );
   await legal(page);
   const summary = page
     .locator(".connected-desktop-sections summary")
@@ -2942,10 +2938,6 @@ async function pendingLink(page: Page, label: string) {
 test("9B Panel vuelve al formulario EIPD y a determinación con sus notas intactas", async ({
   page,
 }) => {
-  test.fixme(
-    true,
-    "Pendiente: inestable con CPU limitada (reproducido con 1 núcleo); posible carrera de foco."
-  );
   await legal(page);
   await enable(page);
   await section(page, "Tratamiento y alcance de la EIPD");
@@ -3211,10 +3203,6 @@ for (const width of [320, 1280]) {
   test(`9B cabecera estable al alternar aviso y abrir pendiente con teclado a ${width}px`, async ({
     page,
   }) => {
-    test.fixme(
-      true,
-      "Pendiente: inestable con CPU limitada (reproducido con 1 núcleo); posible carrera de foco."
-    );
     await page.setViewportSize({ width, height: 844 });
     await legal(page);
     await enable(page);
