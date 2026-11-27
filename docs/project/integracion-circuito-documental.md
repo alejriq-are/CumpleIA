@@ -35,3 +35,27 @@ El [PR #31](https://github.com/alejriq-are/CumpleIA/pull/31) apunta a main desde
 Base `main` en `8d27280`. Corte candidato `2fd8881`, con cuatro commits y nueve archivos. Incorpora la migración `5997a757f17b`, el contexto documental de RAT y los servicios de borrador. La validación incluye 97 pruebas dirigidas y la conservación de un tratamiento RAT y su finalidad preexistentes en PostgreSQL aislado. La primera entrega corresponde a persistencia y servicios internos. Las rutas HTTP quedan para un corte posterior.
 
 Próximo paso. Revisar el PR #31 antes de integrarlo y volver a comparar el lote siguiente con la base efectiva de main.
+
+## Segundo lote tras el merge del PR #31
+
+El PR #31 quedó integrado con `31d68f3`. Desde ese main, el corte `82e0b50` añade 29 commits de la rama histórica. La comparación desde el ancestro común abarca 126 archivos y 17 migraciones. La simulación encontró un conflicto en `backend/tests/test_rls_isolation_licitud.py`, donde convergen los cambios históricos y los ajustes de formato del PR #31.
+
+Preparar primero un corte de API y controles básicos en `6d9bb76`. Es un commit histórico que abarca 68 archivos en la comparación desde el ancestro común. Validar sus migraciones y pruebas HTTP sobre main, preservando las pruebas RLS de ambos lados. Usar `91a71cd` como corte alternativo si las pruebas de preparación y concurrencia deben entrar junto a la API. Una vez integrado ese tramo, volver a medir el alcance de administración de políticas hasta `82e0b50`.
+
+El corte `6d9bb76` se aplicó en un checkout aislado sobre `31d68f3`. Se conservó el import de confirmación que utiliza la prueba RLS del corte. PostgreSQL aislado aplicó las once migraciones hasta `b51d3f6a9c20` sobre el esquema del primer lote. Pasaron 186 pruebas de API de Licitud y aislamiento RLS, además de Ruff y Black. Próximo paso. Publicar el corte validado como PR independiente hacia main.
+
+## Controles EIPD tras el PR #32
+
+El PR #32 se integró en `990f167`. La diferencia de `6d9bb76` a `91a71cd` se aplicó en un checkout aislado sobre ese merge, conservando los ajustes del primer lote. El corte incluye preparación, revisión documental y concurrencia. La actualización desde el esquema del PR #32 no agregó migraciones. Pasaron 412 pruebas dirigidas en PostgreSQL aislado, Ruff y Black. Próximo paso. Publicar el corte como PR independiente hacia main.
+
+## Administración y auditoría de políticas EIPD tras el PR #33
+
+El PR #33 se integró en `9bb0d10`. La diferencia de `91a71cd` a `82e0b50` se aplicó sobre ese merge en un checkout aislado. El corte abarca 64 archivos y seis migraciones, desde `b51d3f6a9c20` hasta `b17d95c0286f`. En PostgreSQL aislado pasaron 265 pruebas dirigidas de políticas, autoridad personal, administración, concurrencia, protección de perfiles y uso de la política seleccionada. Ruff y Black pasaron. Próximo paso. Publicar el corte como PR independiente hacia main y verificar CI.
+
+## Investigación y revisión EIPD tras el PR #35
+
+El PR #35 se integró en `f00f4f9`. El tramo `9bc2d6b..ba1d891` se aplicó sobre ese merge en un checkout aislado. La migración `d39e2b0f841c` se aplicó sobre el esquema del PR #35 en PostgreSQL aislado. Pasaron 357 pruebas dirigidas de investigación, resolución, revisión y concurrencia, además de Ruff y Black. Próximo paso. Publicar el corte como PR independiente hacia main y verificar CI.
+
+## Consulta de revisiones EIPD tras el PR #36
+
+El PR #36 se integró en `f58d8ca`. El corte `ba1d891..321cbdf` se aplicó sobre ese merge en un checkout aislado. Incluye el cliente versionado y el panel interno de consulta, con diagnóstico en español y ajustes para pantallas estrechas. El cliente permite enviar revisiones negativas, mientras que el panel de este corte ofrece consulta. Pasaron 19 pruebas dirigidas en Chromium, TypeScript y ESLint. Próximo paso. Publicar el corte como PR independiente hacia main y verificar CI.
