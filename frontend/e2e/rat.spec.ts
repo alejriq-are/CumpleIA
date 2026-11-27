@@ -18,7 +18,9 @@ test("RAT autenticado: preparación, activación, archivo y reactivación", asyn
   const progress = page.getByRole("progressbar", { name: "Avance de preparación del registro" });
 
   await page.goto("/dashboard/rat");
-  await expect(page.getByRole("heading", { name: "Inventario de tratamientos" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Inventario de tratamientos", exact: true })
+  ).toBeVisible();
   const organization = page.getByRole("combobox", { name: "Organización:" });
   if (await organization.count()) await organization.selectOption(organizationId);
   await expect(page.getByRole("link", { name: "Nueva actividad", exact: true })).toHaveAttribute(
@@ -41,9 +43,13 @@ test("RAT autenticado: preparación, activación, archivo y reactivación", asyn
   expect(created.status()).toBe(201);
   const treatment = await created.json();
   trackTreatment(treatment.id);
-  const detailURL = `/dashboard/rat/${treatment.id}?organizationId=${organizationId}`;
-  await expect(page).toHaveURL(new RegExp(`/dashboard/rat/${treatment.id}\\?`));
+  const detailURL = `/dashboard/trabajo#/rat/general?organizationId=${organizationId}&treatmentId=${treatment.id}`;
+  const goTo = (target: string) => page.goto(detailURL.replace("/rat/general?", `/rat/${target}?`));
+  await expect(page).toHaveURL(
+    new RegExp(`/dashboard/trabajo#/rat/general\\?.*treatmentId=${treatment.id}`)
+  );
   await expect(progress).toHaveAttribute("aria-valuenow", "3");
+  await goTo("revision");
   await expect(
     review.getByRole("button", { name: "Activar actividad", exact: true })
   ).toBeDisabled();
@@ -51,22 +57,26 @@ test("RAT autenticado: preparación, activación, archivo y reactivación", asyn
   const rejected = await request(`/rat/treatments/${treatment.id}`, "PATCH", { status: "activo" });
   expect(rejected.status).toBe(400);
 
+  await goTo("finalidades");
   await page.getByRole("button", { name: "+ Agregar finalidad", exact: true }).click();
   await page
     .getByPlaceholder("Ej. Gestionar la relación comercial con clientes")
     .fill("Gestionar clientes de prueba");
   await page.getByRole("button", { name: "Guardar finalidades", exact: true }).click();
   await expect(page.getByText("Finalidades guardadas.", { exact: true })).toBeVisible();
+  await goTo("categorias");
   await section("Categorías de datos personales")
     .getByRole("checkbox", { name: /Datos de identificación/ })
     .check();
   await page.getByRole("button", { name: "Guardar categorías", exact: true }).click();
   await expect(page.getByText("Categorías de datos guardadas.", { exact: true })).toBeVisible();
+  await goTo("titulares");
   await section("Titulares de los datos")
     .getByRole("checkbox", { name: /Clientes/ })
     .check();
   await page.getByRole("button", { name: "Guardar titulares", exact: true }).click();
   await expect(page.getByText("Titulares guardados.", { exact: true })).toBeVisible();
+  await goTo("fuentes");
   await page.getByRole("button", { name: "+ Agregar fuente", exact: true }).click();
   await section("Fuentes de los datos").getByRole("combobox").selectOption("titular");
   await page
@@ -75,14 +85,17 @@ test("RAT autenticado: preparación, activación, archivo y reactivación", asyn
   await page.getByRole("button", { name: "Guardar fuentes", exact: true }).click();
   await expect(page.getByText("Fuentes de datos guardadas.", { exact: true })).toBeVisible();
 
+  await goTo("sistemas");
   await page.getByRole("radio", { name: "No usa sistemas", exact: true }).check();
   await page.getByRole("button", { name: "Guardar sistemas", exact: true }).click();
   await expect(page.getByText("Información de sistemas guardada.", { exact: true })).toBeVisible();
+  await goTo("proveedores");
   await page.getByRole("radio", { name: "No intervienen", exact: true }).check();
   await page.getByRole("button", { name: "Guardar proveedores", exact: true }).click();
   await expect(
     page.getByText("Información de proveedores guardada.", { exact: true })
   ).toBeVisible();
+  await goTo("transferencias");
   await page.getByRole("radio", { name: "No existen", exact: true }).check();
   await page.getByRole("button", { name: "Guardar transferencias", exact: true }).click();
   await expect(
@@ -92,12 +105,14 @@ test("RAT autenticado: preparación, activación, archivo y reactivación", asyn
   await page.reload();
   await expect(progress).toHaveAttribute("aria-valuenow", "10");
 
+  await goTo("revision");
   await review.getByRole("button", { name: "Activar actividad", exact: true }).click();
   await expect(review.getByText("Esta actividad está activa.", { exact: true })).toBeVisible();
   await page.reload();
   await expect(review.getByText("Esta actividad está activa.", { exact: true })).toBeVisible();
 
   // Un cambio que deja requisitos pendientes debe invalidar el estado activo.
+  await goTo("sistemas");
   await section("Sistemas utilizados")
     .getByRole("radio", { name: "Pendiente de revisión", exact: true })
     .check();
@@ -105,12 +120,15 @@ test("RAT autenticado: preparación, activación, archivo y reactivación", asyn
   await expect(page.getByText("Información de sistemas guardada.", { exact: true })).toBeVisible();
   await page.reload();
   await expect(progress).toHaveAttribute("aria-valuenow", "9");
+  await goTo("revision");
   await expect(
     review.getByRole("button", { name: "Activar actividad", exact: true })
   ).toBeDisabled();
+  await goTo("sistemas");
   await page.getByRole("radio", { name: "No usa sistemas", exact: true }).check();
   await page.getByRole("button", { name: "Guardar sistemas", exact: true }).click();
   await expect(progress).toHaveAttribute("aria-valuenow", "10");
+  await goTo("revision");
   await review.getByRole("button", { name: "Activar actividad", exact: true }).click();
   await expect(review.getByText("Esta actividad está activa.", { exact: true })).toBeVisible();
   await review.getByRole("button", { name: "Volver a preparación", exact: true }).click();
@@ -134,5 +152,6 @@ test("RAT autenticado: preparación, activación, archivo y reactivación", asyn
   await expect(row.getByText("Activo", { exact: true })).toBeVisible();
   await row.getByRole("link", { name, exact: true }).click();
   await expect(page).toHaveURL(`http://localhost:3000${detailURL}`);
+  await goTo("revision");
   await expect(review.getByText("Esta actividad está activa.", { exact: true })).toBeVisible();
 });
